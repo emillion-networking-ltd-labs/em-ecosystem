@@ -189,4 +189,57 @@ describe('UsersService', () => {
       });
     });
   });
+
+  describe('incrementFailedAttempts', () => {
+    it('should increment failedAttempts by 1', async () => {
+      prisma.user.update.mockResolvedValue({
+        ...mockUser,
+        failedAttempts: 1,
+      });
+
+      const result = await usersService.incrementFailedAttempts('uuid-123');
+
+      expect(result.failedAttempts).toBe(1);
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'uuid-123' },
+        data: { failedAttempts: { increment: 1 } },
+      });
+    });
+  });
+
+  describe('resetFailedAttempts', () => {
+    it('should reset failedAttempts to 0 and clear lockedUntil', async () => {
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      await usersService.resetFailedAttempts('uuid-123');
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'uuid-123' },
+        data: { failedAttempts: 0, lockedUntil: null },
+      });
+    });
+  });
+
+  describe('lockAccount', () => {
+    it('should set lockedUntil to 15 minutes from now', async () => {
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      const before = Date.now();
+      await usersService.lockAccount('uuid-123');
+      const after = Date.now();
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'uuid-123' },
+        data: {
+          lockedUntil: expect.any(Date),
+        },
+      });
+
+      const lockDate = prisma.user.update.mock.calls[0][0].data
+        .lockedUntil as Date;
+      const lockMs = lockDate.getTime();
+      expect(lockMs).toBeGreaterThanOrEqual(before + 15 * 60 * 1000);
+      expect(lockMs).toBeLessThanOrEqual(after + 15 * 60 * 1000);
+    });
+  });
 });

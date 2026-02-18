@@ -60,9 +60,12 @@ npm run test:cov
 
 ### Auth
 
-| Method | Endpoint         | Description       | Auth |
-|--------|------------------|-------------------|------|
-| POST   | `/auth/register` | Register new user | No   |
+| Method | Endpoint         | Description          | Auth |
+|--------|------------------|----------------------|------|
+| POST   | `/auth/register` | Register new user    | No   |
+| POST   | `/auth/login`    | Login with email/pwd | No   |
+| POST   | `/auth/refresh`  | Refresh token pair   | No   |
+| POST   | `/auth/logout`   | Invalidate session   | Yes  |
 
 #### POST /auth/register
 
@@ -96,12 +99,72 @@ npm run test:cov
 }
 ```
 
+#### POST /auth/login
+
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "StrongPass1!"
+}
+```
+
+**Response (200):**
+```json
+{
+  "accessToken": "eyJhbG...",
+  "refreshToken": "eyJhbG...",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "role": "USER",
+    "provider": "LOCAL",
+    "emailVerified": false
+  }
+}
+```
+
+**Brute Force Protection:**
+- After 5 failed login attempts, the account is locked for 15 minutes
+- Failed attempt counter resets on successful login
+- Expired locks are automatically cleared on next login attempt
+
+#### POST /auth/refresh
+
+**Request Body:**
+```json
+{
+  "refreshToken": "eyJhbG..."
+}
+```
+
+**Response (200):**
+```json
+{
+  "accessToken": "eyJhbG...",
+  "refreshToken": "eyJhbG..."
+}
+```
+
+#### POST /auth/logout
+
+**Headers:** `Authorization: Bearer <access_token>`
+
+**Response (200):**
+```json
+{
+  "message": "Logged out successfully"
+}
+```
+
 ## Project Structure
 
 ```
 src/
   auth/                    # Authentication module
     dto/                   # Data transfer objects
+    guards/                # Auth guards (JwtAuthGuard)
+    strategies/            # Passport strategies (JWT)
     __tests__/             # Unit tests
     auth.controller.ts     # Route handlers
     auth.service.ts        # Business logic

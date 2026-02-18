@@ -57,4 +57,26 @@ export class UsersService {
       data: { refreshToken },
     });
   }
+
+  async incrementFailedAttempts(userId: string): Promise<User> {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { failedAttempts: { increment: 1 } },
+    }) as Promise<User>;
+  }
+
+  async resetFailedAttempts(userId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { failedAttempts: 0, lockedUntil: null },
+    });
+  }
+
+  async lockAccount(userId: string): Promise<void> {
+    const lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { lockedUntil: lockUntil },
+    });
+  }
 }

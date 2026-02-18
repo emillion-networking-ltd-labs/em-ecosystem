@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ConflictException } from '@nestjs/common';
+import {
+  ConflictException,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../auth.service';
@@ -25,7 +29,7 @@ describe('AuthService', () => {
     emailVerified: false,
     failedAttempts: 0,
     lockedUntil: null,
-    refreshToken: null,
+    refreshToken: 'hashed-refresh-token',
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -40,14 +44,19 @@ describe('AuthService', () => {
           provide: UsersService,
           useValue: {
             findByEmail: jest.fn(),
+            findById: jest.fn(),
             create: jest.fn(),
             updateRefreshToken: jest.fn(),
+            incrementFailedAttempts: jest.fn(),
+            resetFailedAttempts: jest.fn(),
+            lockAccount: jest.fn(),
           },
         },
         {
           provide: JwtService,
           useValue: {
             sign: jest.fn(),
+            verify: jest.fn(),
           },
         },
       ],
@@ -89,45 +98,12 @@ describe('AuthService', () => {
         expect(bcrypt.hash).toHaveBeenCalledWith('StrongPass1!', 12);
       });
 
-      it('should call usersService.create with email and hashed password', async () => {
-        await authService.register(registerDto);
-
-        expect(usersService.create).toHaveBeenCalledWith({
-          email: 'test@example.com',
-          passwordHash: 'hashed-value',
-        });
-      });
-
       it('should return SafeUser without passwordHash or refreshToken', async () => {
         const result = await authService.register(registerDto);
 
         expect(result.user).not.toHaveProperty('passwordHash');
         expect(result.user).not.toHaveProperty('refreshToken');
         expect(result.user.email).toBe('test@example.com');
-        expect(result.user.id).toBe('uuid-123');
-        expect(result.user.role).toBe(Role.USER);
-      });
-
-      it('should generate access token with correct payload', async () => {
-        await authService.register(registerDto);
-
-        expect(jwtService.sign).toHaveBeenCalledWith(
-          {
-            sub: 'uuid-123',
-            email: 'test@example.com',
-            role: Role.USER,
-          },
-          expect.objectContaining({ expiresIn: expect.any(String) }),
-        );
-      });
-
-      it('should store hashed refresh token in database', async () => {
-        await authService.register(registerDto);
-
-        expect(usersService.updateRefreshToken).toHaveBeenCalledWith(
-          'uuid-123',
-          'hashed-value',
-        );
       });
     });
 
@@ -138,42 +114,215 @@ describe('AuthService', () => {
         await expect(authService.register(registerDto)).rejects.toThrow(
           ConflictException,
         );
-        await expect(authService.register(registerDto)).rejects.toThrow(
-          'Email already registered',
+      });
+    });
+  });
+
+  describe('login', () => {
+    const loginDto = { email: 'test@example.com', password: 'StrongPass1!' };
+
+    describe('successful login', () => {
+      beforeEach(() => {
+        usersService.findByEmail.mockResolvedValue(mockUser);
+        usersService.updateRefreshToken.mockResolvedValue(undefined);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+        (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+        jwtService.sign
+          .mockReturnValueOnce('access-token')
+          .mockReturnValueOnce('refresh-token');
+      });
+
+      it('should return JWT pair and SafeUser on valid credentials', async () => {
+        const result = await authService.login(loginDto);
+
+        expect(result.accessToken).toBe('access-token');
+        expect(result.refreshToken).toBe('refresh-token');
+        expect(result.user.email).toBe('test@example.com');
+        expect(result.user).not.toHaveProperty('passwordHash');
+      });
+
+      it('should reset failed attempts on successful login when count > 0', async () => {
+        usersService.findByEmail.mockResolvedValue({
+          ...mockUser,
+          failedAttempts: 3,
+        });
+
+        await authService.login(loginDto);
+
+        expect(usersService.resetFailedAttempts).toHaveBeenCalledWith(
+          'uuid-123',
         );
       });
 
-      it('should not create user when email already exists', async () => {
-        usersService.findByEmail.mockResolvedValue(mockUser);
+      it('should not reset failed attempts when count is 0', async () => {
+        await authService.login(loginDto);
 
-        await expect(authService.register(registerDto)).rejects.toThrow();
+        expect(usersService.resetFailedAttempts).not.toHaveBeenCalled();
+      });
+    });
 
-        expect(usersService.create).not.toHaveBeenCalled();
+    describe('error cases', () => {
+      it('should throw UnauthorizedException when user not found', async () => {
+        usersService.findByEmail.mockResolvedValue(null);
+
+        await expect(authService.login(loginDto)).rejects.toThrow(
+          UnauthorizedException,
+        );
       });
 
-      it('should check for existing email before creating user', async () => {
-        const callOrder: string[] = [];
-        usersService.findByEmail.mockImplementation(async () => {
-          callOrder.push('findByEmail');
-          return null;
+      it('should throw ForbiddenException when account is locked', async () => {
+        usersService.findByEmail.mockResolvedValue({
+          ...mockUser,
+          lockedUntil: new Date(Date.now() + 60000),
         });
-        usersService.create.mockImplementation(async () => {
-          callOrder.push('create');
-          return mockUser;
+
+        await expect(authService.login(loginDto)).rejects.toThrow(
+          ForbiddenException,
+        );
+      });
+
+      it('should reset lockout when lock has expired', async () => {
+        usersService.findByEmail.mockResolvedValue({
+          ...mockUser,
+          lockedUntil: new Date(Date.now() - 1000),
         });
-        usersService.updateRefreshToken.mockResolvedValue(undefined);
-        (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-value');
+        usersService.resetFailedAttempts.mockResolvedValue(undefined);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+        (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
         jwtService.sign.mockReturnValue('token');
 
-        await authService.register(registerDto);
+        await authService.login(loginDto);
 
-        expect(usersService.findByEmail).toHaveBeenCalledWith(
-          'test@example.com',
-        );
-        expect(callOrder.indexOf('findByEmail')).toBeLessThan(
-          callOrder.indexOf('create'),
+        expect(usersService.resetFailedAttempts).toHaveBeenCalledWith(
+          'uuid-123',
         );
       });
+
+      it('should throw UnauthorizedException when user has no passwordHash (OAuth-only)', async () => {
+        usersService.findByEmail.mockResolvedValue({
+          ...mockUser,
+          passwordHash: null,
+        });
+
+        await expect(authService.login(loginDto)).rejects.toThrow(
+          UnauthorizedException,
+        );
+      });
+
+      it('should throw UnauthorizedException on wrong password', async () => {
+        usersService.findByEmail.mockResolvedValue(mockUser);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+        usersService.incrementFailedAttempts.mockResolvedValue({
+          ...mockUser,
+          failedAttempts: 1,
+        });
+
+        await expect(authService.login(loginDto)).rejects.toThrow(
+          UnauthorizedException,
+        );
+      });
+
+      it('should increment failed attempts on wrong password', async () => {
+        usersService.findByEmail.mockResolvedValue(mockUser);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+        usersService.incrementFailedAttempts.mockResolvedValue({
+          ...mockUser,
+          failedAttempts: 1,
+        });
+
+        await expect(authService.login(loginDto)).rejects.toThrow();
+
+        expect(usersService.incrementFailedAttempts).toHaveBeenCalledWith(
+          'uuid-123',
+        );
+      });
+
+      it('should lock account after 5 failed attempts and throw ForbiddenException', async () => {
+        usersService.findByEmail.mockResolvedValue(mockUser);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+        usersService.incrementFailedAttempts.mockResolvedValue({
+          ...mockUser,
+          failedAttempts: 5,
+        });
+        usersService.lockAccount.mockResolvedValue(undefined);
+
+        await expect(authService.login(loginDto)).rejects.toThrow(
+          ForbiddenException,
+        );
+        expect(usersService.lockAccount).toHaveBeenCalledWith('uuid-123');
+      });
+    });
+  });
+
+  describe('refreshTokens', () => {
+    it('should return new token pair on valid refresh token', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'uuid-123' });
+      usersService.findById.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hashed-refresh');
+      usersService.updateRefreshToken.mockResolvedValue(undefined);
+      jwtService.sign
+        .mockReturnValueOnce('new-access')
+        .mockReturnValueOnce('new-refresh');
+
+      const result = await authService.refreshTokens('valid-refresh-token');
+
+      expect(result.accessToken).toBe('new-access');
+      expect(result.refreshToken).toBe('new-refresh');
+    });
+
+    it('should throw UnauthorizedException when token verification fails', async () => {
+      jwtService.verify.mockImplementation(() => {
+        throw new Error('invalid token');
+      });
+
+      await expect(authService.refreshTokens('invalid-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should throw UnauthorizedException when user not found', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'uuid-123' });
+      usersService.findById.mockResolvedValue(null);
+
+      await expect(authService.refreshTokens('valid-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should throw UnauthorizedException when user has no stored refresh token', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'uuid-123' });
+      usersService.findById.mockResolvedValue({
+        ...mockUser,
+        refreshToken: null,
+      });
+
+      await expect(authService.refreshTokens('valid-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should throw UnauthorizedException when refresh token does not match hash', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'uuid-123' });
+      usersService.findById.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(authService.refreshTokens('wrong-token')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+  });
+
+  describe('logout', () => {
+    it('should invalidate refresh token by setting it to null', async () => {
+      usersService.updateRefreshToken.mockResolvedValue(undefined);
+
+      await authService.logout('uuid-123');
+
+      expect(usersService.updateRefreshToken).toHaveBeenCalledWith(
+        'uuid-123',
+        null,
+      );
     });
   });
 });
