@@ -1,140 +1,279 @@
-<div align="center">
-    <a href="https://www.php.net">
-        <img
-            alt="PHP"
-            src="https://www.php.net/images/logos/new-php-logo.svg"
-            width="150">
-    </a>
-</div>
+# EM Ecosystem - Backend API
 
-# The PHP Interpreter
+NestJS backend for the EM Ecosystem platform.
 
-PHP is a popular general-purpose scripting language that is especially suited to
-web development. Fast, flexible and pragmatic, PHP powers everything from your
-blog to the most popular websites in the world. PHP is distributed under the
-[PHP License v3.01](LICENSE).
+## Tech Stack
 
-[![Push](https://github.com/php/php-src/actions/workflows/push.yml/badge.svg)](https://github.com/php/php-src/actions/workflows/push.yml)
-[![Fuzzing Status](https://oss-fuzz-build-logs.storage.googleapis.com/badges/php.svg)](https://bugs.chromium.org/p/oss-fuzz/issues/list?sort=-opened&can=1&q=proj:php)
+- **Framework**: NestJS 11
+- **ORM**: Prisma 7 (PostgreSQL)
+- **Auth**: JWT (access + refresh tokens), bcrypt, OAuth (Google + GitHub)
+- **Validation**: class-validator + class-transformer
+- **Testing**: Jest with 90%+ coverage thresholds
 
-## Documentation
+## Project Setup
 
-The PHP manual is available at [php.net/docs](https://www.php.net/docs).
+```bash
+npm install
+```
 
-## Installation
+### Environment Variables
 
-### Prebuilt packages and binaries
+Copy `.env.example` to `.env` and configure:
 
-Prebuilt packages and binaries can be used to get up and running fast with PHP.
+```bash
+DATABASE_URL=postgresql://user:password@localhost:5432/em_ecosystem
+JWT_SECRET=your-secret-key
+JWT_ACCESS_EXPIRATION=15m
+JWT_REFRESH_EXPIRATION=7d
+PORT=3000
+FRONTEND_URL=http://localhost:3001
 
-For Windows, the PHP binaries can be obtained from
-[windows.php.net](https://windows.php.net). After extracting the archive the
-`*.exe` files are ready to use.
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
 
-For other systems, see the [installation chapter](https://www.php.net/install).
+# GitHub OAuth
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
+```
 
-### Building PHP source code
+### Database
 
-*For Windows, see [Build your own PHP on Windows](https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2).*
+```bash
+npx prisma generate
+npx prisma migrate dev
+```
 
-For a minimal PHP build from Git, you will need autoconf, bison, and re2c. For
-a default build, you will additionally need libxml2 and libsqlite3.
+## Running the App
 
-On Ubuntu, you can install these using:
+```bash
+# development
+npm run start:dev
 
-    sudo apt install -y pkg-config build-essential autoconf bison re2c \
-                        libxml2-dev libsqlite3-dev
+# production
+npm run start:prod
+```
 
-On Fedora, you can install these using:
+## Testing
 
-    sudo dnf install re2c bison autoconf make libtool ccache libxml2-devel sqlite-devel
+```bash
+# unit tests
+npm test
 
-Generate configure:
+# test coverage
+npm run test:cov
+```
 
-    ./buildconf
+## API Endpoints
 
-Configure your build. `--enable-debug` is recommended for development, see
-`./configure --help` for a full list of options.
+### Auth
 
-    # For development
-    ./configure --enable-debug
-    # For production
-    ./configure
+| Method | Endpoint         | Description          | Auth |
+|--------|------------------|----------------------|------|
+| POST   | `/auth/register` | Register new user    | No   |
+| POST   | `/auth/login`    | Login with email/pwd | No   |
+| POST   | `/auth/refresh`  | Refresh token pair   | No   |
+| POST   | `/auth/logout`   | Invalidate session   | Yes  |
+| GET    | `/auth/me`       | Get current user     | Yes  |
+| GET    | `/auth/admin`    | Admin-only endpoint  | Yes (Admin) |
+| GET    | `/auth/google`   | Initiate Google OAuth | No   |
+| GET    | `/auth/google/callback` | Google OAuth callback | No |
+| GET    | `/auth/github`   | Initiate GitHub OAuth | No   |
+| GET    | `/auth/github/callback` | GitHub OAuth callback | No |
 
-Build PHP. To speed up the build, specify the maximum number of jobs using `-j`:
+#### POST /auth/register
 
-    make -j4
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "StrongPass1!"
+}
+```
 
-The number of jobs should usually match the number of available cores, which
-can be determined using `nproc`.
+**Password Requirements:**
+- Minimum 8 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one number
+- At least one special character (@$!%*?&)
 
-## Testing PHP source code
+**Response (201):**
+```json
+{
+  "accessToken": "eyJhbG...",
+  "refreshToken": "eyJhbG...",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "role": "USER",
+    "provider": "LOCAL",
+    "emailVerified": false
+  }
+}
+```
 
-PHP ships with an extensive test suite, the command `make test` is used after
-successful compilation of the sources to run this test suite.
+#### POST /auth/login
 
-It is possible to run tests using multiple cores by setting `-jN` in
-`TEST_PHP_ARGS`:
+**Request Body:**
+```json
+{
+  "email": "user@example.com",
+  "password": "StrongPass1!"
+}
+```
 
-    make TEST_PHP_ARGS=-j4 test
+**Response (200):**
+```json
+{
+  "accessToken": "eyJhbG...",
+  "refreshToken": "eyJhbG...",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "role": "USER",
+    "provider": "LOCAL",
+    "emailVerified": false
+  }
+}
+```
 
-Shall run `make test` with a maximum of 4 concurrent jobs: Generally the maximum
-number of jobs should not exceed the number of cores available.
+**Brute Force Protection:**
+- After 5 failed login attempts, the account is locked for 15 minutes
+- Failed attempt counter resets on successful login
+- Expired locks are automatically cleared on next login attempt
 
-The [qa.php.net](https://qa.php.net) site provides more detailed info about
-testing and quality assurance.
+#### POST /auth/refresh
 
-## Installing PHP built from source
+**Request Body:**
+```json
+{
+  "refreshToken": "eyJhbG..."
+}
+```
 
-After a successful build (and test), PHP may be installed with:
+**Response (200):**
+```json
+{
+  "accessToken": "eyJhbG...",
+  "refreshToken": "eyJhbG..."
+}
+```
 
-    make install
+#### POST /auth/logout
 
-Depending on your permissions and prefix, `make install` may need super user
-permissions.
+**Headers:** `Authorization: Bearer <access_token>`
 
-## PHP extensions
+**Response (200):**
+```json
+{
+  "message": "Logged out successfully"
+}
+```
 
-Extensions provide additional functionality on top of PHP. PHP consists of many
-essential bundled extensions. Additional extensions can be found in the PHP
-Extension Community Library - [PECL](https://pecl.php.net).
+#### GET /auth/me
 
-## Contributing
+**Headers:** `Authorization: Bearer <access_token>`
 
-The PHP source code is located in the Git repository at
-[github.com/php/php-src](https://github.com/php/php-src). Contributions are most
-welcome by forking the repository and sending a pull request.
+**Response (200):**
+```json
+{
+  "id": "uuid",
+  "email": "user@example.com",
+  "role": "USER",
+  "provider": "LOCAL",
+  "providerId": null,
+  "emailVerified": false,
+  "failedAttempts": 0,
+  "lockedUntil": null,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
+}
+```
 
-Discussions are done on GitHub, but depending on the topic can also be relayed
-to the official PHP developer mailing list internals@lists.php.net.
+#### GET /auth/admin
 
-New features require an RFC and must be accepted by the developers. See
-[Request for comments - RFC](https://wiki.php.net/rfc) and
-[Voting on PHP features](https://wiki.php.net/rfc/voting) for more information
-on the process.
+**Headers:** `Authorization: Bearer <access_token>`
 
-Bug fixes don't require an RFC. If the bug has a GitHub issue, reference it in
-the commit message using `GH-NNNNNN`. Use `#NNNNNN` for tickets in the old
-[bugs.php.net](https://bugs.php.net) bug tracker.
+**Required Role:** `ADMIN`
 
-    Fix GH-7815: php_uname doesn't recognise latest Windows versions
-    Fix #55371: get_magic_quotes_gpc() throws deprecation warning
+Returns `403 Forbidden` if the authenticated user does not have the `ADMIN` role.
 
-See [Git workflow](https://wiki.php.net/vcs/gitworkflow) for details on how pull
-requests are merged.
+**Response (200):**
+```json
+{
+  "message": "Admin access granted"
+}
+```
 
-### Guidelines for contributors
+#### GET /auth/google
 
-See further documents in the repository for more information on how to
-contribute:
+Redirects to Google OAuth consent screen. After authorization, Google redirects to `/auth/google/callback`.
 
-- [Contributing to PHP](/CONTRIBUTING.md)
-- [PHP coding standards](/CODING_STANDARDS.md)
-- [Internal documentation](https://php.github.io/php-src/)
-- [Mailing list rules](/docs/mailinglist-rules.md)
-- [PHP release process](/docs/release-process.md)
+#### GET /auth/google/callback
 
-## Credits
+Handles Google OAuth callback. On success, redirects to `FRONTEND_URL/auth/callback?accessToken=...&refreshToken=...`.
 
-For the list of people who've put work into PHP, please see the
-[PHP credits page](https://www.php.net/credits.php).
+**Behavior:**
+- First-time OAuth user: creates a new account automatically
+- Existing LOCAL user with same email: links the OAuth provider to the account
+- Existing OAuth user: returns tokens for existing account
+
+#### GET /auth/github
+
+Redirects to GitHub OAuth authorization page. After authorization, GitHub redirects to `/auth/github/callback`.
+
+#### GET /auth/github/callback
+
+Handles GitHub OAuth callback. Same behavior as Google callback.
+
+## Project Structure
+
+```
+src/
+  auth/                    # Authentication module
+    dto/                   # Data transfer objects
+    guards/                # Auth guards (JWT, Google, GitHub)
+    strategies/            # Passport strategies (JWT, Google, GitHub)
+    __tests__/             # Unit tests
+    auth.controller.ts     # Route handlers
+    auth.service.ts        # Business logic
+    auth.module.ts         # Module definition
+  users/                   # Users module
+    entities/              # User entity & types
+    enums/                 # Role & Provider enums
+    __tests__/             # Unit tests
+    users.service.ts       # CRUD operations
+    users.module.ts        # Module definition
+  common/                  # Shared utilities
+    filters/               # Exception filters
+    interfaces/            # Shared interfaces
+  prisma/                  # Prisma ORM integration
+    prisma.service.ts      # PrismaClient wrapper
+    prisma.module.ts       # Global module
+  app.module.ts            # Root module
+  main.ts                  # Bootstrap
+prisma/
+  schema.prisma            # Database schema
+```
+
+## Data Model
+
+### User
+
+| Field          | Type     | Description                |
+|----------------|----------|----------------------------|
+| id             | UUID     | Primary key                |
+| email          | String   | Unique email               |
+| passwordHash   | String?  | bcrypt hash (null for OAuth)|
+| role           | Enum     | ADMIN, USER                |
+| provider       | Enum     | LOCAL, GOOGLE, GITHUB      |
+| providerId     | String?  | OAuth provider ID          |
+| emailVerified  | Boolean  | Email verification status  |
+| failedAttempts | Int      | Login attempt counter      |
+| lockedUntil    | DateTime?| Account lock expiry        |
+| refreshToken   | String?  | Hashed refresh token       |
+| createdAt      | DateTime | Creation timestamp         |
+| updatedAt      | DateTime | Last update timestamp      |
