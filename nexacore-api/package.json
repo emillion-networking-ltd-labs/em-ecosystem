@@ -1,10 +1,10 @@
 {
-  "name": "em-ecosystem",
+  "name": "@em-ecosystem/nexacore-api",
   "version": "0.0.1",
-  "description": "",
-  "author": "",
+  "description": "EM NexaCore backend API — NestJS 11",
+  "author": "EMillion Networking LTD",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "PROPRIETARY",
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",

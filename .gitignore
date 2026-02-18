@@ -13,24 +13,9 @@ build/
 *.tsbuildinfo
 
 # ────────────────────────────────────────────
-# Python
+# Next.js
 # ────────────────────────────────────────────
-__pycache__/
-*.py[cod]
-*$py.class
-*.egg-info/
-*.egg
-.eggs/
-*.whl
-.venv/
-venv/
-env/
-.Python
-pip-log.txt
-pip-delete-this-directory.txt
-.mypy_cache/
-.pytest_cache/
-.ruff_cache/
+.next/
 
 # ────────────────────────────────────────────
 # VS Code
