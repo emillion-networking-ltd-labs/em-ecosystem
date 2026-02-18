@@ -56,6 +56,7 @@ $RECYCLE.BIN/
 # ────────────────────────────────────────────
 .env
 .env.*
+!.env.example
 *.pem
 *.key
 
@@ -67,3 +68,7 @@ $RECYCLE.BIN/
 *.swp
 *.swo
 *~
+
+coverage/
+
+/generated/prisma
