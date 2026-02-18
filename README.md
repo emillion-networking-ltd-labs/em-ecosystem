@@ -76,6 +76,8 @@ npm run test:cov
 | POST   | `/auth/login`    | Login with email/pwd | No   |
 | POST   | `/auth/refresh`  | Refresh token pair   | No   |
 | POST   | `/auth/logout`   | Invalidate session   | Yes  |
+| GET    | `/auth/me`       | Get current user     | Yes  |
+| GET    | `/auth/admin`    | Admin-only endpoint  | Yes (Admin) |
 | GET    | `/auth/google`   | Initiate Google OAuth | No   |
 | GET    | `/auth/google/callback` | Google OAuth callback | No |
 | GET    | `/auth/github`   | Initiate GitHub OAuth | No   |
@@ -168,6 +170,41 @@ npm run test:cov
 ```json
 {
   "message": "Logged out successfully"
+}
+```
+
+#### GET /auth/me
+
+**Headers:** `Authorization: Bearer <access_token>`
+
+**Response (200):**
+```json
+{
+  "id": "uuid",
+  "email": "user@example.com",
+  "role": "USER",
+  "provider": "LOCAL",
+  "providerId": null,
+  "emailVerified": false,
+  "failedAttempts": 0,
+  "lockedUntil": null,
+  "createdAt": "2024-01-01T00:00:00.000Z",
+  "updatedAt": "2024-01-01T00:00:00.000Z"
+}
+```
+
+#### GET /auth/admin
+
+**Headers:** `Authorization: Bearer <access_token>`
+
+**Required Role:** `ADMIN`
+
+Returns `403 Forbidden` if the authenticated user does not have the `ADMIN` role.
+
+**Response (200):**
+```json
+{
+  "message": "Admin access granted"
 }
 ```
 

@@ -149,6 +149,24 @@ describe('AuthController', () => {
     });
   });
 
+  describe('getMe', () => {
+    it('should return the user from the request', () => {
+      const req = { user: mockAuthResult.user };
+
+      const result = controller.getMe(req);
+
+      expect(result).toBe(mockAuthResult.user);
+    });
+  });
+
+  describe('getAdminDashboard', () => {
+    it('should return admin access granted message', () => {
+      const result = controller.getAdminDashboard();
+
+      expect(result).toEqual({ message: 'Admin access granted' });
+    });
+  });
+
   describe('googleAuthCallback', () => {
     it('should return redirect URL with tokens from OAuth result', () => {
       const req = {

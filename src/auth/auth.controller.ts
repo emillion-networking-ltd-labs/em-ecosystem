@@ -14,8 +14,11 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { RolesGuard } from './guards/roles.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
+import { Roles } from '../common/decorators/roles.decorator';
+import { Role } from '../users/enums/role.enum';
 import { SafeUser } from '../users/entities/user.entity';
 
 @Controller('auth')
@@ -46,6 +49,19 @@ export class AuthController {
   async logout(@Request() req: { user: { id: string } }) {
     await this.authService.logout(req.user.id);
     return { message: 'Logged out successfully' };
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  getMe(@Request() req: { user: SafeUser }) {
+    return req.user;
+  }
+
+  @Get('admin')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  getAdminDashboard() {
+    return { message: 'Admin access granted' };
   }
 
   @Get('google')
