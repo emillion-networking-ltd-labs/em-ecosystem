@@ -11,6 +11,7 @@ import { UsersService } from '../../users/users.service';
 import { Role } from '../../users/enums/role.enum';
 import { Provider } from '../../users/enums/provider.enum';
 import { User } from '../../users/entities/user.entity';
+import { OAuthProfile } from '../../common/interfaces/oauth-profile.interface';
 
 jest.mock('bcrypt');
 
@@ -50,6 +51,7 @@ describe('AuthService', () => {
             incrementFailedAttempts: jest.fn(),
             resetFailedAttempts: jest.fn(),
             lockAccount: jest.fn(),
+            findOrCreateByOAuth: jest.fn(),
           },
         },
         {
@@ -309,6 +311,64 @@ describe('AuthService', () => {
 
       await expect(authService.refreshTokens('wrong-token')).rejects.toThrow(
         UnauthorizedException,
+      );
+    });
+  });
+
+  describe('validateOAuthUser', () => {
+    const oauthProfile: OAuthProfile = {
+      email: 'oauth@example.com',
+      provider: Provider.GOOGLE,
+      providerId: 'google-id-123',
+    };
+
+    const mockOAuthUser: User = {
+      id: 'uuid-oauth',
+      email: 'oauth@example.com',
+      passwordHash: null,
+      role: Role.USER,
+      provider: Provider.GOOGLE,
+      providerId: 'google-id-123',
+      emailVerified: true,
+      failedAttempts: 0,
+      lockedUntil: null,
+      refreshToken: null,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+
+    it('should find or create user and return JWT pair with SafeUser', async () => {
+      usersService.findOrCreateByOAuth.mockResolvedValue(mockOAuthUser);
+      usersService.updateRefreshToken.mockResolvedValue(undefined);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      jwtService.sign
+        .mockReturnValueOnce('oauth-access-token')
+        .mockReturnValueOnce('oauth-refresh-token');
+
+      const result = await authService.validateOAuthUser(oauthProfile);
+
+      expect(usersService.findOrCreateByOAuth).toHaveBeenCalledWith(
+        oauthProfile,
+      );
+      expect(result.accessToken).toBe('oauth-access-token');
+      expect(result.refreshToken).toBe('oauth-refresh-token');
+      expect(result.user.email).toBe('oauth@example.com');
+      expect(result.user).not.toHaveProperty('passwordHash');
+      expect(result.user).not.toHaveProperty('refreshToken');
+    });
+
+    it('should call generateTokens which stores hashed refresh token', async () => {
+      usersService.findOrCreateByOAuth.mockResolvedValue(mockOAuthUser);
+      usersService.updateRefreshToken.mockResolvedValue(undefined);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      jwtService.sign.mockReturnValue('token');
+
+      await authService.validateOAuthUser(oauthProfile);
+
+      expect(bcrypt.hash).toHaveBeenCalled();
+      expect(usersService.updateRefreshToken).toHaveBeenCalledWith(
+        'uuid-oauth',
+        'hashed-refresh',
       );
     });
   });

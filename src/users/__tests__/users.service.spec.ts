@@ -242,4 +242,97 @@ describe('UsersService', () => {
       expect(lockMs).toBeLessThanOrEqual(after + 15 * 60 * 1000);
     });
   });
+
+  describe('findOrCreateByOAuth', () => {
+    const googleProfile = {
+      email: 'oauth@example.com',
+      provider: Provider.GOOGLE,
+      providerId: 'google-id-123',
+    };
+
+    it('should return existing user when provider and providerId match', async () => {
+      const existingOAuthUser = {
+        ...mockUser,
+        email: 'oauth@example.com',
+        provider: Provider.GOOGLE,
+        providerId: 'google-id-123',
+      };
+      prisma.user.findUnique.mockResolvedValue(existingOAuthUser);
+
+      const result = await usersService.findOrCreateByOAuth(googleProfile);
+
+      expect(result).toEqual(existingOAuthUser);
+      expect(prisma.user.update).not.toHaveBeenCalled();
+      expect(prisma.user.create).not.toHaveBeenCalled();
+    });
+
+    it('should link OAuth to existing LOCAL account by updating provider', async () => {
+      const localUser = {
+        ...mockUser,
+        email: 'oauth@example.com',
+        provider: Provider.LOCAL,
+        providerId: null,
+      };
+      const linkedUser = {
+        ...localUser,
+        provider: Provider.GOOGLE,
+        providerId: 'google-id-123',
+        emailVerified: true,
+      };
+      prisma.user.findUnique.mockResolvedValue(localUser);
+      prisma.user.update.mockResolvedValue(linkedUser);
+
+      const result = await usersService.findOrCreateByOAuth(googleProfile);
+
+      expect(result).toEqual(linkedUser);
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: localUser.id },
+        data: {
+          provider: Provider.GOOGLE,
+          providerId: 'google-id-123',
+          emailVerified: true,
+        },
+      });
+    });
+
+    it('should return existing user when email matches but provider is different OAuth', async () => {
+      const githubUser = {
+        ...mockUser,
+        email: 'oauth@example.com',
+        provider: Provider.GITHUB,
+        providerId: 'github-id-789',
+      };
+      prisma.user.findUnique.mockResolvedValue(githubUser);
+
+      const result = await usersService.findOrCreateByOAuth(googleProfile);
+
+      expect(result).toEqual(githubUser);
+      expect(prisma.user.update).not.toHaveBeenCalled();
+    });
+
+    it('should create new user when no existing user with that email', async () => {
+      const newOAuthUser = {
+        ...mockUser,
+        email: 'oauth@example.com',
+        provider: Provider.GOOGLE,
+        providerId: 'google-id-123',
+        passwordHash: null,
+        emailVerified: true,
+      };
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.create.mockResolvedValue(newOAuthUser);
+
+      const result = await usersService.findOrCreateByOAuth(googleProfile);
+
+      expect(result).toEqual(newOAuthUser);
+      expect(prisma.user.create).toHaveBeenCalledWith({
+        data: {
+          email: 'oauth@example.com',
+          provider: Provider.GOOGLE,
+          providerId: 'google-id-123',
+          emailVerified: true,
+        },
+      });
+    });
+  });
 });

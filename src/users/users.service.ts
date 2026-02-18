@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { User } from './entities/user.entity';
 import { Provider } from './enums/provider.enum';
+import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
 
 @Injectable()
 export class UsersService {
@@ -78,5 +79,40 @@ export class UsersService {
       where: { id: userId },
       data: { lockedUntil: lockUntil },
     });
+  }
+
+  async findOrCreateByOAuth(profile: OAuthProfile): Promise<User> {
+    const existingUser = await this.findByEmail(profile.email);
+
+    if (existingUser) {
+      if (
+        existingUser.provider === profile.provider &&
+        existingUser.providerId === profile.providerId
+      ) {
+        return existingUser;
+      }
+
+      if (existingUser.provider === Provider.LOCAL) {
+        return this.prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            provider: profile.provider,
+            providerId: profile.providerId,
+            emailVerified: true,
+          },
+        }) as Promise<User>;
+      }
+
+      return existingUser;
+    }
+
+    return this.prisma.user.create({
+      data: {
+        email: profile.email,
+        provider: profile.provider,
+        providerId: profile.providerId,
+        emailVerified: true,
+      },
+    }) as Promise<User>;
   }
 }

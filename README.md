@@ -6,7 +6,7 @@ NestJS backend for the EM Ecosystem platform.
 
 - **Framework**: NestJS 11
 - **ORM**: Prisma 7 (PostgreSQL)
-- **Auth**: JWT (access + refresh tokens), bcrypt
+- **Auth**: JWT (access + refresh tokens), bcrypt, OAuth (Google + GitHub)
 - **Validation**: class-validator + class-transformer
 - **Testing**: Jest with 90%+ coverage thresholds
 
@@ -27,6 +27,16 @@ JWT_ACCESS_EXPIRATION=15m
 JWT_REFRESH_EXPIRATION=7d
 PORT=3000
 FRONTEND_URL=http://localhost:3001
+
+# Google OAuth
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+
+# GitHub OAuth
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
+GITHUB_CALLBACK_URL=http://localhost:3000/auth/github/callback
 ```
 
 ### Database
@@ -66,6 +76,10 @@ npm run test:cov
 | POST   | `/auth/login`    | Login with email/pwd | No   |
 | POST   | `/auth/refresh`  | Refresh token pair   | No   |
 | POST   | `/auth/logout`   | Invalidate session   | Yes  |
+| GET    | `/auth/google`   | Initiate Google OAuth | No   |
+| GET    | `/auth/google/callback` | Google OAuth callback | No |
+| GET    | `/auth/github`   | Initiate GitHub OAuth | No   |
+| GET    | `/auth/github/callback` | GitHub OAuth callback | No |
 
 #### POST /auth/register
 
@@ -157,14 +171,35 @@ npm run test:cov
 }
 ```
 
+#### GET /auth/google
+
+Redirects to Google OAuth consent screen. After authorization, Google redirects to `/auth/google/callback`.
+
+#### GET /auth/google/callback
+
+Handles Google OAuth callback. On success, redirects to `FRONTEND_URL/auth/callback?accessToken=...&refreshToken=...`.
+
+**Behavior:**
+- First-time OAuth user: creates a new account automatically
+- Existing LOCAL user with same email: links the OAuth provider to the account
+- Existing OAuth user: returns tokens for existing account
+
+#### GET /auth/github
+
+Redirects to GitHub OAuth authorization page. After authorization, GitHub redirects to `/auth/github/callback`.
+
+#### GET /auth/github/callback
+
+Handles GitHub OAuth callback. Same behavior as Google callback.
+
 ## Project Structure
 
 ```
 src/
   auth/                    # Authentication module
     dto/                   # Data transfer objects
-    guards/                # Auth guards (JwtAuthGuard)
-    strategies/            # Passport strategies (JWT)
+    guards/                # Auth guards (JWT, Google, GitHub)
+    strategies/            # Passport strategies (JWT, Google, GitHub)
     __tests__/             # Unit tests
     auth.controller.ts     # Route handlers
     auth.service.ts        # Business logic

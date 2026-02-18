@@ -11,6 +11,8 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User, SafeUser, toSafeUser } from '../users/entities/user.entity';
 import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
+import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
+import type { StringValue } from 'ms';
 
 const BCRYPT_ROUNDS = 12;
 const MAX_FAILED_ATTEMPTS = 5;
@@ -116,6 +118,14 @@ export class AuthService {
     return this.generateTokens(user);
   }
 
+  async validateOAuthUser(
+    profile: OAuthProfile,
+  ): Promise<{ accessToken: string; refreshToken: string; user: SafeUser }> {
+    const user = await this.usersService.findOrCreateByOAuth(profile);
+    const tokens = await this.generateTokens(user);
+    return { ...tokens, user: toSafeUser(user) };
+  }
+
   async logout(userId: string): Promise<void> {
     await this.usersService.updateRefreshToken(userId, null);
   }
@@ -130,12 +140,14 @@ export class AuthService {
     };
 
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: process.env.JWT_ACCESS_EXPIRATION || '15m',
+      expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as StringValue,
     });
 
     const refreshToken = this.jwtService.sign(
       { sub: user.id },
-      { expiresIn: process.env.JWT_REFRESH_EXPIRATION || '7d' },
+      {
+        expiresIn: (process.env.JWT_REFRESH_EXPIRATION || '7d') as StringValue,
+      },
     );
 
     const hashedRefreshToken = await bcrypt.hash(refreshToken, BCRYPT_ROUNDS);

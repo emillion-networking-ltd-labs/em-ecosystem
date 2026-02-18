@@ -148,4 +148,40 @@ describe('AuthController', () => {
       expect(result.message).toBe('Logged out successfully');
     });
   });
+
+  describe('googleAuthCallback', () => {
+    it('should return redirect URL with tokens from OAuth result', () => {
+      const req = {
+        user: {
+          accessToken: 'google-access',
+          refreshToken: 'google-refresh',
+          user: mockAuthResult.user,
+        },
+      };
+
+      const result = controller.googleAuthCallback(req);
+
+      expect(result.url).toBe(
+        'http://localhost:3001/auth/callback?accessToken=google-access&refreshToken=google-refresh',
+      );
+    });
+  });
+
+  describe('githubAuthCallback', () => {
+    it('should return redirect URL with tokens from OAuth result', () => {
+      const req = {
+        user: {
+          accessToken: 'github-access',
+          refreshToken: 'github-refresh',
+          user: mockAuthResult.user,
+        },
+      };
+
+      const result = controller.githubAuthCallback(req);
+
+      expect(result.url).toBe(
+        'http://localhost:3001/auth/callback?accessToken=github-access&refreshToken=github-refresh',
+      );
+    });
+  });
 });
