@@ -9,6 +9,12 @@ import {
   Request,
   Redirect,
 } from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -21,24 +27,36 @@ import { Roles } from '../common/decorators/roles.decorator';
 import { Role } from '../users/enums/role.enum';
 import { SafeUser } from '../users/entities/user.entity';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Register a new user account' })
+  @ApiResponse({ status: 201, description: 'User registered successfully' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  @ApiResponse({ status: 409, description: 'Email already registered' })
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Login with email and password' })
+  @ApiResponse({ status: 200, description: 'Login successful, returns tokens' })
+  @ApiResponse({ status: 401, description: 'Invalid credentials' })
+  @ApiResponse({ status: 403, description: 'Account locked' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiResponse({ status: 200, description: 'Tokens refreshed successfully' })
+  @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshTokens(refreshTokenDto.refreshToken);
   }
@@ -46,6 +64,10 @@ export class AuthController {
   @Post('logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Logout and invalidate refresh token' })
+  @ApiResponse({ status: 200, description: 'Logged out successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   async logout(@Request() req: { user: { id: string } }) {
     await this.authService.logout(req.user.id);
     return { message: 'Logged out successfully' };
@@ -53,6 +75,10 @@ export class AuthController {
 
   @Get('me')
   @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current authenticated user profile' })
+  @ApiResponse({ status: 200, description: 'Returns user profile' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
   getMe(@Request() req: { user: SafeUser }) {
     return req.user;
   }
@@ -60,12 +86,22 @@ export class AuthController {
   @Get('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Access admin dashboard (ADMIN role required)' })
+  @ApiResponse({ status: 200, description: 'Admin access granted' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Forbidden — requires ADMIN role' })
   getAdminDashboard() {
     return { message: 'Admin access granted' };
   }
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Initiate Google OAuth login' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to Google consent screen',
+  })
   googleAuth() {
     // Guard redirects to Google
   }
@@ -73,6 +109,11 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   @Redirect()
+  @ApiOperation({ summary: 'Google OAuth callback' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend with tokens',
+  })
   googleAuthCallback(
     @Request()
     req: {
@@ -88,6 +129,11 @@ export class AuthController {
 
   @Get('github')
   @UseGuards(GitHubAuthGuard)
+  @ApiOperation({ summary: 'Initiate GitHub OAuth login' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to GitHub authorization',
+  })
   githubAuth() {
     // Guard redirects to GitHub
   }
@@ -95,6 +141,11 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(GitHubAuthGuard)
   @Redirect()
+  @ApiOperation({ summary: 'GitHub OAuth callback' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend with tokens',
+  })
   githubAuthCallback(
     @Request()
     req: {
