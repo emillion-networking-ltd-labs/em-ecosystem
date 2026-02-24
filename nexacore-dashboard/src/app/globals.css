@@ -24,7 +24,7 @@
   --border-subtle: rgba(0, 0, 0, 0.03);
 
   /* Semantic feedback colors */
-  --color-error: #8a1111;
+  --color-error: 138 17 17;
   --color-error-bg: #fef2f2;
   --color-error-border: #f5c6c6;
   --color-warning: #92400e;
@@ -68,7 +68,7 @@
   --border-subtle: rgba(255, 255, 255, 0.04);
 
   /* Semantic feedback colors */
-  --color-error: #ef4444;
+  --color-error: 239 68 68;
   --color-error-bg: #451a1a;
   --color-error-border: #7f1d1d;
   --color-warning: #f59e0b;

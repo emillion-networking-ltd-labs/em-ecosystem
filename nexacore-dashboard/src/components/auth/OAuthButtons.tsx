@@ -7,14 +7,14 @@ export default function OAuthButtons() {
       {/* OR Divider */}
       <div className="flex h-[30px] w-full items-center gap-4">
         <div className="h-px flex-1 bg-content-primary/10" />
-        <span className="text-xs text-content-tertiary">OR</span>
+        <span className="text-xs leading-[18px] text-content-tertiary">OR</span>
         <div className="h-px flex-1 bg-content-primary/10" />
       </div>
 
       {/* Google */}
       <button
         type="button"
-        className="flex h-10 w-full items-center justify-center gap-2.5 rounded-md border border-border-default bg-transparent text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+        className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-default bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
       >
         <GoogleIcon width={16} height={16} className="text-content-primary/50" />
         Continue with Google
@@ -23,7 +23,7 @@ export default function OAuthButtons() {
       {/* GitHub */}
       <button
         type="button"
-        className="flex h-10 w-full items-center justify-center gap-2.5 rounded-md border border-border-default bg-transparent text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+        className="flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-default bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
       >
         <Github size={16} className="text-content-primary/50" />
         Continue with GitHub

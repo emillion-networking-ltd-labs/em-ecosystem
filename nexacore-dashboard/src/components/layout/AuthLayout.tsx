@@ -16,7 +16,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
   const isDark = theme === 'dark';
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-surface-primary">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-surface-primary px-2 py-2">
       {/* Decorative background grid — Figma: "Frame BG Lines" */}
       <AuthGridLines />
 

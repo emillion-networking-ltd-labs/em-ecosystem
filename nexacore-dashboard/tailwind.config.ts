@@ -39,7 +39,7 @@ const config: Config = {
           DEFAULT: 'var(--hover-bg)',
         },
         error: {
-          DEFAULT: 'var(--color-error)',
+          DEFAULT: 'rgb(var(--color-error) / <alpha-value>)',
           bg: 'var(--color-error-bg)',
           border: 'var(--color-error-border)',
         },

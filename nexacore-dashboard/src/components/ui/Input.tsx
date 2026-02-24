@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, type ReactNode } from 'react';
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, TriangleAlert } from 'lucide-react';
 import Spinner from './Spinner';
 
 interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'> {
@@ -27,9 +27,9 @@ export default function Input({
   const isPassword = type === 'password';
 
   /* Outline states (ui-design-system: border always 1px black/5, outline on top)
-     default: no outline | hover: 1.5px black/75 | focus: 1.5px black/75 | error: 1.5px error-border */
+     default: no outline | hover: 2px black/75 | focus: 2px black/75 | error: 2px error/75 */
   const outlineClass = error
-    ? 'outline-error-border'
+    ? 'outline-error/75'
     : 'outline-transparent hover:outline-content-primary/75 focus-within:outline-content-primary/75';
 
   return (
@@ -37,7 +37,7 @@ export default function Input({
       {label && (
         <label
           htmlFor={inputId}
-          className="text-[15px] font-semibold leading-[22px] text-content-primary"
+          className={`text-[15px] font-semibold leading-[22px] ${error ? 'text-error/75' : 'text-content-primary'}`}
         >
           {label}
         </label>
@@ -66,7 +66,7 @@ export default function Input({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className="shrink-0 text-content-secondary hover:text-content-primary/75"
+            className={`shrink-0 ${error ? 'text-error/75' : 'text-content-secondary hover:text-content-primary/75'}`}
             tabIndex={-1}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >
@@ -80,13 +80,14 @@ export default function Input({
         )}
       </div>
       {error && (
-        <p
+        <div
           id={`${inputId}-error`}
-          className="text-xs text-error"
+          className="flex items-center gap-2"
           role="alert"
         >
-          {error}
-        </p>
+          <TriangleAlert size={16} className="shrink-0 text-error/75" />
+          <p className="flex-1 text-xs leading-6 text-error/75">{error}</p>
+        </div>
       )}
     </div>
   );
