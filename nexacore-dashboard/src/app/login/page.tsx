@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import AuthLayout from '@/components/layout/AuthLayout';
 import LoginForm from '@/components/auth/LoginForm';
 
@@ -8,7 +9,9 @@ export const metadata = {
 export default function LoginPage() {
   return (
     <AuthLayout>
-      <LoginForm />
+      <Suspense>
+        <LoginForm />
+      </Suspense>
     </AuthLayout>
   );
 }

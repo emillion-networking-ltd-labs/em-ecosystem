@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { ChevronDown, AlertTriangle } from 'lucide-react';
 import Input from '@/components/ui/Input';
@@ -18,13 +18,19 @@ export default function LoginForm() {
   const [step, setStep] = useState<LoginStep>('email');
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [oauthError, setOauthError] = useState<string | null>(null);
   const { login, isLoading, isAuthenticated, error, clearError } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  // Clear stale errors from other auth forms on mount
+  // Clear stale errors from other auth forms on mount + read OAuth error from URL
   useEffect(() => {
     clearError();
-  }, [clearError]);
+    const urlError = searchParams.get('error');
+    if (urlError === 'oauth_failed') {
+      setOauthError('Sign in with provider failed. Please try again.');
+    }
+  }, [clearError, searchParams]);
 
   // Redirect away if already authenticated
   useEffect(() => {
@@ -33,6 +39,7 @@ export default function LoginForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     clearError();
+    setOauthError(null);
     if (e.target.name === 'email') setEmailError(null);
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
@@ -106,14 +113,19 @@ export default function LoginForm() {
             />
 
             {/* System Message — Figma: 348x24, HORIZONTAL, center */}
-            <div className={`flex items-center gap-2 ${emailError ? 'min-h-6' : 'h-6'}`}>
-              {emailError && (
-                <>
-                  <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="flex-1 text-xs leading-6 text-error">{emailError}</span>
-                </>
-              )}
-            </div>
+            {(() => {
+              const activeError = emailError || oauthError;
+              return (
+                <div className={`flex items-center gap-2 ${activeError ? 'min-h-6' : 'h-6'}`}>
+                  {activeError && (
+                    <>
+                      <AlertTriangle size={16} className="shrink-0 text-error" />
+                      <span className="flex-1 text-xs leading-6 text-error">{activeError}</span>
+                    </>
+                  )}
+                </div>
+              );
+            })()}
           </div>
 
           {/* Buttons Field — Figma: horizontal, itemSpacing 8 */}
