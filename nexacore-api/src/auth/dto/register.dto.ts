@@ -26,7 +26,7 @@ export class RegisterDto {
     message: 'Password must contain at least one number',
   })
   @Matches(/(?=.*[@$!%*?&])/, {
-    message: 'Password must contain at least one special character (@$!%*?&)',
+    message: 'Password must include a special character (@$!%*?&)',
   })
   password: string;
 }
