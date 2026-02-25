@@ -20,7 +20,12 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
   async validate(
     _accessToken: string,
     _refreshToken: string,
-    profile: { emails?: { value: string }[]; id: string },
+    profile: {
+      emails?: { value: string }[];
+      id: string;
+      displayName?: string;
+      photos?: { value: string }[];
+    },
     done: (error: Error | null, user?: Record<string, unknown>) => void,
   ): Promise<void> {
     const email = profile.emails?.[0]?.value;
@@ -29,12 +34,27 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
       return;
     }
 
-    const result = await this.authService.validateOAuthUser({
-      email,
-      provider: Provider.GITHUB,
-      providerId: profile.id,
-    });
+    // GitHub gives displayName as a single string — split into first/last
+    let firstName: string | undefined;
+    let lastName: string | undefined;
+    if (profile.displayName) {
+      const parts = profile.displayName.split(' ');
+      firstName = parts[0];
+      lastName = parts.length > 1 ? parts.slice(1).join(' ') : undefined;
+    }
 
-    done(null, result);
+    try {
+      const result = await this.authService.validateOAuthUser({
+        email,
+        provider: Provider.GITHUB,
+        providerId: profile.id,
+        firstName,
+        lastName,
+        avatarUrl: profile.photos?.[0]?.value,
+      });
+      done(null, result);
+    } catch (err) {
+      done(err as Error);
+    }
   }
 }

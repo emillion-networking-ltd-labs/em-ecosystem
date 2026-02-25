@@ -1,5 +1,6 @@
 import AuthLayout from '@/components/layout/AuthLayout';
 import RegisterForm from '@/components/auth/RegisterForm';
+import GuestRoute from '@/components/guards/GuestRoute';
 
 export const metadata = {
   title: 'Create Account — EM NexaCore',
@@ -7,8 +8,10 @@ export const metadata = {
 
 export default function RegisterPage() {
   return (
-    <AuthLayout>
-      <RegisterForm />
-    </AuthLayout>
+    <GuestRoute>
+      <AuthLayout>
+        <RegisterForm />
+      </AuthLayout>
+    </GuestRoute>
   );
 }

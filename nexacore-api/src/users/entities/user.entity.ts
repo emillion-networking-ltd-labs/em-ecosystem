@@ -5,10 +5,14 @@ export interface User {
   id: string;
   email: string;
   passwordHash: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  avatarUrl: string | null;
   role: Role;
   provider: Provider;
   providerId: string | null;
   emailVerified: boolean;
+  isActive: boolean;
   failedAttempts: number;
   lockedUntil: Date | null;
   refreshToken: string | null;
@@ -22,10 +26,14 @@ export function toSafeUser(user: User): SafeUser {
   const safeUser: SafeUser = {
     id: user.id,
     email: user.email,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    avatarUrl: user.avatarUrl,
     role: user.role,
     provider: user.provider,
     providerId: user.providerId,
     emailVerified: user.emailVerified,
+    isActive: user.isActive,
     failedAttempts: user.failedAttempts,
     lockedUntil: user.lockedUntil,
     createdAt: user.createdAt,

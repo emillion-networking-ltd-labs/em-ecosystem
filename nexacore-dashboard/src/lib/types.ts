@@ -1,17 +1,21 @@
+export type UserRole = 'SUPERADMIN' | 'ADMIN' | 'USER';
+
 export type SafeUser = {
   id: string;
   email: string;
-  firstName: string;
-  lastName: string;
+  firstName: string | null;
+  lastName: string | null;
   avatarUrl: string | null;
   role: UserRole;
-  status: UserStatus;
+  provider: 'LOCAL' | 'GOOGLE' | 'GITHUB';
+  providerId: string | null;
+  emailVerified: boolean;
+  isActive: boolean;
+  failedAttempts: number;
+  lockedUntil: string | null;
   createdAt: string;
   updatedAt: string;
 };
-
-export type UserRole = 'SUPERADMIN' | 'ADMIN' | 'MEMBER';
-export type UserStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED';
 
 export type AuthResponse = {
   user: SafeUser;
@@ -36,4 +40,20 @@ export type PaginatedResponse<T> = {
     limit: number;
     totalPages: number;
   };
+};
+
+export type UpdateProfileDto = {
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+};
+
+export type ChangePasswordDto = {
+  currentPassword: string;
+  newPassword: string;
+};
+
+export type AdminUpdateUserDto = {
+  role?: UserRole;
+  isActive?: boolean;
 };

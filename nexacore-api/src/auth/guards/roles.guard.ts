@@ -13,6 +13,16 @@ export class RolesGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    const request = context
+      .switchToHttp()
+      .getRequest<{ user?: { role: Role } }>();
+    const user = request.user;
+
+    // SUPERADMIN bypasses all role checks
+    if (user?.role === Role.SUPERADMIN) {
+      return true;
+    }
+
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
       context.getHandler(),
       context.getClass(),
@@ -21,11 +31,6 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles || requiredRoles.length === 0) {
       return true;
     }
-
-    const request = context
-      .switchToHttp()
-      .getRequest<{ user?: { role: Role } }>();
-    const user = request.user;
 
     if (!user) {
       throw new ForbiddenException('Access denied');

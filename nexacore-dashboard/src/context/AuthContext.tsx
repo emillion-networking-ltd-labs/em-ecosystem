@@ -17,6 +17,7 @@ type AuthState = {
   user: SafeUser | null;
   accessToken: string | null;
   isLoading: boolean;
+  isInitialized: boolean;
   error: string | null;
 };
 
@@ -32,11 +33,17 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
     case 'AUTH_START':
       return { ...state, isLoading: true, error: null };
     case 'AUTH_SUCCESS':
-      return { user: action.payload.user, accessToken: action.payload.accessToken, isLoading: false, error: null };
+      return {
+        user: action.payload.user,
+        accessToken: action.payload.accessToken,
+        isLoading: false,
+        isInitialized: true,
+        error: null,
+      };
     case 'AUTH_ERROR':
-      return { ...state, isLoading: false, error: action.payload };
+      return { ...state, isLoading: false, isInitialized: true, error: action.payload };
     case 'LOGOUT':
-      return { user: null, accessToken: null, isLoading: false, error: null };
+      return { user: null, accessToken: null, isLoading: false, isInitialized: true, error: null };
     case 'CLEAR_ERROR':
       return { ...state, error: null };
     default:
@@ -75,19 +82,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
     accessToken: null,
-    isLoading: true, // true on mount to attempt silent refresh before rendering
+    isLoading: false,
+    isInitialized: false,
     error: null,
   });
 
   const refreshSession = useCallback(async () => {
+    dispatch({ type: 'AUTH_START' });
     try {
-      dispatch({ type: 'AUTH_START' });
       const res = await fetch('/api/auth/refresh', { method: 'POST' });
       if (!res.ok) {
         dispatch({ type: 'LOGOUT' });
         return;
       }
-      const { accessToken } = await res.json() as { accessToken: string };
+      const { accessToken } = (await res.json()) as { accessToken: string };
       apiClient.setAccessToken(accessToken);
       const user = await apiClient.get<SafeUser>('/auth/me');
       dispatch({ type: 'AUTH_SUCCESS', payload: { user, accessToken } });
@@ -111,9 +119,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ refreshToken: data.refreshToken }),
       });
       apiClient.setAccessToken(data.accessToken);
-      dispatch({ type: 'AUTH_SUCCESS', payload: { user: data.user, accessToken: data.accessToken } });
+      dispatch({
+        type: 'AUTH_SUCCESS',
+        payload: { user: data.user, accessToken: data.accessToken },
+      });
     } catch (err: unknown) {
-      dispatch({ type: 'AUTH_ERROR', payload: extractErrorMessage(err, 'Login failed. Please try again.') });
+      dispatch({
+        type: 'AUTH_ERROR',
+        payload: extractErrorMessage(err, 'Login failed. Please try again.'),
+      });
     }
   }, []);
 
@@ -127,27 +141,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ refreshToken: data.refreshToken }),
       });
       apiClient.setAccessToken(data.accessToken);
-      dispatch({ type: 'AUTH_SUCCESS', payload: { user: data.user, accessToken: data.accessToken } });
+      dispatch({
+        type: 'AUTH_SUCCESS',
+        payload: { user: data.user, accessToken: data.accessToken },
+      });
     } catch (err: unknown) {
-      dispatch({ type: 'AUTH_ERROR', payload: extractErrorMessage(err, 'Registration failed. Please try again.') });
+      dispatch({
+        type: 'AUTH_ERROR',
+        payload: extractErrorMessage(err, 'Registration failed. Please try again.'),
+      });
     }
   }, []);
 
-  const handleOAuthCallback = useCallback(async (accessToken: string, refreshToken: string) => {
-    dispatch({ type: 'AUTH_START' });
-    try {
-      await fetch('/api/auth/set-tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      });
-      apiClient.setAccessToken(accessToken);
-      const user = await apiClient.get<SafeUser>('/auth/me');
-      dispatch({ type: 'AUTH_SUCCESS', payload: { user, accessToken } });
-    } catch (err: unknown) {
-      dispatch({ type: 'AUTH_ERROR', payload: extractErrorMessage(err, 'OAuth authentication failed.') });
-    }
-  }, []);
+  const handleOAuthCallback = useCallback(
+    async (accessToken: string, refreshToken: string) => {
+      dispatch({ type: 'AUTH_START' });
+      try {
+        await fetch('/api/auth/set-tokens', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ refreshToken }),
+        });
+        apiClient.setAccessToken(accessToken);
+        const user = await apiClient.get<SafeUser>('/auth/me');
+        dispatch({ type: 'AUTH_SUCCESS', payload: { user, accessToken } });
+      } catch (err: unknown) {
+        dispatch({
+          type: 'AUTH_ERROR',
+          payload: extractErrorMessage(err, 'OAuth authentication failed.'),
+        });
+      }
+    },
+    [],
+  );
 
   const logout = useCallback(async () => {
     try {

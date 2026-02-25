@@ -2,11 +2,22 @@ import {
   Injectable,
   ConflictException,
   InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { User } from './entities/user.entity';
+import { User, SafeUser, toSafeUser } from './entities/user.entity';
 import { Provider } from './enums/provider.enum';
+import { Role } from './enums/role.enum';
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+import { ChangePasswordDto } from './dto/change-password.dto';
+import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
+import { ListUsersQueryDto } from './dto/list-users-query.dto';
+
+const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class UsersService {
@@ -84,11 +95,34 @@ export class UsersService {
   async findOrCreateByOAuth(profile: OAuthProfile): Promise<User> {
     const existingUser = await this.findByEmail(profile.email);
 
+    // Profile fields to populate from OAuth provider
+    const profileData = {
+      ...(profile.firstName && { firstName: profile.firstName }),
+      ...(profile.lastName && { lastName: profile.lastName }),
+      ...(profile.avatarUrl && { avatarUrl: profile.avatarUrl }),
+    };
+
     if (existingUser) {
       if (
         existingUser.provider === profile.provider &&
         existingUser.providerId === profile.providerId
       ) {
+        // Update profile fields if they were empty and OAuth provides them
+        const needsUpdate =
+          (!existingUser.firstName && profileData.firstName) ||
+          (!existingUser.lastName && profileData.lastName) ||
+          (!existingUser.avatarUrl && profileData.avatarUrl);
+
+        if (needsUpdate) {
+          return this.prisma.user.update({
+            where: { id: existingUser.id },
+            data: {
+              ...(!existingUser.firstName && profileData.firstName && { firstName: profileData.firstName }),
+              ...(!existingUser.lastName && profileData.lastName && { lastName: profileData.lastName }),
+              ...(!existingUser.avatarUrl && profileData.avatarUrl && { avatarUrl: profileData.avatarUrl }),
+            },
+          }) as Promise<User>;
+        }
         return existingUser;
       }
 
@@ -99,6 +133,7 @@ export class UsersService {
             provider: profile.provider,
             providerId: profile.providerId,
             emailVerified: true,
+            ...profileData,
           },
         }) as Promise<User>;
       }
@@ -112,7 +147,152 @@ export class UsersService {
         provider: profile.provider,
         providerId: profile.providerId,
         emailVerified: true,
+        ...profileData,
       },
     }) as Promise<User>;
+  }
+
+  // ── New methods for SCRUM-21 ──
+
+  async findAll(
+    query: ListUsersQueryDto,
+  ): Promise<{ data: SafeUser[]; meta: { total: number; page: number; limit: number; totalPages: number } }> {
+    const page = query.page ?? 1;
+    const limit = query.limit ?? 10;
+    const skip = (page - 1) * limit;
+
+    const where: Record<string, unknown> = {};
+
+    if (query.role) {
+      where.role = query.role;
+    }
+
+    if (query.search) {
+      where.OR = [
+        { email: { contains: query.search, mode: 'insensitive' } },
+        { firstName: { contains: query.search, mode: 'insensitive' } },
+        { lastName: { contains: query.search, mode: 'insensitive' } },
+      ];
+    }
+
+    const validSortFields = ['createdAt', 'email', 'role', 'firstName', 'lastName'];
+    const sortBy = validSortFields.includes(query.sortBy ?? '') ? query.sortBy : 'createdAt';
+    const sortOrder = query.sortOrder === 'asc' ? 'asc' : 'desc';
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: { [sortBy!]: sortOrder },
+      }),
+      this.prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: (users as User[]).map(toSafeUser),
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  async updateProfile(userId: string, dto: UpdateProfileDto): Promise<SafeUser> {
+    const user = await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(dto.firstName !== undefined && { firstName: dto.firstName }),
+        ...(dto.lastName !== undefined && { lastName: dto.lastName }),
+        ...(dto.avatarUrl !== undefined && { avatarUrl: dto.avatarUrl }),
+      },
+    });
+    return toSafeUser(user as User);
+  }
+
+  async changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.passwordHash) {
+      throw new ForbiddenException(
+        'Password change not available for OAuth accounts',
+      );
+    }
+
+    const isCurrentValid = await bcrypt.compare(
+      dto.currentPassword,
+      user.passwordHash,
+    );
+    if (!isCurrentValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const newHash = await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS);
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash: newHash,
+        refreshToken: null, // Revoke all sessions
+      },
+    });
+  }
+
+  async adminUpdateUser(
+    targetId: string,
+    dto: AdminUpdateUserDto,
+    actingUser: { role: Role },
+  ): Promise<SafeUser> {
+    const target = await this.findById(targetId);
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Cannot modify SUPERADMIN users
+    if (target.role === Role.SUPERADMIN) {
+      throw new ForbiddenException('Cannot modify SUPERADMIN accounts');
+    }
+
+    // Only SUPERADMIN can assign ADMIN or SUPERADMIN roles
+    if (
+      dto.role &&
+      (dto.role === Role.ADMIN || dto.role === Role.SUPERADMIN) &&
+      actingUser.role !== Role.SUPERADMIN
+    ) {
+      throw new ForbiddenException(
+        'Only SUPERADMIN can assign ADMIN or SUPERADMIN roles',
+      );
+    }
+
+    const updated = await this.prisma.user.update({
+      where: { id: targetId },
+      data: {
+        ...(dto.role !== undefined && { role: dto.role }),
+        ...(dto.isActive !== undefined && { isActive: dto.isActive }),
+      },
+    });
+
+    return toSafeUser(updated as User);
+  }
+
+  async softDelete(targetId: string): Promise<void> {
+    const target = await this.findById(targetId);
+    if (!target) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (target.role === Role.SUPERADMIN) {
+      throw new ForbiddenException('Cannot delete SUPERADMIN accounts');
+    }
+
+    await this.prisma.user.update({
+      where: { id: targetId },
+      data: { isActive: false },
+    });
   }
 }

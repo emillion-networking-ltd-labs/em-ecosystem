@@ -7,6 +7,7 @@ datasource db {
 }
 
 enum Role {
+  SUPERADMIN
   ADMIN
   USER
 }
@@ -21,10 +22,14 @@ model User {
   id             String    @id @default(uuid())
   email          String    @unique
   passwordHash   String?
+  firstName      String?
+  lastName       String?
+  avatarUrl      String?
   role           Role      @default(USER)
   provider       Provider  @default(LOCAL)
   providerId     String?
   emailVerified  Boolean   @default(false)
+  isActive       Boolean   @default(true)
   failedAttempts Int       @default(0)
   lockedUntil    DateTime?
   refreshToken   String?

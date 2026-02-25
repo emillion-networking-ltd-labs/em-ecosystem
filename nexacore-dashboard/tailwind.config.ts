@@ -58,6 +58,14 @@ const config: Config = {
           bg: 'var(--color-success-bg)',
           border: 'var(--color-success-border)',
         },
+        metric: {
+          purple: 'var(--metric-purple)',
+          blue: 'var(--metric-blue)',
+        },
+        notification: {
+          purple: 'var(--notification-purple)',
+          blue: 'var(--notification-blue)',
+        },
       },
       fontSize: {
         'display': ['36px', { lineHeight: '36px', fontWeight: '700' }],

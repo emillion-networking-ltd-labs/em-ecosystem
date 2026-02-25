@@ -47,6 +47,12 @@
   /* Input states */
   --input-border-focus: #1c1c1c;
   --input-bg-disabled: #f5f5f5;
+
+  /* Dashboard-specific accent colors (from Figma extraction) */
+  --metric-purple: #edeefc;
+  --metric-blue: #e6f1fd;
+  --notification-purple: #edeefc;
+  --notification-blue: #e6f1fd;
 }
 
 /* ===== Design Tokens — Dark Mode ===== */
@@ -88,6 +94,12 @@
 
   --input-border-focus: #f5f5f5;
   --input-bg-disabled: #2d2d2d;
+
+  /* Dashboard-specific accent colors (dark variants) */
+  --metric-purple: #2a2a3d;
+  --metric-blue: #1e2d3d;
+  --notification-purple: #2a2a3d;
+  --notification-blue: #1e2d3d;
 }
 
 /* ===== Base Styles ===== */

@@ -12,43 +12,56 @@ class ApiClient {
     return this.accessToken;
   }
 
+  clearAccessToken() {
+    this.accessToken = null;
+  }
+
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(this.accessToken && { Authorization: `Bearer ${this.accessToken}` }),
     };
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers: { ...headers, ...(options.headers as Record<string, string>) },
-    });
+    let response: Response;
+    try {
+      response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        headers: { ...headers, ...(options.headers as Record<string, string>) },
+      });
+    } catch {
+      throw {
+        error: { message: 'Network error. Please check your connection.', code: 'NETWORK_ERROR', statusCode: 0 },
+      };
+    }
 
+    // Handle 401 with silent refresh
     if (response.status === 401 && this.accessToken) {
       const newToken = await this.silentRefresh();
       if (newToken) {
         headers.Authorization = `Bearer ${newToken}`;
-        const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
-          ...options,
-          headers: { ...headers, ...(options.headers as Record<string, string>) },
-        });
+        let retryResponse: Response;
+        try {
+          retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
+            ...options,
+            headers: { ...headers, ...(options.headers as Record<string, string>) },
+          });
+        } catch {
+          throw {
+            error: { message: 'Network error. Please check your connection.', code: 'NETWORK_ERROR', statusCode: 0 },
+          };
+        }
         if (!retryResponse.ok) {
-          const errorData = await retryResponse.json();
-          throw errorData;
+          throw await this.parseErrorResponse(retryResponse);
         }
         return retryResponse.json();
       }
     }
 
     if (!response.ok) {
-      const errorData = await response.json();
-      throw errorData;
+      throw await this.parseErrorResponse(response);
     }
 
     return response.json();
-  }
-
-  clearAccessToken() {
-    this.accessToken = null;
   }
 
   get<T>(endpoint: string, options?: RequestInit): Promise<T> {
@@ -69,6 +82,20 @@ class ApiClient {
 
   delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+  }
+
+  private async parseErrorResponse(response: Response): Promise<unknown> {
+    try {
+      return await response.json();
+    } catch {
+      return {
+        error: {
+          message: `Server error (${response.status})`,
+          code: 'SERVER_ERROR',
+          statusCode: response.status,
+        },
+      };
+    }
   }
 
   private async silentRefresh(): Promise<string | null> {

@@ -4,4 +4,7 @@ export interface OAuthProfile {
   email: string;
   provider: Provider;
   providerId: string;
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
 }
