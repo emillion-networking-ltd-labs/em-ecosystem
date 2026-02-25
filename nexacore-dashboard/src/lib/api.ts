@@ -47,6 +47,30 @@ class ApiClient {
     return response.json();
   }
 
+  clearAccessToken() {
+    this.accessToken = null;
+  }
+
+  get<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'GET' });
+  }
+
+  post<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) });
+  }
+
+  put<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) });
+  }
+
+  patch<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'PATCH', body: JSON.stringify(body) });
+  }
+
+  delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+  }
+
   private async silentRefresh(): Promise<string | null> {
     if (this.refreshPromise) return this.refreshPromise;
 

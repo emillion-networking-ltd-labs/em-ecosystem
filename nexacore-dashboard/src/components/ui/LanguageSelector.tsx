@@ -109,8 +109,8 @@ export default function LanguageSelector() {
                         onClick={() => handleSelect(lang)}
                         className={`flex h-10 items-center gap-2 rounded-md px-2 font-medium transition-colors ${
                           isSelected
-                            ? 'bg-surface-subtle text-content-primary'
-                            : 'bg-transparent text-content-primary/50 hover:bg-surface-subtle hover:text-content-primary/75'
+                            ? 'bg-surface-tertiary text-content-primary'
+                            : 'bg-transparent text-content-primary/75 hover:bg-surface-tertiary hover:text-content-primary'
                         }`}
                       >
                         {/* Avatar — 32px circle, bg black/5, code 12px/600 */}

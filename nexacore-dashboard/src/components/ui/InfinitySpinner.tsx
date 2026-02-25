@@ -1,0 +1,60 @@
+/**
+ * InfinitySpinner — button loading indicator.
+ * Replicates DaisyUI `loading-infinity` as inline SVG + CSS @keyframes.
+ *
+ * All values extracted directly from DaisyUI v5 source:
+ *   viewBox:         0 0 100 100  (square — matches DaisyUI aspect-square)
+ *   path:            figure-8 S-curve lemniscate (extracted from DaisyUI SVG data URI)
+ *   strokeDasharray: 205.271 51.318  (dash ≈80% of path, gap ≈20%)
+ *   animation:       dashoffset 0 → 256.589 (= 205.271 + 51.318) over 2s linear
+ *   transform:       scale(0.8) origin(50px 50px) — matches DaisyUI padding
+ *
+ * Sizes match DaisyUI v5 loading size scale (square px values):
+ *   xs=16  sm=20  md=24  lg=28  xl=32
+ *
+ * vectorEffect="non-scaling-stroke" + strokeWidth="2" → exactly 2px stroke
+ * at every size, immune to viewBox and CSS transform scaling.
+ *
+ * Usage: <InfinitySpinner /> or <InfinitySpinner size="lg" />
+ */
+
+type SpinnerSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+
+const SIZES: Record<SpinnerSize, number> = {
+  xs: 16,
+  sm: 20,
+  md: 24,
+  lg: 28,
+  xl: 32,
+};
+
+export default function InfinitySpinner({ size = 'md' }: { size?: SpinnerSize }) {
+  const px = SIZES[size];
+  return (
+    <svg
+      width={px}
+      height={px}
+      viewBox="0 0 100 100"
+      fill="none"
+      aria-hidden="true"
+    >
+      {/*
+        DaisyUI path — figure-8 S-curve tracing the infinity symbol.
+        Coordinates in 0 0 100 100 space. scale(0.8) around center (50,50)
+        matches DaisyUI's built-in padding so the stroke doesn't clip at edges.
+        strokeDasharray="205.271 51.318": long dash (80%) + short gap (20%).
+        Animation shifts dashoffset by one full cycle (256.589 = 205.271 + 51.318).
+      */}
+      <path
+        d="M24.3 30C11.4 30 5 43.3 5 50s6.4 20 19.3 20c19.3 0 32.1-40 51.4-40C88.6 30 95 43.3 95 50s-6.4 20-19.3 20C56.4 70 43.6 30 24.3 30z"
+        stroke="currentColor"
+        strokeWidth="2"
+        vectorEffect="non-scaling-stroke"
+        strokeLinecap="round"
+        strokeDasharray="205.271 51.318"
+        style={{ transform: 'scale(0.8)', transformOrigin: '50px 50px' }}
+        className="infinity-spinner"
+      />
+    </svg>
+  );
+}

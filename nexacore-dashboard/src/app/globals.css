@@ -138,6 +138,34 @@
   }
 }
 
+/* ===== Autofill override ===== */
+/* Browser autofill applies its own bg only to the <input> element, not the container div.
+   This makes the colored area appear narrower than the visible input box.
+   Override using box-shadow inset trick (cannot override -webkit-autofill bg directly). */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface-primary) inset;
+  -webkit-text-fill-color: rgb(var(--content-primary));
+  caret-color: rgb(var(--content-primary));
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* ===== Infinity button spinner ===== */
+/* Replicates DaisyUI loading-infinity — pure CSS @keyframes, no external dependency.
+   Values extracted directly from DaisyUI v5 source SVG data URI:
+     strokeDasharray: 205.271 51.318  (dash ≈80% of path, gap ≈20%)
+     dashoffset animation: 0 → 256.589  (= 205.271 + 51.318, one full cycle)
+     duration: 2s linear infinite  (matches DaisyUI SMIL <animate dur="2s">) */
+@keyframes infinity-spin {
+  0%   { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 256.589; }
+}
+
+.infinity-spinner {
+  animation: infinity-spin 2s linear infinite;
+}
+
 /* ===== Utility Layer ===== */
 @layer utilities {
   .text-balance {

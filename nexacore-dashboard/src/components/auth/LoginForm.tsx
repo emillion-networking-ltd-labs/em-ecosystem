@@ -1,40 +1,62 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, AlertTriangle } from 'lucide-react';
 import Input from '@/components/ui/Input';
+import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import OAuthButtons from './OAuthButtons';
+import { useAuth } from '@/hooks/useAuth';
 
 type LoginStep = 'email' | 'password';
+
+const isValidEmail = (email: string) =>
+  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 
 export default function LoginForm() {
   const [step, setStep] = useState<LoginStep>('email');
   const [formData, setFormData] = useState({ email: '', password: '' });
-  const [isLoading, setIsLoading] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const { login, isLoading, isAuthenticated, error, clearError } = useAuth();
+  const router = useRouter();
+
+  // Clear stale errors from other auth forms on mount
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
+  // Redirect away if already authenticated
+  useEffect(() => {
+    if (isAuthenticated) router.replace('/dashboard');
+  }, [isAuthenticated, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    clearError();
+    if (e.target.name === 'email') setEmailError(null);
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleEmailNext = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.email) return;
+    if (!formData.email) {
+      setEmailError('Enter your email address');
+      return;
+    }
+    if (!isValidEmail(formData.email)) {
+      setEmailError('Enter a valid email address');
+      return;
+    }
+    setEmailError(null);
+    clearError();
     setStep('password');
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.password) return;
-    setIsLoading(true);
-    try {
-      // TODO: SCRUM-19 — integrate with AuthContext login
-      console.log('Login:', formData);
-    } catch {
-      // handled by AuthContext
-    } finally {
-      setIsLoading(false);
-    }
+    await login(formData.email, formData.password);
+    // On AUTH_SUCCESS → isAuthenticated → useEffect redirects to /dashboard
   };
 
   if (step === 'password') {
@@ -43,9 +65,10 @@ export default function LoginForm() {
         email={formData.email}
         password={formData.password}
         isLoading={isLoading}
+        error={error}
         onChange={handleChange}
         onSubmit={handleLogin}
-        onChangeEmail={() => setStep('email')}
+        onChangeEmail={() => { clearError(); setStep('email'); }}
       />
     );
   }
@@ -57,7 +80,7 @@ export default function LoginForm() {
       <div className="flex w-full flex-col justify-center gap-2 md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
           <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
-            Sign in
+            Sign In
           </h1>
           <p className="text-justify text-sm leading-[21px] text-content-primary/50">
             Connect using your NexaCore Account. This session will be available
@@ -69,8 +92,8 @@ export default function LoginForm() {
       {/* Form — Figma: 348px fixed, vertical, itemSpacing 8 */}
       <div className="w-full md:w-[348px]">
         <form onSubmit={handleEmailNext} className="flex flex-col gap-2">
-          {/* Email Field — Figma: 348x118 FIXED, vertical, gap 8 */}
-          <div className="flex h-[118px] flex-col gap-2">
+          {/* Email Field — Figma: 348x116 FIXED, vertical, gap 8 */}
+          <div className="flex h-[116px] flex-col gap-2">
             <Input
               label="Email"
               type="email"
@@ -78,11 +101,19 @@ export default function LoginForm() {
               value={formData.email}
               onChange={handleChange}
               placeholder="your@email.com"
+              hasError={!!emailError}
               autoFocus
             />
 
             {/* System Message — Figma: 348x24, HORIZONTAL, center */}
-            <div className="flex h-6 items-center gap-2" />
+            <div className={`flex items-center gap-2 ${emailError ? 'min-h-6' : 'h-6'}`}>
+              {emailError && (
+                <>
+                  <AlertTriangle size={16} className="shrink-0 text-error" />
+                  <span className="flex-1 text-xs leading-6 text-error">{emailError}</span>
+                </>
+              )}
+            </div>
           </div>
 
           {/* Buttons Field — Figma: horizontal, itemSpacing 8 */}
@@ -91,7 +122,7 @@ export default function LoginForm() {
               href="/register"
               className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
             >
-              Create account
+              Create Account
             </Link>
             <button
               type="submit"
@@ -119,12 +150,13 @@ type PasswordStepProps = {
   email: string;
   password: string;
   isLoading: boolean;
+  error: string | null;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   onChangeEmail: () => void;
 };
 
-function PasswordStep({ email, password, isLoading, onChange, onSubmit, onChangeEmail }: PasswordStepProps) {
+function PasswordStep({ email, password, isLoading, error, onChange, onSubmit, onChangeEmail }: PasswordStepProps) {
   const [isEmailOpen, setIsEmailOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -141,6 +173,7 @@ function PasswordStep({ email, password, isLoading, onChange, onSubmit, onChange
   }, [isEmailOpen]);
 
   const emailInitial = email.charAt(0).toUpperCase();
+  const showError = !!error;
 
   return (
     <div className="flex flex-col gap-6 md:flex-row">
@@ -148,18 +181,18 @@ function PasswordStep({ email, password, isLoading, onChange, onSubmit, onChange
       <div className="flex w-full flex-col justify-center md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
           <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
-            Sign in
+            Sign In
           </h1>
 
-          {/* Select Email Button — trigger pattern matching LanguageSelector */}
+          {/* Select Email Button — Figma: cornerRadius 100 (pill), px-16, text-base, Bordered variant */}
           <div ref={dropdownRef} className="relative self-start">
             <button
               type="button"
               onClick={() => setIsEmailOpen(!isEmailOpen)}
-              className={`flex h-10 items-center justify-center gap-2 rounded-full px-4 text-sm font-medium transition-all ${
+              className={`flex h-10 items-center justify-center gap-2 rounded-full px-4 text-base font-medium transition-all ${
                 isEmailOpen
                   ? 'border border-border-default bg-surface-primary text-content-primary'
-                  : 'border border-border-default bg-transparent text-content-primary/75 hover:text-content-primary'
+                  : 'border border-border-default bg-transparent text-content-primary'
               }`}
             >
               <span className="whitespace-nowrap leading-none">{email}</span>
@@ -176,7 +209,7 @@ function PasswordStep({ email, password, isLoading, onChange, onSubmit, onChange
                   <button
                     type="button"
                     onClick={() => setIsEmailOpen(false)}
-                    className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-subtle px-2 font-medium text-content-primary transition-colors"
+                    className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-tertiary px-2 font-medium text-content-primary transition-colors"
                   >
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
                       <span className="text-xs font-semibold">{emailInitial}</span>
@@ -199,11 +232,11 @@ function PasswordStep({ email, password, isLoading, onChange, onSubmit, onChange
         </div>
       </div>
 
-      {/* Form — Figma: 348px, password + forgot link + Sign in (no OAuth, no Create Account) */}
+      {/* Form — Figma: 348px, password + System Message (error + forgot link) + Sign In */}
       <div className="w-full md:w-[348px]">
         <form onSubmit={onSubmit} className="flex flex-col gap-2">
-          {/* Password Field — Figma: 348x117 FIXED, vertical, gap 8 */}
-          <div className="flex h-[117px] flex-col gap-2">
+          {/* Password Field — Figma: 348x146 FIXED, vertical, gap 8 */}
+          <div className="flex min-h-[146px] flex-col gap-2">
             <Input
               label="Password"
               type="password"
@@ -211,28 +244,43 @@ function PasswordStep({ email, password, isLoading, onChange, onSubmit, onChange
               value={password}
               onChange={onChange}
               placeholder="Enter your password"
+              hasError={showError}
               autoFocus
             />
 
-            {/* System Message — Figma: 348x24, horizontal, center aligned */}
-            <div className="flex h-6 items-center">
-              {/* Forgot password — Link/Underline (75% → 100%, hover:underline, active:underline dotted) */}
-              <button
-                type="button"
-                className="text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+            {/* System Message — Figma: 348x24 FIXED, error only */}
+            <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+              {showError && (
+                <>
+                  <AlertTriangle size={16} className="shrink-0 text-error" />
+                  <span className="flex-1 text-xs leading-6 text-error">{error}</span>
+                </>
+              )}
+            </div>
+
+            {/* Password Recovery Button — Figma: 348x21, always visible, right-aligned */}
+            <div className="flex items-center justify-end">
+              <Link
+                href="/forgot-password"
+                className="whitespace-nowrap text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Forgot password?
-              </button>
+              </Link>
             </div>
           </div>
 
-          {/* Sign in button — Figma: full width 348px, primary button */}
+          {/* Sign In button — Figma: full width 348px, primary button */}
           <button
             type="submit"
             disabled={isLoading}
-            className="flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none"
           >
-            {isLoading ? 'Signing in...' : 'Sign in'}
+            <span className={isLoading ? 'opacity-30' : ''}>Sign In</span>
+            {isLoading && (
+              <span className="absolute inset-0 flex items-center justify-center">
+                <InfinitySpinner />
+              </span>
+            )}
           </button>
         </form>
       </div>
