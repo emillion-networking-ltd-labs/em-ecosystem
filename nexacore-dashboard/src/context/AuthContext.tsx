@@ -57,7 +57,7 @@ type AuthContextType = AuthState & {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string) => Promise<void>;
-  handleOAuthCallback: (accessToken: string, refreshToken: string) => Promise<void>;
+  handleOAuthCallback: (code: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
   clearError: () => void;
@@ -153,27 +153,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const handleOAuthCallback = useCallback(
-    async (accessToken: string, refreshToken: string) => {
-      dispatch({ type: 'AUTH_START' });
-      try {
-        await fetch('/api/auth/set-tokens', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ refreshToken }),
-        });
-        apiClient.setAccessToken(accessToken);
-        const user = await apiClient.get<SafeUser>('/auth/me');
-        dispatch({ type: 'AUTH_SUCCESS', payload: { user, accessToken } });
-      } catch (err: unknown) {
-        dispatch({
-          type: 'AUTH_ERROR',
-          payload: extractErrorMessage(err, 'OAuth authentication failed.'),
-        });
-      }
-    },
-    [],
-  );
+  const handleOAuthCallback = useCallback(async (code: string) => {
+    dispatch({ type: 'AUTH_START' });
+    try {
+      const data = await apiClient.post<AuthResponse>('/auth/oauth/exchange', {
+        code,
+      });
+      await fetch('/api/auth/set-tokens', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ refreshToken: data.refreshToken }),
+      });
+      apiClient.setAccessToken(data.accessToken);
+      dispatch({
+        type: 'AUTH_SUCCESS',
+        payload: { user: data.user, accessToken: data.accessToken },
+      });
+    } catch (err: unknown) {
+      dispatch({
+        type: 'AUTH_ERROR',
+        payload: extractErrorMessage(err, 'OAuth authentication failed.'),
+      });
+    }
+  }, []);
 
   const logout = useCallback(async () => {
     try {

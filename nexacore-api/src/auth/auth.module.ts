@@ -7,6 +7,8 @@ import { AuthService } from './auth.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GitHubStrategy } from './strategies/github.strategy';
+import { OAuthStateStore } from './stores/oauth-state.store';
+import { OAuthCodeStore } from './stores/oauth-code.store';
 import { UsersModule } from '../users/users.module';
 
 @Module({
@@ -22,7 +24,14 @@ import { UsersModule } from '../users/users.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy, GoogleStrategy, GitHubStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    GoogleStrategy,
+    GitHubStrategy,
+    OAuthStateStore,
+    OAuthCodeStore,
+  ],
   exports: [AuthService],
 })
 export class AuthModule {}

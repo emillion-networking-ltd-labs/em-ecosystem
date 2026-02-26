@@ -47,6 +47,8 @@ describe('AuthController', () => {
             login: jest.fn(),
             refreshTokens: jest.fn(),
             logout: jest.fn(),
+            generateOAuthCode: jest.fn().mockReturnValue('ephemeral-code-uuid'),
+            exchangeOAuthCode: jest.fn(),
           },
         },
       ],
@@ -172,7 +174,7 @@ describe('AuthController', () => {
   });
 
   describe('googleAuthCallback', () => {
-    it('should return redirect URL with tokens from OAuth result', () => {
+    it('should return redirect URL with ephemeral code instead of tokens', () => {
       const req = {
         user: {
           accessToken: 'google-access',
@@ -184,13 +186,16 @@ describe('AuthController', () => {
       const result = controller.googleAuthCallback(req);
 
       expect(result.url).toBe(
-        'http://localhost:3001/auth/callback?accessToken=google-access&refreshToken=google-refresh',
+        'http://localhost:3001/auth/callback?code=ephemeral-code-uuid',
       );
+      expect(result.url).not.toContain('accessToken');
+      expect(result.url).not.toContain('refreshToken');
+      expect(authService.generateOAuthCode).toHaveBeenCalledWith(req.user);
     });
   });
 
   describe('githubAuthCallback', () => {
-    it('should return redirect URL with tokens from OAuth result', () => {
+    it('should return redirect URL with ephemeral code instead of tokens', () => {
       const req = {
         user: {
           accessToken: 'github-access',
@@ -202,8 +207,36 @@ describe('AuthController', () => {
       const result = controller.githubAuthCallback(req);
 
       expect(result.url).toBe(
-        'http://localhost:3001/auth/callback?accessToken=github-access&refreshToken=github-refresh',
+        'http://localhost:3001/auth/callback?code=ephemeral-code-uuid',
       );
+      expect(result.url).not.toContain('accessToken');
+      expect(result.url).not.toContain('refreshToken');
+      expect(authService.generateOAuthCode).toHaveBeenCalledWith(req.user);
+    });
+  });
+
+  describe('exchangeOAuthCode', () => {
+    it('should return tokens and user for a valid code', () => {
+      authService.exchangeOAuthCode.mockReturnValue(mockAuthResult);
+
+      const result = controller.exchangeOAuthCode({ code: 'valid-code' });
+
+      expect(authService.exchangeOAuthCode).toHaveBeenCalledWith('valid-code');
+      expect(result.accessToken).toBe('access-token-123');
+      expect(result.refreshToken).toBe('refresh-token-456');
+      expect(result.user.email).toBe('test@example.com');
+    });
+
+    it('should propagate UnauthorizedException for invalid code', () => {
+      authService.exchangeOAuthCode.mockImplementation(() => {
+        throw new UnauthorizedException(
+          'Invalid or expired authorization code',
+        );
+      });
+
+      expect(() =>
+        controller.exchangeOAuthCode({ code: 'invalid-code' }),
+      ).toThrow(UnauthorizedException);
     });
   });
 });

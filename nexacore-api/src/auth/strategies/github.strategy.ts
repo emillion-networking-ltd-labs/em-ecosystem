@@ -2,11 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github2';
 import { AuthService } from '../auth.service';
+import { OAuthStateStore } from '../stores/oauth-state.store';
 import { Provider } from '../../users/enums/provider.enum';
 
 @Injectable()
 export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
-  constructor(private readonly authService: AuthService) {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly oauthStateStore: OAuthStateStore,
+  ) {
     super({
       clientID: process.env.GITHUB_CLIENT_ID || '',
       clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
@@ -14,10 +18,12 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
         process.env.GITHUB_CALLBACK_URL ||
         'http://localhost:3000/auth/github/callback',
       scope: ['user:email'],
+      passReqToCallback: true,
     });
   }
 
   async validate(
+    req: { query: { state?: string } },
     _accessToken: string,
     _refreshToken: string,
     profile: {
@@ -28,6 +34,13 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     },
     done: (error: Error | null, user?: Record<string, unknown>) => void,
   ): Promise<void> {
+    // Validate OAuth state parameter (CSRF protection)
+    const state = req.query?.state;
+    if (!state || !this.oauthStateStore.validate(state)) {
+      done(new Error('Invalid or expired OAuth state parameter'));
+      return;
+    }
+
     const email = profile.emails?.[0]?.value;
     if (!email) {
       done(new Error('No email provided by GitHub'));

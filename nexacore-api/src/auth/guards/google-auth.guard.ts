@@ -1,5 +1,19 @@
-import { Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { OAuthStateStore } from '../stores/oauth-state.store';
 
 @Injectable()
-export class GoogleAuthGuard extends AuthGuard('google') {}
+export class GoogleAuthGuard extends AuthGuard('google') {
+  constructor(private readonly oauthStateStore: OAuthStateStore) {
+    super();
+  }
+
+  getAuthenticateOptions(context: ExecutionContext) {
+    const request = context.switchToHttp().getRequest();
+    // Only generate state for the initiation endpoint, not the callback
+    if (!request.query?.code) {
+      return { state: this.oauthStateStore.generate() };
+    }
+    return {};
+  }
+}

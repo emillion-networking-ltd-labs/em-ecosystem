@@ -12,6 +12,7 @@ import { Role } from '../../users/enums/role.enum';
 import { Provider } from '../../users/enums/provider.enum';
 import { User } from '../../users/entities/user.entity';
 import { OAuthProfile } from '../../common/interfaces/oauth-profile.interface';
+import { OAuthCodeStore } from '../stores/oauth-code.store';
 
 jest.mock('bcrypt');
 
@@ -19,6 +20,7 @@ describe('AuthService', () => {
   let authService: AuthService;
   let usersService: jest.Mocked<UsersService>;
   let jwtService: jest.Mocked<JwtService>;
+  let oauthCodeStore: jest.Mocked<OAuthCodeStore>;
 
   const mockUser: User = {
     id: 'uuid-123',
@@ -65,12 +67,20 @@ describe('AuthService', () => {
             verify: jest.fn(),
           },
         },
+        {
+          provide: OAuthCodeStore,
+          useValue: {
+            store: jest.fn(),
+            exchange: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     authService = module.get<AuthService>(AuthService);
     usersService = module.get(UsersService);
     jwtService = module.get(JwtService);
+    oauthCodeStore = module.get(OAuthCodeStore);
   });
 
   describe('register', () => {
@@ -377,6 +387,79 @@ describe('AuthService', () => {
       expect(usersService.updateRefreshToken).toHaveBeenCalledWith(
         'uuid-oauth',
         'hashed-refresh',
+      );
+    });
+  });
+
+  describe('generateOAuthCode', () => {
+    it('should delegate to OAuthCodeStore.store and return the ephemeral code', () => {
+      const payload = {
+        accessToken: 'at',
+        refreshToken: 'rt',
+        user: {
+          id: 'uuid-123',
+          email: 'test@example.com',
+          firstName: null,
+          lastName: null,
+          avatarUrl: null,
+          role: Role.USER,
+          provider: Provider.GOOGLE,
+          providerId: 'google-id',
+          emailVerified: true,
+          isActive: true,
+          failedAttempts: 0,
+          lockedUntil: null,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        },
+      };
+      oauthCodeStore.store.mockReturnValue('ephemeral-uuid');
+
+      const code = authService.generateOAuthCode(payload);
+
+      expect(oauthCodeStore.store).toHaveBeenCalledWith(payload);
+      expect(code).toBe('ephemeral-uuid');
+    });
+  });
+
+  describe('exchangeOAuthCode', () => {
+    const mockPayload = {
+      accessToken: 'at',
+      refreshToken: 'rt',
+      user: {
+        id: 'uuid-123',
+        email: 'test@example.com',
+        firstName: null,
+        lastName: null,
+        avatarUrl: null,
+        role: Role.USER,
+        provider: Provider.GOOGLE,
+        providerId: 'google-id',
+        emailVerified: true,
+        isActive: true,
+        failedAttempts: 0,
+        lockedUntil: null,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      },
+    };
+
+    it('should return tokens and user for a valid code', () => {
+      oauthCodeStore.exchange.mockReturnValue(mockPayload);
+
+      const result = authService.exchangeOAuthCode('valid-code');
+
+      expect(oauthCodeStore.exchange).toHaveBeenCalledWith('valid-code');
+      expect(result.accessToken).toBe('at');
+      expect(result.refreshToken).toBe('rt');
+      expect(result.user.email).toBe('test@example.com');
+    });
+
+    it('should throw UnauthorizedException for invalid or expired code', () => {
+      oauthCodeStore.exchange.mockReturnValue(null);
+
+      expect(() => authService.exchangeOAuthCode('invalid-code')).toThrow(
+        UnauthorizedException,
       );
     });
   });

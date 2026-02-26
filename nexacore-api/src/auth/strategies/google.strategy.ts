@@ -2,11 +2,15 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
+import { OAuthStateStore } from '../stores/oauth-state.store';
 import { Provider } from '../../users/enums/provider.enum';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor(private readonly authService: AuthService) {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly oauthStateStore: OAuthStateStore,
+  ) {
     super({
       clientID: process.env.GOOGLE_CLIENT_ID || '',
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
@@ -14,10 +18,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         process.env.GOOGLE_CALLBACK_URL ||
         'http://localhost:3000/auth/google/callback',
       scope: ['email', 'profile'],
+      passReqToCallback: true,
     });
   }
 
   async validate(
+    req: { query: { state?: string } },
     _accessToken: string,
     _refreshToken: string,
     profile: {
@@ -28,6 +34,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     },
     done: VerifyCallback,
   ): Promise<void> {
+    // Validate OAuth state parameter (CSRF protection)
+    const state = req.query?.state;
+    if (!state || !this.oauthStateStore.validate(state)) {
+      done(new Error('Invalid or expired OAuth state parameter'), undefined);
+      return;
+    }
+
     const email = profile.emails?.[0]?.value;
     if (!email) {
       done(new Error('No email provided by Google'), undefined);

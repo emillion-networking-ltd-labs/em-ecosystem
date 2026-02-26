@@ -16,8 +16,7 @@ export default function OAuthCallbackHandler() {
     if (processed.current) return;
     processed.current = true;
 
-    const accessToken = searchParams.get('accessToken');
-    const refreshToken = searchParams.get('refreshToken');
+    const code = searchParams.get('code');
     const urlError = searchParams.get('error');
 
     if (urlError) {
@@ -26,12 +25,12 @@ export default function OAuthCallbackHandler() {
       return;
     }
 
-    if (!accessToken || !refreshToken) {
+    if (!code) {
       router.replace('/login?error=oauth_failed');
       return;
     }
 
-    handleOAuthCallback(accessToken, refreshToken).catch(() => {
+    handleOAuthCallback(code).catch(() => {
       router.replace('/login?error=oauth_failed');
     });
   }, [searchParams, handleOAuthCallback, router]);

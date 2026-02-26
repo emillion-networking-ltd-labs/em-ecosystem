@@ -12,6 +12,7 @@ import { LoginDto } from './dto/login.dto';
 import { User, SafeUser, toSafeUser } from '../users/entities/user.entity';
 import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
+import { OAuthCodeStore } from './stores/oauth-code.store';
 import type { StringValue } from 'ms';
 
 const BCRYPT_ROUNDS = 12;
@@ -22,6 +23,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly oauthCodeStore: OAuthCodeStore,
   ) {}
 
   async register(
@@ -124,6 +126,28 @@ export class AuthService {
     const user = await this.usersService.findOrCreateByOAuth(profile);
     const tokens = await this.generateTokens(user);
     return { ...tokens, user: toSafeUser(user) };
+  }
+
+  generateOAuthCode(payload: {
+    accessToken: string;
+    refreshToken: string;
+    user: SafeUser;
+  }): string {
+    return this.oauthCodeStore.store(payload);
+  }
+
+  exchangeOAuthCode(code: string): {
+    accessToken: string;
+    refreshToken: string;
+    user: SafeUser;
+  } {
+    const payload = this.oauthCodeStore.exchange(code);
+    if (!payload) {
+      throw new UnauthorizedException(
+        'Invalid or expired authorization code',
+      );
+    }
+    return payload;
   }
 
   async logout(userId: string): Promise<void> {

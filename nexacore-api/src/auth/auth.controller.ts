@@ -8,6 +8,7 @@ import {
   UseGuards,
   Request,
   Redirect,
+  UnauthorizedException,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -19,6 +20,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
+import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
@@ -112,7 +114,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Google OAuth callback' })
   @ApiResponse({
     status: 302,
-    description: 'Redirects to frontend with tokens',
+    description: 'Redirects to frontend with ephemeral authorization code',
   })
   googleAuthCallback(
     @Request()
@@ -120,10 +122,10 @@ export class AuthController {
       user: { accessToken: string; refreshToken: string; user: SafeUser };
     },
   ) {
-    const { accessToken, refreshToken } = req.user;
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const code = this.authService.generateOAuthCode(req.user);
+    const frontendUrl = this.getValidatedFrontendUrl();
     return {
-      url: `${frontendUrl}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`,
+      url: `${frontendUrl}/auth/callback?code=${code}`,
     };
   }
 
@@ -144,7 +146,7 @@ export class AuthController {
   @ApiOperation({ summary: 'GitHub OAuth callback' })
   @ApiResponse({
     status: 302,
-    description: 'Redirects to frontend with tokens',
+    description: 'Redirects to frontend with ephemeral authorization code',
   })
   githubAuthCallback(
     @Request()
@@ -152,10 +154,38 @@ export class AuthController {
       user: { accessToken: string; refreshToken: string; user: SafeUser };
     },
   ) {
-    const { accessToken, refreshToken } = req.user;
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const code = this.authService.generateOAuthCode(req.user);
+    const frontendUrl = this.getValidatedFrontendUrl();
     return {
-      url: `${frontendUrl}/auth/callback?accessToken=${accessToken}&refreshToken=${refreshToken}`,
+      url: `${frontendUrl}/auth/callback?code=${code}`,
     };
+  }
+
+  @Post('oauth/exchange')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Exchange ephemeral OAuth code for tokens' })
+  @ApiResponse({ status: 200, description: 'Tokens returned successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request body' })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid or expired authorization code',
+  })
+  exchangeOAuthCode(@Body() dto: OAuthExchangeDto) {
+    return this.authService.exchangeOAuthCode(dto.code);
+  }
+
+  private getValidatedFrontendUrl(): string {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const allowedUrls = (
+      process.env.OAUTH_ALLOWED_REDIRECT_URLS || frontendUrl
+    )
+      .split(',')
+      .map((u) => u.trim());
+
+    if (!allowedUrls.includes(frontendUrl)) {
+      throw new UnauthorizedException('Invalid redirect configuration');
+    }
+
+    return frontendUrl;
   }
 }

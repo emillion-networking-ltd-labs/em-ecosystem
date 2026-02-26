@@ -1,12 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GitHubStrategy } from '../strategies/github.strategy';
 import { AuthService } from '../auth.service';
+import { OAuthStateStore } from '../stores/oauth-state.store';
 import { Provider } from '../../users/enums/provider.enum';
 import { Role } from '../../users/enums/role.enum';
 
 describe('GitHubStrategy', () => {
   let strategy: GitHubStrategy;
   let authService: jest.Mocked<AuthService>;
+  let oauthStateStore: jest.Mocked<OAuthStateStore>;
 
   const mockOAuthResult = {
     accessToken: 'access-token',
@@ -44,11 +46,19 @@ describe('GitHubStrategy', () => {
             validateOAuthUser: jest.fn(),
           },
         },
+        {
+          provide: OAuthStateStore,
+          useValue: {
+            generate: jest.fn(),
+            validate: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     strategy = module.get<GitHubStrategy>(GitHubStrategy);
     authService = module.get(AuthService);
+    oauthStateStore = module.get(OAuthStateStore);
   });
 
   afterEach(() => {
@@ -57,17 +67,22 @@ describe('GitHubStrategy', () => {
   });
 
   describe('validate', () => {
+    const validReq = { query: { state: 'valid-state' } };
+
     it('should call authService.validateOAuthUser with GitHub profile and invoke done', async () => {
+      oauthStateStore.validate.mockReturnValue(true);
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
 
       await strategy.validate(
+        validReq,
         'github-access-token',
         'github-refresh-token',
         { emails: [{ value: 'github@example.com' }], id: 'github-id-456' },
         done,
       );
 
+      expect(oauthStateStore.validate).toHaveBeenCalledWith('valid-state');
       expect(authService.validateOAuthUser).toHaveBeenCalledWith({
         email: 'github@example.com',
         provider: Provider.GITHUB,
@@ -77,9 +92,11 @@ describe('GitHubStrategy', () => {
     });
 
     it('should call done with error when no email is provided', async () => {
+      oauthStateStore.validate.mockReturnValue(true);
       const done = jest.fn();
 
       await strategy.validate(
+        validReq,
         'github-access-token',
         'github-refresh-token',
         { emails: [], id: 'github-id-456' },
@@ -93,9 +110,11 @@ describe('GitHubStrategy', () => {
     });
 
     it('should call done with error when emails array is undefined', async () => {
+      oauthStateStore.validate.mockReturnValue(true);
       const done = jest.fn();
 
       await strategy.validate(
+        validReq,
         'github-access-token',
         'github-refresh-token',
         { id: 'github-id-456' },
@@ -105,6 +124,45 @@ describe('GitHubStrategy', () => {
       expect(done).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'No email provided by GitHub' }),
       );
+    });
+
+    it('should call done with error when state is invalid', async () => {
+      oauthStateStore.validate.mockReturnValue(false);
+      const done = jest.fn();
+
+      await strategy.validate(
+        { query: { state: 'invalid-state' } },
+        'github-access-token',
+        'github-refresh-token',
+        { emails: [{ value: 'github@example.com' }], id: 'github-id-456' },
+        done,
+      );
+
+      expect(done).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Invalid or expired OAuth state parameter',
+        }),
+      );
+      expect(authService.validateOAuthUser).not.toHaveBeenCalled();
+    });
+
+    it('should call done with error when state is missing', async () => {
+      const done = jest.fn();
+
+      await strategy.validate(
+        { query: {} },
+        'github-access-token',
+        'github-refresh-token',
+        { emails: [{ value: 'github@example.com' }], id: 'github-id-456' },
+        done,
+      );
+
+      expect(done).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: 'Invalid or expired OAuth state parameter',
+        }),
+      );
+      expect(authService.validateOAuthUser).not.toHaveBeenCalled();
     });
   });
 });
