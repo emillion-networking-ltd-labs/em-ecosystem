@@ -17,12 +17,18 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
+import { AuditService } from '../audit/audit.service';
+import { AuditAction } from '../audit/enums/audit-action.enum';
+import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
 
 const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditService: AuditService,
+  ) {}
 
   async findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
@@ -216,7 +222,11 @@ export class UsersService {
     };
   }
 
-  async updateProfile(userId: string, dto: UpdateProfileDto): Promise<SafeUser> {
+  async updateProfile(
+    userId: string,
+    dto: UpdateProfileDto,
+    ctx?: RequestContext,
+  ): Promise<SafeUser> {
     const user = await this.prisma.user.update({
       where: { id: userId },
       data: {
@@ -225,10 +235,29 @@ export class UsersService {
         ...(dto.avatarUrl !== undefined && { avatarUrl: dto.avatarUrl }),
       },
     });
+
+    this.auditService
+      .log({
+        action: AuditAction.PROFILE_UPDATE,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: {
+          updatedFields: Object.keys(dto).filter(
+            (k) => (dto as Record<string, unknown>)[k] !== undefined,
+          ),
+        },
+      })
+      .catch(() => {});
+
     return toSafeUser(user as User);
   }
 
-  async changePassword(userId: string, dto: ChangePasswordDto): Promise<void> {
+  async changePassword(
+    userId: string,
+    dto: ChangePasswordDto,
+    ctx?: RequestContext,
+  ): Promise<void> {
     const user = await this.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
@@ -257,12 +286,22 @@ export class UsersService {
         refreshToken: null, // Revoke all sessions
       },
     });
+
+    this.auditService
+      .log({
+        action: AuditAction.PASSWORD_CHANGE,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+      })
+      .catch(() => {});
   }
 
   async adminUpdateUser(
     targetId: string,
     dto: AdminUpdateUserDto,
-    actingUser: { role: Role },
+    actingUser: { id: string; role: Role },
+    ctx?: RequestContext,
   ): Promise<SafeUser> {
     const target = await this.findById(targetId);
     if (!target) {
@@ -293,10 +332,43 @@ export class UsersService {
       },
     });
 
+    // Audit: role change
+    if (dto.role !== undefined && dto.role !== target.role) {
+      this.auditService
+        .log({
+          action: AuditAction.USER_ROLE_CHANGE,
+          userId: actingUser.id,
+          targetUserId: targetId,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+          metadata: { previousRole: target.role, newRole: dto.role },
+        })
+        .catch(() => {});
+    }
+
+    // Audit: activation/deactivation
+    if (dto.isActive !== undefined && dto.isActive !== target.isActive) {
+      this.auditService
+        .log({
+          action: dto.isActive
+            ? AuditAction.USER_ACTIVATED
+            : AuditAction.USER_DEACTIVATED,
+          userId: actingUser.id,
+          targetUserId: targetId,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+        })
+        .catch(() => {});
+    }
+
     return toSafeUser(updated as User);
   }
 
-  async softDelete(targetId: string): Promise<void> {
+  async softDelete(
+    targetId: string,
+    actorId?: string,
+    ctx?: RequestContext,
+  ): Promise<void> {
     const target = await this.findById(targetId);
     if (!target) {
       throw new NotFoundException('User not found');
@@ -310,5 +382,16 @@ export class UsersService {
       where: { id: targetId },
       data: { isActive: false },
     });
+
+    this.auditService
+      .log({
+        action: AuditAction.USER_DELETED,
+        userId: actorId,
+        targetUserId: targetId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: { email: target.email },
+      })
+      .catch(() => {});
   }
 }

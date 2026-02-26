@@ -13,6 +13,7 @@ import { Provider } from '../../users/enums/provider.enum';
 import { User } from '../../users/entities/user.entity';
 import { OAuthProfile } from '../../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from '../stores/oauth-code.store';
+import { AuditService } from '../../audit/audit.service';
 
 jest.mock('bcrypt');
 
@@ -73,6 +74,12 @@ describe('AuthService', () => {
           useValue: {
             store: jest.fn(),
             exchange: jest.fn(),
+          },
+        },
+        {
+          provide: AuditService,
+          useValue: {
+            log: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],

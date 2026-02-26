@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
+import { AuditService } from '../../audit/audit.service';
 import { Role } from '../../users/enums/role.enum';
 import { Provider } from '../../users/enums/provider.enum';
 
@@ -52,6 +53,12 @@ describe('AuthController', () => {
             exchangeOAuthCode: jest.fn(),
           },
         },
+        {
+          provide: AuditService,
+          useValue: {
+            log: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     }).compile();
 
@@ -59,15 +66,22 @@ describe('AuthController', () => {
     authService = module.get(AuthService);
   });
 
+  const mockReq = {
+    ip: '127.0.0.1',
+    headers: { 'user-agent': 'test-agent' },
+  };
+
+  const mockCtx = { ipAddress: '127.0.0.1', userAgent: 'test-agent' };
+
   describe('register', () => {
     const registerDto = { email: 'test@example.com', password: 'StrongPass1!' };
 
     it('should return the registration result on success', async () => {
       authService.register.mockResolvedValue(mockAuthResult);
 
-      const result = await controller.register(registerDto);
+      const result = await controller.register(registerDto, mockReq);
 
-      expect(authService.register).toHaveBeenCalledWith(registerDto);
+      expect(authService.register).toHaveBeenCalledWith(registerDto, mockCtx);
       expect(result.accessToken).toBe('access-token-123');
     });
 
@@ -76,7 +90,7 @@ describe('AuthController', () => {
         new ConflictException('Email already registered'),
       );
 
-      await expect(controller.register(registerDto)).rejects.toThrow(
+      await expect(controller.register(registerDto, mockReq)).rejects.toThrow(
         ConflictException,
       );
     });
@@ -88,9 +102,9 @@ describe('AuthController', () => {
     it('should return JWT pair and user on valid credentials', async () => {
       authService.login.mockResolvedValue(mockAuthResult);
 
-      const result = await controller.login(loginDto);
+      const result = await controller.login(loginDto, mockReq);
 
-      expect(authService.login).toHaveBeenCalledWith(loginDto);
+      expect(authService.login).toHaveBeenCalledWith(loginDto, mockCtx);
       expect(result.accessToken).toBe('access-token-123');
       expect(result.user.email).toBe('test@example.com');
     });
@@ -100,7 +114,7 @@ describe('AuthController', () => {
         new UnauthorizedException('Invalid credentials'),
       );
 
-      await expect(controller.login(loginDto)).rejects.toThrow(
+      await expect(controller.login(loginDto, mockReq)).rejects.toThrow(
         UnauthorizedException,
       );
     });
@@ -110,7 +124,7 @@ describe('AuthController', () => {
         new ForbiddenException('Account locked'),
       );
 
-      await expect(controller.login(loginDto)).rejects.toThrow(
+      await expect(controller.login(loginDto, mockReq)).rejects.toThrow(
         ForbiddenException,
       );
     });
@@ -125,10 +139,11 @@ describe('AuthController', () => {
         refreshToken: 'new-refresh',
       });
 
-      const result = await controller.refresh(refreshDto);
+      const result = await controller.refresh(refreshDto, mockReq);
 
       expect(authService.refreshTokens).toHaveBeenCalledWith(
         'valid-refresh-token',
+        mockCtx,
       );
       expect(result.accessToken).toBe('new-access');
     });
@@ -138,7 +153,7 @@ describe('AuthController', () => {
         new UnauthorizedException('Invalid or expired refresh token'),
       );
 
-      await expect(controller.refresh(refreshDto)).rejects.toThrow(
+      await expect(controller.refresh(refreshDto, mockReq)).rejects.toThrow(
         UnauthorizedException,
       );
     });
@@ -147,11 +162,15 @@ describe('AuthController', () => {
   describe('logout', () => {
     it('should call authService.logout and return success message', async () => {
       authService.logout.mockResolvedValue(undefined);
-      const req = { user: { id: 'uuid-123' } };
+      const req = {
+        user: { id: 'uuid-123' },
+        ip: '127.0.0.1',
+        headers: { 'user-agent': 'test-agent' },
+      };
 
       const result = await controller.logout(req);
 
-      expect(authService.logout).toHaveBeenCalledWith('uuid-123');
+      expect(authService.logout).toHaveBeenCalledWith('uuid-123', mockCtx);
       expect(result.message).toBe('Logged out successfully');
     });
   });

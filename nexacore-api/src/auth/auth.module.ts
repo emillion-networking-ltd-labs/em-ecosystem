@@ -10,10 +10,12 @@ import { GitHubStrategy } from './strategies/github.strategy';
 import { OAuthStateStore } from './stores/oauth-state.store';
 import { OAuthCodeStore } from './stores/oauth-code.store';
 import { UsersModule } from '../users/users.module';
+import { AuditModule } from '../audit/audit.module';
 
 @Module({
   imports: [
     UsersModule,
+    AuditModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret:

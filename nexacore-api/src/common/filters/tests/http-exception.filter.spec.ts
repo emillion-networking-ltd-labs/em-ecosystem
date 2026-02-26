@@ -136,7 +136,7 @@ describe('HttpExceptionFilter', () => {
     });
   });
 
-  it('should return UNKNOWN_ERROR code for unmapped status codes', () => {
+  it('should return RATE_LIMIT_EXCEEDED code for 429 status', () => {
     const exception = new HttpException('Too many requests', 429);
 
     filter.catch(exception, mockHost);
@@ -146,7 +146,7 @@ describe('HttpExceptionFilter', () => {
       success: false,
       error: {
         message: 'Too many requests',
-        code: 'UNKNOWN_ERROR',
+        code: 'RATE_LIMIT_EXCEEDED',
         statusCode: 429,
       },
     });

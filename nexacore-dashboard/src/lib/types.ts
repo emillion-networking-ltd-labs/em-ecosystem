@@ -67,3 +67,41 @@ export type AdminUpdateUserDto = {
   role?: UserRole;
   isActive?: boolean;
 };
+
+export type AuditAction =
+  | 'LOGIN_SUCCESS'
+  | 'LOGIN_FAILURE'
+  | 'LOGOUT'
+  | 'REGISTER'
+  | 'TOKEN_REFRESH'
+  | 'OAUTH_LOGIN'
+  | 'ACCOUNT_LOCKED'
+  | 'ACCOUNT_UNLOCKED'
+  | 'PASSWORD_CHANGE'
+  | 'PROFILE_UPDATE'
+  | 'USER_ROLE_CHANGE'
+  | 'USER_DEACTIVATED'
+  | 'USER_ACTIVATED'
+  | 'USER_DELETED'
+  | 'SUPERADMIN_BYPASS';
+
+export type AuditLogUser = {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: UserRole;
+};
+
+export type AuditLog = {
+  id: string;
+  action: AuditAction;
+  userId: string | null;
+  targetUserId: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  user: AuditLogUser | null;
+  targetUser: AuditLogUser | null;
+};

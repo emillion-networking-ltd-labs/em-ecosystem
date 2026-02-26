@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
+import { AuditService } from '../../audit/audit.service';
 import { OAuthCodeStore } from '../stores/oauth-code.store';
 import { Role } from '../../users/enums/role.enum';
 import { Provider } from '../../users/enums/provider.enum';
@@ -57,6 +58,12 @@ describe('OAuth Exchange Flow (Integration)', () => {
         {
           provide: AuthService,
           useValue: authService,
+        },
+        {
+          provide: AuditService,
+          useValue: {
+            log: jest.fn().mockResolvedValue(undefined),
+          },
         },
       ],
     }).compile();

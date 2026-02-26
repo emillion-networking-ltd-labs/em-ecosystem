@@ -44,8 +44,14 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 409, description: 'Email already registered' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
-  async register(@Body() registerDto: RegisterDto) {
-    return this.authService.register(registerDto);
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Request() req: { ip?: string; headers?: Record<string, string> },
+  ) {
+    return this.authService.register(registerDto, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
   }
 
   @Post('login')
@@ -56,8 +62,14 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @ApiResponse({ status: 403, description: 'Account locked' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
-  async login(@Body() loginDto: LoginDto) {
-    return this.authService.login(loginDto);
+  async login(
+    @Body() loginDto: LoginDto,
+    @Request() req: { ip?: string; headers?: Record<string, string> },
+  ) {
+    return this.authService.login(loginDto, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
   }
 
   @Post('refresh')
@@ -67,8 +79,14 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Tokens refreshed successfully' })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
-  async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
-    return this.authService.refreshTokens(refreshTokenDto.refreshToken);
+  async refresh(
+    @Body() refreshTokenDto: RefreshTokenDto,
+    @Request() req: { ip?: string; headers?: Record<string, string> },
+  ) {
+    return this.authService.refreshTokens(refreshTokenDto.refreshToken, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
   }
 
   @Post('logout')
@@ -78,8 +96,18 @@ export class AuthController {
   @ApiOperation({ summary: 'Logout and invalidate refresh token' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async logout(@Request() req: { user: { id: string } }) {
-    await this.authService.logout(req.user.id);
+  async logout(
+    @Request()
+    req: {
+      user: { id: string };
+      ip?: string;
+      headers?: Record<string, string>;
+    },
+  ) {
+    await this.authService.logout(req.user.id, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
     return { message: 'Logged out successfully' };
   }
 

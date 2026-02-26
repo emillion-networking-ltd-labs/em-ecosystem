@@ -7,6 +7,7 @@ import { UsersService } from '../users.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Provider } from '../enums/provider.enum';
 import { Role } from '../enums/role.enum';
+import { AuditService } from '../../audit/audit.service';
 
 describe('UsersService', () => {
   let usersService: UsersService;
@@ -50,6 +51,12 @@ describe('UsersService', () => {
         {
           provide: PrismaService,
           useValue: prisma,
+        },
+        {
+          provide: AuditService,
+          useValue: {
+            log: jest.fn().mockResolvedValue(undefined),
+          },
         },
       ],
     }).compile();
@@ -221,17 +228,18 @@ describe('UsersService', () => {
   });
 
   describe('lockAccount', () => {
-    it('should set lockedUntil to 15 minutes from now', async () => {
+    it('should set lockedUntil to 15 minutes from now for first lockout', async () => {
       prisma.user.update.mockResolvedValue(mockUser);
 
       const before = Date.now();
-      await usersService.lockAccount('uuid-123');
+      await usersService.lockAccount('uuid-123', 0);
       const after = Date.now();
 
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'uuid-123' },
         data: {
           lockedUntil: expect.any(Date),
+          lockoutCount: { increment: 1 },
         },
       });
 

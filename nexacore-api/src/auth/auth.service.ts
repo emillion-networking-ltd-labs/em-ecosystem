@@ -13,6 +13,9 @@ import { User, SafeUser, toSafeUser } from '../users/entities/user.entity';
 import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from './stores/oauth-code.store';
+import { AuditService } from '../audit/audit.service';
+import { AuditAction } from '../audit/enums/audit-action.enum';
+import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
 import type { StringValue } from 'ms';
 import {
   BCRYPT_ROUNDS,
@@ -27,10 +30,12 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly oauthCodeStore: OAuthCodeStore,
+    private readonly auditService: AuditService,
   ) {}
 
   async register(
     dto: RegisterDto,
+    ctx?: RequestContext,
   ): Promise<{ accessToken: string; refreshToken: string; user: SafeUser }> {
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
@@ -46,6 +51,16 @@ export class AuthService {
 
     const tokens = await this.generateTokens(user);
 
+    this.auditService
+      .log({
+        action: AuditAction.REGISTER,
+        userId: user.id,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: { email: dto.email },
+      })
+      .catch(() => {});
+
     return {
       ...tokens,
       user: toSafeUser(user),
@@ -54,12 +69,21 @@ export class AuthService {
 
   async login(
     dto: LoginDto,
+    ctx?: RequestContext,
   ): Promise<{ accessToken: string; refreshToken: string; user: SafeUser }> {
     const user = await this.usersService.findByEmail(dto.email);
 
     // Timing attack protection: constant-time response when user not found
     if (!user) {
       await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
+      this.auditService
+        .log({
+          action: AuditAction.LOGIN_FAILURE,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+          metadata: { email: dto.email, reason: 'user_not_found' },
+        })
+        .catch(() => {});
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -68,6 +92,16 @@ export class AuthService {
       const remainingMs = user.lockedUntil.getTime() - Date.now();
       const remainingSeconds = Math.ceil(remainingMs / 1000);
       const remainingMinutes = Math.ceil(remainingMs / 60_000);
+
+      this.auditService
+        .log({
+          action: AuditAction.LOGIN_FAILURE,
+          userId: user.id,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+          metadata: { reason: 'account_locked' },
+        })
+        .catch(() => {});
 
       throw new ForbiddenException({
         message: `Account locked due to too many failed attempts. Try again in ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}.`,
@@ -86,6 +120,15 @@ export class AuthService {
     // OAuth-only account (no password set) — constant timing
     if (!user.passwordHash) {
       await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
+      this.auditService
+        .log({
+          action: AuditAction.LOGIN_FAILURE,
+          userId: user.id,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+          metadata: { reason: 'no_password_set' },
+        })
+        .catch(() => {});
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -102,6 +145,19 @@ export class AuthService {
         const lockoutMinutes = getLockoutDurationMinutes(user.lockoutCount);
         const lockoutSeconds = lockoutMinutes * 60;
 
+        this.auditService
+          .log({
+            action: AuditAction.ACCOUNT_LOCKED,
+            userId: user.id,
+            ipAddress: ctx?.ipAddress,
+            userAgent: ctx?.userAgent,
+            metadata: {
+              reason: 'max_failed_attempts',
+              failedAttempts: MAX_FAILED_ATTEMPTS,
+            },
+          })
+          .catch(() => {});
+
         throw new ForbiddenException({
           message: `Account locked due to too many failed attempts. Try again in ${lockoutMinutes} minute${lockoutMinutes !== 1 ? 's' : ''}.`,
           error: 'Forbidden',
@@ -110,6 +166,20 @@ export class AuthService {
           lockoutLevel: user.lockoutCount + 1,
         });
       }
+
+      this.auditService
+        .log({
+          action: AuditAction.LOGIN_FAILURE,
+          userId: user.id,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+          metadata: {
+            reason: 'invalid_password',
+            failedAttempts: updated.failedAttempts,
+          },
+        })
+        .catch(() => {});
+
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -119,6 +189,15 @@ export class AuthService {
 
     const tokens = await this.generateTokens(user);
 
+    this.auditService
+      .log({
+        action: AuditAction.LOGIN_SUCCESS,
+        userId: user.id,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+      })
+      .catch(() => {});
+
     return {
       ...tokens,
       user: toSafeUser(user),
@@ -127,6 +206,7 @@ export class AuthService {
 
   async refreshTokens(
     refreshToken: string,
+    ctx?: RequestContext,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     let payload: { sub: string };
     try {
@@ -148,14 +228,37 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
-    return this.generateTokens(user);
+    const tokens = await this.generateTokens(user);
+
+    this.auditService
+      .log({
+        action: AuditAction.TOKEN_REFRESH,
+        userId: user.id,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+      })
+      .catch(() => {});
+
+    return tokens;
   }
 
   async validateOAuthUser(
     profile: OAuthProfile,
+    ctx?: RequestContext,
   ): Promise<{ accessToken: string; refreshToken: string; user: SafeUser }> {
     const user = await this.usersService.findOrCreateByOAuth(profile);
     const tokens = await this.generateTokens(user);
+
+    this.auditService
+      .log({
+        action: AuditAction.OAUTH_LOGIN,
+        userId: user.id,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: { provider: profile.provider },
+      })
+      .catch(() => {});
+
     return { ...tokens, user: toSafeUser(user) };
   }
 
@@ -181,8 +284,17 @@ export class AuthService {
     return payload;
   }
 
-  async logout(userId: string): Promise<void> {
+  async logout(userId: string, ctx?: RequestContext): Promise<void> {
     await this.usersService.updateRefreshToken(userId, null);
+
+    this.auditService
+      .log({
+        action: AuditAction.LOGOUT,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+      })
+      .catch(() => {});
   }
 
   private async generateTokens(

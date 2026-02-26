@@ -6,6 +6,7 @@ import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
 import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 import { GLOBAL_RATE_LIMIT } from './auth/constants/auth.constants';
+import { AuditModule } from './audit/audit.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { GLOBAL_RATE_LIMIT } from './auth/constants/auth.constants';
     PrismaModule,
     AuthModule,
     UsersModule,
+    AuditModule,
   ],
   controllers: [],
   providers: [

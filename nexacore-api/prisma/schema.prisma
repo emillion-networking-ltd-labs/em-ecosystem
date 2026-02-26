@@ -18,6 +18,24 @@ enum Provider {
   GITHUB
 }
 
+enum AuditAction {
+  LOGIN_SUCCESS
+  LOGIN_FAILURE
+  LOGOUT
+  REGISTER
+  TOKEN_REFRESH
+  OAUTH_LOGIN
+  ACCOUNT_LOCKED
+  ACCOUNT_UNLOCKED
+  PASSWORD_CHANGE
+  PROFILE_UPDATE
+  USER_ROLE_CHANGE
+  USER_DEACTIVATED
+  USER_ACTIVATED
+  USER_DELETED
+  SUPERADMIN_BYPASS
+}
+
 model User {
   id             String    @id @default(uuid())
   email          String    @unique
@@ -37,5 +55,28 @@ model User {
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  auditLogs       AuditLog[] @relation("AuditLogUser")
+  auditLogsTarget AuditLog[] @relation("AuditLogTarget")
+
   @@map("users")
+}
+
+model AuditLog {
+  id            String      @id @default(uuid())
+  action        AuditAction
+  userId        String?
+  targetUserId  String?
+  ipAddress     String?
+  userAgent     String?
+  metadata      Json?
+  createdAt     DateTime    @default(now())
+
+  user          User?       @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
+  targetUser    User?       @relation("AuditLogTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+
+  @@index([action])
+  @@index([userId])
+  @@index([targetUserId])
+  @@index([createdAt])
+  @@map("audit_logs")
 }

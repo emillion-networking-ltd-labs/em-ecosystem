@@ -31,20 +31,28 @@ export class UsersController {
   @Patch('me')
   @UseGuards(JwtAuthGuard)
   async updateProfile(
-    @Request() req: { user: { id: string } },
+    @Request()
+    req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
     @Body() dto: UpdateProfileDto,
   ) {
-    return this.usersService.updateProfile(req.user.id, dto);
+    return this.usersService.updateProfile(req.user.id, dto, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
   }
 
   @Patch('me/password')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async changePassword(
-    @Request() req: { user: { id: string } },
+    @Request()
+    req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
     @Body() dto: ChangePasswordDto,
   ) {
-    await this.usersService.changePassword(req.user.id, dto);
+    await this.usersService.changePassword(req.user.id, dto, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
     return { message: 'Password changed successfully' };
   }
 
@@ -74,17 +82,36 @@ export class UsersController {
   async adminUpdateUser(
     @Param('id') id: string,
     @Body() dto: AdminUpdateUserDto,
-    @Request() req: { user: { role: Role } },
+    @Request()
+    req: {
+      user: { id: string; role: Role };
+      ip?: string;
+      headers?: Record<string, string>;
+    },
   ) {
-    return this.usersService.adminUpdateUser(id, dto, req.user);
+    return this.usersService.adminUpdateUser(id, dto, req.user, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
   @HttpCode(HttpStatus.OK)
-  async deleteUser(@Param('id') id: string) {
-    await this.usersService.softDelete(id);
+  async deleteUser(
+    @Param('id') id: string,
+    @Request()
+    req: {
+      user: { id: string };
+      ip?: string;
+      headers?: Record<string, string>;
+    },
+  ) {
+    await this.usersService.softDelete(id, req.user.id, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
     return { message: 'User deactivated successfully' };
   }
 }

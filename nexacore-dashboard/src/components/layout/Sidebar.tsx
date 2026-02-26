@@ -11,6 +11,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileText,
+  ScrollText,
 } from 'lucide-react';
 
 type SidebarProps = {
@@ -25,6 +26,7 @@ const mainItems = [
 
 const adminItems = [
   { href: '/admin', label: 'Admin', icon: Shield },
+  { href: '/admin/audit-logs', label: 'Audit Logs', icon: ScrollText },
 ];
 
 const accountItems = [
