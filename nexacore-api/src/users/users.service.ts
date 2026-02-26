@@ -12,6 +12,7 @@ import { User, SafeUser, toSafeUser } from './entities/user.entity';
 import { Provider } from './enums/provider.enum';
 import { Role } from './enums/role.enum';
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
+import { getLockoutDurationMs } from '../auth/constants/auth.constants';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
@@ -84,11 +85,26 @@ export class UsersService {
     });
   }
 
-  async lockAccount(userId: string): Promise<void> {
-    const lockUntil = new Date(Date.now() + 15 * 60 * 1000);
+  async lockAccount(userId: string, lockoutCount: number): Promise<void> {
+    const durationMs = getLockoutDurationMs(lockoutCount);
+    const lockUntil = new Date(Date.now() + durationMs);
     await this.prisma.user.update({
       where: { id: userId },
-      data: { lockedUntil: lockUntil },
+      data: {
+        lockedUntil: lockUntil,
+        lockoutCount: { increment: 1 },
+      },
+    });
+  }
+
+  async resetLockoutEscalation(userId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        failedAttempts: 0,
+        lockedUntil: null,
+        lockoutCount: 0,
+      },
     });
   }
 

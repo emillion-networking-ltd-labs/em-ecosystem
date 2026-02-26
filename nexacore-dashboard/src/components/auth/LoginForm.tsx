@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ChevronDown, AlertTriangle } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
+import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import OAuthButtons from './OAuthButtons';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -19,7 +20,7 @@ export default function LoginForm() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [oauthError, setOauthError] = useState<string | null>(null);
-  const { login, isLoading, isAuthenticated, error, clearError } = useAuth();
+  const { login, isLoading, isAuthenticated, error, clearError, rateLimitInfo } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -73,9 +74,11 @@ export default function LoginForm() {
         password={formData.password}
         isLoading={isLoading}
         error={error}
+        rateLimitInfo={rateLimitInfo}
         onChange={handleChange}
         onSubmit={handleLogin}
         onChangeEmail={() => { clearError(); setStep('email'); }}
+        onRateLimitExpired={clearError}
       />
     );
   }
@@ -163,12 +166,14 @@ type PasswordStepProps = {
   password: string;
   isLoading: boolean;
   error: string | null;
+  rateLimitInfo: { isRateLimited: boolean; retryAfter: number | null; message: string | null };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   onChangeEmail: () => void;
+  onRateLimitExpired: () => void;
 };
 
-function PasswordStep({ email, password, isLoading, error, onChange, onSubmit, onChangeEmail }: PasswordStepProps) {
+function PasswordStep({ email, password, isLoading, error, rateLimitInfo, onChange, onSubmit, onChangeEmail, onRateLimitExpired }: PasswordStepProps) {
   const [isEmailOpen, setIsEmailOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -185,7 +190,8 @@ function PasswordStep({ email, password, isLoading, error, onChange, onSubmit, o
   }, [isEmailOpen]);
 
   const emailInitial = email.charAt(0).toUpperCase();
-  const showError = !!error;
+  const showError = !!error && !rateLimitInfo.isRateLimited;
+  const isDisabled = isLoading || rateLimitInfo.isRateLimited;
 
   return (
     <div className="flex flex-col gap-6 md:flex-row">
@@ -260,15 +266,23 @@ function PasswordStep({ email, password, isLoading, error, onChange, onSubmit, o
               autoFocus
             />
 
-            {/* System Message — Figma: 348x24 FIXED, error only */}
-            <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
-              {showError && (
-                <>
-                  <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="flex-1 text-xs leading-6 text-error">{error}</span>
-                </>
-              )}
-            </div>
+            {/* System Message — rate limit banner or error */}
+            {rateLimitInfo.isRateLimited && rateLimitInfo.retryAfter ? (
+              <RateLimitBanner
+                retryAfter={rateLimitInfo.retryAfter}
+                message={rateLimitInfo.message ?? 'Too many attempts.'}
+                onExpired={onRateLimitExpired}
+              />
+            ) : (
+              <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+                {showError && (
+                  <>
+                    <AlertTriangle size={16} className="shrink-0 text-error" />
+                    <span className="flex-1 text-xs leading-6 text-error">{error}</span>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Password Recovery Button — Figma: 348x21, always visible, right-aligned */}
             <div className="flex items-center justify-end">
@@ -284,8 +298,8 @@ function PasswordStep({ email, password, isLoading, error, onChange, onSubmit, o
           {/* Sign In button — Figma: full width 348px, primary button */}
           <button
             type="submit"
-            disabled={isLoading}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none"
+            disabled={isDisabled}
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? 'opacity-30' : ''}>Sign In</span>
             {isLoading && (

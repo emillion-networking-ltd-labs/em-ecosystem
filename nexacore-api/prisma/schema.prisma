@@ -32,6 +32,7 @@ model User {
   isActive       Boolean   @default(true)
   failedAttempts Int       @default(0)
   lockedUntil    DateTime?
+  lockoutCount   Int       @default(0)
   refreshToken   String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt

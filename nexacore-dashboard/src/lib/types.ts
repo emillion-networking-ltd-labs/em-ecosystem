@@ -13,6 +13,7 @@ export type SafeUser = {
   isActive: boolean;
   failedAttempts: number;
   lockedUntil: string | null;
+  lockoutCount: number;
   createdAt: string;
   updatedAt: string;
 };
@@ -29,7 +30,16 @@ export type ErrorResponse = {
     message: string;
     code: string;
     statusCode: number;
+    details?: string[];
+    retryAfter?: number;
+    lockoutLevel?: number;
   };
+};
+
+export type RateLimitInfo = {
+  isRateLimited: boolean;
+  retryAfter: number | null;
+  message: string | null;
 };
 
 export type PaginatedResponse<T> = {

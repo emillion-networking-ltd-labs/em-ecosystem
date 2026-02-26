@@ -86,7 +86,17 @@ class ApiClient {
 
   private async parseErrorResponse(response: Response): Promise<unknown> {
     try {
-      return await response.json();
+      const body = await response.json();
+
+      // Enrich error with rate limit headers when present
+      if (body?.error && response.status === 429) {
+        const retryAfter = response.headers.get('Retry-After');
+        if (retryAfter && !body.error.retryAfter) {
+          body.error.retryAfter = parseInt(retryAfter, 10);
+        }
+      }
+
+      return body;
     } catch {
       return {
         error: {

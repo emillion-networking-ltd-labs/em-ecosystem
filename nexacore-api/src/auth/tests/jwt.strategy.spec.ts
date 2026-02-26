@@ -24,6 +24,7 @@ describe('JwtStrategy', () => {
     isActive: true,
     failedAttempts: 0,
     lockedUntil: null,
+    lockoutCount: 0,
     refreshToken: null,
     createdAt: new Date(),
     updatedAt: new Date(),

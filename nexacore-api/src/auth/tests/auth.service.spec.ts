@@ -36,6 +36,7 @@ describe('AuthService', () => {
     isActive: true,
     failedAttempts: 0,
     lockedUntil: null,
+    lockoutCount: 0,
     refreshToken: 'hashed-refresh-token',
     createdAt: new Date(),
     updatedAt: new Date(),
@@ -178,12 +179,15 @@ describe('AuthService', () => {
     });
 
     describe('error cases', () => {
-      it('should throw UnauthorizedException when user not found', async () => {
+      it('should throw UnauthorizedException when user not found (with timing protection)', async () => {
         usersService.findByEmail.mockResolvedValue(null);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
         await expect(authService.login(loginDto)).rejects.toThrow(
           UnauthorizedException,
         );
+        // Verify dummy bcrypt.compare was called for timing attack protection
+        expect(bcrypt.compare).toHaveBeenCalled();
       });
 
       it('should throw ForbiddenException when account is locked', async () => {
@@ -214,15 +218,17 @@ describe('AuthService', () => {
         );
       });
 
-      it('should throw UnauthorizedException when user has no passwordHash (OAuth-only)', async () => {
+      it('should throw UnauthorizedException when user has no passwordHash (OAuth-only, with timing protection)', async () => {
         usersService.findByEmail.mockResolvedValue({
           ...mockUser,
           passwordHash: null,
         });
+        (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
         await expect(authService.login(loginDto)).rejects.toThrow(
           UnauthorizedException,
         );
+        expect(bcrypt.compare).toHaveBeenCalled();
       });
 
       it('should throw UnauthorizedException on wrong password', async () => {
@@ -265,7 +271,7 @@ describe('AuthService', () => {
         await expect(authService.login(loginDto)).rejects.toThrow(
           ForbiddenException,
         );
-        expect(usersService.lockAccount).toHaveBeenCalledWith('uuid-123');
+        expect(usersService.lockAccount).toHaveBeenCalledWith('uuid-123', 0);
       });
     });
   });
@@ -350,6 +356,7 @@ describe('AuthService', () => {
       isActive: true,
       failedAttempts: 0,
       lockedUntil: null,
+      lockoutCount: 0,
       refreshToken: null,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -409,6 +416,7 @@ describe('AuthService', () => {
           isActive: true,
           failedAttempts: 0,
           lockedUntil: null,
+          lockoutCount: 0,
           createdAt: new Date(),
           updatedAt: new Date(),
         },

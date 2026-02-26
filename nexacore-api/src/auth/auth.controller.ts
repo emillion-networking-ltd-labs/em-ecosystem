@@ -16,7 +16,9 @@ import {
   ApiResponse,
   ApiBearerAuth,
 } from '@nestjs/swagger';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import { AuthService } from './auth.service';
+import { AUTH_RATE_LIMITS } from './constants/auth.constants';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
@@ -35,30 +37,36 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('register')
+  @Throttle({ global: { ttl: AUTH_RATE_LIMITS.register.ttl, limit: AUTH_RATE_LIMITS.register.limit } })
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user account' })
   @ApiResponse({ status: 201, description: 'User registered successfully' })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 409, description: 'Email already registered' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto);
   }
 
   @Post('login')
+  @Throttle({ global: { ttl: AUTH_RATE_LIMITS.login.ttl, limit: AUTH_RATE_LIMITS.login.limit } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Login with email and password' })
   @ApiResponse({ status: 200, description: 'Login successful, returns tokens' })
   @ApiResponse({ status: 401, description: 'Invalid credentials' })
   @ApiResponse({ status: 403, description: 'Account locked' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   async login(@Body() loginDto: LoginDto) {
     return this.authService.login(loginDto);
   }
 
   @Post('refresh')
+  @Throttle({ global: { ttl: AUTH_RATE_LIMITS.refresh.ttl, limit: AUTH_RATE_LIMITS.refresh.limit } })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Refresh access token using refresh token' })
   @ApiResponse({ status: 200, description: 'Tokens refreshed successfully' })
   @ApiResponse({ status: 401, description: 'Invalid or expired refresh token' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   async refresh(@Body() refreshTokenDto: RefreshTokenDto) {
     return this.authService.refreshTokens(refreshTokenDto.refreshToken);
   }
@@ -98,6 +106,7 @@ export class AuthController {
   }
 
   @Get('google')
+  @Throttle({ global: { ttl: AUTH_RATE_LIMITS.oauth.ttl, limit: AUTH_RATE_LIMITS.oauth.limit } })
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
   @ApiResponse({
@@ -109,6 +118,7 @@ export class AuthController {
   }
 
   @Get('google/callback')
+  @SkipThrottle()
   @UseGuards(GoogleAuthGuard)
   @Redirect()
   @ApiOperation({ summary: 'Google OAuth callback' })
@@ -130,6 +140,7 @@ export class AuthController {
   }
 
   @Get('github')
+  @Throttle({ global: { ttl: AUTH_RATE_LIMITS.oauth.ttl, limit: AUTH_RATE_LIMITS.oauth.limit } })
   @UseGuards(GitHubAuthGuard)
   @ApiOperation({ summary: 'Initiate GitHub OAuth login' })
   @ApiResponse({
@@ -141,6 +152,7 @@ export class AuthController {
   }
 
   @Get('github/callback')
+  @SkipThrottle()
   @UseGuards(GitHubAuthGuard)
   @Redirect()
   @ApiOperation({ summary: 'GitHub OAuth callback' })

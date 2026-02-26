@@ -14,9 +14,12 @@ import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from './stores/oauth-code.store';
 import type { StringValue } from 'ms';
-
-const BCRYPT_ROUNDS = 12;
-const MAX_FAILED_ATTEMPTS = 5;
+import {
+  BCRYPT_ROUNDS,
+  MAX_FAILED_ATTEMPTS,
+  DUMMY_PASSWORD_HASH,
+  getLockoutDurationMinutes,
+} from './constants/auth.constants';
 
 @Injectable()
 export class AuthService {
@@ -53,19 +56,36 @@ export class AuthService {
     dto: LoginDto,
   ): Promise<{ accessToken: string; refreshToken: string; user: SafeUser }> {
     const user = await this.usersService.findByEmail(dto.email);
+
+    // Timing attack protection: constant-time response when user not found
     if (!user) {
+      await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Account lockout check with detailed response
     if (user.lockedUntil && user.lockedUntil > new Date()) {
-      throw new ForbiddenException('Account locked. Try again later.');
+      const remainingMs = user.lockedUntil.getTime() - Date.now();
+      const remainingSeconds = Math.ceil(remainingMs / 1000);
+      const remainingMinutes = Math.ceil(remainingMs / 60_000);
+
+      throw new ForbiddenException({
+        message: `Account locked due to too many failed attempts. Try again in ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}.`,
+        error: 'Forbidden',
+        statusCode: 403,
+        retryAfter: remainingSeconds,
+        lockoutLevel: user.lockoutCount,
+      });
     }
 
+    // Expired lockout: reset failed attempts (but NOT lockoutCount)
     if (user.lockedUntil && user.lockedUntil <= new Date()) {
       await this.usersService.resetFailedAttempts(user.id);
     }
 
+    // OAuth-only account (no password set) — constant timing
     if (!user.passwordHash) {
+      await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -75,9 +95,20 @@ export class AuthService {
     );
     if (!isPasswordValid) {
       const updated = await this.usersService.incrementFailedAttempts(user.id);
+
       if (updated.failedAttempts >= MAX_FAILED_ATTEMPTS) {
-        await this.usersService.lockAccount(user.id);
-        throw new ForbiddenException('Account locked. Try again later.');
+        await this.usersService.lockAccount(user.id, user.lockoutCount);
+
+        const lockoutMinutes = getLockoutDurationMinutes(user.lockoutCount);
+        const lockoutSeconds = lockoutMinutes * 60;
+
+        throw new ForbiddenException({
+          message: `Account locked due to too many failed attempts. Try again in ${lockoutMinutes} minute${lockoutMinutes !== 1 ? 's' : ''}.`,
+          error: 'Forbidden',
+          statusCode: 403,
+          retryAfter: lockoutSeconds,
+          lockoutLevel: user.lockoutCount + 1,
+        });
       }
       throw new UnauthorizedException('Invalid credentials');
     }

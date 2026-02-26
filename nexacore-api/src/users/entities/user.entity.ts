@@ -15,6 +15,7 @@ export interface User {
   isActive: boolean;
   failedAttempts: number;
   lockedUntil: Date | null;
+  lockoutCount: number;
   refreshToken: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -36,6 +37,7 @@ export function toSafeUser(user: User): SafeUser {
     isActive: user.isActive,
     failedAttempts: user.failedAttempts,
     lockedUntil: user.lockedUntil,
+    lockoutCount: user.lockoutCount,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

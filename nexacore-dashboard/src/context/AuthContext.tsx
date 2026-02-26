@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { apiClient } from '@/lib/api';
-import type { SafeUser, AuthResponse } from '@/lib/types';
+import type { SafeUser, AuthResponse, RateLimitInfo } from '@/lib/types';
 
 /* ===== State ===== */
 
@@ -19,14 +19,22 @@ type AuthState = {
   isLoading: boolean;
   isInitialized: boolean;
   error: string | null;
+  rateLimitInfo: RateLimitInfo;
 };
 
 type AuthAction =
   | { type: 'AUTH_START' }
   | { type: 'AUTH_SUCCESS'; payload: { user: SafeUser; accessToken: string } }
   | { type: 'AUTH_ERROR'; payload: string }
+  | { type: 'RATE_LIMITED'; payload: { retryAfter: number; message: string } }
   | { type: 'LOGOUT' }
   | { type: 'CLEAR_ERROR' };
+
+const DEFAULT_RATE_LIMIT: RateLimitInfo = {
+  isRateLimited: false,
+  retryAfter: null,
+  message: null,
+};
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
@@ -39,13 +47,26 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         isLoading: false,
         isInitialized: true,
         error: null,
+        rateLimitInfo: DEFAULT_RATE_LIMIT,
       };
     case 'AUTH_ERROR':
       return { ...state, isLoading: false, isInitialized: true, error: action.payload };
+    case 'RATE_LIMITED':
+      return {
+        ...state,
+        isLoading: false,
+        isInitialized: true,
+        error: action.payload.message,
+        rateLimitInfo: {
+          isRateLimited: true,
+          retryAfter: action.payload.retryAfter,
+          message: action.payload.message,
+        },
+      };
     case 'LOGOUT':
-      return { user: null, accessToken: null, isLoading: false, isInitialized: true, error: null };
+      return { user: null, accessToken: null, isLoading: false, isInitialized: true, error: null, rateLimitInfo: DEFAULT_RATE_LIMIT };
     case 'CLEAR_ERROR':
-      return { ...state, error: null };
+      return { ...state, error: null, rateLimitInfo: DEFAULT_RATE_LIMIT };
     default:
       return state;
   }
@@ -67,7 +88,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 /* ===== Helpers ===== */
 
-type ApiError = { error?: { message?: string; details?: string[] } };
+type ApiError = { error?: { message?: string; details?: string[]; retryAfter?: number; code?: string; statusCode?: number } };
 
 function extractErrorMessage(err: unknown, fallback: string): string {
   const errObj = err as ApiError;
@@ -85,6 +106,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: false,
     isInitialized: false,
     error: null,
+    rateLimitInfo: DEFAULT_RATE_LIMIT,
   });
 
   const refreshSession = useCallback(async () => {
@@ -124,10 +146,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         payload: { user: data.user, accessToken: data.accessToken },
       });
     } catch (err: unknown) {
-      dispatch({
-        type: 'AUTH_ERROR',
-        payload: extractErrorMessage(err, 'Login failed. Please try again.'),
-      });
+      const errObj = err as ApiError;
+      if (errObj?.error?.retryAfter) {
+        dispatch({
+          type: 'RATE_LIMITED',
+          payload: {
+            retryAfter: errObj.error.retryAfter,
+            message: errObj.error.message ?? 'Too many requests. Please try again later.',
+          },
+        });
+      } else {
+        dispatch({
+          type: 'AUTH_ERROR',
+          payload: extractErrorMessage(err, 'Login failed. Please try again.'),
+        });
+      }
     }
   }, []);
 
@@ -146,10 +179,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         payload: { user: data.user, accessToken: data.accessToken },
       });
     } catch (err: unknown) {
-      dispatch({
-        type: 'AUTH_ERROR',
-        payload: extractErrorMessage(err, 'Registration failed. Please try again.'),
-      });
+      const errObj = err as ApiError;
+      if (errObj?.error?.retryAfter) {
+        dispatch({
+          type: 'RATE_LIMITED',
+          payload: {
+            retryAfter: errObj.error.retryAfter,
+            message: errObj.error.message ?? 'Too many requests. Please try again later.',
+          },
+        });
+      } else {
+        dispatch({
+          type: 'AUTH_ERROR',
+          payload: extractErrorMessage(err, 'Registration failed. Please try again.'),
+        });
+      }
     }
   }, []);
 
