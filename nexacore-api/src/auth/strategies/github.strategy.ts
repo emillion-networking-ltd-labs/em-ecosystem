@@ -23,7 +23,12 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
   }
 
   async validate(
-    req: { query: { state?: string } },
+    req: {
+      query: { state?: string };
+      ip?: string;
+      socket?: { remoteAddress?: string };
+      headers?: Record<string, string | string[]>;
+    },
     _accessToken: string,
     _refreshToken: string,
     profile: {
@@ -32,7 +37,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
       displayName?: string;
       photos?: { value: string }[];
     },
-    done: (error: Error | null, user?: Record<string, unknown>) => void,
+    done: (error: Error | null, user?: unknown) => void,
   ): Promise<void> {
     // Validate OAuth state parameter (CSRF protection)
     const state = req.query?.state;
@@ -56,15 +61,25 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
       lastName = parts.length > 1 ? parts.slice(1).join(' ') : undefined;
     }
 
+    const requestMeta = {
+      ipAddress: req.ip || req.socket?.remoteAddress || 'unknown',
+      userAgent:
+        (req.headers?.['user-agent'] as string | undefined) || null,
+    };
+
     try {
-      const result = await this.authService.validateOAuthUser({
-        email,
-        provider: Provider.GITHUB,
-        providerId: profile.id,
-        firstName,
-        lastName,
-        avatarUrl: profile.photos?.[0]?.value,
-      });
+      const result = await this.authService.validateOAuthUser(
+        {
+          email,
+          provider: Provider.GITHUB,
+          providerId: profile.id,
+          firstName,
+          lastName,
+          avatarUrl: profile.photos?.[0]?.value,
+        },
+        requestMeta,
+        requestMeta,
+      );
       done(null, result);
     } catch (err) {
       done(err as Error);

@@ -21,7 +21,17 @@ export type SafeUser = {
 export type AuthResponse = {
   user: SafeUser;
   accessToken: string;
-  refreshToken: string;
+};
+
+export type SessionResponse = {
+  id: string;
+  deviceInfo: string | null;
+  ipAddress: string;
+  userAgent: string | null;
+  createdAt: string;
+  lastUsedAt: string;
+  expiresAt: string;
+  isCurrent: boolean;
 };
 
 export type ErrorResponse = {

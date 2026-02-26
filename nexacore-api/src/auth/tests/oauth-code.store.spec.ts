@@ -7,7 +7,6 @@ describe('OAuthCodeStore', () => {
 
   const mockPayload: OAuthTokenPayload = {
     accessToken: 'test-access-token',
-    refreshToken: 'test-refresh-token',
     user: {
       id: 'uuid-123',
       email: 'test@example.com',
@@ -24,6 +23,17 @@ describe('OAuthCodeStore', () => {
       lockoutCount: 0,
       createdAt: new Date(),
       updatedAt: new Date(),
+    },
+    cookie: {
+      name: 'refresh_token',
+      value: 'signed-refresh-jwt',
+      options: {
+        httpOnly: true,
+        secure: false,
+        sameSite: 'strict' as const,
+        path: '/',
+        maxAge: 604800,
+      },
     },
   };
 

@@ -8,6 +8,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { Provider } from '../enums/provider.enum';
 import { Role } from '../enums/role.enum';
 import { AuditService } from '../../audit/audit.service';
+import { SessionsService } from '../../sessions/sessions.service';
 
 describe('UsersService', () => {
   let usersService: UsersService;
@@ -29,7 +30,6 @@ describe('UsersService', () => {
     emailVerified: false,
     failedAttempts: 0,
     lockedUntil: null,
-    refreshToken: null,
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -56,6 +56,12 @@ describe('UsersService', () => {
           provide: AuditService,
           useValue: {
             log: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: SessionsService,
+          useValue: {
+            revokeAllUserSessions: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -170,30 +176,6 @@ describe('UsersService', () => {
           passwordHash: 'hashed-password',
         }),
       ).rejects.toThrow(InternalServerErrorException);
-    });
-  });
-
-  describe('updateRefreshToken', () => {
-    it('should update refresh token for user', async () => {
-      prisma.user.update.mockResolvedValue(mockUser);
-
-      await usersService.updateRefreshToken('uuid-123', 'hashed-refresh-token');
-
-      expect(prisma.user.update).toHaveBeenCalledWith({
-        where: { id: 'uuid-123' },
-        data: { refreshToken: 'hashed-refresh-token' },
-      });
-    });
-
-    it('should set null to invalidate refresh token', async () => {
-      prisma.user.update.mockResolvedValue(mockUser);
-
-      await usersService.updateRefreshToken('uuid-123', null);
-
-      expect(prisma.user.update).toHaveBeenCalledWith({
-        where: { id: 'uuid-123' },
-        data: { refreshToken: null },
-      });
     });
   });
 

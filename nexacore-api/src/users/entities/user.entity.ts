@@ -16,12 +16,11 @@ export interface User {
   failedAttempts: number;
   lockedUntil: Date | null;
   lockoutCount: number;
-  refreshToken: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type SafeUser = Omit<User, 'passwordHash' | 'refreshToken'>;
+export type SafeUser = Omit<User, 'passwordHash'>;
 
 export function toSafeUser(user: User): SafeUser {
   const safeUser: SafeUser = {

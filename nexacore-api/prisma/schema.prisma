@@ -51,14 +51,34 @@ model User {
   failedAttempts Int       @default(0)
   lockedUntil    DateTime?
   lockoutCount   Int       @default(0)
-  refreshToken   String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
+  sessions        Session[]
   auditLogs       AuditLog[] @relation("AuditLogUser")
   auditLogsTarget AuditLog[] @relation("AuditLogTarget")
 
   @@map("users")
+}
+
+model Session {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenFamily      String
+  refreshTokenHash String
+  deviceInfo       String?
+  ipAddress        String
+  userAgent        String?
+  isRevoked        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  lastUsedAt       DateTime @default(now())
+  expiresAt        DateTime
+
+  @@index([userId])
+  @@index([tokenFamily])
+  @@index([userId, isRevoked])
+  @@map("sessions")
 }
 
 model AuditLog {

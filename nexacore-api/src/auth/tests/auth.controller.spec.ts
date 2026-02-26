@@ -4,8 +4,10 @@ import {
   UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
+import { SessionsService } from '../../sessions/sessions.service';
 import { AuditService } from '../../audit/audit.service';
 import { Role } from '../../users/enums/role.enum';
 import { Provider } from '../../users/enums/provider.enum';
@@ -13,10 +15,34 @@ import { Provider } from '../../users/enums/provider.enum';
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: jest.Mocked<AuthService>;
+  let sessionsService: jest.Mocked<SessionsService>;
+
+  const mockCookie = {
+    name: 'refresh_token',
+    value: 'signed-refresh-jwt',
+    options: {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict' as const,
+      path: '/',
+      maxAge: 604800,
+    },
+  };
+
+  const mockClearCookie = {
+    name: 'refresh_token',
+    value: '',
+    options: {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict' as const,
+      path: '/',
+      maxAge: 0,
+    },
+  };
 
   const mockAuthResult = {
     accessToken: 'access-token-123',
-    refreshToken: 'refresh-token-456',
     user: {
       id: 'uuid-123',
       email: 'test@example.com',
@@ -34,6 +60,11 @@ describe('AuthController', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     },
+    cookie: mockCookie,
+  };
+
+  const mockRes = {
+    cookie: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -49,8 +80,26 @@ describe('AuthController', () => {
             login: jest.fn(),
             refreshTokens: jest.fn(),
             logout: jest.fn(),
-            generateOAuthCode: jest.fn().mockReturnValue('ephemeral-code-uuid'),
+            logoutAll: jest.fn(),
+            generateOAuthCode: jest
+              .fn()
+              .mockReturnValue('ephemeral-code-uuid'),
             exchangeOAuthCode: jest.fn(),
+            buildClearCookie: jest.fn().mockReturnValue(mockClearCookie),
+          },
+        },
+        {
+          provide: SessionsService,
+          useValue: {
+            getActiveSessions: jest.fn(),
+            revokeSession: jest.fn(),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+            verify: jest.fn(),
           },
         },
         {
@@ -64,25 +113,37 @@ describe('AuthController', () => {
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get(AuthService);
+    sessionsService = module.get(SessionsService);
   });
 
   const mockReq = {
     ip: '127.0.0.1',
     headers: { 'user-agent': 'test-agent' },
+    cookies: {},
   };
 
-  const mockCtx = { ipAddress: '127.0.0.1', userAgent: 'test-agent' };
-
   describe('register', () => {
-    const registerDto = { email: 'test@example.com', password: 'StrongPass1!' };
+    const registerDto = {
+      email: 'test@example.com',
+      password: 'StrongPass1!',
+    };
 
-    it('should return the registration result on success', async () => {
+    it('should set cookie and return accessToken + user', async () => {
       authService.register.mockResolvedValue(mockAuthResult);
 
-      const result = await controller.register(registerDto, mockReq);
+      const result = await controller.register(
+        registerDto,
+        mockReq,
+        mockRes as any,
+      );
 
-      expect(authService.register).toHaveBeenCalledWith(registerDto, mockCtx);
       expect(result.accessToken).toBe('access-token-123');
+      expect(result.user.email).toBe('test@example.com');
+      expect(mockRes.cookie).toHaveBeenCalledWith(
+        'refresh_token',
+        mockCookie.value,
+        mockCookie.options,
+      );
     });
 
     it('should propagate ConflictException from service', async () => {
@@ -90,23 +151,34 @@ describe('AuthController', () => {
         new ConflictException('Email already registered'),
       );
 
-      await expect(controller.register(registerDto, mockReq)).rejects.toThrow(
-        ConflictException,
-      );
+      await expect(
+        controller.register(registerDto, mockReq, mockRes as any),
+      ).rejects.toThrow(ConflictException);
     });
   });
 
   describe('login', () => {
-    const loginDto = { email: 'test@example.com', password: 'StrongPass1!' };
+    const loginDto = {
+      email: 'test@example.com',
+      password: 'StrongPass1!',
+    };
 
-    it('should return JWT pair and user on valid credentials', async () => {
+    it('should set cookie and return accessToken + user on valid credentials', async () => {
       authService.login.mockResolvedValue(mockAuthResult);
 
-      const result = await controller.login(loginDto, mockReq);
+      const result = await controller.login(
+        loginDto,
+        mockReq,
+        mockRes as any,
+      );
 
-      expect(authService.login).toHaveBeenCalledWith(loginDto, mockCtx);
       expect(result.accessToken).toBe('access-token-123');
       expect(result.user.email).toBe('test@example.com');
+      expect(mockRes.cookie).toHaveBeenCalledWith(
+        'refresh_token',
+        mockCookie.value,
+        mockCookie.options,
+      );
     });
 
     it('should propagate UnauthorizedException on invalid credentials', async () => {
@@ -114,9 +186,9 @@ describe('AuthController', () => {
         new UnauthorizedException('Invalid credentials'),
       );
 
-      await expect(controller.login(loginDto, mockReq)).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        controller.login(loginDto, mockReq, mockRes as any),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should propagate ForbiddenException when account is locked', async () => {
@@ -124,54 +196,124 @@ describe('AuthController', () => {
         new ForbiddenException('Account locked'),
       );
 
-      await expect(controller.login(loginDto, mockReq)).rejects.toThrow(
-        ForbiddenException,
-      );
+      await expect(
+        controller.login(loginDto, mockReq, mockRes as any),
+      ).rejects.toThrow(ForbiddenException);
     });
   });
 
   describe('refresh', () => {
-    const refreshDto = { refreshToken: 'valid-refresh-token' };
-
-    it('should return new token pair on valid refresh token', async () => {
+    it('should read refresh token from cookie and return new accessToken', async () => {
+      const reqWithCookie = {
+        ...mockReq,
+        cookies: { refresh_token: 'old-refresh-token' },
+      };
       authService.refreshTokens.mockResolvedValue({
         accessToken: 'new-access',
-        refreshToken: 'new-refresh',
+        cookie: mockCookie,
       });
 
-      const result = await controller.refresh(refreshDto, mockReq);
+      const result = await controller.refresh(reqWithCookie, mockRes as any);
 
       expect(authService.refreshTokens).toHaveBeenCalledWith(
-        'valid-refresh-token',
-        mockCtx,
+        'old-refresh-token',
+        expect.objectContaining({ ipAddress: '127.0.0.1' }),
+        expect.objectContaining({ ipAddress: '127.0.0.1' }),
       );
       expect(result.accessToken).toBe('new-access');
+      expect(mockRes.cookie).toHaveBeenCalled();
     });
 
-    it('should propagate UnauthorizedException on invalid refresh token', async () => {
-      authService.refreshTokens.mockRejectedValue(
-        new UnauthorizedException('Invalid or expired refresh token'),
-      );
-
-      await expect(controller.refresh(refreshDto, mockReq)).rejects.toThrow(
-        UnauthorizedException,
-      );
+    it('should throw UnauthorizedException when no cookie present', async () => {
+      await expect(
+        controller.refresh(mockReq, mockRes as any),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
   describe('logout', () => {
-    it('should call authService.logout and return success message', async () => {
-      authService.logout.mockResolvedValue(undefined);
-      const req = {
-        user: { id: 'uuid-123' },
-        ip: '127.0.0.1',
-        headers: { 'user-agent': 'test-agent' },
+    it('should clear cookie and return success message when cookie present', async () => {
+      const reqWithCookie = {
+        ...mockReq,
+        cookies: { refresh_token: 'valid-token' },
       };
+      authService.logout.mockResolvedValue(mockClearCookie);
 
-      const result = await controller.logout(req);
+      const result = await controller.logout(reqWithCookie, mockRes as any);
 
-      expect(authService.logout).toHaveBeenCalledWith('uuid-123', mockCtx);
+      expect(authService.logout).toHaveBeenCalledWith(
+        'valid-token',
+        expect.objectContaining({ ipAddress: '127.0.0.1' }),
+      );
       expect(result.message).toBe('Logged out successfully');
+      expect(mockRes.cookie).toHaveBeenCalled();
+    });
+
+    it('should clear cookie even when no refresh token cookie', async () => {
+      const result = await controller.logout(mockReq, mockRes as any);
+
+      expect(result.message).toBe('Logged out successfully');
+      expect(mockRes.cookie).toHaveBeenCalled();
+    });
+  });
+
+  describe('logoutAll', () => {
+    it('should revoke all sessions and return success message', async () => {
+      const reqWithUser = { ...mockReq, user: { id: 'uuid-123' } };
+      authService.logoutAll.mockResolvedValue(mockClearCookie);
+
+      const result = await controller.logoutAll(reqWithUser, mockRes as any);
+
+      expect(authService.logoutAll).toHaveBeenCalledWith(
+        'uuid-123',
+        expect.objectContaining({ ipAddress: '127.0.0.1' }),
+      );
+      expect(result.message).toBe('All sessions revoked');
+    });
+  });
+
+  describe('getSessions', () => {
+    it('should return active sessions for the current user', async () => {
+      const mockSessions = [
+        {
+          id: 'sess-1',
+          deviceInfo: null,
+          ipAddress: '127.0.0.1',
+          userAgent: 'test',
+          createdAt: new Date().toISOString(),
+          lastUsedAt: new Date().toISOString(),
+          expiresAt: new Date().toISOString(),
+          isCurrent: false,
+        },
+      ];
+      const reqWithUser = { ...mockReq, user: { id: 'uuid-123' } };
+      sessionsService.getActiveSessions.mockResolvedValue(mockSessions as any);
+
+      const result = await controller.getSessions(reqWithUser);
+
+      expect(sessionsService.getActiveSessions).toHaveBeenCalledWith(
+        'uuid-123',
+        undefined,
+      );
+      expect(result).toEqual(mockSessions);
+    });
+  });
+
+  describe('revokeSession', () => {
+    it('should revoke the specified session', async () => {
+      const reqWithUser = { ...mockReq, user: { id: 'uuid-123' } };
+      sessionsService.revokeSession.mockResolvedValue(undefined);
+
+      const result = await controller.revokeSession(
+        'session-id',
+        reqWithUser,
+      );
+
+      expect(sessionsService.revokeSession).toHaveBeenCalledWith(
+        'session-id',
+        'uuid-123',
+      );
+      expect(result.message).toBe('Session revoked');
     });
   });
 
@@ -194,12 +336,12 @@ describe('AuthController', () => {
   });
 
   describe('googleAuthCallback', () => {
-    it('should return redirect URL with ephemeral code instead of tokens', () => {
+    it('should return redirect URL with ephemeral code', () => {
       const req = {
         user: {
           accessToken: 'google-access',
-          refreshToken: 'google-refresh',
           user: mockAuthResult.user,
+          cookie: mockCookie,
         },
       };
 
@@ -209,18 +351,17 @@ describe('AuthController', () => {
         'http://localhost:3001/auth/callback?code=ephemeral-code-uuid',
       );
       expect(result.url).not.toContain('accessToken');
-      expect(result.url).not.toContain('refreshToken');
       expect(authService.generateOAuthCode).toHaveBeenCalledWith(req.user);
     });
   });
 
   describe('githubAuthCallback', () => {
-    it('should return redirect URL with ephemeral code instead of tokens', () => {
+    it('should return redirect URL with ephemeral code', () => {
       const req = {
         user: {
           accessToken: 'github-access',
-          refreshToken: 'github-refresh',
           user: mockAuthResult.user,
+          cookie: mockCookie,
         },
       };
 
@@ -230,21 +371,23 @@ describe('AuthController', () => {
         'http://localhost:3001/auth/callback?code=ephemeral-code-uuid',
       );
       expect(result.url).not.toContain('accessToken');
-      expect(result.url).not.toContain('refreshToken');
       expect(authService.generateOAuthCode).toHaveBeenCalledWith(req.user);
     });
   });
 
   describe('exchangeOAuthCode', () => {
-    it('should return tokens and user for a valid code', () => {
-      authService.exchangeOAuthCode.mockReturnValue(mockAuthResult);
+    it('should set cookie and return accessToken + user for a valid code', () => {
+      authService.exchangeOAuthCode.mockReturnValue(mockAuthResult as any);
 
-      const result = controller.exchangeOAuthCode({ code: 'valid-code' });
+      const result = controller.exchangeOAuthCode(
+        { code: 'valid-code' },
+        mockRes as any,
+      );
 
       expect(authService.exchangeOAuthCode).toHaveBeenCalledWith('valid-code');
       expect(result.accessToken).toBe('access-token-123');
-      expect(result.refreshToken).toBe('refresh-token-456');
       expect(result.user.email).toBe('test@example.com');
+      expect(mockRes.cookie).toHaveBeenCalled();
     });
 
     it('should propagate UnauthorizedException for invalid code', () => {
@@ -255,7 +398,10 @@ describe('AuthController', () => {
       });
 
       expect(() =>
-        controller.exchangeOAuthCode({ code: 'invalid-code' }),
+        controller.exchangeOAuthCode(
+          { code: 'invalid-code' },
+          mockRes as any,
+        ),
       ).toThrow(UnauthorizedException);
     });
   });

@@ -1,13 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { randomUUID } from 'crypto';
 import { SafeUser } from '../../users/entities/user.entity';
+import { CookieConfig } from '../auth.service';
 
 const CODE_TTL_MS = 60 * 1000; // 60 seconds
 
 export interface OAuthTokenPayload {
   accessToken: string;
-  refreshToken: string;
   user: SafeUser;
+  cookie: CookieConfig;
 }
 
 @Injectable()

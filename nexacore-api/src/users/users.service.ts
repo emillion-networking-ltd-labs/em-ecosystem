@@ -20,6 +20,7 @@ import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
+import { SessionsService } from '../sessions/sessions.service';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -28,6 +29,7 @@ export class UsersService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    private readonly sessionsService: SessionsService,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
@@ -65,16 +67,6 @@ export class UsersService {
       }
       throw new InternalServerErrorException('Failed to create user');
     }
-  }
-
-  async updateRefreshToken(
-    userId: string,
-    refreshToken: string | null,
-  ): Promise<void> {
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { refreshToken },
-    });
   }
 
   async incrementFailedAttempts(userId: string): Promise<User> {
@@ -281,11 +273,11 @@ export class UsersService {
 
     await this.prisma.user.update({
       where: { id: userId },
-      data: {
-        passwordHash: newHash,
-        refreshToken: null, // Revoke all sessions
-      },
+      data: { passwordHash: newHash },
     });
+
+    // Revoke all sessions on password change
+    await this.sessionsService.revokeAllUserSessions(userId);
 
     this.auditService
       .log({

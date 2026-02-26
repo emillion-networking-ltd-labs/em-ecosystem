@@ -23,7 +23,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   async validate(
-    req: { query: { state?: string } },
+    req: {
+      query: { state?: string };
+      ip?: string;
+      socket?: { remoteAddress?: string };
+      headers?: Record<string, string | string[]>;
+    },
     _accessToken: string,
     _refreshToken: string,
     profile: {
@@ -47,15 +52,25 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       return;
     }
 
+    const requestMeta = {
+      ipAddress: req.ip || req.socket?.remoteAddress || 'unknown',
+      userAgent:
+        (req.headers?.['user-agent'] as string | undefined) || null,
+    };
+
     try {
-      const result = await this.authService.validateOAuthUser({
-        email,
-        provider: Provider.GOOGLE,
-        providerId: profile.id,
-        firstName: profile.name?.givenName,
-        lastName: profile.name?.familyName,
-        avatarUrl: profile.photos?.[0]?.value,
-      });
+      const result = await this.authService.validateOAuthUser(
+        {
+          email,
+          provider: Provider.GOOGLE,
+          providerId: profile.id,
+          firstName: profile.name?.givenName,
+          lastName: profile.name?.familyName,
+          avatarUrl: profile.photos?.[0]?.value,
+        },
+        requestMeta,
+        requestMeta,
+      );
       done(null, result);
     } catch (err) {
       done(err as Error, undefined);

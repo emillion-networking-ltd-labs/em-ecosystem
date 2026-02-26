@@ -6,6 +6,7 @@ import ProfileForm from '@/components/profile/ProfileForm';
 import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
 import AccountInfo from '@/components/profile/AccountInfo';
 import ConnectedAccounts from '@/components/profile/ConnectedAccounts';
+import ActiveSessions from '@/components/profile/ActiveSessions';
 
 export default function ProfilePage() {
   return (
@@ -17,6 +18,7 @@ export default function ProfilePage() {
           <ChangePasswordForm />
           <AccountInfo />
           <ConnectedAccounts />
+          <ActiveSessions />
         </div>
       </DashboardLayout>
     </ProtectedRoute>

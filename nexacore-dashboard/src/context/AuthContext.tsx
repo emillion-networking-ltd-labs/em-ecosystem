@@ -8,7 +8,7 @@ import {
   useCallback,
   type ReactNode,
 } from 'react';
-import { apiClient } from '@/lib/api';
+import { apiClient, API_BASE_URL } from '@/lib/api';
 import type { SafeUser, AuthResponse, RateLimitInfo } from '@/lib/types';
 
 /* ===== State ===== */
@@ -112,7 +112,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshSession = useCallback(async () => {
     dispatch({ type: 'AUTH_START' });
     try {
-      const res = await fetch('/api/auth/refresh', { method: 'POST' });
+      const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      });
       if (!res.ok) {
         dispatch({ type: 'LOGOUT' });
         return;
@@ -135,11 +138,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'AUTH_START' });
     try {
       const data = await apiClient.post<AuthResponse>('/auth/login', { email, password });
-      await fetch('/api/auth/set-tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: data.refreshToken }),
-      });
       apiClient.setAccessToken(data.accessToken);
       dispatch({
         type: 'AUTH_SUCCESS',
@@ -168,11 +166,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'AUTH_START' });
     try {
       const data = await apiClient.post<AuthResponse>('/auth/register', { email, password });
-      await fetch('/api/auth/set-tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: data.refreshToken }),
-      });
       apiClient.setAccessToken(data.accessToken);
       dispatch({
         type: 'AUTH_SUCCESS',
@@ -203,11 +196,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const data = await apiClient.post<AuthResponse>('/auth/oauth/exchange', {
         code,
       });
-      await fetch('/api/auth/set-tokens', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken: data.refreshToken }),
-      });
       apiClient.setAccessToken(data.accessToken);
       dispatch({
         type: 'AUTH_SUCCESS',
@@ -223,7 +211,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
-      await fetch('/api/auth/logout', { method: 'POST' });
+      await fetch(`${API_BASE_URL}/auth/logout`, {
+        method: 'POST',
+        credentials: 'include',
+      });
     } finally {
       apiClient.clearAccessToken();
       dispatch({ type: 'LOGOUT' });

@@ -26,6 +26,7 @@ class ApiClient {
     try {
       response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
+        credentials: 'include',
         headers: { ...headers, ...(options.headers as Record<string, string>) },
       });
     } catch {
@@ -43,6 +44,7 @@ class ApiClient {
         try {
           retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
+            credentials: 'include',
             headers: { ...headers, ...(options.headers as Record<string, string>) },
           });
         } catch {
@@ -113,7 +115,10 @@ class ApiClient {
 
     this.refreshPromise = (async () => {
       try {
-        const res = await fetch('/api/auth/refresh', { method: 'POST' });
+        const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
+          method: 'POST',
+          credentials: 'include',
+        });
         if (!res.ok) return null;
         const data = await res.json();
         this.accessToken = data.accessToken;
@@ -129,4 +134,5 @@ class ApiClient {
   }
 }
 
+export { API_BASE_URL };
 export const apiClient = new ApiClient();

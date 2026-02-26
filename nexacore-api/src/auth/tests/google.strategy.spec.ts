@@ -10,9 +10,20 @@ describe('GoogleStrategy', () => {
   let authService: jest.Mocked<AuthService>;
   let oauthStateStore: jest.Mocked<OAuthStateStore>;
 
+  const mockCookie = {
+    name: 'refresh_token',
+    value: 'signed-jwt',
+    options: {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict' as const,
+      path: '/',
+      maxAge: 604800,
+    },
+  };
+
   const mockOAuthResult = {
     accessToken: 'access-token',
-    refreshToken: 'refresh-token',
     user: {
       id: 'uuid-123',
       email: 'google@example.com',
@@ -30,6 +41,7 @@ describe('GoogleStrategy', () => {
       createdAt: new Date(),
       updatedAt: new Date(),
     },
+    cookie: mockCookie,
   };
 
   beforeEach(async () => {
@@ -68,9 +80,13 @@ describe('GoogleStrategy', () => {
   });
 
   describe('validate', () => {
-    const validReq = { query: { state: 'valid-state' } };
+    const validReq = {
+      query: { state: 'valid-state' },
+      ip: '127.0.0.1',
+      headers: { 'user-agent': 'test-agent' },
+    };
 
-    it('should call authService.validateOAuthUser with Google profile and invoke done', async () => {
+    it('should call authService.validateOAuthUser with profile and requestMeta', async () => {
       oauthStateStore.validate.mockReturnValue(true);
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
@@ -84,11 +100,15 @@ describe('GoogleStrategy', () => {
       );
 
       expect(oauthStateStore.validate).toHaveBeenCalledWith('valid-state');
-      expect(authService.validateOAuthUser).toHaveBeenCalledWith({
-        email: 'google@example.com',
-        provider: Provider.GOOGLE,
-        providerId: 'google-id-123',
-      });
+      expect(authService.validateOAuthUser).toHaveBeenCalledWith(
+        {
+          email: 'google@example.com',
+          provider: Provider.GOOGLE,
+          providerId: 'google-id-123',
+        },
+        expect.objectContaining({ ipAddress: '127.0.0.1' }),
+        expect.objectContaining({ ipAddress: '127.0.0.1' }),
+      );
       expect(done).toHaveBeenCalledWith(null, mockOAuthResult);
     });
 
@@ -134,7 +154,7 @@ describe('GoogleStrategy', () => {
       const done = jest.fn();
 
       await strategy.validate(
-        { query: { state: 'invalid-state' } },
+        { ...validReq, query: { state: 'invalid-state' } },
         'google-access-token',
         'google-refresh-token',
         { emails: [{ value: 'google@example.com' }], id: 'google-id-123' },
@@ -154,7 +174,7 @@ describe('GoogleStrategy', () => {
       const done = jest.fn();
 
       await strategy.validate(
-        { query: {} },
+        { ...validReq, query: {} },
         'google-access-token',
         'google-refresh-token',
         { emails: [{ value: 'google@example.com' }], id: 'google-id-123' },
