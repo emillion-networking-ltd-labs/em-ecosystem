@@ -57,6 +57,8 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
   ): string {
     const request = context.switchToHttp().getRequest();
     const ip = request.ip || request.connection?.remoteAddress || 'unknown';
-    return `${throttlerName}-${ip}-${suffix}`;
+    const handler = context.getHandler().name;
+    const classRef = context.getClass().name;
+    return `${throttlerName}-${classRef}-${handler}-${ip}-${suffix}`;
   }
 }
