@@ -1,4 +1,8 @@
+import { getCsrfToken, clearCsrfToken } from './csrf';
+
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+
+const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 
 class ApiClient {
   private accessToken: string | null = null;
@@ -17,10 +21,19 @@ class ApiClient {
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
+    const method = (options.method || 'GET').toUpperCase();
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(this.accessToken && { Authorization: `Bearer ${this.accessToken}` }),
     };
+
+    if (CSRF_METHODS.has(method)) {
+      const csrfToken = await getCsrfToken();
+      if (csrfToken) {
+        headers['X-CSRF-Token'] = csrfToken;
+      }
+    }
 
     let response: Response;
     try {
@@ -35,11 +48,45 @@ class ApiClient {
       };
     }
 
+    // Handle 403 CSRF token errors — clear and retry once
+    if (response.status === 403) {
+      const body = await response.clone().json().catch(() => null);
+      if (body?.message?.includes('CSRF') || body?.error?.message?.includes('CSRF')) {
+        clearCsrfToken();
+        const newCsrfToken = await getCsrfToken();
+        if (newCsrfToken) {
+          headers['X-CSRF-Token'] = newCsrfToken;
+          try {
+            const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
+              ...options,
+              credentials: 'include',
+              headers: { ...headers, ...(options.headers as Record<string, string>) },
+            });
+            if (!retryResponse.ok) {
+              throw await this.parseErrorResponse(retryResponse);
+            }
+            return retryResponse.json();
+          } catch (retryErr) {
+            if ((retryErr as { error?: unknown })?.error) throw retryErr;
+            throw {
+              error: { message: 'Network error. Please check your connection.', code: 'NETWORK_ERROR', statusCode: 0 },
+            };
+          }
+        }
+      }
+    }
+
     // Handle 401 with silent refresh
     if (response.status === 401 && this.accessToken) {
       const newToken = await this.silentRefresh();
       if (newToken) {
         headers.Authorization = `Bearer ${newToken}`;
+        if (CSRF_METHODS.has(method)) {
+          const csrfToken = await getCsrfToken();
+          if (csrfToken) {
+            headers['X-CSRF-Token'] = csrfToken;
+          }
+        }
         let retryResponse: Response;
         try {
           retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
@@ -90,7 +137,6 @@ class ApiClient {
     try {
       const body = await response.json();
 
-      // Enrich error with rate limit headers when present
       if (body?.error && response.status === 429) {
         const retryAfter = response.headers.get('Retry-After');
         if (retryAfter && !body.error.retryAfter) {

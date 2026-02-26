@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from 'react';
 import { apiClient, API_BASE_URL } from '@/lib/api';
+import { getCsrfToken, clearCsrfToken } from '@/lib/csrf';
 import type { SafeUser, AuthResponse, RateLimitInfo } from '@/lib/types';
 
 /* ===== State ===== */
@@ -112,9 +113,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const refreshSession = useCallback(async () => {
     dispatch({ type: 'AUTH_START' });
     try {
+      const csrfToken = await getCsrfToken();
       const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
         method: 'POST',
         credentials: 'include',
+        headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
       });
       if (!res.ok) {
         dispatch({ type: 'LOGOUT' });
@@ -211,12 +214,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = useCallback(async () => {
     try {
+      const csrfToken = await getCsrfToken();
       await fetch(`${API_BASE_URL}/auth/logout`, {
         method: 'POST',
         credentials: 'include',
+        headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
       });
     } finally {
       apiClient.clearAccessToken();
+      clearCsrfToken();
       dispatch({ type: 'LOGOUT' });
     }
   }, []);

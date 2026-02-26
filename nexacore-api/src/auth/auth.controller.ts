@@ -34,6 +34,9 @@ import { RolesGuard } from './guards/roles.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
+import { CsrfGuard } from '../common/guards/csrf.guard';
+import { SecurityConfig } from '../security/security.config';
 import { Role } from '../users/enums/role.enum';
 import { SafeUser } from '../users/entities/user.entity';
 
@@ -70,6 +73,25 @@ export class AuthController {
     } catch {
       return undefined;
     }
+  }
+
+  @Get('csrf-token')
+  @SkipCsrf()
+  @ApiOperation({ summary: 'Generate CSRF token and set cookie' })
+  @ApiResponse({ status: 200, description: 'CSRF token issued' })
+  getCsrfToken(@Res({ passthrough: true }) res: Response) {
+    const token = CsrfGuard.generateToken();
+    const { cookieOptions } = SecurityConfig.csrf;
+
+    res.cookie(SecurityConfig.csrf.cookieName, token, {
+      httpOnly: cookieOptions.httpOnly,
+      sameSite: cookieOptions.sameSite,
+      secure: cookieOptions.secure,
+      path: cookieOptions.path,
+      maxAge: cookieOptions.maxAge * 1000,
+    });
+
+    return { csrfToken: token };
   }
 
   @Post('register')
