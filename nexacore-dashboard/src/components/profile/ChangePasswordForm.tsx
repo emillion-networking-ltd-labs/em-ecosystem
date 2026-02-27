@@ -19,8 +19,7 @@ export default function ChangePasswordForm() {
     if (newPassword.length >= 8) score++;
     if (/[A-Z]/.test(newPassword)) score++;
     if (/[0-9]/.test(newPassword)) score++;
-    if (/[^A-Za-z0-9]/.test(newPassword)) score++;
-    const labels = ['', 'Weak', 'Fair', 'Good', 'Strong'];
+    const labels = ['', 'Weak', 'Fair', 'Strong'];
     return { level: score, label: labels[score] };
   })();
 
@@ -77,7 +76,7 @@ export default function ChangePasswordForm() {
           {newPassword && (
             <div className="mt-2 flex items-center gap-2">
               <div className="flex flex-1 gap-1">
-                {[1, 2, 3, 4].map((i) => (
+                {[1, 2, 3].map((i) => (
                   <div
                     key={i}
                     className={`h-1 flex-1 rounded-full transition-colors ${

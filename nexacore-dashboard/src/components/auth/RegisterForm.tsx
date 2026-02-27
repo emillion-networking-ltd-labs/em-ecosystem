@@ -3,17 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { RulerDimensionLine, Hash, Asterisk, CaseUpper, CaseLower, Check, AlertTriangle } from 'lucide-react';
+import { RulerDimensionLine, Hash, CaseUpper, CaseLower, Check, AlertTriangle } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import OAuthButtons from './OAuthButtons';
 import { useAuth } from '@/hooks/useAuth';
 
-/* Password requirements — Figma: Password Check component, 5 criteria icons */
+/* Password requirements — Figma: Password Check component, 4 criteria icons */
 const PASSWORD_REQUIREMENTS = [
   { key: 'long',    Icon: RulerDimensionLine, test: (p: string) => p.length >= 8 },
   { key: 'number',  Icon: Hash,               test: (p: string) => /\d/.test(p) },
-  { key: 'special', Icon: Asterisk,           test: (p: string) => /[^a-zA-Z0-9]/.test(p) },
   { key: 'upper',   Icon: CaseUpper,          test: (p: string) => /[A-Z]/.test(p) },
   { key: 'lower',   Icon: CaseLower,          test: (p: string) => /[a-z]/.test(p) },
 ] as const;
