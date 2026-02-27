@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
+// Server returns qrCodeDataUrl as a pre-rendered PNG data URL — display directly via <img>
 import { Shield, ShieldCheck, ShieldOff, Copy, Check, RefreshCw, AlertTriangle } from 'lucide-react';
 import { apiClient } from '@/lib/api';
 import { useAuth } from '@/hooks/useAuth';
@@ -195,7 +195,7 @@ export default function MfaSetup() {
           {/* QR Code */}
           <div className="flex justify-center">
             <div className="rounded-xl border border-border-default bg-white p-4">
-              <QRCodeSVG value={setupData.qrCodeDataUrl} size={200} />
+              <img src={setupData.qrCodeDataUrl} alt="MFA QR Code" width={200} height={200} />
             </div>
           </div>
 
