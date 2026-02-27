@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { apiClient, API_BASE_URL } from '@/lib/api';
 import { getCsrfToken, clearCsrfToken } from '@/lib/csrf';
-import type { SafeUser, AuthResponse, LoginResponse, RateLimitInfo } from '@/lib/types';
+import type { SafeUser, AuthResponse, LoginResponse, RateLimitInfo, MessageResponse } from '@/lib/types';
 
 /* ===== State ===== */
 
@@ -93,10 +93,13 @@ type AuthContextType = AuthState & {
   login: (email: string, password: string) => Promise<void>;
   verifyMfaLogin: (code: string, isRecoveryCode?: boolean) => Promise<void>;
   cancelMfa: () => void;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string) => Promise<boolean>;
   handleOAuthCallback: (code: string) => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
+  forgotPassword: (email: string) => Promise<boolean>;
+  resetPassword: (token: string, newPassword: string) => Promise<boolean>;
+  resendVerification: () => Promise<boolean>;
   clearError: () => void;
 };
 
@@ -194,7 +197,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const register = useCallback(async (email: string, password: string) => {
+  const register = useCallback(async (email: string, password: string): Promise<boolean> => {
     dispatch({ type: 'AUTH_START' });
     try {
       const data = await apiClient.post<AuthResponse>('/auth/register', { email, password });
@@ -203,6 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         type: 'AUTH_SUCCESS',
         payload: { user: data.user, accessToken: data.accessToken },
       });
+      return true;
     } catch (err: unknown) {
       const errObj = err as ApiError;
       if (errObj?.error?.retryAfter) {
@@ -219,6 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           payload: extractErrorMessage(err, 'Registration failed. Please try again.'),
         });
       }
+      return false;
     }
   }, []);
 
@@ -283,6 +288,48 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'LOGOUT' });
   }, []);
 
+  const forgotPassword = useCallback(async (email: string): Promise<boolean> => {
+    dispatch({ type: 'AUTH_START' });
+    try {
+      await apiClient.post<MessageResponse>('/auth/forgot-password', { email });
+      return true;
+    } catch (err: unknown) {
+      dispatch({
+        type: 'AUTH_ERROR',
+        payload: extractErrorMessage(err, 'Failed to send reset email. Please try again.'),
+      });
+      return false;
+    }
+  }, []);
+
+  const resetPassword = useCallback(async (token: string, newPassword: string): Promise<boolean> => {
+    dispatch({ type: 'AUTH_START' });
+    try {
+      await apiClient.post<MessageResponse>('/auth/reset-password', { token, newPassword });
+      return true;
+    } catch (err: unknown) {
+      dispatch({
+        type: 'AUTH_ERROR',
+        payload: extractErrorMessage(err, 'Password reset failed. Please try again.'),
+      });
+      return false;
+    }
+  }, []);
+
+  const resendVerification = useCallback(async (): Promise<boolean> => {
+    dispatch({ type: 'AUTH_START' });
+    try {
+      await apiClient.post<MessageResponse>('/auth/resend-verification', {});
+      return true;
+    } catch (err: unknown) {
+      dispatch({
+        type: 'AUTH_ERROR',
+        payload: extractErrorMessage(err, 'Failed to resend verification email.'),
+      });
+      return false;
+    }
+  }, []);
+
   const clearError = useCallback(() => {
     dispatch({ type: 'CLEAR_ERROR' });
   }, []);
@@ -299,6 +346,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         handleOAuthCallback,
         logout,
         refreshSession,
+        forgotPassword,
+        resetPassword,
+        resendVerification,
         clearError,
       }}
     >

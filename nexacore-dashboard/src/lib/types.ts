@@ -89,6 +89,19 @@ export type ChangePasswordDto = {
   newPassword: string;
 };
 
+export type ForgotPasswordDto = {
+  email: string;
+};
+
+export type ResetPasswordDto = {
+  token: string;
+  newPassword: string;
+};
+
+export type MessageResponse = {
+  message: string;
+};
+
 export type AdminUpdateUserDto = {
   role?: UserRole;
   isActive?: boolean;
