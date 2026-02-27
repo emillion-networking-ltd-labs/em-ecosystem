@@ -8,6 +8,7 @@ import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import OAuthButtons from './OAuthButtons';
+import MfaTotpStep from './MfaTotpStep';
 import { useAuth } from '@/hooks/useAuth';
 
 type LoginStep = 'email' | 'password';
@@ -20,7 +21,7 @@ export default function LoginForm() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [oauthError, setOauthError] = useState<string | null>(null);
-  const { login, isLoading, isAuthenticated, error, clearError, rateLimitInfo } = useAuth();
+  const { login, isLoading, isAuthenticated, error, clearError, rateLimitInfo, mfaRequired } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -66,6 +67,10 @@ export default function LoginForm() {
     await login(formData.email, formData.password);
     // On AUTH_SUCCESS → isAuthenticated → useEffect redirects to /dashboard
   };
+
+  if (mfaRequired) {
+    return <MfaTotpStep />;
+  }
 
   if (step === 'password') {
     return (

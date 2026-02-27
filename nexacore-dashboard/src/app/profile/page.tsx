@@ -5,6 +5,7 @@ import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import ProfileForm from '@/components/profile/ProfileForm';
 import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
 import AccountInfo from '@/components/profile/AccountInfo';
+import MfaSetup from '@/components/profile/MfaSetup';
 import ConnectedAccounts from '@/components/profile/ConnectedAccounts';
 import ActiveSessions from '@/components/profile/ActiveSessions';
 
@@ -16,6 +17,7 @@ export default function ProfilePage() {
         <div className="max-w-2xl space-y-6">
           <ProfileForm />
           <ChangePasswordForm />
+          <MfaSetup />
           <AccountInfo />
           <ConnectedAccounts />
           <ActiveSessions />

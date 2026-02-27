@@ -14,6 +14,7 @@ export type SafeUser = {
   failedAttempts: number;
   lockedUntil: string | null;
   lockoutCount: number;
+  mfaEnabled: boolean;
   createdAt: string;
   updatedAt: string;
 };
@@ -21,6 +22,21 @@ export type SafeUser = {
 export type AuthResponse = {
   user: SafeUser;
   accessToken: string;
+};
+
+export type LoginResponse =
+  | AuthResponse
+  | { mfaRequired: true; mfaToken: string };
+
+export type MfaSetupResponse = {
+  secret: string;
+  qrCodeDataUrl: string;
+  recoveryCodes: string[];
+};
+
+export type MfaStatusResponse = {
+  mfaEnabled: boolean;
+  recoveryCodesRemaining: number;
 };
 
 export type SessionResponse = {

@@ -10,7 +10,7 @@ import {
 } from 'react';
 import { apiClient, API_BASE_URL } from '@/lib/api';
 import { getCsrfToken, clearCsrfToken } from '@/lib/csrf';
-import type { SafeUser, AuthResponse, RateLimitInfo } from '@/lib/types';
+import type { SafeUser, AuthResponse, LoginResponse, RateLimitInfo } from '@/lib/types';
 
 /* ===== State ===== */
 
@@ -21,6 +21,8 @@ type AuthState = {
   isInitialized: boolean;
   error: string | null;
   rateLimitInfo: RateLimitInfo;
+  mfaRequired: boolean;
+  mfaToken: string | null;
 };
 
 type AuthAction =
@@ -28,6 +30,7 @@ type AuthAction =
   | { type: 'AUTH_SUCCESS'; payload: { user: SafeUser; accessToken: string } }
   | { type: 'AUTH_ERROR'; payload: string }
   | { type: 'RATE_LIMITED'; payload: { retryAfter: number; message: string } }
+  | { type: 'MFA_REQUIRED'; payload: { mfaToken: string } }
   | { type: 'LOGOUT' }
   | { type: 'CLEAR_ERROR' };
 
@@ -49,9 +52,11 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         isInitialized: true,
         error: null,
         rateLimitInfo: DEFAULT_RATE_LIMIT,
+        mfaRequired: false,
+        mfaToken: null,
       };
     case 'AUTH_ERROR':
-      return { ...state, isLoading: false, isInitialized: true, error: action.payload };
+      return { ...state, isLoading: false, isInitialized: true, error: action.payload, mfaRequired: false, mfaToken: null };
     case 'RATE_LIMITED':
       return {
         ...state,
@@ -64,8 +69,16 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
           message: action.payload.message,
         },
       };
+    case 'MFA_REQUIRED':
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        mfaRequired: true,
+        mfaToken: action.payload.mfaToken,
+      };
     case 'LOGOUT':
-      return { user: null, accessToken: null, isLoading: false, isInitialized: true, error: null, rateLimitInfo: DEFAULT_RATE_LIMIT };
+      return { user: null, accessToken: null, isLoading: false, isInitialized: true, error: null, rateLimitInfo: DEFAULT_RATE_LIMIT, mfaRequired: false, mfaToken: null };
     case 'CLEAR_ERROR':
       return { ...state, error: null, rateLimitInfo: DEFAULT_RATE_LIMIT };
     default:
@@ -78,6 +91,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 type AuthContextType = AuthState & {
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  verifyMfaLogin: (code: string, isRecoveryCode?: boolean) => Promise<void>;
+  cancelMfa: () => void;
   register: (email: string, password: string) => Promise<void>;
   handleOAuthCallback: (code: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -100,6 +115,12 @@ function extractErrorMessage(err: unknown, fallback: string): string {
 
 /* ===== Provider ===== */
 
+function isMfaResponse(
+  data: LoginResponse,
+): data is { mfaRequired: true; mfaToken: string } {
+  return 'mfaRequired' in data && data.mfaRequired === true;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
@@ -108,6 +129,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isInitialized: false,
     error: null,
     rateLimitInfo: DEFAULT_RATE_LIMIT,
+    mfaRequired: false,
+    mfaToken: null,
   });
 
   const refreshSession = useCallback(async () => {
@@ -140,7 +163,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string) => {
     dispatch({ type: 'AUTH_START' });
     try {
-      const data = await apiClient.post<AuthResponse>('/auth/login', { email, password });
+      const data = await apiClient.post<LoginResponse>('/auth/login', { email, password });
+
+      if (isMfaResponse(data)) {
+        dispatch({ type: 'MFA_REQUIRED', payload: { mfaToken: data.mfaToken } });
+        return;
+      }
+
       apiClient.setAccessToken(data.accessToken);
       dispatch({
         type: 'AUTH_SUCCESS',
@@ -227,6 +256,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const verifyMfaLogin = useCallback(async (code: string, isRecoveryCode = false) => {
+    dispatch({ type: 'AUTH_START' });
+    try {
+      const body: Record<string, string> = { mfaToken: state.mfaToken! };
+      if (isRecoveryCode) {
+        body.recoveryCode = code;
+      } else {
+        body.code = code;
+      }
+      const data = await apiClient.post<AuthResponse>('/auth/mfa/verify-login', body);
+      apiClient.setAccessToken(data.accessToken);
+      dispatch({
+        type: 'AUTH_SUCCESS',
+        payload: { user: data.user, accessToken: data.accessToken },
+      });
+    } catch (err: unknown) {
+      dispatch({
+        type: 'AUTH_ERROR',
+        payload: extractErrorMessage(err, 'MFA verification failed. Please try again.'),
+      });
+    }
+  }, [state.mfaToken]);
+
+  const cancelMfa = useCallback(() => {
+    dispatch({ type: 'LOGOUT' });
+  }, []);
+
   const clearError = useCallback(() => {
     dispatch({ type: 'CLEAR_ERROR' });
   }, []);
@@ -237,6 +293,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         ...state,
         isAuthenticated: !!state.user && !!state.accessToken,
         login,
+        verifyMfaLogin,
+        cancelMfa,
         register,
         handleOAuthCallback,
         logout,
