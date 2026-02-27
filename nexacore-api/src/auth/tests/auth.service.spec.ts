@@ -15,6 +15,8 @@ import { User } from '../../users/entities/user.entity';
 import { OAuthProfile } from '../../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from '../stores/oauth-code.store';
 import { AuditService } from '../../audit/audit.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { MailService } from '../../mail/mail.service';
 
 jest.mock('bcrypt');
 
@@ -35,7 +37,7 @@ describe('AuthService', () => {
     role: Role.USER,
     provider: Provider.LOCAL,
     providerId: null,
-    emailVerified: false,
+    emailVerified: true,
     isActive: true,
     failedAttempts: 0,
     lockedUntil: null,
@@ -111,6 +113,35 @@ describe('AuthService', () => {
           provide: AuditService,
           useValue: {
             log: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: PrismaService,
+          useValue: {
+            emailVerificationToken: {
+              findUnique: jest.fn(),
+              findFirst: jest.fn(),
+              create: jest.fn(),
+              update: jest.fn(),
+            },
+            passwordResetToken: {
+              findUnique: jest.fn(),
+              findFirst: jest.fn(),
+              create: jest.fn(),
+              update: jest.fn(),
+              updateMany: jest.fn(),
+            },
+            user: {
+              update: jest.fn(),
+            },
+            $transaction: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: MailService,
+          useValue: {
+            sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+            sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -251,6 +282,34 @@ describe('AuthService', () => {
         await expect(
           authService.login(loginDto, requestMeta),
         ).rejects.toThrow(ForbiddenException);
+      });
+
+      it('should throw ForbiddenException when LOCAL user email is not verified', async () => {
+        usersService.findByEmail.mockResolvedValue({
+          ...mockUser,
+          emailVerified: false,
+          provider: Provider.LOCAL,
+        });
+        (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+        await expect(
+          authService.login(loginDto, requestMeta),
+        ).rejects.toThrow(ForbiddenException);
+      });
+
+      it('should allow login for OAuth user with unverified email', async () => {
+        usersService.findByEmail.mockResolvedValue({
+          ...mockUser,
+          emailVerified: false,
+          provider: Provider.GOOGLE,
+        });
+        (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+        jwtService.sign.mockReturnValue('token');
+        sessionsService.createSession.mockResolvedValue(mockSession);
+        sessionsService.updateSessionHash.mockResolvedValue(undefined);
+
+        const result = await authService.login(loginDto, requestMeta);
+        expect(result).toHaveProperty('accessToken');
       });
 
       it('should reset lockout when lock has expired', async () => {

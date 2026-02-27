@@ -5,6 +5,7 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
   UseGuards,
@@ -18,6 +19,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
@@ -29,6 +31,8 @@ import { AUTH_RATE_LIMITS } from './constants/auth.constants';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
@@ -251,6 +255,85 @@ export class AuthController {
   getMe(@Request() req: { user: SafeUser }) {
     return req.user;
   }
+
+  // ── Email Verification Endpoints ──
+
+  @Get('verify-email')
+  @ApiOperation({ summary: 'Verify email address via token from email link' })
+  @ApiQuery({
+    name: 'token',
+    required: true,
+    description: 'Verification token',
+  })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend with status' })
+  async verifyEmail(
+    @Query('token') token: string,
+    @Res() res: Response,
+  ) {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+    if (!token) {
+      return res.redirect(`${frontendUrl}/verify-email?status=invalid`);
+    }
+
+    const result = await this.authService.verifyEmail(token);
+    return res.redirect(`${frontendUrl}/verify-email?status=${result.status}`);
+  }
+
+  @Post('resend-verification')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Resend email verification link' })
+  @ApiResponse({ status: 200, description: 'Verification email sent' })
+  @ApiResponse({
+    status: 400,
+    description: 'Email already verified or rate limited',
+  })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async resendVerification(@Request() req: any) {
+    await this.authService.resendVerificationEmail(req.user.id);
+    return { message: 'Verification email sent' };
+  }
+
+  // ── Password Reset Endpoints ──
+
+  @Post('forgot-password')
+  @HttpCode(HttpStatus.OK)
+  @SkipCsrf()
+  @Throttle({
+    global: { ttl: 900000, limit: 3 },
+  })
+  @ApiOperation({ summary: 'Request password reset email' })
+  @ApiResponse({
+    status: 200,
+    description: 'Reset email sent (if account exists)',
+  })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
+  async forgotPassword(@Body() dto: ForgotPasswordDto) {
+    await this.authService.forgotPassword(dto);
+    return { message: 'If an account exists, a reset email has been sent' };
+  }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @SkipCsrf()
+  @ApiOperation({ summary: 'Reset password using token from email' })
+  @ApiResponse({ status: 200, description: 'Password reset successfully' })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid or expired token, or validation error',
+  })
+  async resetPassword(
+    @Body() dto: ResetPasswordDto,
+    @Request() req: any,
+  ) {
+    const meta = this.extractRequestMeta(req);
+    await this.authService.resetPassword(dto, meta);
+    return { message: 'Password reset successfully' };
+  }
+
+  // ── Admin Endpoints ──
 
   @Get('admin')
   @UseGuards(JwtAuthGuard, RolesGuard)

@@ -15,6 +15,7 @@ import { UsersModule } from '../users/users.module';
 import { AuditModule } from '../audit/audit.module';
 import { SessionsModule } from '../sessions/sessions.module';
 import { CryptoModule } from '../common/services/crypto.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { CryptoModule } from '../common/services/crypto.module';
     AuditModule,
     SessionsModule,
     CryptoModule,
+    MailModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret:

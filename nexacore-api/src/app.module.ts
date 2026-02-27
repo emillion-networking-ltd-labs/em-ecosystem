@@ -8,6 +8,7 @@ import { CustomThrottlerGuard } from './common/guards/custom-throttler.guard';
 import { GLOBAL_RATE_LIMIT } from './auth/constants/auth.constants';
 import { AuditModule } from './audit/audit.module';
 import { SecurityModule } from './security/security.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { SecurityModule } from './security/security.module';
     UsersModule,
     AuditModule,
     SecurityModule,
+    MailModule,
   ],
   controllers: [],
   providers: [

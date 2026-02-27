@@ -3,15 +3,22 @@ import {
   ConflictException,
   UnauthorizedException,
   ForbiddenException,
+  BadRequestException,
+  Logger,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
 import { SessionsService } from '../sessions/sessions.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 import { User, SafeUser, toSafeUser } from '../users/entities/user.entity';
+import { Provider } from '../users/enums/provider.enum';
 import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
@@ -26,6 +33,10 @@ import {
   DUMMY_PASSWORD_HASH,
   getLockoutDurationMinutes,
 } from './constants/auth.constants';
+
+const VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
+const RESET_TOKEN_EXPIRY_HOURS = 1;
+const RESEND_COOLDOWN_SECONDS = 60;
 
 /** Parse a duration string like '7d' or '15m' into milliseconds */
 function parseDurationMs(duration: string): number {
@@ -72,6 +83,7 @@ export interface MfaChallengeResult {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
   private readonly refreshExpiration: string;
   private readonly refreshMaxAgeMs: number;
 
@@ -81,6 +93,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly oauthCodeStore: OAuthCodeStore,
     private readonly auditService: AuditService,
+    private readonly prisma: PrismaService,
+    private readonly mailService: MailService,
   ) {
     this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '7d';
     this.refreshMaxAgeMs = parseDurationMs(this.refreshExpiration);
@@ -102,6 +116,9 @@ export class AuthService {
       email: dto.email,
       passwordHash,
     });
+
+    // Send verification email (non-blocking — does not fail registration)
+    this.createAndSendVerificationEmail(user).catch(() => {});
 
     const { accessToken, refreshToken } = await this.generateTokens(
       user,
@@ -240,6 +257,22 @@ export class AuthService {
         .catch(() => {});
 
       throw new UnauthorizedException('Invalid credentials');
+    }
+
+    // Email verification check — LOCAL accounts must verify before login
+    if (user.provider === Provider.LOCAL && !user.emailVerified) {
+      this.auditService
+        .log({
+          action: AuditAction.LOGIN_FAILURE,
+          userId: user.id,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+          metadata: { reason: 'email_not_verified' },
+        })
+        .catch(() => {});
+      throw new ForbiddenException(
+        'Please verify your email address before signing in. Check your inbox for the verification link.',
+      );
     }
 
     if (user.failedAttempts > 0) {
@@ -502,6 +535,208 @@ export class AuthService {
     await this.sessionsService.updateSessionHash(session.id, refreshTokenHash);
 
     return { accessToken, refreshToken, sessionId: session.id };
+  }
+
+  // ── Email Verification ──
+
+  async verifyEmail(token: string): Promise<{ status: 'success' | 'invalid' }> {
+    const tokenHash = this.hashToken(token);
+
+    const verificationToken =
+      await this.prisma.emailVerificationToken.findUnique({
+        where: { tokenHash },
+        include: { user: true },
+      });
+
+    if (!verificationToken) {
+      return { status: 'invalid' };
+    }
+
+    if (verificationToken.usedAt) {
+      // Already used — still success if user is verified
+      if (verificationToken.user.emailVerified) {
+        return { status: 'success' };
+      }
+      return { status: 'invalid' };
+    }
+
+    if (verificationToken.expiresAt < new Date()) {
+      return { status: 'invalid' };
+    }
+
+    // Mark token as used and user as verified
+    await this.prisma.$transaction([
+      this.prisma.emailVerificationToken.update({
+        where: { id: verificationToken.id },
+        data: { usedAt: new Date() },
+      }),
+      this.prisma.user.update({
+        where: { id: verificationToken.userId },
+        data: { emailVerified: true },
+      }),
+    ]);
+
+    return { status: 'success' };
+  }
+
+  async resendVerificationEmail(userId: string): Promise<void> {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+
+    if (user.emailVerified) {
+      throw new BadRequestException('Email already verified');
+    }
+
+    // Rate limiting: check last token creation time
+    const lastToken = await this.prisma.emailVerificationToken.findFirst({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (lastToken) {
+      const secondsSinceLastToken =
+        (Date.now() - lastToken.createdAt.getTime()) / 1000;
+      if (secondsSinceLastToken < RESEND_COOLDOWN_SECONDS) {
+        throw new BadRequestException(
+          'Please wait before requesting another email',
+        );
+      }
+    }
+
+    await this.createAndSendVerificationEmail(user);
+  }
+
+  // ── Password Reset ──
+
+  async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
+    const user = await this.usersService.findByEmail(dto.email);
+
+    // Always return success to prevent email enumeration
+    if (!user) {
+      this.logger.log(
+        `Forgot password requested for non-existent email: ${dto.email}`,
+      );
+      return;
+    }
+
+    // OAuth-only accounts cannot reset password
+    if (!user.passwordHash && user.provider !== 'LOCAL') {
+      this.logger.log(
+        `Forgot password requested for OAuth account: ${dto.email}`,
+      );
+      return;
+    }
+
+    // Invalidate all existing unused reset tokens for this user
+    await this.prisma.passwordResetToken.updateMany({
+      where: {
+        userId: user.id,
+        usedAt: null,
+      },
+      data: { usedAt: new Date() },
+    });
+
+    // Generate new reset token
+    const plainToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = this.hashToken(plainToken);
+    const expiresAt = new Date(
+      Date.now() + RESET_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000,
+    );
+
+    await this.prisma.passwordResetToken.create({
+      data: {
+        tokenHash,
+        userId: user.id,
+        expiresAt,
+      },
+    });
+
+    await this.mailService.sendPasswordResetEmail(
+      user.email,
+      plainToken,
+      user.firstName,
+    );
+  }
+
+  async resetPassword(
+    dto: ResetPasswordDto,
+    ctx?: RequestContext,
+  ): Promise<void> {
+    const tokenHash = this.hashToken(dto.token);
+
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+      include: { user: true },
+    });
+
+    if (!resetToken) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    if (resetToken.usedAt) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    if (resetToken.expiresAt < new Date()) {
+      throw new BadRequestException('Invalid or expired reset token');
+    }
+
+    const newPasswordHash = await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS);
+
+    // Mark token as used and update password
+    await this.prisma.$transaction([
+      this.prisma.passwordResetToken.update({
+        where: { id: resetToken.id },
+        data: { usedAt: new Date() },
+      }),
+      this.prisma.user.update({
+        where: { id: resetToken.userId },
+        data: { passwordHash: newPasswordHash },
+      }),
+    ]);
+
+    // Revoke all sessions (forces re-authentication)
+    await this.sessionsService.revokeAllUserSessions(resetToken.userId);
+
+    this.auditService
+      .log({
+        action: AuditAction.PASSWORD_CHANGE,
+        userId: resetToken.userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: { method: 'reset_token' },
+      })
+      .catch(() => {});
+  }
+
+  // ── Private helpers: email tokens ──
+
+  private async createAndSendVerificationEmail(user: User): Promise<void> {
+    const plainToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = this.hashToken(plainToken);
+    const expiresAt = new Date(
+      Date.now() + VERIFICATION_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000,
+    );
+
+    await this.prisma.emailVerificationToken.create({
+      data: {
+        tokenHash,
+        userId: user.id,
+        expiresAt,
+      },
+    });
+
+    await this.mailService.sendVerificationEmail(
+      user.email,
+      plainToken,
+      user.firstName,
+    );
+  }
+
+  private hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 
   buildRefreshCookie(refreshToken: string): CookieConfig {

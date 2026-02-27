@@ -57,9 +57,11 @@ model User {
   createdAt        DateTime  @default(now())
   updatedAt        DateTime  @updatedAt
 
-  sessions        Session[]
-  auditLogs       AuditLog[] @relation("AuditLogUser")
-  auditLogsTarget AuditLog[] @relation("AuditLogTarget")
+  sessions                 Session[]
+  auditLogs                AuditLog[]                @relation("AuditLogUser")
+  auditLogsTarget          AuditLog[]                @relation("AuditLogTarget")
+  emailVerificationTokens  EmailVerificationToken[]  @relation("UserEmailVerificationTokens")
+  passwordResetTokens      PasswordResetToken[]      @relation("UserPasswordResetTokens")
 
   @@map("users")
 }
@@ -102,4 +104,30 @@ model AuditLog {
   @@index([targetUserId])
   @@index([createdAt])
   @@map("audit_logs")
+}
+
+model EmailVerificationToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation("UserEmailVerificationTokens", fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("email_verification_tokens")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid())
+  tokenHash String    @unique
+  userId    String
+  user      User      @relation("UserPasswordResetTokens", fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([userId])
+  @@map("password_reset_tokens")
 }
