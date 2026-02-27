@@ -5,6 +5,7 @@ import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 import { SessionsService } from '../../sessions/sessions.service';
 import { AuditService } from '../../audit/audit.service';
+import { PermissionsService } from '../../permissions/permissions.service';
 import { OAuthCodeStore } from '../stores/oauth-code.store';
 import { Role } from '../../users/enums/role.enum';
 import { Provider } from '../../users/enums/provider.enum';
@@ -98,6 +99,14 @@ describe('OAuth Exchange Flow (Integration)', () => {
           provide: AuditService,
           useValue: {
             log: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: PermissionsService,
+          useValue: {
+            getPermissionKeysForRole: jest
+              .fn()
+              .mockResolvedValue(['dashboard:read']),
           },
         },
       ],

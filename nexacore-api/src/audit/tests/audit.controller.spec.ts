@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { NotFoundException } from '@nestjs/common';
 import { AuditLogController } from '../audit.controller';
 import { AuditService } from '../audit.service';
+import { PermissionsService } from '../../permissions/permissions.service';
 import { AuditAction } from '../enums/audit-action.enum';
 
 describe('AuditLogController', () => {
@@ -20,6 +21,12 @@ describe('AuditLogController', () => {
             findAll: jest.fn(),
             findById: jest.fn(),
             log: jest.fn(),
+          },
+        },
+        {
+          provide: PermissionsService,
+          useValue: {
+            roleHasAllPermissions: jest.fn().mockResolvedValue(true),
           },
         },
       ],

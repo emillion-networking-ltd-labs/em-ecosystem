@@ -173,4 +173,64 @@ describe('HttpExceptionFilter', () => {
     const callArg = mockJson.mock.calls[0][0];
     expect(callArg.error).not.toHaveProperty('details');
   });
+
+  it('should short-circuit when response already has custom format (success=false + error)', () => {
+    const customBody = {
+      success: false,
+      error: { message: 'Rate limit exceeded', code: 'RATE_LIMIT_EXCEEDED' },
+    };
+    const exception = new HttpException(customBody, 429);
+
+    filter.catch(exception, mockHost);
+
+    expect(mockStatus).toHaveBeenCalledWith(429);
+    expect(mockJson).toHaveBeenCalledWith(customBody);
+  });
+
+  it('should include retryAfter when present in exception response', () => {
+    const exception = new HttpException(
+      {
+        message: 'Account locked',
+        retryAfter: 300,
+        lockoutLevel: 2,
+      },
+      HttpStatus.FORBIDDEN,
+    );
+
+    filter.catch(exception, mockHost);
+
+    expect(mockStatus).toHaveBeenCalledWith(403);
+    const callArg = mockJson.mock.calls[0][0];
+    expect(callArg.error.retryAfter).toBe(300);
+    expect(callArg.error.lockoutLevel).toBe(2);
+  });
+
+  it('should not include retryAfter/lockoutLevel when not present', () => {
+    const exception = new HttpException(
+      { message: 'Forbidden' },
+      HttpStatus.FORBIDDEN,
+    );
+
+    filter.catch(exception, mockHost);
+
+    const callArg = mockJson.mock.calls[0][0];
+    expect(callArg.error).not.toHaveProperty('retryAfter');
+    expect(callArg.error).not.toHaveProperty('lockoutLevel');
+  });
+
+  it('should return UNKNOWN_ERROR code for unrecognized status codes', () => {
+    const exception = new HttpException('Teapot', 418);
+
+    filter.catch(exception, mockHost);
+
+    expect(mockStatus).toHaveBeenCalledWith(418);
+    expect(mockJson).toHaveBeenCalledWith({
+      success: false,
+      error: {
+        message: 'Teapot',
+        code: 'UNKNOWN_ERROR',
+        statusCode: 418,
+      },
+    });
+  });
 });

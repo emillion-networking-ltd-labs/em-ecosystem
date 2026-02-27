@@ -9,6 +9,8 @@ import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
 import { SessionsService } from '../../sessions/sessions.service';
 import { AuditService } from '../../audit/audit.service';
+import { PermissionsService } from '../../permissions/permissions.service';
+import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { Role } from '../../users/enums/role.enum';
 import { Provider } from '../../users/enums/provider.enum';
 
@@ -16,6 +18,7 @@ describe('AuthController', () => {
   let controller: AuthController;
   let authService: jest.Mocked<AuthService>;
   let sessionsService: jest.Mocked<SessionsService>;
+  let jwtSvc: jest.Mocked<JwtService>;
 
   const mockCookie = {
     name: 'refresh_token',
@@ -86,6 +89,10 @@ describe('AuthController', () => {
               .mockReturnValue('ephemeral-code-uuid'),
             exchangeOAuthCode: jest.fn(),
             buildClearCookie: jest.fn().mockReturnValue(mockClearCookie),
+            verifyEmail: jest.fn(),
+            resendVerificationEmail: jest.fn(),
+            forgotPassword: jest.fn(),
+            resetPassword: jest.fn(),
           },
         },
         {
@@ -108,12 +115,21 @@ describe('AuthController', () => {
             log: jest.fn().mockResolvedValue(undefined),
           },
         },
+        {
+          provide: PermissionsService,
+          useValue: {
+            getPermissionKeysForRole: jest
+              .fn()
+              .mockResolvedValue(['dashboard:read']),
+          },
+        },
       ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get(AuthService);
     sessionsService = module.get(SessionsService);
+    jwtSvc = module.get(JwtService);
   });
 
   const mockReq = {
@@ -318,12 +334,15 @@ describe('AuthController', () => {
   });
 
   describe('getMe', () => {
-    it('should return the user from the request', () => {
+    it('should return the user with permissions from the request', async () => {
       const req = { user: mockAuthResult.user };
 
-      const result = controller.getMe(req);
+      const result = await controller.getMe(req);
 
-      expect(result).toBe(mockAuthResult.user);
+      expect(result).toEqual({
+        ...mockAuthResult.user,
+        permissions: ['dashboard:read'],
+      });
     });
   });
 
@@ -403,6 +422,162 @@ describe('AuthController', () => {
           mockRes as any,
         ),
       ).toThrow(UnauthorizedException);
+    });
+  });
+
+  // ─── LOGIN MFA BRANCH ──────────────────────────────────────
+
+  describe('login - MFA challenge branch', () => {
+    it('should return MFA challenge without setting cookie', async () => {
+      const mfaResult = { mfaRequired: true as const, mfaToken: 'mfa-jwt' };
+      authService.login.mockResolvedValue(mfaResult);
+
+      const result = await controller.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        mockReq,
+        mockRes as any,
+      );
+
+      expect(result).toEqual(mfaResult);
+      expect(mockRes.cookie).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── GET /auth/csrf-token ──────────────────────────────────
+
+  describe('getCsrfToken', () => {
+    it('should set CSRF cookie and return token', () => {
+      jest.spyOn(CsrfGuard, 'generateToken').mockReturnValue('csrf-token-123');
+
+      const result = controller.getCsrfToken(mockRes as any);
+
+      expect(result).toEqual({ csrfToken: 'csrf-token-123' });
+      expect(mockRes.cookie).toHaveBeenCalled();
+    });
+  });
+
+  // ─── GET /auth/verify-email ────────────────────────────────
+
+  describe('verifyEmail', () => {
+    it('should redirect with success status on valid token', async () => {
+      authService.verifyEmail.mockResolvedValue({ status: 'success' });
+      const res = { redirect: jest.fn() };
+
+      await controller.verifyEmail('valid-token', res as any);
+
+      expect(authService.verifyEmail).toHaveBeenCalledWith('valid-token');
+      expect(res.redirect).toHaveBeenCalledWith(
+        expect.stringContaining('status=success'),
+      );
+    });
+
+    it('should redirect with invalid status on missing token', async () => {
+      const res = { redirect: jest.fn() };
+
+      await controller.verifyEmail('', res as any);
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        expect.stringContaining('status=invalid'),
+      );
+    });
+
+    it('should redirect with invalid status on bad token', async () => {
+      authService.verifyEmail.mockResolvedValue({ status: 'invalid' });
+      const res = { redirect: jest.fn() };
+
+      await controller.verifyEmail('bad-token', res as any);
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        expect.stringContaining('status=invalid'),
+      );
+    });
+  });
+
+  // ─── POST /auth/resend-verification ────────────────────────
+
+  describe('resendVerification', () => {
+    it('should delegate to authService and return success message', async () => {
+      authService.resendVerificationEmail.mockResolvedValue(undefined);
+      const reqWithUser = { ...mockReq, user: { id: 'uuid-123' } };
+
+      const result = await controller.resendVerification(reqWithUser);
+
+      expect(authService.resendVerificationEmail).toHaveBeenCalledWith(
+        'uuid-123',
+      );
+      expect(result).toEqual({ message: 'Verification email sent' });
+    });
+  });
+
+  // ─── POST /auth/forgot-password ───────────────────────────
+
+  describe('forgotPassword', () => {
+    it('should delegate to authService and return success message', async () => {
+      authService.forgotPassword.mockResolvedValue(undefined);
+      const dto = { email: 'test@example.com' };
+
+      const result = await controller.forgotPassword(dto);
+
+      expect(authService.forgotPassword).toHaveBeenCalledWith(dto);
+      expect(result).toEqual({
+        message: 'If an account exists, a reset email has been sent',
+      });
+    });
+  });
+
+  // ─── POST /auth/reset-password ─────────────────────────────
+
+  describe('resetPassword', () => {
+    it('should delegate to authService and return success message', async () => {
+      authService.resetPassword.mockResolvedValue(undefined);
+      const dto = { token: 'reset-token', newPassword: 'NewPass1!' };
+
+      const result = await controller.resetPassword(dto, mockReq);
+
+      expect(authService.resetPassword).toHaveBeenCalledWith(
+        dto,
+        expect.objectContaining({ ipAddress: '127.0.0.1' }),
+      );
+      expect(result).toEqual({ message: 'Password reset successfully' });
+    });
+  });
+
+  // ─── googleAuth / githubAuth (empty body handlers) ─────────
+
+  describe('googleAuth', () => {
+    it('should be defined (guard handles redirect)', () => {
+      expect(controller.googleAuth()).toBeUndefined();
+    });
+  });
+
+  describe('githubAuth', () => {
+    it('should be defined (guard handles redirect)', () => {
+      expect(controller.githubAuth()).toBeUndefined();
+    });
+  });
+
+  // ─── getSessions with current session ID ───────────────────
+
+  describe('getSessions - with refresh token cookie', () => {
+    it('should extract current session ID from cookie', async () => {
+      jwtSvc.verify.mockReturnValue({
+        sub: 'uuid-123',
+        sessionId: 'current-sess',
+        family: 'fam-1',
+      });
+      sessionsService.getActiveSessions.mockResolvedValue([]);
+      const reqWithCookieAndUser = {
+        ...mockReq,
+        cookies: { refresh_token: 'some-jwt' },
+        user: { id: 'uuid-123' },
+      };
+
+      await controller.getSessions(reqWithCookieAndUser);
+
+      expect(sessionsService.getActiveSessions).toHaveBeenCalledWith(
+        'uuid-123',
+        'current-sess',
+      );
     });
   });
 });
