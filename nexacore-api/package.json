@@ -111,6 +111,8 @@
         "statements": 90
       }
     },
-    "testEnvironment": "node"
+    "testEnvironment": "node",
+    "workerIdleMemoryLimit": "512MB",
+    "maxWorkers": "50%"
   }
 }
