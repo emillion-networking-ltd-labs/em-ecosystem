@@ -13,16 +13,6 @@ export default function ChangePasswordForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
 
-  const passwordStrength = (() => {
-    if (!newPassword) return { level: 0, label: '' };
-    let score = 0;
-    if (newPassword.length >= 8) score++;
-    if (/[A-Z]/.test(newPassword)) score++;
-    if (/[0-9]/.test(newPassword)) score++;
-    const labels = ['', 'Weak', 'Fair', 'Strong'];
-    return { level: score, label: labels[score] };
-  })();
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -74,25 +64,9 @@ export default function ChangePasswordForm() {
             placeholder="Enter new password"
           />
           {newPassword && (
-            <div className="mt-2 flex items-center gap-2">
-              <div className="flex flex-1 gap-1">
-                {[1, 2, 3].map((i) => (
-                  <div
-                    key={i}
-                    className={`h-1 flex-1 rounded-full transition-colors ${
-                      i <= passwordStrength.level
-                        ? passwordStrength.level <= 1
-                          ? 'bg-error'
-                          : passwordStrength.level <= 2
-                            ? 'bg-warning'
-                            : 'bg-success'
-                        : 'bg-surface-subtle'
-                    }`}
-                  />
-                ))}
-              </div>
-              <span className="text-caption text-content-tertiary">{passwordStrength.label}</span>
-            </div>
+            <p className={`mt-1 text-xs ${newPassword.length >= 8 ? 'text-success' : 'text-error'}`}>
+              {newPassword.length >= 8 ? 'Minimum length met' : 'Minimum 8 characters required'}
+            </p>
           )}
         </div>
 

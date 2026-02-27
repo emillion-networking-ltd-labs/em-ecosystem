@@ -3,16 +3,14 @@
 import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { RulerDimensionLine, Hash, CaseUpper, CaseLower, Check, AlertTriangle } from 'lucide-react';
+import { RulerDimensionLine, Check, AlertTriangle } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import { useAuth } from '@/hooks/useAuth';
 
+/* Password requirement — minimum 8 characters */
 const PASSWORD_REQUIREMENTS = [
-  { key: 'long',    Icon: RulerDimensionLine, test: (p: string) => p.length >= 8 },
-  { key: 'number',  Icon: Hash,               test: (p: string) => /\d/.test(p) },
-  { key: 'upper',   Icon: CaseUpper,          test: (p: string) => /[A-Z]/.test(p) },
-  { key: 'lower',   Icon: CaseLower,          test: (p: string) => /[a-z]/.test(p) },
+  { key: 'long', Icon: RulerDimensionLine, test: (p: string) => p.length >= 8 },
 ] as const;
 
 export default function ResetPasswordForm() {
