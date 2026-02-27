@@ -9,6 +9,7 @@ import { GLOBAL_RATE_LIMIT } from './auth/constants/auth.constants';
 import { AuditModule } from './audit/audit.module';
 import { SecurityModule } from './security/security.module';
 import { MailModule } from './mail/mail.module';
+import { PermissionsModule } from './permissions/permissions.module';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { MailModule } from './mail/mail.module';
     AuditModule,
     SecurityModule,
     MailModule,
+    PermissionsModule,
   ],
   controllers: [],
   providers: [

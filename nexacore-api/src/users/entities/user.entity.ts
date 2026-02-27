@@ -25,6 +25,10 @@ export interface User {
 
 export type SafeUser = Omit<User, 'passwordHash' | 'mfaSecret' | 'mfaRecoveryCodes'>;
 
+export type SafeUserWithPermissions = SafeUser & {
+  permissions: string[];
+};
+
 export function toSafeUser(user: User): SafeUser {
   const safeUser: SafeUser = {
     id: user.id,

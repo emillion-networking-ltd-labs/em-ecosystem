@@ -43,6 +43,7 @@ import { CsrfGuard } from '../common/guards/csrf.guard';
 import { SecurityConfig } from '../security/security.config';
 import { Role } from '../users/enums/role.enum';
 import { SafeUser } from '../users/entities/user.entity';
+import { PermissionsService } from '../permissions/permissions.service';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -51,6 +52,7 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly sessionsService: SessionsService,
     private readonly jwtService: JwtService,
+    private readonly permissionsService: PermissionsService,
   ) {}
 
   private extractRequestMeta(req: any): {
@@ -250,10 +252,12 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current authenticated user profile' })
-  @ApiResponse({ status: 200, description: 'Returns user profile' })
+  @ApiResponse({ status: 200, description: 'Returns user profile with permissions' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  getMe(@Request() req: { user: SafeUser }) {
-    return req.user;
+  async getMe(@Request() req: { user: SafeUser }) {
+    const permissions =
+      await this.permissionsService.getPermissionKeysForRole(req.user.role);
+    return { ...req.user, permissions };
   }
 
   // ── Email Verification Endpoints ──

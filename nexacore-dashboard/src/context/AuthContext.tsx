@@ -174,9 +174,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       apiClient.setAccessToken(data.accessToken);
+      const user = await apiClient.get<SafeUser>('/auth/me');
       dispatch({
         type: 'AUTH_SUCCESS',
-        payload: { user: data.user, accessToken: data.accessToken },
+        payload: { user, accessToken: data.accessToken },
       });
     } catch (err: unknown) {
       const errObj = err as ApiError;
@@ -202,9 +203,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       const data = await apiClient.post<AuthResponse>('/auth/register', { email, password });
       apiClient.setAccessToken(data.accessToken);
+      const user = await apiClient.get<SafeUser>('/auth/me');
       dispatch({
         type: 'AUTH_SUCCESS',
-        payload: { user: data.user, accessToken: data.accessToken },
+        payload: { user, accessToken: data.accessToken },
       });
       return true;
     } catch (err: unknown) {
@@ -234,9 +236,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         code,
       });
       apiClient.setAccessToken(data.accessToken);
+      const user = await apiClient.get<SafeUser>('/auth/me');
       dispatch({
         type: 'AUTH_SUCCESS',
-        payload: { user: data.user, accessToken: data.accessToken },
+        payload: { user, accessToken: data.accessToken },
       });
     } catch (err: unknown) {
       dispatch({
@@ -272,9 +275,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       const data = await apiClient.post<AuthResponse>('/auth/mfa/verify-login', body);
       apiClient.setAccessToken(data.accessToken);
+      const user = await apiClient.get<SafeUser>('/auth/me');
       dispatch({
         type: 'AUTH_SUCCESS',
-        payload: { user: data.user, accessToken: data.accessToken },
+        payload: { user, accessToken: data.accessToken },
       });
     } catch (err: unknown) {
       dispatch({

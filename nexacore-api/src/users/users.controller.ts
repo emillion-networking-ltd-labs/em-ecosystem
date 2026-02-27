@@ -14,7 +14,9 @@ import {
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
+import { PermissionsGuard } from '../auth/guards/permissions.guard';
 import { Roles } from '../common/decorators/roles.decorator';
+import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { Role } from './enums/role.enum';
 import { toSafeUser } from './entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -59,15 +61,17 @@ export class UsersController {
   // ── Admin endpoints ──
 
   @Get()
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.ADMIN)
+  @RequirePermissions('users:read')
   async listUsers(@Query() query: ListUsersQueryDto) {
     return this.usersService.findAll(query);
   }
 
   @Get(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.ADMIN)
+  @RequirePermissions('users:read')
   async getUser(@Param('id') id: string) {
     const user = await this.usersService.findById(id);
     if (!user) {
@@ -77,8 +81,9 @@ export class UsersController {
   }
 
   @Patch(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.ADMIN)
+  @RequirePermissions('users:write')
   async adminUpdateUser(
     @Param('id') id: string,
     @Body() dto: AdminUpdateUserDto,
@@ -96,8 +101,9 @@ export class UsersController {
   }
 
   @Delete(':id')
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.ADMIN)
+  @RequirePermissions('users:delete')
   @HttpCode(HttpStatus.OK)
   async deleteUser(
     @Param('id') id: string,

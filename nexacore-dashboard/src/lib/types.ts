@@ -15,6 +15,7 @@ export type SafeUser = {
   lockedUntil: string | null;
   lockoutCount: number;
   mfaEnabled: boolean;
+  permissions?: string[];
   createdAt: string;
   updatedAt: string;
 };
@@ -130,6 +131,24 @@ export type AuditLogUser = {
   firstName: string | null;
   lastName: string | null;
   role: UserRole;
+};
+
+// Permission types (SCRUM-30)
+export type Permission = {
+  id: string;
+  key: string;
+  description: string;
+  resource: string;
+  action: string;
+};
+
+export type RolePermissionsResponse = {
+  role: UserRole;
+  permissions: Permission[];
+};
+
+export type SetRolePermissionsDto = {
+  permissionKeys: string[];
 };
 
 export type AuditLog = {
