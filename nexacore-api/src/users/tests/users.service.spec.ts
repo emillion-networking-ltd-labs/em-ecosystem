@@ -559,6 +559,21 @@ describe('UsersService', () => {
       expect(updateData).not.toHaveProperty('lastName');
       expect(updateData).not.toHaveProperty('avatarUrl');
     });
+
+    it('should not throw when audit log rejects (fire-and-forget)', async () => {
+      auditService.log.mockRejectedValue(new Error('audit fail'));
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      const result = await usersService.updateProfile(
+        'uuid-123',
+        { firstName: 'Jane' },
+        { ipAddress: '10.0.0.1', userAgent: 'test-agent' },
+      );
+
+      await new Promise(process.nextTick);
+
+      expect(result).toBeDefined();
+    });
   });
 
   // ─── changePassword ────────────────────────────────────────────
@@ -631,6 +646,21 @@ describe('UsersService', () => {
         ipAddress: '10.0.0.1',
         userAgent: 'test-agent',
       });
+    });
+
+    it('should not throw when audit log rejects (fire-and-forget)', async () => {
+      auditService.log.mockRejectedValue(new Error('audit fail'));
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hashed-password');
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      await usersService.changePassword('uuid-123', changeDto, {
+        ipAddress: '10.0.0.1',
+        userAgent: 'test-agent',
+      });
+
+      await new Promise(process.nextTick);
     });
   });
 
@@ -750,6 +780,39 @@ describe('UsersService', () => {
         }),
       );
     });
+
+    it('should not throw when role-change audit log rejects (fire-and-forget)', async () => {
+      auditService.log.mockRejectedValue(new Error('audit fail'));
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, role: Role.ADMIN });
+
+      const result = await usersService.adminUpdateUser(
+        'uuid-123',
+        { role: Role.ADMIN },
+        actingSuperadmin,
+      );
+
+      await new Promise(process.nextTick);
+
+      expect(result).toBeDefined();
+    });
+
+    it('should not throw when activation audit log rejects (fire-and-forget)', async () => {
+      auditService.log.mockRejectedValue(new Error('audit fail'));
+      const inactiveUser = { ...mockUser, isActive: false };
+      prisma.user.findUnique.mockResolvedValue(inactiveUser);
+      prisma.user.update.mockResolvedValue({ ...inactiveUser, isActive: true });
+
+      const result = await usersService.adminUpdateUser(
+        'uuid-123',
+        { isActive: true },
+        actingSuperadmin,
+      );
+
+      await new Promise(process.nextTick);
+
+      expect(result).toBeDefined();
+    });
   });
 
   // ─── softDelete ────────────────────────────────────────────────
@@ -795,6 +858,19 @@ describe('UsersService', () => {
           metadata: { email: 'test@example.com' },
         }),
       );
+    });
+
+    it('should not throw when audit log rejects (fire-and-forget)', async () => {
+      auditService.log.mockRejectedValue(new Error('audit fail'));
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, isActive: false });
+
+      await usersService.softDelete('uuid-123', 'admin-1', {
+        ipAddress: '10.0.0.1',
+        userAgent: 'test-agent',
+      });
+
+      await new Promise(process.nextTick);
     });
   });
 
