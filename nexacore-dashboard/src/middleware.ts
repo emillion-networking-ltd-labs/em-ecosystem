@@ -4,14 +4,23 @@ export function middleware(request: NextRequest) {
   const nonce = generateNonce();
 
   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+  const isDev = process.env.NODE_ENV === 'development';
+
+  // In dev mode, webpack uses eval() for module loading and ws: for HMR
+  const scriptSrc = isDev
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval'`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`;
+  const connectSrc = isDev
+    ? `connect-src 'self' ${apiUrl} ws://localhost:3001`
+    : `connect-src 'self' ${apiUrl}`;
 
   const cspDirectives = [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`,
+    scriptSrc,
     `style-src 'self' 'unsafe-inline'`,
     `img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com`,
     `font-src 'self'`,
-    `connect-src 'self' ${apiUrl}`,
+    connectSrc,
     `frame-src 'none'`,
     `frame-ancestors 'none'`,
     `object-src 'none'`,
