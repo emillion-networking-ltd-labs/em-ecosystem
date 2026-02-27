@@ -30,6 +30,12 @@ import { MailModule } from '../mail/mail.module';
         process.env.JWT_SECRET || 'default-dev-secret-change-in-production',
       signOptions: {
         expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as StringValue,
+        issuer: 'nexacore-api',
+        audience: 'nexacore-api',
+      },
+      verifyOptions: {
+        issuer: 'nexacore-api',
+        audience: 'nexacore-api',
       },
     }),
   ],

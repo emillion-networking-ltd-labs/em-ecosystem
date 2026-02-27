@@ -7,7 +7,10 @@ describe('OAuth Guards — getAuthenticateOptions', () => {
 
   beforeEach(() => {
     stateStore = {
-      generate: jest.fn().mockReturnValue('random-state-value'),
+      generate: jest.fn().mockReturnValue({
+        state: 'random-state-value',
+        codeChallenge: 'mock-code-challenge',
+      }),
       validate: jest.fn(),
     };
   });
@@ -31,7 +34,11 @@ describe('OAuth Guards — getAuthenticateOptions', () => {
 
       const options = guard.getAuthenticateOptions(context);
 
-      expect(options).toEqual({ state: 'random-state-value' });
+      expect(options).toEqual({
+        state: 'random-state-value',
+        code_challenge: 'mock-code-challenge',
+        code_challenge_method: 'S256',
+      });
       expect(stateStore.generate).toHaveBeenCalled();
     });
 
@@ -57,7 +64,11 @@ describe('OAuth Guards — getAuthenticateOptions', () => {
 
       const options = guard.getAuthenticateOptions(context);
 
-      expect(options).toEqual({ state: 'random-state-value' });
+      expect(options).toEqual({
+        state: 'random-state-value',
+        code_challenge: 'mock-code-challenge',
+        code_challenge_method: 'S256',
+      });
       expect(stateStore.generate).toHaveBeenCalled();
     });
 

@@ -27,7 +27,7 @@ export const SecurityConfig = {
     headerName: 'x-csrf-token',
     tokenLength: 32,
     cookieOptions: {
-      httpOnly: true,
+      httpOnly: false,
       sameSite: 'strict' as const,
       secure: process.env.NODE_ENV === 'production',
       path: '/',

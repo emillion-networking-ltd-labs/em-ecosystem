@@ -13,6 +13,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       ignoreExpiration: false,
       secretOrKey:
         process.env.JWT_SECRET || 'default-dev-secret-change-in-production',
+      issuer: 'nexacore-api',
+      audience: 'nexacore-api',
     });
   }
 

@@ -2,6 +2,7 @@ import {
   Injectable,
   OnModuleInit,
   BadRequestException,
+  ForbiddenException,
   Logger,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -120,10 +121,21 @@ export class PermissionsService implements OnModuleInit {
     };
   }
 
-  async setPermissionsForRole(role: Role, keys: string[]): Promise<void> {
+  async setPermissionsForRole(
+    role: Role,
+    keys: string[],
+    actingUserRole?: Role,
+  ): Promise<void> {
     if (role === Role.SUPERADMIN) {
       throw new BadRequestException(
         'Cannot modify SUPERADMIN permissions — SUPERADMIN bypasses all checks',
+      );
+    }
+
+    // Prevent ADMIN from escalating their own role's permissions
+    if (actingUserRole === Role.ADMIN && role === Role.ADMIN) {
+      throw new ForbiddenException(
+        'ADMIN cannot modify permissions for the ADMIN role — requires SUPERADMIN',
       );
     }
 

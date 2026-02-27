@@ -106,7 +106,11 @@ describe('MfaController', () => {
 
       const result = await controller.verifySetup(mockReq, { token: '123456' });
 
-      expect(mfaService.verifySetup).toHaveBeenCalledWith('uuid-123', '123456');
+      expect(mfaService.verifySetup).toHaveBeenCalledWith(
+        'uuid-123',
+        '123456',
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      );
       expect(result).toEqual({ message: 'MFA enabled successfully' });
     });
   });
@@ -187,7 +191,11 @@ describe('MfaController', () => {
 
       const result = await controller.disable(mockReq, { password: 'MyPass1!' });
 
-      expect(mfaService.disableMfa).toHaveBeenCalledWith('uuid-123', 'MyPass1!');
+      expect(mfaService.disableMfa).toHaveBeenCalledWith(
+        'uuid-123',
+        'MyPass1!',
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      );
       expect(result).toEqual({ message: 'MFA disabled successfully' });
     });
   });

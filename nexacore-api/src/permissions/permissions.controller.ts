@@ -5,6 +5,7 @@ import {
   Param,
   Body,
   UseGuards,
+  Request,
   BadRequestException,
 } from '@nestjs/common';
 import {
@@ -74,10 +75,12 @@ export class PermissionsController {
   async setForRole(
     @Param('role') role: string,
     @Body() dto: SetRolePermissionsDto,
+    @Request() req: any,
   ) {
     await this.permissionsService.setPermissionsForRole(
       this.parseRole(role),
       dto.permissionKeys,
+      req.user.role,
     );
     return { message: 'Permissions updated successfully' };
   }

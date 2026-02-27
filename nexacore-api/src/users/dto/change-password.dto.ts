@@ -15,8 +15,5 @@ export class ChangePasswordDto {
   @Matches(/(?=.*\d)/, {
     message: 'Password must contain at least one number',
   })
-  @Matches(/(?=.*[@$!%*?&])/, {
-    message: 'Password must include a special character (@$!%*?&)',
-  })
   newPassword: string;
 }

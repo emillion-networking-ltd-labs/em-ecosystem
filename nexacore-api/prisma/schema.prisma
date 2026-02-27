@@ -34,6 +34,8 @@ enum AuditAction {
   USER_ACTIVATED
   USER_DELETED
   SUPERADMIN_BYPASS
+  MFA_ENABLED
+  MFA_DISABLED
 }
 
 model User {

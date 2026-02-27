@@ -13,6 +13,7 @@ import {
   Res,
   Redirect,
   UnauthorizedException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -241,7 +242,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Session revoked' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async revokeSession(
-    @Param('id') sessionId: string,
+    @Param('id', ParseUUIDPipe) sessionId: string,
     @Request() req: any,
   ) {
     await this.sessionsService.revokeSession(sessionId, req.user.id);
@@ -322,6 +323,7 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
+  @Throttle({ default: { ttl: 60_000, limit: 5 } })
   @ApiOperation({ summary: 'Reset password using token from email' })
   @ApiResponse({ status: 200, description: 'Password reset successfully' })
   @ApiResponse({

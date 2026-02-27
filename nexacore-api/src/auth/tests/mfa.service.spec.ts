@@ -73,10 +73,15 @@ describe('MfaService', () => {
       verify: jest.fn().mockReturnValue({ sub: 'user-1', type: 'mfa-challenge' }),
     };
 
+    const auditService = {
+      log: jest.fn().mockResolvedValue(undefined),
+    };
+
     service = new MfaService(
       usersService as unknown as UsersService,
       cryptoService as unknown as CryptoService,
       jwtService as unknown as JwtService,
+      auditService as any,
     );
   });
 

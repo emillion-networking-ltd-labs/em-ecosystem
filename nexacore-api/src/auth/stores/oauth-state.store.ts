@@ -1,34 +1,52 @@
 import { Injectable } from '@nestjs/common';
-import { randomUUID } from 'crypto';
+import { randomUUID, randomBytes, createHash } from 'crypto';
 
 const STATE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+interface StateEntry {
+  timestamp: number;
+  codeVerifier: string;
+}
+
 @Injectable()
 export class OAuthStateStore {
-  private readonly states = new Map<string, number>();
+  private readonly states = new Map<string, StateEntry>();
 
-  generate(): string {
+  generate(): { state: string; codeChallenge: string } {
     this.cleanup();
     const state = randomUUID();
-    this.states.set(state, Date.now());
-    return state;
+    const codeVerifier = randomBytes(32).toString('base64url');
+    const codeChallenge = createHash('sha256')
+      .update(codeVerifier)
+      .digest('base64url');
+    this.states.set(state, { timestamp: Date.now(), codeVerifier });
+    return { state, codeChallenge };
   }
 
+  /** Peek at the code_verifier without consuming the entry. */
+  getCodeVerifier(state: string): string | undefined {
+    const entry = this.states.get(state);
+    if (!entry) return undefined;
+    if (Date.now() - entry.timestamp > STATE_TTL_MS) return undefined;
+    return entry.codeVerifier;
+  }
+
+  /** Consume and validate the state entry (single-use). */
   validate(state: string): boolean {
-    const timestamp = this.states.get(state);
-    if (!timestamp) return false;
+    const entry = this.states.get(state);
+    if (!entry) return false;
 
     this.states.delete(state); // single-use
 
-    if (Date.now() - timestamp > STATE_TTL_MS) return false;
+    if (Date.now() - entry.timestamp > STATE_TTL_MS) return false;
 
     return true;
   }
 
   cleanup(): void {
     const now = Date.now();
-    for (const [state, timestamp] of this.states) {
-      if (now - timestamp > STATE_TTL_MS) {
+    for (const [state, entry] of this.states) {
+      if (now - entry.timestamp > STATE_TTL_MS) {
         this.states.delete(state);
       }
     }

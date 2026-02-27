@@ -110,14 +110,17 @@ describe('PermissionsController', () => {
     it('should update permissions and return success', async () => {
       service.setPermissionsForRole.mockResolvedValue(undefined);
 
+      const mockReq = { user: { role: Role.ADMIN } } as any;
       const result = await controller.setForRole('USER', {
         permissionKeys: ['dashboard:read'],
-      });
+      }, mockReq);
 
       expect(result).toEqual({ message: 'Permissions updated successfully' });
-      expect(service.setPermissionsForRole).toHaveBeenCalledWith(Role.USER, [
-        'dashboard:read',
-      ]);
+      expect(service.setPermissionsForRole).toHaveBeenCalledWith(
+        Role.USER,
+        ['dashboard:read'],
+        Role.ADMIN,
+      );
     });
 
     it('should propagate BadRequestException for invalid keys', async () => {
@@ -125,8 +128,9 @@ describe('PermissionsController', () => {
         new BadRequestException('Invalid permission keys: bad:key'),
       );
 
+      const mockReq = { user: { role: Role.ADMIN } } as any;
       await expect(
-        controller.setForRole('USER', { permissionKeys: ['bad:key'] }),
+        controller.setForRole('USER', { permissionKeys: ['bad:key'] }, mockReq),
       ).rejects.toThrow(BadRequestException);
     });
   });

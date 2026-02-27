@@ -22,6 +22,39 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     });
   }
 
+  // Forward PKCE code_challenge to the authorization URL
+  authorizationParams(options: Record<string, string>): Record<string, string> {
+    const params: Record<string, string> = {};
+    if (options.code_challenge) {
+      params.code_challenge = options.code_challenge;
+      params.code_challenge_method = options.code_challenge_method || 'S256';
+    }
+    return params;
+  }
+
+  // Inject code_verifier into the token exchange on callback
+  authenticate(req: any, options?: any): void {
+    if (req.query?.code && req.query?.state) {
+      const codeVerifier = this.oauthStateStore.getCodeVerifier(
+        req.query.state,
+      );
+      if (codeVerifier) {
+        const oauth2 = (this as any)._oauth2;
+        const originalFn = oauth2.getOAuthAccessToken;
+        oauth2.getOAuthAccessToken = function (
+          code: string,
+          params: Record<string, string>,
+          callback: (...args: any[]) => void,
+        ) {
+          params.code_verifier = codeVerifier;
+          oauth2.getOAuthAccessToken = originalFn; // restore immediately
+          return originalFn.call(oauth2, code, params, callback);
+        };
+      }
+    }
+    return (super.authenticate as Function).call(this, req, options);
+  }
+
   async validate(
     req: {
       query: { state?: string };

@@ -62,10 +62,11 @@ export class MfaController {
   @ApiResponse({ status: 200, description: 'MFA enabled successfully' })
   @ApiResponse({ status: 400, description: 'Invalid verification code' })
   async verifySetup(
-    @Request() req: { user: SafeUser },
+    @Request() req: any,
     @Body() dto: MfaVerifySetupDto,
   ) {
-    await this.mfaService.verifySetup(req.user.id, dto.token);
+    const meta = this.extractRequestMeta(req);
+    await this.mfaService.verifySetup(req.user.id, dto.token, meta);
     return { message: 'MFA enabled successfully' };
   }
 
@@ -102,10 +103,11 @@ export class MfaController {
   @ApiResponse({ status: 400, description: 'MFA is not enabled' })
   @ApiResponse({ status: 401, description: 'Invalid password' })
   async disable(
-    @Request() req: { user: SafeUser },
+    @Request() req: any,
     @Body() dto: MfaDisableDto,
   ) {
-    await this.mfaService.disableMfa(req.user.id, dto.password);
+    const meta = this.extractRequestMeta(req);
+    await this.mfaService.disableMfa(req.user.id, dto.password, meta);
     return { message: 'MFA disabled successfully' };
   }
 

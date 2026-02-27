@@ -10,6 +10,7 @@ import {
   Request,
   HttpCode,
   HttpStatus,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -72,7 +73,7 @@ export class UsersController {
   @UseGuards(JwtAuthGuard, RolesGuard, PermissionsGuard)
   @Roles(Role.ADMIN)
   @RequirePermissions('users:read')
-  async getUser(@Param('id') id: string) {
+  async getUser(@Param('id', ParseUUIDPipe) id: string) {
     const user = await this.usersService.findById(id);
     if (!user) {
       return { error: 'User not found' };
@@ -85,7 +86,7 @@ export class UsersController {
   @Roles(Role.ADMIN)
   @RequirePermissions('users:write')
   async adminUpdateUser(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: AdminUpdateUserDto,
     @Request()
     req: {
@@ -106,7 +107,7 @@ export class UsersController {
   @RequirePermissions('users:delete')
   @HttpCode(HttpStatus.OK)
   async deleteUser(
-    @Param('id') id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Request()
     req: {
       user: { id: string };

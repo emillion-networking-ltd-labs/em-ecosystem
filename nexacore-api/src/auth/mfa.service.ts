@@ -10,6 +10,8 @@ import { generateSecret, generateURI, verify as otpVerify } from 'otplib';
 import * as QRCode from 'qrcode';
 import * as bcrypt from 'bcrypt';
 import { CryptoService } from '../common/services/crypto.service';
+import { AuditService } from '../audit/audit.service';
+import { AuditAction } from '../audit/enums/audit-action.enum';
 import { UsersService } from '../users/users.service';
 import { User } from '../users/entities/user.entity';
 import type { StringValue } from 'ms';
@@ -27,6 +29,7 @@ export class MfaService {
     private readonly usersService: UsersService,
     private readonly cryptoService: CryptoService,
     private readonly jwtService: JwtService,
+    private readonly auditService: AuditService,
   ) {
     this.appName = process.env.MFA_APP_NAME || 'EM NexaCore';
   }
@@ -70,7 +73,11 @@ export class MfaService {
     return { secret, qrCodeDataUrl, recoveryCodes };
   }
 
-  async verifySetup(userId: string, token: string): Promise<void> {
+  async verifySetup(
+    userId: string,
+    token: string,
+    meta?: { ipAddress: string; userAgent: string | null },
+  ): Promise<void> {
     const user = await this.usersService.findById(userId);
     if (!user) {
       throw new UnauthorizedException('User not found');
@@ -93,6 +100,13 @@ export class MfaService {
     }
 
     await this.usersService.enableMfa(userId);
+
+    await this.auditService.log({
+      action: AuditAction.MFA_ENABLED,
+      userId,
+      ipAddress: meta?.ipAddress ?? null,
+      userAgent: meta?.userAgent ?? null,
+    });
   }
 
   generateMfaToken(user: User): string {
@@ -152,7 +166,11 @@ export class MfaService {
     return { user };
   }
 
-  async disableMfa(userId: string, password: string): Promise<void> {
+  async disableMfa(
+    userId: string,
+    password: string,
+    meta?: { ipAddress: string; userAgent: string | null },
+  ): Promise<void> {
     const user = await this.usersService.findById(userId);
     if (!user) {
       throw new UnauthorizedException('User not found');
@@ -174,6 +192,13 @@ export class MfaService {
     }
 
     await this.usersService.disableMfa(userId);
+
+    await this.auditService.log({
+      action: AuditAction.MFA_DISABLED,
+      userId,
+      ipAddress: meta?.ipAddress ?? null,
+      userAgent: meta?.userAgent ?? null,
+    });
   }
 
   async regenerateRecoveryCodes(

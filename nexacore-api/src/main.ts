@@ -6,6 +6,7 @@ import cookieParser from 'cookie-parser';
 import { AppModule } from './app.module';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { registerHelmetMiddleware } from './common/middleware/helmet.middleware';
+import { registerHttpsRedirectMiddleware } from './common/middleware/https-redirect.middleware';
 import { SecurityConfig } from './security/security.config';
 
 function validateProductionSecrets() {
@@ -30,6 +31,7 @@ async function bootstrap() {
 
   const app = await NestFactory.create(AppModule);
 
+  registerHttpsRedirectMiddleware(app);
   registerHelmetMiddleware(app);
 
   app.use(cookieParser());
