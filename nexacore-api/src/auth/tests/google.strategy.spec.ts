@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GoogleStrategy } from '../strategies/google.strategy';
 import { AuthService } from '../auth.service';
 import { OAuthStateStore } from '../stores/oauth-state.store';
+import { Strategy as PassportGoogleStrategy } from 'passport-google-oauth20';
 import { Provider } from '../../users/enums/provider.enum';
 import { Role } from '../../users/enums/role.enum';
 
@@ -64,6 +65,7 @@ describe('GoogleStrategy', () => {
           useValue: {
             generate: jest.fn(),
             validate: jest.fn(),
+            getCodeVerifier: jest.fn(),
           },
         },
       ],
@@ -188,6 +190,143 @@ describe('GoogleStrategy', () => {
         undefined,
       );
       expect(authService.validateOAuthUser).not.toHaveBeenCalled();
+    });
+
+    it('should call done with error when validateOAuthUser throws', async () => {
+      oauthStateStore.validate.mockReturnValue(true);
+      authService.validateOAuthUser.mockRejectedValue(
+        new Error('OAuth error'),
+      );
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'google-access-token',
+        'google-refresh-token',
+        { emails: [{ value: 'google@example.com' }], id: 'g-1' },
+        done,
+      );
+
+      expect(done).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'OAuth error' }),
+        undefined,
+      );
+    });
+  });
+
+  describe('authorizationParams', () => {
+    it('should return code_challenge params with S256 default when code_challenge is present', () => {
+      const result = strategy.authorizationParams({
+        code_challenge: 'abc123',
+      });
+      expect(result).toEqual({
+        code_challenge: 'abc123',
+        code_challenge_method: 'S256',
+      });
+    });
+
+    it('should use provided code_challenge_method instead of default', () => {
+      const result = strategy.authorizationParams({
+        code_challenge: 'abc123',
+        code_challenge_method: 'plain',
+      });
+      expect(result).toEqual({
+        code_challenge: 'abc123',
+        code_challenge_method: 'plain',
+      });
+    });
+
+    it('should return empty object when no code_challenge is present', () => {
+      const result = strategy.authorizationParams({});
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('authenticate', () => {
+    let superAuthSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      superAuthSpy = jest
+        .spyOn(PassportGoogleStrategy.prototype, 'authenticate')
+        .mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      superAuthSpy.mockRestore();
+    });
+
+    it('should monkey-patch _oauth2.getOAuthAccessToken when codeVerifier exists', () => {
+      const originalFn = jest.fn();
+      (strategy as any)._oauth2 = { getOAuthAccessToken: originalFn };
+      (oauthStateStore.getCodeVerifier as jest.Mock).mockReturnValue(
+        'test-verifier',
+      );
+
+      strategy.authenticate(
+        { query: { code: 'auth-code', state: 'test-state' } },
+        {},
+      );
+
+      expect(oauthStateStore.getCodeVerifier).toHaveBeenCalledWith(
+        'test-state',
+      );
+
+      // _oauth2.getOAuthAccessToken should now be the wrapper
+      const patchedFn = (strategy as any)._oauth2.getOAuthAccessToken;
+      expect(patchedFn).not.toBe(originalFn);
+
+      // Call the wrapper and verify it injects code_verifier
+      const params: Record<string, string> = {};
+      const callback = jest.fn();
+      patchedFn('auth-code', params, callback);
+
+      expect(params.code_verifier).toBe('test-verifier');
+      expect(originalFn).toHaveBeenCalledWith('auth-code', params, callback);
+
+      // Should have restored original function
+      expect((strategy as any)._oauth2.getOAuthAccessToken).toBe(originalFn);
+
+      expect(superAuthSpy).toHaveBeenCalled();
+    });
+
+    it('should not monkey-patch when no codeVerifier exists', () => {
+      const originalFn = jest.fn();
+      (strategy as any)._oauth2 = { getOAuthAccessToken: originalFn };
+      (oauthStateStore.getCodeVerifier as jest.Mock).mockReturnValue(undefined);
+
+      strategy.authenticate(
+        { query: { code: 'auth-code', state: 'test-state' } },
+        {},
+      );
+
+      expect((strategy as any)._oauth2.getOAuthAccessToken).toBe(originalFn);
+      expect(superAuthSpy).toHaveBeenCalled();
+    });
+
+    it('should skip PKCE entirely when no code in query', () => {
+      strategy.authenticate({ query: {} }, {});
+
+      expect(oauthStateStore.getCodeVerifier).not.toHaveBeenCalled();
+      expect(superAuthSpy).toHaveBeenCalled();
+    });
+
+    it('should restore original getOAuthAccessToken after single use', () => {
+      const originalFn = jest.fn();
+      (strategy as any)._oauth2 = { getOAuthAccessToken: originalFn };
+      (oauthStateStore.getCodeVerifier as jest.Mock).mockReturnValue(
+        'test-verifier',
+      );
+
+      strategy.authenticate(
+        { query: { code: 'auth-code', state: 'test-state' } },
+        {},
+      );
+
+      const patchedFn = (strategy as any)._oauth2.getOAuthAccessToken;
+      patchedFn('code', {}, jest.fn());
+
+      // After one call, original is restored
+      expect((strategy as any)._oauth2.getOAuthAccessToken).toBe(originalFn);
     });
   });
 });

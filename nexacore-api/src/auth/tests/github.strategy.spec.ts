@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GitHubStrategy } from '../strategies/github.strategy';
 import { AuthService } from '../auth.service';
 import { OAuthStateStore } from '../stores/oauth-state.store';
+import { Strategy as PassportGitHubStrategy } from 'passport-github2';
 import { Provider } from '../../users/enums/provider.enum';
 import { Role } from '../../users/enums/role.enum';
 
@@ -64,6 +65,7 @@ describe('GitHubStrategy', () => {
           useValue: {
             generate: jest.fn(),
             validate: jest.fn(),
+            getCodeVerifier: jest.fn(),
           },
         },
       ],
@@ -184,6 +186,220 @@ describe('GitHubStrategy', () => {
         }),
       );
       expect(authService.validateOAuthUser).not.toHaveBeenCalled();
+    });
+
+    it('should pass firstName and lastName as undefined when displayName is absent', async () => {
+      oauthStateStore.validate.mockReturnValue(true);
+      authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'github-access-token',
+        'github-refresh-token',
+        { emails: [{ value: 'github@example.com' }], id: 'gh-1' },
+        done,
+      );
+
+      expect(authService.validateOAuthUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: undefined,
+          lastName: undefined,
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
+      expect(done).toHaveBeenCalledWith(null, mockOAuthResult);
+    });
+
+    it('should parse single-word displayName as firstName only', async () => {
+      oauthStateStore.validate.mockReturnValue(true);
+      authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'github-access-token',
+        'github-refresh-token',
+        {
+          emails: [{ value: 'github@example.com' }],
+          id: 'gh-2',
+          displayName: 'Mononym',
+        },
+        done,
+      );
+
+      expect(authService.validateOAuthUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: 'Mononym',
+          lastName: undefined,
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
+    it('should parse multi-word displayName into firstName and lastName', async () => {
+      oauthStateStore.validate.mockReturnValue(true);
+      authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'github-access-token',
+        'github-refresh-token',
+        {
+          emails: [{ value: 'github@example.com' }],
+          id: 'gh-3',
+          displayName: 'John Van Doe',
+        },
+        done,
+      );
+
+      expect(authService.validateOAuthUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: 'John',
+          lastName: 'Van Doe',
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
+    it('should call done with error when validateOAuthUser throws', async () => {
+      oauthStateStore.validate.mockReturnValue(true);
+      authService.validateOAuthUser.mockRejectedValue(
+        new Error('OAuth error'),
+      );
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'github-access-token',
+        'github-refresh-token',
+        { emails: [{ value: 'github@example.com' }], id: 'gh-4' },
+        done,
+      );
+
+      expect(done).toHaveBeenCalledWith(
+        expect.objectContaining({ message: 'OAuth error' }),
+      );
+    });
+  });
+
+  describe('authorizationParams', () => {
+    it('should return code_challenge params with S256 default when code_challenge is present', () => {
+      const result = strategy.authorizationParams({
+        code_challenge: 'abc123',
+      });
+      expect(result).toEqual({
+        code_challenge: 'abc123',
+        code_challenge_method: 'S256',
+      });
+    });
+
+    it('should use provided code_challenge_method instead of default', () => {
+      const result = strategy.authorizationParams({
+        code_challenge: 'abc123',
+        code_challenge_method: 'plain',
+      });
+      expect(result).toEqual({
+        code_challenge: 'abc123',
+        code_challenge_method: 'plain',
+      });
+    });
+
+    it('should return empty object when no code_challenge is present', () => {
+      const result = strategy.authorizationParams({});
+      expect(result).toEqual({});
+    });
+  });
+
+  describe('authenticate', () => {
+    let superAuthSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      superAuthSpy = jest
+        .spyOn(PassportGitHubStrategy.prototype, 'authenticate')
+        .mockImplementation(() => {});
+    });
+
+    afterEach(() => {
+      superAuthSpy.mockRestore();
+    });
+
+    it('should monkey-patch _oauth2.getOAuthAccessToken when codeVerifier exists', () => {
+      const originalFn = jest.fn();
+      (strategy as any)._oauth2 = { getOAuthAccessToken: originalFn };
+      (oauthStateStore.getCodeVerifier as jest.Mock).mockReturnValue(
+        'test-verifier',
+      );
+
+      strategy.authenticate(
+        { query: { code: 'auth-code', state: 'test-state' } },
+        {},
+      );
+
+      expect(oauthStateStore.getCodeVerifier).toHaveBeenCalledWith(
+        'test-state',
+      );
+
+      // _oauth2.getOAuthAccessToken should now be the wrapper
+      const patchedFn = (strategy as any)._oauth2.getOAuthAccessToken;
+      expect(patchedFn).not.toBe(originalFn);
+
+      // Call the wrapper and verify it injects code_verifier
+      const params: Record<string, string> = {};
+      const callback = jest.fn();
+      patchedFn('auth-code', params, callback);
+
+      expect(params.code_verifier).toBe('test-verifier');
+      expect(originalFn).toHaveBeenCalledWith('auth-code', params, callback);
+
+      // Should have restored original function
+      expect((strategy as any)._oauth2.getOAuthAccessToken).toBe(originalFn);
+
+      expect(superAuthSpy).toHaveBeenCalled();
+    });
+
+    it('should not monkey-patch when no codeVerifier exists', () => {
+      const originalFn = jest.fn();
+      (strategy as any)._oauth2 = { getOAuthAccessToken: originalFn };
+      (oauthStateStore.getCodeVerifier as jest.Mock).mockReturnValue(undefined);
+
+      strategy.authenticate(
+        { query: { code: 'auth-code', state: 'test-state' } },
+        {},
+      );
+
+      expect((strategy as any)._oauth2.getOAuthAccessToken).toBe(originalFn);
+      expect(superAuthSpy).toHaveBeenCalled();
+    });
+
+    it('should skip PKCE entirely when no code in query', () => {
+      strategy.authenticate({ query: {} }, {});
+
+      expect(oauthStateStore.getCodeVerifier).not.toHaveBeenCalled();
+      expect(superAuthSpy).toHaveBeenCalled();
+    });
+
+    it('should restore original getOAuthAccessToken after single use', () => {
+      const originalFn = jest.fn();
+      (strategy as any)._oauth2 = { getOAuthAccessToken: originalFn };
+      (oauthStateStore.getCodeVerifier as jest.Mock).mockReturnValue(
+        'test-verifier',
+      );
+
+      strategy.authenticate(
+        { query: { code: 'auth-code', state: 'test-state' } },
+        {},
+      );
+
+      const patchedFn = (strategy as any)._oauth2.getOAuthAccessToken;
+      patchedFn('code', {}, jest.fn());
+
+      // After one call, original is restored
+      expect((strategy as any)._oauth2.getOAuthAccessToken).toBe(originalFn);
     });
   });
 });
