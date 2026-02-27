@@ -16,11 +16,14 @@ export interface User {
   failedAttempts: number;
   lockedUntil: Date | null;
   lockoutCount: number;
+  mfaEnabled: boolean;
+  mfaSecret: string | null;
+  mfaRecoveryCodes: string[];
   createdAt: Date;
   updatedAt: Date;
 }
 
-export type SafeUser = Omit<User, 'passwordHash'>;
+export type SafeUser = Omit<User, 'passwordHash' | 'mfaSecret' | 'mfaRecoveryCodes'>;
 
 export function toSafeUser(user: User): SafeUser {
   const safeUser: SafeUser = {
@@ -37,6 +40,7 @@ export function toSafeUser(user: User): SafeUser {
     failedAttempts: user.failedAttempts,
     lockedUntil: user.lockedUntil,
     lockoutCount: user.lockoutCount,
+    mfaEnabled: user.mfaEnabled,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

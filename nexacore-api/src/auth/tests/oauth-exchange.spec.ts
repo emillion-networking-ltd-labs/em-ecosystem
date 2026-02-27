@@ -40,6 +40,7 @@ describe('OAuth Exchange Flow (Integration)', () => {
     failedAttempts: 0,
     lockedUntil: null,
     lockoutCount: 0,
+    mfaEnabled: false,
     createdAt: new Date(),
     updatedAt: new Date(),
   };

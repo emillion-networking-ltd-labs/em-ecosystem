@@ -50,9 +50,12 @@ model User {
   isActive       Boolean   @default(true)
   failedAttempts Int       @default(0)
   lockedUntil    DateTime?
-  lockoutCount   Int       @default(0)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  lockoutCount     Int       @default(0)
+  mfaEnabled       Boolean   @default(false)
+  mfaSecret        String?
+  mfaRecoveryCodes String[]  @default([])
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt
 
   sessions        Session[]
   auditLogs       AuditLog[] @relation("AuditLogUser")

@@ -40,6 +40,9 @@ describe('AuthService', () => {
     failedAttempts: 0,
     lockedUntil: null,
     lockoutCount: 0,
+    mfaEnabled: false,
+    mfaSecret: null,
+    mfaRecoveryCodes: [],
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -422,6 +425,9 @@ describe('AuthService', () => {
       failedAttempts: 0,
       lockedUntil: null,
       lockoutCount: 0,
+      mfaEnabled: false,
+      mfaSecret: null,
+      mfaRecoveryCodes: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     };

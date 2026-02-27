@@ -59,10 +59,15 @@ export interface CookieConfig {
   };
 }
 
-interface AuthResult {
+export interface AuthResult {
   accessToken: string;
   user: SafeUser;
   cookie: CookieConfig;
+}
+
+export interface MfaChallengeResult {
+  mfaRequired: true;
+  mfaToken: string;
 }
 
 @Injectable()
@@ -124,7 +129,7 @@ export class AuthService {
     dto: LoginDto,
     requestMeta: { ipAddress: string; userAgent?: string | null },
     ctx?: RequestContext,
-  ): Promise<AuthResult> {
+  ): Promise<AuthResult | MfaChallengeResult> {
     const user = await this.usersService.findByEmail(dto.email);
 
     // Timing attack protection: constant-time response when user not found
@@ -239,6 +244,26 @@ export class AuthService {
 
     if (user.failedAttempts > 0) {
       await this.usersService.resetFailedAttempts(user.id);
+    }
+
+    // MFA check — return challenge token instead of full auth
+    if (user.mfaEnabled) {
+      const mfaToken = this.jwtService.sign(
+        { sub: user.id, type: 'mfa-challenge' },
+        { expiresIn: '5m' as StringValue },
+      );
+
+      this.auditService
+        .log({
+          action: AuditAction.LOGIN_SUCCESS,
+          userId: user.id,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+          metadata: { mfaChallengeIssued: true },
+        })
+        .catch(() => {});
+
+      return { mfaRequired: true, mfaToken };
     }
 
     const { accessToken, refreshToken } = await this.generateTokens(
@@ -420,6 +445,25 @@ export class AuthService {
       .catch(() => {});
 
     return this.buildClearCookie();
+  }
+
+  async generateTokensForMfa(
+    userId: string,
+    requestMeta: { ipAddress: string; userAgent?: string | null },
+  ): Promise<AuthResult> {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException('User not found');
+    }
+    const { accessToken, refreshToken } = await this.generateTokens(
+      user,
+      requestMeta,
+    );
+    return {
+      accessToken,
+      user: toSafeUser(user),
+      cookie: this.buildRefreshCookie(refreshToken),
+    };
   }
 
   private async generateTokens(

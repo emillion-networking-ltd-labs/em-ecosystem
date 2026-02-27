@@ -25,7 +25,9 @@ describe('JwtStrategy', () => {
     failedAttempts: 0,
     lockedUntil: null,
     lockoutCount: 0,
-    refreshToken: null,
+    mfaEnabled: false,
+    mfaSecret: null,
+    mfaRecoveryCodes: [],
     createdAt: new Date(),
     updatedAt: new Date(),
   };

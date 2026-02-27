@@ -386,4 +386,48 @@ export class UsersService {
       })
       .catch(() => {});
   }
+
+  // ── MFA data access methods (SCRUM-28) ──
+
+  async updateMfaSetupData(
+    userId: string,
+    encryptedSecret: string,
+    hashedRecoveryCodes: string[],
+  ): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        mfaSecret: encryptedSecret,
+        mfaRecoveryCodes: hashedRecoveryCodes,
+      },
+    });
+  }
+
+  async enableMfa(userId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { mfaEnabled: true },
+    });
+  }
+
+  async disableMfa(userId: string): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        mfaEnabled: false,
+        mfaSecret: null,
+        mfaRecoveryCodes: [],
+      },
+    });
+  }
+
+  async updateRecoveryCodes(
+    userId: string,
+    hashedCodes: string[],
+  ): Promise<void> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { mfaRecoveryCodes: hashedCodes },
+    });
+  }
 }

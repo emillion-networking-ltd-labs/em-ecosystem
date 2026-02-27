@@ -4,6 +4,8 @@ import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { MfaController } from './mfa.controller';
+import { MfaService } from './mfa.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GitHubStrategy } from './strategies/github.strategy';
@@ -12,12 +14,14 @@ import { OAuthCodeStore } from './stores/oauth-code.store';
 import { UsersModule } from '../users/users.module';
 import { AuditModule } from '../audit/audit.module';
 import { SessionsModule } from '../sessions/sessions.module';
+import { CryptoModule } from '../common/services/crypto.module';
 
 @Module({
   imports: [
     UsersModule,
     AuditModule,
     SessionsModule,
+    CryptoModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret:
@@ -27,9 +31,10 @@ import { SessionsModule } from '../sessions/sessions.module';
       },
     }),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, MfaController],
   providers: [
     AuthService,
+    MfaService,
     JwtStrategy,
     GoogleStrategy,
     GitHubStrategy,

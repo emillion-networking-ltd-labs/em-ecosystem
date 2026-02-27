@@ -22,7 +22,7 @@ import {
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { AuthService, CookieConfig } from './auth.service';
+import { AuthService, CookieConfig, MfaChallengeResult } from './auth.service';
 import { SessionsService } from '../sessions/sessions.service';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
 import { AUTH_RATE_LIMITS } from './constants/auth.constants';
@@ -138,6 +138,12 @@ export class AuthController {
   ) {
     const meta = this.extractRequestMeta(req);
     const result = await this.authService.login(loginDto, meta, meta);
+
+    // MFA challenge — don't set cookie, return challenge token
+    if ('mfaRequired' in result) {
+      return result as MfaChallengeResult;
+    }
+
     this.setCookie(res, result.cookie);
     return { accessToken: result.accessToken, user: result.user };
   }
