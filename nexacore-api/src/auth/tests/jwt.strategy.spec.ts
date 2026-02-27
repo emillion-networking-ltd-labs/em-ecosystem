@@ -78,5 +78,20 @@ describe('JwtStrategy', () => {
         }),
       ).rejects.toThrow(UnauthorizedException);
     });
+
+    it('should throw UnauthorizedException when user is deactivated', async () => {
+      usersService.findById.mockResolvedValue({
+        ...mockUser,
+        isActive: false,
+      });
+
+      await expect(
+        strategy.validate({
+          sub: 'uuid-123',
+          email: 'test@example.com',
+          role: Role.USER,
+        }),
+      ).rejects.toThrow(new UnauthorizedException('Account deactivated'));
+    });
   });
 });

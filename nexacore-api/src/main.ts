@@ -8,7 +8,26 @@ import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { registerHelmetMiddleware } from './common/middleware/helmet.middleware';
 import { SecurityConfig } from './security/security.config';
 
+function validateProductionSecrets() {
+  if (process.env.NODE_ENV !== 'production') return;
+
+  const defaultJwtSecret = 'default-dev-secret-change-in-production';
+  if (!process.env.JWT_SECRET || process.env.JWT_SECRET === defaultJwtSecret) {
+    throw new Error(
+      'FATAL: JWT_SECRET must be set to a secure value in production',
+    );
+  }
+
+  if (!process.env.MFA_ENCRYPTION_KEY || process.env.MFA_ENCRYPTION_KEY.length < 32) {
+    throw new Error(
+      'FATAL: MFA_ENCRYPTION_KEY must be at least 32 characters in production',
+    );
+  }
+}
+
 async function bootstrap() {
+  validateProductionSecrets();
+
   const app = await NestFactory.create(AppModule);
 
   registerHelmetMiddleware(app);

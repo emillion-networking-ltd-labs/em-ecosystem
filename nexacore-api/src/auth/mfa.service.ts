@@ -1,3 +1,4 @@
+import { randomInt } from 'crypto';
 import {
   Injectable,
   BadRequestException,
@@ -229,7 +230,7 @@ export class MfaService {
     for (let i = 0; i < RECOVERY_CODE_COUNT; i++) {
       let code = '';
       for (let j = 0; j < RECOVERY_CODE_LENGTH; j++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
+        code += chars.charAt(randomInt(chars.length));
       }
       codes.push(code);
     }
