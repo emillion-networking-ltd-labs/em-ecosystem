@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsEnum, IsInt, Min, Max } from 'class-validator';
+import { IsOptional, IsString, IsEnum, IsIn, IsInt, Min, Max } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Role } from '../enums/role.enum';
 
@@ -21,7 +21,7 @@ export class ListUsersQueryDto {
   sortBy?: string = 'createdAt';
 
   @IsOptional()
-  @IsString()
+  @IsIn(['asc', 'desc'], { message: 'sortOrder must be asc or desc' })
   sortOrder?: 'asc' | 'desc' = 'desc';
 
   @IsOptional()

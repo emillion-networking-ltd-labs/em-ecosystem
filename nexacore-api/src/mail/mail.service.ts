@@ -69,4 +69,31 @@ export class MailService {
       // Do not throw — always return 200 to prevent enumeration
     }
   }
+
+  async sendPasswordChangeNotification(
+    email: string,
+    firstName?: string | null,
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Your EM NexaCore password was changed',
+        template: 'password-changed',
+        context: {
+          name: firstName || email.split('@')[0],
+          frontendUrl,
+          changedAt: new Date().toISOString(),
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Password change notification sent to ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send password change notification to ${email}`,
+        error,
+      );
+    }
+  }
 }

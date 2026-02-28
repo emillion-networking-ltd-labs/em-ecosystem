@@ -23,7 +23,10 @@ export interface User {
   updatedAt: Date;
 }
 
-export type SafeUser = Omit<User, 'passwordHash' | 'mfaSecret' | 'mfaRecoveryCodes'>;
+export type SafeUser = Omit<
+  User,
+  'passwordHash' | 'mfaSecret' | 'mfaRecoveryCodes' | 'failedAttempts' | 'lockedUntil' | 'lockoutCount'
+>;
 
 export type SafeUserWithPermissions = SafeUser & {
   permissions: string[];
@@ -41,9 +44,6 @@ export function toSafeUser(user: User): SafeUser {
     providerId: user.providerId,
     emailVerified: user.emailVerified,
     isActive: user.isActive,
-    failedAttempts: user.failedAttempts,
-    lockedUntil: user.lockedUntil,
-    lockoutCount: user.lockoutCount,
     mfaEnabled: user.mfaEnabled,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,

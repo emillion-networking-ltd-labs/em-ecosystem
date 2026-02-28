@@ -21,6 +21,7 @@ import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
 import { SessionsService } from '../sessions/sessions.service';
+import { MailService } from '../mail/mail.service';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -30,6 +31,7 @@ export class UsersService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly sessionsService: SessionsService,
+    private readonly mailService: MailService,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
@@ -286,6 +288,11 @@ export class UsersService {
         ipAddress: ctx?.ipAddress,
         userAgent: ctx?.userAgent,
       })
+      .catch(() => {});
+
+    // Fire-and-forget password change notification email
+    this.mailService
+      .sendPasswordChangeNotification(user.email, user.firstName)
       .catch(() => {});
   }
 

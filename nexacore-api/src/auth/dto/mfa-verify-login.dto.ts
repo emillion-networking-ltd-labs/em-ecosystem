@@ -1,4 +1,4 @@
-import { IsString, IsOptional, Length } from 'class-validator';
+import { IsString, IsOptional, Length, Matches } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class MfaVerifyLoginDto {
@@ -15,6 +15,7 @@ export class MfaVerifyLoginDto {
   @IsOptional()
   @IsString()
   @Length(6, 6, { message: 'TOTP code must be exactly 6 digits' })
+  @Matches(/^\d{6}$/, { message: 'TOTP code must contain only digits' })
   code?: string;
 
   @ApiPropertyOptional({

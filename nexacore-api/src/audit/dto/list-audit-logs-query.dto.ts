@@ -2,6 +2,7 @@ import {
   IsOptional,
   IsString,
   IsEnum,
+  IsIn,
   IsInt,
   Min,
   Max,
@@ -49,6 +50,6 @@ export class ListAuditLogsQueryDto {
 
   @ApiPropertyOptional({ enum: ['asc', 'desc'], default: 'desc' })
   @IsOptional()
-  @IsString()
+  @IsIn(['asc', 'desc'], { message: 'sortOrder must be asc or desc' })
   sortOrder?: 'asc' | 'desc' = 'desc';
 }

@@ -1,4 +1,4 @@
-import { randomInt } from 'crypto';
+import { randomInt, createHmac } from 'crypto';
 import {
   Injectable,
   BadRequestException,
@@ -24,6 +24,7 @@ const MFA_TOKEN_EXPIRY = '5m';
 @Injectable()
 export class MfaService {
   private readonly appName: string;
+  private readonly mfaChallengeSecret: string;
 
   constructor(
     private readonly usersService: UsersService,
@@ -32,6 +33,11 @@ export class MfaService {
     private readonly auditService: AuditService,
   ) {
     this.appName = process.env.MFA_APP_NAME || 'EM NexaCore';
+    const jwtSecret =
+      process.env.JWT_SECRET || 'default-dev-secret-change-in-production';
+    this.mfaChallengeSecret = createHmac('sha256', jwtSecret)
+      .update('mfa-challenge-token')
+      .digest('hex');
   }
 
   async setupMfa(
@@ -112,7 +118,7 @@ export class MfaService {
   generateMfaToken(user: User): string {
     return this.jwtService.sign(
       { sub: user.id, type: 'mfa-challenge' },
-      { expiresIn: MFA_TOKEN_EXPIRY as StringValue },
+      { expiresIn: MFA_TOKEN_EXPIRY as StringValue, secret: this.mfaChallengeSecret },
     );
   }
 
@@ -129,7 +135,9 @@ export class MfaService {
 
     let payload: { sub: string; type: string };
     try {
-      payload = this.jwtService.verify<{ sub: string; type: string }>(mfaToken);
+      payload = this.jwtService.verify<{ sub: string; type: string }>(mfaToken, {
+        secret: this.mfaChallengeSecret,
+      });
     } catch {
       throw new UnauthorizedException('Invalid or expired MFA token');
     }

@@ -12,7 +12,9 @@ export class CryptoService {
     const envKey =
       process.env.MFA_ENCRYPTION_KEY ||
       'dev-mfa-key-change-in-production-32ch';
-    this.key = Buffer.from(envKey.padEnd(32, '0').slice(0, 32), 'utf-8');
+    const keyBuffer = Buffer.alloc(32, 0);
+    Buffer.from(envKey, 'utf-8').copy(keyBuffer, 0, 0, 32);
+    this.key = keyBuffer;
   }
 
   encrypt(plaintext: string): string {

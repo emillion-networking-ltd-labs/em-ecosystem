@@ -32,10 +32,12 @@ import { MailModule } from '../mail/mail.module';
         expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as StringValue,
         issuer: 'nexacore-api',
         audience: 'nexacore-api',
+        algorithm: 'HS256' as const,
       },
       verifyOptions: {
         issuer: 'nexacore-api',
         audience: 'nexacore-api',
+        algorithms: ['HS256'],
       },
     }),
   ],

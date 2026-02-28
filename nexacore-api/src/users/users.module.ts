@@ -3,9 +3,10 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { AuditModule } from '../audit/audit.module';
 import { SessionsModule } from '../sessions/sessions.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
-  imports: [AuditModule, SessionsModule],
+  imports: [AuditModule, SessionsModule, MailModule],
   controllers: [UsersController],
   providers: [UsersService],
   exports: [UsersService],

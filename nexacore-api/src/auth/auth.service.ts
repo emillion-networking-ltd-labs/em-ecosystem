@@ -86,6 +86,7 @@ export class AuthService {
   private readonly logger = new Logger(AuthService.name);
   private readonly refreshExpiration: string;
   private readonly refreshMaxAgeMs: number;
+  private readonly mfaChallengeSecret: string;
 
   constructor(
     private readonly usersService: UsersService,
@@ -98,6 +99,12 @@ export class AuthService {
   ) {
     this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '7d';
     this.refreshMaxAgeMs = parseDurationMs(this.refreshExpiration);
+    const jwtSecret =
+      process.env.JWT_SECRET || 'default-dev-secret-change-in-production';
+    this.mfaChallengeSecret = crypto
+      .createHmac('sha256', jwtSecret)
+      .update('mfa-challenge-token')
+      .digest('hex');
   }
 
   async register(
@@ -193,7 +200,10 @@ export class AuthService {
       await this.usersService.resetFailedAttempts(user.id);
     }
 
-    // OAuth-only account (no password set) — constant timing
+    // OAuth-only account (no password set) — constant timing, NO lockout.
+    // Rationale: there is no password to brute-force, locking would be a DoS
+    // vector and would reveal the account is OAuth-only (enumeration).
+    // IP-based throttler provides sufficient protection.
     if (!user.passwordHash) {
       await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
       this.auditService
@@ -275,15 +285,15 @@ export class AuthService {
       );
     }
 
-    if (user.failedAttempts > 0) {
-      await this.usersService.resetFailedAttempts(user.id);
+    if (user.failedAttempts > 0 || user.lockoutCount > 0) {
+      await this.usersService.resetLockoutEscalation(user.id);
     }
 
     // MFA check — return challenge token instead of full auth
     if (user.mfaEnabled) {
       const mfaToken = this.jwtService.sign(
         { sub: user.id, type: 'mfa-challenge' },
-        { expiresIn: '5m' as StringValue },
+        { expiresIn: '5m' as StringValue, secret: this.mfaChallengeSecret },
       );
 
       this.auditService

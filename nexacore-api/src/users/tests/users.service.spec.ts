@@ -14,6 +14,7 @@ import { Role } from '../enums/role.enum';
 import { AuditService } from '../../audit/audit.service';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
 import { SessionsService } from '../../sessions/sessions.service';
+import { MailService } from '../../mail/mail.service';
 
 jest.mock('bcrypt');
 
@@ -83,6 +84,12 @@ describe('UsersService', () => {
         {
           provide: SessionsService,
           useValue: sessionsService,
+        },
+        {
+          provide: MailService,
+          useValue: {
+            sendPasswordChangeNotification: jest.fn().mockResolvedValue(undefined),
+          },
         },
       ],
     }).compile();

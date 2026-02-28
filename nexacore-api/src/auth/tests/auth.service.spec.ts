@@ -127,6 +127,7 @@ describe('AuthService', () => {
             create: jest.fn(),
             incrementFailedAttempts: jest.fn(),
             resetFailedAttempts: jest.fn(),
+            resetLockoutEscalation: jest.fn(),
             lockAccount: jest.fn(),
             findOrCreateByOAuth: jest.fn(),
           },
@@ -298,7 +299,7 @@ describe('AuthService', () => {
 
         await authService.login(loginDto, requestMeta);
 
-        expect(usersService.resetFailedAttempts).toHaveBeenCalledWith(
+        expect(usersService.resetLockoutEscalation).toHaveBeenCalledWith(
           'uuid-123',
         );
       });
@@ -306,7 +307,7 @@ describe('AuthService', () => {
       it('should not reset failed attempts when count is 0', async () => {
         await authService.login(loginDto, requestMeta);
 
-        expect(usersService.resetFailedAttempts).not.toHaveBeenCalled();
+        expect(usersService.resetLockoutEscalation).not.toHaveBeenCalled();
       });
     });
 
@@ -379,7 +380,7 @@ describe('AuthService', () => {
         );
       });
 
-      it('should throw UnauthorizedException when user has no passwordHash (OAuth-only)', async () => {
+      it('should throw UnauthorizedException when user has no passwordHash (OAuth-only) without incrementing failedAttempts', async () => {
         usersService.findByEmail.mockResolvedValue({
           ...mockUser,
           passwordHash: null,
@@ -390,6 +391,7 @@ describe('AuthService', () => {
           authService.login(loginDto, requestMeta),
         ).rejects.toThrow(UnauthorizedException);
         expect(bcrypt.compare).toHaveBeenCalled();
+        expect(usersService.incrementFailedAttempts).not.toHaveBeenCalled();
       });
 
       it('should throw UnauthorizedException on wrong password', async () => {
@@ -1338,10 +1340,8 @@ describe('AuthService', () => {
         failedAttempts: 5,
       };
       usersService.findByEmail.mockResolvedValue(expiredLockUser);
-      usersService.resetFailedAttempts.mockResolvedValue({
-        ...expiredLockUser,
-        failedAttempts: 0,
-      });
+      usersService.resetFailedAttempts.mockResolvedValue(undefined);
+      usersService.resetLockoutEscalation.mockResolvedValue(undefined);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       jwtService.sign.mockReturnValueOnce('at').mockReturnValueOnce('rt');
       sessionsService.createSession.mockResolvedValue(mockSession);
@@ -1353,6 +1353,7 @@ describe('AuthService', () => {
       );
 
       expect(usersService.resetFailedAttempts).toHaveBeenCalledWith('uuid-123');
+      expect(usersService.resetLockoutEscalation).toHaveBeenCalledWith('uuid-123');
       expect(result).toHaveProperty('accessToken');
     });
   });
@@ -1421,7 +1422,7 @@ describe('AuthService', () => {
         failedAttempts: 3,
       });
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      usersService.resetFailedAttempts.mockResolvedValue(undefined);
+      usersService.resetLockoutEscalation.mockResolvedValue(undefined);
       jwtService.sign.mockReturnValueOnce('at').mockReturnValueOnce('rt');
       sessionsService.createSession.mockResolvedValue(mockSession);
       sessionsService.updateSessionHash.mockResolvedValue(undefined);
@@ -1431,7 +1432,7 @@ describe('AuthService', () => {
         requestMeta,
       );
 
-      expect(usersService.resetFailedAttempts).toHaveBeenCalledWith('uuid-123');
+      expect(usersService.resetLockoutEscalation).toHaveBeenCalledWith('uuid-123');
     });
   });
 });

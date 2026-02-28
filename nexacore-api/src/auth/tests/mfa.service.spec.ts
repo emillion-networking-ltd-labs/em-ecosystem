@@ -406,7 +406,7 @@ describe('MfaService', () => {
 
       expect(jwtService.sign).toHaveBeenCalledWith(
         { sub: 'user-1', type: 'mfa-challenge' },
-        { expiresIn: '5m' },
+        { expiresIn: '5m', secret: expect.any(String) },
       );
       expect(token).toBe('mfa-token-jwt');
     });
