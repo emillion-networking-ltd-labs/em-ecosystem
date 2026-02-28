@@ -26,13 +26,13 @@ export default function ChangePasswordForm() {
     setLoading(true);
     try {
       await apiClient.patch('/users/me/password', { currentPassword, newPassword });
-      addToast({ variant: 'success', title: 'Password changed successfully.' });
+      addToast({ variant: 'success', title: 'Password changed', description: 'Your password has been updated.' });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
-      addToast({ variant: 'error', title: apiErr?.error?.message || 'Failed to change password' });
+      addToast({ variant: 'error', title: 'Password change failed', description: apiErr?.error?.message || 'Could not change password.' });
     } finally {
       setLoading(false);
     }

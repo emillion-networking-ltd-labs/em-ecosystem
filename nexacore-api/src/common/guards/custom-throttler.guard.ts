@@ -41,7 +41,7 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
         {
           success: false,
           error: {
-            message: 'Too many requests. Please try again later.',
+            message: 'Too many requests.',
             code: 'RATE_LIMIT_EXCEEDED',
             statusCode: HttpStatus.TOO_MANY_REQUESTS,
             retryAfter: retryAfterSeconds,

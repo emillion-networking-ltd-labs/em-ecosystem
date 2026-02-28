@@ -101,9 +101,9 @@ export default function PermissionsMatrix() {
         ...prev,
         [role]: new Set(current[role]),
       }));
-      addToast({ variant: 'success', title: `${role} permissions saved successfully.` });
+      addToast({ variant: 'success', title: 'Permissions saved', description: `${role} permissions updated successfully.` });
     } catch {
-      addToast({ variant: 'error', title: `Failed to save ${role} permissions.` });
+      addToast({ variant: 'error', title: 'Save failed', description: `Could not save ${role} permissions.` });
     } finally {
       setSaving(null);
     }

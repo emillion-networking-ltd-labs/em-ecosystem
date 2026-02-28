@@ -3,17 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { RulerDimensionLine, Check, AlertTriangle } from 'lucide-react';
+import { AlertTriangle } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import OAuthButtons from './OAuthButtons';
 import { useAuth } from '@/hooks/useAuth';
-
-/* Password requirement — minimum 8 characters */
-const PASSWORD_REQUIREMENTS = [
-  { key: 'long', Icon: RulerDimensionLine, test: (p: string) => p.length >= 8 },
-] as const;
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
@@ -21,6 +16,7 @@ const isValidEmail = (email: string) =>
 export default function RegisterForm() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const { register, isLoading, isAuthenticated, error, clearError, rateLimitInfo } = useAuth();
   const router = useRouter();
 
@@ -37,6 +33,7 @@ export default function RegisterForm() {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     clearError();
     if (e.target.name === 'email') setEmailError(null);
+    if (e.target.name === 'password') setPasswordError(null);
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -50,20 +47,21 @@ export default function RegisterForm() {
       setEmailError('Enter a valid email address');
       return;
     }
-    if (!formData.password) return;
+    if (!formData.password) {
+      setPasswordError('Enter your password');
+      return;
+    }
     setEmailError(null);
+    setPasswordError(null);
     const success = await register(formData.email, formData.password);
     if (success) router.push('/email-sent');
   };
 
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
 
-  /* System Message slot — only one message at a time:
-     rateLimitBanner / emailError / authError override everything; Password Check visible only while password has content */
-  const activeError = emailError || error;
+  const activeError = emailError || passwordError || error;
   const showRateLimit = rateLimitInfo.isRateLimited;
   const showError = !showRateLimit && !!activeError;
-  const showPasswordCheck = !showRateLimit && !showError && formData.password.length > 0;
 
   return (
     /* Body — Figma: layoutMode HORIZONTAL, itemSpacing 24 */
@@ -93,7 +91,7 @@ export default function RegisterForm() {
               value={formData.email}
               onChange={handleChange}
               placeholder="your@email.com"
-              hasError={!!emailError || showError}
+              hasError={!!emailError || !!error}
               autoFocus
             />
 
@@ -104,10 +102,10 @@ export default function RegisterForm() {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter your password"
-              hasError={showError}
+              hasError={!!passwordError || !!error}
             />
 
-            {/* System Message — single slot: RateLimitBanner / Password Check / Error */}
+            {/* System Message — single slot: RateLimitBanner / Error */}
             {showRateLimit ? (
               <RateLimitBanner
                 retryAfter={rateLimitInfo.retryAfter!}
@@ -116,28 +114,7 @@ export default function RegisterForm() {
               />
             ) : (
               <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
-                {showPasswordCheck && (
-                  /* Password Check — Figma: 200px, 5 icon+badge pairs */
-                  <div className="flex shrink-0 items-center gap-[15px]">
-                    {PASSWORD_REQUIREMENTS.map(({ key, Icon, test }) => {
-                      const met = test(formData.password);
-                      return (
-                        <div key={key} className="relative h-6 w-6">
-                          <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-border-default">
-                            <Icon size={14} className="text-content-primary/50" />
-                          </div>
-                          {met && (
-                            <div className="absolute -bottom-1 -right-1 flex h-[14px] w-[14px] items-center justify-center rounded-full border border-border-default bg-surface-primary">
-                              <Check size={8} className="text-green-800" />
-                            </div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
                 {showError && (
-                  /* Error — overrides Password Check, persists until user types */
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
                     <span className="text-xs leading-6 text-error">{activeError}</span>

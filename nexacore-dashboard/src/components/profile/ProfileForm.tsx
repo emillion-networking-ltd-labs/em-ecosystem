@@ -23,10 +23,10 @@ export default function ProfileForm() {
     try {
       await apiClient.patch<SafeUser>('/users/me', { firstName, lastName });
       await refreshSession();
-      addToast({ variant: 'success', title: 'Profile updated successfully.' });
+      addToast({ variant: 'success', title: 'Profile updated', description: 'Your profile information has been saved.' });
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
-      addToast({ variant: 'error', title: apiErr?.error?.message || 'Failed to update profile' });
+      addToast({ variant: 'error', title: 'Update failed', description: apiErr?.error?.message || 'Could not update profile.' });
     } finally {
       setLoading(false);
     }

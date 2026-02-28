@@ -35,7 +35,7 @@ export default function AdminPage() {
       setUsers(res.data);
       setMeta(res.meta);
     } catch {
-      addToast({ variant: 'error', title: 'Failed to load users' });
+      addToast({ variant: 'error', title: 'Load users failed', description: 'Could not retrieve the user list.' });
     } finally {
       setLoading(false);
     }
@@ -85,7 +85,7 @@ export default function AdminPage() {
       await fetchUsers(meta.page);
       closeModal();
     } catch {
-      addToast({ variant: 'error', title: `Failed to ${modalType} user` });
+      addToast({ variant: 'error', title: 'Action failed', description: `Could not ${modalType} user.` });
       setModalLoading(false);
     }
   };

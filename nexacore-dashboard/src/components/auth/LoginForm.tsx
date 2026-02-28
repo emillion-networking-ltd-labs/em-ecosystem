@@ -20,6 +20,7 @@ export default function LoginForm() {
   const [step, setStep] = useState<LoginStep>('email');
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
   const [oauthError, setOauthError] = useState<string | null>(null);
   const { login, isLoading, isAuthenticated, error, clearError, rateLimitInfo, mfaRequired } = useAuth();
   const router = useRouter();
@@ -43,6 +44,7 @@ export default function LoginForm() {
     clearError();
     setOauthError(null);
     if (e.target.name === 'email') setEmailError(null);
+    if (e.target.name === 'password') setPasswordError(null);
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
@@ -63,7 +65,11 @@ export default function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.password) return;
+    if (!formData.password) {
+      setPasswordError('Enter your password');
+      return;
+    }
+    setPasswordError(null);
     await login(formData.email, formData.password);
     // On AUTH_SUCCESS → isAuthenticated → useEffect redirects to /dashboard
   };
@@ -79,10 +85,11 @@ export default function LoginForm() {
         password={formData.password}
         isLoading={isLoading}
         error={error}
+        passwordError={passwordError}
         rateLimitInfo={rateLimitInfo}
         onChange={handleChange}
         onSubmit={handleLogin}
-        onChangeEmail={() => { clearError(); setStep('email'); }}
+        onChangeEmail={() => { clearError(); setPasswordError(null); setStep('email'); }}
         onRateLimitExpired={clearError}
       />
     );
@@ -171,6 +178,7 @@ type PasswordStepProps = {
   password: string;
   isLoading: boolean;
   error: string | null;
+  passwordError: string | null;
   rateLimitInfo: { isRateLimited: boolean; retryAfter: number | null; message: string | null };
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
@@ -178,7 +186,7 @@ type PasswordStepProps = {
   onRateLimitExpired: () => void;
 };
 
-function PasswordStep({ email, password, isLoading, error, rateLimitInfo, onChange, onSubmit, onChangeEmail, onRateLimitExpired }: PasswordStepProps) {
+function PasswordStep({ email, password, isLoading, error, passwordError, rateLimitInfo, onChange, onSubmit, onChangeEmail, onRateLimitExpired }: PasswordStepProps) {
   const [isEmailOpen, setIsEmailOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -195,7 +203,8 @@ function PasswordStep({ email, password, isLoading, error, rateLimitInfo, onChan
   }, [isEmailOpen]);
 
   const emailInitial = email.charAt(0).toUpperCase();
-  const showError = !!error && !rateLimitInfo.isRateLimited;
+  const activeError = passwordError || error;
+  const showError = !!activeError && !rateLimitInfo.isRateLimited;
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
 
   return (
@@ -283,7 +292,7 @@ function PasswordStep({ email, password, isLoading, error, rateLimitInfo, onChan
                 {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-xs leading-6 text-error">{error}</span>
+                    <span className="flex-1 text-xs leading-6 text-error">{activeError}</span>
                   </>
                 )}
               </div>

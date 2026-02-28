@@ -11,6 +11,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState<string | null>(null);
   const { forgotPassword, isLoading, error, clearError, rateLimitInfo } = useAuth();
   const router = useRouter();
 
@@ -20,14 +21,19 @@ export default function ForgotPasswordForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) return;
+    if (!email) {
+      setEmailError('Enter your email address');
+      return;
+    }
+    setEmailError(null);
     const success = await forgotPassword(email);
     if (success) router.push('/check-email');
   };
 
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
   const showRateLimit = rateLimitInfo.isRateLimited;
-  const showError = !showRateLimit && !!error;
+  const activeError = emailError || error;
+  const showError = !showRateLimit && !!activeError;
 
   return (
     /* Body — Figma: layoutMode HORIZONTAL, itemSpacing 24 */
@@ -55,9 +61,9 @@ export default function ForgotPasswordForm() {
               type="email"
               name="email"
               value={email}
-              onChange={e => { clearError(); setEmail(e.target.value); }}
+              onChange={e => { clearError(); setEmailError(null); setEmail(e.target.value); }}
               placeholder="your@email.com"
-              hasError={showError}
+              hasError={showError || !!emailError}
               autoFocus
             />
 
@@ -73,7 +79,7 @@ export default function ForgotPasswordForm() {
                 {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-xs leading-6 text-error">{error}</span>
+                    <span className="flex-1 text-xs leading-6 text-error">{activeError}</span>
                   </>
                 )}
               </div>

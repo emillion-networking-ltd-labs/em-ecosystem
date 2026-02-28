@@ -91,8 +91,8 @@ export default function Input({
           className="flex items-center gap-2"
           role="alert"
         >
-          <TriangleAlert size={16} className="shrink-0 text-error/75" />
-          <p className="flex-1 text-xs leading-6 text-error/75">{error}</p>
+          <TriangleAlert size={16} className="shrink-0 text-error" />
+          <p className="flex-1 text-xs leading-6 text-error">{error}</p>
         </div>
       )}
     </div>

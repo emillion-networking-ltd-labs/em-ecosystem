@@ -113,11 +113,11 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 type ApiError = { error?: { message?: string; details?: string[]; retryAfter?: number; code?: string; statusCode?: number } };
 
-function extractErrorMessage(err: unknown, fallback: string): string {
+function extractErrorMessage(err: unknown): string {
   const errObj = err as ApiError;
   const details = errObj?.error?.details;
   if (Array.isArray(details) && details.length > 0) return details[0];
-  return errObj?.error?.message ?? fallback;
+  return errObj?.error?.message ?? 'An unexpected error occurred.';
 }
 
 /* ===== Provider ===== */
@@ -195,7 +195,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
       } else {
-        addToast({ variant: 'error', title: extractErrorMessage(err, 'Login failed. Please try again.') });
+        addToast({ variant: 'error', title: 'Sign in failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
       }
     }
@@ -223,7 +223,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
       } else {
-        addToast({ variant: 'error', title: extractErrorMessage(err, 'Registration failed. Please try again.') });
+        addToast({ variant: 'error', title: 'Registration failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
       }
       return false;
@@ -243,7 +243,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         payload: { user, accessToken: data.accessToken },
       });
     } catch (err: unknown) {
-      addToast({ variant: 'error', title: extractErrorMessage(err, 'OAuth authentication failed.') });
+      addToast({ variant: 'error', title: 'Authentication failed', description: extractErrorMessage(err) });
       dispatch({ type: 'AUTH_STOP' });
     }
   }, [addToast]);
@@ -290,7 +290,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
       } else {
-        addToast({ variant: 'error', title: extractErrorMessage(err, 'MFA verification failed. Please try again.') });
+        addToast({ variant: 'error', title: 'Verification failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
       }
     }
@@ -316,7 +316,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
       } else {
-        addToast({ variant: 'error', title: extractErrorMessage(err, 'Failed to send reset email. Please try again.') });
+        addToast({ variant: 'error', title: 'Recovery failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
       }
       return false;
@@ -339,7 +339,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
       } else {
-        addToast({ variant: 'error', title: extractErrorMessage(err, 'Password reset failed. Please try again.') });
+        addToast({ variant: 'error', title: 'Password reset failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
       }
       return false;
@@ -362,7 +362,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
       } else {
-        addToast({ variant: 'error', title: extractErrorMessage(err, 'Failed to resend verification email.') });
+        addToast({ variant: 'error', title: 'Verification email failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
       }
       return false;

@@ -174,7 +174,6 @@ export class AuthService {
     if (user.lockedUntil && user.lockedUntil > new Date()) {
       const remainingMs = user.lockedUntil.getTime() - Date.now();
       const remainingSeconds = Math.ceil(remainingMs / 1000);
-      const remainingMinutes = Math.ceil(remainingMs / 60_000);
 
       this.auditService
         .log({
@@ -187,7 +186,7 @@ export class AuthService {
         .catch(() => {});
 
       throw new ForbiddenException({
-        message: `Account locked due to too many failed attempts. Try again in ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}.`,
+        message: 'Too many attempts. Account locked.',
         error: 'Forbidden',
         statusCode: 403,
         retryAfter: remainingSeconds,
@@ -245,7 +244,7 @@ export class AuthService {
           .catch(() => {});
 
         throw new ForbiddenException({
-          message: `Account locked due to too many failed attempts. Try again in ${lockoutMinutes} minute${lockoutMinutes !== 1 ? 's' : ''}.`,
+          message: 'Too many attempts. Account locked.',
           error: 'Forbidden',
           statusCode: 403,
           retryAfter: lockoutSeconds,

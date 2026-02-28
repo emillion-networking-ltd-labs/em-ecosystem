@@ -64,7 +64,7 @@ export default function ActiveSessions() {
       await apiClient.delete(`/auth/sessions/${sessionId}`);
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     } catch {
-      addToast({ variant: 'error', title: 'Failed to revoke session' });
+      addToast({ variant: 'error', title: 'Revoke failed', description: 'Could not revoke the session.' });
     } finally {
       setRevoking(null);
     }
@@ -76,7 +76,7 @@ export default function ActiveSessions() {
       await apiClient.post('/auth/logout-all', {});
       setSessions((prev) => prev.filter((s) => s.isCurrent));
     } catch {
-      addToast({ variant: 'error', title: 'Failed to revoke sessions' });
+      addToast({ variant: 'error', title: 'Revoke failed', description: 'Could not revoke other sessions.' });
     } finally {
       setRevokingAll(false);
     }
@@ -157,7 +157,7 @@ export default function ActiveSessions() {
                   <button
                     onClick={() => revokeSession(session.id)}
                     disabled={revoking === session.id}
-                    className="shrink-0 rounded-lg p-2 text-content-tertiary transition-colors hover:bg-status-error/10 hover:text-error disabled:opacity-50"
+                    className="shrink-0 rounded-lg p-2 text-content-tertiary transition-colors hover:bg-error/10 hover:text-error disabled:opacity-50"
                     title="Revoke session"
                   >
                     {revoking === session.id ? (
