@@ -8,11 +8,13 @@ import UsersTable from '@/components/admin/UsersTable';
 import Pagination from '@/components/ui/Pagination';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import { apiClient } from '@/lib/api';
+import { useToast } from '@/hooks/useToast';
 import type { SafeUser, PaginatedResponse, UserRole, AdminUpdateUserDto } from '@/lib/types';
 
 const LIMIT = 10;
 
 export default function AdminPage() {
+  const { addToast } = useToast();
   const [users, setUsers] = useState<SafeUser[]>([]);
   const [meta, setMeta] = useState({ total: 0, page: 1, limit: LIMIT, totalPages: 1 });
   const [search, setSearch] = useState('');
@@ -33,11 +35,11 @@ export default function AdminPage() {
       setUsers(res.data);
       setMeta(res.meta);
     } catch {
-      // silently fail — users will see empty table
+      addToast({ variant: 'error', title: 'Failed to load users' });
     } finally {
       setLoading(false);
     }
-  }, [search]);
+  }, [search, addToast]);
 
   useEffect(() => {
     fetchUsers(1);
@@ -83,6 +85,7 @@ export default function AdminPage() {
       await fetchUsers(meta.page);
       closeModal();
     } catch {
+      addToast({ variant: 'error', title: `Failed to ${modalType} user` });
       setModalLoading(false);
     }
   };

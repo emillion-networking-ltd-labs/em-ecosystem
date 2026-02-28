@@ -2,37 +2,37 @@
 
 import { useState } from 'react';
 import { apiClient } from '@/lib/api';
+import { useToast } from '@/hooks/useToast';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 
 export default function ChangePasswordForm() {
+  const { addToast } = useToast();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [localError, setLocalError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess(false);
+    setLocalError('');
 
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match');
+      setLocalError('Passwords do not match');
       return;
     }
 
     setLoading(true);
     try {
       await apiClient.patch('/users/me/password', { currentPassword, newPassword });
-      setSuccess(true);
+      addToast({ variant: 'success', title: 'Password changed successfully.' });
       setCurrentPassword('');
       setNewPassword('');
       setConfirmPassword('');
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
-      setError(apiErr?.error?.message || 'Failed to change password');
+      addToast({ variant: 'error', title: apiErr?.error?.message || 'Failed to change password' });
     } finally {
       setLoading(false);
     }
@@ -80,8 +80,7 @@ export default function ChangePasswordForm() {
           error={confirmPassword && newPassword !== confirmPassword ? 'Passwords do not match' : undefined}
         />
 
-        {error && <p className="text-caption text-error">{error}</p>}
-        {success && <p className="text-caption text-success">Password changed successfully.</p>}
+        {localError && <p className="text-caption text-error">{localError}</p>}
 
         <div className="flex justify-end">
           <Button type="submit" size="md" fullWidth={false} loading={loading}>

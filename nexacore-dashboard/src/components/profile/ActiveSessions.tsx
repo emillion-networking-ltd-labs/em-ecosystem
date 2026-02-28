@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Monitor, Smartphone, Globe, Trash2 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
+import { useToast } from '@/hooks/useToast';
 import type { SessionResponse } from '@/lib/types';
 import Button from '@/components/ui/Button';
 
@@ -34,19 +35,20 @@ function formatRelativeTime(dateStr: string): string {
 }
 
 export default function ActiveSessions() {
+  const { addToast } = useToast();
   const [sessions, setSessions] = useState<SessionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
   const [revokingAll, setRevokingAll] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   const fetchSessions = useCallback(async () => {
     try {
-      setError(null);
+      setLoadError(false);
       const data = await apiClient.get<SessionResponse[]>('/auth/sessions');
       setSessions(data);
     } catch {
-      setError('Failed to load sessions');
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -62,7 +64,7 @@ export default function ActiveSessions() {
       await apiClient.delete(`/auth/sessions/${sessionId}`);
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     } catch {
-      setError('Failed to revoke session');
+      addToast({ variant: 'error', title: 'Failed to revoke session' });
     } finally {
       setRevoking(null);
     }
@@ -74,7 +76,7 @@ export default function ActiveSessions() {
       await apiClient.post('/auth/logout-all', {});
       setSessions((prev) => prev.filter((s) => s.isCurrent));
     } catch {
-      setError('Failed to revoke sessions');
+      addToast({ variant: 'error', title: 'Failed to revoke sessions' });
     } finally {
       setRevokingAll(false);
     }
@@ -101,14 +103,14 @@ export default function ActiveSessions() {
         )}
       </div>
 
-      {error && (
-        <p className="mb-4 text-caption text-error">{error}</p>
-      )}
-
       {loading ? (
         <div className="flex items-center justify-center py-8">
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-content-disabled border-t-content-primary" />
         </div>
+      ) : loadError ? (
+        <p className="py-4 text-center text-body-sm text-error">
+          Failed to load sessions.
+        </p>
       ) : sessions.length === 0 ? (
         <p className="py-4 text-center text-body-sm text-content-tertiary">
           No active sessions found.

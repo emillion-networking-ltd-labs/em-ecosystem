@@ -4,6 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { Lock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/hooks/useToast';
 import { apiClient } from '@/lib/api';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -11,24 +12,21 @@ import type { SafeUser } from '@/lib/types';
 
 export default function ProfileForm() {
   const { user, refreshSession } = useAuth();
+  const { addToast } = useToast();
   const [firstName, setFirstName] = useState(user?.firstName || '');
   const [lastName, setLastName] = useState(user?.lastName || '');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
-    setSuccess(false);
     setLoading(true);
     try {
       await apiClient.patch<SafeUser>('/users/me', { firstName, lastName });
       await refreshSession();
-      setSuccess(true);
+      addToast({ variant: 'success', title: 'Profile updated successfully.' });
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
-      setError(apiErr?.error?.message || 'Failed to update profile');
+      addToast({ variant: 'error', title: apiErr?.error?.message || 'Failed to update profile' });
     } finally {
       setLoading(false);
     }
@@ -88,9 +86,6 @@ export default function ProfileForm() {
           />
           <Lock size={16} className="absolute bottom-4 right-4 text-content-tertiary" />
         </div>
-
-        {error && <p className="text-caption text-error">{error}</p>}
-        {success && <p className="text-caption text-success">Profile updated successfully.</p>}
 
         <div className="flex justify-end">
           <Button type="submit" size="md" fullWidth={false} loading={loading}>

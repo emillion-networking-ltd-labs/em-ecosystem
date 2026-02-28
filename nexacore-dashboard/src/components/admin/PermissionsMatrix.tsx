@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Save, RotateCcw, Loader2 } from 'lucide-react';
 import { apiClient } from '@/lib/api';
+import { useToast } from '@/hooks/useToast';
 import Can from '@/components/guards/Can';
 import type { Permission, RolePermissionsResponse, UserRole } from '@/lib/types';
 
@@ -21,17 +22,17 @@ function groupByResource(permissions: Permission[]): Map<string, Permission[]> {
 }
 
 export default function PermissionsMatrix() {
+  const { addToast } = useToast();
   const [permissions, setPermissions] = useState<Permission[]>([]);
   const [original, setOriginal] = useState<RolePermMap>({});
   const [current, setCurrent] = useState<RolePermMap>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState<UserRole | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    setError(null);
+    setLoadError(false);
     try {
       const [allPerms, userPerms, adminPerms] = await Promise.all([
         apiClient.get<Permission[]>('/permissions'),
@@ -51,7 +52,7 @@ export default function PermissionsMatrix() {
         ADMIN: new Set(origMap.ADMIN),
       });
     } catch {
-      setError('Failed to load permissions data.');
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -92,8 +93,6 @@ export default function PermissionsMatrix() {
 
   const saveRole = async (role: UserRole) => {
     setSaving(role);
-    setError(null);
-    setSuccessMsg(null);
     try {
       await apiClient.put(`/permissions/roles/${role}`, {
         permissionKeys: Array.from(current[role]),
@@ -102,10 +101,9 @@ export default function PermissionsMatrix() {
         ...prev,
         [role]: new Set(current[role]),
       }));
-      setSuccessMsg(`${role} permissions saved successfully.`);
-      setTimeout(() => setSuccessMsg(null), 3000);
+      addToast({ variant: 'success', title: `${role} permissions saved successfully.` });
     } catch {
-      setError(`Failed to save ${role} permissions.`);
+      addToast({ variant: 'error', title: `Failed to save ${role} permissions.` });
     } finally {
       setSaving(null);
     }
@@ -119,10 +117,10 @@ export default function PermissionsMatrix() {
     );
   }
 
-  if (error && permissions.length === 0) {
+  if (loadError && permissions.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center rounded-2xl border border-border-default bg-surface-primary">
-        <p className="text-body-sm text-error">{error}</p>
+        <p className="text-body-sm text-error">Failed to load permissions data.</p>
       </div>
     );
   }
@@ -131,18 +129,6 @@ export default function PermissionsMatrix() {
 
   return (
     <div className="space-y-6">
-      {/* Status messages */}
-      {error && (
-        <div className="rounded-xl border border-error/30 bg-error/10 px-4 py-3 text-body-sm text-error">
-          {error}
-        </div>
-      )}
-      {successMsg && (
-        <div className="rounded-xl border border-success/30 bg-success/10 px-4 py-3 text-body-sm text-success">
-          {successMsg}
-        </div>
-      )}
-
       {/* Matrix table */}
       <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary">
         <table className="w-full">

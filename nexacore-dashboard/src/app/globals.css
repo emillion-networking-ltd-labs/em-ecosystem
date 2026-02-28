@@ -178,6 +178,37 @@ input:-webkit-autofill:focus {
   animation: infinity-spin 2s linear infinite;
 }
 
+/* ===== Toast Animations ===== */
+@keyframes toast-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes toast-out {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+.animate-toast-in {
+  animation: toast-in 300ms ease-out forwards;
+}
+
+.animate-toast-out {
+  animation: toast-out 300ms ease-in forwards;
+}
+
 /* ===== Utility Layer ===== */
 @layer utilities {
   .text-balance {
