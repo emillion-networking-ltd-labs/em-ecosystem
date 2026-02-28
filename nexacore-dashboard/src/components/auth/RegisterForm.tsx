@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { RulerDimensionLine, Check, AlertTriangle } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
+import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import OAuthButtons from './OAuthButtons';
 import { useAuth } from '@/hooks/useAuth';
 
@@ -20,7 +21,7 @@ const isValidEmail = (email: string) =>
 export default function RegisterForm() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState<string | null>(null);
-  const { register, isLoading, isAuthenticated, error, clearError } = useAuth();
+  const { register, isLoading, isAuthenticated, error, clearError, rateLimitInfo } = useAuth();
   const router = useRouter();
 
   // Clear stale errors from other auth forms on mount
@@ -55,11 +56,14 @@ export default function RegisterForm() {
     if (success) router.push('/email-sent');
   };
 
+  const isDisabled = isLoading || rateLimitInfo.isRateLimited;
+
   /* System Message slot — only one message at a time:
-     emailError / authError override everything; Password Check visible only while password has content */
+     rateLimitBanner / emailError / authError override everything; Password Check visible only while password has content */
   const activeError = emailError || error;
-  const showError = !!activeError;
-  const showPasswordCheck = !showError && formData.password.length > 0;
+  const showRateLimit = rateLimitInfo.isRateLimited;
+  const showError = !showRateLimit && !!activeError;
+  const showPasswordCheck = !showRateLimit && !showError && formData.password.length > 0;
 
   return (
     /* Body — Figma: layoutMode HORIZONTAL, itemSpacing 24 */
@@ -103,36 +107,44 @@ export default function RegisterForm() {
               hasError={showError}
             />
 
-            {/* System Message — single slot: Password Check XOR Error */}
-            <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
-              {showPasswordCheck && (
-                /* Password Check — Figma: 200px, 5 icon+badge pairs */
-                <div className="flex shrink-0 items-center gap-[15px]">
-                  {PASSWORD_REQUIREMENTS.map(({ key, Icon, test }) => {
-                    const met = test(formData.password);
-                    return (
-                      <div key={key} className="relative h-6 w-6">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-border-default">
-                          <Icon size={14} className="text-content-primary/50" />
-                        </div>
-                        {met && (
-                          <div className="absolute -bottom-1 -right-1 flex h-[14px] w-[14px] items-center justify-center rounded-full border border-border-default bg-surface-primary">
-                            <Check size={8} className="text-green-800" />
+            {/* System Message — single slot: RateLimitBanner / Password Check / Error */}
+            {showRateLimit ? (
+              <RateLimitBanner
+                retryAfter={rateLimitInfo.retryAfter!}
+                message={rateLimitInfo.message!}
+                onExpired={clearError}
+              />
+            ) : (
+              <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+                {showPasswordCheck && (
+                  /* Password Check — Figma: 200px, 5 icon+badge pairs */
+                  <div className="flex shrink-0 items-center gap-[15px]">
+                    {PASSWORD_REQUIREMENTS.map(({ key, Icon, test }) => {
+                      const met = test(formData.password);
+                      return (
+                        <div key={key} className="relative h-6 w-6">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-border-default">
+                            <Icon size={14} className="text-content-primary/50" />
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              {showError && (
-                /* Error — overrides Password Check, persists until user types */
-                <>
-                  <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="text-xs leading-6 text-error">{activeError}</span>
-                </>
-              )}
-            </div>
+                          {met && (
+                            <div className="absolute -bottom-1 -right-1 flex h-[14px] w-[14px] items-center justify-center rounded-full border border-border-default bg-surface-primary">
+                              <Check size={8} className="text-green-800" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {showError && (
+                  /* Error — overrides Password Check, persists until user types */
+                  <>
+                    <AlertTriangle size={16} className="shrink-0 text-error" />
+                    <span className="text-xs leading-6 text-error">{activeError}</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Buttons Field — Figma: horizontal, itemSpacing 8 */}
@@ -145,7 +157,7 @@ export default function RegisterForm() {
             </Link>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isDisabled}
               className="relative flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none"
             >
               <span className={isLoading ? 'opacity-30' : ''}>Create Account</span>

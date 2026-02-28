@@ -1,5 +1,4 @@
 import { ExecutionContext, HttpException, HttpStatus } from '@nestjs/common';
-import { ThrottlerException } from '@nestjs/throttler';
 import { CustomThrottlerGuard } from '../custom-throttler.guard';
 
 describe('CustomThrottlerGuard', () => {
@@ -59,21 +58,34 @@ describe('CustomThrottlerGuard', () => {
 
   describe('handleRequest', () => {
     let mockResponse: { setHeader: jest.Mock };
+    let mockRequest: Record<string, unknown>;
     let mockContext: ExecutionContext;
+    let mockStorageService: { increment: jest.Mock };
 
     beforeEach(() => {
       mockResponse = { setHeader: jest.fn() };
+      mockRequest = { ip: '127.0.0.1' };
       mockContext = {
         switchToHttp: () => ({
           getResponse: () => mockResponse,
+          getRequest: () => mockRequest,
         }),
       } as unknown as ExecutionContext;
+
+      mockStorageService = {
+        increment: jest.fn(),
+      };
+      (guard as any).storageService = mockStorageService;
     });
 
-    it('should set rate limit headers on successful request', async () => {
-      // Mock the parent handleRequest to succeed
-      const parentHandleRequest = jest.fn().mockResolvedValue(true);
-      Object.getPrototypeOf(Object.getPrototypeOf(guard)).handleRequest = parentHandleRequest;
+    it('should set rate limit headers including X-RateLimit-Remaining on successful request', async () => {
+      // Note: ThrottlerStorageService returns timeToExpire in seconds (not ms)
+      mockStorageService.increment.mockResolvedValue({
+        totalHits: 5,
+        timeToExpire: 60,
+        isBlocked: false,
+        timeToBlockExpire: 0,
+      });
 
       const result = await guard['handleRequest']({
         context: mockContext,
@@ -81,23 +93,26 @@ describe('CustomThrottlerGuard', () => {
         ttl: 60000,
         throttler: { name: 'default', ttl: 60000, limit: 100 },
         blockDuration: 0,
-        getTracker: jest.fn(),
-        generateKey: jest.fn(),
+        getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
+        generateKey: jest.fn().mockReturnValue('test-key'),
       } as any);
 
       expect(result).toBe(true);
       expect(mockResponse.setHeader).toHaveBeenCalledWith('X-RateLimit-Limit', 100);
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('X-RateLimit-Remaining', 95);
       expect(mockResponse.setHeader).toHaveBeenCalledWith(
         'X-RateLimit-Reset',
         expect.any(Number),
       );
     });
 
-    it('should throw HttpException(429) with RATE_LIMIT_EXCEEDED on throttle', async () => {
-      const parentHandleRequest = jest.fn().mockRejectedValue(
-        new ThrottlerException('Too Many Requests'),
-      );
-      Object.getPrototypeOf(Object.getPrototypeOf(guard)).handleRequest = parentHandleRequest;
+    it('should throw HttpException(429) with RATE_LIMIT_EXCEEDED when limit exceeded', async () => {
+      mockStorageService.increment.mockResolvedValue({
+        totalHits: 11,
+        timeToExpire: 60,
+        isBlocked: false,
+        timeToBlockExpire: 0,
+      });
 
       try {
         await guard['handleRequest']({
@@ -106,8 +121,8 @@ describe('CustomThrottlerGuard', () => {
           ttl: 60000,
           throttler: { name: 'default', ttl: 60000, limit: 10 },
           blockDuration: 0,
-          getTracker: jest.fn(),
-          generateKey: jest.fn(),
+          getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
+          generateKey: jest.fn().mockReturnValue('test-key'),
         } as any);
         fail('Should have thrown');
       } catch (error) {
@@ -123,22 +138,62 @@ describe('CustomThrottlerGuard', () => {
       expect(mockResponse.setHeader).toHaveBeenCalledWith('Retry-After', 60);
     });
 
-    it('should re-throw non-ThrottlerException errors', async () => {
-      const genericError = new Error('Something unexpected');
-      const parentHandleRequest = jest.fn().mockRejectedValue(genericError);
-      Object.getPrototypeOf(Object.getPrototypeOf(guard)).handleRequest = parentHandleRequest;
+    it('should throw HttpException(429) when request is blocked, using timeToBlockExpire for retryAfter', async () => {
+      mockStorageService.increment.mockResolvedValue({
+        totalHits: 5,
+        timeToExpire: 30,
+        isBlocked: true,
+        timeToBlockExpire: 45,
+      });
 
-      await expect(
-        guard['handleRequest']({
+      try {
+        await guard['handleRequest']({
           context: mockContext,
           limit: 10,
           ttl: 60000,
           throttler: { name: 'default', ttl: 60000, limit: 10 },
-          blockDuration: 0,
-          getTracker: jest.fn(),
-          generateKey: jest.fn(),
-        } as any),
-      ).rejects.toThrow('Something unexpected');
+          blockDuration: 60000,
+          getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
+          generateKey: jest.fn().mockReturnValue('test-key'),
+        } as any);
+        fail('Should have thrown');
+      } catch (error) {
+        expect(error).toBeInstanceOf(HttpException);
+        expect((error as HttpException).getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
+
+        const body = (error as HttpException).getResponse() as any;
+        expect(body.error.retryAfter).toBe(45);
+      }
+
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('X-RateLimit-Remaining', 0);
+      expect(mockResponse.setHeader).toHaveBeenCalledWith('Retry-After', 45);
+    });
+
+    it('should use "default" when throttler.name is undefined', async () => {
+      mockStorageService.increment.mockResolvedValue({
+        totalHits: 1,
+        timeToExpire: 60,
+        isBlocked: false,
+        timeToBlockExpire: 0,
+      });
+
+      await guard['handleRequest']({
+        context: mockContext,
+        limit: 100,
+        ttl: 60000,
+        throttler: { ttl: 60000, limit: 100 },
+        blockDuration: 0,
+        getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
+        generateKey: jest.fn().mockReturnValue('test-key'),
+      } as any);
+
+      expect(mockStorageService.increment).toHaveBeenCalledWith(
+        'test-key',
+        60000,
+        100,
+        0,
+        'default',
+      );
     });
   });
 });

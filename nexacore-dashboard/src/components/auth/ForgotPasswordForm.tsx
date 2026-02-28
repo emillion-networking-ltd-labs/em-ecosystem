@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { AlertTriangle } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
+import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
-  const { forgotPassword, isLoading, error, clearError } = useAuth();
+  const { forgotPassword, isLoading, error, clearError, rateLimitInfo } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -24,7 +25,9 @@ export default function ForgotPasswordForm() {
     if (success) router.push('/check-email');
   };
 
-  const showError = !!error;
+  const isDisabled = isLoading || rateLimitInfo.isRateLimited;
+  const showRateLimit = rateLimitInfo.isRateLimited;
+  const showError = !showRateLimit && !!error;
 
   return (
     /* Body — Figma: layoutMode HORIZONTAL, itemSpacing 24 */
@@ -58,15 +61,23 @@ export default function ForgotPasswordForm() {
               autoFocus
             />
 
-            {/* System Message — Figma: 348x24 FIXED, error only */}
-            <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
-              {showError && (
-                <>
-                  <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="flex-1 text-xs leading-6 text-error">{error}</span>
-                </>
-              )}
-            </div>
+            {/* System Message — Figma: 348x24 FIXED, rate limit banner or error */}
+            {showRateLimit ? (
+              <RateLimitBanner
+                retryAfter={rateLimitInfo.retryAfter!}
+                message={rateLimitInfo.message!}
+                onExpired={clearError}
+              />
+            ) : (
+              <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+                {showError && (
+                  <>
+                    <AlertTriangle size={16} className="shrink-0 text-error" />
+                    <span className="flex-1 text-xs leading-6 text-error">{error}</span>
+                  </>
+                )}
+              </div>
+            )}
 
             {/* Password Recovery Button — Figma: 348x21, always visible, right-aligned */}
             <div className="flex items-center justify-end">
@@ -82,7 +93,7 @@ export default function ForgotPasswordForm() {
           {/* Recovery Button — Figma: 348x40, primary, single button */}
           <button
             type="submit"
-            disabled={isLoading}
+            disabled={isDisabled}
             className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none"
           >
             <span className={isLoading ? 'opacity-30' : ''}>Send Recovery Email</span>

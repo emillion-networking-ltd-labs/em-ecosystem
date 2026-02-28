@@ -3,10 +3,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
+import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import { useAuth } from '@/hooks/useAuth';
 
 export default function MfaTotpStep() {
-  const { verifyMfaLogin, cancelMfa, isLoading, error, clearError } = useAuth();
+  const { verifyMfaLogin, cancelMfa, isLoading, error, clearError, rateLimitInfo } = useAuth();
+  const showRateLimit = rateLimitInfo.isRateLimited;
+  const showError = !showRateLimit && !!error;
+  const isDisabled = isLoading || rateLimitInfo.isRateLimited;
   const [code, setCode] = useState<string[]>(Array(6).fill(''));
   const [useRecovery, setUseRecovery] = useState(false);
   const [recoveryCode, setRecoveryCode] = useState('');
@@ -108,19 +112,27 @@ export default function MfaTotpStep() {
                 />
               </div>
 
-              <div className={`flex items-center gap-2 ${error ? 'min-h-6' : 'h-6'}`}>
-                {error && (
-                  <>
-                    <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-xs leading-6 text-error">{error}</span>
-                  </>
-                )}
-              </div>
+              {showRateLimit ? (
+                <RateLimitBanner
+                  retryAfter={rateLimitInfo.retryAfter!}
+                  message={rateLimitInfo.message!}
+                  onExpired={clearError}
+                />
+              ) : (
+                <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+                  {showError && (
+                    <>
+                      <AlertTriangle size={16} className="shrink-0 text-error" />
+                      <span className="flex-1 text-xs leading-6 text-error">{error}</span>
+                    </>
+                  )}
+                </div>
+              )}
             </div>
 
             <button
               type="submit"
-              disabled={isLoading || !recoveryCode.trim()}
+              disabled={isDisabled || !recoveryCode.trim()}
               className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
             >
               <span className={isLoading ? 'opacity-30' : ''}>Verify</span>
@@ -192,19 +204,27 @@ export default function MfaTotpStep() {
               ))}
             </div>
 
-            <div className={`flex items-center gap-2 ${error ? 'min-h-6' : 'h-6'}`}>
-              {error && (
-                <>
-                  <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="flex-1 text-xs leading-6 text-error">{error}</span>
-                </>
-              )}
-            </div>
+            {showRateLimit ? (
+              <RateLimitBanner
+                retryAfter={rateLimitInfo.retryAfter!}
+                message={rateLimitInfo.message!}
+                onExpired={clearError}
+              />
+            ) : (
+              <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+                {showError && (
+                  <>
+                    <AlertTriangle size={16} className="shrink-0 text-error" />
+                    <span className="flex-1 text-xs leading-6 text-error">{error}</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={isLoading || code.join('').length !== 6}
+            disabled={isDisabled || code.join('').length !== 6}
             className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? 'opacity-30' : ''}>Verify</span>

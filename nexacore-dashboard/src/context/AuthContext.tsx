@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { apiClient, API_BASE_URL } from '@/lib/api';
 import { getCsrfToken, clearCsrfToken } from '@/lib/csrf';
+import { useToast } from '@/context/ToastContext';
 import type { SafeUser, AuthResponse, LoginResponse, RateLimitInfo, MessageResponse } from '@/lib/types';
 
 /* ===== State ===== */
@@ -29,6 +30,7 @@ type AuthAction =
   | { type: 'AUTH_START' }
   | { type: 'AUTH_SUCCESS'; payload: { user: SafeUser; accessToken: string } }
   | { type: 'AUTH_ERROR'; payload: string }
+  | { type: 'AUTH_STOP' }
   | { type: 'RATE_LIMITED'; payload: { retryAfter: number; message: string } }
   | { type: 'MFA_REQUIRED'; payload: { mfaToken: string } }
   | { type: 'LOGOUT' }
@@ -43,7 +45,7 @@ const DEFAULT_RATE_LIMIT: RateLimitInfo = {
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     case 'AUTH_START':
-      return { ...state, isLoading: true, error: null };
+      return { ...state, isLoading: true, error: null, rateLimitInfo: DEFAULT_RATE_LIMIT };
     case 'AUTH_SUCCESS':
       return {
         user: action.payload.user,
@@ -57,6 +59,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
       };
     case 'AUTH_ERROR':
       return { ...state, isLoading: false, isInitialized: true, error: action.payload, mfaRequired: false, mfaToken: null };
+    case 'AUTH_STOP':
+      return { ...state, isLoading: false, isInitialized: true, mfaRequired: false, mfaToken: null, rateLimitInfo: DEFAULT_RATE_LIMIT };
     case 'RATE_LIMITED':
       return {
         ...state,
@@ -125,6 +129,7 @@ function isMfaResponse(
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  const { addToast } = useToast();
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
     accessToken: null,
@@ -190,13 +195,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
       } else {
-        dispatch({
-          type: 'AUTH_ERROR',
-          payload: extractErrorMessage(err, 'Login failed. Please try again.'),
-        });
+        addToast({ variant: 'error', title: extractErrorMessage(err, 'Login failed. Please try again.') });
+        dispatch({ type: 'AUTH_STOP' });
       }
     }
-  }, []);
+  }, [addToast]);
 
   const register = useCallback(async (email: string, password: string): Promise<boolean> => {
     dispatch({ type: 'AUTH_START' });
@@ -220,14 +223,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           },
         });
       } else {
-        dispatch({
-          type: 'AUTH_ERROR',
-          payload: extractErrorMessage(err, 'Registration failed. Please try again.'),
-        });
+        addToast({ variant: 'error', title: extractErrorMessage(err, 'Registration failed. Please try again.') });
+        dispatch({ type: 'AUTH_STOP' });
       }
       return false;
     }
-  }, []);
+  }, [addToast]);
 
   const handleOAuthCallback = useCallback(async (code: string) => {
     dispatch({ type: 'AUTH_START' });
@@ -242,12 +243,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         payload: { user, accessToken: data.accessToken },
       });
     } catch (err: unknown) {
-      dispatch({
-        type: 'AUTH_ERROR',
-        payload: extractErrorMessage(err, 'OAuth authentication failed.'),
-      });
+      addToast({ variant: 'error', title: extractErrorMessage(err, 'OAuth authentication failed.') });
+      dispatch({ type: 'AUTH_STOP' });
     }
-  }, []);
+  }, [addToast]);
 
   const logout = useCallback(async () => {
     try {
@@ -281,12 +280,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         payload: { user, accessToken: data.accessToken },
       });
     } catch (err: unknown) {
-      dispatch({
-        type: 'AUTH_ERROR',
-        payload: extractErrorMessage(err, 'MFA verification failed. Please try again.'),
-      });
+      const errObj = err as ApiError;
+      if (errObj?.error?.retryAfter) {
+        dispatch({
+          type: 'RATE_LIMITED',
+          payload: {
+            retryAfter: errObj.error.retryAfter,
+            message: errObj.error.message ?? 'Too many requests. Please try again later.',
+          },
+        });
+      } else {
+        addToast({ variant: 'error', title: extractErrorMessage(err, 'MFA verification failed. Please try again.') });
+        dispatch({ type: 'AUTH_STOP' });
+      }
     }
-  }, [state.mfaToken]);
+  }, [state.mfaToken, addToast]);
 
   const cancelMfa = useCallback(() => {
     dispatch({ type: 'LOGOUT' });
@@ -298,13 +306,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiClient.post<MessageResponse>('/auth/forgot-password', { email });
       return true;
     } catch (err: unknown) {
-      dispatch({
-        type: 'AUTH_ERROR',
-        payload: extractErrorMessage(err, 'Failed to send reset email. Please try again.'),
-      });
+      const errObj = err as ApiError;
+      if (errObj?.error?.retryAfter) {
+        dispatch({
+          type: 'RATE_LIMITED',
+          payload: {
+            retryAfter: errObj.error.retryAfter,
+            message: errObj.error.message ?? 'Too many requests. Please try again later.',
+          },
+        });
+      } else {
+        addToast({ variant: 'error', title: extractErrorMessage(err, 'Failed to send reset email. Please try again.') });
+        dispatch({ type: 'AUTH_STOP' });
+      }
       return false;
     }
-  }, []);
+  }, [addToast]);
 
   const resetPassword = useCallback(async (token: string, newPassword: string): Promise<boolean> => {
     dispatch({ type: 'AUTH_START' });
@@ -312,13 +329,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiClient.post<MessageResponse>('/auth/reset-password', { token, newPassword });
       return true;
     } catch (err: unknown) {
-      dispatch({
-        type: 'AUTH_ERROR',
-        payload: extractErrorMessage(err, 'Password reset failed. Please try again.'),
-      });
+      const errObj = err as ApiError;
+      if (errObj?.error?.retryAfter) {
+        dispatch({
+          type: 'RATE_LIMITED',
+          payload: {
+            retryAfter: errObj.error.retryAfter,
+            message: errObj.error.message ?? 'Too many requests. Please try again later.',
+          },
+        });
+      } else {
+        addToast({ variant: 'error', title: extractErrorMessage(err, 'Password reset failed. Please try again.') });
+        dispatch({ type: 'AUTH_STOP' });
+      }
       return false;
     }
-  }, []);
+  }, [addToast]);
 
   const resendVerification = useCallback(async (): Promise<boolean> => {
     dispatch({ type: 'AUTH_START' });
@@ -326,13 +352,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       await apiClient.post<MessageResponse>('/auth/resend-verification', {});
       return true;
     } catch (err: unknown) {
-      dispatch({
-        type: 'AUTH_ERROR',
-        payload: extractErrorMessage(err, 'Failed to resend verification email.'),
-      });
+      const errObj = err as ApiError;
+      if (errObj?.error?.retryAfter) {
+        dispatch({
+          type: 'RATE_LIMITED',
+          payload: {
+            retryAfter: errObj.error.retryAfter,
+            message: errObj.error.message ?? 'Too many requests. Please try again later.',
+          },
+        });
+      } else {
+        addToast({ variant: 'error', title: extractErrorMessage(err, 'Failed to resend verification email.') });
+        dispatch({ type: 'AUTH_STOP' });
+      }
       return false;
     }
-  }, []);
+  }, [addToast]);
 
   const clearError = useCallback(() => {
     dispatch({ type: 'CLEAR_ERROR' });

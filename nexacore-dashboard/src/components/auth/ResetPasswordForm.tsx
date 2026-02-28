@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { RulerDimensionLine, Check, AlertTriangle } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
+import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import { useAuth } from '@/hooks/useAuth';
 
 /* Password requirement — minimum 8 characters */
@@ -18,7 +19,7 @@ export default function ResetPasswordForm() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const { resetPassword, isLoading, error, clearError } = useAuth();
+  const { resetPassword, isLoading, error, clearError, rateLimitInfo } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -48,9 +49,11 @@ export default function ResetPasswordForm() {
     if (ok) setSuccess(true);
   };
 
+  const isDisabled = isLoading || rateLimitInfo.isRateLimited;
   const activeError = localError || error;
-  const showError = !!activeError;
-  const showPasswordCheck = !showError && password.length > 0;
+  const showRateLimit = rateLimitInfo.isRateLimited;
+  const showError = !showRateLimit && !!activeError;
+  const showPasswordCheck = !showRateLimit && !showError && password.length > 0;
 
   if (success) {
     return (
@@ -116,33 +119,41 @@ export default function ResetPasswordForm() {
               hasError={showError}
             />
 
-            <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
-              {showPasswordCheck && (
-                <div className="flex shrink-0 items-center gap-[15px]">
-                  {PASSWORD_REQUIREMENTS.map(({ key, Icon, test }) => {
-                    const met = test(password);
-                    return (
-                      <div key={key} className="relative h-6 w-6">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-border-default">
-                          <Icon size={14} className="text-content-primary/50" />
-                        </div>
-                        {met && (
-                          <div className="absolute -bottom-1 -right-1 flex h-[14px] w-[14px] items-center justify-center rounded-full border border-border-default bg-surface-primary">
-                            <Check size={8} className="text-green-800" />
+            {showRateLimit ? (
+              <RateLimitBanner
+                retryAfter={rateLimitInfo.retryAfter!}
+                message={rateLimitInfo.message!}
+                onExpired={clearError}
+              />
+            ) : (
+              <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+                {showPasswordCheck && (
+                  <div className="flex shrink-0 items-center gap-[15px]">
+                    {PASSWORD_REQUIREMENTS.map(({ key, Icon, test }) => {
+                      const met = test(password);
+                      return (
+                        <div key={key} className="relative h-6 w-6">
+                          <div className="flex h-6 w-6 items-center justify-center rounded-lg border border-border-default">
+                            <Icon size={14} className="text-content-primary/50" />
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-              {showError && (
-                <>
-                  <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="text-xs leading-6 text-error">{activeError}</span>
-                </>
-              )}
-            </div>
+                          {met && (
+                            <div className="absolute -bottom-1 -right-1 flex h-[14px] w-[14px] items-center justify-center rounded-full border border-border-default bg-surface-primary">
+                              <Check size={8} className="text-green-800" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {showError && (
+                  <>
+                    <AlertTriangle size={16} className="shrink-0 text-error" />
+                    <span className="text-xs leading-6 text-error">{activeError}</span>
+                  </>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="flex gap-2">
@@ -154,7 +165,7 @@ export default function ResetPasswordForm() {
             </Link>
             <button
               type="submit"
-              disabled={isLoading}
+              disabled={isDisabled}
               className="relative flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none"
             >
               <span className={isLoading ? 'opacity-30' : ''}>Reset Password</span>

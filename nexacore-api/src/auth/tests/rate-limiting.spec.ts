@@ -12,8 +12,8 @@ describe('Rate Limiting Configuration', () => {
   });
 
   describe('AUTH_RATE_LIMITS', () => {
-    it('should have stricter limit for login (5 per 60s)', () => {
-      expect(AUTH_RATE_LIMITS.login.limit).toBe(5);
+    it('should have login limit higher than MAX_FAILED_ATTEMPTS (10 per 60s)', () => {
+      expect(AUTH_RATE_LIMITS.login.limit).toBe(10);
       expect(AUTH_RATE_LIMITS.login.ttl).toBe(60_000);
     });
 
