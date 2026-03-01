@@ -93,6 +93,8 @@ describe('AuthController', () => {
             resendVerificationEmail: jest.fn(),
             forgotPassword: jest.fn(),
             resetPassword: jest.fn(),
+            validateResetToken: jest.fn(),
+            resendVerificationByEmail: jest.fn(),
           },
         },
         {
@@ -539,6 +541,42 @@ describe('AuthController', () => {
         expect.objectContaining({ ipAddress: '127.0.0.1' }),
       );
       expect(result).toEqual({ message: 'Password reset successfully' });
+    });
+  });
+
+  // ─── GET /auth/validate-reset-token ──────────────────────────
+
+  describe('validateResetToken', () => {
+    it('should return { valid: false } when no token provided', async () => {
+      const result = await controller.validateResetToken(undefined as any);
+
+      expect(result).toEqual({ valid: false });
+      expect(authService.validateResetToken).not.toHaveBeenCalled();
+    });
+
+    it('should delegate to authService and return validity', async () => {
+      authService.validateResetToken.mockResolvedValue({ valid: true });
+
+      const result = await controller.validateResetToken('some-token');
+
+      expect(authService.validateResetToken).toHaveBeenCalledWith('some-token');
+      expect(result).toEqual({ valid: true });
+    });
+  });
+
+  // ─── POST /auth/resend-verification-public ─────────────────
+
+  describe('resendVerificationPublic', () => {
+    it('should delegate to authService and return generic message', async () => {
+      authService.resendVerificationByEmail.mockResolvedValue(undefined);
+      const dto = { email: 'test@example.com' };
+
+      const result = await controller.resendVerificationPublic(dto);
+
+      expect(authService.resendVerificationByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(result).toEqual({
+        message: 'If an account exists and needs verification, we have sent an email',
+      });
     });
   });
 

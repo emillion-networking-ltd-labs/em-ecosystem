@@ -9,6 +9,7 @@ import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import { useAuth } from '@/hooks/useAuth';
 import { useRateLimit } from '@/hooks/useRateLimit';
+import { useToast } from '@/context/ToastContext';
 import { RateLimitError } from '@/lib/types';
 
 export default function ForgotPasswordForm() {
@@ -16,6 +17,7 @@ export default function ForgotPasswordForm() {
   const [emailError, setEmailError] = useState<string | null>(null);
   const { forgotPassword, isLoading, error, clearError } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
+  const { addToast } = useToast();
   const router = useRouter();
 
   useEffect(() => {
@@ -31,7 +33,10 @@ export default function ForgotPasswordForm() {
     setEmailError(null);
     try {
       const success = await forgotPassword(email);
-      if (success) router.push('/check-email');
+      if (success) {
+        addToast({ variant: 'success', title: 'Recovery email sent', description: 'Check your inbox for the password reset link.' });
+        router.push('/password-reset/check-email');
+      }
     } catch (err) {
       if (err instanceof RateLimitError) {
         setRateLimit(err.retryAfter, err.message);
@@ -47,8 +52,8 @@ export default function ForgotPasswordForm() {
   return (
     /* Body — Figma: layoutMode HORIZONTAL, itemSpacing 24 */
     <div className="flex flex-col gap-6 md:flex-row">
-      {/* Title Group — Figma: 330px fixed, vertical center, inner 300px */}
-      <div className="flex w-full flex-col justify-center md:w-[330px]">
+      {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top), inner 300px */}
+      <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
           <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
             Password Recovery
@@ -60,11 +65,11 @@ export default function ForgotPasswordForm() {
         </div>
       </div>
 
-      {/* Form — Figma: 348x146 FIXED, vertical, gap 8 */}
+      {/* Form — Figma: 348x196, vertical, gap 8 */}
       <div className="w-full md:w-[348px]">
         <form onSubmit={handleSubmit} className="flex flex-col gap-2">
-          {/* Email Field — Figma: 348x146 FIXED, vertical, gap 8 */}
-          <div className="flex min-h-[146px] flex-col gap-2">
+          {/* Email Field — Figma: 348x148 FIXED, vertical, gap 8 */}
+          <div className="flex min-h-[148px] flex-col gap-2">
             <Input
               label="Email"
               type="email"

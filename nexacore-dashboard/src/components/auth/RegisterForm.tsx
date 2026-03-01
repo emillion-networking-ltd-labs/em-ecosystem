@@ -58,7 +58,7 @@ export default function RegisterForm() {
     setPasswordError(null);
     try {
       const success = await register(formData.email, formData.password);
-      if (success) router.push('/email-sent');
+      if (success) router.push('/activation/check-email');
     } catch (err) {
       if (err instanceof RateLimitError) {
         setRateLimit(err.retryAfter, err.message);
@@ -75,8 +75,8 @@ export default function RegisterForm() {
   return (
     /* Body — Figma: layoutMode HORIZONTAL, itemSpacing 24 */
     <div className="flex flex-col gap-6 md:flex-row">
-      {/* Title Group — Figma: 330px fixed, vertical center, inner 300px */}
-      <div className="flex w-full flex-col justify-center md:w-[330px]">
+      {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top), inner 300px */}
+      <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
           <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
             Create Account
@@ -91,8 +91,8 @@ export default function RegisterForm() {
       {/* Form — Figma: 348px, vertical, itemSpacing 8 */}
       <div className="w-full md:w-[348px]">
         <form onSubmit={handleRegister} className="flex flex-col gap-2">
-          {/* Form Fields — min-h allows System Message to expand for long errors */}
-          <div className="flex min-h-[204px] flex-col gap-2">
+          {/* Form Fields — Figma: 348x196, min-h allows System Message to expand */}
+          <div className="flex min-h-[196px] flex-col gap-2">
             <Input
               label="Email"
               type="email"

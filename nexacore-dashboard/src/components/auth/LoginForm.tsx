@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronDown, AlertTriangle } from 'lucide-react';
+import { ChevronDown, AlertTriangle, SendHorizontal } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import RateLimitBanner from '@/components/ui/RateLimitBanner';
+import CountdownTimer from '@/components/ui/CountdownTimer';
 import OAuthButtons from './OAuthButtons';
 import MfaTotpStep from './MfaTotpStep';
 import { useAuth } from '@/hooks/useAuth';
 import { useRateLimit } from '@/hooks/useRateLimit';
+import { useToast } from '@/context/ToastContext';
 import { RateLimitError } from '@/lib/types';
 import type { RateLimitInfo } from '@/lib/types';
 
@@ -19,8 +21,9 @@ type LoginStep = 'email' | 'password';
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 
-// Module-level cache — survives component unmount/remount during SPA navigation
+// Module-level caches — survive component unmount/remount during SPA navigation
 const lockoutCache = new Map<string, { retryAfter: number; lockedAt: number }>();
+const resendCooldownCache = new Map<string, number>(); // email → timestamp when cooldown started
 
 export default function LoginForm() {
   const [step, setStep] = useState<LoginStep>('email');
@@ -28,7 +31,7 @@ export default function LoginForm() {
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [oauthError, setOauthError] = useState<string | null>(null);
-  const { login, isLoading, isAuthenticated, error, clearError, mfaRequired } = useAuth();
+  const { login, isLoading, isAuthenticated, error, clearError, mfaRequired, resendVerificationPublic } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -127,6 +130,7 @@ export default function LoginForm() {
         onSubmit={handleLogin}
         onChangeEmail={() => { clearError(); clearRateLimit(); setPasswordError(null); setStep('email'); }}
         onRateLimitExpired={clearRateLimit}
+        onResendVerification={resendVerificationPublic}
       />
     );
   }
@@ -134,8 +138,8 @@ export default function LoginForm() {
   return (
     /* Body — Figma: layoutMode HORIZONTAL, itemSpacing 24 */
     <div className="flex flex-col gap-6 md:flex-row">
-      {/* Title Group — Figma: 330px fixed, vertical center */}
-      <div className="flex w-full flex-col justify-center gap-2 md:w-[330px]">
+      {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top) */}
+      <div className="flex w-full flex-col gap-2 md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
           <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
             Sign In
@@ -150,8 +154,8 @@ export default function LoginForm() {
       {/* Form — Figma: 348px fixed, vertical, itemSpacing 8 */}
       <div className="w-full md:w-[348px]">
         <form onSubmit={handleEmailNext} className="flex flex-col gap-2">
-          {/* Email Field — Figma: 348x116 FIXED, vertical, gap 8 */}
-          <div className="flex h-[116px] flex-col gap-2">
+          {/* Email Field — Figma: 348x110 FIXED, vertical, gap 8 */}
+          <div className="flex h-[110px] flex-col gap-2">
             <Input
               label="Email"
               type="email"
@@ -220,11 +224,14 @@ type PasswordStepProps = {
   onSubmit: (e: React.FormEvent) => void;
   onChangeEmail: () => void;
   onRateLimitExpired: () => void;
+  onResendVerification: (email: string) => Promise<boolean>;
 };
 
-function PasswordStep({ email, password, isLoading, error, passwordError, rateLimitInfo, onChange, onSubmit, onChangeEmail, onRateLimitExpired }: PasswordStepProps) {
+function PasswordStep({ email, password, isLoading, error, passwordError, rateLimitInfo, onChange, onSubmit, onChangeEmail, onRateLimitExpired, onResendVerification }: PasswordStepProps) {
   const [isEmailOpen, setIsEmailOpen] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const { addToast } = useToast();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -238,15 +245,55 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
     }
   }, [isEmailOpen]);
 
+  // Restore cooldown from module-level cache on mount
+  useEffect(() => {
+    const cachedAt = resendCooldownCache.get(email);
+    if (cachedAt) {
+      const elapsed = Math.floor((Date.now() - cachedAt) / 1000);
+      const remaining = 60 - elapsed;
+      if (remaining > 0) {
+        setResendCooldown(remaining);
+      } else {
+        resendCooldownCache.delete(email);
+      }
+    }
+  }, [email]);
+
+  // Countdown timer for resend cooldown
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  const handleResendVerification = useCallback(async () => {
+    resendCooldownCache.set(email, Date.now());
+    setResendCooldown(60);
+    const ok = await onResendVerification(email);
+    if (ok) {
+      addToast({ variant: 'success', title: 'Verification email sent', description: 'Check your inbox for the verification link.' });
+    }
+  }, [email, onResendVerification, addToast]);
+
   const emailInitial = email.charAt(0).toUpperCase();
   const activeError = passwordError || error;
-  const showError = !!activeError && !rateLimitInfo.isRateLimited;
+  const isVerificationError = !!error && error.toLowerCase().includes('verify your email');
+  const showNonVerificationError = !isVerificationError && !!activeError && !rateLimitInfo.isRateLimited;
+  const showResend = isVerificationError && !rateLimitInfo.isRateLimited;
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
 
   return (
     <div className="flex flex-col gap-6 md:flex-row">
-      {/* Title Group — Figma: 330px fixed, vertical center, inner 300px */}
-      <div className="flex w-full flex-col justify-center md:w-[330px]">
+      {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top), inner 300px */}
+      <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
           <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
             Sign In
@@ -303,8 +350,8 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
       {/* Form — Figma: 348px, password + System Message (error + forgot link) + Sign In */}
       <div className="w-full md:w-[348px]">
         <form onSubmit={onSubmit} className="flex flex-col gap-2">
-          {/* Password Field — Figma: 348x146 FIXED, vertical, gap 8 */}
-          <div className="flex min-h-[146px] flex-col gap-2">
+          {/* Password Field — Figma: 348x148 FIXED, vertical, gap 8 */}
+          <div className="flex min-h-[148px] flex-col gap-2">
             <Input
               label="Password"
               type="password"
@@ -312,11 +359,11 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
               value={password}
               onChange={onChange}
               placeholder="Enter your password"
-              hasError={showError}
+              hasError={showNonVerificationError}
               autoFocus
             />
 
-            {/* System Message — rate limit banner or error */}
+            {/* System Message — rate limit banner, resend verification, or error */}
             {rateLimitInfo.isRateLimited && rateLimitInfo.retryAfter ? (
               <RateLimitBanner
                 retryAfter={rateLimitInfo.retryAfter}
@@ -324,9 +371,27 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
                 kind={rateLimitInfo.kind ?? undefined}
                 onExpired={onRateLimitExpired}
               />
+            ) : showResend ? (
+              /* Resend verification — no inline error (toast covers it), just button + CountdownTimer */
+              <div className="flex h-6 items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleResendVerification}
+                  disabled={resendCooldown > 0}
+                  className={`inline-flex items-center gap-2 text-sm font-medium leading-[21px] transition-colors ${
+                    resendCooldown > 0
+                      ? 'pointer-events-none text-error/50'
+                      : 'text-content-primary/75 hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted'
+                  }`}
+                >
+                  <SendHorizontal size={14} className="shrink-0" />
+                  Resend verification email
+                </button>
+                {resendCooldown > 0 && <CountdownTimer seconds={resendCooldown} />}
+              </div>
             ) : (
-              <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
-                {showError && (
+              <div className={`flex items-center gap-2 ${showNonVerificationError ? 'min-h-6' : 'h-6'}`}>
+                {showNonVerificationError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
                     <span className="flex-1 text-xs leading-6 text-error">{activeError}</span>

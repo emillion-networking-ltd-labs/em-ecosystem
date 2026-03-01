@@ -84,6 +84,8 @@ type AuthContextType = AuthState & {
   forgotPassword: (email: string) => Promise<boolean>;
   resetPassword: (token: string, newPassword: string) => Promise<boolean>;
   resendVerification: () => Promise<boolean>;
+  validateResetToken: (token: string) => Promise<boolean>;
+  resendVerificationPublic: (email: string) => Promise<boolean>;
   clearError: () => void;
 };
 
@@ -174,8 +176,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const kind = detectRateLimitKind(errObj);
         throw new RateLimitError(errObj.error.retryAfter, errObj.error.message ?? 'Too many requests.', kind);
       }
-      addToast({ variant: 'error', title: 'Sign in failed', description: extractErrorMessage(err) });
-      dispatch({ type: 'AUTH_STOP' });
+      const message = extractErrorMessage(err);
+      addToast({ variant: 'error', title: 'Sign in failed', description: message });
+      if (message.toLowerCase().includes('verify your email')) {
+        dispatch({ type: 'AUTH_ERROR', payload: message });
+      } else {
+        dispatch({ type: 'AUTH_STOP' });
+      }
     }
   }, [addToast]);
 
@@ -325,6 +332,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [addToast]);
 
+  const validateResetToken = useCallback(async (token: string): Promise<boolean> => {
+    try {
+      const data = await apiClient.get<{ valid: boolean }>(`/auth/validate-reset-token?token=${encodeURIComponent(token)}`);
+      return data.valid;
+    } catch {
+      return false;
+    }
+  }, []);
+
+  const resendVerificationPublic = useCallback(async (email: string): Promise<boolean> => {
+    try {
+      await apiClient.post<MessageResponse>('/auth/resend-verification-public', { email });
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   const clearError = useCallback(() => {
     dispatch({ type: 'CLEAR_ERROR' });
   }, []);
@@ -344,6 +369,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         forgotPassword,
         resetPassword,
         resendVerification,
+        validateResetToken,
+        resendVerificationPublic,
         clearError,
       }}
     >

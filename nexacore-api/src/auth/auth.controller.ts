@@ -34,6 +34,7 @@ import { LoginDto } from './dto/login.dto';
 import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ResendVerificationPublicDto } from './dto/resend-verification-public.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
@@ -301,6 +302,30 @@ export class AuthController {
     return { message: 'Verification email sent' };
   }
 
+  @Post('resend-verification-public')
+  @HttpCode(HttpStatus.OK)
+  @SkipCsrf()
+  @Throttle({
+    global: { ttl: 900000, limit: 3 },
+  })
+  @ApiOperation({
+    summary: 'Resend email verification (public, no auth required)',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Generic success message (anti-enumeration)',
+  })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
+  async resendVerificationPublic(
+    @Body() dto: ResendVerificationPublicDto,
+  ) {
+    await this.authService.resendVerificationByEmail(dto.email);
+    return {
+      message:
+        'If an account exists and needs verification, we have sent an email',
+    };
+  }
+
   // ── Password Reset Endpoints ──
 
   @Post('forgot-password')
@@ -337,6 +362,24 @@ export class AuthController {
     const meta = this.extractRequestMeta(req);
     await this.authService.resetPassword(dto, meta);
     return { message: 'Password reset successfully' };
+  }
+
+  @Get('validate-reset-token')
+  @SkipCsrf()
+  @ApiOperation({
+    summary: 'Validate a password reset token without consuming it',
+  })
+  @ApiQuery({
+    name: 'token',
+    required: true,
+    description: 'Password reset token from email',
+  })
+  @ApiResponse({ status: 200, description: 'Token validity status' })
+  async validateResetToken(@Query('token') token: string) {
+    if (!token) {
+      return { valid: false };
+    }
+    return this.authService.validateResetToken(token);
   }
 
   // ── Admin Endpoints ──

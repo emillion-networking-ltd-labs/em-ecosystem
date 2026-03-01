@@ -280,7 +280,7 @@ export class AuthService {
         })
         .catch(() => {});
       throw new ForbiddenException(
-        'Please verify your email address before signing in. Check your inbox for the verification link.',
+        'Verify your email to sign in. Check your inbox.',
       );
     }
 
@@ -617,6 +617,30 @@ export class AuthService {
     await this.createAndSendVerificationEmail(user);
   }
 
+  async resendVerificationByEmail(email: string): Promise<void> {
+    const user = await this.usersService.findByEmail(email);
+
+    // Anti-enumeration: silently return for all non-happy paths
+    if (!user) return;
+    if (user.emailVerified) return;
+
+    // Rate limiting: check last token creation time (silent)
+    const lastToken = await this.prisma.emailVerificationToken.findFirst({
+      where: { userId: user.id },
+      orderBy: { createdAt: 'desc' },
+    });
+
+    if (lastToken) {
+      const secondsSinceLastToken =
+        (Date.now() - lastToken.createdAt.getTime()) / 1000;
+      if (secondsSinceLastToken < RESEND_COOLDOWN_SECONDS) {
+        return; // Silent — anti-enumeration
+      }
+    }
+
+    await this.createAndSendVerificationEmail(user);
+  }
+
   // ── Password Reset ──
 
   async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
@@ -692,6 +716,19 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired reset token');
     }
 
+    // Reject if new password is same as current
+    if (resetToken.user.passwordHash) {
+      const isSamePassword = await bcrypt.compare(
+        dto.newPassword,
+        resetToken.user.passwordHash,
+      );
+      if (isSamePassword) {
+        throw new BadRequestException(
+          'New password must be different from current password',
+        );
+      }
+    }
+
     const newPasswordHash = await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS);
 
     // Mark token as used and update password
@@ -718,6 +755,20 @@ export class AuthService {
         metadata: { method: 'reset_token' },
       })
       .catch(() => {});
+  }
+
+  async validateResetToken(token: string): Promise<{ valid: boolean }> {
+    const tokenHash = this.hashToken(token);
+
+    const resetToken = await this.prisma.passwordResetToken.findUnique({
+      where: { tokenHash },
+    });
+
+    if (!resetToken || resetToken.usedAt || resetToken.expiresAt < new Date()) {
+      return { valid: false };
+    }
+
+    return { valid: true };
   }
 
   // ── Private helpers: email tokens ──
