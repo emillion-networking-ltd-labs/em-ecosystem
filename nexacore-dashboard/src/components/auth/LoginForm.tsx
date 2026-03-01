@@ -10,11 +10,17 @@ import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import OAuthButtons from './OAuthButtons';
 import MfaTotpStep from './MfaTotpStep';
 import { useAuth } from '@/hooks/useAuth';
+import { useRateLimit } from '@/hooks/useRateLimit';
+import { RateLimitError } from '@/lib/types';
+import type { RateLimitInfo } from '@/lib/types';
 
 type LoginStep = 'email' | 'password';
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+
+// Module-level cache — survives component unmount/remount during SPA navigation
+const lockoutCache = new Map<string, { retryAfter: number; lockedAt: number }>();
 
 export default function LoginForm() {
   const [step, setStep] = useState<LoginStep>('email');
@@ -22,7 +28,8 @@ export default function LoginForm() {
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const [oauthError, setOauthError] = useState<string | null>(null);
-  const { login, isLoading, isAuthenticated, error, clearError, rateLimitInfo, mfaRequired } = useAuth();
+  const { login, isLoading, isAuthenticated, error, clearError, mfaRequired } = useAuth();
+  const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -70,7 +77,36 @@ export default function LoginForm() {
       return;
     }
     setPasswordError(null);
-    await login(formData.email, formData.password);
+    try {
+      await login(formData.email, formData.password);
+    } catch (err) {
+      if (err instanceof RateLimitError) {
+        if (err.kind === 'lockout') {
+          // Cache lockout for this email so it survives IP throttle overlap
+          lockoutCache.set(formData.email, {
+            retryAfter: err.retryAfter,
+            lockedAt: Date.now(),
+          });
+          setRateLimit(err.retryAfter, err.message, 'lockout');
+        } else {
+          // IP throttle — check if current email has a cached lockout still active
+          const cached = lockoutCache.get(formData.email);
+          if (cached) {
+            const elapsed = Math.floor((Date.now() - cached.lockedAt) / 1000);
+            const remaining = cached.retryAfter - elapsed;
+            if (remaining > 0) {
+              // Show the account lockout instead of the IP throttle
+              setRateLimit(remaining, 'Too many attempts. Account locked.', 'lockout');
+            } else {
+              lockoutCache.delete(formData.email);
+              setRateLimit(err.retryAfter, err.message, 'throttle');
+            }
+          } else {
+            setRateLimit(err.retryAfter, err.message, 'throttle');
+          }
+        }
+      }
+    }
     // On AUTH_SUCCESS → isAuthenticated → useEffect redirects to /dashboard
   };
 
@@ -89,8 +125,8 @@ export default function LoginForm() {
         rateLimitInfo={rateLimitInfo}
         onChange={handleChange}
         onSubmit={handleLogin}
-        onChangeEmail={() => { clearError(); setPasswordError(null); setStep('email'); }}
-        onRateLimitExpired={clearError}
+        onChangeEmail={() => { clearError(); clearRateLimit(); setPasswordError(null); setStep('email'); }}
+        onRateLimitExpired={clearRateLimit}
       />
     );
   }
@@ -179,7 +215,7 @@ type PasswordStepProps = {
   isLoading: boolean;
   error: string | null;
   passwordError: string | null;
-  rateLimitInfo: { isRateLimited: boolean; retryAfter: number | null; message: string | null };
+  rateLimitInfo: RateLimitInfo;
   onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSubmit: (e: React.FormEvent) => void;
   onChangeEmail: () => void;
@@ -285,6 +321,7 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
               <RateLimitBanner
                 retryAfter={rateLimitInfo.retryAfter}
                 message={rateLimitInfo.message ?? 'Too many attempts.'}
+                kind={rateLimitInfo.kind ?? undefined}
                 onExpired={onRateLimitExpired}
               />
             ) : (

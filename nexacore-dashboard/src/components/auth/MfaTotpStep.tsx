@@ -1,13 +1,16 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { AlertTriangle, ArrowLeft } from 'lucide-react';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import { useAuth } from '@/hooks/useAuth';
+import { useRateLimit } from '@/hooks/useRateLimit';
+import { RateLimitError } from '@/lib/types';
 
 export default function MfaTotpStep() {
-  const { verifyMfaLogin, cancelMfa, isLoading, error, clearError, rateLimitInfo } = useAuth();
+  const { verifyMfaLogin, cancelMfa, isLoading, error, clearError } = useAuth();
+  const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const showRateLimit = rateLimitInfo.isRateLimited;
   const showError = !showRateLimit && !!error;
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
@@ -21,6 +24,16 @@ export default function MfaTotpStep() {
       inputRefs.current[0]?.focus();
     }
   }, [useRecovery]);
+
+  const handleVerify = useCallback(async (codeStr: string, isRecovery: boolean) => {
+    try {
+      await verifyMfaLogin(codeStr, isRecovery);
+    } catch (err) {
+      if (err instanceof RateLimitError) {
+        setRateLimit(err.retryAfter, err.message);
+      }
+    }
+  }, [verifyMfaLogin, setRateLimit]);
 
   const handleDigitChange = (index: number, value: string) => {
     clearError();
@@ -39,7 +52,7 @@ export default function MfaTotpStep() {
     if (digit && index === 5) {
       const full = updated.join('');
       if (full.length === 6) {
-        verifyMfaLogin(full, false);
+        handleVerify(full, false);
       }
     }
   };
@@ -62,7 +75,7 @@ export default function MfaTotpStep() {
     setCode(updated);
 
     if (pasted.length === 6) {
-      verifyMfaLogin(pasted, false);
+      handleVerify(pasted, false);
     } else {
       inputRefs.current[pasted.length]?.focus();
     }
@@ -71,14 +84,14 @@ export default function MfaTotpStep() {
   const handleRecoverySubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!recoveryCode.trim()) return;
-    verifyMfaLogin(recoveryCode.trim(), true);
+    handleVerify(recoveryCode.trim(), true);
   };
 
   const handleTotpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const full = code.join('');
     if (full.length !== 6) return;
-    verifyMfaLogin(full, false);
+    handleVerify(full, false);
   };
 
   if (useRecovery) {
@@ -116,7 +129,7 @@ export default function MfaTotpStep() {
                 <RateLimitBanner
                   retryAfter={rateLimitInfo.retryAfter!}
                   message={rateLimitInfo.message!}
-                  onExpired={clearError}
+                  onExpired={clearRateLimit}
                 />
               ) : (
                 <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
@@ -146,7 +159,7 @@ export default function MfaTotpStep() {
             <div className="mt-2 flex items-center justify-between">
               <button
                 type="button"
-                onClick={() => { clearError(); setUseRecovery(false); setRecoveryCode(''); }}
+                onClick={() => { clearError(); clearRateLimit(); setUseRecovery(false); setRecoveryCode(''); }}
                 className="flex items-center gap-1 text-sm font-medium text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
               >
                 <ArrowLeft size={14} />
@@ -208,7 +221,7 @@ export default function MfaTotpStep() {
               <RateLimitBanner
                 retryAfter={rateLimitInfo.retryAfter!}
                 message={rateLimitInfo.message!}
-                onExpired={clearError}
+                onExpired={clearRateLimit}
               />
             ) : (
               <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
@@ -238,7 +251,7 @@ export default function MfaTotpStep() {
           <div className="mt-2 flex items-center justify-between">
             <button
               type="button"
-              onClick={() => { clearError(); setUseRecovery(true); setCode(Array(6).fill('')); }}
+              onClick={() => { clearError(); clearRateLimit(); setUseRecovery(true); setCode(Array(6).fill('')); }}
               className="text-sm font-medium text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
             >
               Use recovery code

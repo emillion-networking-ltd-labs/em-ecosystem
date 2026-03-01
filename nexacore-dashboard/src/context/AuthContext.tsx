@@ -11,7 +11,8 @@ import {
 import { apiClient, API_BASE_URL } from '@/lib/api';
 import { getCsrfToken, clearCsrfToken } from '@/lib/csrf';
 import { useToast } from '@/context/ToastContext';
-import type { SafeUser, AuthResponse, LoginResponse, RateLimitInfo, MessageResponse } from '@/lib/types';
+import { RateLimitError } from '@/lib/types';
+import type { SafeUser, AuthResponse, LoginResponse, MessageResponse, RateLimitKind } from '@/lib/types';
 
 /* ===== State ===== */
 
@@ -21,7 +22,6 @@ type AuthState = {
   isLoading: boolean;
   isInitialized: boolean;
   error: string | null;
-  rateLimitInfo: RateLimitInfo;
   mfaRequired: boolean;
   mfaToken: string | null;
 };
@@ -31,21 +31,14 @@ type AuthAction =
   | { type: 'AUTH_SUCCESS'; payload: { user: SafeUser; accessToken: string } }
   | { type: 'AUTH_ERROR'; payload: string }
   | { type: 'AUTH_STOP' }
-  | { type: 'RATE_LIMITED'; payload: { retryAfter: number; message: string } }
   | { type: 'MFA_REQUIRED'; payload: { mfaToken: string } }
   | { type: 'LOGOUT' }
   | { type: 'CLEAR_ERROR' };
 
-const DEFAULT_RATE_LIMIT: RateLimitInfo = {
-  isRateLimited: false,
-  retryAfter: null,
-  message: null,
-};
-
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
     case 'AUTH_START':
-      return { ...state, isLoading: true, error: null, rateLimitInfo: DEFAULT_RATE_LIMIT };
+      return { ...state, isLoading: true, error: null };
     case 'AUTH_SUCCESS':
       return {
         user: action.payload.user,
@@ -53,26 +46,13 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         isLoading: false,
         isInitialized: true,
         error: null,
-        rateLimitInfo: DEFAULT_RATE_LIMIT,
         mfaRequired: false,
         mfaToken: null,
       };
     case 'AUTH_ERROR':
       return { ...state, isLoading: false, isInitialized: true, error: action.payload, mfaRequired: false, mfaToken: null };
     case 'AUTH_STOP':
-      return { ...state, isLoading: false, isInitialized: true, mfaRequired: false, mfaToken: null, rateLimitInfo: DEFAULT_RATE_LIMIT };
-    case 'RATE_LIMITED':
-      return {
-        ...state,
-        isLoading: false,
-        isInitialized: true,
-        error: action.payload.message,
-        rateLimitInfo: {
-          isRateLimited: true,
-          retryAfter: action.payload.retryAfter,
-          message: action.payload.message,
-        },
-      };
+      return { ...state, isLoading: false, isInitialized: true, mfaRequired: false, mfaToken: null };
     case 'MFA_REQUIRED':
       return {
         ...state,
@@ -82,9 +62,9 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         mfaToken: action.payload.mfaToken,
       };
     case 'LOGOUT':
-      return { user: null, accessToken: null, isLoading: false, isInitialized: true, error: null, rateLimitInfo: DEFAULT_RATE_LIMIT, mfaRequired: false, mfaToken: null };
+      return { user: null, accessToken: null, isLoading: false, isInitialized: true, error: null, mfaRequired: false, mfaToken: null };
     case 'CLEAR_ERROR':
-      return { ...state, error: null, rateLimitInfo: DEFAULT_RATE_LIMIT };
+      return { ...state, error: null };
     default:
       return state;
   }
@@ -111,13 +91,17 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 /* ===== Helpers ===== */
 
-type ApiError = { error?: { message?: string; details?: string[]; retryAfter?: number; code?: string; statusCode?: number } };
+type ApiError = { error?: { message?: string; details?: string[]; retryAfter?: number; code?: string; statusCode?: number; lockoutLevel?: number } };
 
 function extractErrorMessage(err: unknown): string {
   const errObj = err as ApiError;
   const details = errObj?.error?.details;
   if (Array.isArray(details) && details.length > 0) return details[0];
   return errObj?.error?.message ?? 'An unexpected error occurred.';
+}
+
+function detectRateLimitKind(errObj: ApiError): RateLimitKind {
+  return errObj?.error?.code === 'FORBIDDEN' ? 'lockout' : 'throttle';
 }
 
 /* ===== Provider ===== */
@@ -136,7 +120,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isLoading: false,
     isInitialized: false,
     error: null,
-    rateLimitInfo: DEFAULT_RATE_LIMIT,
     mfaRequired: false,
     mfaToken: null,
   });
@@ -187,17 +170,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: unknown) {
       const errObj = err as ApiError;
       if (errObj?.error?.retryAfter) {
-        dispatch({
-          type: 'RATE_LIMITED',
-          payload: {
-            retryAfter: errObj.error.retryAfter,
-            message: errObj.error.message ?? 'Too many requests. Please try again later.',
-          },
-        });
-      } else {
-        addToast({ variant: 'error', title: 'Sign in failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
+        const kind = detectRateLimitKind(errObj);
+        throw new RateLimitError(errObj.error.retryAfter, errObj.error.message ?? 'Too many requests.', kind);
       }
+      addToast({ variant: 'error', title: 'Sign in failed', description: extractErrorMessage(err) });
+      dispatch({ type: 'AUTH_STOP' });
     }
   }, [addToast]);
 
@@ -215,17 +193,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: unknown) {
       const errObj = err as ApiError;
       if (errObj?.error?.retryAfter) {
-        dispatch({
-          type: 'RATE_LIMITED',
-          payload: {
-            retryAfter: errObj.error.retryAfter,
-            message: errObj.error.message ?? 'Too many requests. Please try again later.',
-          },
-        });
-      } else {
-        addToast({ variant: 'error', title: 'Registration failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
+        const kind = detectRateLimitKind(errObj);
+        throw new RateLimitError(errObj.error.retryAfter, errObj.error.message ?? 'Too many requests.', kind);
       }
+      addToast({ variant: 'error', title: 'Registration failed', description: extractErrorMessage(err) });
+      dispatch({ type: 'AUTH_STOP' });
       return false;
     }
   }, [addToast]);
@@ -282,17 +255,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (err: unknown) {
       const errObj = err as ApiError;
       if (errObj?.error?.retryAfter) {
-        dispatch({
-          type: 'RATE_LIMITED',
-          payload: {
-            retryAfter: errObj.error.retryAfter,
-            message: errObj.error.message ?? 'Too many requests. Please try again later.',
-          },
-        });
-      } else {
-        addToast({ variant: 'error', title: 'Verification failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
+        const kind = detectRateLimitKind(errObj);
+        throw new RateLimitError(errObj.error.retryAfter, errObj.error.message ?? 'Too many requests.', kind);
       }
+      addToast({ variant: 'error', title: 'Verification failed', description: extractErrorMessage(err) });
+      dispatch({ type: 'AUTH_STOP' });
     }
   }, [state.mfaToken, addToast]);
 
@@ -304,21 +272,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'AUTH_START' });
     try {
       await apiClient.post<MessageResponse>('/auth/forgot-password', { email });
+      dispatch({ type: 'AUTH_STOP' });
       return true;
     } catch (err: unknown) {
       const errObj = err as ApiError;
       if (errObj?.error?.retryAfter) {
-        dispatch({
-          type: 'RATE_LIMITED',
-          payload: {
-            retryAfter: errObj.error.retryAfter,
-            message: errObj.error.message ?? 'Too many requests. Please try again later.',
-          },
-        });
-      } else {
-        addToast({ variant: 'error', title: 'Recovery failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
+        const kind = detectRateLimitKind(errObj);
+        throw new RateLimitError(errObj.error.retryAfter, errObj.error.message ?? 'Too many requests.', kind);
       }
+      addToast({ variant: 'error', title: 'Recovery failed', description: extractErrorMessage(err) });
+      dispatch({ type: 'AUTH_STOP' });
       return false;
     }
   }, [addToast]);
@@ -327,21 +291,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'AUTH_START' });
     try {
       await apiClient.post<MessageResponse>('/auth/reset-password', { token, newPassword });
+      dispatch({ type: 'AUTH_STOP' });
       return true;
     } catch (err: unknown) {
       const errObj = err as ApiError;
       if (errObj?.error?.retryAfter) {
-        dispatch({
-          type: 'RATE_LIMITED',
-          payload: {
-            retryAfter: errObj.error.retryAfter,
-            message: errObj.error.message ?? 'Too many requests. Please try again later.',
-          },
-        });
-      } else {
-        addToast({ variant: 'error', title: 'Password reset failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
+        const kind = detectRateLimitKind(errObj);
+        throw new RateLimitError(errObj.error.retryAfter, errObj.error.message ?? 'Too many requests.', kind);
       }
+      addToast({ variant: 'error', title: 'Password reset failed', description: extractErrorMessage(err) });
+      dispatch({ type: 'AUTH_STOP' });
       return false;
     }
   }, [addToast]);
@@ -350,21 +310,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'AUTH_START' });
     try {
       await apiClient.post<MessageResponse>('/auth/resend-verification', {});
+      dispatch({ type: 'AUTH_STOP' });
       return true;
     } catch (err: unknown) {
       const errObj = err as ApiError;
       if (errObj?.error?.retryAfter) {
-        dispatch({
-          type: 'RATE_LIMITED',
-          payload: {
-            retryAfter: errObj.error.retryAfter,
-            message: errObj.error.message ?? 'Too many requests. Please try again later.',
-          },
-        });
-      } else {
-        addToast({ variant: 'error', title: 'Verification email failed', description: extractErrorMessage(err) });
         dispatch({ type: 'AUTH_STOP' });
+        const kind = detectRateLimitKind(errObj);
+        throw new RateLimitError(errObj.error.retryAfter, errObj.error.message ?? 'Too many requests.', kind);
       }
+      addToast({ variant: 'error', title: 'Verification email failed', description: extractErrorMessage(err) });
+      dispatch({ type: 'AUTH_STOP' });
       return false;
     }
   }, [addToast]);

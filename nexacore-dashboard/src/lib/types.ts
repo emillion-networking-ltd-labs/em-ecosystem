@@ -63,11 +63,27 @@ export type ErrorResponse = {
   };
 };
 
+export type RateLimitKind = 'throttle' | 'lockout';
+
 export type RateLimitInfo = {
   isRateLimited: boolean;
   retryAfter: number | null;
   message: string | null;
+  kind: RateLimitKind | null;
 };
+
+export class RateLimitError extends Error {
+  retryAfter: number;
+  kind: RateLimitKind;
+
+  constructor(retryAfter: number, message: string, kind: RateLimitKind = 'throttle') {
+    super(message);
+    this.name = 'RateLimitError';
+    this.retryAfter = retryAfter;
+    this.kind = kind;
+    Object.setPrototypeOf(this, RateLimitError.prototype);
+  }
+}
 
 export type PaginatedResponse<T> = {
   data: T[];

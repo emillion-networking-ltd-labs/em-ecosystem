@@ -1,16 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { AlertTriangle } from 'lucide-react';
+import { AlertTriangle, Lock } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
+import type { RateLimitKind } from '@/lib/types';
 
 type RateLimitBannerProps = {
   retryAfter: number;
   message: string;
+  kind?: RateLimitKind;
   onExpired?: () => void;
 };
 
-export default function RateLimitBanner({ retryAfter, message, onExpired }: RateLimitBannerProps) {
+export default function RateLimitBanner({ retryAfter, message, kind, onExpired }: RateLimitBannerProps) {
   const [secondsLeft, setSecondsLeft] = useState(retryAfter);
 
   useEffect(() => {
@@ -37,9 +39,11 @@ export default function RateLimitBanner({ retryAfter, message, onExpired }: Rate
     return () => clearInterval(timer);
   }, [secondsLeft, onExpired]);
 
+  const Icon = kind === 'lockout' ? Lock : AlertTriangle;
+
   return (
     <div className="flex items-start gap-2">
-      <AlertTriangle size={16} className="mt-1 shrink-0 text-error" />
+      <Icon size={16} className="mt-1 shrink-0 text-error" />
       <div className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1">
         <span className="text-xs leading-6 text-error">{message}</span>
         {secondsLeft > 0 && <CountdownTimer seconds={secondsLeft} />}

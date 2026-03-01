@@ -323,7 +323,7 @@ export class AuthController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
-  @Throttle({ default: { ttl: 60_000, limit: 5 } })
+  @Throttle({ global: { ttl: 60_000, limit: 5 } })
   @ApiOperation({ summary: 'Reset password using token from email' })
   @ApiResponse({ status: 200, description: 'Password reset successfully' })
   @ApiResponse({

@@ -9,6 +9,8 @@ import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import OAuthButtons from './OAuthButtons';
 import { useAuth } from '@/hooks/useAuth';
+import { useRateLimit } from '@/hooks/useRateLimit';
+import { RateLimitError } from '@/lib/types';
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
@@ -17,7 +19,8 @@ export default function RegisterForm() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const { register, isLoading, isAuthenticated, error, clearError, rateLimitInfo } = useAuth();
+  const { register, isLoading, isAuthenticated, error, clearError } = useAuth();
+  const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const router = useRouter();
 
   // Clear stale errors from other auth forms on mount
@@ -53,8 +56,14 @@ export default function RegisterForm() {
     }
     setEmailError(null);
     setPasswordError(null);
-    const success = await register(formData.email, formData.password);
-    if (success) router.push('/email-sent');
+    try {
+      const success = await register(formData.email, formData.password);
+      if (success) router.push('/email-sent');
+    } catch (err) {
+      if (err instanceof RateLimitError) {
+        setRateLimit(err.retryAfter, err.message);
+      }
+    }
   };
 
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
@@ -110,7 +119,7 @@ export default function RegisterForm() {
               <RateLimitBanner
                 retryAfter={rateLimitInfo.retryAfter!}
                 message={rateLimitInfo.message!}
-                onExpired={clearError}
+                onExpired={clearRateLimit}
               />
             ) : (
               <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
@@ -135,7 +144,7 @@ export default function RegisterForm() {
             <button
               type="submit"
               disabled={isDisabled}
-              className="relative flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none"
+              className="relative flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
             >
               <span className={isLoading ? 'opacity-30' : ''}>Create Account</span>
               {isLoading && (

@@ -52,12 +52,13 @@ export const GLOBAL_RATE_LIMIT = {
 
 /**
  * Per-endpoint rate limit configurations.
- * Login limit (10) is intentionally higher than MAX_FAILED_ATTEMPTS (5)
- * so account lockout (403) always fires before the throttler (429).
+ * Login: 10/60s — strict IP throttle; account lockout (5 wrong passwords →
+ * escalating lockout) provides additional per-account brute-force protection.
+ * The frontend differentiates 429 (IP throttle) from 403 (account lockout).
  */
 export const AUTH_RATE_LIMITS = {
   login: { ttl: 60_000, limit: 10 },
-  register: { ttl: 60_000, limit: 3 },
-  refresh: { ttl: 60_000, limit: 10 },
-  oauth: { ttl: 60_000, limit: 5 },
+  register: { ttl: 60_000, limit: 5 },
+  refresh: { ttl: 60_000, limit: 30 },
+  oauth: { ttl: 60_000, limit: 10 },
 };

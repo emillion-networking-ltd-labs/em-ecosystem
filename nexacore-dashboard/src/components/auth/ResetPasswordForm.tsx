@@ -8,13 +8,16 @@ import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import { useAuth } from '@/hooks/useAuth';
+import { useRateLimit } from '@/hooks/useRateLimit';
+import { RateLimitError } from '@/lib/types';
 
 export default function ResetPasswordForm() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [localError, setLocalError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const { resetPassword, isLoading, error, clearError, rateLimitInfo } = useAuth();
+  const { resetPassword, isLoading, error, clearError } = useAuth();
+  const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get('token');
@@ -40,8 +43,14 @@ export default function ResetPasswordForm() {
       return;
     }
 
-    const ok = await resetPassword(token, password);
-    if (ok) setSuccess(true);
+    try {
+      const ok = await resetPassword(token, password);
+      if (ok) setSuccess(true);
+    } catch (err) {
+      if (err instanceof RateLimitError) {
+        setRateLimit(err.retryAfter, err.message);
+      }
+    }
   };
 
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
@@ -117,7 +126,7 @@ export default function ResetPasswordForm() {
               <RateLimitBanner
                 retryAfter={rateLimitInfo.retryAfter!}
                 message={rateLimitInfo.message!}
-                onExpired={clearError}
+                onExpired={clearRateLimit}
               />
             ) : (
               <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
@@ -141,7 +150,7 @@ export default function ResetPasswordForm() {
             <button
               type="submit"
               disabled={isDisabled}
-              className="relative flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none"
+              className="relative flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
             >
               <span className={isLoading ? 'opacity-30' : ''}>Reset Password</span>
               {isLoading && (

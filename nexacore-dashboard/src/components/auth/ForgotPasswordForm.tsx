@@ -8,11 +8,14 @@ import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import { useAuth } from '@/hooks/useAuth';
+import { useRateLimit } from '@/hooks/useRateLimit';
+import { RateLimitError } from '@/lib/types';
 
 export default function ForgotPasswordForm() {
   const [email, setEmail] = useState('');
   const [emailError, setEmailError] = useState<string | null>(null);
-  const { forgotPassword, isLoading, error, clearError, rateLimitInfo } = useAuth();
+  const { forgotPassword, isLoading, error, clearError } = useAuth();
+  const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const router = useRouter();
 
   useEffect(() => {
@@ -26,8 +29,14 @@ export default function ForgotPasswordForm() {
       return;
     }
     setEmailError(null);
-    const success = await forgotPassword(email);
-    if (success) router.push('/check-email');
+    try {
+      const success = await forgotPassword(email);
+      if (success) router.push('/check-email');
+    } catch (err) {
+      if (err instanceof RateLimitError) {
+        setRateLimit(err.retryAfter, err.message);
+      }
+    }
   };
 
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
@@ -51,7 +60,7 @@ export default function ForgotPasswordForm() {
         </div>
       </div>
 
-      {/* Form — Figma: 348px, vertical, itemSpacing 8 */}
+      {/* Form — Figma: 348x146 FIXED, vertical, gap 8 */}
       <div className="w-full md:w-[348px]">
         <form onSubmit={handleSubmit} className="flex flex-col gap-2">
           {/* Email Field — Figma: 348x146 FIXED, vertical, gap 8 */}
@@ -72,7 +81,7 @@ export default function ForgotPasswordForm() {
               <RateLimitBanner
                 retryAfter={rateLimitInfo.retryAfter!}
                 message={rateLimitInfo.message!}
-                onExpired={clearError}
+                onExpired={clearRateLimit}
               />
             ) : (
               <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
@@ -100,7 +109,7 @@ export default function ForgotPasswordForm() {
           <button
             type="submit"
             disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none"
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? 'opacity-30' : ''}>Send Recovery Email</span>
             {isLoading && (
