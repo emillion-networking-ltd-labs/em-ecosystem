@@ -403,7 +403,7 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
             {/* Password Recovery Button — Figma: 348x21, always visible, right-aligned */}
             <div className="flex items-center justify-end">
               <Link
-                href="/forgot-password"
+                href={`/forgot-password?email=${encodeURIComponent(email)}`}
                 className="whitespace-nowrap text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Forgot password?

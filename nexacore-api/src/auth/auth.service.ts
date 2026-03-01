@@ -76,6 +76,11 @@ export interface AuthResult {
   cookie: CookieConfig;
 }
 
+export interface RegisterResult {
+  message: string;
+  user: SafeUser;
+}
+
 export interface MfaChallengeResult {
   mfaRequired: true;
   mfaToken: string;
@@ -111,7 +116,7 @@ export class AuthService {
     dto: RegisterDto,
     requestMeta: { ipAddress: string; userAgent?: string | null },
     ctx?: RequestContext,
-  ): Promise<AuthResult> {
+  ): Promise<RegisterResult> {
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
       throw new ConflictException('Email already registered');
@@ -127,11 +132,6 @@ export class AuthService {
     // Send verification email (non-blocking — does not fail registration)
     this.createAndSendVerificationEmail(user).catch(() => {});
 
-    const { accessToken, refreshToken } = await this.generateTokens(
-      user,
-      requestMeta,
-    );
-
     this.auditService
       .log({
         action: AuditAction.REGISTER,
@@ -143,9 +143,8 @@ export class AuthService {
       .catch(() => {});
 
     return {
-      accessToken,
+      message: 'Verification email sent',
       user: toSafeUser(user),
-      cookie: this.buildRefreshCookie(refreshToken),
     };
   }
 
@@ -402,6 +401,12 @@ export class AuthService {
     ctx?: RequestContext,
   ): Promise<AuthResult> {
     const user = await this.usersService.findOrCreateByOAuth(profile);
+
+    // Reset lockout on successful OAuth login (proves account ownership)
+    if (user.failedAttempts > 0 || user.lockoutCount > 0) {
+      await this.usersService.resetLockoutEscalation(user.id);
+    }
+
     const { accessToken, refreshToken } = await this.generateTokens(
       user,
       requestMeta,

@@ -214,20 +214,15 @@ describe('AuthService', () => {
         usersService.findByEmail.mockResolvedValue(null);
         usersService.create.mockResolvedValue(mockUser);
         (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-value');
-        jwtService.sign
-          .mockReturnValueOnce('access-token-123')
-          .mockReturnValueOnce('refresh-token-456');
-        sessionsService.createSession.mockResolvedValue(mockSession);
-        sessionsService.updateSessionHash.mockResolvedValue(undefined);
       });
 
-      it('should create a new user with hashed password and return accessToken + cookie', async () => {
+      it('should create a new user with hashed password and return message + user', async () => {
         const result = await authService.register(registerDto, requestMeta);
 
-        expect(result.accessToken).toBe('access-token-123');
-        expect(result.cookie).toBeDefined();
-        expect(result.cookie.name).toBe('refresh_token');
+        expect(result.message).toBe('Verification email sent');
         expect(result.user).toBeDefined();
+        expect(result).not.toHaveProperty('accessToken');
+        expect(result).not.toHaveProperty('cookie');
       });
 
       it('should hash the password with bcrypt using 12 rounds', async () => {
@@ -243,15 +238,16 @@ describe('AuthService', () => {
         expect(result.user.email).toBe('test@example.com');
       });
 
-      it('should create a session via SessionsService', async () => {
+      it('should NOT create a session on register', async () => {
         await authService.register(registerDto, requestMeta);
 
-        expect(sessionsService.createSession).toHaveBeenCalledWith(
-          expect.objectContaining({
-            userId: 'uuid-123',
-            ipAddress: '127.0.0.1',
-          }),
-        );
+        expect(sessionsService.createSession).not.toHaveBeenCalled();
+      });
+
+      it('should NOT call generateTokens on register', async () => {
+        await authService.register(registerDto, requestMeta);
+
+        expect(jwtService.sign).not.toHaveBeenCalled();
       });
     });
 
@@ -1254,20 +1250,14 @@ describe('AuthService', () => {
       usersService.findByEmail.mockResolvedValue(null);
       usersService.create.mockResolvedValue(mockUser);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
-      jwtService.sign.mockReturnValueOnce('at').mockReturnValueOnce('rt');
-      sessionsService.createSession.mockResolvedValue(mockSession);
-      sessionsService.updateSessionHash.mockResolvedValue(undefined);
-      const prismaService = (authService as any).prisma;
-      prismaService.emailVerificationToken.create.mockResolvedValue({});
-      const mailSvc = (authService as any).mailService;
-      mailSvc.sendVerificationEmail.mockResolvedValue(undefined);
 
       const result = await authService.register(
         { email: 'test@example.com', password: 'StrongPass1!' },
         requestMeta,
       );
 
-      expect(result.accessToken).toBe('at');
+      expect(result.message).toBe('Verification email sent');
+      expect(result.user).toBeDefined();
     });
 
     it('login success should succeed even when audit fails', async () => {
@@ -1415,9 +1405,6 @@ describe('AuthService', () => {
       usersService.findByEmail.mockResolvedValue(null);
       usersService.create.mockResolvedValue(mockUser);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
-      jwtService.sign.mockReturnValueOnce('at').mockReturnValueOnce('rt');
-      sessionsService.createSession.mockResolvedValue(mockSession);
-      sessionsService.updateSessionHash.mockResolvedValue(undefined);
 
       // Make the verification email path fail
       const prismaService = (authService as any).prisma;
@@ -1430,7 +1417,8 @@ describe('AuthService', () => {
         requestMeta,
       );
 
-      expect(result.accessToken).toBe('at');
+      expect(result.message).toBe('Verification email sent');
+      expect(result.user).toBeDefined();
     });
   });
 

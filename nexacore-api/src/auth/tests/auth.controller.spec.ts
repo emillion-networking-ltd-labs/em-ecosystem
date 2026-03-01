@@ -146,22 +146,18 @@ describe('AuthController', () => {
       password: 'StrongPass1!',
     };
 
-    it('should set cookie and return accessToken + user', async () => {
-      authService.register.mockResolvedValue(mockAuthResult);
+    it('should return message + user without setting cookie', async () => {
+      const mockRegisterResult = {
+        message: 'Verification email sent',
+        user: mockAuthResult.user,
+      };
+      authService.register.mockResolvedValue(mockRegisterResult);
 
-      const result = await controller.register(
-        registerDto,
-        mockReq,
-        mockRes as any,
-      );
+      const result = await controller.register(registerDto, mockReq);
 
-      expect(result.accessToken).toBe('access-token-123');
+      expect(result.message).toBe('Verification email sent');
       expect(result.user.email).toBe('test@example.com');
-      expect(mockRes.cookie).toHaveBeenCalledWith(
-        'refresh_token',
-        mockCookie.value,
-        mockCookie.options,
-      );
+      expect(mockRes.cookie).not.toHaveBeenCalled();
     });
 
     it('should propagate ConflictException from service', async () => {
@@ -170,7 +166,7 @@ describe('AuthController', () => {
       );
 
       await expect(
-        controller.register(registerDto, mockReq, mockRes as any),
+        controller.register(registerDto, mockReq),
       ).rejects.toThrow(ConflictException);
     });
   });

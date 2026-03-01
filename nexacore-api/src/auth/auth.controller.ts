@@ -111,19 +111,20 @@ export class AuthController {
   })
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({ summary: 'Register a new user account' })
-  @ApiResponse({ status: 201, description: 'User registered successfully' })
+  @ApiResponse({
+    status: 201,
+    description: 'User registered — verification email sent',
+  })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 409, description: 'Email already registered' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
   async register(
     @Body() registerDto: RegisterDto,
     @Request() req: any,
-    @Res({ passthrough: true }) res: Response,
   ) {
     const meta = this.extractRequestMeta(req);
     const result = await this.authService.register(registerDto, meta, meta);
-    this.setCookie(res, result.cookie);
-    return { accessToken: result.accessToken, user: result.user };
+    return { message: result.message, user: result.user };
   }
 
   @Post('login')

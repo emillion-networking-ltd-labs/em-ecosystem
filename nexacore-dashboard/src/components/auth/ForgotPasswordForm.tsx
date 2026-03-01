@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { AlertTriangle } from 'lucide-react';
 import Input from '@/components/ui/Input';
@@ -13,7 +13,8 @@ import { useToast } from '@/context/ToastContext';
 import { RateLimitError } from '@/lib/types';
 
 export default function ForgotPasswordForm() {
-  const [email, setEmail] = useState('');
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState(searchParams.get('email') ?? '');
   const [emailError, setEmailError] = useState<string | null>(null);
   const { forgotPassword, isLoading, error, clearError } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();

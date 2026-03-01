@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import RingSpinner from '@/components/ui/RingSpinner';
 
 export default function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated, isInitialized } = useAuth();
+  const { isAuthenticated, isInitialized, user } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
@@ -14,6 +14,12 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
       router.replace('/login');
     }
   }, [isInitialized, isAuthenticated, router]);
+
+  useEffect(() => {
+    if (isAuthenticated && user && user.emailVerified === false) {
+      router.replace('/activation/check-email');
+    }
+  }, [isAuthenticated, user, router]);
 
   // Show spinner only during the initial session check
   if (!isInitialized) {
@@ -25,6 +31,10 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   }
 
   if (!isAuthenticated) {
+    return null;
+  }
+
+  if (isAuthenticated && user && user.emailVerified === false) {
     return null;
   }
 

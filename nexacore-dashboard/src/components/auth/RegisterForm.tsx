@@ -10,6 +10,7 @@ import RateLimitBanner from '@/components/ui/RateLimitBanner';
 import OAuthButtons from './OAuthButtons';
 import { useAuth } from '@/hooks/useAuth';
 import { useRateLimit } from '@/hooks/useRateLimit';
+import { useToast } from '@/hooks/useToast';
 import { RateLimitError } from '@/lib/types';
 
 const isValidEmail = (email: string) =>
@@ -19,19 +20,15 @@ export default function RegisterForm() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const { register, isLoading, isAuthenticated, error, clearError } = useAuth();
+  const { register, isLoading, error, clearError } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
+  const { addToast } = useToast();
   const router = useRouter();
 
   // Clear stale errors from other auth forms on mount
   useEffect(() => {
     clearError();
   }, [clearError]);
-
-  // Redirect away if already authenticated
-  useEffect(() => {
-    if (isAuthenticated) router.replace('/dashboard');
-  }, [isAuthenticated, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     clearError();
@@ -58,7 +55,10 @@ export default function RegisterForm() {
     setPasswordError(null);
     try {
       const success = await register(formData.email, formData.password);
-      if (success) router.push('/activation/check-email');
+      if (success) {
+        addToast({ variant: 'success', title: 'Account created', description: 'Check your inbox to verify your email.' });
+        router.push('/activation/check-email');
+      }
     } catch (err) {
       if (err instanceof RateLimitError) {
         setRateLimit(err.retryAfter, err.message);

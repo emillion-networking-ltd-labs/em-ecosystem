@@ -72,7 +72,7 @@ export default function ResetPasswordForm() {
     try {
       const ok = await resetPassword(token, password);
       if (ok) {
-        addToast({ variant: 'success', title: 'Password updated', description: 'Your password has been reset successfully. Sign in with your new credentials.' });
+        addToast({ variant: 'success', title: 'Password updated', description: 'Your password has been reset. Sign in now.' });
         router.replace('/login');
       }
     } catch (err) {
