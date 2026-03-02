@@ -86,7 +86,7 @@ describe('AuthController', () => {
             logoutAll: jest.fn(),
             generateOAuthCode: jest
               .fn()
-              .mockReturnValue('ephemeral-code-uuid'),
+              .mockResolvedValue('ephemeral-code-uuid'),
             exchangeOAuthCode: jest.fn(),
             buildClearCookie: jest.fn().mockReturnValue(mockClearCookie),
             verifyEmail: jest.fn(),
@@ -354,7 +354,7 @@ describe('AuthController', () => {
   });
 
   describe('googleAuthCallback', () => {
-    it('should return redirect URL with ephemeral code', () => {
+    it('should return redirect URL with ephemeral code', async () => {
       const req = {
         user: {
           accessToken: 'google-access',
@@ -363,7 +363,7 @@ describe('AuthController', () => {
         },
       };
 
-      const result = controller.googleAuthCallback(req);
+      const result = await controller.googleAuthCallback(req);
 
       expect(result.url).toBe(
         'http://localhost:3001/auth/callback?code=ephemeral-code-uuid',
@@ -374,7 +374,7 @@ describe('AuthController', () => {
   });
 
   describe('githubAuthCallback', () => {
-    it('should return redirect URL with ephemeral code', () => {
+    it('should return redirect URL with ephemeral code', async () => {
       const req = {
         user: {
           accessToken: 'github-access',
@@ -383,7 +383,7 @@ describe('AuthController', () => {
         },
       };
 
-      const result = controller.githubAuthCallback(req);
+      const result = await controller.githubAuthCallback(req);
 
       expect(result.url).toBe(
         'http://localhost:3001/auth/callback?code=ephemeral-code-uuid',
@@ -394,10 +394,10 @@ describe('AuthController', () => {
   });
 
   describe('exchangeOAuthCode', () => {
-    it('should set cookie and return accessToken + user for a valid code', () => {
-      authService.exchangeOAuthCode.mockReturnValue(mockAuthResult as any);
+    it('should set cookie and return accessToken + user for a valid code', async () => {
+      authService.exchangeOAuthCode.mockResolvedValue(mockAuthResult as any);
 
-      const result = controller.exchangeOAuthCode(
+      const result = await controller.exchangeOAuthCode(
         { code: 'valid-code' },
         mockRes as any,
       );
@@ -408,19 +408,19 @@ describe('AuthController', () => {
       expect(mockRes.cookie).toHaveBeenCalled();
     });
 
-    it('should propagate UnauthorizedException for invalid code', () => {
-      authService.exchangeOAuthCode.mockImplementation(() => {
-        throw new UnauthorizedException(
+    it('should propagate UnauthorizedException for invalid code', async () => {
+      authService.exchangeOAuthCode.mockRejectedValue(
+        new UnauthorizedException(
           'Invalid or expired authorization code',
-        );
-      });
+        ),
+      );
 
-      expect(() =>
+      await expect(
         controller.exchangeOAuthCode(
           { code: 'invalid-code' },
           mockRes as any,
         ),
-      ).toThrow(UnauthorizedException);
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 

@@ -472,20 +472,20 @@ export class AuthService {
     };
   }
 
-  generateOAuthCode(payload: {
+  async generateOAuthCode(payload: {
     accessToken: string;
     user: SafeUser;
     cookie: CookieConfig;
-  }): string {
+  }): Promise<string> {
     return this.oauthCodeStore.store(payload);
   }
 
-  exchangeOAuthCode(code: string): {
+  async exchangeOAuthCode(code: string): Promise<{
     accessToken: string;
     user: SafeUser;
     cookie: CookieConfig;
-  } {
-    const payload = this.oauthCodeStore.exchange(code);
+  }> {
+    const payload = await this.oauthCodeStore.exchange(code);
     if (!payload) {
       throw new UnauthorizedException(
         'Invalid or expired authorization code',

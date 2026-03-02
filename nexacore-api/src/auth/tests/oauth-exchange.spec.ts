@@ -6,14 +6,15 @@ import { AuthService } from '../auth.service';
 import { SessionsService } from '../../sessions/sessions.service';
 import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
-import { OAuthCodeStore } from '../stores/oauth-code.store';
 import { Role } from '../../users/enums/role.enum';
 import { Provider } from '../../users/enums/provider.enum';
 
 describe('OAuth Exchange Flow (Integration)', () => {
   let controller: AuthController;
   let authService: { [key: string]: jest.Mock };
-  let oauthCodeStore: OAuthCodeStore;
+
+  /** In-memory store that simulates the Redis-backed OAuthCodeStore */
+  const codeMap = new Map<string, any>();
 
   const mockCookie = {
     name: 'refresh_token',
@@ -51,7 +52,7 @@ describe('OAuth Exchange Flow (Integration)', () => {
   };
 
   beforeEach(async () => {
-    oauthCodeStore = new OAuthCodeStore();
+    codeMap.clear();
 
     authService = {
       register: jest.fn(),
@@ -62,9 +63,14 @@ describe('OAuth Exchange Flow (Integration)', () => {
       buildClearCookie: jest.fn(),
       generateOAuthCode: jest
         .fn()
-        .mockImplementation((payload) => oauthCodeStore.store(payload)),
-      exchangeOAuthCode: jest.fn().mockImplementation((code) => {
-        const result = oauthCodeStore.exchange(code);
+        .mockImplementation(async (payload) => {
+          const code = `code-${Date.now()}-${Math.random()}`;
+          codeMap.set(code, payload);
+          return code;
+        }),
+      exchangeOAuthCode: jest.fn().mockImplementation(async (code) => {
+        const result = codeMap.get(code) || null;
+        codeMap.delete(code);
         if (!result) {
           throw new UnauthorizedException(
             'Invalid or expired authorization code',
@@ -122,7 +128,7 @@ describe('OAuth Exchange Flow (Integration)', () => {
       cookie: mockCookie,
     };
     const req = { user: tokenPayload };
-    const redirectResult = controller.googleAuthCallback(req);
+    const redirectResult = await controller.googleAuthCallback(req);
 
     const url = new URL(redirectResult.url);
     const code = url.searchParams.get('code');
@@ -130,7 +136,7 @@ describe('OAuth Exchange Flow (Integration)', () => {
     expect(url.searchParams.has('accessToken')).toBe(false);
     expect(url.searchParams.has('refreshToken')).toBe(false);
 
-    const exchangeResult = controller.exchangeOAuthCode(
+    const exchangeResult = await controller.exchangeOAuthCode(
       { code: code! },
       mockRes as any,
     );
@@ -139,28 +145,28 @@ describe('OAuth Exchange Flow (Integration)', () => {
     expect(mockRes.cookie).toHaveBeenCalled();
   });
 
-  it('should reject a code that has already been used', () => {
+  it('should reject a code that has already been used', async () => {
     const req = {
       user: { accessToken: 'at', user: mockUser, cookie: mockCookie },
     };
-    const redirectResult = controller.googleAuthCallback(req);
+    const redirectResult = await controller.googleAuthCallback(req);
     const code = new URL(redirectResult.url).searchParams.get('code')!;
 
     // First exchange succeeds
-    controller.exchangeOAuthCode({ code }, mockRes as any);
+    await controller.exchangeOAuthCode({ code }, mockRes as any);
 
     // Second exchange fails
-    expect(() =>
+    await expect(
       controller.exchangeOAuthCode({ code }, mockRes as any),
-    ).toThrow(UnauthorizedException);
+    ).rejects.toThrow(UnauthorizedException);
   });
 
-  it('should reject a fabricated code', () => {
-    expect(() =>
+  it('should reject a fabricated code', async () => {
+    await expect(
       controller.exchangeOAuthCode(
         { code: 'fabricated-code-123' },
         mockRes as any,
       ),
-    ).toThrow(UnauthorizedException);
+    ).rejects.toThrow(UnauthorizedException);
   });
 });

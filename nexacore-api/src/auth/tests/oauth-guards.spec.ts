@@ -7,7 +7,7 @@ describe('OAuth Guards — getAuthenticateOptions', () => {
 
   beforeEach(() => {
     stateStore = {
-      generate: jest.fn().mockReturnValue({
+      generate: jest.fn().mockResolvedValue({
         state: 'random-state-value',
         codeChallenge: 'mock-code-challenge',
       }),
@@ -29,10 +29,10 @@ describe('OAuth Guards — getAuthenticateOptions', () => {
       guard = new GoogleAuthGuard(stateStore as unknown as OAuthStateStore);
     });
 
-    it('should return state when initiating OAuth (no code in query)', () => {
+    it('should return state when initiating OAuth (no code in query)', async () => {
       const context = createMockContext({});
 
-      const options = guard.getAuthenticateOptions(context);
+      const options = await guard.getAuthenticateOptions(context);
 
       expect(options).toEqual({
         state: 'random-state-value',
@@ -42,10 +42,10 @@ describe('OAuth Guards — getAuthenticateOptions', () => {
       expect(stateStore.generate).toHaveBeenCalled();
     });
 
-    it('should return empty options on callback (code present in query)', () => {
+    it('should return empty options on callback (code present in query)', async () => {
       const context = createMockContext({ code: 'auth-code-123' });
 
-      const options = guard.getAuthenticateOptions(context);
+      const options = await guard.getAuthenticateOptions(context);
 
       expect(options).toEqual({});
       expect(stateStore.generate).not.toHaveBeenCalled();
@@ -59,10 +59,10 @@ describe('OAuth Guards — getAuthenticateOptions', () => {
       guard = new GitHubAuthGuard(stateStore as unknown as OAuthStateStore);
     });
 
-    it('should return state when initiating OAuth (no code in query)', () => {
+    it('should return state when initiating OAuth (no code in query)', async () => {
       const context = createMockContext({});
 
-      const options = guard.getAuthenticateOptions(context);
+      const options = await guard.getAuthenticateOptions(context);
 
       expect(options).toEqual({
         state: 'random-state-value',
@@ -72,10 +72,10 @@ describe('OAuth Guards — getAuthenticateOptions', () => {
       expect(stateStore.generate).toHaveBeenCalled();
     });
 
-    it('should return empty options on callback (code present in query)', () => {
+    it('should return empty options on callback (code present in query)', async () => {
       const context = createMockContext({ code: 'auth-code-123' });
 
-      const options = guard.getAuthenticateOptions(context);
+      const options = await guard.getAuthenticateOptions(context);
 
       expect(options).toEqual({});
       expect(stateStore.generate).not.toHaveBeenCalled();

@@ -614,7 +614,7 @@ describe('AuthService', () => {
   });
 
   describe('generateOAuthCode', () => {
-    it('should delegate to OAuthCodeStore.store and return the ephemeral code', () => {
+    it('should delegate to OAuthCodeStore.store and return the ephemeral code', async () => {
       const mockCookie = {
         name: 'refresh_token',
         value: 'signed-jwt',
@@ -647,9 +647,9 @@ describe('AuthService', () => {
         },
         cookie: mockCookie,
       };
-      oauthCodeStore.store.mockReturnValue('ephemeral-uuid');
+      oauthCodeStore.store.mockResolvedValue('ephemeral-uuid');
 
-      const code = authService.generateOAuthCode(payload);
+      const code = await authService.generateOAuthCode(payload);
 
       expect(oauthCodeStore.store).toHaveBeenCalledWith(payload);
       expect(code).toBe('ephemeral-uuid');
@@ -691,10 +691,10 @@ describe('AuthService', () => {
       cookie: mockCookie,
     };
 
-    it('should return accessToken, user, and cookie for a valid code', () => {
-      oauthCodeStore.exchange.mockReturnValue(mockPayload);
+    it('should return accessToken, user, and cookie for a valid code', async () => {
+      oauthCodeStore.exchange.mockResolvedValue(mockPayload);
 
-      const result = authService.exchangeOAuthCode('valid-code');
+      const result = await authService.exchangeOAuthCode('valid-code');
 
       expect(oauthCodeStore.exchange).toHaveBeenCalledWith('valid-code');
       expect(result.accessToken).toBe('at');
@@ -702,10 +702,10 @@ describe('AuthService', () => {
       expect(result.user.email).toBe('test@example.com');
     });
 
-    it('should throw UnauthorizedException for invalid or expired code', () => {
-      oauthCodeStore.exchange.mockReturnValue(null);
+    it('should throw UnauthorizedException for invalid or expired code', async () => {
+      oauthCodeStore.exchange.mockResolvedValue(null);
 
-      expect(() => authService.exchangeOAuthCode('invalid-code')).toThrow(
+      await expect(authService.exchangeOAuthCode('invalid-code')).rejects.toThrow(
         UnauthorizedException,
       );
     });

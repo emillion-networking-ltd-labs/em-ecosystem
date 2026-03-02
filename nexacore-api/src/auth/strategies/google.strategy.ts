@@ -33,9 +33,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   }
 
   // Inject code_verifier into the token exchange on callback
-  authenticate(req: any, options?: any): void {
+  async authenticate(req: any, options?: any): Promise<void> {
     if (req.query?.code && req.query?.state) {
-      const codeVerifier = this.oauthStateStore.getCodeVerifier(
+      const codeVerifier = await this.oauthStateStore.getCodeVerifier(
         req.query.state,
       );
       if (codeVerifier) {
@@ -74,7 +74,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   ): Promise<void> {
     // Validate OAuth state parameter (CSRF protection)
     const state = req.query?.state;
-    if (!state || !this.oauthStateStore.validate(state)) {
+    if (!state || !(await this.oauthStateStore.validate(state))) {
       done(new Error('Invalid or expired OAuth state parameter'), undefined);
       return;
     }

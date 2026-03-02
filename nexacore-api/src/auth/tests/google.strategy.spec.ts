@@ -89,7 +89,7 @@ describe('GoogleStrategy', () => {
     };
 
     it('should call authService.validateOAuthUser with profile and requestMeta', async () => {
-      oauthStateStore.validate.mockReturnValue(true);
+      oauthStateStore.validate.mockResolvedValue(true);
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
 
@@ -115,7 +115,7 @@ describe('GoogleStrategy', () => {
     });
 
     it('should call done with error when no email is provided', async () => {
-      oauthStateStore.validate.mockReturnValue(true);
+      oauthStateStore.validate.mockResolvedValue(true);
       const done = jest.fn();
 
       await strategy.validate(
@@ -134,7 +134,7 @@ describe('GoogleStrategy', () => {
     });
 
     it('should call done with error when emails array is undefined', async () => {
-      oauthStateStore.validate.mockReturnValue(true);
+      oauthStateStore.validate.mockResolvedValue(true);
       const done = jest.fn();
 
       await strategy.validate(
@@ -152,7 +152,7 @@ describe('GoogleStrategy', () => {
     });
 
     it('should call done with error when state is invalid', async () => {
-      oauthStateStore.validate.mockReturnValue(false);
+      oauthStateStore.validate.mockResolvedValue(false);
       const done = jest.fn();
 
       await strategy.validate(
@@ -193,7 +193,7 @@ describe('GoogleStrategy', () => {
     });
 
     it('should call done with error when validateOAuthUser throws', async () => {
-      oauthStateStore.validate.mockReturnValue(true);
+      oauthStateStore.validate.mockResolvedValue(true);
       authService.validateOAuthUser.mockRejectedValue(
         new Error('OAuth error'),
       );
@@ -255,14 +255,14 @@ describe('GoogleStrategy', () => {
       superAuthSpy.mockRestore();
     });
 
-    it('should monkey-patch _oauth2.getOAuthAccessToken when codeVerifier exists', () => {
+    it('should monkey-patch _oauth2.getOAuthAccessToken when codeVerifier exists', async () => {
       const originalFn = jest.fn();
       (strategy as any)._oauth2 = { getOAuthAccessToken: originalFn };
-      (oauthStateStore.getCodeVerifier as jest.Mock).mockReturnValue(
+      (oauthStateStore.getCodeVerifier as jest.Mock).mockResolvedValue(
         'test-verifier',
       );
 
-      strategy.authenticate(
+      await strategy.authenticate(
         { query: { code: 'auth-code', state: 'test-state' } },
         {},
       );
@@ -289,12 +289,12 @@ describe('GoogleStrategy', () => {
       expect(superAuthSpy).toHaveBeenCalled();
     });
 
-    it('should not monkey-patch when no codeVerifier exists', () => {
+    it('should not monkey-patch when no codeVerifier exists', async () => {
       const originalFn = jest.fn();
       (strategy as any)._oauth2 = { getOAuthAccessToken: originalFn };
-      (oauthStateStore.getCodeVerifier as jest.Mock).mockReturnValue(undefined);
+      (oauthStateStore.getCodeVerifier as jest.Mock).mockResolvedValue(undefined);
 
-      strategy.authenticate(
+      await strategy.authenticate(
         { query: { code: 'auth-code', state: 'test-state' } },
         {},
       );
@@ -303,21 +303,21 @@ describe('GoogleStrategy', () => {
       expect(superAuthSpy).toHaveBeenCalled();
     });
 
-    it('should skip PKCE entirely when no code in query', () => {
-      strategy.authenticate({ query: {} }, {});
+    it('should skip PKCE entirely when no code in query', async () => {
+      await strategy.authenticate({ query: {} }, {});
 
       expect(oauthStateStore.getCodeVerifier).not.toHaveBeenCalled();
       expect(superAuthSpy).toHaveBeenCalled();
     });
 
-    it('should restore original getOAuthAccessToken after single use', () => {
+    it('should restore original getOAuthAccessToken after single use', async () => {
       const originalFn = jest.fn();
       (strategy as any)._oauth2 = { getOAuthAccessToken: originalFn };
-      (oauthStateStore.getCodeVerifier as jest.Mock).mockReturnValue(
+      (oauthStateStore.getCodeVerifier as jest.Mock).mockResolvedValue(
         'test-verifier',
       );
 
-      strategy.authenticate(
+      await strategy.authenticate(
         { query: { code: 'auth-code', state: 'test-state' } },
         {},
       );

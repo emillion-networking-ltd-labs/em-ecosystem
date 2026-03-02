@@ -8,11 +8,11 @@ export class GitHubAuthGuard extends AuthGuard('github') {
     super();
   }
 
-  getAuthenticateOptions(context: ExecutionContext) {
+  async getAuthenticateOptions(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     // Only generate state + PKCE for the initiation endpoint, not the callback
     if (!request.query?.code) {
-      const { state, codeChallenge } = this.oauthStateStore.generate();
+      const { state, codeChallenge } = await this.oauthStateStore.generate();
       return {
         state,
         code_challenge: codeChallenge,

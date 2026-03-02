@@ -1,54 +1,47 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { randomUUID, randomBytes, createHash } from 'crypto';
+import Redis from 'ioredis';
+import { REDIS_CLIENT } from '../../common/services/redis.constants';
 
-const STATE_TTL_MS = 5 * 60 * 1000; // 5 minutes
-
-interface StateEntry {
-  timestamp: number;
-  codeVerifier: string;
-}
+const STATE_TTL_SECONDS = 300; // 5 minutes
 
 @Injectable()
 export class OAuthStateStore {
-  private readonly states = new Map<string, StateEntry>();
+  constructor(@Inject(REDIS_CLIENT) private readonly redis: Redis) {}
 
-  generate(): { state: string; codeChallenge: string } {
-    this.cleanup();
+  async generate(): Promise<{ state: string; codeChallenge: string }> {
     const state = randomUUID();
     const codeVerifier = randomBytes(32).toString('base64url');
     const codeChallenge = createHash('sha256')
       .update(codeVerifier)
       .digest('base64url');
-    this.states.set(state, { timestamp: Date.now(), codeVerifier });
+    await this.redis.set(
+      `oauth:state:${state}`,
+      JSON.stringify({ codeVerifier }),
+      'EX',
+      STATE_TTL_SECONDS,
+    );
     return { state, codeChallenge };
   }
 
   /** Peek at the code_verifier without consuming the entry. */
-  getCodeVerifier(state: string): string | undefined {
-    const entry = this.states.get(state);
-    if (!entry) return undefined;
-    if (Date.now() - entry.timestamp > STATE_TTL_MS) return undefined;
-    return entry.codeVerifier;
+  async getCodeVerifier(state: string): Promise<string | undefined> {
+    const data = await this.redis.get(`oauth:state:${state}`);
+    if (!data) return undefined;
+    const parsed = JSON.parse(data) as { codeVerifier: string };
+    return parsed.codeVerifier;
   }
 
   /** Consume and validate the state entry (single-use). */
-  validate(state: string): boolean {
-    const entry = this.states.get(state);
-    if (!entry) return false;
-
-    this.states.delete(state); // single-use
-
-    if (Date.now() - entry.timestamp > STATE_TTL_MS) return false;
-
+  async validate(state: string): Promise<boolean> {
+    const data = await this.redis.get(`oauth:state:${state}`);
+    if (!data) return false;
+    await this.redis.del(`oauth:state:${state}`);
     return true;
   }
 
+  /** No-op — Redis TTL handles expiration automatically. */
   cleanup(): void {
-    const now = Date.now();
-    for (const [state, entry] of this.states) {
-      if (now - entry.timestamp > STATE_TTL_MS) {
-        this.states.delete(state);
-      }
-    }
+    // Redis TTL handles expiration
   }
 }

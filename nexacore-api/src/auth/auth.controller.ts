@@ -450,13 +450,13 @@ export class AuthController {
     status: 302,
     description: 'Redirects to frontend with ephemeral authorization code',
   })
-  googleAuthCallback(
+  async googleAuthCallback(
     @Request()
     req: {
       user: { accessToken: string; user: SafeUser; cookie: CookieConfig };
     },
   ) {
-    const code = this.authService.generateOAuthCode(req.user);
+    const code = await this.authService.generateOAuthCode(req.user);
     const frontendUrl = this.getValidatedFrontendUrl();
     return {
       url: `${frontendUrl}/auth/callback?code=${code}`,
@@ -489,13 +489,13 @@ export class AuthController {
     status: 302,
     description: 'Redirects to frontend with ephemeral authorization code',
   })
-  githubAuthCallback(
+  async githubAuthCallback(
     @Request()
     req: {
       user: { accessToken: string; user: SafeUser; cookie: CookieConfig };
     },
   ) {
-    const code = this.authService.generateOAuthCode(req.user);
+    const code = await this.authService.generateOAuthCode(req.user);
     const frontendUrl = this.getValidatedFrontendUrl();
     return {
       url: `${frontendUrl}/auth/callback?code=${code}`,
@@ -511,11 +511,11 @@ export class AuthController {
     status: 401,
     description: 'Invalid or expired authorization code',
   })
-  exchangeOAuthCode(
+  async exchangeOAuthCode(
     @Body() dto: OAuthExchangeDto,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = this.authService.exchangeOAuthCode(dto.code);
+    const result = await this.authService.exchangeOAuthCode(dto.code);
     this.setCookie(res, result.cookie);
     return { accessToken: result.accessToken, user: result.user };
   }

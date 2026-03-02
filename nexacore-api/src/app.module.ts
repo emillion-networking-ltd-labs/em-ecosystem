@@ -10,9 +10,11 @@ import { AuditModule } from './audit/audit.module';
 import { SecurityModule } from './security/security.module';
 import { MailModule } from './mail/mail.module';
 import { PermissionsModule } from './permissions/permissions.module';
+import { RedisModule } from './common/services/redis.module';
 
 @Module({
   imports: [
+    RedisModule,
     ThrottlerModule.forRoot([
       {
         name: 'global',
