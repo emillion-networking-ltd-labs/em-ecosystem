@@ -503,6 +503,12 @@ export class AuthController {
   }
 
   @Post('oauth/exchange')
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.oauth.ttl,
+      limit: AUTH_RATE_LIMITS.oauth.limit,
+    },
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Exchange ephemeral OAuth code for tokens' })
   @ApiResponse({ status: 200, description: 'Tokens returned successfully' })
@@ -510,6 +516,10 @@ export class AuthController {
   @ApiResponse({
     status: 401,
     description: 'Invalid or expired authorization code',
+  })
+  @ApiResponse({
+    status: 429,
+    description: 'Too many exchange attempts — rate limited (10 req/60s per IP)',
   })
   async exchangeOAuthCode(
     @Body() dto: OAuthExchangeDto,

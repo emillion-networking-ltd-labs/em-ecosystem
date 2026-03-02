@@ -161,6 +161,12 @@ export class MfaController {
   }
 
   @Get('status')
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.mfa.ttl,
+      limit: AUTH_RATE_LIMITS.mfa.limit,
+    },
+  })
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get MFA status and remaining recovery codes' })

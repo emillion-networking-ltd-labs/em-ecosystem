@@ -394,6 +394,19 @@ describe('AuthController', () => {
   });
 
   describe('exchangeOAuthCode', () => {
+    it('should have @Throttle decorator', () => {
+      const limitMeta = Reflect.getMetadata(
+        'THROTTLER:LIMITglobal',
+        controller.exchangeOAuthCode,
+      );
+      const ttlMeta = Reflect.getMetadata(
+        'THROTTLER:TTLglobal',
+        controller.exchangeOAuthCode,
+      );
+      expect(limitMeta).toBeDefined();
+      expect(ttlMeta).toBeDefined();
+    });
+
     it('should set cookie and return accessToken + user for a valid code', async () => {
       authService.exchangeOAuthCode.mockResolvedValue(mockAuthResult as any);
 

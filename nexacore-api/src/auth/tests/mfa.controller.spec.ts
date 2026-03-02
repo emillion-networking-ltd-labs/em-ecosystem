@@ -242,6 +242,7 @@ describe('MfaController', () => {
       'verifyLogin',
       'disable',
       'regenerateCodes',
+      'status',
     ];
 
     throttledMethods.forEach((method) => {
@@ -257,14 +258,6 @@ describe('MfaController', () => {
         expect(limitMeta).toBeDefined();
         expect(ttlMeta).toBeDefined();
       });
-    });
-
-    it('should NOT have @Throttle on status (inherits global)', () => {
-      const limitMeta = Reflect.getMetadata(
-        'THROTTLER:LIMITglobal',
-        controller['status'],
-      );
-      expect(limitMeta).toBeUndefined();
     });
   });
 });
