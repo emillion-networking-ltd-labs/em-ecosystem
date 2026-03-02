@@ -12,6 +12,7 @@ import {
   HttpCode,
   HttpStatus,
   ParseUUIDPipe,
+  NotFoundException,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { UsersService } from './users.service';
@@ -109,7 +110,7 @@ export class UsersController {
   async getUser(@Param('id', ParseUUIDPipe) id: string) {
     const user = await this.usersService.findById(id);
     if (!user) {
-      return { error: 'User not found' };
+      throw new NotFoundException('User not found');
     }
     return toSafeUser(user);
   }

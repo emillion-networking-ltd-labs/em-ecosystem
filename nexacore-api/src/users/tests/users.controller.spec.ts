@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { NotFoundException } from '@nestjs/common';
 import { UsersController } from '../users.controller';
 import { UsersService } from '../users.service';
 import { Role } from '../enums/role.enum';
@@ -172,12 +173,12 @@ describe('UsersController', () => {
       expect(result).toHaveProperty('email', 'test@example.com');
     });
 
-    it('should return error object when user not found', async () => {
+    it('should throw NotFoundException when user not found', async () => {
       usersService.findById.mockResolvedValue(null);
 
-      const result = await controller.getUser('nonexistent');
-
-      expect(result).toEqual({ error: 'User not found' });
+      await expect(controller.getUser('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
   });
 

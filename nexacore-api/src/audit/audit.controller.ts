@@ -5,6 +5,7 @@ import {
   Query,
   UseGuards,
   NotFoundException,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -51,7 +52,7 @@ export class AuditLogController {
   @ApiOperation({ summary: 'Get a single audit log entry by ID' })
   @ApiResponse({ status: 200, description: 'Audit log entry' })
   @ApiResponse({ status: 404, description: 'Audit log not found' })
-  async getAuditLog(@Param('id') id: string) {
+  async getAuditLog(@Param('id', ParseUUIDPipe) id: string) {
     const log = await this.auditService.findById(id);
     if (!log) {
       throw new NotFoundException('Audit log not found');
