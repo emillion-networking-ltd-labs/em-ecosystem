@@ -232,4 +232,39 @@ describe('MfaController', () => {
       expect(result).toEqual(statusResult);
     });
   });
+
+  // ─── Rate limiting decorators ─────────────────────────────
+
+  describe('Rate limiting decorators', () => {
+    const throttledMethods = [
+      'setup',
+      'verifySetup',
+      'verifyLogin',
+      'disable',
+      'regenerateCodes',
+    ];
+
+    throttledMethods.forEach((method) => {
+      it(`should have @Throttle on ${method}`, () => {
+        const limitMeta = Reflect.getMetadata(
+          'THROTTLER:LIMITglobal',
+          controller[method],
+        );
+        const ttlMeta = Reflect.getMetadata(
+          'THROTTLER:TTLglobal',
+          controller[method],
+        );
+        expect(limitMeta).toBeDefined();
+        expect(ttlMeta).toBeDefined();
+      });
+    });
+
+    it('should NOT have @Throttle on status (inherits global)', () => {
+      const limitMeta = Reflect.getMetadata(
+        'THROTTLER:LIMITglobal',
+        controller['status'],
+      );
+      expect(limitMeta).toBeUndefined();
+    });
+  });
 });

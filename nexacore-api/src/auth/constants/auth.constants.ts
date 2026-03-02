@@ -55,10 +55,13 @@ export const GLOBAL_RATE_LIMIT = {
  * Login: 10/60s — strict IP throttle; account lockout (5 wrong passwords →
  * escalating lockout) provides additional per-account brute-force protection.
  * The frontend differentiates 429 (IP throttle) from 403 (account lockout).
+ * MFA: 5/60s — strict; limits TOTP brute-force (6-digit = 1M combinations).
+ * Combined with 5-minute mfaToken expiry, attacker gets max 25 guesses per challenge.
  */
 export const AUTH_RATE_LIMITS = {
   login: { ttl: 60_000, limit: 10 },
   register: { ttl: 60_000, limit: 5 },
   refresh: { ttl: 60_000, limit: 30 },
   oauth: { ttl: 60_000, limit: 10 },
+  mfa: { ttl: 60_000, limit: 5 },
 };

@@ -38,4 +38,26 @@ describe('Rate Limiting Configuration', () => {
       });
     });
   });
+
+  describe('MFA rate limits (AUTH_RATE_LIMITS.mfa)', () => {
+    it('should have strict limit for MFA (5 per 60s)', () => {
+      expect(AUTH_RATE_LIMITS.mfa.limit).toBe(5);
+      expect(AUTH_RATE_LIMITS.mfa.ttl).toBe(60_000);
+    });
+
+    it('should have MFA limit at or below global', () => {
+      expect(AUTH_RATE_LIMITS.mfa.limit).toBeLessThanOrEqual(
+        GLOBAL_RATE_LIMIT.limit,
+      );
+    });
+
+    it('should limit brute-force to max 25 attempts per 5-minute MFA token', () => {
+      const mfaTokenExpirySeconds = 300; // 5 minutes
+      const windowsPerToken = Math.ceil(
+        mfaTokenExpirySeconds / (AUTH_RATE_LIMITS.mfa.ttl / 1000),
+      );
+      const maxAttempts = windowsPerToken * AUTH_RATE_LIMITS.mfa.limit;
+      expect(maxAttempts).toBeLessThanOrEqual(25);
+    });
+  });
 });
