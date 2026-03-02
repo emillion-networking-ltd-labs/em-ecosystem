@@ -96,4 +96,56 @@ export class MailService {
       );
     }
   }
+
+  async sendLoginNotificationEmail(
+    email: string,
+    ipAddress: string,
+    userAgent: string | null,
+    firstName?: string | null,
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const sessionsUrl = `${frontendUrl}/dashboard/security/sessions`;
+
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'New sign-in to your EM NexaCore account',
+        template: 'login-notification',
+        context: {
+          name: firstName || email.split('@')[0],
+          device: this.parseUserAgent(userAgent),
+          ipAddress,
+          loginTime: new Date().toISOString(),
+          sessionsUrl,
+          frontendUrl,
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Login notification email sent to ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send login notification email to ${email}`,
+        error,
+      );
+    }
+  }
+
+  private parseUserAgent(ua: string | null): string {
+    if (!ua) return 'Unknown device';
+
+    let browser = 'Unknown browser';
+    if (ua.includes('Edg/')) browser = 'Edge';
+    else if (ua.includes('Chrome/')) browser = 'Chrome';
+    else if (ua.includes('Firefox/')) browser = 'Firefox';
+    else if (ua.includes('Safari/') && !ua.includes('Chrome/')) browser = 'Safari';
+
+    let os = 'Unknown OS';
+    if (ua.includes('Windows')) os = 'Windows';
+    else if (ua.includes('Mac OS') || ua.includes('Macintosh')) os = 'macOS';
+    else if (ua.includes('Linux') && !ua.includes('Android')) os = 'Linux';
+    else if (ua.includes('Android')) os = 'Android';
+    else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+
+    return `${browser} on ${os}`;
+  }
 }

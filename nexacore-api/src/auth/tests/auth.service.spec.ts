@@ -193,6 +193,9 @@ describe('AuthService', () => {
             user: {
               update: jest.fn(),
             },
+            session: {
+              findMany: jest.fn().mockResolvedValue([]),
+            },
             $transaction: jest.fn().mockResolvedValue(undefined),
           },
         },
@@ -201,6 +204,7 @@ describe('AuthService', () => {
           useValue: {
             sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
             sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
+            sendLoginNotificationEmail: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -1623,6 +1627,110 @@ describe('AuthService', () => {
       );
 
       expect(usersService.resetLockoutEscalation).toHaveBeenCalledWith('uuid-123');
+    });
+  });
+
+  describe('notifyIfNewDevice (via login)', () => {
+    let prismaService: any;
+    let mailService: any;
+
+    beforeEach(() => {
+      prismaService = (authService as any).prisma;
+      mailService = (authService as any).mailService;
+
+      usersService.findByEmail.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+    });
+
+    it('should send login notification when IP is new', async () => {
+      prismaService.session.findMany.mockResolvedValue([
+        { ipAddress: '10.0.0.99', userAgent: 'test-agent' },
+      ]);
+
+      await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+      );
+
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(mailService.sendLoginNotificationEmail).toHaveBeenCalledWith(
+        'test@example.com',
+        '127.0.0.1',
+        'test-agent',
+        null,
+      );
+    });
+
+    it('should send login notification when userAgent is new', async () => {
+      prismaService.session.findMany.mockResolvedValue([
+        { ipAddress: '127.0.0.1', userAgent: 'different-agent' },
+      ]);
+
+      await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+      );
+
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(mailService.sendLoginNotificationEmail).toHaveBeenCalledWith(
+        'test@example.com',
+        '127.0.0.1',
+        'test-agent',
+        null,
+      );
+    });
+
+    it('should NOT send notification on first-ever login (no previous sessions)', async () => {
+      prismaService.session.findMany.mockResolvedValue([]);
+
+      await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+      );
+
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(mailService.sendLoginNotificationEmail).not.toHaveBeenCalled();
+    });
+
+    it('should NOT send notification when IP and UA are both known', async () => {
+      prismaService.session.findMany.mockResolvedValue([
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      ]);
+
+      await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+      );
+
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(mailService.sendLoginNotificationEmail).not.toHaveBeenCalled();
+    });
+
+    it('should not fail login when notification email fails', async () => {
+      prismaService.session.findMany.mockResolvedValue([
+        { ipAddress: '10.0.0.99', userAgent: 'other-agent' },
+      ]);
+      mailService.sendLoginNotificationEmail.mockRejectedValueOnce(
+        new Error('SMTP error'),
+      );
+
+      const result = await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+      );
+
+      expect(result.accessToken).toBe('access-token');
+      expect(result.user.email).toBe('test@example.com');
     });
   });
 });

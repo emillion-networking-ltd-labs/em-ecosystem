@@ -316,7 +316,7 @@ export class AuthService {
       return { mfaRequired: true, mfaToken };
     }
 
-    const { accessToken, refreshToken } = await this.generateTokens(
+    const { accessToken, refreshToken, sessionId } = await this.generateTokens(
       user,
       requestMeta,
     );
@@ -329,6 +329,8 @@ export class AuthService {
         userAgent: ctx?.userAgent,
       })
       .catch(() => {});
+
+    this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
 
     return {
       accessToken,
@@ -416,7 +418,7 @@ export class AuthService {
       await this.usersService.resetLockoutEscalation(user.id);
     }
 
-    const { accessToken, refreshToken } = await this.generateTokens(
+    const { accessToken, refreshToken, sessionId } = await this.generateTokens(
       user,
       requestMeta,
     );
@@ -430,6 +432,8 @@ export class AuthService {
         metadata: { provider: profile.provider },
       })
       .catch(() => {});
+
+    this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
 
     return {
       accessToken,
@@ -511,10 +515,13 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('User not found');
     }
-    const { accessToken, refreshToken } = await this.generateTokens(
+    const { accessToken, refreshToken, sessionId } = await this.generateTokens(
       user,
       requestMeta,
     );
+
+    this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
+
     return {
       accessToken,
       user: toSafeUser(user),
@@ -558,6 +565,40 @@ export class AuthService {
     await this.sessionsService.updateSessionHash(session.id, refreshTokenHash);
 
     return { accessToken, refreshToken, sessionId: session.id };
+  }
+
+  private async notifyIfNewDevice(
+    user: { id: string; email: string; firstName: string | null },
+    sessionId: string,
+    requestMeta: { ipAddress: string; userAgent?: string | null },
+  ): Promise<void> {
+    const previousSessions = await this.prisma.session.findMany({
+      where: {
+        userId: user.id,
+        id: { not: sessionId },
+        isRevoked: false,
+        expiresAt: { gt: new Date() },
+      },
+      select: { ipAddress: true, userAgent: true },
+    });
+
+    if (previousSessions.length === 0) return;
+
+    const knownIp = previousSessions.some(
+      (s) => s.ipAddress === requestMeta.ipAddress,
+    );
+    const knownUa = previousSessions.some(
+      (s) => s.userAgent === (requestMeta.userAgent || null),
+    );
+
+    if (!knownIp || !knownUa) {
+      await this.mailService.sendLoginNotificationEmail(
+        user.email,
+        requestMeta.ipAddress,
+        requestMeta.userAgent || null,
+        user.firstName,
+      );
+    }
   }
 
   // ── Email Verification ──
