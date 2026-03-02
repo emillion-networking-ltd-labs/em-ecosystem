@@ -57,3 +57,8 @@ $RECYCLE.BIN/
 coverage/
 
 /generated/prisma
+
+# Prisma config build artifacts
+prisma.config.js
+prisma.config.d.ts
+prisma.config.js.map
