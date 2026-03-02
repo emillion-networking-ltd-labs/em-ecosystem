@@ -13,6 +13,7 @@ describe('UsersController', () => {
     updateProfile: jest.Mock;
     changePassword: jest.Mock;
     requestEmailChange: jest.Mock;
+    selfDeleteAccount: jest.Mock;
     findAll: jest.Mock;
     findById: jest.Mock;
     adminUpdateUser: jest.Mock;
@@ -57,6 +58,7 @@ describe('UsersController', () => {
       updateProfile: jest.fn(),
       changePassword: jest.fn(),
       requestEmailChange: jest.fn(),
+      selfDeleteAccount: jest.fn(),
       findAll: jest.fn(),
       findById: jest.fn(),
       adminUpdateUser: jest.fn(),
@@ -218,6 +220,46 @@ describe('UsersController', () => {
         { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
       );
       expect(result).toEqual({ message: 'User deactivated successfully' });
+    });
+  });
+
+  // ─── DELETE /users/me ──────────────────────────────────────
+
+  describe('deleteOwnAccount', () => {
+    it('should delegate to usersService.selfDeleteAccount with userId and context', async () => {
+      usersService.selfDeleteAccount.mockResolvedValue({
+        message: 'Account deleted successfully',
+      });
+
+      const result = await controller.deleteOwnAccount(mockReq, {
+        password: 'StrongPass1!',
+      });
+
+      expect(usersService.selfDeleteAccount).toHaveBeenCalledWith(
+        'uuid-123',
+        { password: 'StrongPass1!' },
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      );
+      expect(result).toEqual({
+        message: 'Account deleted successfully',
+      });
+    });
+
+    it('should delegate without password for OAuth accounts', async () => {
+      usersService.selfDeleteAccount.mockResolvedValue({
+        message: 'Account deleted successfully',
+      });
+
+      const result = await controller.deleteOwnAccount(mockReq, {});
+
+      expect(usersService.selfDeleteAccount).toHaveBeenCalledWith(
+        'uuid-123',
+        {},
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      );
+      expect(result).toEqual({
+        message: 'Account deleted successfully',
+      });
     });
   });
 

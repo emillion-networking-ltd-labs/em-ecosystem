@@ -10,6 +10,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { User, SafeUser, toSafeUser } from './entities/user.entity';
 import { Provider } from './enums/provider.enum';
@@ -27,6 +28,7 @@ import { SessionsService } from '../sessions/sessions.service';
 import { MailService } from '../mail/mail.service';
 import { PasswordBreachService } from '../auth/password-breach.service';
 import { ChangeEmailDto } from './dto/change-email.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 import * as crypto from 'crypto';
 
 const BCRYPT_ROUNDS = 12;
@@ -553,6 +555,95 @@ export class UsersService {
       .catch(() => {});
 
     return { message: 'Verification email sent to new address' };
+  }
+
+  // ── Account self-deletion (SCRUM-105) ──
+
+  async selfDeleteAccount(
+    userId: string,
+    dto: DeleteAccountDto,
+    ctx?: RequestContext,
+  ): Promise<{ message: string }> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.role === Role.SUPERADMIN) {
+      throw new ForbiddenException('Cannot delete SUPERADMIN accounts');
+    }
+
+    // Password check: required for local accounts, skipped for OAuth-only
+    if (user.passwordHash) {
+      if (!dto.password) {
+        throw new BadRequestException(
+          'Password confirmation required for local accounts',
+        );
+      }
+      const isPasswordValid = await bcrypt.compare(
+        dto.password,
+        user.passwordHash,
+      );
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Password is incorrect');
+      }
+    }
+
+    // Send confirmation email BEFORE anonymization (needs real email)
+    await this.mailService.sendAccountDeletionConfirmation(
+      user.email,
+      user.firstName,
+    );
+
+    // Anonymize PII + delete related data in a single transaction
+    const anonymizedEmail = `deleted-${userId}@anonymized.local`;
+
+    await this.prisma.$transaction([
+      // 1. Anonymize user PII (tombstone)
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          email: anonymizedEmail,
+          passwordHash: null,
+          firstName: null,
+          lastName: null,
+          avatarUrl: null,
+          providerId: null,
+          pendingEmail: null,
+          emailVerified: false,
+          isActive: false,
+          failedAttempts: 0,
+          lockedUntil: null,
+          lockoutCount: 0,
+          mfaEnabled: false,
+          mfaSecret: null,
+          mfaRecoveryCodes: [],
+        },
+      }),
+      // 2. Delete all sessions (contain IP/UA PII)
+      this.prisma.session.deleteMany({ where: { userId } }),
+      // 3. Delete all email verification tokens
+      this.prisma.emailVerificationToken.deleteMany({ where: { userId } }),
+      // 4. Delete all password reset tokens
+      this.prisma.passwordResetToken.deleteMany({ where: { userId } }),
+      // 5. Scrub audit log PII (ipAddress, userAgent, metadata)
+      this.prisma.auditLog.updateMany({
+        where: { OR: [{ userId }, { targetUserId: userId }] },
+        data: { ipAddress: null, userAgent: null, metadata: Prisma.DbNull },
+      }),
+    ]);
+
+    // Audit log AFTER transaction (intentionally keeps IP/UA for the deletion event)
+    this.auditService
+      .log({
+        action: AuditAction.ACCOUNT_SELF_DELETED,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+      })
+      .catch(() => {});
+
+    return { message: 'Account deleted successfully' };
   }
 
   private hashToken(token: string): string {

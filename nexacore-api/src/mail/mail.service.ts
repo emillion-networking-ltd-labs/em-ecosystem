@@ -219,6 +219,33 @@ export class MailService {
     }
   }
 
+  async sendAccountDeletionConfirmation(
+    email: string,
+    firstName?: string | null,
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Your EM NexaCore account has been deleted',
+        template: 'account-deleted',
+        context: {
+          name: firstName || email.split('@')[0],
+          frontendUrl,
+          deletedAt: new Date().toISOString(),
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Account deletion confirmation sent to ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send account deletion confirmation to ${email}`,
+        error,
+      );
+    }
+  }
+
   private parseUserAgent(ua: string | null): string {
     if (!ua) return 'Unknown device';
 

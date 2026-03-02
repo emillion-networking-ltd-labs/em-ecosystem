@@ -30,6 +30,7 @@ describe('UsersService', () => {
     sendEmailChangeVerificationEmail: jest.Mock;
     sendEmailChangeRequestNotification: jest.Mock;
     sendEmailChangedConfirmation: jest.Mock;
+    sendAccountDeletionConfirmation: jest.Mock;
   };
   let prisma: {
     user: {
@@ -41,7 +42,18 @@ describe('UsersService', () => {
     };
     emailVerificationToken: {
       create: jest.Mock;
+      deleteMany: jest.Mock;
     };
+    session: {
+      deleteMany: jest.Mock;
+    };
+    passwordResetToken: {
+      deleteMany: jest.Mock;
+    };
+    auditLog: {
+      updateMany: jest.Mock;
+    };
+    $transaction: jest.Mock;
   };
 
   const mockUser = {
@@ -80,7 +92,18 @@ describe('UsersService', () => {
       },
       emailVerificationToken: {
         create: jest.fn().mockResolvedValue(undefined),
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
+      session: {
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
+      passwordResetToken: {
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
+      auditLog: {
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
+      $transaction: jest.fn().mockResolvedValue(undefined),
     };
 
     auditService = { log: jest.fn().mockResolvedValue(undefined) };
@@ -109,6 +132,7 @@ describe('UsersService', () => {
             sendEmailChangeVerificationEmail: jest.fn().mockResolvedValue(undefined),
             sendEmailChangeRequestNotification: jest.fn().mockResolvedValue(undefined),
             sendEmailChangedConfirmation: jest.fn().mockResolvedValue(undefined),
+            sendAccountDeletionConfirmation: jest.fn().mockResolvedValue(undefined),
           },
         },
         {
@@ -1175,6 +1199,203 @@ describe('UsersService', () => {
       await new Promise(process.nextTick);
 
       expect(result).toEqual({ message: 'Verification email sent to new address' });
+    });
+  });
+
+  // ── selfDeleteAccount (SCRUM-105) ──
+
+  describe('selfDeleteAccount', () => {
+    const deleteDto = { password: 'ValidPass1!' };
+    const ctx = { ipAddress: '10.0.0.1', userAgent: 'test-agent' };
+
+    it('should throw NotFoundException when user not found', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(
+        usersService.selfDeleteAccount('nonexistent', deleteDto, ctx),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException for SUPERADMIN accounts', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        role: 'SUPERADMIN',
+      });
+
+      await expect(
+        usersService.selfDeleteAccount('uuid-123', deleteDto, ctx),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw BadRequestException when local account provides no password', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+
+      await expect(
+        usersService.selfDeleteAccount('uuid-123', {}, ctx),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw UnauthorizedException when password is incorrect', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        usersService.selfDeleteAccount('uuid-123', deleteDto, ctx),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should succeed for local account with correct password', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      const result = await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+
+      expect(result).toEqual({ message: 'Account deleted successfully' });
+    });
+
+    it('should succeed for OAuth-only account without password', async () => {
+      const oauthUser = { ...mockUser, passwordHash: null, provider: 'GOOGLE' };
+      prisma.user.findUnique.mockResolvedValue(oauthUser);
+
+      const result = await usersService.selfDeleteAccount('uuid-123', {}, ctx);
+
+      expect(result).toEqual({ message: 'Account deleted successfully' });
+    });
+
+    it('should send confirmation email before anonymization', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+
+      expect(mailService.sendAccountDeletionConfirmation).toHaveBeenCalledWith(
+        'test@example.com',
+        null,
+      );
+      // Email should be called before $transaction
+      const emailCallOrder = mailService.sendAccountDeletionConfirmation.mock.invocationCallOrder[0];
+      const txCallOrder = prisma.$transaction.mock.invocationCallOrder[0];
+      expect(emailCallOrder).toBeLessThan(txCallOrder);
+    });
+
+    it('should execute $transaction with 5 operations', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+
+      expect(prisma.$transaction).toHaveBeenCalledWith(
+        expect.arrayContaining([
+          expect.anything(), // user.update (anonymize)
+          expect.anything(), // session.deleteMany
+          expect.anything(), // emailVerificationToken.deleteMany
+          expect.anything(), // passwordResetToken.deleteMany
+          expect.anything(), // auditLog.updateMany
+        ]),
+      );
+      // Verify exactly 5 operations
+      expect(prisma.$transaction.mock.calls[0][0]).toHaveLength(5);
+    });
+
+    it('should anonymize all PII fields in the transaction', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+
+      // The user.update call is part of the $transaction array
+      // Verify that prisma.user.update was called with anonymization data
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'uuid-123' },
+        data: expect.objectContaining({
+          email: 'deleted-uuid-123@anonymized.local',
+          passwordHash: null,
+          firstName: null,
+          lastName: null,
+          avatarUrl: null,
+          providerId: null,
+          pendingEmail: null,
+          emailVerified: false,
+          isActive: false,
+          failedAttempts: 0,
+          lockedUntil: null,
+          lockoutCount: 0,
+          mfaEnabled: false,
+          mfaSecret: null,
+          mfaRecoveryCodes: [],
+        }),
+      });
+    });
+
+    it('should delete all sessions', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+
+      expect(prisma.session.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'uuid-123' },
+      });
+    });
+
+    it('should delete all email verification tokens', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+
+      expect(prisma.emailVerificationToken.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'uuid-123' },
+      });
+    });
+
+    it('should delete all password reset tokens', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+
+      expect(prisma.passwordResetToken.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'uuid-123' },
+      });
+    });
+
+    it('should scrub audit log PII (ipAddress, userAgent, metadata)', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+
+      expect(prisma.auditLog.updateMany).toHaveBeenCalledWith({
+        where: { OR: [{ userId: 'uuid-123' }, { targetUserId: 'uuid-123' }] },
+        data: { ipAddress: null, userAgent: null, metadata: expect.anything() },
+      });
+    });
+
+    it('should log ACCOUNT_SELF_DELETED audit after transaction', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+
+      expect(auditService.log).toHaveBeenCalledWith({
+        action: AuditAction.ACCOUNT_SELF_DELETED,
+        userId: 'uuid-123',
+        ipAddress: '10.0.0.1',
+        userAgent: 'test-agent',
+      });
+    });
+
+    it('should not throw when audit log rejects (fire-and-forget)', async () => {
+      auditService.log.mockRejectedValue(new Error('audit fail'));
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      const result = await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+
+      await new Promise(process.nextTick);
+
+      expect(result).toEqual({ message: 'Account deleted successfully' });
     });
   });
 });

@@ -25,6 +25,7 @@ import { toSafeUser } from './entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ChangeEmailDto } from './dto/change-email.dto';
+import { DeleteAccountDto } from './dto/delete-account.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 
@@ -72,6 +73,20 @@ export class UsersController {
     @Body() dto: ChangeEmailDto,
   ) {
     return this.usersService.requestEmailChange(req.user.id, dto, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
+  }
+
+  @Delete('me')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.OK)
+  async deleteOwnAccount(
+    @Request()
+    req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
+    @Body() dto: DeleteAccountDto,
+  ) {
+    return this.usersService.selfDeleteAccount(req.user.id, dto, {
       ipAddress: req.ip || null,
       userAgent: req.headers?.['user-agent'] || null,
     });

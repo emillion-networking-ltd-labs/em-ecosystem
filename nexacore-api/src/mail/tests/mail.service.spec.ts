@@ -336,4 +336,36 @@ describe('MailService', () => {
       ).resolves.toBeUndefined();
     });
   });
+
+  describe('sendAccountDeletionConfirmation', () => {
+    it('should send account deletion confirmation with correct parameters', async () => {
+      await mailService.sendAccountDeletionConfirmation(
+        'user@example.com',
+        'John',
+      );
+
+      expect(mailerService.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'user@example.com',
+          subject: 'Your EM NexaCore account has been deleted',
+          template: 'account-deleted',
+          context: expect.objectContaining({
+            name: 'John',
+            deletedAt: expect.any(String),
+          }),
+        }),
+      );
+    });
+
+    it('should not throw when mailer fails', async () => {
+      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP error'));
+
+      await expect(
+        mailService.sendAccountDeletionConfirmation(
+          'user@example.com',
+          null,
+        ),
+      ).resolves.toBeUndefined();
+    });
+  });
 });

@@ -40,6 +40,7 @@ enum AuditAction {
   SESSION_LIMIT_EXCEEDED
   EMAIL_CHANGE_REQUESTED
   EMAIL_CHANGED
+  ACCOUNT_SELF_DELETED
 }
 
 enum EmailVerificationTokenType {
