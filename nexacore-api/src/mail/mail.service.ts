@@ -130,6 +130,95 @@ export class MailService {
     }
   }
 
+  async sendEmailChangeVerificationEmail(
+    newEmail: string,
+    token: string,
+    firstName?: string | null,
+  ): Promise<void> {
+    const apiUrl = process.env.API_URL || 'http://localhost:3000';
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const verificationUrl = `${apiUrl}/auth/verify-email-change?token=${token}`;
+
+    try {
+      await this.mailerService.sendMail({
+        to: newEmail,
+        subject: 'Verify your new EM NexaCore email address',
+        template: 'email-change-verification',
+        context: {
+          name: firstName || newEmail.split('@')[0],
+          verificationUrl,
+          frontendUrl,
+          expiresIn: '24 hours',
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Email change verification sent to ${newEmail}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send email change verification to ${newEmail}`,
+        error,
+      );
+    }
+  }
+
+  async sendEmailChangeRequestNotification(
+    oldEmail: string,
+    newEmail: string,
+    firstName?: string | null,
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+    try {
+      await this.mailerService.sendMail({
+        to: oldEmail,
+        subject: 'Email change requested for your EM NexaCore account',
+        template: 'email-change-notification',
+        context: {
+          name: firstName || oldEmail.split('@')[0],
+          newEmail,
+          frontendUrl,
+          requestedAt: new Date().toISOString(),
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Email change notification sent to ${oldEmail}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send email change notification to ${oldEmail}`,
+        error,
+      );
+    }
+  }
+
+  async sendEmailChangedConfirmation(
+    oldEmail: string,
+    newEmail: string,
+    firstName?: string | null,
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+    try {
+      await this.mailerService.sendMail({
+        to: oldEmail,
+        subject: 'Your EM NexaCore email address was changed',
+        template: 'email-changed-confirmation',
+        context: {
+          name: firstName || oldEmail.split('@')[0],
+          newEmail,
+          frontendUrl,
+          changedAt: new Date().toISOString(),
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Email changed confirmation sent to ${oldEmail}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send email changed confirmation to ${oldEmail}`,
+        error,
+      );
+    }
+  }
+
   private parseUserAgent(ua: string | null): string {
     if (!ua) return 'Unknown device';
 

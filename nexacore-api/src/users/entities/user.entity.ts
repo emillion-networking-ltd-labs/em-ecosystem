@@ -12,6 +12,7 @@ export interface User {
   provider: Provider;
   providerId: string | null;
   emailVerified: boolean;
+  pendingEmail: string | null;
   isActive: boolean;
   failedAttempts: number;
   lockedUntil: Date | null;
@@ -25,7 +26,7 @@ export interface User {
 
 export type SafeUser = Omit<
   User,
-  'passwordHash' | 'mfaSecret' | 'mfaRecoveryCodes' | 'failedAttempts' | 'lockedUntil' | 'lockoutCount'
+  'passwordHash' | 'pendingEmail' | 'mfaSecret' | 'mfaRecoveryCodes' | 'failedAttempts' | 'lockedUntil' | 'lockoutCount'
 >;
 
 export type SafeUserWithPermissions = SafeUser & {

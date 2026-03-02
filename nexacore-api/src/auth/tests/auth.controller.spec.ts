@@ -95,6 +95,7 @@ describe('AuthController', () => {
             resetPassword: jest.fn(),
             validateResetToken: jest.fn(),
             resendVerificationByEmail: jest.fn(),
+            verifyEmailChange: jest.fn(),
           },
         },
         {
@@ -611,6 +612,32 @@ describe('AuthController', () => {
       expect(sessionsService.getActiveSessions).toHaveBeenCalledWith(
         'uuid-123',
         'current-sess',
+      );
+    });
+  });
+
+  // ─── GET /auth/verify-email-change ──────────────────────────
+
+  describe('verifyEmailChange', () => {
+    it('should redirect to frontend with status=invalid when no token provided', async () => {
+      const res = { redirect: jest.fn() };
+
+      await controller.verifyEmailChange('', res as any);
+
+      expect(res.redirect).toHaveBeenCalledWith(
+        expect.stringContaining('status=invalid'),
+      );
+    });
+
+    it('should redirect to frontend with verification result status on success', async () => {
+      authService.verifyEmailChange.mockResolvedValue({ status: 'success' });
+      const res = { redirect: jest.fn() };
+
+      await controller.verifyEmailChange('valid-token', res as any);
+
+      expect(authService.verifyEmailChange).toHaveBeenCalledWith('valid-token');
+      expect(res.redirect).toHaveBeenCalledWith(
+        expect.stringContaining('status=success'),
       );
     });
   });

@@ -203,4 +203,137 @@ describe('MailService', () => {
       }
     });
   });
+
+  describe('sendEmailChangeVerificationEmail', () => {
+    it('should send email change verification email with correct parameters', async () => {
+      await mailService.sendEmailChangeVerificationEmail(
+        'new@example.com',
+        'change-token',
+        'John',
+      );
+
+      expect(mailerService.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'new@example.com',
+          subject: 'Verify your new EM NexaCore email address',
+          template: 'email-change-verification',
+          context: expect.objectContaining({
+            name: 'John',
+            expiresIn: '24 hours',
+          }),
+        }),
+      );
+    });
+
+    it('should use email prefix as name when firstName is null', async () => {
+      await mailService.sendEmailChangeVerificationEmail(
+        'new@example.com',
+        'change-token',
+        null,
+      );
+
+      expect(mailerService.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          context: expect.objectContaining({
+            name: 'new',
+          }),
+        }),
+      );
+    });
+
+    it('should include verification URL with token', async () => {
+      await mailService.sendEmailChangeVerificationEmail(
+        'new@example.com',
+        'abc123',
+        null,
+      );
+
+      const call = mailerService.sendMail.mock.calls[0][0];
+      expect(call.context.verificationUrl).toContain(
+        '/auth/verify-email-change?token=abc123',
+      );
+    });
+
+    it('should not throw when mailer fails', async () => {
+      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP error'));
+
+      await expect(
+        mailService.sendEmailChangeVerificationEmail(
+          'new@example.com',
+          'change-token',
+          null,
+        ),
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('sendEmailChangeRequestNotification', () => {
+    it('should send email change request notification with correct parameters', async () => {
+      await mailService.sendEmailChangeRequestNotification(
+        'old@example.com',
+        'new@example.com',
+        'Jane',
+      );
+
+      expect(mailerService.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'old@example.com',
+          subject: 'Email change requested for your EM NexaCore account',
+          template: 'email-change-notification',
+          context: expect.objectContaining({
+            name: 'Jane',
+            newEmail: 'new@example.com',
+            requestedAt: expect.any(String),
+          }),
+        }),
+      );
+    });
+
+    it('should not throw when mailer fails', async () => {
+      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP error'));
+
+      await expect(
+        mailService.sendEmailChangeRequestNotification(
+          'old@example.com',
+          'new@example.com',
+          null,
+        ),
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('sendEmailChangedConfirmation', () => {
+    it('should send email changed confirmation with correct parameters', async () => {
+      await mailService.sendEmailChangedConfirmation(
+        'old@example.com',
+        'new@example.com',
+        'Alice',
+      );
+
+      expect(mailerService.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'old@example.com',
+          subject: 'Your EM NexaCore email address was changed',
+          template: 'email-changed-confirmation',
+          context: expect.objectContaining({
+            name: 'Alice',
+            newEmail: 'new@example.com',
+            changedAt: expect.any(String),
+          }),
+        }),
+      );
+    });
+
+    it('should not throw when mailer fails', async () => {
+      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP error'));
+
+      await expect(
+        mailService.sendEmailChangedConfirmation(
+          'old@example.com',
+          'new@example.com',
+          null,
+        ),
+      ).resolves.toBeUndefined();
+    });
+  });
 });

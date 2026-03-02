@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Delete,
   Param,
@@ -12,6 +13,7 @@ import {
   HttpStatus,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { Throttle } from '@nestjs/throttler';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
@@ -22,6 +24,7 @@ import { Role } from './enums/role.enum';
 import { toSafeUser } from './entities/user.entity';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
+import { ChangeEmailDto } from './dto/change-email.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 
@@ -57,6 +60,21 @@ export class UsersController {
       userAgent: req.headers?.['user-agent'] || null,
     });
     return { message: 'Password changed successfully' };
+  }
+
+  @Post('me/email')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ global: { ttl: 60_000, limit: 5 } })
+  @HttpCode(HttpStatus.OK)
+  async requestEmailChange(
+    @Request()
+    req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
+    @Body() dto: ChangeEmailDto,
+  ) {
+    return this.usersService.requestEmailChange(req.user.id, dto, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
   }
 
   // ── Admin endpoints ──

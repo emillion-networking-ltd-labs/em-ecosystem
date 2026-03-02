@@ -287,6 +287,30 @@ export class AuthController {
     return res.redirect(`${frontendUrl}/verify-email?status=${result.status}`);
   }
 
+  @Get('verify-email-change')
+  @ApiOperation({ summary: 'Verify email change via token from email link' })
+  @ApiQuery({
+    name: 'token',
+    required: true,
+    description: 'Email change verification token',
+  })
+  @ApiResponse({ status: 302, description: 'Redirects to frontend with status' })
+  async verifyEmailChange(
+    @Query('token') token: string,
+    @Res() res: Response,
+  ) {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+    if (!token) {
+      return res.redirect(`${frontendUrl}/verify-email-change?status=invalid`);
+    }
+
+    const result = await this.authService.verifyEmailChange(token);
+    return res.redirect(
+      `${frontendUrl}/verify-email-change?status=${result.status}`,
+    );
+  }
+
   @Post('resend-verification')
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)

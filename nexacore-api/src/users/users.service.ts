@@ -26,8 +26,11 @@ import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
 import { SessionsService } from '../sessions/sessions.service';
 import { MailService } from '../mail/mail.service';
 import { PasswordBreachService } from '../auth/password-breach.service';
+import { ChangeEmailDto } from './dto/change-email.dto';
+import * as crypto from 'crypto';
 
 const BCRYPT_ROUNDS = 12;
+const EMAIL_CHANGE_TOKEN_EXPIRY_HOURS = 24;
 
 @Injectable()
 export class UsersService {
@@ -459,5 +462,100 @@ export class UsersService {
       where: { id: userId },
       data: { mfaRecoveryCodes: hashedCodes },
     });
+  }
+
+  // ── Email change methods (SCRUM-104) ──
+
+  async requestEmailChange(
+    userId: string,
+    dto: ChangeEmailDto,
+    ctx?: RequestContext,
+  ): Promise<{ message: string }> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        'Email change not available for OAuth accounts',
+      );
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      dto.password,
+      user.passwordHash,
+    );
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Password is incorrect');
+    }
+
+    const normalizedNewEmail = dto.newEmail.toLowerCase();
+
+    if (normalizedNewEmail === user.email.toLowerCase()) {
+      throw new BadRequestException(
+        'New email must be different from current email',
+      );
+    }
+
+    const existingUser = await this.findByEmail(normalizedNewEmail);
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    // Store pending email on user
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { pendingEmail: normalizedNewEmail },
+    });
+
+    // Create verification token
+    const rawToken = crypto.randomBytes(32).toString('hex');
+    const tokenHash = this.hashToken(rawToken);
+    const expiresAt = new Date(
+      Date.now() + EMAIL_CHANGE_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000,
+    );
+
+    await this.prisma.emailVerificationToken.create({
+      data: {
+        tokenHash,
+        userId,
+        type: 'EMAIL_CHANGE',
+        expiresAt,
+      },
+    });
+
+    // Send verification email to NEW address (awaited — user needs the link)
+    await this.mailService.sendEmailChangeVerificationEmail(
+      normalizedNewEmail,
+      rawToken,
+      user.firstName,
+    );
+
+    // Send notification to OLD address (fire-and-forget)
+    this.mailService
+      .sendEmailChangeRequestNotification(
+        user.email,
+        normalizedNewEmail,
+        user.firstName,
+      )
+      .catch(() => {});
+
+    // Audit log (fire-and-forget)
+    this.auditService
+      .log({
+        action: AuditAction.EMAIL_CHANGE_REQUESTED,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: { newEmail: normalizedNewEmail },
+      })
+      .catch(() => {});
+
+    return { message: 'Verification email sent to new address' };
+  }
+
+  private hashToken(token: string): string {
+    return crypto.createHash('sha256').update(token).digest('hex');
   }
 }

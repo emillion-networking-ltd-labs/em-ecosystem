@@ -652,6 +652,11 @@ export class AuthService {
       return { status: 'invalid' };
     }
 
+    // Cross-flow guard: reject EMAIL_CHANGE tokens at registration endpoint
+    if (verificationToken.type !== 'REGISTRATION') {
+      return { status: 'invalid' };
+    }
+
     if (verificationToken.usedAt) {
       // Already used — still success if user is verified
       if (verificationToken.user.emailVerified) {
@@ -675,6 +680,89 @@ export class AuthService {
         data: { emailVerified: true },
       }),
     ]);
+
+    return { status: 'success' };
+  }
+
+  async verifyEmailChange(
+    token: string,
+    ctx?: RequestContext,
+  ): Promise<{ status: 'success' | 'invalid' }> {
+    const tokenHash = this.hashToken(token);
+
+    const verificationToken =
+      await this.prisma.emailVerificationToken.findUnique({
+        where: { tokenHash },
+        include: { user: true },
+      });
+
+    if (!verificationToken) {
+      return { status: 'invalid' };
+    }
+
+    // Cross-flow guard: only accept EMAIL_CHANGE tokens
+    if (verificationToken.type !== 'EMAIL_CHANGE') {
+      return { status: 'invalid' };
+    }
+
+    if (verificationToken.usedAt) {
+      return { status: 'invalid' };
+    }
+
+    if (verificationToken.expiresAt < new Date()) {
+      return { status: 'invalid' };
+    }
+
+    const user = verificationToken.user as any;
+
+    // Ensure pendingEmail is still set (request not cancelled)
+    if (!user.pendingEmail) {
+      return { status: 'invalid' };
+    }
+
+    // Race condition guard: check the pending email is still available
+    const existingUser = await this.usersService.findByEmail(user.pendingEmail);
+    if (existingUser && existingUser.id !== user.id) {
+      return { status: 'invalid' };
+    }
+
+    const oldEmail = user.email;
+    const newEmail = user.pendingEmail;
+
+    // Atomic: swap email + clear pendingEmail + mark token used
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          email: newEmail,
+          pendingEmail: null,
+          emailVerified: true,
+        },
+      }),
+      this.prisma.emailVerificationToken.update({
+        where: { id: verificationToken.id },
+        data: { usedAt: new Date() },
+      }),
+    ]);
+
+    // Revoke all sessions — forces re-login with new email
+    await this.sessionsService.revokeAllUserSessions(user.id);
+
+    // Send confirmation to OLD email (fire-and-forget)
+    this.mailService
+      .sendEmailChangedConfirmation(oldEmail, newEmail, user.firstName)
+      .catch(() => {});
+
+    // Audit log (fire-and-forget)
+    this.auditService
+      .log({
+        action: AuditAction.EMAIL_CHANGED,
+        userId: user.id,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: { oldEmail, newEmail },
+      })
+      .catch(() => {});
 
     return { status: 'success' };
   }

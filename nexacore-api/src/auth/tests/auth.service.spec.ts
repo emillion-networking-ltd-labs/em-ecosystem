@@ -90,6 +90,7 @@ describe('AuthService', () => {
     provider: Provider.LOCAL,
     providerId: null,
     emailVerified: true,
+    pendingEmail: null,
     isActive: true,
     failedAttempts: 0,
     lockedUntil: null,
@@ -209,6 +210,9 @@ describe('AuthService', () => {
             sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
             sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
             sendLoginNotificationEmail: jest.fn().mockResolvedValue(undefined),
+            sendEmailChangeVerificationEmail: jest.fn().mockResolvedValue(undefined),
+            sendEmailChangeRequestNotification: jest.fn().mockResolvedValue(undefined),
+            sendEmailChangedConfirmation: jest.fn().mockResolvedValue(undefined),
           },
         },
       ],
@@ -805,6 +809,7 @@ describe('AuthService', () => {
         id: 'vt-1',
         tokenHash: 'hash',
         userId: 'uuid-123',
+        type: 'REGISTRATION',
         usedAt: new Date(),
         expiresAt: new Date(Date.now() + 86400000),
         user: { ...mockUser, emailVerified: true },
@@ -820,6 +825,7 @@ describe('AuthService', () => {
         id: 'vt-1',
         tokenHash: 'hash',
         userId: 'uuid-123',
+        type: 'REGISTRATION',
         usedAt: new Date(),
         expiresAt: new Date(Date.now() + 86400000),
         user: { ...mockUser, emailVerified: false },
@@ -835,6 +841,7 @@ describe('AuthService', () => {
         id: 'vt-1',
         tokenHash: 'hash',
         userId: 'uuid-123',
+        type: 'REGISTRATION',
         usedAt: null,
         expiresAt: new Date(Date.now() - 1000),
         user: mockUser,
@@ -850,6 +857,7 @@ describe('AuthService', () => {
         id: 'vt-1',
         tokenHash: 'hash',
         userId: 'uuid-123',
+        type: 'REGISTRATION',
         usedAt: null,
         expiresAt: new Date(Date.now() + 86400000),
         user: mockUser,
@@ -860,6 +868,220 @@ describe('AuthService', () => {
 
       expect(result).toEqual({ status: 'success' });
       expect(prismaService.$transaction).toHaveBeenCalled();
+    });
+
+    it('should return invalid when token type is EMAIL_CHANGE', async () => {
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: mockUser,
+      });
+
+      const result = await authService.verifyEmail('email-change-token');
+
+      expect(result).toEqual({ status: 'invalid' });
+      expect(prismaService.$transaction).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── verifyEmailChange ─────────────────────────────────────────
+
+  describe('verifyEmailChange', () => {
+    let prismaService: any;
+    let mailService: any;
+    let auditService: any;
+
+    beforeEach(() => {
+      prismaService = (authService as any).prisma;
+      mailService = (authService as any).mailService;
+      auditService = (authService as any).auditService;
+    });
+
+    it('should return invalid when token not found', async () => {
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue(null);
+
+      const result = await authService.verifyEmailChange('invalid-token');
+
+      expect(result).toEqual({ status: 'invalid' });
+    });
+
+    it('should return invalid when token type is REGISTRATION', async () => {
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'REGISTRATION',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: mockUser,
+      });
+
+      const result = await authService.verifyEmailChange('registration-token');
+
+      expect(result).toEqual({ status: 'invalid' });
+    });
+
+    it('should return invalid when token already used', async () => {
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: new Date(),
+        expiresAt: new Date(Date.now() + 86400000),
+        user: { ...mockUser, pendingEmail: 'new@example.com' },
+      });
+
+      const result = await authService.verifyEmailChange('used-token');
+
+      expect(result).toEqual({ status: 'invalid' });
+    });
+
+    it('should return invalid when token expired', async () => {
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() - 1000),
+        user: { ...mockUser, pendingEmail: 'new@example.com' },
+      });
+
+      const result = await authService.verifyEmailChange('expired-token');
+
+      expect(result).toEqual({ status: 'invalid' });
+    });
+
+    it('should return invalid when user has no pendingEmail', async () => {
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: { ...mockUser, pendingEmail: null },
+      });
+
+      const result = await authService.verifyEmailChange('valid-token');
+
+      expect(result).toEqual({ status: 'invalid' });
+    });
+
+    it('should return invalid when pending email is already taken', async () => {
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: { ...mockUser, pendingEmail: 'new@example.com' },
+      });
+      usersService.findByEmail.mockResolvedValue({
+        ...mockUser,
+        id: 'other-user-id',
+        email: 'new@example.com',
+      } as User);
+
+      const result = await authService.verifyEmailChange('valid-token');
+
+      expect(result).toEqual({ status: 'invalid' });
+    });
+
+    it('should atomically swap email and mark token used on success', async () => {
+      const userWithPending = { ...mockUser, pendingEmail: 'new@example.com' };
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: userWithPending,
+      });
+      usersService.findByEmail.mockResolvedValue(null);
+      prismaService.$transaction.mockResolvedValue(undefined);
+      sessionsService.revokeAllUserSessions.mockResolvedValue(undefined);
+
+      const result = await authService.verifyEmailChange('valid-token');
+
+      expect(result).toEqual({ status: 'success' });
+      expect(prismaService.$transaction).toHaveBeenCalled();
+    });
+
+    it('should revoke all sessions on successful email change', async () => {
+      const userWithPending = { ...mockUser, pendingEmail: 'new@example.com' };
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: userWithPending,
+      });
+      usersService.findByEmail.mockResolvedValue(null);
+      prismaService.$transaction.mockResolvedValue(undefined);
+      sessionsService.revokeAllUserSessions.mockResolvedValue(undefined);
+
+      await authService.verifyEmailChange('valid-token');
+
+      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith('uuid-123');
+    });
+
+    it('should send confirmation to old email on success', async () => {
+      const userWithPending = { ...mockUser, pendingEmail: 'new@example.com' };
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: userWithPending,
+      });
+      usersService.findByEmail.mockResolvedValue(null);
+      prismaService.$transaction.mockResolvedValue(undefined);
+      sessionsService.revokeAllUserSessions.mockResolvedValue(undefined);
+
+      await authService.verifyEmailChange('valid-token');
+
+      expect(mailService.sendEmailChangedConfirmation).toHaveBeenCalledWith(
+        mockUser.email,
+        'new@example.com',
+        mockUser.firstName,
+      );
+    });
+
+    it('should fire EMAIL_CHANGED audit log on success', async () => {
+      const userWithPending = { ...mockUser, pendingEmail: 'new@example.com' };
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: userWithPending,
+      });
+      usersService.findByEmail.mockResolvedValue(null);
+      prismaService.$transaction.mockResolvedValue(undefined);
+      sessionsService.revokeAllUserSessions.mockResolvedValue(undefined);
+
+      await authService.verifyEmailChange('valid-token');
+
+      expect(auditService.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'EMAIL_CHANGED',
+          userId: 'uuid-123',
+        }),
+      );
     });
   });
 

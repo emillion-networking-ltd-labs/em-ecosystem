@@ -25,6 +25,12 @@ describe('UsersService', () => {
   let auditService: { log: jest.Mock };
   let sessionsService: { revokeAllUserSessions: jest.Mock };
   let passwordBreachService: { isBreached: jest.Mock };
+  let mailService: {
+    sendPasswordChangeNotification: jest.Mock;
+    sendEmailChangeVerificationEmail: jest.Mock;
+    sendEmailChangeRequestNotification: jest.Mock;
+    sendEmailChangedConfirmation: jest.Mock;
+  };
   let prisma: {
     user: {
       findUnique: jest.Mock;
@@ -32,6 +38,9 @@ describe('UsersService', () => {
       update: jest.Mock;
       findMany: jest.Mock;
       count: jest.Mock;
+    };
+    emailVerificationToken: {
+      create: jest.Mock;
     };
   };
 
@@ -46,6 +55,7 @@ describe('UsersService', () => {
     provider: Provider.LOCAL,
     providerId: null,
     emailVerified: false,
+    pendingEmail: null,
     isActive: true,
     failedAttempts: 0,
     lockedUntil: null,
@@ -67,6 +77,9 @@ describe('UsersService', () => {
         update: jest.fn(),
         findMany: jest.fn(),
         count: jest.fn(),
+      },
+      emailVerificationToken: {
+        create: jest.fn().mockResolvedValue(undefined),
       },
     };
 
@@ -93,6 +106,9 @@ describe('UsersService', () => {
           provide: MailService,
           useValue: {
             sendPasswordChangeNotification: jest.fn().mockResolvedValue(undefined),
+            sendEmailChangeVerificationEmail: jest.fn().mockResolvedValue(undefined),
+            sendEmailChangeRequestNotification: jest.fn().mockResolvedValue(undefined),
+            sendEmailChangedConfirmation: jest.fn().mockResolvedValue(undefined),
           },
         },
         {
@@ -103,6 +119,7 @@ describe('UsersService', () => {
     }).compile();
 
     usersService = module.get<UsersService>(UsersService);
+    mailService = module.get(MailService);
   });
 
   describe('findByEmail', () => {
@@ -1015,6 +1032,149 @@ describe('UsersService', () => {
         where: { id: 'uuid-123' },
         data: { mfaRecoveryCodes: ['new-code1-hash', 'new-code2-hash'] },
       });
+    });
+  });
+
+  // ─── requestEmailChange ─────────────────────────────────────────
+
+  describe('requestEmailChange', () => {
+    const changeEmailDto = { newEmail: 'new@example.com', password: 'StrongPass1!' };
+
+    it('should throw NotFoundException when user not found', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(
+        usersService.requestEmailChange('uuid-123', changeEmailDto),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw BadRequestException for OAuth accounts (no passwordHash)', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        passwordHash: null,
+        provider: Provider.GOOGLE,
+      });
+
+      await expect(
+        usersService.requestEmailChange('uuid-123', changeEmailDto),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw UnauthorizedException when password is incorrect', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        usersService.requestEmailChange('uuid-123', changeEmailDto),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw BadRequestException when new email is same as current (case-insensitive)', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(
+        usersService.requestEmailChange('uuid-123', {
+          newEmail: 'TEST@EXAMPLE.COM',
+          password: 'StrongPass1!',
+        }),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('should throw ConflictException when new email is already registered', async () => {
+      // findById returns the user, then findByEmail returns an existing user
+      prisma.user.findUnique
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce({ ...mockUser, id: 'uuid-other', email: 'new@example.com' });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(
+        usersService.requestEmailChange('uuid-123', changeEmailDto),
+      ).rejects.toThrow(ConflictException);
+    });
+
+    it('should store pendingEmail and create verification token on success', async () => {
+      // findById returns user, findByEmail returns null (email available)
+      prisma.user.findUnique
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.user.update.mockResolvedValue({ ...mockUser, pendingEmail: 'new@example.com' });
+
+      await usersService.requestEmailChange('uuid-123', changeEmailDto);
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'uuid-123' },
+        data: { pendingEmail: 'new@example.com' },
+      });
+      expect(prisma.emailVerificationToken.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          userId: 'uuid-123',
+          type: 'EMAIL_CHANGE',
+          tokenHash: expect.any(String),
+          expiresAt: expect.any(Date),
+        }),
+      });
+    });
+
+    it('should send verification email to new address and notification to old address', async () => {
+      prisma.user.findUnique
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.user.update.mockResolvedValue({ ...mockUser, pendingEmail: 'new@example.com' });
+
+      await usersService.requestEmailChange('uuid-123', changeEmailDto);
+
+      expect(mailService.sendEmailChangeVerificationEmail).toHaveBeenCalledWith(
+        'new@example.com',
+        expect.any(String),
+        mockUser.firstName,
+      );
+      expect(mailService.sendEmailChangeRequestNotification).toHaveBeenCalledWith(
+        mockUser.email,
+        'new@example.com',
+        mockUser.firstName,
+      );
+    });
+
+    it('should fire EMAIL_CHANGE_REQUESTED audit log', async () => {
+      prisma.user.findUnique
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.user.update.mockResolvedValue({ ...mockUser, pendingEmail: 'new@example.com' });
+
+      await usersService.requestEmailChange('uuid-123', changeEmailDto, {
+        ipAddress: '10.0.0.1',
+        userAgent: 'test-agent',
+      });
+
+      expect(auditService.log).toHaveBeenCalledWith({
+        action: AuditAction.EMAIL_CHANGE_REQUESTED,
+        userId: 'uuid-123',
+        ipAddress: '10.0.0.1',
+        userAgent: 'test-agent',
+        metadata: { newEmail: 'new@example.com' },
+      });
+    });
+
+    it('should not throw when audit log rejects (fire-and-forget)', async () => {
+      auditService.log.mockRejectedValue(new Error('audit fail'));
+      prisma.user.findUnique
+        .mockResolvedValueOnce(mockUser)
+        .mockResolvedValueOnce(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.user.update.mockResolvedValue({ ...mockUser, pendingEmail: 'new@example.com' });
+
+      const result = await usersService.requestEmailChange('uuid-123', changeEmailDto, {
+        ipAddress: '10.0.0.1',
+        userAgent: 'test-agent',
+      });
+
+      await new Promise(process.nextTick);
+
+      expect(result).toEqual({ message: 'Verification email sent to new address' });
     });
   });
 });

@@ -38,6 +38,13 @@ enum AuditAction {
   MFA_DISABLED
   SESSION_IDLE_REVOKED
   SESSION_LIMIT_EXCEEDED
+  EMAIL_CHANGE_REQUESTED
+  EMAIL_CHANGED
+}
+
+enum EmailVerificationTokenType {
+  REGISTRATION
+  EMAIL_CHANGE
 }
 
 model User {
@@ -51,6 +58,7 @@ model User {
   provider       Provider  @default(LOCAL)
   providerId     String?
   emailVerified  Boolean   @default(false)
+  pendingEmail   String?
   isActive       Boolean   @default(true)
   failedAttempts Int       @default(0)
   lockedUntil    DateTime?
@@ -115,6 +123,7 @@ model EmailVerificationToken {
   id        String    @id @default(uuid())
   tokenHash String    @unique
   userId    String
+  type      EmailVerificationTokenType @default(REGISTRATION)
   user      User      @relation("UserEmailVerificationTokens", fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   usedAt    DateTime?

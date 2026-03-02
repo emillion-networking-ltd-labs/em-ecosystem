@@ -12,6 +12,7 @@ describe('UsersController', () => {
   let usersService: {
     updateProfile: jest.Mock;
     changePassword: jest.Mock;
+    requestEmailChange: jest.Mock;
     findAll: jest.Mock;
     findById: jest.Mock;
     adminUpdateUser: jest.Mock;
@@ -55,6 +56,7 @@ describe('UsersController', () => {
     usersService = {
       updateProfile: jest.fn(),
       changePassword: jest.fn(),
+      requestEmailChange: jest.fn(),
       findAll: jest.fn(),
       findById: jest.fn(),
       adminUpdateUser: jest.fn(),
@@ -216,6 +218,30 @@ describe('UsersController', () => {
         { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
       );
       expect(result).toEqual({ message: 'User deactivated successfully' });
+    });
+  });
+
+  // ─── POST /users/me/email ───────────────────────────────────
+
+  describe('requestEmailChange', () => {
+    it('should delegate to usersService.requestEmailChange with userId and context', async () => {
+      usersService.requestEmailChange.mockResolvedValue({
+        message: 'Verification email sent to new address',
+      });
+
+      const result = await controller.requestEmailChange(mockReq, {
+        newEmail: 'new@example.com',
+        password: 'StrongPass1!',
+      });
+
+      expect(usersService.requestEmailChange).toHaveBeenCalledWith(
+        'uuid-123',
+        { newEmail: 'new@example.com', password: 'StrongPass1!' },
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      );
+      expect(result).toEqual({
+        message: 'Verification email sent to new address',
+      });
     });
   });
 });
