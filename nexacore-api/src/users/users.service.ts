@@ -375,6 +375,11 @@ export class UsersService {
         .catch(() => {});
     }
 
+    // Revoke all sessions on deactivation (immediate lockout)
+    if (dto.isActive === false && dto.isActive !== target.isActive) {
+      await this.sessionsService.revokeAllUserSessions(targetId);
+    }
+
     return toSafeUser(updated as User);
   }
 
@@ -396,6 +401,9 @@ export class UsersService {
       where: { id: targetId },
       data: { isActive: false },
     });
+
+    // Revoke all sessions on soft delete (immediate lockout)
+    await this.sessionsService.revokeAllUserSessions(targetId);
 
     this.auditService
       .log({

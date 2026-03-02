@@ -840,6 +840,46 @@ describe('UsersService', () => {
 
       expect(result).toBeDefined();
     });
+
+    it('should revoke all sessions when deactivating a user', async () => {
+      prisma.user.findUnique.mockResolvedValue({ ...mockUser, isActive: true });
+      prisma.user.update.mockResolvedValue({ ...mockUser, isActive: false });
+
+      await usersService.adminUpdateUser(
+        'uuid-123',
+        { isActive: false },
+        actingSuperadmin,
+      );
+
+      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith('uuid-123');
+    });
+
+    it('should NOT revoke sessions when activating a user', async () => {
+      const inactiveUser = { ...mockUser, isActive: false };
+      prisma.user.findUnique.mockResolvedValue(inactiveUser);
+      prisma.user.update.mockResolvedValue({ ...inactiveUser, isActive: true });
+
+      await usersService.adminUpdateUser(
+        'uuid-123',
+        { isActive: true },
+        actingSuperadmin,
+      );
+
+      expect(sessionsService.revokeAllUserSessions).not.toHaveBeenCalled();
+    });
+
+    it('should NOT revoke sessions on role-only change', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, role: Role.ADMIN });
+
+      await usersService.adminUpdateUser(
+        'uuid-123',
+        { role: Role.ADMIN },
+        actingSuperadmin,
+      );
+
+      expect(sessionsService.revokeAllUserSessions).not.toHaveBeenCalled();
+    });
   });
 
   // ─── softDelete ────────────────────────────────────────────────
@@ -898,6 +938,15 @@ describe('UsersService', () => {
       });
 
       await new Promise(process.nextTick);
+    });
+
+    it('should revoke all sessions on soft delete', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, isActive: false });
+
+      await usersService.softDelete('uuid-123', 'admin-1');
+
+      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith('uuid-123');
     });
   });
 
