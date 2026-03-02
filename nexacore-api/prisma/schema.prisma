@@ -36,6 +36,8 @@ enum AuditAction {
   SUPERADMIN_BYPASS
   MFA_ENABLED
   MFA_DISABLED
+  SESSION_IDLE_REVOKED
+  SESSION_LIMIT_EXCEEDED
 }
 
 model User {
@@ -85,6 +87,7 @@ model Session {
   @@index([userId])
   @@index([tokenFamily])
   @@index([userId, isRevoked])
+  @@index([userId, isRevoked, lastUsedAt])
   @@map("sessions")
 }
 

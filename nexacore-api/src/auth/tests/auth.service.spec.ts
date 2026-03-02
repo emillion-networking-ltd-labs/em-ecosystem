@@ -146,6 +146,9 @@ describe('AuthService', () => {
             revokeAllUserSessions: jest.fn(),
             getActiveSessions: jest.fn(),
             updateSessionHash: jest.fn(),
+            isSessionIdle: jest.fn().mockReturnValue(false),
+            getActiveNonIdleSessions: jest.fn().mockResolvedValue([]),
+            enforceSessionLimit: jest.fn().mockResolvedValue(undefined),
           },
         },
         {
@@ -195,6 +198,7 @@ describe('AuthService', () => {
             },
             session: {
               findMany: jest.fn().mockResolvedValue([]),
+              update: jest.fn().mockResolvedValue(undefined),
             },
             $transaction: jest.fn().mockResolvedValue(undefined),
           },
@@ -1731,6 +1735,168 @@ describe('AuthService', () => {
 
       expect(result.accessToken).toBe('access-token');
       expect(result.user.email).toBe('test@example.com');
+    });
+  });
+
+  // ─── refreshTokens — idle timeout ──────────────────────────────
+
+  describe('refreshTokens - idle timeout', () => {
+    let prismaService: any;
+    let auditServiceMock: any;
+
+    beforeEach(() => {
+      prismaService = (authService as any).prisma;
+      auditServiceMock = (authService as any).auditService;
+
+      jwtService.verify.mockReturnValue({
+        sub: 'uuid-123',
+        sessionId: 'session-uuid',
+        family: 'family-uuid',
+      });
+      usersService.findById.mockResolvedValue(mockUser);
+      sessionsService.rotateRefreshToken.mockResolvedValue(mockSession);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+      jwtService.sign.mockReturnValue('token');
+    });
+
+    it('should throw UnauthorizedException when session is idle', async () => {
+      sessionsService.findById.mockResolvedValue(mockSession);
+      sessionsService.isSessionIdle.mockReturnValue(true);
+
+      await expect(
+        authService.refreshTokens('valid-token', requestMeta),
+      ).rejects.toThrow(UnauthorizedException);
+
+      await expect(
+        authService.refreshTokens('valid-token', requestMeta),
+      ).rejects.toThrow('Session expired due to inactivity');
+    });
+
+    it('should NOT call rotateRefreshToken when session is idle', async () => {
+      sessionsService.findById.mockResolvedValue(mockSession);
+      sessionsService.isSessionIdle.mockReturnValue(true);
+
+      await authService
+        .refreshTokens('valid-token', requestMeta)
+        .catch(() => {});
+
+      expect(sessionsService.rotateRefreshToken).not.toHaveBeenCalled();
+    });
+
+    it('should revoke idle session and log SESSION_IDLE_REVOKED audit', async () => {
+      sessionsService.findById.mockResolvedValue(mockSession);
+      sessionsService.isSessionIdle.mockReturnValue(true);
+
+      await authService
+        .refreshTokens('valid-token', requestMeta)
+        .catch(() => {});
+
+      await new Promise((r) => setTimeout(r, 50));
+
+      expect(prismaService.session.update).toHaveBeenCalledWith({
+        where: { id: 'session-uuid' },
+        data: { isRevoked: true },
+      });
+
+      expect(auditServiceMock.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'SESSION_IDLE_REVOKED',
+          userId: 'uuid-123',
+        }),
+      );
+    });
+
+    it('should proceed normally when session is not idle', async () => {
+      sessionsService.findById.mockResolvedValue(mockSession);
+      sessionsService.isSessionIdle.mockReturnValue(false);
+
+      await authService.refreshTokens('valid-token', requestMeta);
+
+      expect(sessionsService.rotateRefreshToken).toHaveBeenCalled();
+    });
+  });
+
+  // ─── concurrent session limit ──────────────────────────────────
+
+  describe('concurrent session limit', () => {
+    beforeEach(() => {
+      usersService.findByEmail.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+    });
+
+    it('should call enforceSessionLimit before session creation on login', async () => {
+      await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+      );
+
+      expect(sessionsService.enforceSessionLimit).toHaveBeenCalledWith(
+        'uuid-123',
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      );
+    });
+
+    it('should call enforceSessionLimit on OAuth login', async () => {
+      usersService.findOrCreateByOAuth.mockResolvedValue(mockUser);
+
+      await authService.validateOAuthUser(
+        {
+          email: 'test@example.com',
+          provider: 'GOOGLE' as any,
+          providerId: 'google-id',
+        },
+        requestMeta,
+      );
+
+      expect(sessionsService.enforceSessionLimit).toHaveBeenCalledWith(
+        'uuid-123',
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      );
+    });
+
+    it('should call enforceSessionLimit on MFA login', async () => {
+      usersService.findById.mockResolvedValue(mockUser);
+
+      await authService.generateTokensForMfa('uuid-123', requestMeta);
+
+      expect(sessionsService.enforceSessionLimit).toHaveBeenCalledWith(
+        'uuid-123',
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      );
+    });
+
+    it('should propagate enforceSessionLimit errors', async () => {
+      sessionsService.enforceSessionLimit.mockRejectedValueOnce(
+        new Error('DB connection failed'),
+      );
+
+      await expect(
+        authService.login(
+          { email: 'test@example.com', password: 'StrongPass1!' },
+          requestMeta,
+        ),
+      ).rejects.toThrow('DB connection failed');
+    });
+
+    it('should pass ipAddress and userAgent to enforceSessionLimit', async () => {
+      const customMeta = { ipAddress: '192.168.1.100', userAgent: 'Custom-Agent/1.0' };
+
+      await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        customMeta,
+      );
+
+      expect(sessionsService.enforceSessionLimit).toHaveBeenCalledWith(
+        'uuid-123',
+        { ipAddress: '192.168.1.100', userAgent: 'Custom-Agent/1.0' },
+      );
     });
   });
 });

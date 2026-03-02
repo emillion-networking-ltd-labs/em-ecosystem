@@ -6,6 +6,12 @@ import {
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { AuditService } from '../audit/audit.service';
+import { AuditAction } from '../audit/enums/audit-action.enum';
+import {
+  SESSION_IDLE_TIMEOUT_HOURS,
+  MAX_CONCURRENT_SESSIONS,
+} from '../auth/constants/auth.constants';
 import {
   Session,
   SessionResponse,
@@ -16,7 +22,10 @@ const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class SessionsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly auditService: AuditService,
+  ) {}
 
   async createSession(params: {
     userId: string;
@@ -135,11 +144,16 @@ export class SessionsService {
     userId: string,
     currentSessionId?: string,
   ): Promise<SessionResponse[]> {
+    const idleThreshold = new Date(
+      Date.now() - SESSION_IDLE_TIMEOUT_HOURS * 60 * 60 * 1000,
+    );
+
     const sessions = await this.prisma.session.findMany({
       where: {
         userId,
         isRevoked: false,
         expiresAt: { gt: new Date() },
+        lastUsedAt: { gte: idleThreshold },
       },
       orderBy: { lastUsedAt: 'desc' },
     });
@@ -157,5 +171,66 @@ export class SessionsService {
       where: { id: sessionId },
       data: { refreshTokenHash },
     });
+  }
+
+  isSessionIdle(
+    lastUsedAt: Date,
+    idleTimeoutHours: number = SESSION_IDLE_TIMEOUT_HOURS,
+  ): boolean {
+    const idleThreshold = new Date(
+      Date.now() - idleTimeoutHours * 60 * 60 * 1000,
+    );
+    return lastUsedAt < idleThreshold;
+  }
+
+  async getActiveNonIdleSessions(userId: string): Promise<Session[]> {
+    const idleThreshold = new Date(
+      Date.now() - SESSION_IDLE_TIMEOUT_HOURS * 60 * 60 * 1000,
+    );
+
+    return this.prisma.session.findMany({
+      where: {
+        userId,
+        isRevoked: false,
+        expiresAt: { gt: new Date() },
+        lastUsedAt: { gte: idleThreshold },
+      },
+      orderBy: { lastUsedAt: 'asc' },
+    }) as Promise<Session[]>;
+  }
+
+  async enforceSessionLimit(
+    userId: string,
+    ctx?: { ipAddress?: string; userAgent?: string | null },
+  ): Promise<void> {
+    const activeSessions = await this.getActiveNonIdleSessions(userId);
+    const sessionsToRevoke =
+      activeSessions.length - (MAX_CONCURRENT_SESSIONS - 1);
+
+    if (sessionsToRevoke <= 0) return;
+
+    const sessionsToEvict = activeSessions.slice(0, sessionsToRevoke);
+
+    for (const session of sessionsToEvict) {
+      await this.prisma.session.update({
+        where: { id: session.id },
+        data: { isRevoked: true },
+      });
+
+      this.auditService
+        .log({
+          action: AuditAction.SESSION_LIMIT_EXCEEDED,
+          userId,
+          ipAddress: ctx?.ipAddress ?? null,
+          userAgent: ctx?.userAgent ?? null,
+          metadata: {
+            revokedSessionId: session.id,
+            reason: 'concurrent_session_limit',
+            activeCount: activeSessions.length,
+            limit: MAX_CONCURRENT_SESSIONS,
+          },
+        })
+        .catch(() => {});
+    }
   }
 }

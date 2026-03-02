@@ -7,6 +7,8 @@ import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { SessionsService } from '../sessions.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AuditService } from '../../audit/audit.service';
+import { AuditAction } from '../../audit/enums/audit-action.enum';
 import { Session } from '../entities/session.entity';
 
 jest.mock('bcrypt');
@@ -17,6 +19,7 @@ jest.mock('crypto', () => ({
 
 describe('SessionsService', () => {
   let sessionsService: SessionsService;
+  let auditService: { log: jest.Mock };
   let prisma: {
     session: {
       create: jest.Mock;
@@ -59,12 +62,20 @@ describe('SessionsService', () => {
       },
     };
 
+    auditService = {
+      log: jest.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SessionsService,
         {
           provide: PrismaService,
           useValue: prisma,
+        },
+        {
+          provide: AuditService,
+          useValue: auditService,
         },
       ],
     }).compile();
@@ -399,6 +410,7 @@ describe('SessionsService', () => {
           userId: 'user-1',
           isRevoked: false,
           expiresAt: { gt: expect.any(Date) },
+          lastUsedAt: { gte: expect.any(Date) },
         },
         orderBy: { lastUsedAt: 'desc' },
       });
@@ -451,6 +463,157 @@ describe('SessionsService', () => {
         where: { id: 'session-1' },
         data: { refreshTokenHash: 'new-hash' },
       });
+    });
+  });
+
+  // ─── isSessionIdle ────────────────────────────────────────────
+
+  describe('isSessionIdle', () => {
+    it('should return true when lastUsedAt is older than threshold', () => {
+      const twentyFiveHoursAgo = new Date(now.getTime() - 25 * 60 * 60 * 1000);
+      expect(sessionsService.isSessionIdle(twentyFiveHoursAgo)).toBe(true);
+    });
+
+    it('should return false when lastUsedAt is within threshold', () => {
+      const twentyThreeHoursAgo = new Date(now.getTime() - 23 * 60 * 60 * 1000);
+      expect(sessionsService.isSessionIdle(twentyThreeHoursAgo)).toBe(false);
+    });
+
+    it('should respect custom idle timeout parameter', () => {
+      const twoHoursAgo = new Date(now.getTime() - 2 * 60 * 60 * 1000);
+      const thirtyMinsAgo = new Date(now.getTime() - 30 * 60 * 1000);
+
+      expect(sessionsService.isSessionIdle(twoHoursAgo, 1)).toBe(true);
+      expect(sessionsService.isSessionIdle(thirtyMinsAgo, 1)).toBe(false);
+    });
+  });
+
+  // ─── getActiveNonIdleSessions ─────────────────────────────────
+
+  describe('getActiveNonIdleSessions', () => {
+    it('should query with correct where clause and orderBy', async () => {
+      prisma.session.findMany.mockResolvedValue([mockSession]);
+
+      await sessionsService.getActiveNonIdleSessions('user-1');
+
+      expect(prisma.session.findMany).toHaveBeenCalledWith({
+        where: {
+          userId: 'user-1',
+          isRevoked: false,
+          expiresAt: { gt: expect.any(Date) },
+          lastUsedAt: { gte: expect.any(Date) },
+        },
+        orderBy: { lastUsedAt: 'asc' },
+      });
+    });
+
+    it('should return sessions as Session[]', async () => {
+      const sessions = [
+        mockSession,
+        { ...mockSession, id: 'session-2' },
+      ];
+      prisma.session.findMany.mockResolvedValue(sessions);
+
+      const result = await sessionsService.getActiveNonIdleSessions('user-1');
+
+      expect(result).toHaveLength(2);
+      expect(result[0]).toEqual(mockSession);
+    });
+
+    it('should return empty array when no qualifying sessions', async () => {
+      prisma.session.findMany.mockResolvedValue([]);
+
+      const result = await sessionsService.getActiveNonIdleSessions('user-1');
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  // ─── enforceSessionLimit ──────────────────────────────────────
+
+  describe('enforceSessionLimit', () => {
+    const makeSessions = (count: number): Session[] =>
+      Array.from({ length: count }, (_, i) => ({
+        ...mockSession,
+        id: `session-${i + 1}`,
+        lastUsedAt: new Date(now.getTime() - (count - i) * 60_000),
+      }));
+
+    it('should do nothing when active sessions are below limit', async () => {
+      prisma.session.findMany.mockResolvedValue(makeSessions(3));
+
+      await sessionsService.enforceSessionLimit('user-1');
+
+      expect(prisma.session.update).not.toHaveBeenCalled();
+    });
+
+    it('should revoke oldest session when at limit', async () => {
+      const sessions = makeSessions(5);
+      prisma.session.findMany.mockResolvedValue(sessions);
+      prisma.session.update.mockResolvedValue({ ...sessions[0], isRevoked: true });
+
+      await sessionsService.enforceSessionLimit('user-1');
+
+      expect(prisma.session.update).toHaveBeenCalledTimes(1);
+      expect(prisma.session.update).toHaveBeenCalledWith({
+        where: { id: 'session-1' },
+        data: { isRevoked: true },
+      });
+    });
+
+    it('should revoke multiple sessions when over limit', async () => {
+      const sessions = makeSessions(6);
+      prisma.session.findMany.mockResolvedValue(sessions);
+      prisma.session.update.mockResolvedValue({});
+
+      await sessionsService.enforceSessionLimit('user-1');
+
+      expect(prisma.session.update).toHaveBeenCalledTimes(2);
+      expect(prisma.session.update).toHaveBeenCalledWith({
+        where: { id: 'session-1' },
+        data: { isRevoked: true },
+      });
+      expect(prisma.session.update).toHaveBeenCalledWith({
+        where: { id: 'session-2' },
+        data: { isRevoked: true },
+      });
+    });
+
+    it('should log SESSION_LIMIT_EXCEEDED audit event per eviction', async () => {
+      const sessions = makeSessions(5);
+      prisma.session.findMany.mockResolvedValue(sessions);
+      prisma.session.update.mockResolvedValue({});
+
+      await sessionsService.enforceSessionLimit('user-1', {
+        ipAddress: '10.0.0.1',
+        userAgent: 'Test-Agent',
+      });
+
+      expect(auditService.log).toHaveBeenCalledWith({
+        action: AuditAction.SESSION_LIMIT_EXCEEDED,
+        userId: 'user-1',
+        ipAddress: '10.0.0.1',
+        userAgent: 'Test-Agent',
+        metadata: {
+          revokedSessionId: 'session-1',
+          reason: 'concurrent_session_limit',
+          activeCount: 5,
+          limit: 5,
+        },
+      });
+    });
+
+    it('should not fail when audit logging fails', async () => {
+      const sessions = makeSessions(5);
+      prisma.session.findMany.mockResolvedValue(sessions);
+      prisma.session.update.mockResolvedValue({});
+      auditService.log.mockRejectedValue(new Error('Audit failed'));
+
+      await expect(
+        sessionsService.enforceSessionLimit('user-1'),
+      ).resolves.toBeUndefined();
+
+      expect(prisma.session.update).toHaveBeenCalledTimes(1);
     });
   });
 });

@@ -33,6 +33,7 @@ import {
   MAX_FAILED_ATTEMPTS,
   DUMMY_PASSWORD_HASH,
   getLockoutDurationMinutes,
+  SESSION_IDLE_TIMEOUT_HOURS,
 } from './constants/auth.constants';
 
 const VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
@@ -356,6 +357,35 @@ export class AuthService {
       throw new UnauthorizedException('Invalid or expired refresh token');
     }
 
+    // Idle timeout check: reject refresh if session inactive too long
+    const oldSession = await this.sessionsService.findById(payload.sessionId);
+    if (
+      oldSession &&
+      !oldSession.isRevoked &&
+      this.sessionsService.isSessionIdle(oldSession.lastUsedAt)
+    ) {
+      await this.prisma.session.update({
+        where: { id: payload.sessionId },
+        data: { isRevoked: true },
+      });
+
+      this.auditService
+        .log({
+          action: AuditAction.SESSION_IDLE_REVOKED,
+          userId: payload.sub,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+          metadata: {
+            sessionId: payload.sessionId,
+            lastUsedAt: oldSession.lastUsedAt.toISOString(),
+            idleTimeoutHours: SESSION_IDLE_TIMEOUT_HOURS,
+          },
+        })
+        .catch(() => {});
+
+      throw new UnauthorizedException('Session expired due to inactivity');
+    }
+
     // Rotate: validates old session, detects theft, creates new session
     const expiresAt = new Date(Date.now() + this.refreshMaxAgeMs);
     const tempToken = crypto.randomUUID();
@@ -540,6 +570,12 @@ export class AuthService {
 
     const tokenFamily = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + this.refreshMaxAgeMs);
+
+    // Enforce concurrent session limit — evict oldest if over limit
+    await this.sessionsService.enforceSessionLimit(user.id, {
+      ipAddress: requestMeta.ipAddress,
+      userAgent: requestMeta.userAgent,
+    });
 
     // Create session with temp token, then sign JWT with session ID, then update hash
     const tempToken = crypto.randomUUID();

@@ -65,3 +65,21 @@ export const AUTH_RATE_LIMITS = {
   oauth: { ttl: 60_000, limit: 10 },
   mfa: { ttl: 60_000, limit: 5 },
 };
+
+/**
+ * Session idle timeout in hours.
+ * Sessions with lastUsedAt older than this are rejected on refresh.
+ */
+export const SESSION_IDLE_TIMEOUT_HOURS = parseInt(
+  process.env.SESSION_IDLE_TIMEOUT_HOURS || '24',
+  10,
+);
+
+/**
+ * Maximum concurrent active (non-idle, non-revoked, non-expired) sessions per user.
+ * Oldest evicted on overflow.
+ */
+export const MAX_CONCURRENT_SESSIONS = parseInt(
+  process.env.MAX_CONCURRENT_SESSIONS || '5',
+  10,
+);
