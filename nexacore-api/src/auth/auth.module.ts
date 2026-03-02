@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
@@ -11,6 +11,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { GitHubStrategy } from './strategies/github.strategy';
 import { OAuthStateStore } from './stores/oauth-state.store';
 import { OAuthCodeStore } from './stores/oauth-code.store';
+import { PasswordBreachService } from './password-breach.service';
 import { UsersModule } from '../users/users.module';
 import { AuditModule } from '../audit/audit.module';
 import { SessionsModule } from '../sessions/sessions.module';
@@ -19,7 +20,7 @@ import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
-    UsersModule,
+    forwardRef(() => UsersModule),
     AuditModule,
     SessionsModule,
     CryptoModule,
@@ -50,7 +51,8 @@ import { MailModule } from '../mail/mail.module';
     GitHubStrategy,
     OAuthStateStore,
     OAuthCodeStore,
+    PasswordBreachService,
   ],
-  exports: [AuthService],
+  exports: [AuthService, PasswordBreachService],
 })
 export class AuthModule {}

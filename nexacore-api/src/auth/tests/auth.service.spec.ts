@@ -3,6 +3,7 @@ import {
   ConflictException,
   UnauthorizedException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -14,6 +15,7 @@ import { Provider } from '../../users/enums/provider.enum';
 import { User } from '../../users/entities/user.entity';
 import { OAuthProfile } from '../../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from '../stores/oauth-code.store';
+import { PasswordBreachService } from '../password-breach.service';
 import { AuditService } from '../../audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
@@ -31,6 +33,7 @@ describe('parseDurationMs (via AuthService constructor)', () => {
         { provide: JwtService, useValue: { sign: jest.fn(), verify: jest.fn() } },
         { provide: OAuthCodeStore, useValue: {} },
         { provide: AuditService, useValue: { log: jest.fn().mockResolvedValue(undefined) } },
+        { provide: PasswordBreachService, useValue: { isBreached: jest.fn().mockResolvedValue(false) } },
         { provide: PrismaService, useValue: {} },
         { provide: MailService, useValue: {} },
       ],
@@ -74,6 +77,7 @@ describe('AuthService', () => {
   let sessionsService: jest.Mocked<SessionsService>;
   let jwtService: jest.Mocked<JwtService>;
   let oauthCodeStore: jest.Mocked<OAuthCodeStore>;
+  let passwordBreachService: jest.Mocked<PasswordBreachService>;
 
   const mockUser: User = {
     id: 'uuid-123',
@@ -165,6 +169,12 @@ describe('AuthService', () => {
           },
         },
         {
+          provide: PasswordBreachService,
+          useValue: {
+            isBreached: jest.fn().mockResolvedValue(false),
+          },
+        },
+        {
           provide: PrismaService,
           useValue: {
             emailVerificationToken: {
@@ -201,6 +211,7 @@ describe('AuthService', () => {
     sessionsService = module.get(SessionsService);
     jwtService = module.get(JwtService);
     oauthCodeStore = module.get(OAuthCodeStore);
+    passwordBreachService = module.get(PasswordBreachService);
   });
 
   describe('register', () => {
@@ -258,6 +269,17 @@ describe('AuthService', () => {
         await expect(
           authService.register(registerDto, requestMeta),
         ).rejects.toThrow(ConflictException);
+      });
+
+      it('should throw BadRequestException when password is breached', async () => {
+        usersService.findByEmail.mockResolvedValue(null);
+        passwordBreachService.isBreached.mockResolvedValue(true);
+
+        await expect(
+          authService.register(registerDto, requestMeta),
+        ).rejects.toThrow(BadRequestException);
+
+        expect(usersService.create).not.toHaveBeenCalled();
       });
     });
   });
@@ -1022,6 +1044,25 @@ describe('AuthService', () => {
       ).rejects.toThrow('New password must be different from current password');
 
       expect(bcrypt.compare).toHaveBeenCalledWith('SamePass1!', mockUser.passwordHash);
+      expect(prismaService.$transaction).not.toHaveBeenCalled();
+    });
+
+    it('should throw BadRequestException when new password is breached', async () => {
+      prismaService.passwordResetToken.findUnique.mockResolvedValue({
+        id: 'rt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 3600000),
+        user: mockUser,
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false); // not same password
+      passwordBreachService.isBreached.mockResolvedValue(true);
+
+      await expect(
+        authService.resetPassword({ token: 'valid', newPassword: 'BreachedPass1!' }),
+      ).rejects.toThrow('This password has appeared in a data breach');
+
       expect(prismaService.$transaction).not.toHaveBeenCalled();
     });
 

@@ -5,6 +5,7 @@ import {
   NotFoundException,
   UnauthorizedException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users.service';
@@ -15,6 +16,7 @@ import { AuditService } from '../../audit/audit.service';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
 import { SessionsService } from '../../sessions/sessions.service';
 import { MailService } from '../../mail/mail.service';
+import { PasswordBreachService } from '../../auth/password-breach.service';
 
 jest.mock('bcrypt');
 
@@ -22,6 +24,7 @@ describe('UsersService', () => {
   let usersService: UsersService;
   let auditService: { log: jest.Mock };
   let sessionsService: { revokeAllUserSessions: jest.Mock };
+  let passwordBreachService: { isBreached: jest.Mock };
   let prisma: {
     user: {
       findUnique: jest.Mock;
@@ -69,6 +72,7 @@ describe('UsersService', () => {
 
     auditService = { log: jest.fn().mockResolvedValue(undefined) };
     sessionsService = { revokeAllUserSessions: jest.fn().mockResolvedValue(undefined) };
+    passwordBreachService = { isBreached: jest.fn().mockResolvedValue(false) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -90,6 +94,10 @@ describe('UsersService', () => {
           useValue: {
             sendPasswordChangeNotification: jest.fn().mockResolvedValue(undefined),
           },
+        },
+        {
+          provide: PasswordBreachService,
+          useValue: passwordBreachService,
         },
       ],
     }).compile();
@@ -618,6 +626,18 @@ describe('UsersService', () => {
       await expect(
         usersService.changePassword('uuid-123', changeDto),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw BadRequestException when new password is breached', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      passwordBreachService.isBreached.mockResolvedValue(true);
+
+      await expect(
+        usersService.changePassword('uuid-123', changeDto),
+      ).rejects.toThrow(BadRequestException);
+
+      expect(bcrypt.hash).not.toHaveBeenCalled();
     });
 
     it('should hash new password, update, and revoke all sessions', async () => {

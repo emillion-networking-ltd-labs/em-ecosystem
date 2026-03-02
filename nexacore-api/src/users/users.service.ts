@@ -1,10 +1,13 @@
 import {
   Injectable,
+  Inject,
+  forwardRef,
   ConflictException,
   InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
@@ -22,6 +25,7 @@ import { AuditAction } from '../audit/enums/audit-action.enum';
 import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
 import { SessionsService } from '../sessions/sessions.service';
 import { MailService } from '../mail/mail.service';
+import { PasswordBreachService } from '../auth/password-breach.service';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -32,6 +36,8 @@ export class UsersService {
     private readonly auditService: AuditService,
     private readonly sessionsService: SessionsService,
     private readonly mailService: MailService,
+    @Inject(forwardRef(() => PasswordBreachService))
+    private readonly passwordBreachService: PasswordBreachService,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
@@ -269,6 +275,15 @@ export class UsersService {
     );
     if (!isCurrentValid) {
       throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    const isBreached = await this.passwordBreachService.isBreached(
+      dto.newPassword,
+    );
+    if (isBreached) {
+      throw new BadRequestException(
+        'This password has appeared in a data breach. Please choose a different password.',
+      );
     }
 
     const newHash = await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS);

@@ -23,6 +23,7 @@ import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from './stores/oauth-code.store';
+import { PasswordBreachService } from './password-breach.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
@@ -99,6 +100,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     private readonly oauthCodeStore: OAuthCodeStore,
     private readonly auditService: AuditService,
+    private readonly passwordBreachService: PasswordBreachService,
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
   ) {
@@ -120,6 +122,13 @@ export class AuthService {
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
       throw new ConflictException('Email already registered');
+    }
+
+    const isBreached = await this.passwordBreachService.isBreached(dto.password);
+    if (isBreached) {
+      throw new BadRequestException(
+        'This password has appeared in a data breach. Please choose a different password.',
+      );
     }
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
@@ -732,6 +741,15 @@ export class AuthService {
           'New password must be different from current password',
         );
       }
+    }
+
+    const isBreached = await this.passwordBreachService.isBreached(
+      dto.newPassword,
+    );
+    if (isBreached) {
+      throw new BadRequestException(
+        'This password has appeared in a data breach. Please choose a different password.',
+      );
     }
 
     const newPasswordHash = await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS);
