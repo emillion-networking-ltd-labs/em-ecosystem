@@ -32,11 +32,10 @@ export class OAuthStateStore {
     return parsed.codeVerifier;
   }
 
-  /** Consume and validate the state entry (single-use). */
+  /** Consume and validate the state entry (single-use, atomic). */
   async validate(state: string): Promise<boolean> {
-    const data = await this.redis.get(`oauth:state:${state}`);
+    const data = await this.redis.getdel(`oauth:state:${state}`);
     if (!data) return false;
-    await this.redis.del(`oauth:state:${state}`);
     return true;
   }
 

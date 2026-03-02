@@ -4,13 +4,14 @@ import { REDIS_CLIENT } from '../../common/services/redis.constants';
 
 describe('OAuthStateStore', () => {
   let store: OAuthStateStore;
-  let redis: { get: jest.Mock; set: jest.Mock; del: jest.Mock };
+  let redis: { get: jest.Mock; set: jest.Mock; del: jest.Mock; getdel: jest.Mock };
 
   beforeEach(async () => {
     redis = {
       get: jest.fn(),
       set: jest.fn().mockResolvedValue('OK'),
       del: jest.fn().mockResolvedValue(1),
+      getdel: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -60,19 +61,19 @@ describe('OAuthStateStore', () => {
   });
 
   describe('validate', () => {
-    it('should return true and delete key for an existing state', async () => {
-      redis.get.mockResolvedValue(JSON.stringify({ codeVerifier: 'abc' }));
+    it('should atomically get and delete key for an existing state', async () => {
+      redis.getdel.mockResolvedValue(JSON.stringify({ codeVerifier: 'abc' }));
       const result = await store.validate('test-state');
       expect(result).toBe(true);
-      expect(redis.get).toHaveBeenCalledWith('oauth:state:test-state');
-      expect(redis.del).toHaveBeenCalledWith('oauth:state:test-state');
+      expect(redis.getdel).toHaveBeenCalledWith('oauth:state:test-state');
+      expect(redis.get).not.toHaveBeenCalled();
+      expect(redis.del).not.toHaveBeenCalled();
     });
 
     it('should return false for an unknown state', async () => {
-      redis.get.mockResolvedValue(null);
+      redis.getdel.mockResolvedValue(null);
       const result = await store.validate('nonexistent-state');
       expect(result).toBe(false);
-      expect(redis.del).not.toHaveBeenCalled();
     });
   });
 
