@@ -45,6 +45,10 @@ enum AuditAction {
   DEVICE_UNTRUSTED
   IMPOSSIBLE_TRAVEL_DETECTED
   LOGIN_BLOCKED_TRAVEL
+  BRUTE_FORCE_DETECTED
+  CREDENTIAL_STUFFING_DETECTED
+  UNUSUAL_LOGIN_HOURS
+  NEW_COUNTRY_LOGIN
 }
 
 enum EmailVerificationTokenType {
@@ -126,6 +130,8 @@ model AuditLog {
   @@index([userId])
   @@index([targetUserId])
   @@index([createdAt])
+  @@index([action, userId, createdAt])
+  @@index([action, ipAddress, createdAt])
   @@map("audit_logs")
 }
 

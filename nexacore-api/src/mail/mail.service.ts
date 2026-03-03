@@ -300,6 +300,87 @@ export class MailService {
     }
   }
 
+  async sendSecurityAlertToAdmins(
+    alertType: string,
+    details: {
+      userId?: string;
+      userEmail?: string;
+      ipAddress: string;
+      location?: string;
+      failureCount?: number;
+      timestamp: Date;
+    },
+    adminEmails: string[],
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const auditLogsUrl = `${frontendUrl}/dashboard/admin/audit-logs`;
+
+    for (const adminEmail of adminEmails) {
+      try {
+        await this.mailerService.sendMail({
+          to: adminEmail,
+          subject: `[Security Alert] ${alertType} detected — EM NexaCore`,
+          template: 'security-alert-admin',
+          context: {
+            alertType,
+            userId: details.userId || 'N/A',
+            userEmail: details.userEmail || 'N/A',
+            ipAddress: details.ipAddress,
+            location: details.location || 'Unknown',
+            failureCount: details.failureCount,
+            timestamp: details.timestamp.toISOString(),
+            auditLogsUrl,
+            frontendUrl,
+            currentYear: new Date().getFullYear(),
+          },
+        });
+      } catch (error) {
+        this.logger.error(
+          `Failed to send security alert to ${adminEmail}`,
+          error,
+        );
+      }
+    }
+  }
+
+  async sendNewCountryLoginAlert(
+    email: string,
+    params: {
+      firstName?: string | null;
+      newCountry: string;
+      previousCountries: string[];
+      ipAddress: string;
+      userAgent?: string | null;
+    },
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const sessionsUrl = `${frontendUrl}/dashboard/security/sessions`;
+
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'New login location detected — EM NexaCore',
+        template: 'new-country-login-alert',
+        context: {
+          name: params.firstName || email.split('@')[0],
+          newCountry: params.newCountry,
+          previousCountries: params.previousCountries.join(', '),
+          device: this.parseUserAgent(params.userAgent ?? null),
+          ipAddress: params.ipAddress,
+          sessionsUrl,
+          frontendUrl,
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`New country login alert sent to ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send new country login alert to ${email}`,
+        error,
+      );
+    }
+  }
+
   private formatLocation(
     city: string | null,
     country: string | null,

@@ -18,6 +18,7 @@ import { OAuthCodeStore } from '../stores/oauth-code.store';
 import { PasswordBreachService } from '../password-breach.service';
 import { TrustedDeviceService } from '../trusted-device.service';
 import { ImpossibleTravelService } from '../../geolocation/impossible-travel.service';
+import { SuspiciousLoginService } from '../../security/suspicious-login.service';
 import { AuditService } from '../../audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
@@ -40,6 +41,7 @@ describe('parseDurationMs (via AuthService constructor)', () => {
         { provide: MailService, useValue: {} },
         { provide: TrustedDeviceService, useValue: { isTrustedDevice: jest.fn().mockResolvedValue(false) } },
         { provide: ImpossibleTravelService, useValue: { detectImpossibleTravel: jest.fn().mockResolvedValue(null) } },
+        { provide: SuspiciousLoginService, useValue: { analyzeLoginFailure: jest.fn().mockResolvedValue(undefined), analyzeLoginSuccess: jest.fn().mockResolvedValue(undefined) } },
       ],
     }).compile();
     return mod.get<AuthService>(AuthService);
@@ -84,6 +86,7 @@ describe('AuthService', () => {
   let passwordBreachService: jest.Mocked<PasswordBreachService>;
   let trustedDeviceService: jest.Mocked<TrustedDeviceService>;
   let impossibleTravelService: jest.Mocked<ImpossibleTravelService>;
+  let suspiciousLoginService: jest.Mocked<SuspiciousLoginService>;
 
   const mockUser: User = {
     id: 'uuid-123',
@@ -234,6 +237,13 @@ describe('AuthService', () => {
             detectImpossibleTravel: jest.fn().mockResolvedValue(null),
           },
         },
+        {
+          provide: SuspiciousLoginService,
+          useValue: {
+            analyzeLoginFailure: jest.fn().mockResolvedValue(undefined),
+            analyzeLoginSuccess: jest.fn().mockResolvedValue(undefined),
+          },
+        },
       ],
     }).compile();
 
@@ -245,6 +255,7 @@ describe('AuthService', () => {
     passwordBreachService = module.get(PasswordBreachService);
     trustedDeviceService = module.get(TrustedDeviceService);
     impossibleTravelService = module.get(ImpossibleTravelService);
+    suspiciousLoginService = module.get(SuspiciousLoginService);
   });
 
   describe('register', () => {
@@ -2271,6 +2282,70 @@ describe('AuthService', () => {
       impossibleTravelService.detectImpossibleTravel.mockRejectedValue(
         new Error('Geolocation service unavailable'),
       );
+
+      const result = await authService.login(loginDto, requestMeta);
+
+      expect(result.accessToken).toBe('access-token');
+    });
+  });
+
+  describe('suspicious login detection integration', () => {
+    const loginDto = { email: 'test@example.com', password: 'StrongPass1!' };
+
+    beforeEach(() => {
+      usersService.findByEmail.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      sessionsService.createSession.mockResolvedValue({
+        id: 'session-uuid',
+        userId: 'uuid-123',
+        tokenFamily: 'family-uuid',
+        refreshTokenHash: 'hashed',
+        deviceInfo: null,
+        ipAddress: '127.0.0.1',
+        userAgent: 'test-agent',
+        isRevoked: false,
+        createdAt: new Date(),
+        lastUsedAt: new Date(),
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      });
+    });
+
+    it('should call analyzeLoginFailure after failed password', async () => {
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      usersService.incrementFailedAttempts.mockResolvedValue({ failedAttempts: 1, lockedUntil: null });
+
+      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(UnauthorizedException);
+
+      expect(suspiciousLoginService.analyzeLoginFailure).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'uuid-123',
+          ipAddress: '127.0.0.1',
+        }),
+      );
+    });
+
+    it('should call analyzeLoginSuccess after successful login', async () => {
+      await authService.login(loginDto, requestMeta);
+
+      expect(suspiciousLoginService.analyzeLoginSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'uuid-123',
+          ipAddress: '127.0.0.1',
+        }),
+      );
+    });
+
+    it('should not block login when analyzeLoginFailure throws (fail-open)', async () => {
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      usersService.incrementFailedAttempts.mockResolvedValue({ failedAttempts: 1, lockedUntil: null });
+      suspiciousLoginService.analyzeLoginFailure.mockRejectedValue(new Error('Detection service down'));
+
+      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should not block login when analyzeLoginSuccess throws (fail-open)', async () => {
+      suspiciousLoginService.analyzeLoginSuccess.mockRejectedValue(new Error('Detection service down'));
 
       const result = await authService.login(loginDto, requestMeta);
 

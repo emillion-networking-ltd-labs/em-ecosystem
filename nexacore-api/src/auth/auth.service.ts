@@ -26,6 +26,7 @@ import { OAuthCodeStore } from './stores/oauth-code.store';
 import { PasswordBreachService } from './password-breach.service';
 import { TrustedDeviceService } from './trusted-device.service';
 import { ImpossibleTravelService } from '../geolocation/impossible-travel.service';
+import { SuspiciousLoginService } from '../security/suspicious-login.service';
 import { ImpossibleTravelResult } from '../geolocation/interfaces/geolocation-result.interface';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
@@ -109,6 +110,7 @@ export class AuthService {
     private readonly mailService: MailService,
     private readonly trustedDeviceService: TrustedDeviceService,
     private readonly impossibleTravelService: ImpossibleTravelService,
+    private readonly suspiciousLoginService: SuspiciousLoginService,
   ) {
     this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '7d';
     this.refreshMaxAgeMs = parseDurationMs(this.refreshExpiration);
@@ -280,6 +282,8 @@ export class AuthService {
         })
         .catch(() => {});
 
+      this.checkSuspiciousLoginFailure(user.id, requestMeta);
+
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -333,6 +337,7 @@ export class AuthService {
           }
 
           this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
+          this.checkSuspiciousLoginSuccess(user, requestMeta);
 
           return {
             accessToken,
@@ -389,6 +394,7 @@ export class AuthService {
       .catch(() => {});
 
     this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
+    this.checkSuspiciousLoginSuccess(user, requestMeta);
 
     return {
       accessToken,
@@ -529,6 +535,7 @@ export class AuthService {
       .catch(() => {});
 
     this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
+    this.checkSuspiciousLoginSuccess(user, requestMeta);
 
     return {
       accessToken,
@@ -621,6 +628,7 @@ export class AuthService {
     }
 
     this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
+    this.checkSuspiciousLoginSuccess(user, requestMeta);
 
     return {
       accessToken,
@@ -753,6 +761,36 @@ export class AuthService {
     throw new ForbiddenException(
       'Login blocked due to suspicious location activity. Please try again later or contact support.',
     );
+  }
+
+  private checkSuspiciousLoginSuccess(
+    user: { id: string; email: string; firstName?: string | null },
+    requestMeta: { ipAddress: string; userAgent?: string | null },
+  ): void {
+    this.suspiciousLoginService
+      .analyzeLoginSuccess({
+        userId: user.id,
+        email: user.email,
+        firstName: user.firstName ?? null,
+        ipAddress: requestMeta.ipAddress,
+        userAgent: requestMeta.userAgent ?? null,
+        loginTime: new Date(),
+      })
+      .catch(() => {});
+  }
+
+  private checkSuspiciousLoginFailure(
+    userId: string | undefined,
+    requestMeta: { ipAddress: string; userAgent?: string | null },
+  ): void {
+    if (!userId) return;
+    this.suspiciousLoginService
+      .analyzeLoginFailure({
+        userId,
+        ipAddress: requestMeta.ipAddress,
+        userAgent: requestMeta.userAgent ?? null,
+      })
+      .catch(() => {});
   }
 
   // ── Email Verification ──

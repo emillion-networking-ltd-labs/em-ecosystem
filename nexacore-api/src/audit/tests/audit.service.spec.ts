@@ -10,6 +10,7 @@ describe('AuditService', () => {
     auditLog: {
       create: jest.Mock;
       findMany: jest.Mock;
+      findFirst: jest.Mock;
       findUnique: jest.Mock;
       count: jest.Mock;
     };
@@ -22,6 +23,7 @@ describe('AuditService', () => {
       auditLog: {
         create: jest.fn().mockResolvedValue(undefined),
         findMany: jest.fn().mockResolvedValue([]),
+        findFirst: jest.fn().mockResolvedValue(null),
         findUnique: jest.fn().mockResolvedValue(null),
         count: jest.fn().mockResolvedValue(0),
       },
@@ -276,6 +278,81 @@ describe('AuditService', () => {
       const result = await auditService.findById('nonexistent');
 
       expect(result).toBeNull();
+    });
+  });
+
+  describe('countRecentActions', () => {
+    it('should count recent actions by userId within time window', async () => {
+      prisma.auditLog.count.mockResolvedValue(5);
+
+      const result = await auditService.countRecentActions({
+        action: AuditAction.LOGIN_FAILURE,
+        userId: 'user-1',
+        windowMinutes: 15,
+      });
+
+      expect(result).toBe(5);
+      expect(prisma.auditLog.count).toHaveBeenCalledWith({
+        where: {
+          action: AuditAction.LOGIN_FAILURE,
+          userId: 'user-1',
+          createdAt: { gte: expect.any(Date) },
+        },
+      });
+    });
+  });
+
+  describe('countRecentActionsByIp', () => {
+    it('should count recent actions by ipAddress within time window', async () => {
+      prisma.auditLog.count.mockResolvedValue(12);
+
+      const result = await auditService.countRecentActionsByIp({
+        action: AuditAction.LOGIN_FAILURE,
+        ipAddress: '192.168.1.1',
+        windowMinutes: 15,
+      });
+
+      expect(result).toBe(12);
+      expect(prisma.auditLog.count).toHaveBeenCalledWith({
+        where: {
+          action: AuditAction.LOGIN_FAILURE,
+          ipAddress: '192.168.1.1',
+          createdAt: { gte: expect.any(Date) },
+        },
+      });
+    });
+  });
+
+  describe('hasRecentAction', () => {
+    it('should return true when a matching action exists within window', async () => {
+      prisma.auditLog.findFirst.mockResolvedValue({ id: 'log-1' });
+
+      const result = await auditService.hasRecentAction({
+        action: AuditAction.BRUTE_FORCE_DETECTED,
+        userId: 'user-1',
+        windowMinutes: 15,
+      });
+
+      expect(result).toBe(true);
+      expect(prisma.auditLog.findFirst).toHaveBeenCalledWith({
+        where: {
+          action: AuditAction.BRUTE_FORCE_DETECTED,
+          createdAt: { gte: expect.any(Date) },
+          userId: 'user-1',
+        },
+      });
+    });
+
+    it('should return false when no matching action exists', async () => {
+      prisma.auditLog.findFirst.mockResolvedValue(null);
+
+      const result = await auditService.hasRecentAction({
+        action: AuditAction.BRUTE_FORCE_DETECTED,
+        ipAddress: '10.0.0.1',
+        windowMinutes: 15,
+      });
+
+      expect(result).toBe(false);
     });
   });
 });

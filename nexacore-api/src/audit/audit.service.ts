@@ -108,6 +108,54 @@ export class AuditService {
     };
   }
 
+  async countRecentActions(params: {
+    action: AuditAction;
+    userId: string;
+    windowMinutes: number;
+  }): Promise<number> {
+    const sinceDate = new Date(Date.now() - params.windowMinutes * 60 * 1000);
+    return this.prisma.auditLog.count({
+      where: {
+        action: params.action,
+        userId: params.userId,
+        createdAt: { gte: sinceDate },
+      },
+    });
+  }
+
+  async countRecentActionsByIp(params: {
+    action: AuditAction;
+    ipAddress: string;
+    windowMinutes: number;
+  }): Promise<number> {
+    const sinceDate = new Date(Date.now() - params.windowMinutes * 60 * 1000);
+    return this.prisma.auditLog.count({
+      where: {
+        action: params.action,
+        ipAddress: params.ipAddress,
+        createdAt: { gte: sinceDate },
+      },
+    });
+  }
+
+  async hasRecentAction(params: {
+    action: AuditAction;
+    userId?: string;
+    ipAddress?: string;
+    windowMinutes: number;
+  }): Promise<boolean> {
+    const sinceDate = new Date(Date.now() - params.windowMinutes * 60 * 1000);
+    const where: Record<string, unknown> = {
+      action: params.action,
+      createdAt: { gte: sinceDate },
+    };
+    if (params.userId) where.userId = params.userId;
+    if (params.ipAddress) where.ipAddress = params.ipAddress;
+
+    const entry = await this.prisma.auditLog.findFirst({ where });
+    return entry !== null;
+  }
+
   async findById(id: string) {
     return this.prisma.auditLog.findUnique({
       where: { id },

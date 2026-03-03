@@ -425,4 +425,89 @@ describe('MailService', () => {
       ).resolves.toBeUndefined();
     });
   });
+
+  describe('sendSecurityAlertToAdmins', () => {
+    const alertDetails = {
+      userId: 'user-1',
+      userEmail: 'user@example.com',
+      ipAddress: '192.168.1.100',
+      location: 'Madrid, ES',
+      failureCount: 15,
+      timestamp: new Date('2026-03-01T10:00:00Z'),
+    };
+
+    it('should send security alert email to each admin', async () => {
+      await mailService.sendSecurityAlertToAdmins(
+        'Brute-force attack',
+        alertDetails,
+        ['admin1@example.com', 'admin2@example.com'],
+      );
+
+      expect(mailerService.sendMail).toHaveBeenCalledTimes(2);
+      expect(mailerService.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'admin1@example.com',
+          subject: '[Security Alert] Brute-force attack detected — EM NexaCore',
+          template: 'security-alert-admin',
+          context: expect.objectContaining({
+            alertType: 'Brute-force attack',
+            ipAddress: '192.168.1.100',
+            failureCount: 15,
+          }),
+        }),
+      );
+    });
+
+    it('should not throw when mailer fails for one admin', async () => {
+      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP error'));
+
+      await expect(
+        mailService.sendSecurityAlertToAdmins(
+          'Brute-force attack',
+          alertDetails,
+          ['admin@example.com'],
+        ),
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  describe('sendNewCountryLoginAlert', () => {
+    it('should send new country login alert with correct parameters', async () => {
+      await mailService.sendNewCountryLoginAlert('user@example.com', {
+        firstName: 'John',
+        newCountry: 'JP',
+        previousCountries: ['ES', 'US'],
+        ipAddress: '203.0.113.1',
+        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+      });
+
+      expect(mailerService.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'user@example.com',
+          subject: 'New login location detected — EM NexaCore',
+          template: 'new-country-login-alert',
+          context: expect.objectContaining({
+            name: 'John',
+            newCountry: 'JP',
+            previousCountries: 'ES, US',
+            device: 'Chrome on Windows',
+            ipAddress: '203.0.113.1',
+          }),
+        }),
+      );
+    });
+
+    it('should not throw when mailer fails', async () => {
+      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP error'));
+
+      await expect(
+        mailService.sendNewCountryLoginAlert('user@example.com', {
+          firstName: null,
+          newCountry: 'JP',
+          previousCountries: ['ES'],
+          ipAddress: '203.0.113.1',
+        }),
+      ).resolves.toBeUndefined();
+    });
+  });
 });
