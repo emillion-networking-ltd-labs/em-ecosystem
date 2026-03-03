@@ -6,6 +6,10 @@ export interface Session {
   deviceInfo: string | null;
   ipAddress: string;
   userAgent: string | null;
+  locationCity: string | null;
+  locationCountry: string | null;
+  latitude: number | null;
+  longitude: number | null;
   isRevoked: boolean;
   createdAt: Date;
   lastUsedAt: Date;
@@ -17,6 +21,8 @@ export interface SessionResponse {
   deviceInfo: string | null;
   ipAddress: string;
   userAgent: string | null;
+  locationCity: string | null;
+  locationCountry: string | null;
   createdAt: string;
   lastUsedAt: string;
   expiresAt: string;
@@ -32,6 +38,8 @@ export function toSessionResponse(
     deviceInfo: session.deviceInfo,
     ipAddress: session.ipAddress,
     userAgent: session.userAgent,
+    locationCity: session.locationCity,
+    locationCountry: session.locationCountry,
     createdAt: session.createdAt.toISOString(),
     lastUsedAt: session.lastUsedAt.toISOString(),
     expiresAt: session.expiresAt.toISOString(),

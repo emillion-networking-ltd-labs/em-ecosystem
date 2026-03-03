@@ -8,6 +8,7 @@ import * as crypto from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
+import { GeolocationService } from '../geolocation/geolocation.service';
 import {
   SESSION_IDLE_TIMEOUT_HOURS,
   MAX_CONCURRENT_SESSIONS,
@@ -25,6 +26,7 @@ export class SessionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    private readonly geolocationService: GeolocationService,
   ) {}
 
   async createSession(params: {
@@ -41,6 +43,7 @@ export class SessionsService {
       BCRYPT_ROUNDS,
     );
     const tokenFamily = params.tokenFamily || crypto.randomUUID();
+    const geo = this.geolocationService.lookupIp(params.ipAddress);
 
     return this.prisma.session.create({
       data: {
@@ -50,6 +53,10 @@ export class SessionsService {
         deviceInfo: params.deviceInfo || null,
         ipAddress: params.ipAddress,
         userAgent: params.userAgent || null,
+        locationCity: geo?.city || null,
+        locationCountry: geo?.countryCode || null,
+        latitude: geo?.latitude || null,
+        longitude: geo?.longitude || null,
         expiresAt: params.expiresAt,
       },
     }) as Promise<Session>;

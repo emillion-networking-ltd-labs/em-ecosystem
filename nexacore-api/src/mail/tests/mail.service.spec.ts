@@ -337,6 +337,63 @@ describe('MailService', () => {
     });
   });
 
+  describe('sendImpossibleTravelAlert', () => {
+    const travelParams = {
+      firstName: 'John',
+      previousCity: 'Madrid',
+      previousCountry: 'ES',
+      currentCity: 'New York',
+      currentCountry: 'US',
+      distanceKm: 5762.3,
+      elapsedHours: 0.5,
+      requiredSpeedKmh: 11524.6,
+      ipAddress: '203.0.113.1',
+      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+      actionTaken: 'allowed' as const,
+    };
+
+    it('should send impossible travel alert with correct parameters', async () => {
+      await mailService.sendImpossibleTravelAlert(
+        'test@example.com',
+        travelParams,
+      );
+
+      expect(mailerService.sendMail).toHaveBeenCalledWith(
+        expect.objectContaining({
+          to: 'test@example.com',
+          subject: 'Suspicious login detected on your EM NexaCore account',
+          template: 'impossible-travel-alert',
+          context: expect.objectContaining({
+            name: 'John',
+            previousLocation: 'Madrid, ES',
+            currentLocation: 'New York, US',
+            distanceKm: 5762,
+            ipAddress: '203.0.113.1',
+            wasBlocked: false,
+          }),
+        }),
+      );
+    });
+
+    it('should set wasBlocked true when actionTaken is blocked', async () => {
+      await mailService.sendImpossibleTravelAlert('test@example.com', {
+        ...travelParams,
+        actionTaken: 'blocked',
+      });
+
+      const call = mailerService.sendMail.mock.calls[0][0];
+      expect(call.context.wasBlocked).toBe(true);
+    });
+
+    it('should not throw when mailer fails', async () => {
+      mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP error'));
+
+      await expect(
+        mailService.sendImpossibleTravelAlert('test@example.com', travelParams),
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('sendAccountDeletionConfirmation', () => {
     it('should send account deletion confirmation with correct parameters', async () => {
       await mailService.sendAccountDeletionConfirmation(

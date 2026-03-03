@@ -40,6 +40,7 @@
     "handlebars": "^4.7.8",
     "helmet": "^8.1.0",
     "ioredis": "^5.10.0",
+    "maxmind": "^5.0.5",
     "nodemailer": "^8.0.1",
     "otplib": "^13.3.0",
     "passport": "^0.7.0",

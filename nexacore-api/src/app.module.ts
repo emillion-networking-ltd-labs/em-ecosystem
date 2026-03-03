@@ -11,6 +11,7 @@ import { SecurityModule } from './security/security.module';
 import { MailModule } from './mail/mail.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { RedisModule } from './common/services/redis.module';
+import { GeolocationModule } from './geolocation/geolocation.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { RedisModule } from './common/services/redis.module';
       },
     ]),
     PrismaModule,
+    GeolocationModule,
     AuthModule,
     UsersModule,
     AuditModule,

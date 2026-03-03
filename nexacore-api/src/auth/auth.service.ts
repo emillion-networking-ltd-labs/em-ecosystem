@@ -25,6 +25,8 @@ import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from './stores/oauth-code.store';
 import { PasswordBreachService } from './password-breach.service';
 import { TrustedDeviceService } from './trusted-device.service';
+import { ImpossibleTravelService } from '../geolocation/impossible-travel.service';
+import { ImpossibleTravelResult } from '../geolocation/interfaces/geolocation-result.interface';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
@@ -106,6 +108,7 @@ export class AuthService {
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
     private readonly trustedDeviceService: TrustedDeviceService,
+    private readonly impossibleTravelService: ImpossibleTravelService,
   ) {
     this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '7d';
     this.refreshMaxAgeMs = parseDurationMs(this.refreshExpiration);
@@ -321,6 +324,14 @@ export class AuthService {
             })
             .catch(() => {});
 
+          const travelResult = await this.checkImpossibleTravel(
+            user,
+            requestMeta,
+          );
+          if (travelResult?.isAnomalous && travelResult.actionTaken === 'blocked') {
+            this.handleTravelBlock(travelResult, user.id, requestMeta);
+          }
+
           this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
 
           return {
@@ -353,6 +364,20 @@ export class AuthService {
       user,
       requestMeta,
     );
+
+    const travelResult = await this.checkImpossibleTravel(user, requestMeta);
+    if (travelResult?.isAnomalous) {
+      if (travelResult.actionTaken === 'blocked') {
+        this.handleTravelBlock(travelResult, user.id, requestMeta);
+      }
+      if (travelResult.actionTaken === 'challenged' && user.mfaEnabled) {
+        const mfaChallengeToken = this.jwtService.sign(
+          { sub: user.id, type: 'mfa-challenge' },
+          { expiresIn: '5m' as StringValue, secret: this.mfaChallengeSecret },
+        );
+        return { mfaRequired: true, mfaToken: mfaChallengeToken };
+      }
+    }
 
     this.auditService
       .log({
@@ -485,6 +510,14 @@ export class AuthService {
       requestMeta,
     );
 
+    const travelResult = await this.checkImpossibleTravel(
+      { ...user, mfaEnabled: user.mfaEnabled ?? false },
+      requestMeta,
+    );
+    if (travelResult?.isAnomalous && travelResult.actionTaken === 'blocked') {
+      this.handleTravelBlock(travelResult, user.id, requestMeta);
+    }
+
     this.auditService
       .log({
         action: AuditAction.OAUTH_LOGIN,
@@ -582,6 +615,11 @@ export class AuthService {
       requestMeta,
     );
 
+    const travelResult = await this.checkImpossibleTravel(user, requestMeta);
+    if (travelResult?.isAnomalous && travelResult.actionTaken === 'blocked') {
+      this.handleTravelBlock(travelResult, user.id, requestMeta);
+    }
+
     this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
 
     return {
@@ -667,6 +705,54 @@ export class AuthService {
         user.firstName,
       );
     }
+  }
+
+  private async checkImpossibleTravel(
+    user: {
+      id: string;
+      email: string;
+      firstName: string | null;
+      mfaEnabled: boolean;
+    },
+    requestMeta: { ipAddress: string; userAgent?: string | null },
+  ): Promise<ImpossibleTravelResult | null> {
+    try {
+      return await this.impossibleTravelService.detectImpossibleTravel({
+        userId: user.id,
+        ipAddress: requestMeta.ipAddress,
+        email: user.email,
+        firstName: user.firstName,
+        userAgent: requestMeta.userAgent || null,
+        mfaEnabled: user.mfaEnabled,
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  private handleTravelBlock(
+    travelResult: ImpossibleTravelResult,
+    userId: string,
+    requestMeta: { ipAddress: string; userAgent?: string | null },
+  ): void {
+    this.auditService
+      .log({
+        action: AuditAction.LOGIN_BLOCKED_TRAVEL,
+        userId,
+        ipAddress: requestMeta.ipAddress,
+        userAgent: requestMeta.userAgent,
+        metadata: {
+          previousLocation: travelResult.previousLocation,
+          currentLocation: travelResult.currentLocation,
+          distanceKm: travelResult.distanceKm,
+          elapsedHours: travelResult.elapsedHours,
+          requiredSpeedKmh: travelResult.requiredSpeedKmh,
+        },
+      })
+      .catch(() => {});
+    throw new ForbiddenException(
+      'Login blocked due to suspicious location activity. Please try again later or contact support.',
+    );
   }
 
   // ── Email Verification ──

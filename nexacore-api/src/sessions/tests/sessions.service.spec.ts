@@ -9,6 +9,7 @@ import { SessionsService } from '../sessions.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../../audit/audit.service';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
+import { GeolocationService } from '../../geolocation/geolocation.service';
 import { Session } from '../entities/session.entity';
 
 jest.mock('bcrypt');
@@ -20,6 +21,7 @@ jest.mock('crypto', () => ({
 describe('SessionsService', () => {
   let sessionsService: SessionsService;
   let auditService: { log: jest.Mock };
+  let geolocationService: { lookupIp: jest.Mock };
   let prisma: {
     session: {
       create: jest.Mock;
@@ -43,6 +45,10 @@ describe('SessionsService', () => {
     ipAddress: '127.0.0.1',
     userAgent: 'Mozilla/5.0',
     isRevoked: false,
+    locationCity: null,
+    locationCountry: null,
+    latitude: null,
+    longitude: null,
     createdAt: now,
     lastUsedAt: now,
     expiresAt: futureDate,
@@ -66,6 +72,10 @@ describe('SessionsService', () => {
       log: jest.fn().mockResolvedValue(undefined),
     };
 
+    geolocationService = {
+      lookupIp: jest.fn().mockReturnValue(null),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SessionsService,
@@ -76,6 +86,10 @@ describe('SessionsService', () => {
         {
           provide: AuditService,
           useValue: auditService,
+        },
+        {
+          provide: GeolocationService,
+          useValue: geolocationService,
         },
       ],
     }).compile();
@@ -154,6 +168,10 @@ describe('SessionsService', () => {
           deviceInfo: 'Chrome on Windows',
           ipAddress: '127.0.0.1',
           userAgent: 'Mozilla/5.0',
+          locationCity: null,
+          locationCountry: null,
+          latitude: null,
+          longitude: null,
           expiresAt: futureDate,
         },
       });
@@ -176,6 +194,58 @@ describe('SessionsService', () => {
         data: expect.objectContaining({
           deviceInfo: null,
           userAgent: null,
+        }),
+      });
+    });
+
+    it('should include geolocation data when lookupIp returns a result', async () => {
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-token');
+      (crypto.randomUUID as jest.Mock).mockReturnValue('gen-family');
+      prisma.session.create.mockResolvedValue(mockSession);
+      geolocationService.lookupIp.mockReturnValue({
+        city: 'Madrid',
+        country: 'Spain',
+        countryCode: 'ES',
+        latitude: 40.4168,
+        longitude: -3.7038,
+      });
+
+      await sessionsService.createSession({
+        userId: 'user-1',
+        refreshToken: 'raw-token',
+        ipAddress: '203.0.113.1',
+        expiresAt: futureDate,
+      });
+
+      expect(prisma.session.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          locationCity: 'Madrid',
+          locationCountry: 'ES',
+          latitude: 40.4168,
+          longitude: -3.7038,
+        }),
+      });
+    });
+
+    it('should store null geo fields when lookupIp returns null (private IP)', async () => {
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-token');
+      (crypto.randomUUID as jest.Mock).mockReturnValue('gen-family');
+      prisma.session.create.mockResolvedValue(mockSession);
+      geolocationService.lookupIp.mockReturnValue(null);
+
+      await sessionsService.createSession({
+        userId: 'user-1',
+        refreshToken: 'raw-token',
+        ipAddress: '192.168.1.1',
+        expiresAt: futureDate,
+      });
+
+      expect(prisma.session.create).toHaveBeenCalledWith({
+        data: expect.objectContaining({
+          locationCity: null,
+          locationCountry: null,
+          latitude: null,
+          longitude: null,
         }),
       });
     });
@@ -421,6 +491,8 @@ describe('SessionsService', () => {
         deviceInfo: 'Chrome on Windows',
         ipAddress: '127.0.0.1',
         userAgent: 'Mozilla/5.0',
+        locationCity: null,
+        locationCountry: null,
         createdAt: now.toISOString(),
         lastUsedAt: now.toISOString(),
         expiresAt: futureDate.toISOString(),

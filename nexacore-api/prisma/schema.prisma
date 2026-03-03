@@ -43,6 +43,8 @@ enum AuditAction {
   ACCOUNT_SELF_DELETED
   DEVICE_TRUSTED
   DEVICE_UNTRUSTED
+  IMPOSSIBLE_TRAVEL_DETECTED
+  LOGIN_BLOCKED_TRAVEL
 }
 
 enum EmailVerificationTokenType {
@@ -91,6 +93,10 @@ model Session {
   deviceInfo       String?
   ipAddress        String
   userAgent        String?
+  locationCity     String?
+  locationCountry  String?
+  latitude         Float?
+  longitude        Float?
   isRevoked        Boolean  @default(false)
   createdAt        DateTime @default(now())
   lastUsedAt       DateTime @default(now())

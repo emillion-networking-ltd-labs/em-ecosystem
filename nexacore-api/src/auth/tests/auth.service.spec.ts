@@ -17,6 +17,7 @@ import { OAuthProfile } from '../../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from '../stores/oauth-code.store';
 import { PasswordBreachService } from '../password-breach.service';
 import { TrustedDeviceService } from '../trusted-device.service';
+import { ImpossibleTravelService } from '../../geolocation/impossible-travel.service';
 import { AuditService } from '../../audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
@@ -38,6 +39,7 @@ describe('parseDurationMs (via AuthService constructor)', () => {
         { provide: PrismaService, useValue: {} },
         { provide: MailService, useValue: {} },
         { provide: TrustedDeviceService, useValue: { isTrustedDevice: jest.fn().mockResolvedValue(false) } },
+        { provide: ImpossibleTravelService, useValue: { detectImpossibleTravel: jest.fn().mockResolvedValue(null) } },
       ],
     }).compile();
     return mod.get<AuthService>(AuthService);
@@ -81,6 +83,7 @@ describe('AuthService', () => {
   let oauthCodeStore: jest.Mocked<OAuthCodeStore>;
   let passwordBreachService: jest.Mocked<PasswordBreachService>;
   let trustedDeviceService: jest.Mocked<TrustedDeviceService>;
+  let impossibleTravelService: jest.Mocked<ImpossibleTravelService>;
 
   const mockUser: User = {
     id: 'uuid-123',
@@ -225,6 +228,12 @@ describe('AuthService', () => {
             revokeAllDevices: jest.fn().mockResolvedValue(0),
           },
         },
+        {
+          provide: ImpossibleTravelService,
+          useValue: {
+            detectImpossibleTravel: jest.fn().mockResolvedValue(null),
+          },
+        },
       ],
     }).compile();
 
@@ -235,6 +244,7 @@ describe('AuthService', () => {
     oauthCodeStore = module.get(OAuthCodeStore);
     passwordBreachService = module.get(PasswordBreachService);
     trustedDeviceService = module.get(TrustedDeviceService);
+    impossibleTravelService = module.get(ImpossibleTravelService);
   });
 
   describe('register', () => {
@@ -2198,6 +2208,73 @@ describe('AuthService', () => {
         'uuid-123',
         { ipAddress: '192.168.1.100', userAgent: 'Custom-Agent/1.0' },
       );
+    });
+  });
+
+  describe('impossible travel integration', () => {
+    const loginDto = { email: 'test@example.com', password: 'StrongPass1!' };
+
+    beforeEach(() => {
+      usersService.findByEmail.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+    });
+
+    it('should allow login when impossible travel returns null', async () => {
+      impossibleTravelService.detectImpossibleTravel.mockResolvedValue(null);
+
+      const result = await authService.login(loginDto, requestMeta);
+
+      expect(result.accessToken).toBe('access-token');
+    });
+
+    it('should allow login when travel is not anomalous', async () => {
+      impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
+        isAnomalous: false,
+        previousLocation: null,
+        currentLocation: { city: 'Madrid', country: 'Spain', countryCode: 'ES', latitude: 40.4168, longitude: -3.7038 },
+        distanceKm: 5762,
+        elapsedHours: 10,
+        requiredSpeedKmh: 576,
+        strategy: 'alert_only',
+        actionTaken: 'allowed',
+      });
+
+      const result = await authService.login(loginDto, requestMeta);
+
+      expect(result.accessToken).toBe('access-token');
+    });
+
+    it('should throw ForbiddenException when travel action is blocked', async () => {
+      impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
+        isAnomalous: true,
+        previousLocation: { city: 'Madrid', country: 'Spain', countryCode: 'ES', latitude: 40.4168, longitude: -3.7038 },
+        currentLocation: { city: 'New York', country: 'United States', countryCode: 'US', latitude: 40.7128, longitude: -74.006 },
+        distanceKm: 5762,
+        elapsedHours: 0.5,
+        requiredSpeedKmh: 11524,
+        strategy: 'block',
+        actionTaken: 'blocked',
+      });
+
+      await expect(
+        authService.login(loginDto, requestMeta),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should allow login gracefully when impossible travel check throws (fail-open)', async () => {
+      impossibleTravelService.detectImpossibleTravel.mockRejectedValue(
+        new Error('Geolocation service unavailable'),
+      );
+
+      const result = await authService.login(loginDto, requestMeta);
+
+      expect(result.accessToken).toBe('access-token');
     });
   });
 });

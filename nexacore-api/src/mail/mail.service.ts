@@ -246,6 +246,75 @@ export class MailService {
     }
   }
 
+  async sendImpossibleTravelAlert(
+    email: string,
+    params: {
+      firstName?: string | null;
+      previousCity: string | null;
+      previousCountry: string | null;
+      currentCity: string | null;
+      currentCountry: string | null;
+      distanceKm: number;
+      elapsedHours: number;
+      requiredSpeedKmh: number;
+      ipAddress: string;
+      userAgent: string | null;
+      actionTaken: 'allowed' | 'challenged' | 'blocked';
+    },
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const sessionsUrl = `${frontendUrl}/dashboard/security/sessions`;
+
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Suspicious login detected on your EM NexaCore account',
+        template: 'impossible-travel-alert',
+        context: {
+          name: params.firstName || email.split('@')[0],
+          previousLocation: this.formatLocation(
+            params.previousCity,
+            params.previousCountry,
+          ),
+          currentLocation: this.formatLocation(
+            params.currentCity,
+            params.currentCountry,
+          ),
+          distanceKm: Math.round(params.distanceKm),
+          elapsedTime: this.formatElapsedTime(params.elapsedHours),
+          device: this.parseUserAgent(params.userAgent),
+          ipAddress: params.ipAddress,
+          actionTaken: params.actionTaken,
+          wasBlocked: params.actionTaken === 'blocked',
+          sessionsUrl,
+          frontendUrl,
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Impossible travel alert sent to ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send impossible travel alert to ${email}`,
+        error,
+      );
+    }
+  }
+
+  private formatLocation(
+    city: string | null,
+    country: string | null,
+  ): string {
+    if (city && country) return `${city}, ${country}`;
+    if (city) return city;
+    if (country) return country;
+    return 'Unknown location';
+  }
+
+  private formatElapsedTime(hours: number): string {
+    if (hours < 1) return `${Math.round(hours * 60)} minutes`;
+    return `${hours.toFixed(1)} hours`;
+  }
+
   private parseUserAgent(ua: string | null): string {
     if (!ua) return 'Unknown device';
 
