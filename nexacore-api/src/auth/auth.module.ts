@@ -6,6 +6,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { MfaController } from './mfa.controller';
 import { MfaService } from './mfa.service';
+import { PasskeyController } from './passkey.controller';
+import { PasskeyService } from './passkey.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GitHubStrategy } from './strategies/github.strategy';
@@ -45,10 +47,11 @@ import { SecurityModule } from '../security/security.module';
       },
     }),
   ],
-  controllers: [AuthController, MfaController],
+  controllers: [AuthController, MfaController, PasskeyController],
   providers: [
     AuthService,
     MfaService,
+    PasskeyService,
     JwtStrategy,
     GoogleStrategy,
     GitHubStrategy,
