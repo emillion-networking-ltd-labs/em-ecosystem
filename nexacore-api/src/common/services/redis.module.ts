@@ -21,6 +21,9 @@ import { REDIS_CLIENT } from './redis.constants';
         const password = process.env.REDIS_PASSWORD || undefined;
         const db = parseInt(process.env.REDIS_DB || '0', 10);
         const keyPrefix = process.env.REDIS_KEY_PREFIX || 'nexacore:';
+        const tlsEnabled = process.env.REDIS_TLS_ENABLED === 'true';
+        const tlsRejectUnauthorized =
+          process.env.REDIS_TLS_REJECT_UNAUTHORIZED !== 'false';
 
         const client = new Redis({
           host,
@@ -30,10 +33,15 @@ import { REDIS_CLIENT } from './redis.constants';
           keyPrefix,
           maxRetriesPerRequest: 1,
           lazyConnect: false,
+          ...(tlsEnabled && {
+            tls: { rejectUnauthorized: tlsRejectUnauthorized },
+          }),
         });
 
         client.on('connect', () => {
-          logger.log(`Redis connected to ${host}:${port}`);
+          logger.log(
+            `Redis connected to ${host}:${port}${tlsEnabled ? ' (TLS)' : ''}`,
+          );
         });
 
         client.on('error', (err: Error) => {
