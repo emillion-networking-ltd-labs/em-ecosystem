@@ -27,6 +27,7 @@ import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ChangePasswordDto } from './dto/change-password.dto';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { UnlinkOAuthDto } from './dto/unlink-oauth.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 
@@ -88,6 +89,21 @@ export class UsersController {
     @Body() dto: DeleteAccountDto,
   ) {
     return this.usersService.selfDeleteAccount(req.user.id, dto, {
+      ipAddress: req.ip || null,
+      userAgent: req.headers?.['user-agent'] || null,
+    });
+  }
+
+  @Delete('me/oauth')
+  @UseGuards(JwtAuthGuard)
+  @Throttle({ global: { ttl: 60_000, limit: 5 } })
+  @HttpCode(HttpStatus.OK)
+  async unlinkOAuth(
+    @Request()
+    req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
+    @Body() dto: UnlinkOAuthDto,
+  ) {
+    return this.usersService.unlinkOAuth(req.user.id, dto, {
       ipAddress: req.ip || null,
       userAgent: req.headers?.['user-agent'] || null,
     });

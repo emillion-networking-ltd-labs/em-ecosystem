@@ -30,6 +30,7 @@ import { PasswordBreachService } from '../auth/password-breach.service';
 import { TrustedDeviceService } from '../auth/trusted-device.service';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
+import { UnlinkOAuthDto } from './dto/unlink-oauth.dto';
 import * as crypto from 'crypto';
 
 const BCRYPT_ROUNDS = 12;
@@ -648,6 +649,62 @@ export class UsersService {
       .catch(() => {});
 
     return { message: 'Account deleted successfully' };
+  }
+
+  // ── OAuth unlinking (SCRUM-111) ──
+
+  async unlinkOAuth(
+    userId: string,
+    dto: UnlinkOAuthDto,
+    ctx?: RequestContext,
+  ): Promise<{ message: string }> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.provider === Provider.LOCAL) {
+      throw new BadRequestException(
+        'No OAuth provider linked to this account',
+      );
+    }
+
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        'You must set a password before unlinking your OAuth provider',
+      );
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      dto.password,
+      user.passwordHash,
+    );
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid password');
+    }
+
+    const previousProvider = user.provider;
+    const previousProviderId = user.providerId;
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { provider: Provider.LOCAL, providerId: null },
+    });
+
+    await this.sessionsService.revokeAllUserSessions(userId);
+    await this.trustedDeviceService.revokeAllDevices(userId);
+
+    this.auditService
+      .log({
+        action: AuditAction.OAUTH_UNLINKED,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: { previousProvider, previousProviderId },
+      })
+      .catch(() => {});
+
+    return { message: 'OAuth provider unlinked successfully' };
   }
 
   private hashToken(token: string): string {

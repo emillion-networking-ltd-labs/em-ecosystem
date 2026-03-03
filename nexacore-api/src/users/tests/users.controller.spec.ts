@@ -15,6 +15,7 @@ describe('UsersController', () => {
     changePassword: jest.Mock;
     requestEmailChange: jest.Mock;
     selfDeleteAccount: jest.Mock;
+    unlinkOAuth: jest.Mock;
     findAll: jest.Mock;
     findById: jest.Mock;
     adminUpdateUser: jest.Mock;
@@ -64,6 +65,7 @@ describe('UsersController', () => {
       findById: jest.fn(),
       adminUpdateUser: jest.fn(),
       softDelete: jest.fn(),
+      unlinkOAuth: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -285,6 +287,60 @@ describe('UsersController', () => {
       expect(result).toEqual({
         message: 'Verification email sent to new address',
       });
+    });
+  });
+
+  // ─── DELETE /users/me/oauth ─────────────────────────────────
+
+  describe('unlinkOAuth', () => {
+    it('should delegate to usersService.unlinkOAuth with userId, dto, and context', async () => {
+      usersService.unlinkOAuth.mockResolvedValue({
+        message: 'OAuth provider unlinked successfully',
+      });
+
+      const result = await controller.unlinkOAuth(mockReq, {
+        password: 'StrongPass1!',
+      });
+
+      expect(usersService.unlinkOAuth).toHaveBeenCalledWith(
+        'uuid-123',
+        { password: 'StrongPass1!' },
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      );
+      expect(result).toEqual({
+        message: 'OAuth provider unlinked successfully',
+      });
+    });
+
+    it('should return service result directly', async () => {
+      const serviceResult = { message: 'OAuth provider unlinked successfully' };
+      usersService.unlinkOAuth.mockResolvedValue(serviceResult);
+
+      const result = await controller.unlinkOAuth(mockReq, {
+        password: 'MyPass123!',
+      });
+
+      expect(result).toBe(serviceResult);
+    });
+
+    it('should extract RequestContext from request object', async () => {
+      usersService.unlinkOAuth.mockResolvedValue({
+        message: 'OAuth provider unlinked successfully',
+      });
+
+      const customReq = {
+        user: { id: 'user-456' },
+        ip: '192.168.1.1',
+        headers: { 'user-agent': 'Mozilla/5.0' },
+      };
+
+      await controller.unlinkOAuth(customReq, { password: 'TestPass1!' });
+
+      expect(usersService.unlinkOAuth).toHaveBeenCalledWith(
+        'user-456',
+        { password: 'TestPass1!' },
+        { ipAddress: '192.168.1.1', userAgent: 'Mozilla/5.0' },
+      );
     });
   });
 });

@@ -53,6 +53,7 @@ enum AuditAction {
   PASSKEY_DELETED
   PASSKEY_AUTH_SUCCESS
   PASSKEY_AUTH_FAILURE
+  OAUTH_UNLINKED
 }
 
 enum EmailVerificationTokenType {
