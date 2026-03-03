@@ -27,6 +27,7 @@ import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
 import { SessionsService } from '../sessions/sessions.service';
 import { MailService } from '../mail/mail.service';
 import { PasswordBreachService } from '../auth/password-breach.service';
+import { TrustedDeviceService } from '../auth/trusted-device.service';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import * as crypto from 'crypto';
@@ -43,6 +44,8 @@ export class UsersService {
     private readonly mailService: MailService,
     @Inject(forwardRef(() => PasswordBreachService))
     private readonly passwordBreachService: PasswordBreachService,
+    @Inject(forwardRef(() => TrustedDeviceService))
+    private readonly trustedDeviceService: TrustedDeviceService,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
@@ -298,8 +301,9 @@ export class UsersService {
       data: { passwordHash: newHash },
     });
 
-    // Revoke all sessions on password change
+    // Revoke all sessions and trusted devices on password change
     await this.sessionsService.revokeAllUserSessions(userId);
+    await this.trustedDeviceService.revokeAllDevices(userId);
 
     this.auditService
       .log({

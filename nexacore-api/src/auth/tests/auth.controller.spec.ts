@@ -5,8 +5,10 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { NotFoundException } from '@nestjs/common';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
+import { TrustedDeviceService } from '../trusted-device.service';
 import { SessionsService } from '../../sessions/sessions.service';
 import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
@@ -19,6 +21,7 @@ describe('AuthController', () => {
   let authService: jest.Mocked<AuthService>;
   let sessionsService: jest.Mocked<SessionsService>;
   let jwtSvc: jest.Mocked<JwtService>;
+  let trustedDeviceService: jest.Mocked<TrustedDeviceService>;
 
   const mockCookie = {
     name: 'refresh_token',
@@ -126,6 +129,15 @@ describe('AuthController', () => {
               .mockResolvedValue(['dashboard:read']),
           },
         },
+        {
+          provide: TrustedDeviceService,
+          useValue: {
+            trustDevice: jest.fn(),
+            listTrustedDevices: jest.fn(),
+            revokeDevice: jest.fn(),
+            revokeAllDevices: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
@@ -133,6 +145,7 @@ describe('AuthController', () => {
     authService = module.get(AuthService);
     sessionsService = module.get(SessionsService);
     jwtSvc = module.get(JwtService);
+    trustedDeviceService = module.get(TrustedDeviceService);
   });
 
   const mockReq = {
@@ -652,6 +665,112 @@ describe('AuthController', () => {
       expect(res.redirect).toHaveBeenCalledWith(
         expect.stringContaining('status=success'),
       );
+    });
+  });
+
+  // ─── Trusted Device Endpoints ─────────────────────────────────
+
+  describe('trustDevice', () => {
+    const mockAuthReq = {
+      ...mockReq,
+      user: { id: 'uuid-123' },
+    };
+
+    it('should trust device and return id, deviceName, expiresAt', async () => {
+      const mockDevice = {
+        id: 'device-1',
+        deviceName: 'Chrome on Windows',
+        expiresAt: new Date('2026-04-02'),
+      };
+      trustedDeviceService.trustDevice.mockResolvedValue(mockDevice as any);
+
+      const result = await controller.trustDevice(
+        { fingerprint: 'abcdef1234567890' },
+        mockAuthReq,
+      );
+
+      expect(result).toEqual({
+        id: 'device-1',
+        deviceName: 'Chrome on Windows',
+        expiresAt: mockDevice.expiresAt,
+      });
+      expect(trustedDeviceService.trustDevice).toHaveBeenCalledWith(
+        'uuid-123',
+        'abcdef1234567890',
+        '127.0.0.1',
+        'test-agent',
+      );
+    });
+  });
+
+  describe('listTrustedDevices', () => {
+    const mockAuthReq = {
+      ...mockReq,
+      user: { id: 'uuid-123' },
+    };
+
+    it('should return list of trusted devices', async () => {
+      const devices = [
+        { id: 'device-1', deviceName: 'Chrome on Windows' },
+      ];
+      trustedDeviceService.listTrustedDevices.mockResolvedValue(devices as any);
+
+      const result = await controller.listTrustedDevices(mockAuthReq);
+
+      expect(result).toEqual(devices);
+      expect(trustedDeviceService.listTrustedDevices).toHaveBeenCalledWith(
+        'uuid-123',
+      );
+    });
+  });
+
+  describe('revokeAllTrustedDevices', () => {
+    const mockAuthReq = {
+      ...mockReq,
+      user: { id: 'uuid-123' },
+    };
+
+    it('should revoke all devices and return count', async () => {
+      trustedDeviceService.revokeAllDevices.mockResolvedValue(3);
+
+      const result = await controller.revokeAllTrustedDevices(mockAuthReq);
+
+      expect(result).toEqual({
+        message: 'All trusted devices revoked',
+        count: 3,
+      });
+    });
+  });
+
+  describe('revokeTrustedDevice', () => {
+    const mockAuthReq = {
+      ...mockReq,
+      user: { id: 'uuid-123' },
+    };
+
+    it('should revoke a specific device', async () => {
+      trustedDeviceService.revokeDevice.mockResolvedValue(undefined);
+
+      const result = await controller.revokeTrustedDevice(
+        'device-uuid',
+        mockAuthReq,
+      );
+
+      expect(result).toEqual({ message: 'Device trust revoked' });
+      expect(trustedDeviceService.revokeDevice).toHaveBeenCalledWith(
+        'uuid-123',
+        'device-uuid',
+      );
+    });
+
+    it('should propagate NotFoundException when device not found', async () => {
+      trustedDeviceService.revokeDevice.mockRejectedValue(
+        new NotFoundException('Trusted device not found'),
+      );
+
+      await expect(
+        controller.revokeTrustedDevice('unknown-id', mockAuthReq),
+      ).rejects.toThrow(NotFoundException);
     });
   });
 });

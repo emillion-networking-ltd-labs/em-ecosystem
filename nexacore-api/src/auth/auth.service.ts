@@ -24,6 +24,7 @@ import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interfac
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from './stores/oauth-code.store';
 import { PasswordBreachService } from './password-breach.service';
+import { TrustedDeviceService } from './trusted-device.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
@@ -104,6 +105,7 @@ export class AuthService {
     private readonly passwordBreachService: PasswordBreachService,
     private readonly prisma: PrismaService,
     private readonly mailService: MailService,
+    private readonly trustedDeviceService: TrustedDeviceService,
   ) {
     this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '7d';
     this.refreshMaxAgeMs = parseDurationMs(this.refreshExpiration);
@@ -162,6 +164,7 @@ export class AuthService {
     dto: LoginDto,
     requestMeta: { ipAddress: string; userAgent?: string | null },
     ctx?: RequestContext,
+    fingerprint?: string,
   ): Promise<AuthResult | MfaChallengeResult> {
     const user = await this.usersService.findByEmail(dto.email);
 
@@ -297,8 +300,37 @@ export class AuthService {
       await this.usersService.resetLockoutEscalation(user.id);
     }
 
-    // MFA check — return challenge token instead of full auth
+    // MFA check — skip if device is trusted, otherwise return challenge token
     if (user.mfaEnabled) {
+      if (fingerprint) {
+        const isTrusted = await this.trustedDeviceService.isTrustedDevice(
+          user.id,
+          fingerprint,
+        );
+        if (isTrusted) {
+          const { accessToken, refreshToken, sessionId } =
+            await this.generateTokens(user, requestMeta);
+
+          this.auditService
+            .log({
+              action: AuditAction.LOGIN_SUCCESS,
+              userId: user.id,
+              ipAddress: ctx?.ipAddress,
+              userAgent: ctx?.userAgent,
+              metadata: { mfaSkipped: true, trustedDevice: true },
+            })
+            .catch(() => {});
+
+          this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
+
+          return {
+            accessToken,
+            user: toSafeUser(user),
+            cookie: this.buildRefreshCookie(refreshToken),
+          };
+        }
+      }
+
       const mfaToken = this.jwtService.sign(
         { sub: user.id, type: 'mfa-challenge' },
         { expiresIn: '5m' as StringValue, secret: this.mfaChallengeSecret },

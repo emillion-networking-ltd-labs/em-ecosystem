@@ -13,6 +13,7 @@ import { CryptoService } from '../common/services/crypto.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { UsersService } from '../users/users.service';
+import { TrustedDeviceService } from './trusted-device.service';
 import { User } from '../users/entities/user.entity';
 import type { StringValue } from 'ms';
 
@@ -31,6 +32,7 @@ export class MfaService {
     private readonly cryptoService: CryptoService,
     private readonly jwtService: JwtService,
     private readonly auditService: AuditService,
+    private readonly trustedDeviceService: TrustedDeviceService,
   ) {
     this.appName = process.env.MFA_APP_NAME || 'EM NexaCore';
     const jwtSecret =
@@ -200,6 +202,7 @@ export class MfaService {
     }
 
     await this.usersService.disableMfa(userId);
+    await this.trustedDeviceService.revokeAllDevices(userId);
 
     await this.auditService.log({
       action: AuditAction.MFA_DISABLED,

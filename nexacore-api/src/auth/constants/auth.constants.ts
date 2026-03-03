@@ -83,3 +83,18 @@ export const MAX_CONCURRENT_SESSIONS = parseInt(
   process.env.MAX_CONCURRENT_SESSIONS || '5',
   10,
 );
+
+/**
+ * Trusted device TTL in days.
+ * After this period, the device must re-verify via MFA.
+ */
+export const TRUSTED_DEVICE_TTL_DAYS = parseInt(
+  process.env.TRUSTED_DEVICE_TTL_DAYS || '30',
+  10,
+);
+
+/**
+ * Maximum trusted devices per user.
+ * Oldest revoked when exceeded.
+ */
+export const MAX_TRUSTED_DEVICES_PER_USER = 10;

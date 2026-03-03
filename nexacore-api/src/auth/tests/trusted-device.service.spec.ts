@@ -1,0 +1,392 @@
+import { NotFoundException } from '@nestjs/common';
+import { TrustedDeviceService } from '../trusted-device.service';
+import { AuditAction } from '../../audit/enums/audit-action.enum';
+
+describe('TrustedDeviceService', () => {
+  let service: TrustedDeviceService;
+  let prisma: {
+    trustedDevice: {
+      count: jest.Mock;
+      findFirst: jest.Mock;
+      findMany: jest.Mock;
+      update: jest.Mock;
+      updateMany: jest.Mock;
+      upsert: jest.Mock;
+    };
+  };
+  let auditService: { log: jest.Mock };
+
+  const mockDevice = {
+    id: 'device-1',
+    userId: 'user-1',
+    fingerprintHash: 'hashed-fp',
+    deviceName: 'Chrome on Windows',
+    ipAddress: '127.0.0.1',
+    lastVerifiedAt: new Date(),
+    expiresAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+    isRevoked: false,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+
+    prisma = {
+      trustedDevice: {
+        count: jest.fn().mockResolvedValue(0),
+        findFirst: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
+        update: jest.fn().mockResolvedValue(mockDevice),
+        updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        upsert: jest.fn().mockResolvedValue(mockDevice),
+      },
+    };
+
+    auditService = {
+      log: jest.fn().mockResolvedValue(undefined),
+    };
+
+    service = new TrustedDeviceService(
+      prisma as any,
+      auditService as any,
+    );
+  });
+
+  describe('hashFingerprint', () => {
+    it('should return consistent hash for same userId + fingerprint', () => {
+      const hash1 = service.hashFingerprint('user-1', 'fingerprint-abc');
+      const hash2 = service.hashFingerprint('user-1', 'fingerprint-abc');
+
+      expect(hash1).toBe(hash2);
+      expect(hash1).toHaveLength(64); // SHA-256 hex
+    });
+
+    it('should return different hash for same fingerprint + different userId', () => {
+      const hash1 = service.hashFingerprint('user-1', 'fingerprint-abc');
+      const hash2 = service.hashFingerprint('user-2', 'fingerprint-abc');
+
+      expect(hash1).not.toBe(hash2);
+    });
+
+    it('should return different hash for different fingerprint + same userId', () => {
+      const hash1 = service.hashFingerprint('user-1', 'fingerprint-abc');
+      const hash2 = service.hashFingerprint('user-1', 'fingerprint-xyz');
+
+      expect(hash1).not.toBe(hash2);
+    });
+  });
+
+  describe('trustDevice', () => {
+    it('should create trusted device with correct expiry', async () => {
+      const device = await service.trustDevice(
+        'user-1',
+        'fingerprint-abc',
+        '127.0.0.1',
+        'Mozilla/5.0 (Windows NT 10.0) Chrome/120.0.0.0',
+      );
+
+      expect(prisma.trustedDevice.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            userId_fingerprintHash: {
+              userId: 'user-1',
+              fingerprintHash: expect.any(String),
+            },
+          },
+          create: expect.objectContaining({
+            userId: 'user-1',
+            fingerprintHash: expect.any(String),
+            deviceName: 'Chrome on Windows',
+            ipAddress: '127.0.0.1',
+          }),
+        }),
+      );
+      expect(device.id).toBe('device-1');
+    });
+
+    it('should derive deviceName from User-Agent', async () => {
+      await service.trustDevice(
+        'user-1',
+        'fingerprint-abc',
+        '127.0.0.1',
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X) Safari/605.1.15',
+      );
+
+      expect(prisma.trustedDevice.upsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          create: expect.objectContaining({
+            deviceName: 'Safari on macOS',
+          }),
+        }),
+      );
+    });
+
+    it('should enforce MAX_TRUSTED_DEVICES_PER_USER limit', async () => {
+      prisma.trustedDevice.count.mockResolvedValue(10);
+      prisma.trustedDevice.findFirst.mockResolvedValue({
+        id: 'oldest-device',
+      });
+
+      await service.trustDevice(
+        'user-1',
+        'fingerprint-abc',
+        '127.0.0.1',
+        null,
+      );
+
+      expect(prisma.trustedDevice.update).toHaveBeenCalledWith({
+        where: { id: 'oldest-device' },
+        data: { isRevoked: true },
+      });
+    });
+
+    it('should not revoke when under limit', async () => {
+      prisma.trustedDevice.count.mockResolvedValue(3);
+
+      await service.trustDevice(
+        'user-1',
+        'fingerprint-abc',
+        '127.0.0.1',
+        null,
+      );
+
+      // update called only by upsert, not for revoking oldest
+      expect(prisma.trustedDevice.findFirst).not.toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { createdAt: 'asc' },
+        }),
+      );
+    });
+
+    it('should audit log DEVICE_TRUSTED', async () => {
+      await service.trustDevice(
+        'user-1',
+        'fingerprint-abc',
+        '127.0.0.1',
+        'Mozilla/5.0 (Windows NT 10.0) Chrome/120.0.0.0',
+      );
+
+      expect(auditService.log).toHaveBeenCalledWith({
+        action: AuditAction.DEVICE_TRUSTED,
+        userId: 'user-1',
+        metadata: { deviceId: 'device-1', deviceName: 'Chrome on Windows' },
+      });
+    });
+  });
+
+  describe('isTrustedDevice', () => {
+    it('should return true for valid, non-expired, non-revoked device', async () => {
+      prisma.trustedDevice.findFirst.mockResolvedValue(mockDevice);
+
+      const result = await service.isTrustedDevice('user-1', 'fingerprint-abc');
+
+      expect(result).toBe(true);
+    });
+
+    it('should update lastVerifiedAt on successful check', async () => {
+      prisma.trustedDevice.findFirst.mockResolvedValue(mockDevice);
+
+      await service.isTrustedDevice('user-1', 'fingerprint-abc');
+
+      expect(prisma.trustedDevice.update).toHaveBeenCalledWith({
+        where: { id: 'device-1' },
+        data: { lastVerifiedAt: expect.any(Date) },
+      });
+    });
+
+    it('should return false when no matching device found', async () => {
+      prisma.trustedDevice.findFirst.mockResolvedValue(null);
+
+      const result = await service.isTrustedDevice('user-1', 'unknown-fp');
+
+      expect(result).toBe(false);
+      expect(prisma.trustedDevice.update).not.toHaveBeenCalled();
+    });
+
+    it('should query with correct filters', async () => {
+      prisma.trustedDevice.findFirst.mockResolvedValue(null);
+
+      await service.isTrustedDevice('user-1', 'fingerprint-abc');
+
+      expect(prisma.trustedDevice.findFirst).toHaveBeenCalledWith({
+        where: {
+          userId: 'user-1',
+          fingerprintHash: expect.any(String),
+          isRevoked: false,
+          expiresAt: { gt: expect.any(Date) },
+        },
+      });
+    });
+  });
+
+  describe('listTrustedDevices', () => {
+    it('should return non-revoked, non-expired devices', async () => {
+      const devices = [
+        {
+          id: 'device-1',
+          deviceName: 'Chrome on Windows',
+          ipAddress: '127.0.0.1',
+          lastVerifiedAt: new Date(),
+          expiresAt: new Date(),
+          createdAt: new Date(),
+        },
+      ];
+      prisma.trustedDevice.findMany.mockResolvedValue(devices);
+
+      const result = await service.listTrustedDevices('user-1');
+
+      expect(result).toEqual(devices);
+      expect(prisma.trustedDevice.findMany).toHaveBeenCalledWith({
+        where: {
+          userId: 'user-1',
+          isRevoked: false,
+          expiresAt: { gt: expect.any(Date) },
+        },
+        orderBy: { lastVerifiedAt: 'desc' },
+        select: {
+          id: true,
+          deviceName: true,
+          ipAddress: true,
+          lastVerifiedAt: true,
+          expiresAt: true,
+          createdAt: true,
+        },
+      });
+    });
+
+    it('should return empty array when no devices', async () => {
+      const result = await service.listTrustedDevices('user-1');
+
+      expect(result).toEqual([]);
+    });
+  });
+
+  describe('revokeDevice', () => {
+    it('should set isRevoked to true', async () => {
+      prisma.trustedDevice.findFirst.mockResolvedValue(mockDevice);
+
+      await service.revokeDevice('user-1', 'device-1');
+
+      expect(prisma.trustedDevice.update).toHaveBeenCalledWith({
+        where: { id: 'device-1' },
+        data: { isRevoked: true },
+      });
+    });
+
+    it('should throw NotFoundException for wrong userId (ownership)', async () => {
+      prisma.trustedDevice.findFirst.mockResolvedValue(null);
+
+      await expect(
+        service.revokeDevice('user-1', 'device-999'),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should audit log DEVICE_UNTRUSTED', async () => {
+      prisma.trustedDevice.findFirst.mockResolvedValue(mockDevice);
+
+      await service.revokeDevice('user-1', 'device-1');
+
+      expect(auditService.log).toHaveBeenCalledWith({
+        action: AuditAction.DEVICE_UNTRUSTED,
+        userId: 'user-1',
+        metadata: { deviceId: 'device-1', deviceName: 'Chrome on Windows' },
+      });
+    });
+  });
+
+  describe('revokeAllDevices', () => {
+    it('should revoke all non-revoked devices and return count', async () => {
+      prisma.trustedDevice.updateMany.mockResolvedValue({ count: 3 });
+
+      const count = await service.revokeAllDevices('user-1');
+
+      expect(count).toBe(3);
+      expect(prisma.trustedDevice.updateMany).toHaveBeenCalledWith({
+        where: { userId: 'user-1', isRevoked: false },
+        data: { isRevoked: true },
+      });
+    });
+
+    it('should audit log when devices were revoked', async () => {
+      prisma.trustedDevice.updateMany.mockResolvedValue({ count: 2 });
+
+      await service.revokeAllDevices('user-1');
+
+      expect(auditService.log).toHaveBeenCalledWith({
+        action: AuditAction.DEVICE_UNTRUSTED,
+        userId: 'user-1',
+        metadata: { scope: 'all', count: 2 },
+      });
+    });
+
+    it('should not audit log when no devices exist', async () => {
+      prisma.trustedDevice.updateMany.mockResolvedValue({ count: 0 });
+
+      const count = await service.revokeAllDevices('user-1');
+
+      expect(count).toBe(0);
+      expect(auditService.log).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('parseDeviceName', () => {
+    it('should detect Chrome on Windows', () => {
+      expect(
+        service.parseDeviceName(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+        ),
+      ).toBe('Chrome on Windows');
+    });
+
+    it('should detect Firefox on Linux', () => {
+      expect(
+        service.parseDeviceName(
+          'Mozilla/5.0 (X11; Linux x86_64; rv:121.0) Gecko/20100101 Firefox/121.0',
+        ),
+      ).toBe('Firefox on Linux');
+    });
+
+    it('should detect Safari on macOS', () => {
+      expect(
+        service.parseDeviceName(
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Safari/605.1.15',
+        ),
+      ).toBe('Safari on macOS');
+    });
+
+    it('should detect Edge on Windows', () => {
+      expect(
+        service.parseDeviceName(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36 Edg/120.0',
+        ),
+      ).toBe('Edge on Windows');
+    });
+
+    it('should detect Chrome on Android', () => {
+      expect(
+        service.parseDeviceName(
+          'Mozilla/5.0 (Linux; Android 14) AppleWebKit/537.36 Chrome/120.0 Mobile Safari/537.36',
+        ),
+      ).toBe('Chrome on Android');
+    });
+
+    it('should detect Safari on iOS (iPhone)', () => {
+      expect(
+        service.parseDeviceName(
+          'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+        ),
+      ).toBe('Safari on iOS');
+    });
+
+    it('should return Unknown Device for null User-Agent', () => {
+      expect(service.parseDeviceName(null)).toBe('Unknown Device');
+    });
+
+    it('should return Unknown Browser on Unknown OS for unrecognized agent', () => {
+      expect(service.parseDeviceName('CustomBot/1.0')).toBe(
+        'Unknown Browser on Unknown OS',
+      );
+    });
+  });
+});

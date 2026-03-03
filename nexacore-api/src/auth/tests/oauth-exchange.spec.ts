@@ -3,6 +3,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
+import { TrustedDeviceService } from '../trusted-device.service';
 import { SessionsService } from '../../sessions/sessions.service';
 import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
@@ -113,6 +114,15 @@ describe('OAuth Exchange Flow (Integration)', () => {
             getPermissionKeysForRole: jest
               .fn()
               .mockResolvedValue(['dashboard:read']),
+          },
+        },
+        {
+          provide: TrustedDeviceService,
+          useValue: {
+            trustDevice: jest.fn(),
+            listTrustedDevices: jest.fn(),
+            revokeDevice: jest.fn(),
+            revokeAllDevices: jest.fn(),
           },
         },
       ],

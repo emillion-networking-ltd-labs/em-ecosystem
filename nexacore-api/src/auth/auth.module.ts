@@ -12,6 +12,7 @@ import { GitHubStrategy } from './strategies/github.strategy';
 import { OAuthStateStore } from './stores/oauth-state.store';
 import { OAuthCodeStore } from './stores/oauth-code.store';
 import { PasswordBreachService } from './password-breach.service';
+import { TrustedDeviceService } from './trusted-device.service';
 import { UsersModule } from '../users/users.module';
 import { AuditModule } from '../audit/audit.module';
 import { SessionsModule } from '../sessions/sessions.module';
@@ -52,7 +53,8 @@ import { MailModule } from '../mail/mail.module';
     OAuthStateStore,
     OAuthCodeStore,
     PasswordBreachService,
+    TrustedDeviceService,
   ],
-  exports: [AuthService, PasswordBreachService],
+  exports: [AuthService, PasswordBreachService, TrustedDeviceService],
 })
 export class AuthModule {}

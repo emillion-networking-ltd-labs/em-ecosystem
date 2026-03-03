@@ -16,6 +16,7 @@ import { User } from '../../users/entities/user.entity';
 import { OAuthProfile } from '../../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from '../stores/oauth-code.store';
 import { PasswordBreachService } from '../password-breach.service';
+import { TrustedDeviceService } from '../trusted-device.service';
 import { AuditService } from '../../audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
@@ -36,6 +37,7 @@ describe('parseDurationMs (via AuthService constructor)', () => {
         { provide: PasswordBreachService, useValue: { isBreached: jest.fn().mockResolvedValue(false) } },
         { provide: PrismaService, useValue: {} },
         { provide: MailService, useValue: {} },
+        { provide: TrustedDeviceService, useValue: { isTrustedDevice: jest.fn().mockResolvedValue(false) } },
       ],
     }).compile();
     return mod.get<AuthService>(AuthService);
@@ -78,6 +80,7 @@ describe('AuthService', () => {
   let jwtService: jest.Mocked<JwtService>;
   let oauthCodeStore: jest.Mocked<OAuthCodeStore>;
   let passwordBreachService: jest.Mocked<PasswordBreachService>;
+  let trustedDeviceService: jest.Mocked<TrustedDeviceService>;
 
   const mockUser: User = {
     id: 'uuid-123',
@@ -215,6 +218,13 @@ describe('AuthService', () => {
             sendEmailChangedConfirmation: jest.fn().mockResolvedValue(undefined),
           },
         },
+        {
+          provide: TrustedDeviceService,
+          useValue: {
+            isTrustedDevice: jest.fn().mockResolvedValue(false),
+            revokeAllDevices: jest.fn().mockResolvedValue(0),
+          },
+        },
       ],
     }).compile();
 
@@ -224,6 +234,7 @@ describe('AuthService', () => {
     jwtService = module.get(JwtService);
     oauthCodeStore = module.get(OAuthCodeStore);
     passwordBreachService = module.get(PasswordBreachService);
+    trustedDeviceService = module.get(TrustedDeviceService);
   });
 
   describe('register', () => {
@@ -1502,6 +1513,74 @@ describe('AuthService', () => {
         mfaRequired: true,
         mfaToken: 'mfa-challenge-token',
       });
+    });
+
+    it('should skip MFA when trusted device fingerprint matches', async () => {
+      usersService.findByEmail.mockResolvedValue({
+        ...mockUser,
+        mfaEnabled: true,
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      trustedDeviceService.isTrustedDevice.mockResolvedValue(true);
+      jwtService.sign.mockReturnValueOnce('at').mockReturnValueOnce('rt');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+
+      const result = await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+        requestMeta,
+        'trusted-fingerprint',
+      );
+
+      expect(result).toHaveProperty('accessToken');
+      expect(result).not.toHaveProperty('mfaRequired');
+      expect(trustedDeviceService.isTrustedDevice).toHaveBeenCalledWith(
+        'uuid-123',
+        'trusted-fingerprint',
+      );
+    });
+
+    it('should proceed with MFA challenge when fingerprint does not match', async () => {
+      usersService.findByEmail.mockResolvedValue({
+        ...mockUser,
+        mfaEnabled: true,
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      trustedDeviceService.isTrustedDevice.mockResolvedValue(false);
+      jwtService.sign.mockReturnValue('mfa-challenge-token');
+
+      const result = await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+        requestMeta,
+        'unknown-fingerprint',
+      );
+
+      expect(result).toEqual({
+        mfaRequired: true,
+        mfaToken: 'mfa-challenge-token',
+      });
+    });
+
+    it('should proceed with MFA challenge when no fingerprint provided', async () => {
+      usersService.findByEmail.mockResolvedValue({
+        ...mockUser,
+        mfaEnabled: true,
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      jwtService.sign.mockReturnValue('mfa-challenge-token');
+
+      const result = await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+      );
+
+      expect(result).toEqual({
+        mfaRequired: true,
+        mfaToken: 'mfa-challenge-token',
+      });
+      expect(trustedDeviceService.isTrustedDevice).not.toHaveBeenCalled();
     });
   });
 

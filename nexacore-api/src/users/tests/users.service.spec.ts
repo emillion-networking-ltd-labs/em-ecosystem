@@ -17,6 +17,7 @@ import { AuditAction } from '../../audit/enums/audit-action.enum';
 import { SessionsService } from '../../sessions/sessions.service';
 import { MailService } from '../../mail/mail.service';
 import { PasswordBreachService } from '../../auth/password-breach.service';
+import { TrustedDeviceService } from '../../auth/trusted-device.service';
 
 jest.mock('bcrypt');
 
@@ -25,6 +26,7 @@ describe('UsersService', () => {
   let auditService: { log: jest.Mock };
   let sessionsService: { revokeAllUserSessions: jest.Mock };
   let passwordBreachService: { isBreached: jest.Mock };
+  let trustedDeviceService: { revokeAllDevices: jest.Mock };
   let mailService: {
     sendPasswordChangeNotification: jest.Mock;
     sendEmailChangeVerificationEmail: jest.Mock;
@@ -109,6 +111,7 @@ describe('UsersService', () => {
     auditService = { log: jest.fn().mockResolvedValue(undefined) };
     sessionsService = { revokeAllUserSessions: jest.fn().mockResolvedValue(undefined) };
     passwordBreachService = { isBreached: jest.fn().mockResolvedValue(false) };
+    trustedDeviceService = { revokeAllDevices: jest.fn().mockResolvedValue(0) };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -138,6 +141,10 @@ describe('UsersService', () => {
         {
           provide: PasswordBreachService,
           useValue: passwordBreachService,
+        },
+        {
+          provide: TrustedDeviceService,
+          useValue: trustedDeviceService,
         },
       ],
     }).compile();
@@ -681,7 +688,7 @@ describe('UsersService', () => {
       expect(bcrypt.hash).not.toHaveBeenCalled();
     });
 
-    it('should hash new password, update, and revoke all sessions', async () => {
+    it('should hash new password, update, revoke all sessions and trusted devices', async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       (bcrypt.hash as jest.Mock).mockResolvedValue('new-hashed-password');
@@ -695,6 +702,7 @@ describe('UsersService', () => {
         data: { passwordHash: 'new-hashed-password' },
       });
       expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith('uuid-123');
+      expect(trustedDeviceService.revokeAllDevices).toHaveBeenCalledWith('uuid-123');
     });
 
     it('should fire audit log on successful password change', async () => {

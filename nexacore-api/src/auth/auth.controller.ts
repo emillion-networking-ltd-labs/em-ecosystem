@@ -26,6 +26,8 @@ import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService, CookieConfig, MfaChallengeResult } from './auth.service';
+import { TrustedDeviceService } from './trusted-device.service';
+import { TrustDeviceDto } from './dto/trust-device.dto';
 import { SessionsService } from '../sessions/sessions.service';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
 import { AUTH_RATE_LIMITS } from './constants/auth.constants';
@@ -55,6 +57,7 @@ export class AuthController {
     private readonly sessionsService: SessionsService,
     private readonly jwtService: JwtService,
     private readonly permissionsService: PermissionsService,
+    private readonly trustedDeviceService: TrustedDeviceService,
   ) {}
 
   private extractRequestMeta(req: any): {
@@ -146,7 +149,8 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const meta = this.extractRequestMeta(req);
-    const result = await this.authService.login(loginDto, meta, meta);
+    const fingerprint = req.headers?.['x-device-fingerprint'] || undefined;
+    const result = await this.authService.login(loginDto, meta, meta, fingerprint);
 
     // MFA challenge — don't set cookie, return challenge token
     if ('mfaRequired' in result) {
@@ -528,6 +532,71 @@ export class AuthController {
     const result = await this.authService.exchangeOAuthCode(dto.code);
     this.setCookie(res, result.cookie);
     return { accessToken: result.accessToken, user: result.user };
+  }
+
+  // ── Trusted Device Endpoints ──────────────────────────────────────
+
+  @Post('trusted-devices')
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @Throttle({ global: { ttl: 60_000, limit: 5 } })
+  @ApiOperation({
+    summary: 'Mark current device as trusted (skips MFA on future logins)',
+  })
+  @ApiResponse({ status: 201, description: 'Device trusted' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
+  async trustDevice(@Body() dto: TrustDeviceDto, @Request() req: any) {
+    const meta = this.extractRequestMeta(req);
+    const device = await this.trustedDeviceService.trustDevice(
+      req.user.id,
+      dto.fingerprint,
+      meta.ipAddress,
+      meta.userAgent,
+    );
+    return {
+      id: device.id,
+      deviceName: device.deviceName,
+      expiresAt: device.expiresAt,
+    };
+  }
+
+  @Get('trusted-devices')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'List trusted devices for current user' })
+  @ApiResponse({ status: 200, description: 'List of trusted devices' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async listTrustedDevices(@Request() req: any) {
+    return this.trustedDeviceService.listTrustedDevices(req.user.id);
+  }
+
+  @Delete('trusted-devices')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Revoke all trusted devices' })
+  @ApiResponse({ status: 200, description: 'All trusted devices revoked' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async revokeAllTrustedDevices(@Request() req: any) {
+    const count = await this.trustedDeviceService.revokeAllDevices(req.user.id);
+    return { message: 'All trusted devices revoked', count };
+  }
+
+  @Delete('trusted-devices/:id')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Revoke trust for a specific device' })
+  @ApiResponse({ status: 200, description: 'Device trust revoked' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 404, description: 'Device not found' })
+  async revokeTrustedDevice(
+    @Param('id', ParseUUIDPipe) deviceId: string,
+    @Request() req: any,
+  ) {
+    await this.trustedDeviceService.revokeDevice(req.user.id, deviceId);
+    return { message: 'Device trust revoked' };
   }
 
   private getValidatedFrontendUrl(): string {

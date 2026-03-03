@@ -41,6 +41,8 @@ enum AuditAction {
   EMAIL_CHANGE_REQUESTED
   EMAIL_CHANGED
   ACCOUNT_SELF_DELETED
+  DEVICE_TRUSTED
+  DEVICE_UNTRUSTED
 }
 
 enum EmailVerificationTokenType {
@@ -75,6 +77,7 @@ model User {
   auditLogsTarget          AuditLog[]                @relation("AuditLogTarget")
   emailVerificationTokens  EmailVerificationToken[]  @relation("UserEmailVerificationTokens")
   passwordResetTokens      PasswordResetToken[]      @relation("UserPasswordResetTokens")
+  trustedDevices           TrustedDevice[]
 
   @@map("users")
 }
@@ -145,6 +148,24 @@ model PasswordResetToken {
 
   @@index([userId])
   @@map("password_reset_tokens")
+}
+
+model TrustedDevice {
+  id              String   @id @default(uuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fingerprintHash String
+  deviceName      String
+  ipAddress       String
+  lastVerifiedAt  DateTime @default(now())
+  expiresAt       DateTime
+  isRevoked       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@unique([userId, fingerprintHash])
+  @@index([userId, isRevoked, expiresAt])
+  @@map("trusted_devices")
 }
 
 model Permission {

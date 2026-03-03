@@ -6,6 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { MfaService } from '../mfa.service';
+import { TrustedDeviceService } from '../trusted-device.service';
 import { CryptoService } from '../../common/services/crypto.service';
 import { UsersService } from '../../users/users.service';
 import { Role } from '../../users/enums/role.enum';
@@ -77,11 +78,16 @@ describe('MfaService', () => {
       log: jest.fn().mockResolvedValue(undefined),
     };
 
+    const trustedDeviceService = {
+      revokeAllDevices: jest.fn().mockResolvedValue(0),
+    };
+
     service = new MfaService(
       usersService as unknown as UsersService,
       cryptoService as unknown as CryptoService,
       jwtService as unknown as JwtService,
       auditService as any,
+      trustedDeviceService as unknown as TrustedDeviceService,
     );
   });
 
