@@ -25,7 +25,12 @@ import {
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { AuthService, CookieConfig, MfaChallengeResult } from './auth.service';
+import {
+  AuthService,
+  CookieConfig,
+  MfaChallengeResult,
+  MfaSetupRequiredResult,
+} from './auth.service';
 import { TrustedDeviceService } from './trusted-device.service';
 import { TrustDeviceDto } from './dto/trust-device.dto';
 import { SessionsService } from '../sessions/sessions.service';
@@ -155,6 +160,11 @@ export class AuthController {
     // MFA challenge — don't set cookie, return challenge token
     if ('mfaRequired' in result) {
       return result as MfaChallengeResult;
+    }
+
+    // Admin without MFA — don't issue tokens, require MFA setup first
+    if ('mfaSetupRequired' in result) {
+      return result as MfaSetupRequiredResult;
     }
 
     this.setCookie(res, result.cookie);
