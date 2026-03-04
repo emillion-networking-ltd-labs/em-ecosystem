@@ -6,7 +6,9 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
+import * as crypto from 'crypto';
 import { UsersService } from '../users/users.service';
+import { TokenDenyListService, ACCESS_TOKEN_TTL_SECONDS } from './token-deny-list.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { User, SafeUser, toSafeUser } from '../users/entities/user.entity';
@@ -22,6 +24,7 @@ export class AuthService {
   constructor(
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
+    private readonly tokenDenyListService: TokenDenyListService,
   ) {}
 
   async register(
@@ -128,6 +131,7 @@ export class AuthService {
 
   async logout(userId: string): Promise<void> {
     await this.usersService.updateRefreshToken(userId, null);
+    this.tokenDenyListService.denyAllForUser(userId, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
   }
 
   private async generateTokens(
@@ -137,6 +141,7 @@ export class AuthService {
       sub: user.id,
       email: user.email,
       role: user.role,
+      jti: crypto.randomUUID(),
     };
 
     const accessToken = this.jwtService.sign(payload, {

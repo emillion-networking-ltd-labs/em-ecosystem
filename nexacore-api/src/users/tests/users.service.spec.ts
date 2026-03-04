@@ -2,11 +2,18 @@ import { Test, TestingModule } from '@nestjs/testing';
 import {
   ConflictException,
   InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+  ForbiddenException,
 } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users.service';
 import { PrismaService } from '../../prisma/prisma.service';
+import { TokenDenyListService } from '../../auth/token-deny-list.service';
 import { Provider } from '../enums/provider.enum';
 import { Role } from '../enums/role.enum';
+
+jest.mock('bcrypt');
 
 describe('UsersService', () => {
   let usersService: UsersService;
@@ -15,17 +22,24 @@ describe('UsersService', () => {
       findUnique: jest.Mock;
       create: jest.Mock;
       update: jest.Mock;
+      findMany: jest.Mock;
+      count: jest.Mock;
     };
   };
+  let tokenDenyListService: jest.Mocked<TokenDenyListService>;
 
   const mockUser = {
     id: 'uuid-123',
     email: 'test@example.com',
     passwordHash: 'hashed-password',
+    firstName: null,
+    lastName: null,
+    avatarUrl: null,
     role: Role.USER,
     provider: Provider.LOCAL,
     providerId: null,
     emailVerified: false,
+    isActive: true,
     failedAttempts: 0,
     lockedUntil: null,
     refreshToken: null,
@@ -41,6 +55,8 @@ describe('UsersService', () => {
         findUnique: jest.fn(),
         create: jest.fn(),
         update: jest.fn(),
+        findMany: jest.fn(),
+        count: jest.fn(),
       },
     };
 
@@ -51,10 +67,19 @@ describe('UsersService', () => {
           provide: PrismaService,
           useValue: prisma,
         },
+        {
+          provide: TokenDenyListService,
+          useValue: {
+            denyAllForUser: jest.fn().mockResolvedValue(undefined),
+            denyToken: jest.fn().mockResolvedValue(undefined),
+            isDenied: jest.fn().mockResolvedValue(false),
+          },
+        },
       ],
     }).compile();
 
     usersService = module.get<UsersService>(UsersService);
+    tokenDenyListService = module.get(TokenDenyListService);
   });
 
   describe('findByEmail', () => {
@@ -333,6 +358,178 @@ describe('UsersService', () => {
           emailVerified: true,
         },
       });
+    });
+  });
+
+  describe('changePassword', () => {
+    const dto = { currentPassword: 'OldPass1!', newPassword: 'NewPass1!' };
+
+    it('should change password and revoke sessions', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      await usersService.changePassword('uuid-123', dto);
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'uuid-123' },
+        data: { passwordHash: 'new-hash', refreshToken: null },
+      });
+    });
+
+    it('should call denyAllForUser after password change', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      await usersService.changePassword('uuid-123', dto);
+
+      expect(tokenDenyListService.denyAllForUser).toHaveBeenCalledWith('uuid-123', 900);
+    });
+
+    it('should throw NotFoundException when user not found', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(usersService.changePassword('uuid-123', dto)).rejects.toThrow(
+        NotFoundException,
+      );
+    });
+
+    it('should throw ForbiddenException for OAuth-only accounts', async () => {
+      prisma.user.findUnique.mockResolvedValue({ ...mockUser, passwordHash: null });
+
+      await expect(usersService.changePassword('uuid-123', dto)).rejects.toThrow(
+        ForbiddenException,
+      );
+    });
+
+    it('should throw UnauthorizedException when current password is wrong', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(usersService.changePassword('uuid-123', dto)).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should still succeed when denyAllForUser fails (fire-and-forget)', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
+      prisma.user.update.mockResolvedValue(mockUser);
+      tokenDenyListService.denyAllForUser.mockRejectedValue(new Error('Redis down'));
+
+      await expect(usersService.changePassword('uuid-123', dto)).resolves.toBeUndefined();
+    });
+  });
+
+  describe('adminUpdateUser', () => {
+    it('should update user role', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, role: Role.ADMIN });
+
+      const result = await usersService.adminUpdateUser(
+        'uuid-123',
+        { role: Role.ADMIN },
+        { role: Role.SUPERADMIN },
+      );
+
+      expect(result.role).toBe(Role.ADMIN);
+    });
+
+    it('should call denyAllForUser when deactivating user', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, isActive: false });
+
+      await usersService.adminUpdateUser(
+        'uuid-123',
+        { isActive: false },
+        { role: Role.SUPERADMIN },
+      );
+
+      expect(tokenDenyListService.denyAllForUser).toHaveBeenCalledWith('uuid-123', 900);
+    });
+
+    it('should call denyAllForUser when changing role', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, role: Role.ADMIN });
+
+      await usersService.adminUpdateUser(
+        'uuid-123',
+        { role: Role.ADMIN },
+        { role: Role.SUPERADMIN },
+      );
+
+      expect(tokenDenyListService.denyAllForUser).toHaveBeenCalledWith('uuid-123', 900);
+    });
+
+    it('should throw NotFoundException when target not found', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(
+        usersService.adminUpdateUser('uuid-123', { role: Role.ADMIN }, { role: Role.SUPERADMIN }),
+      ).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException when target is SUPERADMIN', async () => {
+      prisma.user.findUnique.mockResolvedValue({ ...mockUser, role: Role.SUPERADMIN });
+
+      await expect(
+        usersService.adminUpdateUser('uuid-123', { role: Role.ADMIN }, { role: Role.SUPERADMIN }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should throw ForbiddenException when non-SUPERADMIN assigns ADMIN role', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+
+      await expect(
+        usersService.adminUpdateUser('uuid-123', { role: Role.ADMIN }, { role: Role.ADMIN }),
+      ).rejects.toThrow(ForbiddenException);
+    });
+  });
+
+  describe('softDelete', () => {
+    it('should deactivate user', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, isActive: false });
+
+      await usersService.softDelete('uuid-123');
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'uuid-123' },
+        data: { isActive: false },
+      });
+    });
+
+    it('should call denyAllForUser after soft delete', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, isActive: false });
+
+      await usersService.softDelete('uuid-123');
+
+      expect(tokenDenyListService.denyAllForUser).toHaveBeenCalledWith('uuid-123', 900);
+    });
+
+    it('should throw NotFoundException when target not found', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(usersService.softDelete('uuid-123')).rejects.toThrow(NotFoundException);
+    });
+
+    it('should throw ForbiddenException when target is SUPERADMIN', async () => {
+      prisma.user.findUnique.mockResolvedValue({ ...mockUser, role: Role.SUPERADMIN });
+
+      await expect(usersService.softDelete('uuid-123')).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should still succeed when denyAllForUser fails (fire-and-forget)', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+      prisma.user.update.mockResolvedValue({ ...mockUser, isActive: false });
+      tokenDenyListService.denyAllForUser.mockRejectedValue(new Error('Redis down'));
+
+      await expect(usersService.softDelete('uuid-123')).resolves.toBeUndefined();
     });
   });
 });

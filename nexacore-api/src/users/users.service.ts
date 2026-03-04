@@ -1,13 +1,16 @@
 import {
   Injectable,
+  Inject,
   ConflictException,
   InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
   ForbiddenException,
+  forwardRef,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
+import { TokenDenyListService, ACCESS_TOKEN_TTL_SECONDS } from '../auth/token-deny-list.service';
 import { User, SafeUser, toSafeUser } from './entities/user.entity';
 import { Provider } from './enums/provider.enum';
 import { Role } from './enums/role.enum';
@@ -21,7 +24,11 @@ const BCRYPT_ROUNDS = 12;
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Inject(forwardRef(() => TokenDenyListService))
+    private readonly tokenDenyListService: TokenDenyListService,
+  ) {}
 
   async findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
@@ -241,6 +248,8 @@ export class UsersService {
         refreshToken: null, // Revoke all sessions
       },
     });
+
+    this.tokenDenyListService.denyAllForUser(userId, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
   }
 
   async adminUpdateUser(
@@ -277,6 +286,10 @@ export class UsersService {
       },
     });
 
+    if (dto.isActive === false || dto.role !== undefined) {
+      this.tokenDenyListService.denyAllForUser(targetId, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
+    }
+
     return toSafeUser(updated as User);
   }
 
@@ -294,5 +307,7 @@ export class UsersService {
       where: { id: targetId },
       data: { isActive: false },
     });
+
+    this.tokenDenyListService.denyAllForUser(targetId, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
   }
 }

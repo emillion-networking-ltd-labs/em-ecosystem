@@ -8,6 +8,7 @@ import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { AuthService } from '../auth.service';
 import { UsersService } from '../../users/users.service';
+import { TokenDenyListService } from '../token-deny-list.service';
 import { Role } from '../../users/enums/role.enum';
 import { Provider } from '../../users/enums/provider.enum';
 import { User } from '../../users/entities/user.entity';
@@ -19,6 +20,7 @@ describe('AuthService', () => {
   let authService: AuthService;
   let usersService: jest.Mocked<UsersService>;
   let jwtService: jest.Mocked<JwtService>;
+  let tokenDenyListService: jest.Mocked<TokenDenyListService>;
 
   const mockUser: User = {
     id: 'uuid-123',
@@ -65,12 +67,21 @@ describe('AuthService', () => {
             verify: jest.fn(),
           },
         },
+        {
+          provide: TokenDenyListService,
+          useValue: {
+            denyAllForUser: jest.fn().mockResolvedValue(undefined),
+            denyToken: jest.fn().mockResolvedValue(undefined),
+            isDenied: jest.fn().mockResolvedValue(false),
+          },
+        },
       ],
     }).compile();
 
     authService = module.get<AuthService>(AuthService);
     usersService = module.get(UsersService);
     jwtService = module.get(JwtService);
+    tokenDenyListService = module.get(TokenDenyListService);
   });
 
   describe('register', () => {
@@ -110,6 +121,17 @@ describe('AuthService', () => {
         expect(result.user).not.toHaveProperty('passwordHash');
         expect(result.user).not.toHaveProperty('refreshToken');
         expect(result.user.email).toBe('test@example.com');
+      });
+
+      it('should include jti in access token payload', async () => {
+        await authService.register(registerDto);
+
+        const signCall = jwtService.sign.mock.calls[0];
+        expect(signCall[0]).toHaveProperty('jti');
+        expect(typeof signCall[0].jti).toBe('string');
+        expect(signCall[0].jti).toMatch(
+          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+        );
       });
     });
 
@@ -277,6 +299,21 @@ describe('AuthService', () => {
       expect(result.refreshToken).toBe('new-refresh');
     });
 
+    it('should include jti in refreshed access token', async () => {
+      jwtService.verify.mockReturnValue({ sub: 'uuid-123' });
+      usersService.findById.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hashed-refresh');
+      usersService.updateRefreshToken.mockResolvedValue(undefined);
+      jwtService.sign.mockReturnValue('token');
+
+      await authService.refreshTokens('valid-refresh-token');
+
+      const signCall = jwtService.sign.mock.calls[0];
+      expect(signCall[0]).toHaveProperty('jti');
+      expect(typeof signCall[0].jti).toBe('string');
+    });
+
     it('should throw UnauthorizedException when token verification fails', async () => {
       jwtService.verify.mockImplementation(() => {
         throw new Error('invalid token');
@@ -391,6 +428,24 @@ describe('AuthService', () => {
         'uuid-123',
         null,
       );
+    });
+
+    it('should call denyAllForUser to deny access tokens', async () => {
+      usersService.updateRefreshToken.mockResolvedValue(undefined);
+
+      await authService.logout('uuid-123');
+
+      expect(tokenDenyListService.denyAllForUser).toHaveBeenCalledWith(
+        'uuid-123',
+        900,
+      );
+    });
+
+    it('should still succeed when denyAllForUser fails (fire-and-forget)', async () => {
+      usersService.updateRefreshToken.mockResolvedValue(undefined);
+      tokenDenyListService.denyAllForUser.mockRejectedValue(new Error('Redis down'));
+
+      await expect(authService.logout('uuid-123')).resolves.toBeUndefined();
     });
   });
 });
