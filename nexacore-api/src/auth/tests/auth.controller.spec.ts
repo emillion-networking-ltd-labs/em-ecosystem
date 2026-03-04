@@ -468,6 +468,27 @@ describe('AuthController', () => {
     });
   });
 
+  // ─── SCRUM-119: MFA setup required branch ───────────────────
+
+  describe('login - MFA setup required branch', () => {
+    it('should return mfaSetupRequired without setting cookie', async () => {
+      const mfaSetupResult = {
+        mfaSetupRequired: true as const,
+        message: 'MFA setup is required for administrator accounts. Please enable MFA to continue.',
+      };
+      authService.login.mockResolvedValue(mfaSetupResult);
+
+      const result = await controller.login(
+        { email: 'admin@example.com', password: 'StrongPass1!' },
+        mockReq,
+        mockRes as any,
+      );
+
+      expect(result).toEqual(mfaSetupResult);
+      expect(mockRes.cookie).not.toHaveBeenCalled();
+    });
+  });
+
   // ─── GET /auth/csrf-token ──────────────────────────────────
 
   describe('getCsrfToken', () => {
@@ -567,10 +588,10 @@ describe('AuthController', () => {
     });
   });
 
-  // ─── POST /auth/validate-reset-token ─────────────────────────
+  // ─── POST /auth/validate-reset-token ──────────────────────────
 
   describe('validateResetToken', () => {
-    it('should delegate to authService with token from DTO body', async () => {
+    it('should delegate to authService and return validity', async () => {
       authService.validateResetToken.mockResolvedValue({ valid: true });
 
       const result = await controller.validateResetToken({ token: 'some-token' });

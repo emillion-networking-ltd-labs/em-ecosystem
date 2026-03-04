@@ -34,8 +34,10 @@ export class OAuthStateStore {
 
   /** Consume and validate the state entry (single-use, atomic). */
   async validate(state: string): Promise<boolean> {
-    const data = await this.redis.getdel(`oauth:state:${state}`);
+    const key = `oauth:state:${state}`;
+    const data = await this.redis.get(key);
     if (!data) return false;
+    await this.redis.del(key);
     return true;
   }
 

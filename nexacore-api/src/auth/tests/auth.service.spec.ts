@@ -2278,6 +2278,34 @@ describe('AuthService', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
+    it('should log audit with travel metadata when blocking', async () => {
+      const auditSvc = (authService as any).auditService;
+      impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
+        isAnomalous: true,
+        previousLocation: { city: 'Madrid', country: 'Spain', countryCode: 'ES', latitude: 40.4168, longitude: -3.7038 },
+        currentLocation: { city: 'New York', country: 'United States', countryCode: 'US', latitude: 40.7128, longitude: -74.006 },
+        distanceKm: 5762,
+        elapsedHours: 0.5,
+        requiredSpeedKmh: 11524,
+        strategy: 'block',
+        actionTaken: 'blocked',
+      });
+
+      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(ForbiddenException);
+
+      expect(auditSvc.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'LOGIN_BLOCKED_TRAVEL',
+          userId: 'uuid-123',
+          metadata: expect.objectContaining({
+            distanceKm: 5762,
+            elapsedHours: 0.5,
+            requiredSpeedKmh: 11524,
+          }),
+        }),
+      );
+    });
+
     it('should allow login gracefully when impossible travel check throws (fail-open)', async () => {
       impossibleTravelService.detectImpossibleTravel.mockRejectedValue(
         new Error('Geolocation service unavailable'),
@@ -2350,6 +2378,117 @@ describe('AuthService', () => {
       const result = await authService.login(loginDto, requestMeta);
 
       expect(result.accessToken).toBe('access-token');
+    });
+
+    it('should pass full payload to analyzeLoginSuccess', async () => {
+      await authService.login(loginDto, requestMeta);
+
+      expect(suspiciousLoginService.analyzeLoginSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'uuid-123',
+          email: 'test@example.com',
+          firstName: null,
+          ipAddress: '127.0.0.1',
+          userAgent: 'test-agent',
+          loginTime: expect.any(Date),
+        }),
+      );
+    });
+
+    it('should not call analyzeLoginFailure when user is not found', async () => {
+      usersService.findByEmail.mockResolvedValue(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        authService.login(
+          { email: 'nonexistent@example.com', password: 'pass' },
+          requestMeta,
+        ),
+      ).rejects.toThrow(UnauthorizedException);
+
+      expect(suspiciousLoginService.analyzeLoginFailure).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── SCRUM-119: MFA enforcement for Admin/SUPERADMIN ─────────
+
+  describe('MFA enforcement for admin roles (OWASP ASVS V2.7.2)', () => {
+    const loginDto = { email: 'test@example.com', password: 'StrongPass1!' };
+
+    beforeEach(() => {
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+    });
+
+    it('should return mfaSetupRequired for ADMIN without MFA', async () => {
+      const adminUser = { ...mockUser, role: Role.ADMIN, mfaEnabled: false };
+      usersService.findByEmail.mockResolvedValue(adminUser);
+
+      const result = await authService.login(loginDto, requestMeta);
+
+      expect((result as any).mfaSetupRequired).toBe(true);
+      expect((result as any).message).toContain('MFA setup is required');
+      expect((result as any).accessToken).toBeUndefined();
+    });
+
+    it('should return mfaSetupRequired for SUPERADMIN without MFA', async () => {
+      const superadminUser = { ...mockUser, role: Role.SUPERADMIN, mfaEnabled: false };
+      usersService.findByEmail.mockResolvedValue(superadminUser);
+
+      const result = await authService.login(loginDto, requestMeta);
+
+      expect((result as any).mfaSetupRequired).toBe(true);
+      expect((result as any).accessToken).toBeUndefined();
+    });
+
+    it('should return MFA challenge for ADMIN with MFA enabled', async () => {
+      const adminWithMfa = { ...mockUser, role: Role.ADMIN, mfaEnabled: true };
+      usersService.findByEmail.mockResolvedValue(adminWithMfa);
+      jwtService.sign.mockReset();
+      jwtService.sign.mockReturnValue('mfa-challenge-jwt');
+
+      const result = await authService.login(loginDto, requestMeta);
+
+      expect((result as any).mfaRequired).toBe(true);
+      expect((result as any).mfaToken).toBeDefined();
+      expect((result as any).mfaSetupRequired).toBeUndefined();
+    });
+
+    it('should return tokens normally for USER without MFA', async () => {
+      usersService.findByEmail.mockResolvedValue(mockUser); // Role.USER, mfaEnabled: false
+
+      const result = await authService.login(loginDto, requestMeta);
+
+      expect((result as any).accessToken).toBe('access-token');
+      expect((result as any).mfaSetupRequired).toBeUndefined();
+    });
+
+    it('should log audit event with mfaSetupRequired metadata', async () => {
+      const adminUser = { ...mockUser, role: Role.ADMIN, mfaEnabled: false };
+      usersService.findByEmail.mockResolvedValue(adminUser);
+      const auditService = (authService as any).auditService;
+
+      await authService.login(loginDto, requestMeta, requestMeta);
+
+      expect(auditService.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: expect.objectContaining({ mfaSetupRequired: true, role: 'ADMIN' }),
+        }),
+      );
+    });
+
+    it('should still return mfaSetupRequired when audit log rejects (fire-and-forget)', async () => {
+      const auditService = (authService as any).auditService;
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      const adminUser = { ...mockUser, role: Role.ADMIN, mfaEnabled: false };
+      usersService.findByEmail.mockResolvedValue(adminUser);
+
+      const result = await authService.login(loginDto, requestMeta);
+
+      expect((result as any).mfaSetupRequired).toBe(true);
     });
   });
 

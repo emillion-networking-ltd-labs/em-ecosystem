@@ -41,6 +41,7 @@ import { LoginDto } from './dto/login.dto';
 import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ValidateResetTokenDto } from './dto/validate-reset-token.dto';
 import { ResendVerificationPublicDto } from './dto/resend-verification-public.dto';
 import { ValidateResetTokenDto } from './dto/validate-reset-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -409,7 +410,6 @@ export class AuthController {
   @SkipCsrf()
   @ApiOperation({
     summary: 'Validate a password reset token without consuming it',
-    description: 'Token sent in body (not URL) to prevent leakage via logs/referer — OWASP ASVS V3.5.1',
   })
   @ApiResponse({ status: 200, description: 'Token validity status' })
   async validateResetToken(@Body() dto: ValidateResetTokenDto) {

@@ -63,7 +63,7 @@ describe('PasskeyService', () => {
   let service: PasskeyService;
   let usersService: jest.Mocked<Partial<UsersService>>;
   let auditService: { log: jest.Mock };
-  let redis: { set: jest.Mock; getdel: jest.Mock };
+  let redis: { set: jest.Mock; get: jest.Mock; del: jest.Mock };
   let prisma: {
     webAuthnCredential: {
       count: jest.Mock;
@@ -90,7 +90,8 @@ describe('PasskeyService', () => {
 
     redis = {
       set: jest.fn().mockResolvedValue('OK'),
-      getdel: jest.fn(),
+      get: jest.fn(),
+      del: jest.fn().mockResolvedValue(1),
     };
 
     prisma = {
@@ -217,7 +218,7 @@ describe('PasskeyService', () => {
     };
 
     it('should store credential on successful verification', async () => {
-      redis.getdel.mockResolvedValue(storedOptions);
+      redis.get.mockResolvedValue(storedOptions);
       mockVerifyRegistrationResponse.mockResolvedValue(mockVerificationResult);
       prisma.webAuthnCredential.create.mockResolvedValue({
         id: 'record-1',
@@ -247,7 +248,7 @@ describe('PasskeyService', () => {
     });
 
     it('should use default name when none provided', async () => {
-      redis.getdel.mockResolvedValue(storedOptions);
+      redis.get.mockResolvedValue(storedOptions);
       mockVerifyRegistrationResponse.mockResolvedValue(mockVerificationResult);
       prisma.webAuthnCredential.create.mockResolvedValue({
         id: 'record-1',
@@ -268,7 +269,7 @@ describe('PasskeyService', () => {
     });
 
     it('should throw BadRequestException if challenge not found', async () => {
-      redis.getdel.mockResolvedValue(null);
+      redis.get.mockResolvedValue(null);
 
       await expect(
         service.verifyRegistration('user-1', mockCredential, undefined, mockMeta),
@@ -276,7 +277,7 @@ describe('PasskeyService', () => {
     });
 
     it('should throw UnauthorizedException if verification fails (throws)', async () => {
-      redis.getdel.mockResolvedValue(storedOptions);
+      redis.get.mockResolvedValue(storedOptions);
       mockVerifyRegistrationResponse.mockRejectedValue(new Error('bad'));
 
       await expect(
@@ -285,7 +286,7 @@ describe('PasskeyService', () => {
     });
 
     it('should throw UnauthorizedException if verification returns not verified', async () => {
-      redis.getdel.mockResolvedValue(storedOptions);
+      redis.get.mockResolvedValue(storedOptions);
       mockVerifyRegistrationResponse.mockResolvedValue({
         verified: false,
         registrationInfo: null,
@@ -297,7 +298,7 @@ describe('PasskeyService', () => {
     });
 
     it('should audit PASSKEY_REGISTERED on success', async () => {
-      redis.getdel.mockResolvedValue(storedOptions);
+      redis.get.mockResolvedValue(storedOptions);
       mockVerifyRegistrationResponse.mockResolvedValue(mockVerificationResult);
       prisma.webAuthnCredential.create.mockResolvedValue({
         id: 'record-1',
@@ -317,7 +318,7 @@ describe('PasskeyService', () => {
     });
 
     it('should not throw if audit logging fails', async () => {
-      redis.getdel.mockResolvedValue(storedOptions);
+      redis.get.mockResolvedValue(storedOptions);
       mockVerifyRegistrationResponse.mockResolvedValue(mockVerificationResult);
       prisma.webAuthnCredential.create.mockResolvedValue({
         id: 'record-1',
@@ -336,7 +337,7 @@ describe('PasskeyService', () => {
     });
 
     it('should use null for audit fields when ctx is undefined', async () => {
-      redis.getdel.mockResolvedValue(storedOptions);
+      redis.get.mockResolvedValue(storedOptions);
       mockVerifyRegistrationResponse.mockResolvedValue(mockVerificationResult);
       prisma.webAuthnCredential.create.mockResolvedValue({
         id: 'record-1',
@@ -354,7 +355,7 @@ describe('PasskeyService', () => {
     });
 
     it('should handle credential with no transports', async () => {
-      redis.getdel.mockResolvedValue(storedOptions);
+      redis.get.mockResolvedValue(storedOptions);
       const noTransportResult = {
         ...mockVerificationResult,
         registrationInfo: {
@@ -468,7 +469,7 @@ describe('PasskeyService', () => {
     };
 
     it('should return userId on successful authentication', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
       mockVerifyAuthenticationResponse.mockResolvedValue({
         verified: true,
@@ -490,7 +491,7 @@ describe('PasskeyService', () => {
     });
 
     it('should throw UnauthorizedException if challenge expired', async () => {
-      redis.getdel.mockResolvedValue(null);
+      redis.get.mockResolvedValue(null);
 
       await expect(
         service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
@@ -498,7 +499,7 @@ describe('PasskeyService', () => {
     });
 
     it('should throw UnauthorizedException if credential not found', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue(null);
 
       await expect(
@@ -507,7 +508,7 @@ describe('PasskeyService', () => {
     });
 
     it('should audit PASSKEY_AUTH_FAILURE when credential not found', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue(null);
 
       await expect(
@@ -523,7 +524,7 @@ describe('PasskeyService', () => {
     });
 
     it('should throw ForbiddenException if account deactivated', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue({
         ...storedDbCredential,
         user: mockUser({ isActive: false }),
@@ -535,7 +536,7 @@ describe('PasskeyService', () => {
     });
 
     it('should audit PASSKEY_AUTH_FAILURE when account deactivated', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue({
         ...storedDbCredential,
         user: mockUser({ isActive: false }),
@@ -554,7 +555,7 @@ describe('PasskeyService', () => {
     });
 
     it('should throw UnauthorizedException if verification throws', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
       mockVerifyAuthenticationResponse.mockRejectedValue(new Error('fail'));
 
@@ -564,7 +565,7 @@ describe('PasskeyService', () => {
     });
 
     it('should throw UnauthorizedException if verified is false', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
       mockVerifyAuthenticationResponse.mockResolvedValue({
         verified: false,
@@ -577,7 +578,7 @@ describe('PasskeyService', () => {
     });
 
     it('should handle deactivated account without ctx', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue({
         ...storedDbCredential,
         user: mockUser({ isActive: false }),
@@ -589,7 +590,7 @@ describe('PasskeyService', () => {
     });
 
     it('should handle verification failure without ctx', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
       mockVerifyAuthenticationResponse.mockRejectedValue(new Error('fail'));
 
@@ -599,7 +600,7 @@ describe('PasskeyService', () => {
     });
 
     it('should handle verified=false without ctx', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
       mockVerifyAuthenticationResponse.mockResolvedValue({
         verified: false,
@@ -612,7 +613,7 @@ describe('PasskeyService', () => {
     });
 
     it('should handle sign count replay without ctx', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue({
         ...storedDbCredential,
         signCount: 10,
@@ -628,7 +629,7 @@ describe('PasskeyService', () => {
     });
 
     it('should reject sign count replay (cloned credential)', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue({
         ...storedDbCredential,
         signCount: 10,
@@ -644,7 +645,7 @@ describe('PasskeyService', () => {
     });
 
     it('should allow zero counters (authenticators that do not track)', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue({
         ...storedDbCredential,
         signCount: 0,
@@ -665,7 +666,7 @@ describe('PasskeyService', () => {
     });
 
     it('should audit PASSKEY_AUTH_SUCCESS on success', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
       mockVerifyAuthenticationResponse.mockResolvedValue({
         verified: true,
@@ -685,7 +686,7 @@ describe('PasskeyService', () => {
     });
 
     it('should audit sign count replay failure', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue({
         ...storedDbCredential,
         signCount: 10,
@@ -708,7 +709,7 @@ describe('PasskeyService', () => {
     });
 
     it('should use null for audit fields when ctx is undefined', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
       mockVerifyAuthenticationResponse.mockResolvedValue({
         verified: true,
@@ -727,7 +728,7 @@ describe('PasskeyService', () => {
     });
 
     it('should audit credential not found with null ctx fields', async () => {
-      redis.getdel.mockResolvedValue(storedAuthOptions);
+      redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue(null);
 
       await expect(
