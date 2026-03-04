@@ -5,6 +5,9 @@ describe('validateProductionSecrets', () => {
     JWT_SECRET: 'production-jwt-secret-at-least-32-characters-long',
     MFA_ENCRYPTION_KEY: 'production-mfa-key-at-least-32-characters-long',
     CSRF_SECRET: 'production-csrf-secret-at-least-32-chars-long',
+    GOOGLE_CALLBACK_URL: 'https://myapp.com/auth/google/callback',
+    GITHUB_CALLBACK_URL: 'https://myapp.com/auth/github/callback',
+    JWT_ACCESS_EXPIRATION: '15m',
   };
 
   beforeEach(() => {
@@ -110,6 +113,83 @@ describe('validateProductionSecrets', () => {
 
       const validate = loadValidator();
       expect(() => validate()).toThrow('FATAL: CSRF_SECRET');
+    });
+  });
+
+  // ─── GOOGLE_CALLBACK_URL ───────────────────────────────────────
+
+  describe('GOOGLE_CALLBACK_URL', () => {
+    it('should throw when GOOGLE_CALLBACK_URL uses HTTP', () => {
+      process.env.GOOGLE_CALLBACK_URL =
+        'http://myapp.com/auth/google/callback';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: GOOGLE_CALLBACK_URL');
+    });
+
+    it('should not throw when GOOGLE_CALLBACK_URL is not set', () => {
+      delete process.env.GOOGLE_CALLBACK_URL;
+
+      const validate = loadValidator();
+      expect(() => validate()).not.toThrow();
+    });
+  });
+
+  // ─── GITHUB_CALLBACK_URL ───────────────────────────────────────
+
+  describe('GITHUB_CALLBACK_URL', () => {
+    it('should throw when GITHUB_CALLBACK_URL uses HTTP', () => {
+      process.env.GITHUB_CALLBACK_URL =
+        'http://myapp.com/auth/github/callback';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: GITHUB_CALLBACK_URL');
+    });
+
+    it('should not throw when GITHUB_CALLBACK_URL is not set', () => {
+      delete process.env.GITHUB_CALLBACK_URL;
+
+      const validate = loadValidator();
+      expect(() => validate()).not.toThrow();
+    });
+  });
+
+  // ─── JWT_ACCESS_EXPIRATION ─────────────────────────────────────
+
+  describe('JWT_ACCESS_EXPIRATION', () => {
+    it('should throw when JWT_ACCESS_EXPIRATION exceeds 15 minutes', () => {
+      process.env.JWT_ACCESS_EXPIRATION = '30m';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: JWT_ACCESS_EXPIRATION');
+    });
+
+    it('should throw when JWT_ACCESS_EXPIRATION is 1h', () => {
+      process.env.JWT_ACCESS_EXPIRATION = '1h';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: JWT_ACCESS_EXPIRATION');
+    });
+
+    it('should not throw when JWT_ACCESS_EXPIRATION is 15m', () => {
+      process.env.JWT_ACCESS_EXPIRATION = '15m';
+
+      const validate = loadValidator();
+      expect(() => validate()).not.toThrow();
+    });
+
+    it('should not throw when JWT_ACCESS_EXPIRATION is not set', () => {
+      delete process.env.JWT_ACCESS_EXPIRATION;
+
+      const validate = loadValidator();
+      expect(() => validate()).not.toThrow();
+    });
+
+    it('should throw when JWT_ACCESS_EXPIRATION has invalid format', () => {
+      process.env.JWT_ACCESS_EXPIRATION = 'invalid';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: JWT_ACCESS_EXPIRATION');
     });
   });
 
