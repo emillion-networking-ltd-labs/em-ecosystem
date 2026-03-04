@@ -588,20 +588,13 @@ describe('AuthController', () => {
     });
   });
 
-  // ─── GET /auth/validate-reset-token ──────────────────────────
+  // ─── POST /auth/validate-reset-token ──────────────────────────
 
   describe('validateResetToken', () => {
-    it('should return { valid: false } when no token provided', async () => {
-      const result = await controller.validateResetToken(undefined as any);
-
-      expect(result).toEqual({ valid: false });
-      expect(authService.validateResetToken).not.toHaveBeenCalled();
-    });
-
     it('should delegate to authService and return validity', async () => {
       authService.validateResetToken.mockResolvedValue({ valid: true });
 
-      const result = await controller.validateResetToken('some-token');
+      const result = await controller.validateResetToken({ token: 'some-token' });
 
       expect(authService.validateResetToken).toHaveBeenCalledWith('some-token');
       expect(result).toEqual({ valid: true });
