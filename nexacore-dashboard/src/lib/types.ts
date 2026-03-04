@@ -179,3 +179,27 @@ export type AuditLog = {
   user: AuditLogUser | null;
   targetUser: AuditLogUser | null;
 };
+
+export type MessageResponse = {
+  message: string;
+};
+
+export type PasskeyResponse = {
+  id: string;
+  name: string | null;
+  deviceType: string;
+  backedUp: boolean;
+  transports: string[];
+  lastUsedAt: string | null;
+  createdAt: string;
+};
+
+export type PasskeyLoginOptionsResponse = {
+  options: Record<string, unknown>;
+  challengeId: string;
+};
+
+export type PasskeyRegisterResult = {
+  id: string;
+  name: string;
+};

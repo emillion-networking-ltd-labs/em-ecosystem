@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronDown, AlertTriangle, SendHorizontal } from 'lucide-react';
+import { ChevronDown, AlertTriangle, SendHorizontal, Key } from 'lucide-react';
 import Input from '@/components/ui/Input';
 import InfinitySpinner from '@/components/ui/InfinitySpinner';
 import RateLimitBanner from '@/components/ui/RateLimitBanner';
@@ -13,6 +13,7 @@ import MfaTotpStep from './MfaTotpStep';
 import { useAuth } from '@/hooks/useAuth';
 import { useRateLimit } from '@/hooks/useRateLimit';
 import { useToast } from '@/context/ToastContext';
+import { usePasskey } from '@/hooks/usePasskey';
 import { RateLimitError } from '@/lib/types';
 import type { RateLimitInfo } from '@/lib/types';
 
@@ -33,6 +34,8 @@ export default function LoginForm() {
   const [oauthError, setOauthError] = useState<string | null>(null);
   const { login, isLoading, isAuthenticated, error, clearError, mfaRequired, resendVerificationPublic } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
+  const { isSupported: passkeySupported, loginWithPasskey, isLoggingIn: passkeyLoading } = usePasskey();
+  const [passkeyError, setPasskeyError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -71,6 +74,17 @@ export default function LoginForm() {
     setEmailError(null);
     clearError();
     setStep('password');
+  };
+
+  const handlePasskeyLogin = async () => {
+    setPasskeyError(null);
+    clearError();
+    setOauthError(null);
+    try {
+      await loginWithPasskey(formData.email || undefined);
+    } catch {
+      setPasskeyError('Passkey authentication failed. Please try again.');
+    }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -199,6 +213,38 @@ export default function LoginForm() {
             </button>
           </div>
         </form>
+
+        {/* Passkey Login */}
+        {passkeySupported && (
+          <div className="mt-2">
+            <div className="flex items-center gap-4 py-2">
+              <div className="h-px flex-1 bg-content-primary/10" />
+              <span className="text-xs text-content-tertiary">or</span>
+              <div className="h-px flex-1 bg-content-primary/10" />
+            </div>
+            <button
+              type="button"
+              onClick={handlePasskeyLogin}
+              disabled={passkeyLoading}
+              aria-label="Sign in with passkey"
+              className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-default bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
+            >
+              <Key size={16} className={passkeyLoading ? 'opacity-30' : ''} />
+              <span className={passkeyLoading ? 'opacity-30' : ''}>Sign in with passkey</span>
+              {passkeyLoading && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <InfinitySpinner />
+                </span>
+              )}
+            </button>
+            {passkeyError && (
+              <div className="mt-2 flex items-center gap-2">
+                <AlertTriangle size={14} className="shrink-0 text-error" />
+                <span className="text-xs text-error">{passkeyError}</span>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Actions — OR + OAuth */}
         <div className="mt-2">

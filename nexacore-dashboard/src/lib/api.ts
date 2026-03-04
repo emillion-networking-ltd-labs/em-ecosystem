@@ -133,6 +133,10 @@ class ApiClient {
     return this.request<T>(endpoint, { ...options, method: 'DELETE' });
   }
 
+  deleteWithBody<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
+    return this.request<T>(endpoint, { ...options, method: 'DELETE', body: JSON.stringify(body) });
+  }
+
   private async parseErrorResponse(response: Response): Promise<unknown> {
     try {
       const body = await response.json();

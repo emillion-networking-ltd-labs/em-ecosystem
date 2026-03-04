@@ -6,6 +6,7 @@ import ProfileForm from '@/components/profile/ProfileForm';
 import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
 import AccountInfo from '@/components/profile/AccountInfo';
 import MfaSetup from '@/components/profile/MfaSetup';
+import PasskeyManager from '@/components/profile/PasskeyManager';
 import ConnectedAccounts from '@/components/profile/ConnectedAccounts';
 import ActiveSessions from '@/components/profile/ActiveSessions';
 
@@ -18,6 +19,7 @@ export default function ProfilePage() {
           <ProfileForm />
           <ChangePasswordForm />
           <MfaSetup />
+          <PasskeyManager />
           <AccountInfo />
           <ConnectedAccounts />
           <ActiveSessions />

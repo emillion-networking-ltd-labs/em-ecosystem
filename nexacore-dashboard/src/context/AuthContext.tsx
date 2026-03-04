@@ -10,6 +10,7 @@ import {
 } from 'react';
 import { apiClient, API_BASE_URL } from '@/lib/api';
 import { getCsrfToken, clearCsrfToken } from '@/lib/csrf';
+import { passkeyLoginVerify } from '@/lib/passkey-api';
 import { useToast } from '@/context/ToastContext';
 import { RateLimitError } from '@/lib/types';
 import type { SafeUser, AuthResponse, LoginResponse, MessageResponse, RateLimitKind } from '@/lib/types';
@@ -79,6 +80,7 @@ type AuthContextType = AuthState & {
   cancelMfa: () => void;
   register: (email: string, password: string) => Promise<boolean>;
   handleOAuthCallback: (code: string) => Promise<void>;
+  passkeyLogin: (challengeId: string, credential: Record<string, unknown>) => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
   forgotPassword: (email: string) => Promise<boolean>;
@@ -223,6 +225,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [addToast]);
 
+  const passkeyLogin = useCallback(
+    async (challengeId: string, credential: Record<string, unknown>) => {
+      dispatch({ type: 'AUTH_START' });
+      try {
+        const data = await passkeyLoginVerify(challengeId, credential);
+        apiClient.setAccessToken(data.accessToken);
+        const user = await apiClient.get<SafeUser>('/auth/me');
+        dispatch({
+          type: 'AUTH_SUCCESS',
+          payload: { user, accessToken: data.accessToken },
+        });
+      } catch (err: unknown) {
+        dispatch({
+          type: 'AUTH_ERROR',
+          payload: extractErrorMessage(err, 'Passkey authentication failed.'),
+        });
+        throw err;
+      }
+    },
+    [],
+  );
+
   const logout = useCallback(async () => {
     try {
       const csrfToken = await getCsrfToken();
@@ -359,6 +383,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         cancelMfa,
         register,
         handleOAuthCallback,
+        passkeyLogin,
         logout,
         refreshSession,
         forgotPassword,
