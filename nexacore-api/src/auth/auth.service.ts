@@ -118,7 +118,8 @@ export class AuthService {
     private readonly impossibleTravelService: ImpossibleTravelService,
     private readonly suspiciousLoginService: SuspiciousLoginService,
   ) {
-    this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '7d';
+    // OWASP ASVS V3.3.3 / NIST SP 800-63B §7.2: absolute timeout <= 12h at AAL2
+    this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '12h';
     this.refreshMaxAgeMs = parseDurationMs(this.refreshExpiration);
     const jwtSecret =
       process.env.JWT_SECRET || 'default-dev-secret-change-in-production';
