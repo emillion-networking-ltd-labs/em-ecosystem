@@ -29,8 +29,10 @@ export class OAuthCodeStore {
   }
 
   async exchange(code: string): Promise<OAuthTokenPayload | null> {
-    const data = await this.redis.getdel(`oauth:code:${code}`);
+    const key = `oauth:code:${code}`;
+    const data = await this.redis.get(key);
     if (!data) return null;
+    await this.redis.del(key);
     const payload = JSON.parse(data) as OAuthTokenPayload;
     // Reconstruct Date objects lost during JSON serialization
     payload.user.createdAt = new Date(payload.user.createdAt);

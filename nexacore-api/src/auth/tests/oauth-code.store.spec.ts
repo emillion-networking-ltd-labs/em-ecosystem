@@ -6,7 +6,7 @@ import { REDIS_CLIENT } from '../../common/services/redis.constants';
 
 describe('OAuthCodeStore', () => {
   let store: OAuthCodeStore;
-  let redis: { get: jest.Mock; set: jest.Mock; del: jest.Mock; getdel: jest.Mock };
+  let redis: { get: jest.Mock; set: jest.Mock; del: jest.Mock };
 
   const mockDate = new Date('2026-03-02T12:00:00.000Z');
   const mockPayload: OAuthTokenPayload = {
@@ -47,7 +47,6 @@ describe('OAuthCodeStore', () => {
       get: jest.fn(),
       set: jest.fn().mockResolvedValue('OK'),
       del: jest.fn().mockResolvedValue(1),
-      getdel: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -94,29 +93,29 @@ describe('OAuthCodeStore', () => {
 
   describe('exchange', () => {
     it('should return the payload for a valid code', async () => {
-      redis.getdel.mockResolvedValue(JSON.stringify(mockPayload));
+      redis.get.mockResolvedValue(JSON.stringify(mockPayload));
       const result = await store.exchange('valid-code');
       expect(result).not.toBeNull();
       expect(result!.accessToken).toBe('test-access-token');
       expect(result!.user.email).toBe('test@example.com');
     });
 
-    it('should atomically get and delete the key (single-use)', async () => {
-      redis.getdel.mockResolvedValue(JSON.stringify(mockPayload));
+    it('should get and then delete the key (single-use)', async () => {
+      redis.get.mockResolvedValue(JSON.stringify(mockPayload));
       await store.exchange('valid-code');
-      expect(redis.getdel).toHaveBeenCalledWith('oauth:code:valid-code');
-      expect(redis.get).not.toHaveBeenCalled();
+      expect(redis.get).toHaveBeenCalledWith('oauth:code:valid-code');
+      expect(redis.del).toHaveBeenCalledWith('oauth:code:valid-code');
+    });
+
+    it('should return null and not delete for an unknown code', async () => {
+      redis.get.mockResolvedValue(null);
+      const result = await store.exchange('nonexistent-code');
+      expect(result).toBeNull();
       expect(redis.del).not.toHaveBeenCalled();
     });
 
-    it('should return null for an unknown code', async () => {
-      redis.getdel.mockResolvedValue(null);
-      const result = await store.exchange('nonexistent-code');
-      expect(result).toBeNull();
-    });
-
     it('should reconstruct Date objects from JSON serialization', async () => {
-      redis.getdel.mockResolvedValue(JSON.stringify(mockPayload));
+      redis.get.mockResolvedValue(JSON.stringify(mockPayload));
       const result = await store.exchange('valid-code');
       expect(result!.user.createdAt).toBeInstanceOf(Date);
       expect(result!.user.updatedAt).toBeInstanceOf(Date);

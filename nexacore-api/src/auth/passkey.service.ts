@@ -104,14 +104,14 @@ export class PasskeyService {
     name?: string,
     ctx?: { ipAddress: string; userAgent: string | null },
   ): Promise<{ id: string; name: string }> {
-    const stored = await this.redis.getdel(
-      `${WEBAUTHN_REG_KEY_PREFIX}${userId}`,
-    );
+    const regKey = `${WEBAUTHN_REG_KEY_PREFIX}${userId}`;
+    const stored = await this.redis.get(regKey);
     if (!stored) {
       throw new BadRequestException(
         'Registration challenge not found or expired',
       );
     }
+    await this.redis.del(regKey);
 
     const expectedOptions = JSON.parse(stored);
 
@@ -210,14 +210,14 @@ export class PasskeyService {
     credential: Record<string, unknown>,
     ctx?: { ipAddress: string; userAgent: string | null },
   ): Promise<string> {
-    const stored = await this.redis.getdel(
-      `${WEBAUTHN_AUTH_KEY_PREFIX}${challengeId}`,
-    );
+    const authKey = `${WEBAUTHN_AUTH_KEY_PREFIX}${challengeId}`;
+    const stored = await this.redis.get(authKey);
     if (!stored) {
       throw new UnauthorizedException(
         'Authentication challenge not found or expired',
       );
     }
+    await this.redis.del(authKey);
 
     const expectedOptions = JSON.parse(stored);
     const authResponse = credential as unknown as AuthenticationResponseJSON;
