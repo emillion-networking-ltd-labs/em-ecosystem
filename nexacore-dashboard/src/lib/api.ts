@@ -7,6 +7,7 @@ const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
 class ApiClient {
   private accessToken: string | null = null;
   private refreshPromise: Promise<string | null> | null = null;
+  private deviceFingerprint: string | null = null;
 
   setAccessToken(token: string | null) {
     this.accessToken = token;
@@ -20,12 +21,17 @@ class ApiClient {
     this.accessToken = null;
   }
 
+  setDeviceFingerprint(fp: string | null) {
+    this.deviceFingerprint = fp;
+  }
+
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
     const method = (options.method || 'GET').toUpperCase();
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(this.accessToken && { Authorization: `Bearer ${this.accessToken}` }),
+      ...(this.deviceFingerprint && { 'X-Device-Fingerprint': this.deviceFingerprint }),
     };
 
     if (CSRF_METHODS.has(method)) {

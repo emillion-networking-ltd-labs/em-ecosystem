@@ -11,6 +11,7 @@ import {
 import { apiClient, API_BASE_URL } from '@/lib/api';
 import { getCsrfToken, clearCsrfToken } from '@/lib/csrf';
 import { passkeyLoginVerify } from '@/lib/passkey-api';
+import { getFingerprint } from '@/lib/fingerprint';
 import { useToast } from '@/context/ToastContext';
 import { RateLimitError } from '@/lib/types';
 import type { SafeUser, AuthResponse, LoginResponse, MessageResponse, RateLimitKind } from '@/lib/types';
@@ -150,9 +151,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Attempt silent refresh on mount to restore session from httpOnly cookie
+  // Generate fingerprint then attempt silent refresh on mount
   useEffect(() => {
-    refreshSession();
+    (async () => {
+      const fp = await getFingerprint();
+      if (fp) apiClient.setDeviceFingerprint(fp);
+      await refreshSession();
+    })();
   }, [refreshSession]);
 
   const login = useCallback(async (email: string, password: string) => {

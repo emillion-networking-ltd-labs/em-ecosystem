@@ -203,3 +203,23 @@ export type PasskeyRegisterResult = {
   id: string;
   name: string;
 };
+
+export type TrustedDeviceResponse = {
+  id: string;
+  deviceName: string;
+  ipAddress: string;
+  lastVerifiedAt: string;
+  expiresAt: string;
+  createdAt: string;
+};
+
+export type TrustDeviceResult = {
+  id: string;
+  deviceName: string;
+  expiresAt: string;
+};
+
+export type RevokeAllDevicesResponse = {
+  message: string;
+  count: number;
+};
