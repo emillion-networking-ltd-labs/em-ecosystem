@@ -2278,6 +2278,34 @@ describe('AuthService', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
+    it('should log audit with travel metadata when blocking', async () => {
+      const auditSvc = (authService as any).auditService;
+      impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
+        isAnomalous: true,
+        previousLocation: { city: 'Madrid', country: 'Spain', countryCode: 'ES', latitude: 40.4168, longitude: -3.7038 },
+        currentLocation: { city: 'New York', country: 'United States', countryCode: 'US', latitude: 40.7128, longitude: -74.006 },
+        distanceKm: 5762,
+        elapsedHours: 0.5,
+        requiredSpeedKmh: 11524,
+        strategy: 'block',
+        actionTaken: 'blocked',
+      });
+
+      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(ForbiddenException);
+
+      expect(auditSvc.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: 'LOGIN_BLOCKED_TRAVEL',
+          userId: 'uuid-123',
+          metadata: expect.objectContaining({
+            distanceKm: 5762,
+            elapsedHours: 0.5,
+            requiredSpeedKmh: 11524,
+          }),
+        }),
+      );
+    });
+
     it('should allow login gracefully when impossible travel check throws (fail-open)', async () => {
       impossibleTravelService.detectImpossibleTravel.mockRejectedValue(
         new Error('Geolocation service unavailable'),
@@ -2350,6 +2378,35 @@ describe('AuthService', () => {
       const result = await authService.login(loginDto, requestMeta);
 
       expect(result.accessToken).toBe('access-token');
+    });
+
+    it('should pass full payload to analyzeLoginSuccess', async () => {
+      await authService.login(loginDto, requestMeta);
+
+      expect(suspiciousLoginService.analyzeLoginSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'uuid-123',
+          email: 'test@example.com',
+          firstName: null,
+          ipAddress: '127.0.0.1',
+          userAgent: 'test-agent',
+          loginTime: expect.any(Date),
+        }),
+      );
+    });
+
+    it('should not call analyzeLoginFailure when user is not found', async () => {
+      usersService.findByEmail.mockResolvedValue(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        authService.login(
+          { email: 'nonexistent@example.com', password: 'pass' },
+          requestMeta,
+        ),
+      ).rejects.toThrow(UnauthorizedException);
+
+      expect(suspiciousLoginService.analyzeLoginFailure).not.toHaveBeenCalled();
     });
   });
 

@@ -330,6 +330,40 @@ describe('TrustedDeviceService', () => {
     });
   });
 
+  // ─── Fire-and-forget audit resilience ──────────────────────────
+
+  describe('fire-and-forget audit resilience', () => {
+    it('trustDevice should succeed even when audit log rejects', async () => {
+      auditService.log.mockRejectedValue(new Error('audit write failed'));
+      prisma.trustedDevice.count.mockResolvedValue(0);
+      prisma.trustedDevice.upsert.mockResolvedValue(mockDevice);
+
+      const result = await service.trustDevice('user-1', 'fingerprint', '127.0.0.1', 'Chrome UA');
+
+      expect(result).toBeDefined();
+      expect(result.id).toBe('device-1');
+    });
+
+    it('revokeDevice should succeed even when audit log rejects', async () => {
+      auditService.log.mockRejectedValue(new Error('audit write failed'));
+      prisma.trustedDevice.findFirst.mockResolvedValue(mockDevice);
+      prisma.trustedDevice.update.mockResolvedValue({ ...mockDevice, isRevoked: true });
+
+      await expect(
+        service.revokeDevice('user-1', 'device-1'),
+      ).resolves.not.toThrow();
+    });
+
+    it('revokeAllDevices should succeed even when audit log rejects', async () => {
+      auditService.log.mockRejectedValue(new Error('audit write failed'));
+      prisma.trustedDevice.updateMany.mockResolvedValue({ count: 3 });
+
+      const count = await service.revokeAllDevices('user-1');
+
+      expect(count).toBe(3);
+    });
+  });
+
   describe('parseDeviceName', () => {
     it('should detect Chrome on Windows', () => {
       expect(
@@ -363,6 +397,14 @@ describe('TrustedDeviceService', () => {
       ).toBe('Edge on Windows');
     });
 
+    it('should detect legacy Edge on Windows', () => {
+      expect(
+        service.parseDeviceName(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/64.0 Safari/537.36 Edge/18.0',
+        ),
+      ).toBe('Edge on Windows');
+    });
+
     it('should detect Chrome on Android', () => {
       expect(
         service.parseDeviceName(
@@ -375,6 +417,14 @@ describe('TrustedDeviceService', () => {
       expect(
         service.parseDeviceName(
           'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+        ),
+      ).toBe('Safari on iOS');
+    });
+
+    it('should detect Safari on iOS (iPad)', () => {
+      expect(
+        service.parseDeviceName(
+          'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
         ),
       ).toBe('Safari on iOS');
     });
