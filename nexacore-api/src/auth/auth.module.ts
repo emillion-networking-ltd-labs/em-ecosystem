@@ -15,6 +15,7 @@ import { OAuthStateStore } from './stores/oauth-state.store';
 import { OAuthCodeStore } from './stores/oauth-code.store';
 import { PasswordBreachService } from './password-breach.service';
 import { TrustedDeviceService } from './trusted-device.service';
+import { TokenDenyListService } from './token-deny-list.service';
 import { UsersModule } from '../users/users.module';
 import { AuditModule } from '../audit/audit.module';
 import { SessionsModule } from '../sessions/sessions.module';
@@ -59,7 +60,8 @@ import { SecurityModule } from '../security/security.module';
     OAuthCodeStore,
     PasswordBreachService,
     TrustedDeviceService,
+    TokenDenyListService,
   ],
-  exports: [AuthService, PasswordBreachService, TrustedDeviceService],
+  exports: [AuthService, PasswordBreachService, TrustedDeviceService, TokenDenyListService],
 })
 export class AuthModule {}

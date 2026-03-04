@@ -26,6 +26,7 @@ import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from './stores/oauth-code.store';
 import { PasswordBreachService } from './password-breach.service';
 import { TrustedDeviceService } from './trusted-device.service';
+import { TokenDenyListService, ACCESS_TOKEN_TTL_SECONDS } from './token-deny-list.service';
 import { ImpossibleTravelService } from '../geolocation/impossible-travel.service';
 import { SuspiciousLoginService } from '../security/suspicious-login.service';
 import { ImpossibleTravelResult } from '../geolocation/interfaces/geolocation-result.interface';
@@ -117,6 +118,7 @@ export class AuthService {
     private readonly trustedDeviceService: TrustedDeviceService,
     private readonly impossibleTravelService: ImpossibleTravelService,
     private readonly suspiciousLoginService: SuspiciousLoginService,
+    private readonly tokenDenyListService: TokenDenyListService,
   ) {
     // OWASP ASVS V3.3.3 / NIST SP 800-63B §7.2: absolute timeout <= 12h at AAL2
     this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '12h';
@@ -493,7 +495,7 @@ export class AuthService {
 
     // Sign new tokens with actual session ID
     const newAccessToken = this.jwtService.sign(
-      { sub: user.id, email: user.email, role: user.role } satisfies JwtPayload,
+      { sub: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() } satisfies JwtPayload,
       { expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as StringValue },
     );
 
@@ -603,6 +605,7 @@ export class AuthService {
       const payload =
         this.jwtService.verify<RefreshTokenPayload>(refreshToken);
       await this.sessionsService.revokeSession(payload.sessionId, payload.sub);
+      this.tokenDenyListService.denyAllForUser(payload.sub, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
 
       this.auditService
         .log({
@@ -624,6 +627,7 @@ export class AuthService {
     ctx?: RequestContext,
   ): Promise<CookieConfig> {
     await this.sessionsService.revokeAllUserSessions(userId);
+    this.tokenDenyListService.denyAllForUser(userId, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
 
     this.auditService
       .log({
@@ -671,7 +675,7 @@ export class AuthService {
     requestMeta: { ipAddress: string; userAgent?: string | null },
   ): Promise<{ accessToken: string; refreshToken: string; sessionId: string }> {
     const accessToken = this.jwtService.sign(
-      { sub: user.id, email: user.email, role: user.role } satisfies JwtPayload,
+      { sub: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() } satisfies JwtPayload,
       { expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as StringValue },
     );
 

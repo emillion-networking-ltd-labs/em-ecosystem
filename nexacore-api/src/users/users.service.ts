@@ -28,6 +28,7 @@ import { SessionsService } from '../sessions/sessions.service';
 import { MailService } from '../mail/mail.service';
 import { PasswordBreachService } from '../auth/password-breach.service';
 import { TrustedDeviceService } from '../auth/trusted-device.service';
+import { TokenDenyListService, ACCESS_TOKEN_TTL_SECONDS } from '../auth/token-deny-list.service';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { UnlinkOAuthDto } from './dto/unlink-oauth.dto';
@@ -47,6 +48,8 @@ export class UsersService {
     private readonly passwordBreachService: PasswordBreachService,
     @Inject(forwardRef(() => TrustedDeviceService))
     private readonly trustedDeviceService: TrustedDeviceService,
+    @Inject(forwardRef(() => TokenDenyListService))
+    private readonly tokenDenyListService: TokenDenyListService,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
@@ -390,6 +393,10 @@ export class UsersService {
       await this.sessionsService.revokeAllUserSessions(targetId);
     }
 
+    if (dto.isActive === false || dto.role !== undefined) {
+      this.tokenDenyListService.denyAllForUser(targetId, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
+    }
+
     return toSafeUser(updated as User);
   }
 
@@ -414,6 +421,7 @@ export class UsersService {
 
     // Revoke all sessions on soft delete (immediate lockout)
     await this.sessionsService.revokeAllUserSessions(targetId);
+    this.tokenDenyListService.denyAllForUser(targetId, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
 
     this.auditService
       .log({
