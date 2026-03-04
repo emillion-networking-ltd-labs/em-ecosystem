@@ -26,6 +26,10 @@ async function bootstrap() {
       origin: string | undefined,
       callback: (err: Error | null, allow?: boolean) => void,
     ) => {
+      // ACCEPTED RISK (H-06): Requests without Origin header are allowed.
+      // This covers server-to-server calls (curl, Postman, internal services)
+      // and same-origin form submissions. Browser-initiated cross-origin
+      // requests always include an Origin header and are validated below.
       if (!origin) {
         callback(null, true);
         return;

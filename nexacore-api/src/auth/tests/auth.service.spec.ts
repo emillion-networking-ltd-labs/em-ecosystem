@@ -2352,4 +2352,227 @@ describe('AuthService', () => {
       expect(result.accessToken).toBe('access-token');
     });
   });
+
+  // ─── Fire-and-forget resilience ─────────────────────────────
+  // Tests that audit/mail/notify rejections don't break flows.
+  // Covers anonymous .catch(() => {}) handlers for function coverage.
+
+  describe('fire-and-forget resilience (audit log rejection)', () => {
+    const flushPromises = () => new Promise(resolve => process.nextTick(resolve));
+    let auditService: any;
+    let mailService: any;
+
+    beforeEach(() => {
+      auditService = (authService as any).auditService;
+      mailService = (authService as any).mailService;
+    });
+
+    it('should still throw ForbiddenException when audit rejects on locked account', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      const lockedUser = {
+        ...mockUser,
+        lockedUntil: new Date(Date.now() + 600_000),
+        lockoutCount: 1,
+      };
+      usersService.findByEmail.mockResolvedValue(lockedUser);
+
+      await expect(
+        authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
+      ).rejects.toThrow(ForbiddenException);
+      await flushPromises();
+    });
+
+    it('should still throw UnauthorizedException when audit rejects on OAuth-only account', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      const oauthOnlyUser = { ...mockUser, passwordHash: null };
+      usersService.findByEmail.mockResolvedValue(oauthOnlyUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
+      ).rejects.toThrow(UnauthorizedException);
+      await flushPromises();
+    });
+
+    it('should still throw ForbiddenException when audit rejects on account lockout', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      usersService.findByEmail.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      usersService.incrementFailedAttempts.mockResolvedValue({ failedAttempts: 5, lockedUntil: null });
+      usersService.lockAccount.mockResolvedValue(undefined);
+
+      await expect(
+        authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
+      ).rejects.toThrow(ForbiddenException);
+      await flushPromises();
+    });
+
+    it('should still throw ForbiddenException when audit rejects on email not verified', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      const unverifiedUser = { ...mockUser, emailVerified: false };
+      usersService.findByEmail.mockResolvedValue(unverifiedUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      await expect(
+        authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
+      ).rejects.toThrow(ForbiddenException);
+      await flushPromises();
+    });
+
+    it('should still return mfaSetupRequired when audit rejects for admin without MFA', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      const adminUser = { ...mockUser, role: Role.ADMIN, mfaEnabled: false };
+      usersService.findByEmail.mockResolvedValue(adminUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      const result = await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+      );
+
+      expect((result as any).mfaSetupRequired).toBe(true);
+      await flushPromises();
+    });
+
+    it('should still return tokens when audit rejects on successful login', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      usersService.findByEmail.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+
+      const result = await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+      );
+
+      expect(result.accessToken).toBe('access-token');
+      await flushPromises();
+    });
+
+    it('should still return tokens for trusted device MFA skip when audit rejects', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      const mfaUser = { ...mockUser, mfaEnabled: true };
+      usersService.findByEmail.mockResolvedValue(mfaUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      trustedDeviceService.isTrustedDevice.mockResolvedValue(true);
+      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+
+      const result = await authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+        undefined,
+        'fp-123',
+      );
+
+      expect(result.accessToken).toBe('access-token');
+      await flushPromises();
+    });
+
+    it('should still throw on idle session when audit rejects during refreshTokens', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      jwtService.verify.mockReturnValue({ sub: 'uuid-123', sessionId: 'session-uuid', tokenFamily: 'family-uuid' });
+      sessionsService.findById.mockResolvedValue({
+        ...mockSession,
+        lastUsedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
+      });
+      sessionsService.isSessionIdle.mockReturnValue(true);
+
+      await expect(
+        authService.refreshTokens('valid-refresh-token', requestMeta),
+      ).rejects.toThrow(UnauthorizedException);
+      await flushPromises();
+    });
+
+    it('should still return tokens for OAuth login when audit rejects', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      const oauthUser = {
+        ...mockUser,
+        id: 'uuid-oauth',
+        provider: Provider.GOOGLE,
+        providerId: 'gid',
+      };
+      usersService.findOrCreateByOAuth.mockResolvedValue(oauthUser);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      jwtService.sign.mockReturnValueOnce('oauth-access').mockReturnValueOnce('oauth-refresh');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+
+      const result = await authService.validateOAuthUser(
+        { email: 'oauth@example.com', provider: Provider.GOOGLE, providerId: 'gid' },
+        requestMeta,
+      );
+
+      expect(result.accessToken).toBe('oauth-access');
+      await flushPromises();
+    });
+
+    it('should still return tokens for generateTokensForMfa when audit rejects', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      usersService.findById.mockResolvedValue(mockUser);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      jwtService.sign.mockReturnValueOnce('mfa-access').mockReturnValueOnce('mfa-refresh');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+
+      const result = await authService.generateTokensForMfa('uuid-123', requestMeta);
+
+      expect(result.accessToken).toBe('mfa-access');
+      await flushPromises();
+    });
+
+    it('should still throw when audit rejects on impossible travel block', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      usersService.findByEmail.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+      impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
+        isAnomalous: true,
+        previousLocation: { city: 'Madrid', country: 'Spain', countryCode: 'ES', latitude: 40.4, longitude: -3.7 },
+        currentLocation: { city: 'Tokyo', country: 'Japan', countryCode: 'JP', latitude: 35.6, longitude: 139.6 },
+        distanceKm: 10500,
+        elapsedHours: 0.5,
+        requiredSpeedKmh: 21000,
+        strategy: 'block',
+        actionTaken: 'blocked',
+      });
+
+      await expect(
+        authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
+      ).rejects.toThrow(ForbiddenException);
+      await flushPromises();
+    });
+
+    it('should still succeed verifyEmailChange when mail and audit reject', async () => {
+      const prismaService = (authService as any).prisma;
+      mailService.sendEmailChangedConfirmation.mockRejectedValue(new Error('SMTP down'));
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      const userWithPending = { ...mockUser, pendingEmail: 'new@example.com' };
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: userWithPending,
+      });
+      usersService.findByEmail.mockResolvedValue(null);
+      prismaService.$transaction.mockResolvedValue(undefined);
+      sessionsService.revokeAllUserSessions.mockResolvedValue(undefined);
+
+      const result = await authService.verifyEmailChange('valid-token');
+
+      expect(result).toEqual({ status: 'success' });
+      await flushPromises();
+    });
+  });
 });

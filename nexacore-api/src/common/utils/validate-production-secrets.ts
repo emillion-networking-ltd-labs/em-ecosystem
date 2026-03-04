@@ -41,4 +41,45 @@ export function validateProductionSecrets(): void {
       'FATAL: CSRF_SECRET must be set to a non-default value of at least 32 characters in production',
     );
   }
+
+  // RFC 9700 §2.1: OAuth callback URLs must be HTTPS in production
+  if (
+    !process.env.GOOGLE_CALLBACK_URL ||
+    !process.env.GOOGLE_CALLBACK_URL.startsWith('https://')
+  ) {
+    throw new Error(
+      'FATAL: GOOGLE_CALLBACK_URL must be set to an HTTPS URL in production',
+    );
+  }
+  if (
+    !process.env.GITHUB_CALLBACK_URL ||
+    !process.env.GITHUB_CALLBACK_URL.startsWith('https://')
+  ) {
+    throw new Error(
+      'FATAL: GITHUB_CALLBACK_URL must be set to an HTTPS URL in production',
+    );
+  }
+
+  // RFC 8725 §3.9: Access token expiry must not exceed 15 minutes in production
+  const accessExp = process.env.JWT_ACCESS_EXPIRATION;
+  if (accessExp) {
+    const match = accessExp.match(/^(\d+)(m|h|d|s)$/);
+    if (match) {
+      const value = parseInt(match[1], 10);
+      const unit = match[2];
+      const minutes =
+        unit === 's'
+          ? value / 60
+          : unit === 'm'
+            ? value
+            : unit === 'h'
+              ? value * 60
+              : value * 1440;
+      if (minutes > 15) {
+        throw new Error(
+          'FATAL: JWT_ACCESS_EXPIRATION must not exceed 15 minutes in production (RFC 8725)',
+        );
+      }
+    }
+  }
 }

@@ -542,13 +542,15 @@ describe('SessionsService', () => {
 
   describe('isSessionIdle', () => {
     it('should return true when lastUsedAt is older than threshold', () => {
-      const twentyFiveHoursAgo = new Date(now.getTime() - 25 * 60 * 60 * 1000);
-      expect(sessionsService.isSessionIdle(twentyFiveHoursAgo)).toBe(true);
+      // Default idle timeout is 0.5h (30 min) — 1 hour ago should be idle
+      const oneHourAgo = new Date(now.getTime() - 60 * 60 * 1000);
+      expect(sessionsService.isSessionIdle(oneHourAgo)).toBe(true);
     });
 
     it('should return false when lastUsedAt is within threshold', () => {
-      const twentyThreeHoursAgo = new Date(now.getTime() - 23 * 60 * 60 * 1000);
-      expect(sessionsService.isSessionIdle(twentyThreeHoursAgo)).toBe(false);
+      // Default idle timeout is 0.5h (30 min) — 10 minutes ago should NOT be idle
+      const tenMinsAgo = new Date(now.getTime() - 10 * 60 * 1000);
+      expect(sessionsService.isSessionIdle(tenMinsAgo)).toBe(false);
     });
 
     it('should respect custom idle timeout parameter', () => {

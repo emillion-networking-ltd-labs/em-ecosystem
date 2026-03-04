@@ -18,6 +18,7 @@ import { LoginDto } from './dto/login.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { User, SafeUser, toSafeUser } from '../users/entities/user.entity';
+import { Role } from '../users/enums/role.enum';
 import { Provider } from '../users/enums/provider.enum';
 import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
@@ -92,6 +93,11 @@ export interface MfaChallengeResult {
   mfaToken: string;
 }
 
+export interface MfaSetupRequiredResult {
+  mfaSetupRequired: true;
+  message: string;
+}
+
 @Injectable()
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
@@ -112,7 +118,8 @@ export class AuthService {
     private readonly impossibleTravelService: ImpossibleTravelService,
     private readonly suspiciousLoginService: SuspiciousLoginService,
   ) {
-    this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '7d';
+    // OWASP ASVS V3.3.3 / NIST SP 800-63B §7.2: absolute timeout <= 12h at AAL2
+    this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '12h';
     this.refreshMaxAgeMs = parseDurationMs(this.refreshExpiration);
     const jwtSecret =
       process.env.JWT_SECRET || 'default-dev-secret-change-in-production';
@@ -170,7 +177,7 @@ export class AuthService {
     requestMeta: { ipAddress: string; userAgent?: string | null },
     ctx?: RequestContext,
     fingerprint?: string,
-  ): Promise<AuthResult | MfaChallengeResult> {
+  ): Promise<AuthResult | MfaChallengeResult | MfaSetupRequiredResult> {
     const user = await this.usersService.findByEmail(dto.email);
 
     // Timing attack protection: constant-time response when user not found
@@ -363,6 +370,28 @@ export class AuthService {
         .catch(() => {});
 
       return { mfaRequired: true, mfaToken };
+    }
+
+    // OWASP ASVS V2.7.2: Admin/SUPERADMIN must have MFA enabled
+    if (
+      (user.role === Role.ADMIN || user.role === Role.SUPERADMIN) &&
+      !user.mfaEnabled
+    ) {
+      this.auditService
+        .log({
+          action: AuditAction.LOGIN_SUCCESS,
+          userId: user.id,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+          metadata: { mfaSetupRequired: true, role: user.role },
+        })
+        .catch(() => {});
+
+      return {
+        mfaSetupRequired: true,
+        message:
+          'MFA setup is required for administrator accounts. Please enable MFA to continue.',
+      };
     }
 
     const { accessToken, refreshToken, sessionId } = await this.generateTokens(

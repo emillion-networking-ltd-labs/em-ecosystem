@@ -388,5 +388,63 @@ describe('TrustedDeviceService', () => {
         'Unknown Browser on Unknown OS',
       );
     });
+
+    it('should detect Edge/ (legacy Edge) on Windows', () => {
+      expect(
+        service.parseDeviceName(
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/70.0 Safari/537.36 Edge/18.0',
+        ),
+      ).toBe('Edge on Windows');
+    });
+
+    it('should detect Safari on iPad (iOS)', () => {
+      expect(
+        service.parseDeviceName(
+          'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+        ),
+      ).toBe('Safari on iOS');
+    });
+  });
+
+  // ─── Fire-and-forget resilience ─────────────────────────────
+  describe('fire-and-forget resilience (audit log rejection)', () => {
+    const flushPromises = () => new Promise(resolve => process.nextTick(resolve));
+
+    it('should still trust device when audit log rejects', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+
+      const device = await service.trustDevice(
+        'user-1',
+        'fingerprint-abc',
+        '127.0.0.1',
+        'Mozilla/5.0 (Windows NT 10.0) Chrome/120.0.0.0',
+      );
+
+      expect(device.id).toBe('device-1');
+      await flushPromises();
+    });
+
+    it('should still revoke device when audit log rejects', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      prisma.trustedDevice.findFirst.mockResolvedValue(mockDevice);
+
+      await service.revokeDevice('user-1', 'device-1');
+
+      expect(prisma.trustedDevice.update).toHaveBeenCalledWith({
+        where: { id: 'device-1' },
+        data: { isRevoked: true },
+      });
+      await flushPromises();
+    });
+
+    it('should still revoke all devices when audit log rejects', async () => {
+      auditService.log.mockRejectedValue(new Error('Audit DB down'));
+      prisma.trustedDevice.updateMany.mockResolvedValue({ count: 3 });
+
+      const count = await service.revokeAllDevices('user-1');
+
+      expect(count).toBe(3);
+      await flushPromises();
+    });
   });
 });

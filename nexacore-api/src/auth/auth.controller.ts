@@ -25,7 +25,12 @@ import {
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { JwtService } from '@nestjs/jwt';
-import { AuthService, CookieConfig, MfaChallengeResult } from './auth.service';
+import {
+  AuthService,
+  CookieConfig,
+  MfaChallengeResult,
+  MfaSetupRequiredResult,
+} from './auth.service';
 import { TrustedDeviceService } from './trusted-device.service';
 import { TrustDeviceDto } from './dto/trust-device.dto';
 import { SessionsService } from '../sessions/sessions.service';
@@ -37,6 +42,7 @@ import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ResendVerificationPublicDto } from './dto/resend-verification-public.dto';
+import { ValidateResetTokenDto } from './dto/validate-reset-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
@@ -155,6 +161,11 @@ export class AuthController {
     // MFA challenge — don't set cookie, return challenge token
     if ('mfaRequired' in result) {
       return result as MfaChallengeResult;
+    }
+
+    // Admin without MFA — don't issue tokens, require MFA setup first
+    if ('mfaSetupRequired' in result) {
+      return result as MfaSetupRequiredResult;
     }
 
     this.setCookie(res, result.cookie);
@@ -393,22 +404,16 @@ export class AuthController {
     return { message: 'Password reset successfully' };
   }
 
-  @Get('validate-reset-token')
+  @Post('validate-reset-token')
+  @HttpCode(HttpStatus.OK)
   @SkipCsrf()
   @ApiOperation({
     summary: 'Validate a password reset token without consuming it',
-  })
-  @ApiQuery({
-    name: 'token',
-    required: true,
-    description: 'Password reset token from email',
+    description: 'Token sent in body (not URL) to prevent leakage via logs/referer — OWASP ASVS V3.5.1',
   })
   @ApiResponse({ status: 200, description: 'Token validity status' })
-  async validateResetToken(@Query('token') token: string) {
-    if (!token) {
-      return { valid: false };
-    }
-    return this.authService.validateResetToken(token);
+  async validateResetToken(@Body() dto: ValidateResetTokenDto) {
+    return this.authService.validateResetToken(dto.token);
   }
 
   // ── Admin Endpoints ──

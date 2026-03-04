@@ -69,10 +69,11 @@ export const AUTH_RATE_LIMITS = {
 /**
  * Session idle timeout in hours.
  * Sessions with lastUsedAt older than this are rejected on refresh.
+ * NIST SP 800-63B §7.2 / OWASP ASVS V3.3.2: idle timeout <= 30 min at AAL2.
+ * Default: 0.5h (30 minutes). Override via SESSION_IDLE_TIMEOUT_HOURS env var.
  */
-export const SESSION_IDLE_TIMEOUT_HOURS = parseInt(
-  process.env.SESSION_IDLE_TIMEOUT_HOURS || '24',
-  10,
+export const SESSION_IDLE_TIMEOUT_HOURS = parseFloat(
+  process.env.SESSION_IDLE_TIMEOUT_HOURS || '0.5',
 );
 
 /**
