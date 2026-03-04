@@ -84,6 +84,14 @@ export default function ProfileForm() {
             value={user?.email || ''}
             disabled
           />
+          {user?.provider === 'LOCAL' && (
+            <a
+              href="#change-email"
+              className="absolute bottom-4 right-10 text-caption font-medium text-accent hover:underline"
+            >
+              Change
+            </a>
+          )}
           <Lock size={16} className="absolute bottom-4 right-4 text-content-tertiary" />
         </div>
 

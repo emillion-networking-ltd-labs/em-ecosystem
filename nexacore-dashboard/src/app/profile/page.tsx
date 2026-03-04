@@ -3,6 +3,7 @@
 import DashboardLayout from '@/components/layout/DashboardLayout';
 import ProtectedRoute from '@/components/guards/ProtectedRoute';
 import ProfileForm from '@/components/profile/ProfileForm';
+import ChangeEmailForm from '@/components/profile/ChangeEmailForm';
 import ChangePasswordForm from '@/components/profile/ChangePasswordForm';
 import AccountInfo from '@/components/profile/AccountInfo';
 import MfaSetup from '@/components/profile/MfaSetup';
@@ -18,6 +19,7 @@ export default function ProfilePage() {
         <h1 className="mb-6 text-body-sm font-semibold text-content-primary">Profile</h1>
         <div className="max-w-2xl space-y-6">
           <ProfileForm />
+          <ChangeEmailForm />
           <ChangePasswordForm />
           <MfaSetup />
           <PasskeyManager />

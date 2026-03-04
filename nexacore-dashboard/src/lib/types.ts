@@ -180,8 +180,9 @@ export type AuditLog = {
   targetUser: AuditLogUser | null;
 };
 
-export type MessageResponse = {
-  message: string;
+export type ChangeEmailDto = {
+  newEmail: string;
+  password: string;
 };
 
 export type PasskeyResponse = {
