@@ -30,6 +30,7 @@ import { DeleteAccountDto } from './dto/delete-account.dto';
 import { UnlinkOAuthDto } from './dto/unlink-oauth.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
+import { ListSecurityActivityQueryDto } from './dto/list-security-activity-query.dto';
 
 @Controller('users')
 export class UsersController {
@@ -107,6 +108,19 @@ export class UsersController {
       ipAddress: req.ip || null,
       userAgent: req.headers?.['user-agent'] || null,
     });
+  }
+
+  @Get('me/security-activity')
+  @UseGuards(JwtAuthGuard)
+  async getSecurityActivity(
+    @Request() req: { user: { id: string } },
+    @Query() query: ListSecurityActivityQueryDto,
+  ) {
+    return this.usersService.getSecurityActivity(
+      req.user.id,
+      query.page ?? 1,
+      query.limit ?? 20,
+    );
   }
 
   // ── Admin endpoints ──

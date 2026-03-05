@@ -16,6 +16,7 @@ describe('UsersController', () => {
     requestEmailChange: jest.Mock;
     selfDeleteAccount: jest.Mock;
     unlinkOAuth: jest.Mock;
+    getSecurityActivity: jest.Mock;
     findAll: jest.Mock;
     findById: jest.Mock;
     adminUpdateUser: jest.Mock;
@@ -66,6 +67,7 @@ describe('UsersController', () => {
       adminUpdateUser: jest.fn(),
       softDelete: jest.fn(),
       unlinkOAuth: jest.fn(),
+      getSecurityActivity: jest.fn(),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -340,6 +342,70 @@ describe('UsersController', () => {
         'user-456',
         { password: 'TestPass1!' },
         { ipAddress: '192.168.1.1', userAgent: 'Mozilla/5.0' },
+      );
+    });
+  });
+
+  // ─── GET /users/me/security-activity ────────────────────────
+
+  describe('getSecurityActivity', () => {
+    it('should delegate to usersService.getSecurityActivity with userId and pagination', async () => {
+      const mockResult = {
+        data: [
+          {
+            id: 'log-1',
+            action: 'LOGIN_SUCCESS',
+            ipAddress: '127.0.0.1',
+            userAgent: 'test-agent',
+            metadata: null,
+            createdAt: new Date(),
+          },
+        ],
+        meta: { total: 1, page: 1, limit: 20, totalPages: 1 },
+      };
+      usersService.getSecurityActivity.mockResolvedValue(mockResult);
+
+      const result = await controller.getSecurityActivity(mockReq, {
+        page: 1,
+        limit: 20,
+      });
+
+      expect(usersService.getSecurityActivity).toHaveBeenCalledWith(
+        'uuid-123',
+        1,
+        20,
+      );
+      expect(result).toEqual(mockResult);
+    });
+
+    it('should use default pagination when no query params provided', async () => {
+      const emptyResult = {
+        data: [],
+        meta: { total: 0, page: 1, limit: 20, totalPages: 0 },
+      };
+      usersService.getSecurityActivity.mockResolvedValue(emptyResult);
+
+      await controller.getSecurityActivity(mockReq, {});
+
+      expect(usersService.getSecurityActivity).toHaveBeenCalledWith(
+        'uuid-123',
+        1,
+        20,
+      );
+    });
+
+    it('should pass custom pagination params', async () => {
+      usersService.getSecurityActivity.mockResolvedValue({
+        data: [],
+        meta: { total: 0, page: 3, limit: 50, totalPages: 0 },
+      });
+
+      await controller.getSecurityActivity(mockReq, { page: 3, limit: 50 });
+
+      expect(usersService.getSecurityActivity).toHaveBeenCalledWith(
+        'uuid-123',
+        3,
+        50,
       );
     });
   });

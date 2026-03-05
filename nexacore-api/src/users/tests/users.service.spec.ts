@@ -18,6 +18,7 @@ import { SessionsService } from '../../sessions/sessions.service';
 import { MailService } from '../../mail/mail.service';
 import { PasswordBreachService } from '../../auth/password-breach.service';
 import { TrustedDeviceService } from '../../auth/trusted-device.service';
+import { TokenDenyListService } from '../../auth/token-deny-list.service';
 
 jest.mock('bcrypt');
 
@@ -54,6 +55,8 @@ describe('UsersService', () => {
     };
     auditLog: {
       updateMany: jest.Mock;
+      findMany: jest.Mock;
+      count: jest.Mock;
     };
     $transaction: jest.Mock;
   };
@@ -104,6 +107,8 @@ describe('UsersService', () => {
       },
       auditLog: {
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
+        findMany: jest.fn().mockResolvedValue([]),
+        count: jest.fn().mockResolvedValue(0),
       },
       $transaction: jest.fn().mockResolvedValue(undefined),
     };
@@ -145,6 +150,10 @@ describe('UsersService', () => {
         {
           provide: TrustedDeviceService,
           useValue: trustedDeviceService,
+        },
+        {
+          provide: TokenDenyListService,
+          useValue: { denyToken: jest.fn().mockResolvedValue(undefined), denyAllForUser: jest.fn().mockResolvedValue(undefined) },
         },
       ],
     }).compile();
@@ -1570,6 +1579,130 @@ describe('UsersService', () => {
           userAgent: undefined,
         }),
       );
+    });
+  });
+
+  // ─── getSecurityActivity (SCRUM-135) ─────────────────────────
+
+  describe('getSecurityActivity', () => {
+    const mockLogs = [
+      {
+        id: 'log-1',
+        action: 'LOGIN_SUCCESS',
+        ipAddress: '192.168.1.1',
+        userAgent: 'Mozilla/5.0',
+        metadata: null,
+        createdAt: new Date('2026-03-05T10:00:00Z'),
+      },
+      {
+        id: 'log-2',
+        action: 'PASSWORD_CHANGE',
+        ipAddress: '192.168.1.1',
+        userAgent: 'Mozilla/5.0',
+        metadata: { updatedFields: ['password'] },
+        createdAt: new Date('2026-03-05T09:00:00Z'),
+      },
+    ];
+
+    it('should return paginated security events for the user', async () => {
+      prisma.auditLog.findMany.mockResolvedValue(mockLogs);
+      prisma.auditLog.count.mockResolvedValue(2);
+
+      const result = await usersService.getSecurityActivity('uuid-123', 1, 20);
+
+      expect(result).toEqual({
+        data: mockLogs,
+        meta: { total: 2, page: 1, limit: 20, totalPages: 1 },
+      });
+    });
+
+    it('should filter by userId only (not targetUserId)', async () => {
+      prisma.auditLog.findMany.mockResolvedValue([]);
+      prisma.auditLog.count.mockResolvedValue(0);
+
+      await usersService.getSecurityActivity('uuid-123', 1, 20);
+
+      expect(prisma.auditLog.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { userId: 'uuid-123' },
+        }),
+      );
+      expect(prisma.auditLog.count).toHaveBeenCalledWith({
+        where: { userId: 'uuid-123' },
+      });
+    });
+
+    it('should use select to exclude sensitive fields', async () => {
+      prisma.auditLog.findMany.mockResolvedValue([]);
+      prisma.auditLog.count.mockResolvedValue(0);
+
+      await usersService.getSecurityActivity('uuid-123', 1, 20);
+
+      const findManyCall = prisma.auditLog.findMany.mock.calls[0][0];
+      expect(findManyCall.select).toEqual({
+        id: true,
+        action: true,
+        ipAddress: true,
+        userAgent: true,
+        metadata: true,
+        createdAt: true,
+      });
+      expect(findManyCall.select.userId).toBeUndefined();
+      expect(findManyCall.select.targetUserId).toBeUndefined();
+    });
+
+    it('should order by createdAt DESC', async () => {
+      prisma.auditLog.findMany.mockResolvedValue([]);
+      prisma.auditLog.count.mockResolvedValue(0);
+
+      await usersService.getSecurityActivity('uuid-123', 1, 20);
+
+      expect(prisma.auditLog.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          orderBy: { createdAt: 'desc' },
+        }),
+      );
+    });
+
+    it('should calculate skip and take correctly for pagination', async () => {
+      prisma.auditLog.findMany.mockResolvedValue([]);
+      prisma.auditLog.count.mockResolvedValue(45);
+
+      const result = await usersService.getSecurityActivity('uuid-123', 2, 10);
+
+      expect(prisma.auditLog.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          skip: 10,
+          take: 10,
+        }),
+      );
+      expect(result.meta).toEqual({
+        total: 45,
+        page: 2,
+        limit: 10,
+        totalPages: 5,
+      });
+    });
+
+    it('should return empty results when user has no activity', async () => {
+      prisma.auditLog.findMany.mockResolvedValue([]);
+      prisma.auditLog.count.mockResolvedValue(0);
+
+      const result = await usersService.getSecurityActivity('uuid-123', 1, 20);
+
+      expect(result).toEqual({
+        data: [],
+        meta: { total: 0, page: 1, limit: 20, totalPages: 0 },
+      });
+    });
+
+    it('should calculate totalPages correctly with remainder', async () => {
+      prisma.auditLog.findMany.mockResolvedValue([]);
+      prisma.auditLog.count.mockResolvedValue(45);
+
+      const result = await usersService.getSecurityActivity('uuid-123', 1, 20);
+
+      expect(result.meta.totalPages).toBe(3);
     });
   });
 });
