@@ -45,6 +45,8 @@ export type SessionResponse = {
   deviceInfo: string | null;
   ipAddress: string;
   userAgent: string | null;
+  locationCity: string | null;
+  locationCountry: string | null;
   createdAt: string;
   lastUsedAt: string;
   expiresAt: string;
@@ -178,6 +180,15 @@ export type AuditLog = {
   createdAt: string;
   user: AuditLogUser | null;
   targetUser: AuditLogUser | null;
+};
+
+export type SecurityEvent = {
+  id: string;
+  action: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
 };
 
 export type ChangeEmailDto = {

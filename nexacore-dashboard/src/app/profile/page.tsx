@@ -12,6 +12,7 @@ import TrustedDevices from '@/components/profile/TrustedDevices';
 import ConnectedAccounts from '@/components/profile/ConnectedAccounts';
 import ActiveSessions from '@/components/profile/ActiveSessions';
 import DeleteAccount from '@/components/profile/DeleteAccount';
+import SecurityActivity from '@/components/profile/SecurityActivity';
 
 export default function ProfilePage() {
   return (
@@ -29,6 +30,7 @@ export default function ProfilePage() {
           <ConnectedAccounts />
           <ActiveSessions />
           <DeleteAccount />
+          <SecurityActivity />
         </div>
       </DashboardLayout>
     </ProtectedRoute>
