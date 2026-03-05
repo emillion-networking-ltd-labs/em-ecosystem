@@ -43,7 +43,6 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ValidateResetTokenDto } from './dto/validate-reset-token.dto';
 import { ResendVerificationPublicDto } from './dto/resend-verification-public.dto';
-import { ValidateResetTokenDto } from './dto/validate-reset-token.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';

@@ -244,7 +244,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (err: unknown) {
         dispatch({
           type: 'AUTH_ERROR',
-          payload: extractErrorMessage(err, 'Passkey authentication failed.'),
+          payload: extractErrorMessage(err) || 'Passkey authentication failed.',
         });
         throw err;
       }
