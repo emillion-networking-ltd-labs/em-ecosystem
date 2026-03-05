@@ -1,7 +1,12 @@
 'use client';
 
-import { Check } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { unlinkOAuth } from '@/lib/unlink-oauth-api';
+import Input from '@/components/ui/Input';
+
+type ApiError = { error?: { message?: string; statusCode?: number } };
 
 const providers = [
   {
@@ -40,7 +45,55 @@ const providers = [
 ];
 
 export default function ConnectedAccounts() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const router = useRouter();
+  const overlayRef = useRef<HTMLDivElement>(null);
+
+  const [showModal, setShowModal] = useState(false);
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const canConfirm = password.length >= 8 && !loading;
+
+  const connectedProvider = providers.find((p) => p.id === user?.provider);
+
+  const handleClose = () => {
+    if (loading) return;
+    setShowModal(false);
+    setPassword('');
+    setError('');
+  };
+
+  const handleUnlink = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await unlinkOAuth(password);
+      await logout();
+      router.push('/login');
+    } catch (err: unknown) {
+      const e = err as ApiError;
+      if (e?.error?.statusCode === 429) {
+        setError('Too many requests. Try again later.');
+      } else if (e?.error?.statusCode === 401) {
+        setError('Invalid password.');
+      } else {
+        setError(e?.error?.message ?? 'Failed to unlink OAuth provider.');
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!showModal) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') handleClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  });
 
   if (!user) return null;
 
@@ -49,44 +102,103 @@ export default function ConnectedAccounts() {
   };
 
   return (
-    <div className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card">
-      <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
-        Connected Accounts
-      </h2>
+    <>
+      <div className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card">
+        <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
+          Connected Accounts
+        </h2>
 
-      <div className="space-y-3">
-        {providers.map((provider) => {
-          const isConnected = user.provider === provider.id;
+        <div className="space-y-3">
+          {providers.map((provider) => {
+            const isConnected = user.provider === provider.id;
 
-          return (
-            <div
-              key={provider.id}
-              className="flex items-center justify-between rounded-xl border border-border-default p-4"
-            >
-              <div className="flex items-center gap-3">
-                {provider.icon}
-                <span className="text-body-sm font-medium text-content-primary">
-                  {provider.name}
-                </span>
+            return (
+              <div
+                key={provider.id}
+                className="flex items-center justify-between rounded-xl border border-border-default p-4"
+              >
+                <div className="flex items-center gap-3">
+                  {provider.icon}
+                  <span className="text-body-sm font-medium text-content-primary">
+                    {provider.name}
+                  </span>
+                </div>
+
+                {isConnected ? (
+                  <button
+                    onClick={() => setShowModal(true)}
+                    className="rounded-md border border-error-border px-4 py-1.5 text-caption text-error hover:bg-error-bg"
+                  >
+                    Disconnect
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleConnect(provider.id)}
+                    className="rounded-md border border-border-default px-4 py-1.5 text-caption text-content-primary hover:bg-surface-subtle"
+                  >
+                    Connect
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Disconnect confirmation modal */}
+      {showModal && (
+        <div
+          ref={overlayRef}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+          onClick={(e) => {
+            if (e.target === overlayRef.current) handleClose();
+          }}
+        >
+          <div className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary shadow-card">
+            {/* Top section */}
+            <div className="border-b border-border-default bg-surface-primary p-6">
+              <h2 className="text-heading-md text-content-primary">
+                Disconnect {connectedProvider?.name}
+              </h2>
+              <p className="mt-2 text-body-sm text-content-secondary">
+                Your account will be converted to local authentication. All sessions will be
+                revoked and you&apos;ll need to log in with your email and password.
+              </p>
+
+              <div className="mt-4">
+                <Input
+                  label="Password"
+                  name="unlinkPassword"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your password"
+                />
               </div>
 
-              {isConnected ? (
-                <div className="flex items-center gap-2">
-                  <span className="text-caption text-success">Connected</span>
-                  <Check size={16} className="text-success" />
-                </div>
-              ) : (
-                <button
-                  onClick={() => handleConnect(provider.id)}
-                  className="rounded-md border border-border-default px-4 py-1.5 text-caption text-content-primary hover:bg-surface-subtle"
-                >
-                  Connect
-                </button>
-              )}
+              {error && <p className="mt-4 text-caption text-error">{error}</p>}
             </div>
-          );
-        })}
-      </div>
-    </div>
+
+            {/* Bottom section — buttons */}
+            <div className="flex justify-end gap-3 p-3">
+              <button
+                onClick={handleClose}
+                disabled={loading}
+                className="h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleUnlink}
+                disabled={!canConfirm}
+                className="h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
+              >
+                {loading ? 'Disconnecting...' : 'Disconnect'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }

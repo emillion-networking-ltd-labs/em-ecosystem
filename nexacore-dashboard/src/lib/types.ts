@@ -228,3 +228,7 @@ export type RevokeAllDevicesResponse = {
 export type DeleteAccountDto = {
   password?: string;
 };
+
+export type UnlinkOAuthDto = {
+  password: string;
+};
