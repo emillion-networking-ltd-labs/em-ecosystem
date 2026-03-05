@@ -224,3 +224,7 @@ export type RevokeAllDevicesResponse = {
   message: string;
   count: number;
 };
+
+export type DeleteAccountDto = {
+  password?: string;
+};

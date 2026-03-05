@@ -11,6 +11,7 @@ import PasskeyManager from '@/components/profile/PasskeyManager';
 import TrustedDevices from '@/components/profile/TrustedDevices';
 import ConnectedAccounts from '@/components/profile/ConnectedAccounts';
 import ActiveSessions from '@/components/profile/ActiveSessions';
+import DeleteAccount from '@/components/profile/DeleteAccount';
 
 export default function ProfilePage() {
   return (
@@ -27,6 +28,7 @@ export default function ProfilePage() {
           <AccountInfo />
           <ConnectedAccounts />
           <ActiveSessions />
+          <DeleteAccount />
         </div>
       </DashboardLayout>
     </ProtectedRoute>
