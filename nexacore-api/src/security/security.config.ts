@@ -17,6 +17,7 @@ export const SecurityConfig = {
       'Authorization',
       'X-CSRF-Token',
       'X-Requested-With',
+      'X-Device-Fingerprint',
     ],
     credentials: true,
     maxAge: 86400,
