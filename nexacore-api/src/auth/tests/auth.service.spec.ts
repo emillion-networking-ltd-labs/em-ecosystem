@@ -22,6 +22,7 @@ import { SuspiciousLoginService } from '../../security/suspicious-login.service'
 import { AuditService } from '../../audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
+import { TokenDenyListService } from '../token-deny-list.service';
 
 jest.mock('bcrypt');
 
@@ -42,6 +43,7 @@ describe('parseDurationMs (via AuthService constructor)', () => {
         { provide: TrustedDeviceService, useValue: { isTrustedDevice: jest.fn().mockResolvedValue(false) } },
         { provide: ImpossibleTravelService, useValue: { detectImpossibleTravel: jest.fn().mockResolvedValue(null) } },
         { provide: SuspiciousLoginService, useValue: { analyzeLoginFailure: jest.fn().mockResolvedValue(undefined), analyzeLoginSuccess: jest.fn().mockResolvedValue(undefined) } },
+        { provide: TokenDenyListService, useValue: { denyToken: jest.fn(), denyAllForUser: jest.fn(), isDenied: jest.fn().mockResolvedValue(false) } },
       ],
     }).compile();
     return mod.get<AuthService>(AuthService);
@@ -242,6 +244,14 @@ describe('AuthService', () => {
           useValue: {
             analyzeLoginFailure: jest.fn().mockResolvedValue(undefined),
             analyzeLoginSuccess: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: TokenDenyListService,
+          useValue: {
+            denyToken: jest.fn().mockResolvedValue(undefined),
+            denyAllForUser: jest.fn().mockResolvedValue(undefined),
+            isDenied: jest.fn().mockResolvedValue(false),
           },
         },
       ],

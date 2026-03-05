@@ -2,6 +2,7 @@ import { UnauthorizedException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtStrategy } from '../strategies/jwt.strategy';
 import { UsersService } from '../../users/users.service';
+import { TokenDenyListService } from '../token-deny-list.service';
 import { Role } from '../../users/enums/role.enum';
 import { Provider } from '../../users/enums/provider.enum';
 import { User } from '../../users/entities/user.entity';
@@ -9,6 +10,7 @@ import { User } from '../../users/entities/user.entity';
 describe('JwtStrategy', () => {
   let strategy: JwtStrategy;
   let usersService: jest.Mocked<UsersService>;
+  let tokenDenyListService: jest.Mocked<TokenDenyListService>;
 
   const mockUser: User = {
     id: 'uuid-123',
@@ -44,11 +46,18 @@ describe('JwtStrategy', () => {
             findById: jest.fn(),
           },
         },
+        {
+          provide: TokenDenyListService,
+          useValue: {
+            isDenied: jest.fn().mockResolvedValue(false),
+          },
+        },
       ],
     }).compile();
 
     strategy = module.get<JwtStrategy>(JwtStrategy);
     usersService = module.get(UsersService);
+    tokenDenyListService = module.get(TokenDenyListService);
   });
 
   describe('validate', () => {
@@ -59,6 +68,7 @@ describe('JwtStrategy', () => {
         sub: 'uuid-123',
         email: 'test@example.com',
         role: Role.USER,
+        jti: 'test-jti-123',
       });
 
       expect(result.id).toBe('uuid-123');
@@ -75,6 +85,7 @@ describe('JwtStrategy', () => {
           sub: 'nonexistent-id',
           email: 'test@example.com',
           role: Role.USER,
+          jti: 'test-jti-456',
         }),
       ).rejects.toThrow(UnauthorizedException);
     });
@@ -90,8 +101,22 @@ describe('JwtStrategy', () => {
           sub: 'uuid-123',
           email: 'test@example.com',
           role: Role.USER,
+          jti: 'test-jti-789',
         }),
       ).rejects.toThrow(new UnauthorizedException('Account deactivated'));
+    });
+
+    it('should throw UnauthorizedException when token is denied', async () => {
+      tokenDenyListService.isDenied.mockResolvedValue(true);
+
+      await expect(
+        strategy.validate({
+          sub: 'uuid-123',
+          email: 'test@example.com',
+          role: Role.USER,
+          jti: 'denied-jti',
+        }),
+      ).rejects.toThrow(new UnauthorizedException('Token has been revoked'));
     });
   });
 });
