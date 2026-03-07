@@ -24,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<SafeUser> {
-    const isDenied = await this.tokenDenyListService.isDenied(payload.jti, payload.sub);
+    const isDenied = await this.tokenDenyListService.isDenied(payload.jti, payload.sub, payload.iat);
     if (isDenied) {
       throw new UnauthorizedException('Token has been revoked');
     }

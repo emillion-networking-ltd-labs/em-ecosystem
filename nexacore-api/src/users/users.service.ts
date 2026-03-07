@@ -126,7 +126,9 @@ export class UsersService {
     });
   }
 
-  async findOrCreateByOAuth(profile: OAuthProfile): Promise<User> {
+  async findOrCreateByOAuth(
+    profile: OAuthProfile,
+  ): Promise<{ user: User; action: 'login' | 'created' | 'linked' }> {
     const existingUser = await this.findByEmail(profile.email);
 
     // Profile fields to populate from OAuth provider
@@ -148,20 +150,27 @@ export class UsersService {
           (!existingUser.avatarUrl && profileData.avatarUrl);
 
         if (needsUpdate) {
-          return this.prisma.user.update({
+          const user = await this.prisma.user.update({
             where: { id: existingUser.id },
             data: {
               ...(!existingUser.firstName && profileData.firstName && { firstName: profileData.firstName }),
               ...(!existingUser.lastName && profileData.lastName && { lastName: profileData.lastName }),
               ...(!existingUser.avatarUrl && profileData.avatarUrl && { avatarUrl: profileData.avatarUrl }),
             },
-          }) as Promise<User>;
+          }) as User;
+          return { user, action: 'login' };
         }
-        return existingUser;
+        return { user: existingUser, action: 'login' };
       }
 
       if (existingUser.provider === Provider.LOCAL) {
-        return this.prisma.user.update({
+        // Auto-link: only if the LOCAL account has a verified email (prevents pre-account takeover)
+        if (!existingUser.emailVerified) {
+          throw new ConflictException(
+            'An account with this email already exists but is not verified. Please verify your email first.',
+          );
+        }
+        const user = await this.prisma.user.update({
           where: { id: existingUser.id },
           data: {
             provider: profile.provider,
@@ -169,13 +178,14 @@ export class UsersService {
             emailVerified: true,
             ...profileData,
           },
-        }) as Promise<User>;
+        }) as User;
+        return { user, action: 'linked' };
       }
 
-      return existingUser;
+      return { user: existingUser, action: 'login' };
     }
 
-    return this.prisma.user.create({
+    const user = await this.prisma.user.create({
       data: {
         email: profile.email,
         provider: profile.provider,
@@ -183,7 +193,8 @@ export class UsersService {
         emailVerified: true,
         ...profileData,
       },
-    }) as Promise<User>;
+    }) as User;
+    return { user, action: 'created' };
   }
 
   // ── Security activity (SCRUM-135) ──
@@ -314,18 +325,18 @@ export class UsersService {
       throw new NotFoundException('User not found');
     }
 
-    if (!user.passwordHash) {
-      throw new ForbiddenException(
-        'Password change not available for OAuth accounts',
+    if (user.passwordHash) {
+      // User has a password — require currentPassword
+      if (!dto.currentPassword) {
+        throw new BadRequestException('Current password is required');
+      }
+      const isCurrentValid = await bcrypt.compare(
+        dto.currentPassword,
+        user.passwordHash,
       );
-    }
-
-    const isCurrentValid = await bcrypt.compare(
-      dto.currentPassword,
-      user.passwordHash,
-    );
-    if (!isCurrentValid) {
-      throw new UnauthorizedException('Current password is incorrect');
+      if (!isCurrentValid) {
+        throw new UnauthorizedException('Current password is incorrect');
+      }
     }
 
     const isBreached = await this.passwordBreachService.isBreached(
@@ -344,9 +355,11 @@ export class UsersService {
       data: { passwordHash: newHash },
     });
 
-    // Revoke all sessions and trusted devices on password change
-    await this.sessionsService.revokeAllUserSessions(userId);
-    await this.trustedDeviceService.revokeAllDevices(userId);
+    // Only revoke sessions/devices on actual password CHANGE (not first-time SET)
+    if (user.passwordHash) {
+      await this.sessionsService.revokeAllUserSessions(userId);
+      await this.trustedDeviceService.revokeAllDevices(userId);
+    }
 
     this.auditService
       .log({
@@ -737,9 +750,6 @@ export class UsersService {
       where: { id: userId },
       data: { provider: Provider.LOCAL, providerId: null },
     });
-
-    await this.sessionsService.revokeAllUserSessions(userId);
-    await this.trustedDeviceService.revokeAllDevices(userId);
 
     this.auditService
       .log({

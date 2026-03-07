@@ -34,13 +34,14 @@ export default function DashboardLayout({ children, rightPanel }: DashboardLayou
         />
       </div>
 
-      {/* Mobile sidebar */}
-      <div
-        className={`fixed left-0 top-0 z-30 lg:hidden transition-transform duration-200 ${
-          mobileOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <Sidebar collapsed={false} onToggle={() => setMobileOpen(false)} />
+      {/* Mobile sidebar — slide-in controlled by mobileVisible prop */}
+      <div className="lg:hidden">
+        <Sidebar
+          collapsed={false}
+          onToggle={() => setMobileOpen(false)}
+          onNavigate={() => setMobileOpen(false)}
+          mobileVisible={mobileOpen}
+        />
       </div>
 
       {/* Main content */}

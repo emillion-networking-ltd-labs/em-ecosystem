@@ -6,6 +6,7 @@ import {
   useReducer,
   useEffect,
   useCallback,
+  useRef,
   type ReactNode,
 } from 'react';
 import { apiClient, API_BASE_URL } from '@/lib/api';
@@ -98,11 +99,15 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 type ApiError = { error?: { message?: string; details?: string[]; retryAfter?: number; code?: string; statusCode?: number; lockoutLevel?: number } };
 
+function ensurePeriod(s: string): string {
+  return s.endsWith('.') ? s : `${s}.`;
+}
+
 function extractErrorMessage(err: unknown): string {
   const errObj = err as ApiError;
   const details = errObj?.error?.details;
-  if (Array.isArray(details) && details.length > 0) return details[0];
-  return errObj?.error?.message ?? 'An unexpected error occurred.';
+  if (Array.isArray(details) && details.length > 0) return ensurePeriod(details[0]);
+  return ensurePeriod(errObj?.error?.message ?? 'An unexpected error occurred.');
 }
 
 function detectRateLimitKind(errObj: ApiError): RateLimitKind {
@@ -151,8 +156,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Generate fingerprint then attempt silent refresh on mount
+  // Generate fingerprint then attempt silent refresh on mount (ref guard prevents StrictMode double-fire)
+  const mountedRef = useRef(false);
   useEffect(() => {
+    if (mountedRef.current) return;
+    mountedRef.current = true;
     (async () => {
       const fp = await getFingerprint();
       if (fp) apiClient.setDeviceFingerprint(fp);
@@ -177,6 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         payload: { user, accessToken: data.accessToken },
       });
     } catch (err: unknown) {
+      apiClient.clearAccessToken();
       const errObj = err as ApiError;
       if (errObj?.error?.retryAfter) {
         dispatch({ type: 'AUTH_STOP' });
@@ -224,7 +233,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         type: 'AUTH_SUCCESS',
         payload: { user, accessToken: data.accessToken },
       });
+      if (data.oauthAction === 'created') {
+        addToast({ variant: 'success', title: 'Account created', description: 'Your account has been created successfully.' });
+      } else if (data.oauthAction === 'linked') {
+        const providerName = user.provider === 'GOOGLE' ? 'Google' : user.provider === 'GITHUB' ? 'GitHub' : user.provider;
+        addToast({ variant: 'success', title: 'Account linked', description: `Your account has been linked to ${providerName}.` });
+      }
     } catch (err: unknown) {
+      apiClient.clearAccessToken();
       addToast({ variant: 'error', title: 'Authentication failed', description: extractErrorMessage(err) });
       dispatch({ type: 'AUTH_STOP' });
     }
@@ -242,14 +258,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           payload: { user, accessToken: data.accessToken },
         });
       } catch (err: unknown) {
-        dispatch({
-          type: 'AUTH_ERROR',
-          payload: extractErrorMessage(err) || 'Passkey authentication failed.',
-        });
+        apiClient.clearAccessToken();
+        addToast({ variant: 'error', title: 'Passkey login failed', description: extractErrorMessage(err) || 'Passkey authentication failed.' });
+        dispatch({ type: 'AUTH_STOP' });
         throw err;
       }
     },
-    [],
+    [addToast],
   );
 
   const logout = useCallback(async () => {
@@ -284,6 +299,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         payload: { user, accessToken: data.accessToken },
       });
     } catch (err: unknown) {
+      apiClient.clearAccessToken();
       const errObj = err as ApiError;
       if (errObj?.error?.retryAfter) {
         dispatch({ type: 'AUTH_STOP' });

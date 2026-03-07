@@ -27,7 +27,9 @@ export interface User {
 export type SafeUser = Omit<
   User,
   'passwordHash' | 'pendingEmail' | 'mfaSecret' | 'mfaRecoveryCodes' | 'failedAttempts' | 'lockedUntil' | 'lockoutCount'
->;
+> & {
+  hasPassword: boolean;
+};
 
 export type SafeUserWithPermissions = SafeUser & {
   permissions: string[];
@@ -46,6 +48,7 @@ export function toSafeUser(user: User): SafeUser {
     emailVerified: user.emailVerified,
     isActive: user.isActive,
     mfaEnabled: user.mfaEnabled,
+    hasPassword: !!user.passwordHash,
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

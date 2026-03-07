@@ -18,6 +18,9 @@ import {
 type SidebarProps = {
   collapsed: boolean;
   onToggle: () => void;
+  onNavigate?: () => void;
+  /** Mobile-only: controls slide-in visibility */
+  mobileVisible?: boolean;
 };
 
 const mainItems = [
@@ -35,17 +38,22 @@ const accountItems = [
   { href: '/docs', label: 'Documentation', icon: FileText, external: true },
 ];
 
-export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
+export default function Sidebar({ collapsed, onToggle, onNavigate, mobileVisible }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
 
   const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPERADMIN';
 
+  // When mobileVisible is defined, sidebar is in mobile mode: always 212px, slide via transform
+  const isMobileMode = mobileVisible !== undefined;
+  const widthClass = isMobileMode ? 'w-[212px]' : collapsed ? 'w-[68px]' : 'w-[212px]';
+  const translateClass = isMobileMode
+    ? mobileVisible ? 'translate-x-0' : '-translate-x-full'
+    : '';
+
   return (
     <aside
-      className={`fixed left-0 top-0 z-30 flex h-screen flex-col border-r border-border-default bg-surface-primary transition-[width] duration-200 ${
-        collapsed ? 'w-[68px]' : 'w-[212px]'
-      }`}
+      className={`fixed left-0 top-0 z-30 flex h-screen flex-col border-r border-border-default bg-surface-primary transition-[width,transform] duration-200 ${widthClass} ${translateClass}`}
     >
       {/* Logo area */}
       <div className="flex h-[68px] items-center justify-between px-4">
@@ -71,6 +79,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               {...item}
               active={pathname === item.href || pathname.startsWith(item.href + '/')}
               collapsed={collapsed}
+              onNavigate={onNavigate}
             />
           ))}
           {isAdmin &&
@@ -80,6 +89,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
                 {...item}
                 active={pathname === item.href || pathname.startsWith(item.href + '/')}
                 collapsed={collapsed}
+                onNavigate={onNavigate}
               />
             ))}
         </NavSection>
@@ -92,6 +102,7 @@ export default function Sidebar({ collapsed, onToggle }: SidebarProps) {
               {...item}
               active={false}
               collapsed={collapsed}
+              onNavigate={onNavigate}
             />
           ))}
         </NavSection>
@@ -153,6 +164,7 @@ function NavItem({
   icon: Icon,
   active,
   collapsed,
+  onNavigate,
 }: {
   href: string;
   label: string;
@@ -160,10 +172,12 @@ function NavItem({
   active: boolean;
   collapsed: boolean;
   external?: boolean;
+  onNavigate?: () => void;
 }) {
   return (
     <Link
       href={href}
+      onClick={onNavigate}
       className={`flex items-center gap-1 p-2 text-body-sm transition-colors ${
         active
           ? 'rounded-3xl bg-surface-subtle text-content-primary'

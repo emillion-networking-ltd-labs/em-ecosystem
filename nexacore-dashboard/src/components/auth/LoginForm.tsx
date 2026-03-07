@@ -31,22 +31,24 @@ export default function LoginForm() {
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [oauthError, setOauthError] = useState<string | null>(null);
   const { login, isLoading, isAuthenticated, error, clearError, mfaRequired, resendVerificationPublic } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const { isSupported: passkeySupported, loginWithPasskey, isLoggingIn: passkeyLoading } = usePasskey();
+  const { addToast } = useToast();
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const oauthErrorShown = useRef(false);
 
   // Clear stale errors from other auth forms on mount + read OAuth error from URL
   useEffect(() => {
     clearError();
-    const urlError = searchParams.get('error');
-    if (urlError === 'oauth_failed') {
-      setOauthError('Sign in with provider failed. Please try again.');
+    const oauthError = searchParams.get('oauth_error');
+    if (oauthError && !oauthErrorShown.current) {
+      oauthErrorShown.current = true;
+      addToast({ variant: 'error', title: 'Sign in failed', description: decodeURIComponent(oauthError) });
     }
-  }, [clearError, searchParams]);
+  }, [clearError, searchParams, addToast]);
 
   // Redirect away if already authenticated
   useEffect(() => {
@@ -55,7 +57,6 @@ export default function LoginForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     clearError();
-    setOauthError(null);
     if (e.target.name === 'email') setEmailError(null);
     if (e.target.name === 'password') setPasswordError(null);
     setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
@@ -79,7 +80,6 @@ export default function LoginForm() {
   const handlePasskeyLogin = async () => {
     setPasskeyError(null);
     clearError();
-    setOauthError(null);
     try {
       await loginWithPasskey(formData.email || undefined);
     } catch {
@@ -183,7 +183,7 @@ export default function LoginForm() {
 
             {/* System Message — Figma: 348x24, HORIZONTAL, center */}
             {(() => {
-              const activeError = emailError || oauthError;
+              const activeError = emailError;
               return (
                 <div className={`flex items-center gap-2 ${activeError ? 'min-h-6' : 'h-6'}`}>
                   {activeError && (

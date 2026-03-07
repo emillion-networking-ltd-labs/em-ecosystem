@@ -69,12 +69,14 @@ describe('JwtStrategy', () => {
         email: 'test@example.com',
         role: Role.USER,
         jti: 'test-jti-123',
+        iat: Math.floor(Date.now() / 1000),
       });
 
       expect(result.id).toBe('uuid-123');
       expect(result.email).toBe('test@example.com');
       expect(result).not.toHaveProperty('passwordHash');
       expect(result).not.toHaveProperty('refreshToken');
+      expect(tokenDenyListService.isDenied).toHaveBeenCalledWith('test-jti-123', 'uuid-123', expect.any(Number));
     });
 
     it('should throw UnauthorizedException when user not found', async () => {
@@ -86,6 +88,7 @@ describe('JwtStrategy', () => {
           email: 'test@example.com',
           role: Role.USER,
           jti: 'test-jti-456',
+          iat: Math.floor(Date.now() / 1000),
         }),
       ).rejects.toThrow(UnauthorizedException);
     });
@@ -102,6 +105,7 @@ describe('JwtStrategy', () => {
           email: 'test@example.com',
           role: Role.USER,
           jti: 'test-jti-789',
+          iat: Math.floor(Date.now() / 1000),
         }),
       ).rejects.toThrow(new UnauthorizedException('Account deactivated'));
     });
@@ -115,6 +119,7 @@ describe('JwtStrategy', () => {
           email: 'test@example.com',
           role: Role.USER,
           jti: 'denied-jti',
+          iat: Math.floor(Date.now() / 1000),
         }),
       ).rejects.toThrow(new UnauthorizedException('Token has been revoked'));
     });

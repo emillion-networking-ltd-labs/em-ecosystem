@@ -72,7 +72,7 @@ export default function Input({
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
-            className={`shrink-0 ${error ? 'text-error/75' : 'text-content-secondary hover:text-content-primary/75'}`}
+            className="shrink-0 text-content-secondary hover:text-content-primary/75"
             tabIndex={-1}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
           >

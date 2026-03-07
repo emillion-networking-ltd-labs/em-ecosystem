@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import { Shield, Laptop, Smartphone, Trash2, AlertTriangle, ShieldCheck, Plus } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Shield, Laptop, Smartphone, Trash2, Plus } from 'lucide-react';
 import { useTrustedDevices } from '@/hooks/useTrustedDevices';
+import { useToast } from '@/context/ToastContext';
 import Button from '@/components/ui/Button';
 import ConfirmModal from '@/components/ui/ConfirmModal';
 import Spinner from '@/components/ui/Spinner';
@@ -40,11 +41,10 @@ export default function TrustedDevices() {
     trustCurrentDevice,
     revokeDevice,
     revokeAllDevices,
-    error,
-    clearError,
   } = useTrustedDevices();
 
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const { addToast } = useToast();
+
   const [isTrusting, setIsTrusting] = useState(false);
   const [revokeTarget, setRevokeTarget] = useState<TrustedDeviceResponse | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
@@ -55,23 +55,15 @@ export default function TrustedDevices() {
     fetchDevices();
   }, [fetchDevices]);
 
-  // Auto-dismiss success messages
-  useEffect(() => {
-    if (!successMsg) return;
-    const timer = setTimeout(() => setSuccessMsg(null), 3000);
-    return () => clearTimeout(timer);
-  }, [successMsg]);
-
-  // Clear error on user interaction
-  const dismissError = useCallback(() => {
-    clearError();
-  }, [clearError]);
-
   const handleTrust = async () => {
     setIsTrusting(true);
     const ok = await trustCurrentDevice();
     setIsTrusting(false);
-    if (ok) setSuccessMsg('Device trusted successfully.');
+    if (ok) {
+      addToast({ variant: 'success', title: 'Device trusted', description: 'This device is now trusted for future logins.' });
+    } else {
+      addToast({ variant: 'error', title: 'Trust failed', description: 'Could not trust this device. Try again later.' });
+    }
   };
 
   const handleRevoke = async () => {
@@ -80,7 +72,11 @@ export default function TrustedDevices() {
     const ok = await revokeDevice(revokeTarget.id);
     setIsRevoking(false);
     setRevokeTarget(null);
-    if (ok) setSuccessMsg('Device trust revoked.');
+    if (ok) {
+      addToast({ variant: 'success', title: 'Device revoked', description: 'This device will require MFA on next login.' });
+    } else {
+      addToast({ variant: 'error', title: 'Revoke failed', description: 'Could not revoke device trust. Try again later.' });
+    }
   };
 
   const handleRevokeAll = async () => {
@@ -88,7 +84,11 @@ export default function TrustedDevices() {
     const ok = await revokeAllDevices();
     setIsRevokingAll(false);
     setShowRevokeAll(false);
-    if (ok) setSuccessMsg('All devices revoked.');
+    if (ok) {
+      addToast({ variant: 'success', title: 'All devices revoked', description: `${devices.length} device${devices.length !== 1 ? 's' : ''} will require MFA on next login.` });
+    } else {
+      addToast({ variant: 'error', title: 'Revoke failed', description: 'Could not revoke all devices. Try again later.' });
+    }
   };
 
   return (
@@ -119,27 +119,6 @@ export default function TrustedDevices() {
           )}
         </div>
       </div>
-
-      {/* Success message */}
-      {successMsg && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-green-200 bg-green-50 p-3 text-body-sm text-green-800 dark:border-green-800 dark:bg-green-950 dark:text-green-200">
-          <ShieldCheck size={16} className="shrink-0" />
-          {successMsg}
-        </div>
-      )}
-
-      {/* Error message */}
-      {error && (
-        <div className="mb-4 flex items-center justify-between gap-2 rounded-lg border border-error-border bg-error-bg p-3 text-body-sm text-error">
-          <div className="flex items-center gap-2">
-            <AlertTriangle size={16} className="shrink-0" />
-            {error}
-          </div>
-          <button onClick={dismissError} className="text-error hover:opacity-70">
-            &times;
-          </button>
-        </div>
-      )}
 
       {/* Loading state */}
       {isLoading && devices.length === 0 && (

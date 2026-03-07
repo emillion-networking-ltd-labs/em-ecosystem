@@ -14,6 +14,7 @@ import {
   Redirect,
   UnauthorizedException,
   ParseUUIDPipe,
+  UseFilters,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -47,6 +48,7 @@ import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
+import { OAuthCallbackFilter } from './guards/oauth-callback.filter';
 import { Roles } from '../common/decorators/roles.decorator';
 import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
 import { CsrfGuard } from '../common/guards/csrf.guard';
@@ -452,6 +454,7 @@ export class AuthController {
   @Get('google/callback')
   @SkipThrottle()
   @UseGuards(GoogleAuthGuard)
+  @UseFilters(OAuthCallbackFilter)
   @Redirect()
   @ApiOperation({ summary: 'Google OAuth callback' })
   @ApiResponse({
@@ -461,7 +464,7 @@ export class AuthController {
   async googleAuthCallback(
     @Request()
     req: {
-      user: { accessToken: string; user: SafeUser; cookie: CookieConfig };
+      user: { accessToken: string; user: SafeUser; cookie: CookieConfig; oauthAction?: 'login' | 'created' | 'linked' };
     },
   ) {
     const code = await this.authService.generateOAuthCode(req.user);
@@ -491,6 +494,7 @@ export class AuthController {
   @Get('github/callback')
   @SkipThrottle()
   @UseGuards(GitHubAuthGuard)
+  @UseFilters(OAuthCallbackFilter)
   @Redirect()
   @ApiOperation({ summary: 'GitHub OAuth callback' })
   @ApiResponse({
@@ -500,7 +504,7 @@ export class AuthController {
   async githubAuthCallback(
     @Request()
     req: {
-      user: { accessToken: string; user: SafeUser; cookie: CookieConfig };
+      user: { accessToken: string; user: SafeUser; cookie: CookieConfig; oauthAction?: 'login' | 'created' | 'linked' };
     },
   ) {
     const code = await this.authService.generateOAuthCode(req.user);
@@ -535,7 +539,11 @@ export class AuthController {
   ) {
     const result = await this.authService.exchangeOAuthCode(dto.code);
     this.setCookie(res, result.cookie);
-    return { accessToken: result.accessToken, user: result.user };
+    return {
+      accessToken: result.accessToken,
+      user: result.user,
+      ...(result.oauthAction && result.oauthAction !== 'login' && { oauthAction: result.oauthAction }),
+    };
   }
 
   // ── Trusted Device Endpoints ──────────────────────────────────────

@@ -82,6 +82,7 @@ export interface AuthResult {
   accessToken: string;
   user: SafeUser;
   cookie: CookieConfig;
+  oauthAction?: 'login' | 'created' | 'linked';
 }
 
 export interface RegisterResult {
@@ -535,7 +536,7 @@ export class AuthService {
     requestMeta: { ipAddress: string; userAgent?: string | null },
     ctx?: RequestContext,
   ): Promise<AuthResult> {
-    const user = await this.usersService.findOrCreateByOAuth(profile);
+    const { user, action } = await this.usersService.findOrCreateByOAuth(profile);
 
     // Reset lockout on successful OAuth login (proves account ownership)
     if (user.failedAttempts > 0 || user.lockoutCount > 0) {
@@ -572,6 +573,7 @@ export class AuthService {
       accessToken,
       user: toSafeUser(user),
       cookie: this.buildRefreshCookie(refreshToken),
+      oauthAction: action,
     };
   }
 
@@ -579,6 +581,7 @@ export class AuthService {
     accessToken: string;
     user: SafeUser;
     cookie: CookieConfig;
+    oauthAction?: 'login' | 'created' | 'linked';
   }): Promise<string> {
     return this.oauthCodeStore.store(payload);
   }
@@ -587,6 +590,7 @@ export class AuthService {
     accessToken: string;
     user: SafeUser;
     cookie: CookieConfig;
+    oauthAction?: 'login' | 'created' | 'linked';
   }> {
     const payload = await this.oauthCodeStore.exchange(code);
     if (!payload) {
@@ -919,6 +923,8 @@ export class AuthService {
     const newEmail = user.pendingEmail;
 
     // Atomic: swap email + clear pendingEmail + mark token used
+    // If user has OAuth, unlink it — the OAuth providerId is tied to the old email
+    const isOAuth = user.provider !== 'LOCAL';
     await this.prisma.$transaction([
       this.prisma.user.update({
         where: { id: user.id },
@@ -926,6 +932,7 @@ export class AuthService {
           email: newEmail,
           pendingEmail: null,
           emailVerified: true,
+          ...(isOAuth && { provider: 'LOCAL', providerId: null }),
         },
       }),
       this.prisma.emailVerificationToken.update({

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Key, Smartphone, Monitor, Pencil, Trash2, Plus, AlertTriangle, ShieldCheck } from 'lucide-react';
 import { usePasskey } from '@/hooks/usePasskey';
+import { useToast } from '@/context/ToastContext';
 import Button from '@/components/ui/Button';
 import Input from '@/components/ui/Input';
 import ConfirmModal from '@/components/ui/ConfirmModal';
@@ -94,13 +95,13 @@ export default function PasskeyManager() {
     isRegistering,
     renamePasskey,
     deletePasskey,
-    error,
     clearError,
   } = usePasskey();
 
+  const { addToast } = useToast();
+
   const [view, setView] = useState<View>('list');
   const [regName, setRegName] = useState('');
-  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   // Rename state
   const [renamingPasskey, setRenamingPasskey] = useState<PasskeyResponse | null>(null);
@@ -110,27 +111,22 @@ export default function PasskeyManager() {
   // Delete state
   const [deletingPasskey, setDeletingPasskey] = useState<PasskeyResponse | null>(null);
   const [deletePassword, setDeletePassword] = useState('');
+  const [deleteFieldError, setDeleteFieldError] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
-  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchPasskeys();
   }, [fetchPasskeys]);
 
-  useEffect(() => {
-    if (successMsg) {
-      const t = setTimeout(() => setSuccessMsg(null), 3000);
-      return () => clearTimeout(t);
-    }
-  }, [successMsg]);
-
   const handleRegister = async () => {
     clearError();
     const result = await registerPasskey(regName.trim() || undefined);
     if (result) {
-      setSuccessMsg(`Passkey "${result.name}" registered successfully.`);
+      addToast({ variant: 'success', title: 'Passkey registered', description: `"${result.name}" added successfully.` });
       setRegName('');
       setView('list');
+    } else {
+      addToast({ variant: 'error', title: 'Registration failed', description: 'Passkey registration failed. Please try again.' });
     }
   };
 
@@ -140,23 +136,29 @@ export default function PasskeyManager() {
     const ok = await renamePasskey(renamingPasskey.id, renameValue.trim());
     setIsRenaming(false);
     if (ok) {
-      setSuccessMsg('Passkey renamed.');
+      addToast({ variant: 'success', title: 'Passkey renamed', description: `Renamed to "${renameValue.trim()}".` });
       setRenamingPasskey(null);
+    } else {
+      addToast({ variant: 'error', title: 'Rename failed', description: 'Failed to rename passkey.' });
     }
   };
 
   const handleDeleteSubmit = async () => {
     if (!deletingPasskey) return;
+    if (!deletePassword.trim()) {
+      setDeleteFieldError('Enter your password');
+      return;
+    }
+    setDeleteFieldError('');
     setIsDeleting(true);
-    setDeleteError(null);
-    const ok = await deletePasskey(deletingPasskey.id, deletePassword || undefined);
+    const errMsg = await deletePasskey(deletingPasskey.id, deletePassword);
     setIsDeleting(false);
-    if (ok) {
-      setSuccessMsg('Passkey deleted.');
+    if (!errMsg) {
+      addToast({ variant: 'success', title: 'Passkey deleted', description: 'Passkey removed. You can also delete it from your browser or device settings.' });
       setDeletingPasskey(null);
       setDeletePassword('');
     } else {
-      setDeleteError(error || 'Failed to delete passkey.');
+      addToast({ variant: 'error', title: 'Delete failed', description: errMsg });
     }
   };
 
@@ -193,22 +195,6 @@ export default function PasskeyManager() {
         </div>
       )}
 
-      {/* Error */}
-      {error && view === 'list' && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-error-border bg-error-bg p-3">
-          <AlertTriangle size={16} className="shrink-0 text-error" />
-          <span className="text-caption text-error">{error}</span>
-        </div>
-      )}
-
-      {/* Success */}
-      {successMsg && (
-        <div className="mb-4 flex items-center gap-2 rounded-lg border border-success-border bg-success-bg p-3">
-          <ShieldCheck size={16} className="shrink-0 text-success" />
-          <span className="text-caption text-success">{successMsg}</span>
-        </div>
-      )}
-
       {/* Loading */}
       {isLoadingList && passkeys.length === 0 && (
         <div className="flex items-center justify-center py-8">
@@ -238,7 +224,6 @@ export default function PasskeyManager() {
                   }}
                   onDelete={(p) => {
                     clearError();
-                    setDeleteError(null);
                     setDeletePassword('');
                     setDeletingPasskey(p);
                   }}
@@ -286,12 +271,6 @@ export default function PasskeyManager() {
             maxLength={64}
             disabled={isRegistering}
           />
-          {error && (
-            <div className="flex items-center gap-2">
-              <AlertTriangle size={14} className="shrink-0 text-error" />
-              <span className="text-caption text-error">{error}</span>
-            </div>
-          )}
           <div className="flex gap-2">
             <Button
               variant="outline"
@@ -340,7 +319,7 @@ export default function PasskeyManager() {
       {/* Delete Modal */}
       <ConfirmModal
         open={!!deletingPasskey}
-        onClose={() => { setDeletingPasskey(null); setDeleteError(null); }}
+        onClose={() => { setDeletingPasskey(null); setDeleteFieldError(''); clearError(); }}
         onConfirm={handleDeleteSubmit}
         title="Delete Passkey"
         description={`Are you sure you want to delete "${deletingPasskey?.name || 'Passkey'}"? This action cannot be undone.`}
@@ -354,9 +333,9 @@ export default function PasskeyManager() {
             type="password"
             name="delete-passkey-password"
             value={deletePassword}
-            onChange={(e) => { setDeletePassword(e.target.value); setDeleteError(null); }}
+            onChange={(e) => { setDeletePassword(e.target.value); setDeleteFieldError(''); }}
             placeholder="Enter your password"
-            error={deleteError || undefined}
+            error={deleteFieldError || undefined}
           />
         </div>
       </ConfirmModal>

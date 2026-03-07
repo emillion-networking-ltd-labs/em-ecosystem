@@ -15,6 +15,7 @@ export type SafeUser = {
   lockedUntil: string | null;
   lockoutCount: number;
   mfaEnabled: boolean;
+  hasPassword: boolean;
   permissions?: string[];
   createdAt: string;
   updatedAt: string;
@@ -23,6 +24,7 @@ export type SafeUser = {
 export type AuthResponse = {
   user: SafeUser;
   accessToken: string;
+  oauthAction?: 'created' | 'linked';
 };
 
 export type LoginResponse =

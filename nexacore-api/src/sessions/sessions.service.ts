@@ -21,6 +21,26 @@ import {
 
 const BCRYPT_ROUNDS = 12;
 
+function parseDeviceInfo(userAgent: string | null | undefined): string | null {
+  if (!userAgent) return null;
+
+  let browser = 'Unknown Browser';
+  if (userAgent.includes('Edg/')) browser = 'Edge';
+  else if (userAgent.includes('OPR/') || userAgent.includes('Opera')) browser = 'Opera';
+  else if (userAgent.includes('Chrome/') && !userAgent.includes('Chromium')) browser = 'Chrome';
+  else if (userAgent.includes('Firefox/')) browser = 'Firefox';
+  else if (userAgent.includes('Safari/') && !userAgent.includes('Chrome')) browser = 'Safari';
+
+  let os = 'Unknown OS';
+  if (userAgent.includes('Windows')) os = 'Windows';
+  else if (userAgent.includes('Mac OS X') || userAgent.includes('Macintosh')) os = 'macOS';
+  else if (userAgent.includes('Android')) os = 'Android';
+  else if (userAgent.includes('iPhone') || userAgent.includes('iPad')) os = 'iOS';
+  else if (userAgent.includes('Linux')) os = 'Linux';
+
+  return `${browser} on ${os}`;
+}
+
 @Injectable()
 export class SessionsService {
   constructor(
@@ -50,7 +70,7 @@ export class SessionsService {
         userId: params.userId,
         tokenFamily,
         refreshTokenHash,
-        deviceInfo: params.deviceInfo || null,
+        deviceInfo: params.deviceInfo || parseDeviceInfo(params.userAgent) || null,
         ipAddress: params.ipAddress,
         userAgent: params.userAgent || null,
         locationCity: geo?.city || null,

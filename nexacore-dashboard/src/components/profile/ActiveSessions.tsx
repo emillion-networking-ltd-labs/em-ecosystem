@@ -11,10 +11,20 @@ function parseUserAgent(ua: string | null): { label: string; isMobile: boolean }
   if (!ua) return { label: 'Unknown device', isMobile: false };
 
   const isMobile = /mobile|android|iphone|ipad/i.test(ua);
-  const browserMatch = ua.match(/(Chrome|Firefox|Safari|Edge|Opera)\/[\d.]+/i);
-  const browser = browserMatch ? browserMatch[1] : 'Browser';
-  const osMatch = ua.match(/\((.*?)\)/);
-  const os = osMatch ? osMatch[1].split(';')[0].trim() : '';
+
+  let browser = 'Browser';
+  if (ua.includes('Edg/')) browser = 'Edge';
+  else if (ua.includes('OPR/') || ua.includes('Opera')) browser = 'Opera';
+  else if (ua.includes('Chrome/') && !ua.includes('Chromium')) browser = 'Chrome';
+  else if (ua.includes('Firefox/')) browser = 'Firefox';
+  else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari';
+
+  let os = '';
+  if (ua.includes('Windows')) os = 'Windows';
+  else if (ua.includes('Mac OS X') || ua.includes('Macintosh')) os = 'macOS';
+  else if (ua.includes('Android')) os = 'Android';
+  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
+  else if (ua.includes('Linux')) os = 'Linux';
 
   return {
     label: os ? `${browser} on ${os}` : browser,
@@ -118,8 +128,9 @@ export default function ActiveSessions() {
       ) : (
         <div className="space-y-3">
           {sessions.map((session) => {
-            const { label, isMobile } = parseUserAgent(session.userAgent);
-            const DeviceIcon = isMobile ? Smartphone : Monitor;
+            const parsed = parseUserAgent(session.userAgent);
+            const label = session.deviceInfo || parsed.label;
+            const DeviceIcon = parsed.isMobile ? Smartphone : Monitor;
 
             return (
               <div

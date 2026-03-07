@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import RingSpinner from '@/components/ui/RingSpinner';
@@ -10,7 +10,6 @@ export default function OAuthCallbackHandler() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const processed = useRef(false);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (processed.current) return;
@@ -20,18 +19,19 @@ export default function OAuthCallbackHandler() {
     const urlError = searchParams.get('error');
 
     if (urlError) {
-      setError('Authentication failed. Please try again.');
-      setTimeout(() => router.replace('/login?error=oauth_failed'), 2000);
+      const message = decodeURIComponent(urlError);
+      const encoded = encodeURIComponent(message !== 'true' ? message : 'Authentication failed. Please try again.');
+      router.replace(`/login?oauth_error=${encoded}`);
       return;
     }
 
     if (!code) {
-      router.replace('/login?error=oauth_failed');
+      router.replace('/login?oauth_error=' + encodeURIComponent('Authentication failed. Please try again.'));
       return;
     }
 
     handleOAuthCallback(code).catch(() => {
-      router.replace('/login?error=oauth_failed');
+      router.replace('/login?oauth_error=' + encodeURIComponent('Authentication failed. Please try again.'));
     });
   }, [searchParams, handleOAuthCallback, router]);
 
@@ -42,14 +42,8 @@ export default function OAuthCallbackHandler() {
   return (
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-4">
-        {error ? (
-          <p className="text-sm text-error">{error}</p>
-        ) : (
-          <>
-            <RingSpinner size="xl" />
-            <p className="text-sm text-content-primary/50">Completing sign in...</p>
-          </>
-        )}
+        <RingSpinner size="xl" />
+        <p className="text-sm text-content-primary/50">Completing sign in...</p>
       </div>
     </div>
   );

@@ -15,7 +15,8 @@ type ApiError = { error?: { message?: string; statusCode?: number } };
 function extractMessage(err: unknown, fallback: string): string {
   const e = err as ApiError;
   if (e?.error?.statusCode === 429) return 'Too many requests. Try again later.';
-  return e?.error?.message ?? fallback;
+  const msg = e?.error?.message ?? fallback;
+  return msg.endsWith('.') ? msg : `${msg}.`;
 }
 
 export function useTrustedDevices() {

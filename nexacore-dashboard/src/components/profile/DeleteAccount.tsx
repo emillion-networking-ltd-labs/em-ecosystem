@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/context/ToastContext';
 import { deleteAccount } from '@/lib/delete-account-api';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
@@ -14,11 +15,13 @@ function extractMessage(err: unknown, fallback: string): string {
   if (e?.error?.statusCode === 429) return 'Too many requests. Try again later.';
   if (e?.error?.statusCode === 403) return 'SUPERADMIN accounts cannot be deleted.';
   if (e?.error?.statusCode === 401) return 'Incorrect password.';
-  return e?.error?.message ?? fallback;
+  const msg = e?.error?.message ?? fallback;
+  return msg.endsWith('.') ? msg : `${msg}.`;
 }
 
 export default function DeleteAccount() {
   const { user, logout } = useAuth();
+  const { addToast } = useToast();
   const router = useRouter();
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -26,11 +29,10 @@ export default function DeleteAccount() {
   const [confirmText, setConfirmText] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
-  const isLocal = user?.provider === 'LOCAL';
+  const requiresPassword = user?.hasPassword ?? false;
   const isConfirmValid = confirmText === 'DELETE';
-  const isPasswordValid = !isLocal || password.length >= 8;
+  const isPasswordValid = !requiresPassword || password.length >= 8;
   const canConfirm = isConfirmValid && isPasswordValid && !loading;
 
   const handleClose = () => {
@@ -38,18 +40,16 @@ export default function DeleteAccount() {
     setShowModal(false);
     setConfirmText('');
     setPassword('');
-    setError('');
   };
 
   const handleDelete = async () => {
-    setError('');
     setLoading(true);
     try {
-      await deleteAccount(isLocal ? password : undefined);
+      await deleteAccount(requiresPassword ? password : undefined);
       await logout();
       router.push('/login');
     } catch (err: unknown) {
-      setError(extractMessage(err, 'Failed to delete account.'));
+      addToast({ variant: 'error', title: 'Delete failed', description: extractMessage(err, 'Failed to delete account.') });
     } finally {
       setLoading(false);
     }
@@ -117,7 +117,7 @@ export default function DeleteAccount() {
                 />
               </div>
 
-              {isLocal && (
+              {requiresPassword && (
                 <div className="mt-4">
                   <Input
                     label="Password"
@@ -130,7 +130,6 @@ export default function DeleteAccount() {
                 </div>
               )}
 
-              {error && <p className="mt-4 text-caption text-error">{error}</p>}
             </div>
 
             {/* Bottom section — buttons */}

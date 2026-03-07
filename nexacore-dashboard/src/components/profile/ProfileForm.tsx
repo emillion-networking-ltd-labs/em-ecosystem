@@ -26,7 +26,8 @@ export default function ProfileForm() {
       addToast({ variant: 'success', title: 'Profile updated', description: 'Your profile information has been saved.' });
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
-      addToast({ variant: 'error', title: 'Update failed', description: apiErr?.error?.message || 'Could not update profile.' });
+      const msg = apiErr?.error?.message || 'Could not update profile.';
+      addToast({ variant: 'error', title: 'Update failed', description: msg.endsWith('.') ? msg : `${msg}.` });
     } finally {
       setLoading(false);
     }
@@ -84,14 +85,6 @@ export default function ProfileForm() {
             value={user?.email || ''}
             disabled
           />
-          {user?.provider === 'LOCAL' && (
-            <a
-              href="#change-email"
-              className="absolute bottom-4 right-10 text-caption font-medium text-accent hover:underline"
-            >
-              Change
-            </a>
-          )}
           <Lock size={16} className="absolute bottom-4 right-4 text-content-tertiary" />
         </div>
 

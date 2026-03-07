@@ -16,7 +16,8 @@ import type { PasskeyResponse, PasskeyRegisterResult } from '@/lib/types';
 type ApiError = { error?: { message?: string } };
 
 function extractMessage(err: unknown, fallback: string): string {
-  return (err as ApiError)?.error?.message ?? fallback;
+  const msg = (err as ApiError)?.error?.message ?? fallback;
+  return msg.endsWith('.') ? msg : `${msg}.`;
 }
 
 export function usePasskey() {
@@ -79,8 +80,7 @@ export function usePasskey() {
         await passkeyLogin(challengeId, credential as unknown as Record<string, unknown>);
       } catch (err: unknown) {
         if ((err as Error)?.name === 'NotAllowedError') return;
-        setError(extractMessage(err, 'Passkey authentication failed.'));
-        throw err;
+        // AuthContext.passkeyLogin already shows a toast — avoid duplicate inline error
       } finally {
         setIsLoggingIn(false);
       }
@@ -104,15 +104,16 @@ export function usePasskey() {
   );
 
   const handleDelete = useCallback(
-    async (id: string, password?: string): Promise<boolean> => {
+    async (id: string, password?: string): Promise<string | null> => {
       setError(null);
       try {
         await apiDeletePasskey(id, password);
         await fetchPasskeys();
-        return true;
+        return null;
       } catch (err) {
-        setError(extractMessage(err, 'Failed to delete passkey.'));
-        return false;
+        const msg = extractMessage(err, 'Failed to delete passkey.');
+        setError(msg);
+        return msg;
       }
     },
     [fetchPasskeys],

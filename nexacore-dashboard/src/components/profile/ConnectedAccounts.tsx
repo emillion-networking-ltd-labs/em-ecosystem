@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
+import { useToast } from '@/context/ToastContext';
 import { unlinkOAuth } from '@/lib/unlink-oauth-api';
 import Input from '@/components/ui/Input';
 
@@ -45,14 +45,13 @@ const providers = [
 ];
 
 export default function ConnectedAccounts() {
-  const { user, logout } = useAuth();
-  const router = useRouter();
+  const { user, refreshSession } = useAuth();
+  const { addToast } = useToast();
   const overlayRef = useRef<HTMLDivElement>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   const canConfirm = password.length >= 8 && !loading;
 
@@ -62,25 +61,28 @@ export default function ConnectedAccounts() {
     if (loading) return;
     setShowModal(false);
     setPassword('');
-    setError('');
   };
 
   const handleUnlink = async () => {
-    setError('');
     setLoading(true);
     try {
       await unlinkOAuth(password);
-      await logout();
-      router.push('/login');
+      setShowModal(false);
+      setPassword('');
+      addToast({ variant: 'success', title: 'Account disconnected', description: 'Your account now uses local authentication.' });
+      await refreshSession();
     } catch (err: unknown) {
       const e = err as ApiError;
+      let msg: string;
       if (e?.error?.statusCode === 429) {
-        setError('Too many requests. Try again later.');
+        msg = 'Too many requests. Try again later.';
       } else if (e?.error?.statusCode === 401) {
-        setError('Invalid password.');
+        msg = 'Invalid password.';
       } else {
-        setError(e?.error?.message ?? 'Failed to unlink OAuth provider.');
+        const raw = e?.error?.message ?? 'Failed to unlink OAuth provider.';
+        msg = raw.endsWith('.') ? raw : `${raw}.`;
       }
+      addToast({ variant: 'error', title: 'Disconnect failed', description: msg });
     } finally {
       setLoading(false);
     }
@@ -103,7 +105,7 @@ export default function ConnectedAccounts() {
 
   return (
     <>
-      <div className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card">
+      <div id="connected-accounts" className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card">
         <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
           Connected Accounts
         </h2>
@@ -125,12 +127,18 @@ export default function ConnectedAccounts() {
                 </div>
 
                 {isConnected ? (
-                  <button
-                    onClick={() => setShowModal(true)}
-                    className="rounded-md border border-error-border px-4 py-1.5 text-caption text-error hover:bg-error-bg"
-                  >
-                    Disconnect
-                  </button>
+                  user.hasPassword ? (
+                    <button
+                      onClick={() => setShowModal(true)}
+                      className="rounded-md border border-error-border px-4 py-1.5 text-caption text-error hover:bg-error-bg"
+                    >
+                      Disconnect
+                    </button>
+                  ) : (
+                    <span className="text-caption text-content-tertiary">
+                      Set a password first
+                    </span>
+                  )
                 ) : (
                   <button
                     onClick={() => handleConnect(provider.id)}
@@ -161,8 +169,8 @@ export default function ConnectedAccounts() {
                 Disconnect {connectedProvider?.name}
               </h2>
               <p className="mt-2 text-body-sm text-content-secondary">
-                Your account will be converted to local authentication. All sessions will be
-                revoked and you&apos;ll need to log in with your email and password.
+                Your account will be converted to local authentication. You&apos;ll use your
+                email and password to log in from now on.
               </p>
 
               <div className="mt-4">
@@ -176,7 +184,6 @@ export default function ConnectedAccounts() {
                 />
               </div>
 
-              {error && <p className="mt-4 text-caption text-error">{error}</p>}
             </div>
 
             {/* Bottom section — buttons */}

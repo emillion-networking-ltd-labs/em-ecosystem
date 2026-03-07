@@ -67,10 +67,10 @@ export default function NavBar({ onMenuClick, onRightPanelToggle }: NavBarProps)
         {/* Mobile hamburger */}
         <button
           onClick={onMenuClick}
-          className="flex h-6 w-6 items-center justify-center rounded-xl p-1 text-content-secondary hover:bg-surface-subtle lg:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-content-secondary hover:bg-surface-subtle lg:hidden"
           aria-label="Toggle sidebar"
         >
-          <PanelLeft size={16} />
+          <PanelLeft size={20} />
         </button>
 
         {/* Desktop: sidebar toggle + star + breadcrumbs */}
