@@ -614,7 +614,7 @@ describe('AuthService', () => {
     };
 
     it('should find or create user and return accessToken, cookie, and SafeUser', async () => {
-      usersService.findOrCreateByOAuth.mockResolvedValue(mockOAuthUser);
+      usersService.findOrCreateByOAuth.mockResolvedValue({ user: mockOAuthUser, action: 'login' });
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
       jwtService.sign
         .mockReturnValueOnce('oauth-access-token')
@@ -638,7 +638,7 @@ describe('AuthService', () => {
     });
 
     it('should create a session via SessionsService', async () => {
-      usersService.findOrCreateByOAuth.mockResolvedValue(mockOAuthUser);
+      usersService.findOrCreateByOAuth.mockResolvedValue({ user: mockOAuthUser, action: 'login' });
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
       jwtService.sign.mockReturnValue('token');
       sessionsService.createSession.mockResolvedValue(mockSession);
@@ -1824,7 +1824,7 @@ describe('AuthService', () => {
         providerId: 'google-123',
       };
 
-      usersService.findOrCreateByOAuth.mockResolvedValue(oauthUser);
+      usersService.findOrCreateByOAuth.mockResolvedValue({ user: oauthUser, action: 'login' });
       jwtService.sign.mockReturnValueOnce('oauth-at').mockReturnValueOnce('oauth-rt');
       sessionsService.createSession.mockResolvedValue({
         ...mockSession,
@@ -2176,7 +2176,7 @@ describe('AuthService', () => {
     });
 
     it('should call enforceSessionLimit on OAuth login', async () => {
-      usersService.findOrCreateByOAuth.mockResolvedValue(mockUser);
+      usersService.findOrCreateByOAuth.mockResolvedValue({ user: mockUser, action: 'login' });
 
       await authService.validateOAuthUser(
         {
@@ -2646,7 +2646,7 @@ describe('AuthService', () => {
         provider: Provider.GOOGLE,
         providerId: 'gid',
       };
-      usersService.findOrCreateByOAuth.mockResolvedValue(oauthUser);
+      usersService.findOrCreateByOAuth.mockResolvedValue({ user: oauthUser, action: 'login' });
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
       jwtService.sign.mockReturnValueOnce('oauth-access').mockReturnValueOnce('oauth-refresh');
       sessionsService.createSession.mockResolvedValue(mockSession);
