@@ -165,7 +165,7 @@ describe('GoogleStrategy', () => {
 
       expect(done).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Invalid or expired OAuth state parameter',
+          message: 'Authentication failed',
         }),
         undefined,
       );
@@ -185,7 +185,7 @@ describe('GoogleStrategy', () => {
 
       expect(done).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Invalid or expired OAuth state parameter',
+          message: 'Authentication failed',
         }),
         undefined,
       );
