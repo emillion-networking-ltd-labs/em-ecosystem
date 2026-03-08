@@ -2178,7 +2178,7 @@ describe('AuthService', () => {
 
       await expect(
         authService.refreshTokens('valid-token', requestMeta),
-      ).rejects.toThrow('Session expired due to inactivity');
+      ).rejects.toThrow('Invalid or expired refresh token');
     });
 
     it('should NOT call rotateRefreshToken when session is idle', async () => {

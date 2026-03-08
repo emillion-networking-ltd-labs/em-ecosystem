@@ -496,7 +496,7 @@ export class AuthService {
         })
         .catch(() => {});
 
-      throw new UnauthorizedException(ErrorMessages.auth.SESSION_EXPIRED);
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
 
     // Rotate: validates old session, detects theft, creates new session
