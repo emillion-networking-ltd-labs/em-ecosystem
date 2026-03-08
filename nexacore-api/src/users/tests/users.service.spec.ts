@@ -657,12 +657,12 @@ describe('UsersService', () => {
       newPassword: 'NewPass456!',
     };
 
-    it('should throw NotFoundException when user not found', async () => {
+    it('should throw UnauthorizedException when user not found (CWE-200)', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
         usersService.changePassword('uuid-123', changeDto),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should allow setting password for OAuth accounts (no existing password)', async () => {
@@ -1091,12 +1091,12 @@ describe('UsersService', () => {
   describe('requestEmailChange', () => {
     const changeEmailDto = { newEmail: 'new@example.com', password: 'StrongPass1!' };
 
-    it('should throw NotFoundException when user not found', async () => {
+    it('should throw UnauthorizedException when user not found (CWE-200)', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
         usersService.requestEmailChange('uuid-123', changeEmailDto),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw BadRequestException for OAuth accounts (no passwordHash)', async () => {
@@ -1235,12 +1235,12 @@ describe('UsersService', () => {
     const deleteDto = { password: 'ValidPass1!' };
     const ctx = { ipAddress: '10.0.0.1', userAgent: 'test-agent' };
 
-    it('should throw NotFoundException when user not found', async () => {
+    it('should throw UnauthorizedException when user not found (CWE-200)', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
         usersService.selfDeleteAccount('nonexistent', deleteDto, ctx),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw ForbiddenException for SUPERADMIN accounts', async () => {
@@ -1510,12 +1510,12 @@ describe('UsersService', () => {
       });
     });
 
-    it('should throw NotFoundException if user not found', async () => {
+    it('should throw UnauthorizedException if user not found (CWE-200)', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
         usersService.unlinkOAuth('nonexistent', unlinkDto, ctx),
-      ).rejects.toThrow(NotFoundException);
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw BadRequestException if already LOCAL', async () => {
