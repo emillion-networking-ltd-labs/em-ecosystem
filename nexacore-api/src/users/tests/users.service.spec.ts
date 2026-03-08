@@ -343,7 +343,7 @@ describe('UsersService', () => {
 
       const result = await usersService.findOrCreateByOAuth(googleProfile);
 
-      expect(result).toEqual(existingOAuthUser);
+      expect(result).toEqual({ user: existingOAuthUser, action: 'login' });
       expect(prisma.user.update).not.toHaveBeenCalled();
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
@@ -354,6 +354,7 @@ describe('UsersService', () => {
         email: 'oauth@example.com',
         provider: Provider.LOCAL,
         providerId: null,
+        emailVerified: true,
       };
       const linkedUser = {
         ...localUser,
@@ -366,7 +367,7 @@ describe('UsersService', () => {
 
       const result = await usersService.findOrCreateByOAuth(googleProfile);
 
-      expect(result).toEqual(linkedUser);
+      expect(result).toEqual({ user: linkedUser, action: 'linked' });
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: localUser.id },
         data: {
@@ -388,7 +389,7 @@ describe('UsersService', () => {
 
       const result = await usersService.findOrCreateByOAuth(googleProfile);
 
-      expect(result).toEqual(githubUser);
+      expect(result).toEqual({ user: githubUser, action: 'login' });
       expect(prisma.user.update).not.toHaveBeenCalled();
     });
 
@@ -406,7 +407,7 @@ describe('UsersService', () => {
 
       const result = await usersService.findOrCreateByOAuth(googleProfile);
 
-      expect(result).toEqual(newOAuthUser);
+      expect(result).toEqual({ user: newOAuthUser, action: 'created' });
       expect(prisma.user.create).toHaveBeenCalledWith({
         data: {
           email: 'oauth@example.com',
@@ -443,7 +444,7 @@ describe('UsersService', () => {
         avatarUrl: 'https://example.com/avatar.jpg',
       });
 
-      expect(result).toEqual(updatedUser);
+      expect(result).toEqual({ user: updatedUser, action: 'login' });
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: existingOAuthUser.id },
         data: {
@@ -664,16 +665,25 @@ describe('UsersService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw ForbiddenException for OAuth accounts (no password)', async () => {
+    it('should allow setting password for OAuth accounts (no existing password)', async () => {
       prisma.user.findUnique.mockResolvedValue({
         ...mockUser,
         passwordHash: null,
         provider: Provider.GOOGLE,
       });
+      passwordBreachService.isBreached.mockResolvedValue(false);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hashed-password');
+      prisma.user.update.mockResolvedValue(mockUser);
 
-      await expect(
-        usersService.changePassword('uuid-123', changeDto),
-      ).rejects.toThrow(ForbiddenException);
+      await usersService.changePassword('uuid-123', changeDto);
+
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'uuid-123' },
+        data: { passwordHash: 'new-hashed-password' },
+      });
+      // Should NOT revoke sessions/devices when setting password for the first time
+      expect(sessionsService.revokeAllUserSessions).not.toHaveBeenCalled();
+      expect(trustedDeviceService.revokeAllDevices).not.toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException when current password is wrong', async () => {
@@ -1464,24 +1474,24 @@ describe('UsersService', () => {
       });
     });
 
-    it('should revoke all sessions after unlink', async () => {
+    it('should not revoke sessions after unlink', async () => {
       prisma.user.findUnique.mockResolvedValue(googleUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       prisma.user.update.mockResolvedValue({ ...googleUser, provider: Provider.LOCAL, providerId: null });
 
       await usersService.unlinkOAuth('uuid-123', unlinkDto, ctx);
 
-      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith('uuid-123');
+      expect(sessionsService.revokeAllUserSessions).not.toHaveBeenCalled();
     });
 
-    it('should revoke all trusted devices after unlink', async () => {
+    it('should not revoke trusted devices after unlink', async () => {
       prisma.user.findUnique.mockResolvedValue(googleUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       prisma.user.update.mockResolvedValue({ ...googleUser, provider: Provider.LOCAL, providerId: null });
 
       await usersService.unlinkOAuth('uuid-123', unlinkDto, ctx);
 
-      expect(trustedDeviceService.revokeAllDevices).toHaveBeenCalledWith('uuid-123');
+      expect(trustedDeviceService.revokeAllDevices).not.toHaveBeenCalled();
     });
 
     it('should audit OAUTH_UNLINKED with previous provider metadata', async () => {
