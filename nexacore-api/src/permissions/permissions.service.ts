@@ -8,6 +8,7 @@ import {
 import { PrismaService } from '../prisma/prisma.service';
 import { PermissionsCache } from './permissions.cache';
 import { Role } from '../users/enums/role.enum';
+import { ErrorMessages } from '../common/constants/error-messages';
 import {
   DEFAULT_PERMISSIONS,
   DEFAULT_ROLE_PERMISSIONS,
@@ -105,7 +106,7 @@ export class PermissionsService implements OnModuleInit {
   async getPermissionsForRole(role: Role): Promise<RolePermissionsResponse> {
     if (role === Role.SUPERADMIN) {
       throw new BadRequestException(
-        'SUPERADMIN bypasses all permissions — no explicit assignments',
+        ErrorMessages.permission.INVALID_ROLE_OPERATION,
       );
     }
 
@@ -128,14 +129,14 @@ export class PermissionsService implements OnModuleInit {
   ): Promise<void> {
     if (role === Role.SUPERADMIN) {
       throw new BadRequestException(
-        'Cannot modify SUPERADMIN permissions — SUPERADMIN bypasses all checks',
+        ErrorMessages.permission.INVALID_ROLE_OPERATION,
       );
     }
 
     // Prevent ADMIN from escalating their own role's permissions
     if (actingUserRole === Role.ADMIN && role === Role.ADMIN) {
       throw new ForbiddenException(
-        'ADMIN cannot modify permissions for the ADMIN role — requires SUPERADMIN',
+        ErrorMessages.user.OPERATION_NOT_PERMITTED,
       );
     }
 

@@ -401,7 +401,7 @@ export class UsersService {
       actingUser.role !== Role.SUPERADMIN
     ) {
       throw new ForbiddenException(
-        'Only SUPERADMIN can assign ADMIN or SUPERADMIN roles',
+        ErrorMessages.user.OPERATION_NOT_PERMITTED,
       );
     }
 

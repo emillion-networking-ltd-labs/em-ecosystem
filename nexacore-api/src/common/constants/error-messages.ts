@@ -30,6 +30,7 @@ export const ErrorMessages = {
     ACCESS_DENIED: 'Access denied',
     INSUFFICIENT_PERMISSIONS: 'Insufficient permissions',
     INSUFFICIENT_ROLE: 'Insufficient role',
+    INVALID_ROLE_OPERATION: 'Invalid role for this operation',
   },
   csrf: {
     VALIDATION_FAILED: 'CSRF validation failed',

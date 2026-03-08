@@ -97,7 +97,7 @@ describe('PermissionsController', () => {
 
     it('should propagate BadRequestException for SUPERADMIN', async () => {
       service.getPermissionsForRole.mockRejectedValue(
-        new BadRequestException('SUPERADMIN bypasses all permissions'),
+        new BadRequestException('Invalid role for this operation'),
       );
 
       await expect(controller.getForRole('SUPERADMIN')).rejects.toThrow(

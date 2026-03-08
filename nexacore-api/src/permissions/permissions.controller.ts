@@ -55,7 +55,7 @@ export class PermissionsController {
   @RequirePermissions('permissions:read')
   @ApiOperation({ summary: 'Get permissions assigned to a role' })
   @ApiResponse({ status: 200, description: 'Returns role permissions' })
-  @ApiResponse({ status: 400, description: 'Invalid role or SUPERADMIN' })
+  @ApiResponse({ status: 400, description: 'Invalid role' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
   async getForRole(@Param('role') role: string) {
@@ -68,7 +68,7 @@ export class PermissionsController {
   @ApiResponse({ status: 200, description: 'Permissions updated' })
   @ApiResponse({
     status: 400,
-    description: 'Invalid role, SUPERADMIN, or invalid permission keys',
+    description: 'Invalid role or invalid permission keys',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 403, description: 'Forbidden' })
