@@ -35,7 +35,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
         message = (responseObj.message as string) || exception.message;
 
         if (Array.isArray(responseObj.message)) {
-          details = responseObj.message as string[];
+          details = this.sanitizeValidationDetails(
+            responseObj.message as string[],
+          );
           message = 'Validation failed';
         }
 
@@ -56,6 +58,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
         statusCode,
         ...(details && { details }),
       },
+    });
+  }
+
+  private sanitizeValidationDetails(details: string[]): string[] {
+    return details.map((detail) => {
+      // class-validator format: "fieldName constraint message"
+      // Strip the leading field name to prevent DTO structure disclosure (CWE-209)
+      const stripped = detail.replace(/^[a-zA-Z_][a-zA-Z0-9_]* /, '');
+      return stripped.charAt(0).toUpperCase() + stripped.slice(1);
     });
   }
 

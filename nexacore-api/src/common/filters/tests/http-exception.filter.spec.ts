@@ -64,10 +64,13 @@ describe('HttpExceptionFilter', () => {
     });
   });
 
-  it('should handle validation errors with array of messages', () => {
+  it('should sanitize field names from class-validator validation errors', () => {
     const exception = new HttpException(
       {
-        message: ['Email is required', 'Password too short'],
+        message: [
+          'email must be an email',
+          'password must be longer than or equal to 8 characters',
+        ],
         error: 'Bad Request',
         statusCode: 400,
       },
@@ -83,9 +86,69 @@ describe('HttpExceptionFilter', () => {
         message: 'Validation failed',
         code: 'VALIDATION_ERROR',
         statusCode: 400,
-        details: ['Email is required', 'Password too short'],
+        details: [
+          'Must be an email',
+          'Must be longer than or equal to 8 characters',
+        ],
       },
     });
+  });
+
+  it('should sanitize nested field names from validation errors', () => {
+    const exception = new HttpException(
+      {
+        message: [
+          'firstName must be shorter than or equal to 100 characters',
+          'avatarUrl must be a valid URL',
+        ],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+
+    filter.catch(exception, mockHost);
+
+    const callArg = mockJson.mock.calls[0][0];
+    expect(callArg.error.details).toEqual([
+      'Must be shorter than or equal to 100 characters',
+      'Must be a valid URL',
+    ]);
+  });
+
+  it('should capitalize messages that have no field name prefix', () => {
+    const exception = new HttpException(
+      {
+        message: ['each value in items must be a string', 'should not be empty'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+
+    filter.catch(exception, mockHost);
+
+    const callArg = mockJson.mock.calls[0][0];
+    expect(callArg.error.details).toEqual([
+      'Value in items must be a string',
+      'Not be empty',
+    ]);
+  });
+
+  it('should handle single-word validation messages unchanged', () => {
+    const exception = new HttpException(
+      {
+        message: ['Required'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+
+    filter.catch(exception, mockHost);
+
+    const callArg = mockJson.mock.calls[0][0];
+    expect(callArg.error.details).toEqual(['Required']);
   });
 
   it('should handle non-HttpException errors as 500', () => {
