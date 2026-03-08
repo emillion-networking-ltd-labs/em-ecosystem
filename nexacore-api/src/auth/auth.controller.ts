@@ -121,14 +121,13 @@ export class AuthController {
       limit: AUTH_RATE_LIMITS.register.limit,
     },
   })
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Register a new user account' })
   @ApiResponse({
-    status: 201,
-    description: 'User registered — verification email sent',
+    status: 200,
+    description: 'Registration request processed',
   })
   @ApiResponse({ status: 400, description: 'Validation error' })
-  @ApiResponse({ status: 409, description: 'Email already registered' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
   async register(
     @Body() registerDto: RegisterDto,
@@ -136,7 +135,7 @@ export class AuthController {
   ) {
     const meta = this.extractRequestMeta(req);
     const result = await this.authService.register(registerDto, meta, meta);
-    return { message: result.message, user: result.user };
+    return { message: result.message };
   }
 
   @Post('login')

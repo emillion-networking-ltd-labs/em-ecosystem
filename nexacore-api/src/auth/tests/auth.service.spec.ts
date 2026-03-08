@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
-  ConflictException,
   UnauthorizedException,
   ForbiddenException,
   BadRequestException,
@@ -89,6 +88,7 @@ describe('AuthService', () => {
   let trustedDeviceService: jest.Mocked<TrustedDeviceService>;
   let impossibleTravelService: jest.Mocked<ImpossibleTravelService>;
   let suspiciousLoginService: jest.Mocked<SuspiciousLoginService>;
+  let mailService: jest.Mocked<MailService>;
 
   const mockUser: User = {
     id: 'uuid-123',
@@ -219,6 +219,7 @@ describe('AuthService', () => {
           provide: MailService,
           useValue: {
             sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
+            sendRegistrationAttemptNotification: jest.fn().mockResolvedValue(undefined),
             sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
             sendLoginNotificationEmail: jest.fn().mockResolvedValue(undefined),
             sendEmailChangeVerificationEmail: jest.fn().mockResolvedValue(undefined),
@@ -266,6 +267,7 @@ describe('AuthService', () => {
     trustedDeviceService = module.get(TrustedDeviceService);
     impossibleTravelService = module.get(ImpossibleTravelService);
     suspiciousLoginService = module.get(SuspiciousLoginService);
+    mailService = module.get(MailService);
   });
 
   describe('register', () => {
@@ -274,18 +276,18 @@ describe('AuthService', () => {
       password: 'StrongPass1!',
     };
 
-    describe('successful registration', () => {
+    describe('successful registration (new email)', () => {
       beforeEach(() => {
         usersService.findByEmail.mockResolvedValue(null);
         usersService.create.mockResolvedValue(mockUser);
         (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-value');
       });
 
-      it('should create a new user with hashed password and return message + user', async () => {
+      it('should return generic message without user object', async () => {
         const result = await authService.register(registerDto, requestMeta);
 
-        expect(result.message).toBe('Verification email sent');
-        expect(result.user).toBeDefined();
+        expect(result.message).toBe('Please check your email to continue');
+        expect(result).not.toHaveProperty('user');
         expect(result).not.toHaveProperty('accessToken');
         expect(result).not.toHaveProperty('cookie');
       });
@@ -294,13 +296,6 @@ describe('AuthService', () => {
         await authService.register(registerDto, requestMeta);
 
         expect(bcrypt.hash).toHaveBeenCalledWith('StrongPass1!', 12);
-      });
-
-      it('should return SafeUser without passwordHash', async () => {
-        const result = await authService.register(registerDto, requestMeta);
-
-        expect(result.user).not.toHaveProperty('passwordHash');
-        expect(result.user.email).toBe('test@example.com');
       });
 
       it('should NOT create a session on register', async () => {
@@ -316,15 +311,45 @@ describe('AuthService', () => {
       });
     });
 
-    describe('error cases', () => {
-      it('should throw ConflictException when email already exists', async () => {
+    describe('existing email — anti-enumeration', () => {
+      beforeEach(() => {
         usersService.findByEmail.mockResolvedValue(mockUser);
-
-        await expect(
-          authService.register(registerDto, requestMeta),
-        ).rejects.toThrow(ConflictException);
+        (bcrypt.compare as jest.Mock).mockResolvedValue(false);
       });
 
+      it('should return same response shape as new email registration', async () => {
+        const result = await authService.register(registerDto, requestMeta);
+
+        expect(result.message).toBe('Please check your email to continue');
+        expect(result).not.toHaveProperty('user');
+        expect(Object.keys(result)).toEqual(['message']);
+      });
+
+      it('should call bcrypt.compare for timing protection when email exists', async () => {
+        await authService.register(registerDto, requestMeta);
+
+        expect(bcrypt.compare).toHaveBeenCalledTimes(1);
+        // First argument is the submitted password (timing parity with bcrypt.hash)
+        expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe(registerDto.password);
+      });
+
+      it('should NOT create a new user', async () => {
+        await authService.register(registerDto, requestMeta);
+
+        expect(usersService.create).not.toHaveBeenCalled();
+      });
+
+      it('should send registration attempt notification to existing user', async () => {
+        await authService.register(registerDto, requestMeta);
+
+        expect(mailService.sendRegistrationAttemptNotification).toHaveBeenCalledWith(
+          mockUser.email,
+          mockUser.firstName,
+        );
+      });
+    });
+
+    describe('error cases', () => {
       it('should throw BadRequestException when password is breached', async () => {
         usersService.findByEmail.mockResolvedValue(null);
         passwordBreachService.isBreached.mockResolvedValue(true);
@@ -1637,8 +1662,8 @@ describe('AuthService', () => {
         requestMeta,
       );
 
-      expect(result.message).toBe('Verification email sent');
-      expect(result.user).toBeDefined();
+      expect(result.message).toBe('Please check your email to continue');
+      expect(result).not.toHaveProperty('user');
     });
 
     it('login success should succeed even when audit fails', async () => {
@@ -1798,8 +1823,8 @@ describe('AuthService', () => {
         requestMeta,
       );
 
-      expect(result.message).toBe('Verification email sent');
-      expect(result.user).toBeDefined();
+      expect(result.message).toBe('Please check your email to continue');
+      expect(result).not.toHaveProperty('user');
     });
   });
 

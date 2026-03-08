@@ -1,6 +1,5 @@
 import {
   Injectable,
-  ConflictException,
   UnauthorizedException,
   ForbiddenException,
   BadRequestException,
@@ -88,7 +87,6 @@ export interface AuthResult {
 
 export interface RegisterResult {
   message: string;
-  user: SafeUser;
 }
 
 export interface MfaChallengeResult {
@@ -139,8 +137,31 @@ export class AuthService {
     ctx?: RequestContext,
   ): Promise<RegisterResult> {
     const existingUser = await this.usersService.findByEmail(dto.email);
+
     if (existingUser) {
-      throw new ConflictException(ErrorMessages.auth.REGISTRATION_FAILED);
+      // CWE-203 / OWASP ASVS V2.1.1: timing protection — consume ~same
+      // time as bcrypt.hash() so response latency doesn't reveal email existence
+      await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
+
+      // Notify existing user of registration attempt (non-blocking)
+      this.mailService
+        .sendRegistrationAttemptNotification(
+          existingUser.email,
+          existingUser.firstName,
+        )
+        .catch(() => {});
+
+      this.auditService
+        .log({
+          action: AuditAction.REGISTER,
+          userId: existingUser.id,
+          ipAddress: ctx?.ipAddress,
+          userAgent: ctx?.userAgent,
+          metadata: { email: dto.email, outcome: 'existing_email' },
+        })
+        .catch(() => {});
+
+      return { message: ErrorMessages.auth.CHECK_EMAIL };
     }
 
     const isBreached = await this.passwordBreachService.isBreached(dto.password);
@@ -166,14 +187,11 @@ export class AuthService {
         userId: user.id,
         ipAddress: ctx?.ipAddress,
         userAgent: ctx?.userAgent,
-        metadata: { email: dto.email },
+        metadata: { email: dto.email, outcome: 'new_account' },
       })
       .catch(() => {});
 
-    return {
-      message: 'Verification email sent',
-      user: toSafeUser(user),
-    };
+    return { message: ErrorMessages.auth.CHECK_EMAIL };
   }
 
   async login(

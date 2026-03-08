@@ -1,6 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import {
-  ConflictException,
   UnauthorizedException,
   ForbiddenException,
 } from '@nestjs/common';
@@ -160,28 +159,27 @@ describe('AuthController', () => {
       password: 'StrongPass1!',
     };
 
-    it('should return message + user without setting cookie', async () => {
+    it('should return only message without user or cookie', async () => {
       const mockRegisterResult = {
-        message: 'Verification email sent',
-        user: mockAuthResult.user,
+        message: 'Please check your email to continue',
       };
       authService.register.mockResolvedValue(mockRegisterResult);
 
       const result = await controller.register(registerDto, mockReq);
 
-      expect(result.message).toBe('Verification email sent');
-      expect(result.user.email).toBe('test@example.com');
+      expect(result.message).toBe('Please check your email to continue');
+      expect(result).not.toHaveProperty('user');
       expect(mockRes.cookie).not.toHaveBeenCalled();
     });
 
-    it('should propagate ConflictException from service', async () => {
-      authService.register.mockRejectedValue(
-        new ConflictException('Email already registered'),
-      );
+    it('should return same response for existing and new emails', async () => {
+      authService.register.mockResolvedValue({
+        message: 'Please check your email to continue',
+      });
 
-      await expect(
-        controller.register(registerDto, mockReq),
-      ).rejects.toThrow(ConflictException);
+      const result = await controller.register(registerDto, mockReq);
+
+      expect(Object.keys(result)).toEqual(['message']);
     });
   });
 

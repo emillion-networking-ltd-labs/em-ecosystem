@@ -39,6 +39,33 @@ export class MailService {
     }
   }
 
+  async sendRegistrationAttemptNotification(
+    email: string,
+    firstName?: string | null,
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Registration attempt on your EM NexaCore account',
+        template: 'registration-attempt',
+        context: {
+          name: firstName || email.split('@')[0],
+          frontendUrl,
+          attemptedAt: new Date().toISOString(),
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Registration attempt notification sent to ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send registration attempt notification to ${email}`,
+        error,
+      );
+    }
+  }
+
   async sendPasswordResetEmail(
     email: string,
     token: string,

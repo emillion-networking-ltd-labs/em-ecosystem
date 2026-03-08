@@ -205,7 +205,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const register = useCallback(async (email: string, password: string): Promise<boolean> => {
     dispatch({ type: 'AUTH_START' });
     try {
-      await apiClient.post<{ message: string; user: SafeUser }>('/auth/register', { email, password });
+      await apiClient.post<{ message: string }>('/auth/register', { email, password });
       dispatch({ type: 'AUTH_STOP' });
       return true;
     } catch (err: unknown) {
