@@ -4,6 +4,7 @@ import { Strategy } from 'passport-github2';
 import { AuthService } from '../auth.service';
 import { OAuthStateStore } from '../stores/oauth-state.store';
 import { Provider } from '../../users/enums/provider.enum';
+import { ErrorMessages } from '../../common/constants/error-messages';
 
 @Injectable()
 export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
@@ -75,7 +76,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     // Validate OAuth state parameter (CSRF protection)
     const state = req.query?.state;
     if (!state || !(await this.oauthStateStore.validate(state))) {
-      done(new Error('Invalid or expired OAuth state parameter'));
+      done(new Error(ErrorMessages.auth.AUTHENTICATION_FAILED));
       return;
     }
 

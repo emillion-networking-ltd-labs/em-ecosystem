@@ -163,7 +163,7 @@ describe('GitHubStrategy', () => {
 
       expect(done).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Invalid or expired OAuth state parameter',
+          message: 'Authentication failed',
         }),
       );
       expect(authService.validateOAuthUser).not.toHaveBeenCalled();
@@ -182,7 +182,7 @@ describe('GitHubStrategy', () => {
 
       expect(done).toHaveBeenCalledWith(
         expect.objectContaining({
-          message: 'Invalid or expired OAuth state parameter',
+          message: 'Authentication failed',
         }),
       );
       expect(authService.validateOAuthUser).not.toHaveBeenCalled();

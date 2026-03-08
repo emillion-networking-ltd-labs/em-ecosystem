@@ -4,6 +4,7 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
 import { OAuthStateStore } from '../stores/oauth-state.store';
 import { Provider } from '../../users/enums/provider.enum';
+import { ErrorMessages } from '../../common/constants/error-messages';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -75,7 +76,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     // Validate OAuth state parameter (CSRF protection)
     const state = req.query?.state;
     if (!state || !(await this.oauthStateStore.validate(state))) {
-      done(new Error('Invalid or expired OAuth state parameter'), undefined);
+      done(new Error(ErrorMessages.auth.AUTHENTICATION_FAILED), undefined);
       return;
     }
 
