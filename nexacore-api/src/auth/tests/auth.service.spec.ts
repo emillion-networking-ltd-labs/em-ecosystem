@@ -419,7 +419,7 @@ describe('AuthService', () => {
         expect(bcrypt.compare).toHaveBeenCalled();
       });
 
-      it('should throw ForbiddenException when account is locked', async () => {
+      it('should throw UnauthorizedException when account is locked (anti-enumeration)', async () => {
         usersService.findByEmail.mockResolvedValue({
           ...mockUser,
           lockedUntil: new Date(Date.now() + 60000),
@@ -427,7 +427,7 @@ describe('AuthService', () => {
 
         await expect(
           authService.login(loginDto, requestMeta),
-        ).rejects.toThrow(ForbiddenException);
+        ).rejects.toThrow(UnauthorizedException);
       });
 
       it('should throw ForbiddenException when LOCAL user email is not verified', async () => {
@@ -521,7 +521,7 @@ describe('AuthService', () => {
         );
       });
 
-      it('should lock account after 5 failed attempts and throw ForbiddenException', async () => {
+      it('should lock account after 5 failed attempts and throw UnauthorizedException (anti-enumeration)', async () => {
         usersService.findByEmail.mockResolvedValue(mockUser);
         (bcrypt.compare as jest.Mock).mockResolvedValue(false);
         usersService.incrementFailedAttempts.mockResolvedValue({
@@ -532,7 +532,7 @@ describe('AuthService', () => {
 
         await expect(
           authService.login(loginDto, requestMeta),
-        ).rejects.toThrow(ForbiddenException);
+        ).rejects.toThrow(UnauthorizedException);
         expect(usersService.lockAccount).toHaveBeenCalledWith('uuid-123', 0);
       });
     });
@@ -1872,7 +1872,7 @@ describe('AuthService', () => {
   // ─── login edge cases ──────────────────────────────────────────
 
   describe('login - account locked', () => {
-    it('should throw ForbiddenException when account is locked', async () => {
+    it('should throw UnauthorizedException when account is locked (anti-enumeration)', async () => {
       usersService.findByEmail.mockResolvedValue({
         ...mockUser,
         lockedUntil: new Date(Date.now() + 300000), // locked for 5 more minutes
@@ -1884,7 +1884,7 @@ describe('AuthService', () => {
           { email: 'test@example.com', password: 'pass' },
           requestMeta,
         ),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should reset failed attempts when lock has expired', async () => {
@@ -1950,7 +1950,7 @@ describe('AuthService', () => {
   });
 
   describe('login - max failed attempts triggers lockout', () => {
-    it('should lock account after max failed attempts', async () => {
+    it('should lock account after max failed attempts and throw UnauthorizedException (anti-enumeration)', async () => {
       usersService.findByEmail.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
       usersService.incrementFailedAttempts.mockResolvedValue({
@@ -1964,9 +1964,32 @@ describe('AuthService', () => {
           { email: 'test@example.com', password: 'wrong' },
           requestMeta,
         ),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(UnauthorizedException);
 
       expect(usersService.lockAccount).toHaveBeenCalledWith('uuid-123', 0);
+    });
+  });
+
+  describe('login - lockout anti-enumeration', () => {
+    it('locked account and non-existing account should throw same exception type', async () => {
+      // Non-existing account
+      usersService.findByEmail.mockResolvedValue(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+      await expect(
+        authService.login({ email: 'nobody@example.com', password: 'pass' }, requestMeta),
+      ).rejects.toThrow(UnauthorizedException);
+
+      // Locked account
+      usersService.findByEmail.mockResolvedValue({
+        ...mockUser,
+        lockedUntil: new Date(Date.now() + 300000),
+        lockoutCount: 1,
+      });
+
+      await expect(
+        authService.login({ email: 'test@example.com', password: 'pass' }, requestMeta),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -2541,7 +2564,7 @@ describe('AuthService', () => {
       mailService = (authService as any).mailService;
     });
 
-    it('should still throw ForbiddenException when audit rejects on locked account', async () => {
+    it('should still throw UnauthorizedException when audit rejects on locked account', async () => {
       auditService.log.mockRejectedValue(new Error('Audit DB down'));
       const lockedUser = {
         ...mockUser,
@@ -2552,7 +2575,7 @@ describe('AuthService', () => {
 
       await expect(
         authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(UnauthorizedException);
       await flushPromises();
     });
 
@@ -2568,7 +2591,7 @@ describe('AuthService', () => {
       await flushPromises();
     });
 
-    it('should still throw ForbiddenException when audit rejects on account lockout', async () => {
+    it('should still throw UnauthorizedException when audit rejects on account lockout', async () => {
       auditService.log.mockRejectedValue(new Error('Audit DB down'));
       usersService.findByEmail.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
@@ -2577,7 +2600,7 @@ describe('AuthService', () => {
 
       await expect(
         authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(UnauthorizedException);
       await flushPromises();
     });
 

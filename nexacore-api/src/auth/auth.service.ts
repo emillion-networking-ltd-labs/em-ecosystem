@@ -216,7 +216,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Account lockout check with detailed response
+    // Account lockout check — CWE-203: same exception type as non-existing
+    // account to prevent enumeration via status code differences
     if (user.lockedUntil && user.lockedUntil > new Date()) {
       const remainingMs = user.lockedUntil.getTime() - Date.now();
       const remainingSeconds = Math.ceil(remainingMs / 1000);
@@ -231,10 +232,10 @@ export class AuthService {
         })
         .catch(() => {});
 
-      throw new ForbiddenException({
-        message: ErrorMessages.auth.TOO_MANY_ATTEMPTS,
-        error: 'Forbidden',
-        statusCode: 403,
+      throw new UnauthorizedException({
+        message: 'Invalid credentials',
+        error: 'Unauthorized',
+        statusCode: 401,
         retryAfter: remainingSeconds,
       });
     }
@@ -288,10 +289,10 @@ export class AuthService {
           })
           .catch(() => {});
 
-        throw new ForbiddenException({
-          message: ErrorMessages.auth.TOO_MANY_ATTEMPTS,
-          error: 'Forbidden',
-          statusCode: 403,
+        throw new UnauthorizedException({
+          message: 'Invalid credentials',
+          error: 'Unauthorized',
+          statusCode: 401,
           retryAfter: lockoutSeconds,
         });
       }
