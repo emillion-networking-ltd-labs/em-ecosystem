@@ -323,7 +323,8 @@ export class UsersService {
   ): Promise<void> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
+      // CWE-200: JWT valid but user deleted — treat as auth failure, not 404
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     if (user.passwordHash) {
@@ -541,7 +542,8 @@ export class UsersService {
   ): Promise<{ message: string }> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
+      // CWE-200: JWT valid but user deleted — treat as auth failure, not 404
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     if (!user.passwordHash) {
@@ -632,7 +634,8 @@ export class UsersService {
   ): Promise<{ message: string }> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
+      // CWE-200: JWT valid but user deleted — treat as auth failure, not 404
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     if (user.role === Role.SUPERADMIN) {
@@ -721,7 +724,8 @@ export class UsersService {
   ): Promise<{ message: string }> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
+      // CWE-200: JWT valid but user deleted — treat as auth failure, not 404
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     if (user.provider === Provider.LOCAL) {
