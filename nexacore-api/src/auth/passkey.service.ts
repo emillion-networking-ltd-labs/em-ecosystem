@@ -4,7 +4,6 @@ import {
   Inject,
   BadRequestException,
   UnauthorizedException,
-  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import {
@@ -32,6 +31,7 @@ import {
   MAX_PASSKEYS_PER_USER,
   DEFAULT_PASSKEY_NAME,
 } from './constants/passkey.constants';
+import { ErrorMessages } from '../common/constants/error-messages';
 
 @Injectable()
 export class PasskeyService {
@@ -56,7 +56,7 @@ export class PasskeyService {
   ): Promise<Record<string, unknown>> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
     }
 
     const count = await this.prisma.webAuthnCredential.count({
@@ -124,11 +124,11 @@ export class PasskeyService {
         expectedRPID: this.rpId,
       });
     } catch {
-      throw new UnauthorizedException('Passkey registration verification failed');
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     if (!verification.verified || !verification.registrationInfo) {
-      throw new UnauthorizedException('Passkey registration verification failed');
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     const { credential: regCredential, credentialDeviceType, credentialBackedUp } =
@@ -237,7 +237,7 @@ export class PasskeyService {
           metadata: { reason: 'credential_not_found' },
         })
         .catch(this.auditNoop);
-      throw new UnauthorizedException('Passkey not recognized');
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     if (!storedCredential.user.isActive) {
@@ -250,7 +250,7 @@ export class PasskeyService {
           metadata: { reason: 'account_deactivated' },
         })
         .catch(this.auditNoop);
-      throw new ForbiddenException('Account is deactivated');
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     let verification;
@@ -278,7 +278,7 @@ export class PasskeyService {
           metadata: { reason: 'verification_failed' },
         })
         .catch(this.auditNoop);
-      throw new UnauthorizedException('Passkey authentication failed');
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     if (!verification.verified) {
@@ -291,7 +291,7 @@ export class PasskeyService {
           metadata: { reason: 'verification_not_verified' },
         })
         .catch(this.auditNoop);
-      throw new UnauthorizedException('Passkey authentication failed');
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     // Sign count replay detection (skip if both are 0 — some authenticators don't track)
@@ -313,9 +313,7 @@ export class PasskeyService {
           },
         })
         .catch(this.auditNoop);
-      throw new UnauthorizedException(
-        'Passkey may have been cloned. Authentication rejected.',
-      );
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     await this.prisma.webAuthnCredential.update({
@@ -396,7 +394,7 @@ export class PasskeyService {
   ): Promise<void> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
     }
 
     if (user.passwordHash) {
@@ -407,7 +405,7 @@ export class PasskeyService {
       }
       const isValid = await bcrypt.compare(password, user.passwordHash);
       if (!isValid) {
-        throw new UnauthorizedException('Invalid password');
+        throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
       }
     }
 

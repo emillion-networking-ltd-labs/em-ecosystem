@@ -33,6 +33,7 @@ import { ChangeEmailDto } from './dto/change-email.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { UnlinkOAuthDto } from './dto/unlink-oauth.dto';
 import * as crypto from 'crypto';
+import { ErrorMessages } from '../common/constants/error-messages';
 
 const BCRYPT_ROUNDS = 12;
 const EMAIL_CHANGE_TOKEN_EXPIRY_HOURS = 24;
@@ -83,7 +84,7 @@ export class UsersService {
         'code' in error &&
         (error as { code: string }).code === 'P2002'
       ) {
-        throw new ConflictException('Email already registered');
+        throw new ConflictException(ErrorMessages.auth.REGISTRATION_FAILED);
       }
       throw new InternalServerErrorException('Failed to create user');
     }
@@ -322,20 +323,20 @@ export class UsersService {
   ): Promise<void> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
     }
 
     if (user.passwordHash) {
       // User has a password — require currentPassword
       if (!dto.currentPassword) {
-        throw new BadRequestException('Current password is required');
+        throw new BadRequestException(ErrorMessages.user.PASSWORD_REQUIRED);
       }
       const isCurrentValid = await bcrypt.compare(
         dto.currentPassword,
         user.passwordHash,
       );
       if (!isCurrentValid) {
-        throw new UnauthorizedException('Current password is incorrect');
+        throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
       }
     }
 
@@ -384,12 +385,12 @@ export class UsersService {
   ): Promise<SafeUser> {
     const target = await this.findById(targetId);
     if (!target) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
     }
 
     // Cannot modify SUPERADMIN users
     if (target.role === Role.SUPERADMIN) {
-      throw new ForbiddenException('Cannot modify SUPERADMIN accounts');
+      throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
     // Only SUPERADMIN can assign ADMIN or SUPERADMIN roles
@@ -459,11 +460,11 @@ export class UsersService {
   ): Promise<void> {
     const target = await this.findById(targetId);
     if (!target) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
     }
 
     if (target.role === Role.SUPERADMIN) {
-      throw new ForbiddenException('Cannot delete SUPERADMIN accounts');
+      throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
     await this.prisma.user.update({
@@ -540,7 +541,7 @@ export class UsersService {
   ): Promise<{ message: string }> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
     }
 
     if (!user.passwordHash) {
@@ -554,7 +555,7 @@ export class UsersService {
       user.passwordHash,
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Password is incorrect');
+      throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
     }
 
     const normalizedNewEmail = dto.newEmail.toLowerCase();
@@ -567,7 +568,7 @@ export class UsersService {
 
     const existingUser = await this.findByEmail(normalizedNewEmail);
     if (existingUser) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException(ErrorMessages.auth.UNABLE_TO_COMPLETE);
     }
 
     // Store pending email on user
@@ -631,11 +632,11 @@ export class UsersService {
   ): Promise<{ message: string }> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
     }
 
     if (user.role === Role.SUPERADMIN) {
-      throw new ForbiddenException('Cannot delete SUPERADMIN accounts');
+      throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
     // Password check: required for local accounts, skipped for OAuth-only
@@ -650,7 +651,7 @@ export class UsersService {
         user.passwordHash,
       );
       if (!isPasswordValid) {
-        throw new UnauthorizedException('Password is incorrect');
+        throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
       }
     }
 
@@ -720,7 +721,7 @@ export class UsersService {
   ): Promise<{ message: string }> {
     const user = await this.findById(userId);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
     }
 
     if (user.provider === Provider.LOCAL) {
@@ -740,7 +741,7 @@ export class UsersService {
       user.passwordHash,
     );
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
     }
 
     const previousProvider = user.provider;

@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   UnauthorizedException,
-  ForbiddenException,
   NotFoundException,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
@@ -523,7 +522,7 @@ describe('PasskeyService', () => {
       );
     });
 
-    it('should throw ForbiddenException if account deactivated', async () => {
+    it('should throw UnauthorizedException if account deactivated', async () => {
       redis.get.mockResolvedValue(storedAuthOptions);
       prisma.webAuthnCredential.findUnique.mockResolvedValue({
         ...storedDbCredential,
@@ -532,7 +531,7 @@ describe('PasskeyService', () => {
 
       await expect(
         service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should audit PASSKEY_AUTH_FAILURE when account deactivated', async () => {
@@ -586,7 +585,7 @@ describe('PasskeyService', () => {
 
       await expect(
         service.verifyAuthentication('challenge-id', mockAuthCredential),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should handle verification failure without ctx', async () => {

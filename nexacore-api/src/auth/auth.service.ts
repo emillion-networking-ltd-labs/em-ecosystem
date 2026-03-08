@@ -41,6 +41,7 @@ import {
   getLockoutDurationMinutes,
   SESSION_IDLE_TIMEOUT_HOURS,
 } from './constants/auth.constants';
+import { ErrorMessages } from '../common/constants/error-messages';
 
 const VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
 const RESET_TOKEN_EXPIRY_HOURS = 1;
@@ -139,7 +140,7 @@ export class AuthService {
   ): Promise<RegisterResult> {
     const existingUser = await this.usersService.findByEmail(dto.email);
     if (existingUser) {
-      throw new ConflictException('Email already registered');
+      throw new ConflictException(ErrorMessages.auth.REGISTRATION_FAILED);
     }
 
     const isBreached = await this.passwordBreachService.isBreached(dto.password);
@@ -213,11 +214,10 @@ export class AuthService {
         .catch(() => {});
 
       throw new ForbiddenException({
-        message: 'Too many attempts. Account locked.',
+        message: ErrorMessages.auth.TOO_MANY_ATTEMPTS,
         error: 'Forbidden',
         statusCode: 403,
         retryAfter: remainingSeconds,
-        lockoutLevel: user.lockoutCount,
       });
     }
 
@@ -271,11 +271,10 @@ export class AuthService {
           .catch(() => {});
 
         throw new ForbiddenException({
-          message: 'Too many attempts. Account locked.',
+          message: ErrorMessages.auth.TOO_MANY_ATTEMPTS,
           error: 'Forbidden',
           statusCode: 403,
           retryAfter: lockoutSeconds,
-          lockoutLevel: user.lockoutCount + 1,
         });
       }
 
@@ -309,7 +308,7 @@ export class AuthService {
         })
         .catch(() => {});
       throw new ForbiddenException(
-        'Verify your email to sign in. Check your inbox.',
+        ErrorMessages.auth.CHECK_EMAIL,
       );
     }
 
@@ -444,12 +443,12 @@ export class AuthService {
     try {
       payload = this.jwtService.verify<RefreshTokenPayload>(refreshToken);
     } catch {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
 
     const user = await this.usersService.findById(payload.sub);
     if (!user) {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
 
     // Idle timeout check: reject refresh if session inactive too long
@@ -478,7 +477,7 @@ export class AuthService {
         })
         .catch(() => {});
 
-      throw new UnauthorizedException('Session expired due to inactivity');
+      throw new UnauthorizedException(ErrorMessages.auth.SESSION_EXPIRED);
     }
 
     // Rotate: validates old session, detects theft, creates new session
@@ -595,7 +594,7 @@ export class AuthService {
     const payload = await this.oauthCodeStore.exchange(code);
     if (!payload) {
       throw new UnauthorizedException(
-        'Invalid or expired authorization code',
+        ErrorMessages.auth.AUTHENTICATION_FAILED,
       );
     }
     return payload;
@@ -652,7 +651,7 @@ export class AuthService {
   ): Promise<AuthResult> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
     }
     const { accessToken, refreshToken, sessionId } = await this.generateTokens(
       user,
@@ -966,7 +965,7 @@ export class AuthService {
   async resendVerificationEmail(userId: string): Promise<void> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
     }
 
     if (user.emailVerified) {
@@ -1080,15 +1079,15 @@ export class AuthService {
     });
 
     if (!resetToken) {
-      throw new BadRequestException('Invalid or expired reset token');
+      throw new BadRequestException(ErrorMessages.auth.INVALID_RESET_TOKEN);
     }
 
     if (resetToken.usedAt) {
-      throw new BadRequestException('Invalid or expired reset token');
+      throw new BadRequestException(ErrorMessages.auth.INVALID_RESET_TOKEN);
     }
 
     if (resetToken.expiresAt < new Date()) {
-      throw new BadRequestException('Invalid or expired reset token');
+      throw new BadRequestException(ErrorMessages.auth.INVALID_RESET_TOKEN);
     }
 
     // Reject if new password is same as current

@@ -3,7 +3,6 @@ import {
   Injectable,
   BadRequestException,
   UnauthorizedException,
-  ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { generateSecret, generateURI, verify as otpVerify } from 'otplib';
@@ -16,6 +15,7 @@ import { UsersService } from '../users/users.service';
 import { TrustedDeviceService } from './trusted-device.service';
 import { User } from '../users/entities/user.entity';
 import type { StringValue } from 'ms';
+import { ErrorMessages } from '../common/constants/error-messages';
 
 const BCRYPT_ROUNDS_RECOVERY = 10;
 const RECOVERY_CODE_COUNT = 10;
@@ -47,11 +47,11 @@ export class MfaService {
   ): Promise<{ secret: string; qrCodeDataUrl: string; recoveryCodes: string[] }> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
     }
 
     if (user.mfaEnabled) {
-      throw new ConflictException('MFA is already enabled');
+      throw new BadRequestException(ErrorMessages.mfa.OPERATION_NOT_AVAILABLE);
     }
 
     const secret = generateSecret();
@@ -88,11 +88,11 @@ export class MfaService {
   ): Promise<void> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
     }
 
     if (user.mfaEnabled) {
-      throw new ConflictException('MFA is already enabled');
+      throw new BadRequestException(ErrorMessages.mfa.OPERATION_NOT_AVAILABLE);
     }
 
     if (!user.mfaSecret) {
@@ -104,7 +104,7 @@ export class MfaService {
     const secret = this.cryptoService.decrypt(user.mfaSecret);
     const result = await otpVerify({ token, secret });
     if (!result.valid) {
-      throw new BadRequestException('Invalid verification code');
+      throw new BadRequestException(ErrorMessages.mfa.INVALID_CODE);
     }
 
     await this.usersService.enableMfa(userId);
@@ -141,23 +141,23 @@ export class MfaService {
         secret: this.mfaChallengeSecret,
       });
     } catch {
-      throw new UnauthorizedException('Invalid or expired MFA token');
+      throw new UnauthorizedException(ErrorMessages.mfa.INVALID_TOKEN);
     }
 
     if (payload.type !== 'mfa-challenge') {
-      throw new UnauthorizedException('Invalid MFA token type');
+      throw new UnauthorizedException(ErrorMessages.mfa.INVALID_TOKEN);
     }
 
     const user = await this.usersService.findById(payload.sub);
     if (!user || !user.mfaEnabled || !user.mfaSecret) {
-      throw new UnauthorizedException('Invalid or expired MFA token');
+      throw new UnauthorizedException(ErrorMessages.mfa.INVALID_TOKEN);
     }
 
     if (code) {
       const secret = this.cryptoService.decrypt(user.mfaSecret);
       const result = await otpVerify({ token: code, secret });
       if (!result.valid) {
-        throw new UnauthorizedException('Invalid MFA code');
+        throw new UnauthorizedException(ErrorMessages.mfa.INVALID_CODE);
       }
     } else if (recoveryCode) {
       const codeIndex = await this.findMatchingRecoveryCode(
@@ -165,7 +165,7 @@ export class MfaService {
         user.mfaRecoveryCodes,
       );
       if (codeIndex === -1) {
-        throw new UnauthorizedException('Invalid recovery code');
+        throw new UnauthorizedException(ErrorMessages.mfa.INVALID_CODE);
       }
 
       const updatedCodes = [...user.mfaRecoveryCodes];
@@ -183,11 +183,11 @@ export class MfaService {
   ): Promise<void> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
     }
 
     if (!user.mfaEnabled) {
-      throw new BadRequestException('MFA is not enabled');
+      throw new BadRequestException(ErrorMessages.mfa.OPERATION_NOT_AVAILABLE);
     }
 
     if (!user.passwordHash) {
@@ -198,7 +198,7 @@ export class MfaService {
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
     }
 
     await this.usersService.disableMfa(userId);
@@ -218,11 +218,11 @@ export class MfaService {
   ): Promise<string[]> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
     }
 
     if (!user.mfaEnabled) {
-      throw new BadRequestException('MFA is not enabled');
+      throw new BadRequestException(ErrorMessages.mfa.OPERATION_NOT_AVAILABLE);
     }
 
     if (!user.passwordHash) {
@@ -233,7 +233,7 @@ export class MfaService {
 
     const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
     if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid password');
+      throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
     }
 
     const recoveryCodes = this.generateRecoveryCodes();
@@ -251,7 +251,7 @@ export class MfaService {
   ): Promise<{ mfaEnabled: boolean; recoveryCodesRemaining: number }> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
     }
 
     return {

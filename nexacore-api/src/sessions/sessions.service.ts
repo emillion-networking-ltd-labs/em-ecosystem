@@ -18,6 +18,7 @@ import {
   SessionResponse,
   toSessionResponse,
 } from './entities/session.entity';
+import { ErrorMessages } from '../common/constants/error-messages';
 
 const BCRYPT_ROUNDS = 12;
 
@@ -99,19 +100,17 @@ export class SessionsService {
     const oldSession = await this.findById(params.oldSessionId);
 
     if (!oldSession) {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
 
     if (oldSession.expiresAt < new Date()) {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
 
     // THEFT DETECTION: session already revoked means old token is being reused
     if (oldSession.isRevoked) {
       await this.revokeAllByFamily(oldSession.tokenFamily);
-      throw new UnauthorizedException(
-        'Token reuse detected. All sessions revoked for security.',
-      );
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
 
     const isValid = await bcrypt.compare(
@@ -119,7 +118,7 @@ export class SessionsService {
       oldSession.refreshTokenHash,
     );
     if (!isValid) {
-      throw new UnauthorizedException('Invalid or expired refresh token');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
 
     // Revoke the old session
@@ -151,7 +150,7 @@ export class SessionsService {
     const session = await this.findById(sessionId);
 
     if (!session || session.userId !== userId) {
-      throw new NotFoundException('Session not found');
+      throw new NotFoundException(ErrorMessages.session.NOT_FOUND);
     }
 
     await this.prisma.session.update({

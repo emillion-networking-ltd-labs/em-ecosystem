@@ -65,13 +65,13 @@ describe('CsrfGuard', () => {
   it('should throw ForbiddenException when CSRF cookie is missing on POST', () => {
     const context = createMockContext('POST', {}, { 'x-csrf-token': 'token' });
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
-    expect(() => guard.canActivate(context)).toThrow('CSRF token missing');
+    expect(() => guard.canActivate(context)).toThrow('CSRF validation failed');
   });
 
   it('should throw ForbiddenException when CSRF header is missing on POST', () => {
     const context = createMockContext('POST', { __csrf: 'token' }, {});
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
-    expect(() => guard.canActivate(context)).toThrow('CSRF token missing');
+    expect(() => guard.canActivate(context)).toThrow('CSRF validation failed');
   });
 
   it('should throw ForbiddenException when tokens do not match', () => {
@@ -83,7 +83,7 @@ describe('CsrfGuard', () => {
       { 'x-csrf-token': differentToken },
     );
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
-    expect(() => guard.canActivate(context)).toThrow('CSRF token mismatch');
+    expect(() => guard.canActivate(context)).toThrow('CSRF validation failed');
   });
 
   it('should allow POST when cookie and header tokens match and are valid', () => {
@@ -126,7 +126,7 @@ describe('CsrfGuard', () => {
       { 'x-csrf-token': tamperedToken },
     );
     expect(() => guard.canActivate(context)).toThrow(ForbiddenException);
-    expect(() => guard.canActivate(context)).toThrow('Invalid CSRF token');
+    expect(() => guard.canActivate(context)).toThrow('CSRF validation failed');
   });
 
   it('should skip CSRF when @SkipCsrf() decorator is present', () => {
