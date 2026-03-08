@@ -33,7 +33,14 @@ export default function LoginForm() {
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const { login, isLoading, isAuthenticated, error, clearError, mfaRequired, resendVerificationPublic } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
-  const { isSupported: passkeySupported, loginWithPasskey, isLoggingIn: passkeyLoading } = usePasskey();
+  const {
+    isSupported: passkeySupported,
+    loginWithPasskey,
+    isLoggingIn: passkeyLoading,
+    isConditionalAvailable,
+    startConditionalUI,
+    abortConditionalUI,
+  } = usePasskey();
   const { addToast } = useToast();
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
   const router = useRouter();
@@ -49,6 +56,16 @@ export default function LoginForm() {
       addToast({ variant: 'error', title: 'Sign in failed', description: decodeURIComponent(oauthError) });
     }
   }, [clearError, searchParams, addToast]);
+
+  // Start WebAuthn Conditional UI on mount (passkey autofill suggestions)
+  useEffect(() => {
+    if (isConditionalAvailable) {
+      startConditionalUI();
+    }
+    return () => {
+      abortConditionalUI();
+    };
+  }, [isConditionalAvailable, startConditionalUI, abortConditionalUI]);
 
   // Redirect away if already authenticated
   useEffect(() => {
@@ -74,12 +91,14 @@ export default function LoginForm() {
     }
     setEmailError(null);
     clearError();
+    abortConditionalUI();
     setStep('password');
   };
 
   const handlePasskeyLogin = async () => {
     setPasskeyError(null);
     clearError();
+    abortConditionalUI();
     try {
       await loginWithPasskey(formData.email || undefined);
     } catch {
@@ -178,6 +197,7 @@ export default function LoginForm() {
               onChange={handleChange}
               placeholder="your@email.com"
               hasError={!!emailError}
+              autoComplete="username webauthn"
               autoFocus
             />
 

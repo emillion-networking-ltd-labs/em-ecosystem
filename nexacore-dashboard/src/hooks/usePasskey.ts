@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -28,6 +28,8 @@ export function usePasskey() {
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const abortRef = useRef(false);
+  const [isConditionalAvailable, setIsConditionalAvailable] = useState(false);
+  const conditionalAbortRef = useRef<AbortController | null>(null);
 
   const isSupported =
     typeof window !== 'undefined' && !!window.PublicKeyCredential;
@@ -119,6 +121,56 @@ export function usePasskey() {
     [fetchPasskeys],
   );
 
+  // Detect WebAuthn Conditional UI support (autofill-assisted passkeys)
+  useEffect(() => {
+    let cancelled = false;
+    const pk = window.PublicKeyCredential as unknown as
+      | { isConditionalMediationAvailable?: () => Promise<boolean> }
+      | undefined;
+    if (pk?.isConditionalMediationAvailable) {
+      pk.isConditionalMediationAvailable().then((available) => {
+        if (!cancelled) setIsConditionalAvailable(available);
+      });
+    }
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const startConditionalUI = useCallback(async (): Promise<void> => {
+    if (!isConditionalAvailable) return;
+    // Abort any existing conditional request
+    conditionalAbortRef.current?.abort();
+    const controller = new AbortController();
+    conditionalAbortRef.current = controller;
+    try {
+      const { options, challengeId } = await passkeyLoginOptions();
+      if (controller.signal.aborted) return;
+      const credential = await startAuthentication({
+        optionsJSON: options as never,
+        useBrowserAutofill: true,
+      });
+      if (controller.signal.aborted) return;
+      await passkeyLogin(
+        challengeId,
+        credential as unknown as Record<string, unknown>,
+      );
+    } catch (err: unknown) {
+      const name = (err as Error)?.name;
+      if (name === 'AbortError' || name === 'NotAllowedError') return;
+      // Silently ignore — conditional UI is a progressive enhancement
+    } finally {
+      if (conditionalAbortRef.current === controller) {
+        conditionalAbortRef.current = null;
+      }
+    }
+  }, [isConditionalAvailable, passkeyLogin]);
+
+  const abortConditionalUI = useCallback(() => {
+    conditionalAbortRef.current?.abort();
+    conditionalAbortRef.current = null;
+  }, []);
+
   return {
     isSupported,
     passkeys,
@@ -132,5 +184,8 @@ export function usePasskey() {
     deletePasskey: handleDelete,
     error,
     clearError,
+    isConditionalAvailable,
+    startConditionalUI,
+    abortConditionalUI,
   };
 }
