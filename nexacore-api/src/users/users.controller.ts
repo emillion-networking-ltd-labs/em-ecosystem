@@ -31,6 +31,7 @@ import { UnlinkOAuthDto } from './dto/unlink-oauth.dto';
 import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { ListSecurityActivityQueryDto } from './dto/list-security-activity-query.dto';
+import { ErrorMessages } from '../common/constants/error-messages';
 
 @Controller('users')
 export class UsersController {
@@ -140,7 +141,7 @@ export class UsersController {
   async getUser(@Param('id', ParseUUIDPipe) id: string) {
     const user = await this.usersService.findById(id);
     if (!user) {
-      throw new NotFoundException('User not found');
+      throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
     }
     return toSafeUser(user);
   }

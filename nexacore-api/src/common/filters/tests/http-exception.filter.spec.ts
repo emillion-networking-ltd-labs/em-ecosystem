@@ -5,6 +5,7 @@ describe('HttpExceptionFilter', () => {
   let filter: HttpExceptionFilter;
   let mockJson: jest.Mock;
   let mockStatus: jest.Mock;
+  let mockSetHeader: jest.Mock;
   let mockHost: ArgumentsHost;
 
   beforeEach(() => {
@@ -13,10 +14,11 @@ describe('HttpExceptionFilter', () => {
     filter = new HttpExceptionFilter();
     mockJson = jest.fn();
     mockStatus = jest.fn().mockReturnValue({ json: mockJson });
+    mockSetHeader = jest.fn();
 
     mockHost = {
       switchToHttp: () => ({
-        getResponse: () => ({ status: mockStatus }),
+        getResponse: () => ({ status: mockStatus, setHeader: mockSetHeader }),
         getRequest: () => ({}),
       }),
       getArgs: jest.fn(),
@@ -187,12 +189,11 @@ describe('HttpExceptionFilter', () => {
     expect(mockJson).toHaveBeenCalledWith(customBody);
   });
 
-  it('should include retryAfter when present in exception response', () => {
+  it('should set Retry-After header when retryAfter present in exception response', () => {
     const exception = new HttpException(
       {
         message: 'Account locked',
         retryAfter: 300,
-        lockoutLevel: 2,
       },
       HttpStatus.FORBIDDEN,
     );
@@ -200,9 +201,10 @@ describe('HttpExceptionFilter', () => {
     filter.catch(exception, mockHost);
 
     expect(mockStatus).toHaveBeenCalledWith(403);
+    expect(mockSetHeader).toHaveBeenCalledWith('Retry-After', '300');
     const callArg = mockJson.mock.calls[0][0];
-    expect(callArg.error.retryAfter).toBe(300);
-    expect(callArg.error.lockoutLevel).toBe(2);
+    expect(callArg.error).not.toHaveProperty('retryAfter');
+    expect(callArg.error).not.toHaveProperty('lockoutLevel');
   });
 
   it('should not include retryAfter/lockoutLevel when not present', () => {

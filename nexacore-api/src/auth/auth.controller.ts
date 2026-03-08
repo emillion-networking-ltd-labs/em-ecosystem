@@ -56,6 +56,7 @@ import { SecurityConfig } from '../security/security.config';
 import { Role } from '../users/enums/role.enum';
 import { SafeUser } from '../users/entities/user.entity';
 import { PermissionsService } from '../permissions/permissions.service';
+import { ErrorMessages } from '../common/constants/error-messages';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -195,7 +196,7 @@ export class AuthController {
   ) {
     const refreshToken = req.cookies?.['refresh_token'];
     if (!refreshToken) {
-      throw new UnauthorizedException('No refresh token provided');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
     const meta = this.extractRequestMeta(req);
     const result = await this.authService.refreshTokens(
@@ -620,7 +621,7 @@ export class AuthController {
       .map((u) => u.trim());
 
     if (!allowedUrls.includes(frontendUrl)) {
-      throw new UnauthorizedException('Invalid redirect configuration');
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     return frontendUrl;

@@ -107,7 +107,7 @@ describe('JwtStrategy', () => {
           jti: 'test-jti-789',
           iat: Math.floor(Date.now() / 1000),
         }),
-      ).rejects.toThrow(new UnauthorizedException('Account deactivated'));
+      ).rejects.toThrow(new UnauthorizedException('Authentication failed'));
     });
 
     it('should throw UnauthorizedException when token is denied', async () => {

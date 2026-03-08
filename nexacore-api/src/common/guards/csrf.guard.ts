@@ -9,6 +9,7 @@ import { Request } from 'express';
 import * as crypto from 'crypto';
 import { SKIP_CSRF_KEY } from '../decorators/skip-csrf.decorator';
 import { SecurityConfig } from '../../security/security.config';
+import { ErrorMessages } from '../constants/error-messages';
 
 const SAFE_METHODS = new Set(['GET', 'HEAD', 'OPTIONS']);
 
@@ -38,15 +39,15 @@ export class CsrfGuard implements CanActivate {
     const headerToken = request.headers[headerName] as string | undefined;
 
     if (!cookieToken || !headerToken) {
-      throw new ForbiddenException('CSRF token missing');
+      throw new ForbiddenException(ErrorMessages.csrf.VALIDATION_FAILED);
     }
 
     if (!this.verifyToken(cookieToken)) {
-      throw new ForbiddenException('Invalid CSRF token');
+      throw new ForbiddenException(ErrorMessages.csrf.VALIDATION_FAILED);
     }
 
     if (!this.timingSafeEqual(cookieToken, headerToken)) {
-      throw new ForbiddenException('CSRF token mismatch');
+      throw new ForbiddenException(ErrorMessages.csrf.VALIDATION_FAILED);
     }
 
     return true;

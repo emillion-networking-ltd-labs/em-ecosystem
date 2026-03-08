@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   UnauthorizedException,
-  ConflictException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
@@ -110,13 +109,13 @@ describe('MfaService', () => {
       );
     });
 
-    it('should throw ConflictException if MFA already enabled', async () => {
+    it('should throw BadRequestException if MFA already enabled', async () => {
       (usersService.findById as jest.Mock).mockResolvedValue(
         mockUser({ mfaEnabled: true }),
       );
 
       await expect(service.setupMfa('user-1')).rejects.toThrow(
-        ConflictException,
+        BadRequestException,
       );
     });
 
@@ -152,13 +151,13 @@ describe('MfaService', () => {
       );
     });
 
-    it('should throw ConflictException if MFA already enabled', async () => {
+    it('should throw BadRequestException if MFA already enabled', async () => {
       (usersService.findById as jest.Mock).mockResolvedValue(
         mockUser({ mfaEnabled: true }),
       );
 
       await expect(service.verifySetup('user-1', '123456')).rejects.toThrow(
-        ConflictException,
+        BadRequestException,
       );
     });
 

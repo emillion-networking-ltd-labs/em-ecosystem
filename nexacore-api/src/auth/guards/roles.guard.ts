@@ -9,6 +9,7 @@ import { Role } from '../../users/enums/role.enum';
 import { ROLES_KEY } from '../../common/decorators/roles.decorator';
 import { AuditService } from '../../audit/audit.service';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
+import { ErrorMessages } from '../../common/constants/error-messages';
 
 @Injectable()
 export class RolesGuard implements CanActivate {
@@ -58,11 +59,11 @@ export class RolesGuard implements CanActivate {
     }
 
     if (!user) {
-      throw new ForbiddenException('Access denied');
+      throw new ForbiddenException(ErrorMessages.permission.ACCESS_DENIED);
     }
 
     if (!requiredRoles.includes(user.role)) {
-      throw new ForbiddenException('Insufficient role');
+      throw new ForbiddenException(ErrorMessages.permission.INSUFFICIENT_ROLE);
     }
 
     return true;

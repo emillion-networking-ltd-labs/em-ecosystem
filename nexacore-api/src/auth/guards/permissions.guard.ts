@@ -8,6 +8,7 @@ import { Reflector } from '@nestjs/core';
 import { Role } from '../../users/enums/role.enum';
 import { PERMISSIONS_KEY } from '../../common/decorators/permissions.decorator';
 import { PermissionsService } from '../../permissions/permissions.service';
+import { ErrorMessages } from '../../common/constants/error-messages';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -32,7 +33,7 @@ export class PermissionsGuard implements CanActivate {
     const user = request.user;
 
     if (!user) {
-      throw new ForbiddenException('Access denied');
+      throw new ForbiddenException(ErrorMessages.permission.ACCESS_DENIED);
     }
 
     // SUPERADMIN bypasses all permission checks (RolesGuard already logs bypass)
@@ -47,9 +48,7 @@ export class PermissionsGuard implements CanActivate {
       );
 
     if (!hasPermissions) {
-      throw new ForbiddenException(
-        `Insufficient permissions. Required: ${requiredPermissions.join(', ')}`,
-      );
+      throw new ForbiddenException(ErrorMessages.permission.INSUFFICIENT_PERMISSIONS);
     }
 
     return true;

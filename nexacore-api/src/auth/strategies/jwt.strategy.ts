@@ -5,6 +5,7 @@ import { UsersService } from '../../users/users.service';
 import { TokenDenyListService } from '../token-deny-list.service';
 import { JwtPayload } from '../../common/interfaces/jwt-payload.interface';
 import { SafeUser, toSafeUser } from '../../users/entities/user.entity';
+import { ErrorMessages } from '../../common/constants/error-messages';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -26,15 +27,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   async validate(payload: JwtPayload): Promise<SafeUser> {
     const isDenied = await this.tokenDenyListService.isDenied(payload.jti, payload.sub, payload.iat);
     if (isDenied) {
-      throw new UnauthorizedException('Token has been revoked');
+      throw new UnauthorizedException(ErrorMessages.auth.TOKEN_REVOKED);
     }
 
     const user = await this.usersService.findById(payload.sub);
     if (!user) {
-      throw new UnauthorizedException('User not found');
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
     if (!user.isActive) {
-      throw new UnauthorizedException('Account deactivated');
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
     return toSafeUser(user);
   }

@@ -17,9 +17,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     let message = 'Internal server error';
     let code = 'INTERNAL_SERVER_ERROR';
     let details: string[] | undefined;
-    let retryAfter: number | undefined;
-    let lockoutLevel: number | undefined;
-
     if (exception instanceof HttpException) {
       statusCode = exception.getStatus();
       const exceptionResponse = exception.getResponse();
@@ -42,12 +39,9 @@ export class HttpExceptionFilter implements ExceptionFilter {
           message = 'Validation failed';
         }
 
-        // Pass through retryAfter and lockoutLevel from ForbiddenException payloads
+        // Set Retry-After header (standard HTTP mechanism) instead of leaking in body
         if (typeof responseObj.retryAfter === 'number') {
-          retryAfter = responseObj.retryAfter;
-        }
-        if (typeof responseObj.lockoutLevel === 'number') {
-          lockoutLevel = responseObj.lockoutLevel;
+          response.setHeader('Retry-After', String(responseObj.retryAfter));
         }
       }
 
@@ -61,8 +55,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
         code,
         statusCode,
         ...(details && { details }),
-        ...(retryAfter !== undefined && { retryAfter }),
-        ...(lockoutLevel !== undefined && { lockoutLevel }),
       },
     });
   }

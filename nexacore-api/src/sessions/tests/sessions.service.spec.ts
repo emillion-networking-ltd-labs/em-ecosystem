@@ -323,7 +323,7 @@ describe('SessionsService', () => {
           ...rotateParams,
           oldSessionId: 'session-1',
         }),
-      ).rejects.toThrow('Token reuse detected. All sessions revoked for security.');
+      ).rejects.toThrow('Invalid or expired refresh token');
 
       // Verify all sessions in the family were revoked
       expect(prisma.session.updateMany).toHaveBeenCalledWith({
