@@ -1236,10 +1236,15 @@ describe('AuthService', () => {
 
     it('should return silently when user not found (prevent enumeration)', async () => {
       usersService.findByEmail.mockResolvedValue(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(
         authService.forgotPassword({ email: 'nonexistent@example.com' }),
       ).resolves.toBeUndefined();
+
+      // CWE-203: bcrypt.compare must be called for timing protection
+      expect(bcrypt.compare).toHaveBeenCalled();
+      expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe('nonexistent@example.com');
     });
 
     it('should return silently for OAuth-only accounts', async () => {
@@ -1248,12 +1253,16 @@ describe('AuthService', () => {
         passwordHash: null,
         provider: Provider.GOOGLE,
       });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(
         authService.forgotPassword({ email: 'test@example.com' }),
       ).resolves.toBeUndefined();
 
       expect(prismaService.passwordResetToken.create).not.toHaveBeenCalled();
+      // CWE-203: bcrypt.compare must be called for timing protection
+      expect(bcrypt.compare).toHaveBeenCalled();
+      expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe('test@example.com');
     });
 
     it('should invalidate existing tokens and create new reset token', async () => {
@@ -1275,6 +1284,25 @@ describe('AuthService', () => {
         expect.any(String),
         null,
       );
+    });
+
+    it('non-existing and OAuth-only paths should both call bcrypt.compare for timing protection', async () => {
+      // Non-existing email path
+      usersService.findByEmail.mockResolvedValue(null);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      await authService.forgotPassword({ email: 'nobody@example.com' });
+      expect(bcrypt.compare).toHaveBeenCalled();
+
+      (bcrypt.compare as jest.Mock).mockClear();
+
+      // OAuth-only account path
+      usersService.findByEmail.mockResolvedValue({
+        ...mockUser,
+        passwordHash: null,
+        provider: Provider.GOOGLE,
+      });
+      await authService.forgotPassword({ email: 'oauth@example.com' });
+      expect(bcrypt.compare).toHaveBeenCalled();
     });
   });
 

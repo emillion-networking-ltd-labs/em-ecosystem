@@ -1039,19 +1039,15 @@ export class AuthService {
   async forgotPassword(dto: ForgotPasswordDto): Promise<void> {
     const user = await this.usersService.findByEmail(dto.email);
 
-    // Always return success to prevent email enumeration
     if (!user) {
-      this.logger.log(
-        `Forgot password requested for non-existent email: ${dto.email}`,
-      );
+      // CWE-203: timing protection — match CPU cost of existing-email path
+      await bcrypt.compare(dto.email, DUMMY_PASSWORD_HASH);
       return;
     }
 
-    // OAuth-only accounts cannot reset password
     if (!user.passwordHash && user.provider !== 'LOCAL') {
-      this.logger.log(
-        `Forgot password requested for OAuth account: ${dto.email}`,
-      );
+      // CWE-203: timing protection — match CPU cost of LOCAL-email path
+      await bcrypt.compare(dto.email, DUMMY_PASSWORD_HASH);
       return;
     }
 
