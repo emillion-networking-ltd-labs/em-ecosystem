@@ -1,5 +1,4 @@
 import { Role } from '../enums/role.enum';
-import { Provider } from '../enums/provider.enum';
 
 export interface User {
   id: string;
@@ -9,8 +8,6 @@ export interface User {
   lastName: string | null;
   avatarUrl: string | null;
   role: Role;
-  provider: Provider;
-  providerId: string | null;
   emailVerified: boolean;
   pendingEmail: string | null;
   isActive: boolean;
@@ -46,8 +43,6 @@ export function toSafeUser(
     lastName: user.lastName,
     avatarUrl: user.avatarUrl,
     role: user.role,
-    provider: user.provider,
-    providerId: user.providerId,
     emailVerified: user.emailVerified,
     isActive: user.isActive,
     mfaEnabled: user.mfaEnabled,

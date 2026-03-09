@@ -98,8 +98,6 @@ describe('AuthService', () => {
     lastName: null,
     avatarUrl: null,
     role: Role.USER,
-    provider: Provider.LOCAL,
-    providerId: null,
     emailVerified: true,
     pendingEmail: null,
     isActive: true,
@@ -434,32 +432,16 @@ describe('AuthService', () => {
         ).rejects.toThrow(UnauthorizedException);
       });
 
-      it('should throw ForbiddenException when LOCAL user email is not verified', async () => {
+      it('should throw ForbiddenException when user with password has unverified email', async () => {
         usersService.findByEmail.mockResolvedValue({
           ...mockUser,
           emailVerified: false,
-          provider: Provider.LOCAL,
         });
         (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
         await expect(
           authService.login(loginDto, requestMeta),
         ).rejects.toThrow(ForbiddenException);
-      });
-
-      it('should allow login for OAuth user with unverified email', async () => {
-        usersService.findByEmail.mockResolvedValue({
-          ...mockUser,
-          emailVerified: false,
-          provider: Provider.GOOGLE,
-        });
-        (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-        jwtService.sign.mockReturnValue('token');
-        sessionsService.createSession.mockResolvedValue(mockSession);
-        sessionsService.updateSessionHash.mockResolvedValue(undefined);
-
-        const result = await authService.login(loginDto, requestMeta);
-        expect(result).toHaveProperty('accessToken');
       });
 
       it('should reset lockout when lock has expired', async () => {
@@ -628,8 +610,6 @@ describe('AuthService', () => {
       lastName: null,
       avatarUrl: null,
       role: Role.USER,
-      provider: Provider.GOOGLE,
-      providerId: 'google-id-123',
       emailVerified: true,
       isActive: true,
       failedAttempts: 0,
@@ -706,8 +686,6 @@ describe('AuthService', () => {
           lastName: null,
           avatarUrl: null,
           role: Role.USER,
-          provider: Provider.GOOGLE,
-          providerId: 'google-id',
           emailVerified: true,
           isActive: true,
           failedAttempts: 0,
@@ -749,8 +727,6 @@ describe('AuthService', () => {
         lastName: null,
         avatarUrl: null,
         role: Role.USER,
-        provider: Provider.GOOGLE,
-        providerId: 'google-id',
         emailVerified: true,
         isActive: true,
         failedAttempts: 0,
@@ -1089,8 +1065,6 @@ describe('AuthService', () => {
     it('should include oAuthAccount.deleteMany in transaction when user has OAuth accounts', async () => {
       const oauthUserWithPending = {
         ...mockUser,
-        provider: Provider.GOOGLE,
-        providerId: 'google-id-123',
         pendingEmail: 'new@example.com',
       };
       prismaService.emailVerificationToken.findUnique.mockResolvedValue({
@@ -1310,11 +1284,10 @@ describe('AuthService', () => {
       expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe('nonexistent@example.com');
     });
 
-    it('should return silently for OAuth-only accounts', async () => {
+    it('should return silently for OAuth-only accounts (no passwordHash)', async () => {
       usersService.findByEmail.mockResolvedValue({
         ...mockUser,
         passwordHash: null,
-        provider: Provider.GOOGLE,
       });
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
@@ -1358,11 +1331,10 @@ describe('AuthService', () => {
 
       (bcrypt.compare as jest.Mock).mockClear();
 
-      // OAuth-only account path
+      // OAuth-only account path (no passwordHash)
       usersService.findByEmail.mockResolvedValue({
         ...mockUser,
         passwordHash: null,
-        provider: Provider.GOOGLE,
       });
       await authService.forgotPassword({ email: 'oauth@example.com' });
       expect(bcrypt.compare).toHaveBeenCalled();
@@ -1936,8 +1908,6 @@ describe('AuthService', () => {
         ...mockUser,
         id: 'oauth-uuid',
         email: 'oauth@example.com',
-        provider: Provider.GOOGLE,
-        providerId: 'google-123',
       };
 
       usersService.findOrCreateByOAuth.mockResolvedValue({ user: oauthUser, action: 'login' });
@@ -2005,11 +1975,10 @@ describe('AuthService', () => {
   });
 
   describe('login - no password (OAuth account)', () => {
-    it('should throw UnauthorizedException for OAuth-only account', async () => {
+    it('should throw UnauthorizedException for OAuth-only account (no passwordHash)', async () => {
       usersService.findByEmail.mockResolvedValue({
         ...mockUser,
         passwordHash: null,
-        provider: Provider.GOOGLE,
       });
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
@@ -2023,11 +1992,10 @@ describe('AuthService', () => {
   });
 
   describe('login - email not verified', () => {
-    it('should throw ForbiddenException for unverified LOCAL account', async () => {
+    it('should throw ForbiddenException for unverified account with password', async () => {
       usersService.findByEmail.mockResolvedValue({
         ...mockUser,
         emailVerified: false,
-        provider: Provider.LOCAL,
       });
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
@@ -2782,8 +2750,6 @@ describe('AuthService', () => {
       const oauthUser = {
         ...mockUser,
         id: 'uuid-oauth',
-        provider: Provider.GOOGLE,
-        providerId: 'gid',
       };
       usersService.findOrCreateByOAuth.mockResolvedValue({ user: oauthUser, action: 'login' });
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');

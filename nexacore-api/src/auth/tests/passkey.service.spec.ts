@@ -8,7 +8,7 @@ import { PasskeyService } from '../passkey.service';
 import { UsersService } from '../../users/users.service';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
 import { Role } from '../../users/enums/role.enum';
-import { Provider } from '../../users/enums/provider.enum';
+
 import { User } from '../../users/entities/user.entity';
 import {
   MAX_PASSKEYS_PER_USER,
@@ -40,8 +40,6 @@ const mockUser = (overrides: Partial<User> = {}): User => ({
   lastName: null,
   avatarUrl: null,
   role: Role.USER,
-  provider: Provider.LOCAL,
-  providerId: null,
   emailVerified: true,
   pendingEmail: null,
   isActive: true,
@@ -852,7 +850,7 @@ describe('PasskeyService', () => {
 
     it('should delete passkey without password for OAuth user', async () => {
       usersService.findById!.mockResolvedValue(
-        mockUser({ passwordHash: null, provider: Provider.GOOGLE }),
+        mockUser({ passwordHash: null }),
       );
       prisma.webAuthnCredential.findFirst.mockResolvedValue({
         id: 'pk-1',

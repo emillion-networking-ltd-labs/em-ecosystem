@@ -8,7 +8,7 @@ import { SessionsService } from '../../sessions/sessions.service';
 import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
 import { Role } from '../../users/enums/role.enum';
-import { Provider } from '../../users/enums/provider.enum';
+
 
 describe('OAuth Exchange Flow (Integration)', () => {
   let controller: AuthController;
@@ -36,8 +36,6 @@ describe('OAuth Exchange Flow (Integration)', () => {
     lastName: null,
     avatarUrl: null,
     role: Role.USER,
-    provider: Provider.GOOGLE,
-    providerId: 'google-123',
     hasPassword: false,
     oauthProviders: ['GOOGLE'],
     emailVerified: true,

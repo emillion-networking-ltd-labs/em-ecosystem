@@ -9,7 +9,7 @@ import { TrustedDeviceService } from '../trusted-device.service';
 import { CryptoService } from '../../common/services/crypto.service';
 import { UsersService } from '../../users/users.service';
 import { Role } from '../../users/enums/role.enum';
-import { Provider } from '../../users/enums/provider.enum';
+
 import { User } from '../../users/entities/user.entity';
 
 const mockVerify = jest.fn();
@@ -31,8 +31,6 @@ const mockUser = (overrides: Partial<User> = {}): User => ({
   lastName: null,
   avatarUrl: null,
   role: Role.USER,
-  provider: Provider.LOCAL,
-  providerId: null,
   emailVerified: false,
   isActive: true,
   failedAttempts: 0,

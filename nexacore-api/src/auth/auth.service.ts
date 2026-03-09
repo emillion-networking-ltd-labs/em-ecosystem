@@ -18,7 +18,6 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { User, SafeUser, toSafeUser } from '../users/entities/user.entity';
 import { Role } from '../users/enums/role.enum';
-import { Provider } from '../users/enums/provider.enum';
 import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
@@ -315,8 +314,8 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Email verification check — LOCAL accounts must verify before login
-    if (user.provider === Provider.LOCAL && !user.emailVerified) {
+    // Email verification check — accounts with password must verify before login
+    if (user.passwordHash && !user.emailVerified) {
       this.auditService
         .log({
           action: AuditAction.LOGIN_FAILURE,
@@ -950,7 +949,6 @@ export class AuthService {
           email: newEmail,
           pendingEmail: null,
           emailVerified: true,
-          ...(hasOAuthAccounts && { provider: 'LOCAL', providerId: null }),
         },
       }),
       this.prisma.emailVerificationToken.update({
@@ -1048,7 +1046,7 @@ export class AuthService {
       return;
     }
 
-    if (!user.passwordHash && user.provider !== 'LOCAL') {
+    if (!user.passwordHash) {
       // CWE-203: timing protection — match CPU cost of LOCAL-email path
       await bcrypt.compare(dto.email, DUMMY_PASSWORD_HASH);
       return;

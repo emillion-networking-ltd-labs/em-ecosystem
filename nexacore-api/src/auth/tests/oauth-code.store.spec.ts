@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OAuthCodeStore, OAuthTokenPayload } from '../stores/oauth-code.store';
 import { Role } from '../../users/enums/role.enum';
-import { Provider } from '../../users/enums/provider.enum';
+
 import { REDIS_CLIENT } from '../../common/services/redis.constants';
 
 describe('OAuthCodeStore', () => {
@@ -18,8 +18,6 @@ describe('OAuthCodeStore', () => {
       lastName: null,
       avatarUrl: null,
       role: Role.USER,
-      provider: Provider.GOOGLE,
-      providerId: 'google-123',
       hasPassword: false,
       oauthProviders: ['GOOGLE'],
       emailVerified: true,

@@ -7,8 +7,6 @@ export type SafeUser = {
   lastName: string | null;
   avatarUrl: string | null;
   role: UserRole;
-  provider: 'LOCAL' | 'GOOGLE' | 'GITHUB';
-  providerId: string | null;
   emailVerified: boolean;
   isActive: boolean;
   mfaEnabled: boolean;

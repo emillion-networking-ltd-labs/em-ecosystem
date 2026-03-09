@@ -71,14 +71,12 @@ export class UsersService {
   async create(data: {
     email: string;
     passwordHash: string;
-    provider?: Provider;
   }): Promise<User> {
     try {
       return (await this.prisma.user.create({
         data: {
           email: data.email,
           passwordHash: data.passwordHash,
-          provider: data.provider || Provider.LOCAL,
         },
       })) as User;
     } catch (error: unknown) {
@@ -185,13 +183,11 @@ export class UsersService {
         );
       }
 
-      // Create OAuthAccount row + dual-write User.provider/providerId
+      // Create OAuthAccount row + update user profile
       const [user] = await this.prisma.$transaction([
         this.prisma.user.update({
           where: { id: existingUser.id },
           data: {
-            provider: profile.provider,
-            providerId: profile.providerId,
             emailVerified: true,
             ...profileData,
           },
@@ -213,8 +209,6 @@ export class UsersService {
     const user = await this.prisma.user.create({
       data: {
         email: profile.email,
-        provider: profile.provider,
-        providerId: profile.providerId,
         emailVerified: true,
         ...profileData,
         oauthAccounts: {
@@ -272,12 +266,6 @@ export class UsersService {
         providerId: profile.providerId,
         email: profile.email,
       },
-    });
-
-    // Dual-write to User.provider/providerId for backward compat
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { provider: profile.provider, providerId: profile.providerId },
     });
 
     this.auditService
@@ -777,7 +765,6 @@ export class UsersService {
           firstName: null,
           lastName: null,
           avatarUrl: null,
-          providerId: null,
           pendingEmail: null,
           emailVerified: false,
           isActive: false,
@@ -855,27 +842,6 @@ export class UsersService {
     await this.prisma.oAuthAccount.delete({
       where: { id: account.id },
     });
-
-    // Dual-write: check if user has remaining OAuthAccounts
-    const remainingAccounts = await this.prisma.oAuthAccount.findFirst({
-      where: { userId },
-    });
-    if (!remainingAccounts) {
-      // No more OAuth accounts — reset User to LOCAL
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: { provider: Provider.LOCAL, providerId: null },
-      });
-    } else {
-      // Update User to reflect the remaining account
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          provider: remainingAccounts.provider as Provider,
-          providerId: remainingAccounts.providerId,
-        },
-      });
-    }
 
     this.auditService
       .log({
