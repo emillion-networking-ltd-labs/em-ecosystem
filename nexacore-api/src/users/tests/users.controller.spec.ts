@@ -3,7 +3,7 @@ import { NotFoundException } from '@nestjs/common';
 import { UsersController } from '../users.controller';
 import { UsersService } from '../users.service';
 import { Role } from '../enums/role.enum';
-import { Provider } from '../enums/provider.enum';
+
 import { Reflector } from '@nestjs/core';
 import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
@@ -31,8 +31,6 @@ describe('UsersController', () => {
     lastName: 'Doe',
     avatarUrl: null,
     role: Role.USER,
-    provider: Provider.LOCAL,
-    providerId: null,
     emailVerified: true,
     isActive: true,
     failedAttempts: 0,

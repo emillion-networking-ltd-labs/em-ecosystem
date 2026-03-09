@@ -70,8 +70,6 @@ model User {
   lastName       String?
   avatarUrl      String?
   role           Role      @default(USER)
-  provider       Provider  @default(LOCAL)
-  providerId     String?
   emailVerified  Boolean   @default(false)
   pendingEmail   String?
   isActive       Boolean   @default(true)

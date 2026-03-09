@@ -13,7 +13,7 @@ import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { Role } from '../../users/enums/role.enum';
-import { Provider } from '../../users/enums/provider.enum';
+
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -55,8 +55,6 @@ describe('AuthController', () => {
       lastName: null,
       avatarUrl: null,
       role: Role.USER,
-      provider: Provider.LOCAL,
-      providerId: null,
       hasPassword: true,
       oauthProviders: [],
       emailVerified: false,

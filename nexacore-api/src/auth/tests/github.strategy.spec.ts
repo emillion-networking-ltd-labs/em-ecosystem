@@ -32,8 +32,6 @@ describe('GitHubStrategy', () => {
       lastName: null,
       avatarUrl: null,
       role: Role.USER,
-      provider: Provider.GITHUB,
-      providerId: 'github-id-456',
       hasPassword: false,
       oauthProviders: ['GITHUB'],
       emailVerified: true,

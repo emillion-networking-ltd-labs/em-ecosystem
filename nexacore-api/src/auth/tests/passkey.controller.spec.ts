@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Role } from '../../users/enums/role.enum';
-import { Provider } from '../../users/enums/provider.enum';
+
 import { SafeUser } from '../../users/entities/user.entity';
 
 // Mock @simplewebauthn/server (ESM) before any imports that transitively load it
@@ -37,8 +37,6 @@ describe('PasskeyController', () => {
     lastName: 'Doe',
     avatarUrl: null,
     role: Role.USER,
-    provider: Provider.LOCAL,
-    providerId: null,
     hasPassword: true,
     oauthProviders: [],
     emailVerified: true,
