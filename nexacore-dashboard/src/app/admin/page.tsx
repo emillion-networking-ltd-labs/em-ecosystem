@@ -52,9 +52,8 @@ export default function AdminPage() {
   };
 
   const handleToggleLock = (user: SafeUser) => {
-    const isLocked = !!user.lockedUntil && new Date(user.lockedUntil) > new Date();
     setSelectedUser(user);
-    setModalType(isLocked ? 'unlock' : 'lock');
+    setModalType(user.isActive ? 'lock' : 'unlock');
   };
 
   const handleDelete = (user: SafeUser) => {

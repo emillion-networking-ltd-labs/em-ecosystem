@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/context/ToastContext';
-import { unlinkOAuth } from '@/lib/unlink-oauth-api';
+import { unlinkOAuth } from '@/lib/oauth-api';
 import Input from '@/components/ui/Input';
 
 type ApiError = { error?: { message?: string; statusCode?: number } };
@@ -49,27 +49,27 @@ export default function ConnectedAccounts() {
   const { addToast } = useToast();
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const [showModal, setShowModal] = useState(false);
+  const [disconnectingProvider, setDisconnectingProvider] = useState<string | null>(null);
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const canConfirm = password.length >= 8 && !loading;
 
-  const connectedProvider = providers.find((p) => p.id === user?.provider);
-
   const handleClose = () => {
     if (loading) return;
-    setShowModal(false);
+    setDisconnectingProvider(null);
     setPassword('');
   };
 
   const handleUnlink = async () => {
+    if (!disconnectingProvider) return;
     setLoading(true);
     try {
-      await unlinkOAuth(password);
-      setShowModal(false);
+      await unlinkOAuth(disconnectingProvider, password);
+      const providerName = providers.find((p) => p.id === disconnectingProvider)?.name ?? disconnectingProvider;
+      setDisconnectingProvider(null);
       setPassword('');
-      addToast({ variant: 'success', title: 'Account disconnected', description: 'Your account now uses local authentication.' });
+      addToast({ variant: 'success', title: 'Account disconnected', description: `${providerName} has been disconnected.` });
       await refreshSession();
     } catch (err: unknown) {
       const e = err as ApiError;
@@ -89,7 +89,7 @@ export default function ConnectedAccounts() {
   };
 
   useEffect(() => {
-    if (!showModal) return;
+    if (!disconnectingProvider) return;
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'Escape') handleClose();
     };
@@ -100,8 +100,10 @@ export default function ConnectedAccounts() {
   if (!user) return null;
 
   const handleConnect = (providerId: string) => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/auth/${providerId.toLowerCase()}`;
+    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/auth/link/${providerId.toLowerCase()}`;
   };
+
+  const activeProvider = providers.find((p) => p.id === disconnectingProvider);
 
   return (
     <>
@@ -112,7 +114,8 @@ export default function ConnectedAccounts() {
 
         <div className="space-y-3">
           {providers.map((provider) => {
-            const isConnected = user.provider === provider.id;
+            const isConnected = user.oauthProviders.includes(provider.id);
+            const isLastAuthMethod = !user.hasPassword && user.oauthProviders.length === 1;
 
             return (
               <div
@@ -127,17 +130,17 @@ export default function ConnectedAccounts() {
                 </div>
 
                 {isConnected ? (
-                  user.hasPassword ? (
+                  isLastAuthMethod ? (
+                    <span className="text-caption text-content-tertiary">
+                      Set a password first
+                    </span>
+                  ) : (
                     <button
-                      onClick={() => setShowModal(true)}
+                      onClick={() => setDisconnectingProvider(provider.id)}
                       className="rounded-md border border-error-border px-4 py-1.5 text-caption text-error hover:bg-error-bg"
                     >
                       Disconnect
                     </button>
-                  ) : (
-                    <span className="text-caption text-content-tertiary">
-                      Set a password first
-                    </span>
                   )
                 ) : (
                   <button
@@ -154,7 +157,7 @@ export default function ConnectedAccounts() {
       </div>
 
       {/* Disconnect confirmation modal */}
-      {showModal && (
+      {disconnectingProvider && (
         <div
           ref={overlayRef}
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
@@ -166,11 +169,10 @@ export default function ConnectedAccounts() {
             {/* Top section */}
             <div className="border-b border-border-default bg-surface-primary p-6">
               <h2 className="text-heading-md text-content-primary">
-                Disconnect {connectedProvider?.name}
+                Disconnect {activeProvider?.name}
               </h2>
               <p className="mt-2 text-body-sm text-content-secondary">
-                Your account will be converted to local authentication. You&apos;ll use your
-                email and password to log in from now on.
+                This provider will be removed from your account. You can reconnect it later.
               </p>
 
               <div className="mt-4">

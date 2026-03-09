@@ -236,7 +236,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (data.oauthAction === 'created') {
         addToast({ variant: 'success', title: 'Account created', description: 'Your account has been created successfully.' });
       } else if (data.oauthAction === 'linked') {
-        const providerName = user.provider === 'GOOGLE' ? 'Google' : user.provider === 'GITHUB' ? 'GitHub' : user.provider;
+        const lastProvider = user.oauthProviders[user.oauthProviders.length - 1];
+        const providerName = lastProvider === 'GOOGLE' ? 'Google' : lastProvider === 'GITHUB' ? 'GitHub' : lastProvider;
         addToast({ variant: 'success', title: 'Account linked', description: `Your account has been linked to ${providerName}.` });
       }
     } catch (err: unknown) {

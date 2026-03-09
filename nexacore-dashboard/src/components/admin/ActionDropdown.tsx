@@ -37,7 +37,7 @@ export default function ActionDropdown({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const isLocked = !!user.lockedUntil && new Date(user.lockedUntil) > new Date();
+  const isLocked = !user.isActive;
 
   return (
     <Can anyPermission={['users:write', 'users:delete']}>

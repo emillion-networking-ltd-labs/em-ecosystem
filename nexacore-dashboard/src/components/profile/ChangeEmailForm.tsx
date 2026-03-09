@@ -28,17 +28,19 @@ export default function ChangeEmailForm() {
 
   if (!user) return null;
 
-  const isLocal = user.provider === 'LOCAL';
-  const providerName = user.provider === 'GOOGLE' ? 'Google' : user.provider === 'GITHUB' ? 'GitHub' : user.provider;
+  const isOAuthOnly = user.oauthProviders.length > 0 && !user.hasPassword;
+  const providerNames = user.oauthProviders
+    .map((p) => p === 'GOOGLE' ? 'Google' : p === 'GITHUB' ? 'GitHub' : p)
+    .join(' and ');
 
   const isValidEmail = EMAIL_REGEX.test(newEmail);
   const isSameEmail = newEmail.toLowerCase() === user.email.toLowerCase();
   const isValidPassword = password.length >= 8;
-  const canSubmit = isLocal && isValidEmail && !isSameEmail && isValidPassword && !loading;
+  const canSubmit = !isOAuthOnly && isValidEmail && !isSameEmail && isValidPassword && !loading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isLocal) return;
+    if (isOAuthOnly) return;
     setLoading(true);
     try {
       await requestEmailChange(newEmail, password);
@@ -58,15 +60,15 @@ export default function ChangeEmailForm() {
         Change Email
       </h2>
 
-      {!isLocal ? (
+      {isOAuthOnly ? (
         <div className="flex items-start gap-3 rounded-xl bg-surface-subtle p-4">
           <Info size={18} className="mt-0.5 shrink-0 text-content-secondary" />
           <p className="text-body-sm text-content-secondary">
-            Your email is managed by {providerName}. To change your email, disconnect your {providerName} account in{' '}
+            Your email is managed by {providerNames}. Set a password in{' '}
             <a href="#connected-accounts" className="font-medium text-content-primary underline underline-offset-2 hover:text-brand">
               Connected Accounts
             </a>{' '}
-            first.
+            to change your email.
           </p>
         </div>
       ) : (
