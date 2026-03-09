@@ -14,7 +14,7 @@ export default function AccountInfo() {
     year: 'numeric',
   });
 
-  const isLocked = !!user.lockedUntil && new Date(user.lockedUntil) > new Date();
+  const isLocked = !user.isActive;
   const statusLabel = isLocked ? 'Locked' : user.isActive ? 'Active' : 'Inactive';
   const statusDotClass = isLocked
     ? 'bg-error'

@@ -11,14 +11,19 @@ export type SafeUser = {
   providerId: string | null;
   emailVerified: boolean;
   isActive: boolean;
-  failedAttempts: number;
-  lockedUntil: string | null;
-  lockoutCount: number;
   mfaEnabled: boolean;
   hasPassword: boolean;
+  oauthProviders: string[];
   permissions?: string[];
   createdAt: string;
   updatedAt: string;
+};
+
+export type LinkedProvider = {
+  provider: string;
+  providerId: string;
+  email: string;
+  linkedAt: string;
 };
 
 export type AuthResponse = {
@@ -243,5 +248,5 @@ export type DeleteAccountDto = {
 };
 
 export type UnlinkOAuthDto = {
-  password: string;
+  password?: string;
 };
