@@ -54,6 +54,7 @@ enum AuditAction {
   PASSKEY_AUTH_SUCCESS
   PASSKEY_AUTH_FAILURE
   OAUTH_UNLINKED
+  OAUTH_LINKED
 }
 
 enum EmailVerificationTokenType {
@@ -90,6 +91,7 @@ model User {
   passwordResetTokens      PasswordResetToken[]      @relation("UserPasswordResetTokens")
   trustedDevices           TrustedDevice[]
   webAuthnCredentials      WebAuthnCredential[]
+  oauthAccounts            OAuthAccount[]
 
   @@map("users")
 }
@@ -203,6 +205,22 @@ model WebAuthnCredential {
 
   @@index([userId])
   @@map("webauthn_credentials")
+}
+
+model OAuthAccount {
+  id         String   @id @default(uuid())
+  userId     String
+  provider   Provider
+  providerId String
+  email      String
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@unique([userId, provider])
+  @@index([userId])
+  @@map("oauth_accounts")
 }
 
 model Permission {
