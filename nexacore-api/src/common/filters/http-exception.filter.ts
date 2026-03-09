@@ -28,6 +28,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
         // Short-circuit if already in our custom format (e.g., from CustomThrottlerGuard)
         if (responseObj.success === false && responseObj.error) {
+          const errorObj = responseObj.error as Record<string, unknown>;
+          // Strip retryAfter from body — it's already in the Retry-After HTTP header
+          if (typeof errorObj.retryAfter === 'number') {
+            response.setHeader('Retry-After', String(errorObj.retryAfter));
+            delete errorObj.retryAfter;
+          }
           response.status(statusCode).json(exceptionResponse);
           return;
         }

@@ -252,6 +252,28 @@ describe('HttpExceptionFilter', () => {
     expect(mockJson).toHaveBeenCalledWith(customBody);
   });
 
+  it('should strip retryAfter from custom format body and set Retry-After header', () => {
+    const customBody = {
+      success: false,
+      error: {
+        message: 'Too many requests.',
+        code: 'RATE_LIMIT_EXCEEDED',
+        statusCode: 429,
+        retryAfter: 60,
+      },
+    };
+    const exception = new HttpException(customBody, 429);
+
+    filter.catch(exception, mockHost);
+
+    expect(mockStatus).toHaveBeenCalledWith(429);
+    expect(mockSetHeader).toHaveBeenCalledWith('Retry-After', '60');
+    const callArg = mockJson.mock.calls[0][0];
+    expect(callArg.error).not.toHaveProperty('retryAfter');
+    expect(callArg.error.message).toBe('Too many requests.');
+    expect(callArg.error.code).toBe('RATE_LIMIT_EXCEEDED');
+  });
+
   it('should set Retry-After header when retryAfter present in exception response', () => {
     const exception = new HttpException(
       {
