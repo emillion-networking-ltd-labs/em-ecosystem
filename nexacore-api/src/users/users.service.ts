@@ -34,6 +34,7 @@ import { DeleteAccountDto } from './dto/delete-account.dto';
 import { UnlinkOAuthDto } from './dto/unlink-oauth.dto';
 import * as crypto from 'crypto';
 import { ErrorMessages } from '../common/constants/error-messages';
+import { LinkedProvider } from '../auth/interfaces/oauth-account.interface';
 
 const BCRYPT_ROUNDS = 12;
 const EMAIL_CHANGE_TOKEN_EXPIRY_HOURS = 24;
@@ -56,12 +57,14 @@ export class UsersService {
   async findByEmail(email: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { email },
+      include: { oauthAccounts: { select: { provider: true } } },
     }) as Promise<User | null>;
   }
 
   async findById(id: string): Promise<User | null> {
     return this.prisma.user.findUnique({
       where: { id },
+      include: { oauthAccounts: { select: { provider: true } } },
     }) as Promise<User | null>;
   }
 
@@ -130,8 +133,6 @@ export class UsersService {
   async findOrCreateByOAuth(
     profile: OAuthProfile,
   ): Promise<{ user: User; action: 'login' | 'created' | 'linked' }> {
-    const existingUser = await this.findByEmail(profile.email);
-
     // Profile fields to populate from OAuth provider
     const profileData = {
       ...(profile.firstName && { firstName: profile.firstName }),
@@ -139,39 +140,54 @@ export class UsersService {
       ...(profile.avatarUrl && { avatarUrl: profile.avatarUrl }),
     };
 
-    if (existingUser) {
-      if (
-        existingUser.provider === profile.provider &&
-        existingUser.providerId === profile.providerId
-      ) {
-        // Update profile fields if they were empty and OAuth provides them
-        const needsUpdate =
-          (!existingUser.firstName && profileData.firstName) ||
-          (!existingUser.lastName && profileData.lastName) ||
-          (!existingUser.avatarUrl && profileData.avatarUrl);
+    // 1. Look up OAuthAccount by (provider, providerId)
+    const existingAccount = await this.prisma.oAuthAccount.findUnique({
+      where: {
+        provider_providerId: {
+          provider: profile.provider,
+          providerId: profile.providerId,
+        },
+      },
+      include: { user: { include: { oauthAccounts: { select: { provider: true } } } } },
+    });
 
-        if (needsUpdate) {
-          const user = await this.prisma.user.update({
-            where: { id: existingUser.id },
-            data: {
-              ...(!existingUser.firstName && profileData.firstName && { firstName: profileData.firstName }),
-              ...(!existingUser.lastName && profileData.lastName && { lastName: profileData.lastName }),
-              ...(!existingUser.avatarUrl && profileData.avatarUrl && { avatarUrl: profileData.avatarUrl }),
-            },
-          }) as User;
-          return { user, action: 'login' };
-        }
-        return { user: existingUser, action: 'login' };
+    if (existingAccount) {
+      const existingUser = existingAccount.user as User;
+      // Update profile fields if they were empty and OAuth provides them
+      const needsUpdate =
+        (!existingUser.firstName && profileData.firstName) ||
+        (!existingUser.lastName && profileData.lastName) ||
+        (!existingUser.avatarUrl && profileData.avatarUrl);
+
+      if (needsUpdate) {
+        const user = await this.prisma.user.update({
+          where: { id: existingUser.id },
+          data: {
+            ...(!existingUser.firstName && profileData.firstName && { firstName: profileData.firstName }),
+            ...(!existingUser.lastName && profileData.lastName && { lastName: profileData.lastName }),
+            ...(!existingUser.avatarUrl && profileData.avatarUrl && { avatarUrl: profileData.avatarUrl }),
+          },
+          include: { oauthAccounts: { select: { provider: true } } },
+        }) as User;
+        return { user, action: 'login' };
+      }
+      return { user: existingUser, action: 'login' };
+    }
+
+    // 2. Look up User by email
+    const existingUser = await this.findByEmail(profile.email);
+
+    if (existingUser) {
+      // Auto-link: only if the account has a verified email (prevents pre-account takeover)
+      if (!existingUser.emailVerified) {
+        throw new ConflictException(
+          'An account with this email already exists but is not verified. Please verify your email first.',
+        );
       }
 
-      if (existingUser.provider === Provider.LOCAL) {
-        // Auto-link: only if the LOCAL account has a verified email (prevents pre-account takeover)
-        if (!existingUser.emailVerified) {
-          throw new ConflictException(
-            'An account with this email already exists but is not verified. Please verify your email first.',
-          );
-        }
-        const user = await this.prisma.user.update({
+      // Create OAuthAccount row + dual-write User.provider/providerId
+      const [user] = await this.prisma.$transaction([
+        this.prisma.user.update({
           where: { id: existingUser.id },
           data: {
             provider: profile.provider,
@@ -179,13 +195,21 @@ export class UsersService {
             emailVerified: true,
             ...profileData,
           },
-        }) as User;
-        return { user, action: 'linked' };
-      }
-
-      return { user: existingUser, action: 'login' };
+          include: { oauthAccounts: { select: { provider: true } } },
+        }),
+        this.prisma.oAuthAccount.create({
+          data: {
+            userId: existingUser.id,
+            provider: profile.provider,
+            providerId: profile.providerId,
+            email: profile.email,
+          },
+        }),
+      ]);
+      return { user: user as User, action: 'linked' };
     }
 
+    // 3. New user: create User with nested OAuthAccount
     const user = await this.prisma.user.create({
       data: {
         email: profile.email,
@@ -193,9 +217,85 @@ export class UsersService {
         providerId: profile.providerId,
         emailVerified: true,
         ...profileData,
+        oauthAccounts: {
+          create: {
+            provider: profile.provider,
+            providerId: profile.providerId,
+            email: profile.email,
+          },
+        },
       },
+      include: { oauthAccounts: { select: { provider: true } } },
     }) as User;
     return { user, action: 'created' };
+  }
+
+  // ── OAuth account management (SCRUM-161) ──
+
+  async getLinkedProviders(userId: string): Promise<LinkedProvider[]> {
+    const accounts = await this.prisma.oAuthAccount.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'asc' },
+    });
+    return accounts.map((a) => ({
+      provider: a.provider,
+      providerId: a.providerId,
+      email: a.email,
+      linkedAt: a.createdAt.toISOString(),
+    }));
+  }
+
+  async linkOAuthProvider(
+    userId: string,
+    profile: OAuthProfile,
+    ctx?: RequestContext,
+  ): Promise<LinkedProvider> {
+    // Check if this OAuth identity is already linked to any user
+    const existingAccount = await this.prisma.oAuthAccount.findUnique({
+      where: {
+        provider_providerId: {
+          provider: profile.provider,
+          providerId: profile.providerId,
+        },
+      },
+    });
+    if (existingAccount) {
+      // CWE-200: Don't reveal if the OAuth identity belongs to another user
+      throw new ConflictException(ErrorMessages.oauth.LINK_FAILED);
+    }
+
+    // Create OAuthAccount row (@@unique([userId, provider]) prevents duplicates)
+    const account = await this.prisma.oAuthAccount.create({
+      data: {
+        userId,
+        provider: profile.provider,
+        providerId: profile.providerId,
+        email: profile.email,
+      },
+    });
+
+    // Dual-write to User.provider/providerId for backward compat
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { provider: profile.provider, providerId: profile.providerId },
+    });
+
+    this.auditService
+      .log({
+        action: AuditAction.OAUTH_LINKED,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: { provider: profile.provider },
+      })
+      .catch(() => {});
+
+    return {
+      provider: account.provider,
+      providerId: account.providerId,
+      email: account.email,
+      linkedAt: account.createdAt.toISOString(),
+    };
   }
 
   // ── Security activity (SCRUM-135) ──
@@ -715,10 +815,11 @@ export class UsersService {
     return { message: 'Account deleted successfully' };
   }
 
-  // ── OAuth unlinking (SCRUM-111) ──
+  // ── OAuth unlinking (SCRUM-111, refactored SCRUM-161) ──
 
   async unlinkOAuth(
     userId: string,
+    provider: string,
     dto: UnlinkOAuthDto,
     ctx?: RequestContext,
   ): Promise<{ message: string }> {
@@ -728,16 +829,18 @@ export class UsersService {
       throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
-    if (user.provider === Provider.LOCAL) {
-      throw new BadRequestException(
-        'No OAuth provider linked to this account',
-      );
+    // Find the specific OAuthAccount to unlink
+    const account = await this.prisma.oAuthAccount.findUnique({
+      where: {
+        userId_provider: { userId, provider: provider as Provider },
+      },
+    });
+    if (!account) {
+      throw new BadRequestException(ErrorMessages.oauth.NOT_LINKED);
     }
 
     if (!user.passwordHash) {
-      throw new BadRequestException(
-        'You must set a password before unlinking your OAuth provider',
-      );
+      throw new BadRequestException(ErrorMessages.oauth.PASSWORD_REQUIRED_FOR_UNLINK);
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -748,13 +851,31 @@ export class UsersService {
       throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
     }
 
-    const previousProvider = user.provider;
-    const previousProviderId = user.providerId;
-
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: { provider: Provider.LOCAL, providerId: null },
+    // Delete the OAuthAccount row
+    await this.prisma.oAuthAccount.delete({
+      where: { id: account.id },
     });
+
+    // Dual-write: check if user has remaining OAuthAccounts
+    const remainingAccounts = await this.prisma.oAuthAccount.findFirst({
+      where: { userId },
+    });
+    if (!remainingAccounts) {
+      // No more OAuth accounts — reset User to LOCAL
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { provider: Provider.LOCAL, providerId: null },
+      });
+    } else {
+      // Update User to reflect the remaining account
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          provider: remainingAccounts.provider as Provider,
+          providerId: remainingAccounts.providerId,
+        },
+      });
+    }
 
     this.auditService
       .log({
@@ -762,7 +883,7 @@ export class UsersService {
         userId,
         ipAddress: ctx?.ipAddress,
         userAgent: ctx?.userAgent,
-        metadata: { previousProvider, previousProviderId },
+        metadata: { provider: account.provider, providerId: account.providerId },
       })
       .catch(() => {});
 

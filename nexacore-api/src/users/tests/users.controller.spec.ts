@@ -16,6 +16,7 @@ describe('UsersController', () => {
     requestEmailChange: jest.Mock;
     selfDeleteAccount: jest.Mock;
     unlinkOAuth: jest.Mock;
+    getLinkedProviders: jest.Mock;
     getSecurityActivity: jest.Mock;
     findAll: jest.Mock;
     findById: jest.Mock;
@@ -38,6 +39,8 @@ describe('UsersController', () => {
     lockedUntil: null,
     lockoutCount: 0,
     mfaEnabled: false,
+    hasPassword: true,
+    oauthProviders: [],
     createdAt: new Date(),
     updatedAt: new Date(),
   };
@@ -67,6 +70,7 @@ describe('UsersController', () => {
       adminUpdateUser: jest.fn(),
       softDelete: jest.fn(),
       unlinkOAuth: jest.fn(),
+      getLinkedProviders: jest.fn(),
       getSecurityActivity: jest.fn(),
     };
 
@@ -292,20 +296,37 @@ describe('UsersController', () => {
     });
   });
 
-  // ─── DELETE /users/me/oauth ─────────────────────────────────
+  // ─── GET /users/me/oauth ───────────────────────────────────
+
+  describe('getLinkedProviders', () => {
+    it('should delegate to usersService.getLinkedProviders with userId', async () => {
+      const mockProviders = [
+        { provider: 'GOOGLE', providerId: 'g-123', email: 'test@gmail.com', linkedAt: '2026-01-01T00:00:00.000Z' },
+      ];
+      usersService.getLinkedProviders.mockResolvedValue(mockProviders);
+
+      const result = await controller.getLinkedProviders(mockReq);
+
+      expect(usersService.getLinkedProviders).toHaveBeenCalledWith('uuid-123');
+      expect(result).toEqual(mockProviders);
+    });
+  });
+
+  // ─── DELETE /users/me/oauth/:provider ─────────────────────
 
   describe('unlinkOAuth', () => {
-    it('should delegate to usersService.unlinkOAuth with userId, dto, and context', async () => {
+    it('should delegate to usersService.unlinkOAuth with userId, provider, dto, and context', async () => {
       usersService.unlinkOAuth.mockResolvedValue({
         message: 'OAuth provider unlinked successfully',
       });
 
-      const result = await controller.unlinkOAuth(mockReq, {
+      const result = await controller.unlinkOAuth('google', mockReq, {
         password: 'StrongPass1!',
       });
 
       expect(usersService.unlinkOAuth).toHaveBeenCalledWith(
         'uuid-123',
+        'GOOGLE',
         { password: 'StrongPass1!' },
         { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
       );
@@ -314,15 +335,21 @@ describe('UsersController', () => {
       });
     });
 
-    it('should return service result directly', async () => {
-      const serviceResult = { message: 'OAuth provider unlinked successfully' };
-      usersService.unlinkOAuth.mockResolvedValue(serviceResult);
+    it('should normalize provider to uppercase', async () => {
+      usersService.unlinkOAuth.mockResolvedValue({
+        message: 'OAuth provider unlinked successfully',
+      });
 
-      const result = await controller.unlinkOAuth(mockReq, {
+      await controller.unlinkOAuth('GitHub', mockReq, {
         password: 'MyPass123!',
       });
 
-      expect(result).toBe(serviceResult);
+      expect(usersService.unlinkOAuth).toHaveBeenCalledWith(
+        'uuid-123',
+        'GITHUB',
+        { password: 'MyPass123!' },
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+      );
     });
 
     it('should extract RequestContext from request object', async () => {
@@ -336,10 +363,11 @@ describe('UsersController', () => {
         headers: { 'user-agent': 'Mozilla/5.0' },
       };
 
-      await controller.unlinkOAuth(customReq, { password: 'TestPass1!' });
+      await controller.unlinkOAuth('google', customReq, { password: 'TestPass1!' });
 
       expect(usersService.unlinkOAuth).toHaveBeenCalledWith(
         'user-456',
+        'GOOGLE',
         { password: 'TestPass1!' },
         { ipAddress: '192.168.1.1', userAgent: 'Mozilla/5.0' },
       );

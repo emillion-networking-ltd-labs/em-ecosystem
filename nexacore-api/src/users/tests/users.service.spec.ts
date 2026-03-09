@@ -58,6 +58,14 @@ describe('UsersService', () => {
       findMany: jest.Mock;
       count: jest.Mock;
     };
+    oAuthAccount: {
+      findUnique: jest.Mock;
+      create: jest.Mock;
+      findMany: jest.Mock;
+      findFirst: jest.Mock;
+      delete: jest.Mock;
+      deleteMany: jest.Mock;
+    };
     $transaction: jest.Mock;
   };
 
@@ -109,6 +117,14 @@ describe('UsersService', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
+      },
+      oAuthAccount: {
+        findUnique: jest.fn(),
+        create: jest.fn(),
+        findMany: jest.fn().mockResolvedValue([]),
+        findFirst: jest.fn().mockResolvedValue(null),
+        delete: jest.fn().mockResolvedValue(undefined),
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
       $transaction: jest.fn().mockResolvedValue(undefined),
     };
@@ -171,6 +187,7 @@ describe('UsersService', () => {
       expect(result).toEqual(mockUser);
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { email: 'test@example.com' },
+        include: { oauthAccounts: { select: { provider: true } } },
       });
     });
 
@@ -192,6 +209,7 @@ describe('UsersService', () => {
       expect(result).toEqual(mockUser);
       expect(prisma.user.findUnique).toHaveBeenCalledWith({
         where: { id: 'uuid-123' },
+        include: { oauthAccounts: { select: { provider: true } } },
       });
     });
 
@@ -338,12 +356,26 @@ describe('UsersService', () => {
         email: 'oauth@example.com',
         provider: Provider.GOOGLE,
         providerId: 'google-id-123',
+        oauthAccounts: [{ provider: Provider.GOOGLE }],
       };
-      prisma.user.findUnique.mockResolvedValue(existingOAuthUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue({
+        provider: Provider.GOOGLE,
+        providerId: 'google-id-123',
+        user: existingOAuthUser,
+      });
 
       const result = await usersService.findOrCreateByOAuth(googleProfile);
 
       expect(result).toEqual({ user: existingOAuthUser, action: 'login' });
+      expect(prisma.oAuthAccount.findUnique).toHaveBeenCalledWith({
+        where: {
+          provider_providerId: {
+            provider: Provider.GOOGLE,
+            providerId: 'google-id-123',
+          },
+        },
+        include: { user: { include: { oauthAccounts: { select: { provider: true } } } } },
+      });
       expect(prisma.user.update).not.toHaveBeenCalled();
       expect(prisma.user.create).not.toHaveBeenCalled();
     });
@@ -355,42 +387,45 @@ describe('UsersService', () => {
         provider: Provider.LOCAL,
         providerId: null,
         emailVerified: true,
+        oauthAccounts: [],
       };
       const linkedUser = {
         ...localUser,
         provider: Provider.GOOGLE,
         providerId: 'google-id-123',
         emailVerified: true,
+        oauthAccounts: [{ provider: Provider.GOOGLE }],
       };
+      // Step 1: No existing OAuthAccount
+      prisma.oAuthAccount.findUnique.mockResolvedValue(null);
+      // Step 2: findByEmail returns the local user
       prisma.user.findUnique.mockResolvedValue(localUser);
-      prisma.user.update.mockResolvedValue(linkedUser);
+      // Step 3: $transaction for dual-write + OAuthAccount creation
+      prisma.$transaction.mockResolvedValue([linkedUser]);
 
       const result = await usersService.findOrCreateByOAuth(googleProfile);
 
       expect(result).toEqual({ user: linkedUser, action: 'linked' });
-      expect(prisma.user.update).toHaveBeenCalledWith({
-        where: { id: localUser.id },
-        data: {
-          provider: Provider.GOOGLE,
-          providerId: 'google-id-123',
-          emailVerified: true,
-        },
-      });
+      expect(prisma.$transaction).toHaveBeenCalled();
     });
 
-    it('should return existing user when email matches but provider is different OAuth', async () => {
-      const githubUser = {
+    it('should throw ConflictException when email matches but is not verified', async () => {
+      const unverifiedUser = {
         ...mockUser,
         email: 'oauth@example.com',
-        provider: Provider.GITHUB,
-        providerId: 'github-id-789',
+        provider: Provider.LOCAL,
+        providerId: null,
+        emailVerified: false,
+        oauthAccounts: [],
       };
-      prisma.user.findUnique.mockResolvedValue(githubUser);
+      // No existing OAuthAccount
+      prisma.oAuthAccount.findUnique.mockResolvedValue(null);
+      // findByEmail returns unverified user
+      prisma.user.findUnique.mockResolvedValue(unverifiedUser);
 
-      const result = await usersService.findOrCreateByOAuth(googleProfile);
-
-      expect(result).toEqual({ user: githubUser, action: 'login' });
-      expect(prisma.user.update).not.toHaveBeenCalled();
+      await expect(
+        usersService.findOrCreateByOAuth(googleProfile),
+      ).rejects.toThrow(ConflictException);
     });
 
     it('should create new user when no existing user with that email', async () => {
@@ -401,7 +436,11 @@ describe('UsersService', () => {
         providerId: 'google-id-123',
         passwordHash: null,
         emailVerified: true,
+        oauthAccounts: [{ provider: Provider.GOOGLE }],
       };
+      // No existing OAuthAccount
+      prisma.oAuthAccount.findUnique.mockResolvedValue(null);
+      // No existing user by email
       prisma.user.findUnique.mockResolvedValue(null);
       prisma.user.create.mockResolvedValue(newOAuthUser);
 
@@ -414,7 +453,15 @@ describe('UsersService', () => {
           provider: Provider.GOOGLE,
           providerId: 'google-id-123',
           emailVerified: true,
+          oauthAccounts: {
+            create: {
+              provider: Provider.GOOGLE,
+              providerId: 'google-id-123',
+              email: 'oauth@example.com',
+            },
+          },
         },
+        include: { oauthAccounts: { select: { provider: true } } },
       });
     });
 
@@ -427,6 +474,7 @@ describe('UsersService', () => {
         firstName: null,
         lastName: null,
         avatarUrl: null,
+        oauthAccounts: [{ provider: Provider.GOOGLE }],
       };
       const updatedUser = {
         ...existingOAuthUser,
@@ -434,7 +482,11 @@ describe('UsersService', () => {
         lastName: 'Doe',
         avatarUrl: 'https://example.com/avatar.jpg',
       };
-      prisma.user.findUnique.mockResolvedValue(existingOAuthUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue({
+        provider: Provider.GOOGLE,
+        providerId: 'google-id-123',
+        user: existingOAuthUser,
+      });
       prisma.user.update.mockResolvedValue(updatedUser);
 
       const result = await usersService.findOrCreateByOAuth({
@@ -452,6 +504,7 @@ describe('UsersService', () => {
           lastName: 'Doe',
           avatarUrl: 'https://example.com/avatar.jpg',
         },
+        include: { oauthAccounts: { select: { provider: true } } },
       });
     });
   });
@@ -1437,6 +1490,7 @@ describe('UsersService', () => {
       provider: Provider.GOOGLE,
       providerId: 'google-id-123',
       passwordHash: 'hashed-password',
+      oauthAccounts: [{ provider: Provider.GOOGLE }],
     };
 
     const githubUser = {
@@ -1444,16 +1498,39 @@ describe('UsersService', () => {
       provider: Provider.GITHUB,
       providerId: 'github-id-456',
       passwordHash: 'hashed-password',
+      oauthAccounts: [{ provider: Provider.GITHUB }],
+    };
+
+    const googleAccount = {
+      id: 'oauth-acc-1',
+      userId: 'uuid-123',
+      provider: Provider.GOOGLE,
+      providerId: 'google-id-123',
+      email: 'test@example.com',
+    };
+
+    const githubAccount = {
+      id: 'oauth-acc-2',
+      userId: 'uuid-123',
+      provider: Provider.GITHUB,
+      providerId: 'github-id-456',
+      email: 'test@example.com',
     };
 
     it('should successfully unlink Google provider', async () => {
       prisma.user.findUnique.mockResolvedValue(googleUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(googleAccount);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
+      prisma.oAuthAccount.findFirst.mockResolvedValue(null);
       prisma.user.update.mockResolvedValue({ ...googleUser, provider: Provider.LOCAL, providerId: null });
 
-      const result = await usersService.unlinkOAuth('uuid-123', unlinkDto, ctx);
+      const result = await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx);
 
       expect(result).toEqual({ message: 'OAuth provider unlinked successfully' });
+      expect(prisma.oAuthAccount.delete).toHaveBeenCalledWith({
+        where: { id: googleAccount.id },
+      });
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'uuid-123' },
         data: { provider: Provider.LOCAL, providerId: null },
@@ -1462,51 +1539,84 @@ describe('UsersService', () => {
 
     it('should successfully unlink GitHub provider', async () => {
       prisma.user.findUnique.mockResolvedValue(githubUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(githubAccount);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.oAuthAccount.delete.mockResolvedValue(githubAccount);
+      prisma.oAuthAccount.findFirst.mockResolvedValue(null);
       prisma.user.update.mockResolvedValue({ ...githubUser, provider: Provider.LOCAL, providerId: null });
 
-      const result = await usersService.unlinkOAuth('uuid-123', unlinkDto, ctx);
+      const result = await usersService.unlinkOAuth('uuid-123', 'GITHUB', unlinkDto, ctx);
 
       expect(result).toEqual({ message: 'OAuth provider unlinked successfully' });
+      expect(prisma.oAuthAccount.delete).toHaveBeenCalledWith({
+        where: { id: githubAccount.id },
+      });
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'uuid-123' },
         data: { provider: Provider.LOCAL, providerId: null },
       });
     });
 
+    it('should update user to remaining provider when other accounts exist', async () => {
+      prisma.user.findUnique.mockResolvedValue(googleUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(googleAccount);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
+      // Another account remains
+      prisma.oAuthAccount.findFirst.mockResolvedValue(githubAccount);
+      prisma.user.update.mockResolvedValue({ ...googleUser, provider: Provider.GITHUB, providerId: 'github-id-456' });
+
+      const result = await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx);
+
+      expect(result).toEqual({ message: 'OAuth provider unlinked successfully' });
+      expect(prisma.user.update).toHaveBeenCalledWith({
+        where: { id: 'uuid-123' },
+        data: { provider: Provider.GITHUB, providerId: 'github-id-456' },
+      });
+    });
+
     it('should not revoke sessions after unlink', async () => {
       prisma.user.findUnique.mockResolvedValue(googleUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(googleAccount);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
+      prisma.oAuthAccount.findFirst.mockResolvedValue(null);
       prisma.user.update.mockResolvedValue({ ...googleUser, provider: Provider.LOCAL, providerId: null });
 
-      await usersService.unlinkOAuth('uuid-123', unlinkDto, ctx);
+      await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx);
 
       expect(sessionsService.revokeAllUserSessions).not.toHaveBeenCalled();
     });
 
     it('should not revoke trusted devices after unlink', async () => {
       prisma.user.findUnique.mockResolvedValue(googleUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(googleAccount);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
+      prisma.oAuthAccount.findFirst.mockResolvedValue(null);
       prisma.user.update.mockResolvedValue({ ...googleUser, provider: Provider.LOCAL, providerId: null });
 
-      await usersService.unlinkOAuth('uuid-123', unlinkDto, ctx);
+      await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx);
 
       expect(trustedDeviceService.revokeAllDevices).not.toHaveBeenCalled();
     });
 
-    it('should audit OAUTH_UNLINKED with previous provider metadata', async () => {
+    it('should audit OAUTH_UNLINKED with provider metadata', async () => {
       prisma.user.findUnique.mockResolvedValue(googleUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(googleAccount);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
+      prisma.oAuthAccount.findFirst.mockResolvedValue(null);
       prisma.user.update.mockResolvedValue({ ...googleUser, provider: Provider.LOCAL, providerId: null });
 
-      await usersService.unlinkOAuth('uuid-123', unlinkDto, ctx);
+      await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx);
 
       expect(auditService.log).toHaveBeenCalledWith({
         action: AuditAction.OAUTH_UNLINKED,
         userId: 'uuid-123',
         ipAddress: '10.0.0.1',
         userAgent: 'test-agent',
-        metadata: { previousProvider: Provider.GOOGLE, previousProviderId: 'google-id-123' },
+        metadata: { provider: Provider.GOOGLE, providerId: 'google-id-123' },
       });
     });
 
@@ -1514,43 +1624,49 @@ describe('UsersService', () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
-        usersService.unlinkOAuth('nonexistent', unlinkDto, ctx),
+        usersService.unlinkOAuth('nonexistent', 'GOOGLE', unlinkDto, ctx),
       ).rejects.toThrow(UnauthorizedException);
     });
 
-    it('should throw BadRequestException if already LOCAL', async () => {
-      prisma.user.findUnique.mockResolvedValue(mockUser);
+    it('should throw BadRequestException if provider not linked', async () => {
+      prisma.user.findUnique.mockResolvedValue({ ...mockUser, oauthAccounts: [] });
+      prisma.oAuthAccount.findUnique.mockResolvedValue(null);
 
       await expect(
-        usersService.unlinkOAuth('uuid-123', unlinkDto, ctx),
+        usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw BadRequestException if no password set (OAuth-only)', async () => {
       const oauthOnlyUser = { ...googleUser, passwordHash: null };
       prisma.user.findUnique.mockResolvedValue(oauthOnlyUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(googleAccount);
 
       await expect(
-        usersService.unlinkOAuth('uuid-123', unlinkDto, ctx),
+        usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx),
       ).rejects.toThrow(BadRequestException);
     });
 
     it('should throw UnauthorizedException if wrong password', async () => {
       prisma.user.findUnique.mockResolvedValue(googleUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(googleAccount);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(
-        usersService.unlinkOAuth('uuid-123', unlinkDto, ctx),
+        usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx),
       ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should not throw when audit log rejects (fire-and-forget)', async () => {
       auditService.log.mockRejectedValue(new Error('audit fail'));
       prisma.user.findUnique.mockResolvedValue(googleUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(googleAccount);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
+      prisma.oAuthAccount.findFirst.mockResolvedValue(null);
       prisma.user.update.mockResolvedValue({ ...googleUser, provider: Provider.LOCAL, providerId: null });
 
-      const result = await usersService.unlinkOAuth('uuid-123', unlinkDto, ctx);
+      const result = await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx);
 
       await new Promise(process.nextTick);
 
@@ -1559,10 +1675,13 @@ describe('UsersService', () => {
 
     it('should pass ipAddress and userAgent from ctx to audit', async () => {
       prisma.user.findUnique.mockResolvedValue(googleUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(googleAccount);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
+      prisma.oAuthAccount.findFirst.mockResolvedValue(null);
       prisma.user.update.mockResolvedValue({ ...googleUser, provider: Provider.LOCAL, providerId: null });
 
-      await usersService.unlinkOAuth('uuid-123', unlinkDto, {
+      await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, {
         ipAddress: '192.168.1.1',
         userAgent: 'Mozilla/5.0',
       });
@@ -1577,10 +1696,13 @@ describe('UsersService', () => {
 
     it('should work without ctx parameter', async () => {
       prisma.user.findUnique.mockResolvedValue(googleUser);
+      prisma.oAuthAccount.findUnique.mockResolvedValue(googleAccount);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
+      prisma.oAuthAccount.findFirst.mockResolvedValue(null);
       prisma.user.update.mockResolvedValue({ ...googleUser, provider: Provider.LOCAL, providerId: null });
 
-      const result = await usersService.unlinkOAuth('uuid-123', unlinkDto);
+      const result = await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto);
 
       expect(result).toEqual({ message: 'OAuth provider unlinked successfully' });
       expect(auditService.log).toHaveBeenCalledWith(

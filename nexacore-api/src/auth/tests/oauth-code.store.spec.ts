@@ -20,6 +20,8 @@ describe('OAuthCodeStore', () => {
       role: Role.USER,
       provider: Provider.GOOGLE,
       providerId: 'google-123',
+      hasPassword: false,
+      oauthProviders: ['GOOGLE'],
       emailVerified: true,
       isActive: true,
       failedAttempts: 0,

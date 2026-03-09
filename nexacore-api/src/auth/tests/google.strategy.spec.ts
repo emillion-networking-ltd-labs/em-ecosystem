@@ -34,6 +34,8 @@ describe('GoogleStrategy', () => {
       role: Role.USER,
       provider: Provider.GOOGLE,
       providerId: 'google-id-123',
+      hasPassword: false,
+      oauthProviders: ['GOOGLE'],
       emailVerified: true,
       isActive: true,
       failedAttempts: 0,

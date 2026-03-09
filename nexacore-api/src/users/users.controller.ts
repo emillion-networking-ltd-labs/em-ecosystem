@@ -13,6 +13,7 @@ import {
   HttpStatus,
   ParseUUIDPipe,
   NotFoundException,
+  BadRequestException,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
 import { UsersService } from './users.service';
@@ -96,16 +97,28 @@ export class UsersController {
     });
   }
 
-  @Delete('me/oauth')
+  @Get('me/oauth')
+  @UseGuards(JwtAuthGuard)
+  async getLinkedProviders(@Request() req: { user: { id: string } }) {
+    return this.usersService.getLinkedProviders(req.user.id);
+  }
+
+  @Delete('me/oauth/:provider')
   @UseGuards(JwtAuthGuard)
   @Throttle({ global: { ttl: 60_000, limit: 5 } })
   @HttpCode(HttpStatus.OK)
   async unlinkOAuth(
+    @Param('provider') provider: string,
     @Request()
     req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
     @Body() dto: UnlinkOAuthDto,
   ) {
-    return this.usersService.unlinkOAuth(req.user.id, dto, {
+    const validProviders = ['GOOGLE', 'GITHUB'];
+    const normalizedProvider = provider.toUpperCase();
+    if (!validProviders.includes(normalizedProvider)) {
+      throw new BadRequestException(ErrorMessages.oauth.INVALID_PROVIDER);
+    }
+    return this.usersService.unlinkOAuth(req.user.id, normalizedProvider, dto, {
       ipAddress: req.ip || null,
       userAgent: req.headers?.['user-agent'] || null,
     });

@@ -29,13 +29,16 @@ export type SafeUser = Omit<
   'passwordHash' | 'pendingEmail' | 'mfaSecret' | 'mfaRecoveryCodes' | 'failedAttempts' | 'lockedUntil' | 'lockoutCount'
 > & {
   hasPassword: boolean;
+  oauthProviders: string[];
 };
 
 export type SafeUserWithPermissions = SafeUser & {
   permissions: string[];
 };
 
-export function toSafeUser(user: User): SafeUser {
+export function toSafeUser(
+  user: User & { oauthAccounts?: { provider: string }[] },
+): SafeUser {
   const safeUser: SafeUser = {
     id: user.id,
     email: user.email,
@@ -49,6 +52,7 @@ export function toSafeUser(user: User): SafeUser {
     isActive: user.isActive,
     mfaEnabled: user.mfaEnabled,
     hasPassword: !!user.passwordHash,
+    oauthProviders: (user.oauthAccounts ?? []).map((a) => a.provider),
     createdAt: user.createdAt,
     updatedAt: user.updatedAt,
   };

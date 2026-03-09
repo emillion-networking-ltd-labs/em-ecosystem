@@ -32,6 +32,12 @@ export const ErrorMessages = {
     INSUFFICIENT_ROLE: 'Insufficient role',
     INVALID_ROLE_OPERATION: 'Invalid role for this operation',
   },
+  oauth: {
+    LINK_FAILED: 'Unable to link this provider',
+    NOT_LINKED: 'No OAuth provider linked to this account',
+    PASSWORD_REQUIRED_FOR_UNLINK: 'You must set a password before unlinking your OAuth provider',
+    INVALID_PROVIDER: 'Invalid OAuth provider',
+  },
   csrf: {
     VALIDATION_FAILED: 'CSRF validation failed',
   },

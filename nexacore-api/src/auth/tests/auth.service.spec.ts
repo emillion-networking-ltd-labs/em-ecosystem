@@ -212,6 +212,10 @@ describe('AuthService', () => {
               findMany: jest.fn().mockResolvedValue([]),
               update: jest.fn().mockResolvedValue(undefined),
             },
+            oAuthAccount: {
+              count: jest.fn().mockResolvedValue(0),
+              deleteMany: jest.fn(),
+            },
             $transaction: jest.fn().mockResolvedValue(undefined),
           },
         },
@@ -1080,6 +1084,65 @@ describe('AuthService', () => {
 
       expect(result).toEqual({ status: 'success' });
       expect(prismaService.$transaction).toHaveBeenCalled();
+    });
+
+    it('should include oAuthAccount.deleteMany in transaction when user has OAuth accounts', async () => {
+      const oauthUserWithPending = {
+        ...mockUser,
+        provider: Provider.GOOGLE,
+        providerId: 'google-id-123',
+        pendingEmail: 'new@example.com',
+      };
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: oauthUserWithPending,
+      });
+      usersService.findByEmail.mockResolvedValue(null);
+      prismaService.oAuthAccount.count.mockResolvedValue(1);
+      prismaService.$transaction.mockResolvedValue(undefined);
+      sessionsService.revokeAllUserSessions.mockResolvedValue(undefined);
+
+      const result = await authService.verifyEmailChange('valid-token');
+
+      expect(result).toEqual({ status: 'success' });
+      expect(prismaService.oAuthAccount.count).toHaveBeenCalledWith({
+        where: { userId: 'uuid-123' },
+      });
+      // Transaction should include 3 operations: user.update, token.update, oAuthAccount.deleteMany
+      const transactionArg = prismaService.$transaction.mock.calls[0][0];
+      expect(transactionArg).toHaveLength(3);
+      expect(prismaService.oAuthAccount.deleteMany).toHaveBeenCalledWith({
+        where: { userId: 'uuid-123' },
+      });
+    });
+
+    it('should NOT include oAuthAccount.deleteMany when user has no OAuth accounts', async () => {
+      const userWithPending = { ...mockUser, pendingEmail: 'new@example.com' };
+      prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: userWithPending,
+      });
+      usersService.findByEmail.mockResolvedValue(null);
+      prismaService.oAuthAccount.count.mockResolvedValue(0);
+      prismaService.$transaction.mockResolvedValue(undefined);
+      sessionsService.revokeAllUserSessions.mockResolvedValue(undefined);
+
+      await authService.verifyEmailChange('valid-token');
+
+      expect(prismaService.oAuthAccount.count).toHaveBeenCalledWith({
+        where: { userId: 'uuid-123' },
+      });
+      expect(prismaService.oAuthAccount.deleteMany).not.toHaveBeenCalled();
     });
 
     it('should revoke all sessions on successful email change', async () => {

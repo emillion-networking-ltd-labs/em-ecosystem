@@ -39,6 +39,8 @@ describe('PasskeyController', () => {
     role: Role.USER,
     provider: Provider.LOCAL,
     providerId: null,
+    hasPassword: true,
+    oauthProviders: [],
     emailVerified: true,
     isActive: true,
     mfaEnabled: false,

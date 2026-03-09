@@ -57,6 +57,8 @@ describe('AuthController', () => {
       role: Role.USER,
       provider: Provider.LOCAL,
       providerId: null,
+      hasPassword: true,
+      oauthProviders: [],
       emailVerified: false,
       isActive: true,
       failedAttempts: 0,

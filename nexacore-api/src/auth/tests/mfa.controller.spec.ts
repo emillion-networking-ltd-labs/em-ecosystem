@@ -37,6 +37,8 @@ describe('MfaController', () => {
     role: Role.USER,
     provider: Provider.LOCAL,
     providerId: null,
+    hasPassword: true,
+    oauthProviders: [],
     emailVerified: true,
     isActive: true,
     failedAttempts: 0,

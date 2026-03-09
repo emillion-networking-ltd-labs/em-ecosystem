@@ -941,8 +941,8 @@ export class AuthService {
     const newEmail = user.pendingEmail;
 
     // Atomic: swap email + clear pendingEmail + mark token used
-    // If user has OAuth, unlink it — the OAuth providerId is tied to the old email
-    const isOAuth = user.provider !== 'LOCAL';
+    // Delete all OAuthAccounts — the OAuth identity is tied to the old email
+    const hasOAuthAccounts = await this.prisma.oAuthAccount.count({ where: { userId: user.id } }) > 0;
     await this.prisma.$transaction([
       this.prisma.user.update({
         where: { id: user.id },
@@ -950,13 +950,16 @@ export class AuthService {
           email: newEmail,
           pendingEmail: null,
           emailVerified: true,
-          ...(isOAuth && { provider: 'LOCAL', providerId: null }),
+          ...(hasOAuthAccounts && { provider: 'LOCAL', providerId: null }),
         },
       }),
       this.prisma.emailVerificationToken.update({
         where: { id: verificationToken.id },
         data: { usedAt: new Date() },
       }),
+      ...(hasOAuthAccounts
+        ? [this.prisma.oAuthAccount.deleteMany({ where: { userId: user.id } })]
+        : []),
     ]);
 
     // Revoke all sessions — forces re-login with new email
