@@ -25,7 +25,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
 
   // Forward PKCE code_challenge to the authorization URL
   authorizationParams(options: Record<string, string>): Record<string, string> {
-    const params: Record<string, string> = {};
+    const params: Record<string, string> = { login: '' };
     if (options.code_challenge) {
       params.code_challenge = options.code_challenge;
       params.code_challenge_method = options.code_challenge_method || 'S256';

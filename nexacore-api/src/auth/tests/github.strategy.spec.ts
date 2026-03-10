@@ -293,6 +293,7 @@ describe('GitHubStrategy', () => {
         code_challenge: 'abc123',
       });
       expect(result).toEqual({
+        login: '',
         code_challenge: 'abc123',
         code_challenge_method: 'S256',
       });
@@ -304,14 +305,15 @@ describe('GitHubStrategy', () => {
         code_challenge_method: 'plain',
       });
       expect(result).toEqual({
+        login: '',
         code_challenge: 'abc123',
         code_challenge_method: 'plain',
       });
     });
 
-    it('should return empty object when no code_challenge is present', () => {
+    it('should return login param only when no code_challenge is present', () => {
       const result = strategy.authorizationParams({});
-      expect(result).toEqual({});
+      expect(result).toEqual({ login: '' });
     });
   });
 
