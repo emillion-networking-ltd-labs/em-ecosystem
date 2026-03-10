@@ -89,7 +89,7 @@ describe('GitHubStrategy', () => {
     };
 
     it('should call authService.validateOAuthUser with GitHub profile and requestMeta', async () => {
-      oauthStateStore.validate.mockResolvedValue(true);
+      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
 
@@ -115,7 +115,7 @@ describe('GitHubStrategy', () => {
     });
 
     it('should call done with error when no email is provided', async () => {
-      oauthStateStore.validate.mockResolvedValue(true);
+      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
       const done = jest.fn();
 
       await strategy.validate(
@@ -133,7 +133,7 @@ describe('GitHubStrategy', () => {
     });
 
     it('should call done with error when emails array is undefined', async () => {
-      oauthStateStore.validate.mockResolvedValue(true);
+      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
       const done = jest.fn();
 
       await strategy.validate(
@@ -150,7 +150,7 @@ describe('GitHubStrategy', () => {
     });
 
     it('should call done with error when state is invalid', async () => {
-      oauthStateStore.validate.mockResolvedValue(false);
+      oauthStateStore.validate.mockResolvedValue(null);
       const done = jest.fn();
 
       await strategy.validate(
@@ -189,7 +189,7 @@ describe('GitHubStrategy', () => {
     });
 
     it('should pass firstName and lastName as undefined when displayName is absent', async () => {
-      oauthStateStore.validate.mockResolvedValue(true);
+      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
 
@@ -213,7 +213,7 @@ describe('GitHubStrategy', () => {
     });
 
     it('should parse single-word displayName as firstName only', async () => {
-      oauthStateStore.validate.mockResolvedValue(true);
+      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
 
@@ -240,7 +240,7 @@ describe('GitHubStrategy', () => {
     });
 
     it('should parse multi-word displayName into firstName and lastName', async () => {
-      oauthStateStore.validate.mockResolvedValue(true);
+      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
 
@@ -267,7 +267,7 @@ describe('GitHubStrategy', () => {
     });
 
     it('should call done with error when validateOAuthUser throws', async () => {
-      oauthStateStore.validate.mockResolvedValue(true);
+      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
       authService.validateOAuthUser.mockRejectedValue(
         new Error('OAuth error'),
       );

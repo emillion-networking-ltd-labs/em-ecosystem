@@ -45,7 +45,7 @@ const providers = [
 ];
 
 export default function ConnectedAccounts() {
-  const { user, refreshSession } = useAuth();
+  const { user, accessToken, refreshSession } = useAuth();
   const { addToast } = useToast();
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -100,7 +100,8 @@ export default function ConnectedAccounts() {
   if (!user) return null;
 
   const handleConnect = (providerId: string) => {
-    window.location.href = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/auth/link/${providerId.toLowerCase()}`;
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    window.location.href = `${apiUrl}/auth/link/${providerId.toLowerCase()}?token=${encodeURIComponent(accessToken || '')}`;
   };
 
   const activeProvider = providers.find((p) => p.id === disconnectingProvider);

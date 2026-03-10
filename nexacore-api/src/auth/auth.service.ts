@@ -594,6 +594,30 @@ export class AuthService {
     };
   }
 
+  async validateOAuthLink(
+    userId: string,
+    profile: OAuthProfile,
+    ctx: { ipAddress: string; userAgent?: string | null },
+  ): Promise<AuthResult> {
+    await this.usersService.linkOAuthProvider(userId, profile, {
+      ipAddress: ctx.ipAddress,
+      userAgent: ctx.userAgent ?? null,
+    });
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
+    }
+
+    const { accessToken, refreshToken } = await this.generateTokens(user, ctx);
+
+    return {
+      accessToken,
+      user: toSafeUser(user),
+      cookie: this.buildRefreshCookie(refreshToken),
+      oauthAction: 'linked',
+    };
+  }
+
   async generateOAuthCode(payload: {
     accessToken: string;
     user: SafeUser;

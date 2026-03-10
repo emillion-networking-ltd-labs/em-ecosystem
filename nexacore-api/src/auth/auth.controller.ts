@@ -49,6 +49,7 @@ import { RolesGuard } from './guards/roles.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
 import { OAuthCallbackFilter } from './guards/oauth-callback.filter';
+import { OAuthLinkGuard } from './guards/oauth-link.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
 import { CsrfGuard } from '../common/guards/csrf.guard';
@@ -609,6 +610,42 @@ export class AuthController {
   ) {
     await this.trustedDeviceService.revokeDevice(req.user.id, deviceId);
     return { message: 'Device trust revoked' };
+  }
+
+  // ── OAuth Link Endpoints ───────────────────────────────────────────
+
+  @Get('link/google')
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.oauth.ttl,
+      limit: AUTH_RATE_LIMITS.oauth.limit,
+    },
+  })
+  @UseGuards(OAuthLinkGuard, GoogleAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Link Google account to authenticated user' })
+  @ApiResponse({ status: 302, description: 'Redirects to Google consent screen' })
+  @ApiResponse({ status: 401, description: 'Unauthorized — valid JWT required' })
+  googleLinkAuth() {
+    // OAuthLinkGuard validates JWT and sets req.oauthAction='link' + req.user.id
+    // GoogleAuthGuard then generates state with action=link and userId, redirects to Google
+  }
+
+  @Get('link/github')
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.oauth.ttl,
+      limit: AUTH_RATE_LIMITS.oauth.limit,
+    },
+  })
+  @UseGuards(OAuthLinkGuard, GitHubAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Link GitHub account to authenticated user' })
+  @ApiResponse({ status: 302, description: 'Redirects to GitHub authorization' })
+  @ApiResponse({ status: 401, description: 'Unauthorized — valid JWT required' })
+  githubLinkAuth() {
+    // OAuthLinkGuard validates JWT and sets req.oauthAction='link' + req.user.id
+    // GitHubAuthGuard then generates state with action=link and userId, redirects to GitHub
   }
 
   private getValidatedFrontendUrl(): string {

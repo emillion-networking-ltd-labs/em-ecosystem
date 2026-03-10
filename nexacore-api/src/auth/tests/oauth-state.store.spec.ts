@@ -60,18 +60,24 @@ describe('OAuthStateStore', () => {
   });
 
   describe('validate', () => {
-    it('should get and then delete key for an existing state', async () => {
-      redis.get.mockResolvedValue(JSON.stringify({ codeVerifier: 'abc' }));
+    it('should return state data and delete key for an existing state', async () => {
+      redis.get.mockResolvedValue(JSON.stringify({ codeVerifier: 'abc', action: 'login' }));
       const result = await store.validate('test-state');
-      expect(result).toBe(true);
+      expect(result).toEqual({ codeVerifier: 'abc', action: 'login' });
       expect(redis.get).toHaveBeenCalledWith('oauth:state:test-state');
       expect(redis.del).toHaveBeenCalledWith('oauth:state:test-state');
     });
 
-    it('should return false and not delete for an unknown state', async () => {
+    it('should return state data with link action and userId', async () => {
+      redis.get.mockResolvedValue(JSON.stringify({ codeVerifier: 'abc', action: 'link', userId: 'user-123' }));
+      const result = await store.validate('test-state');
+      expect(result).toEqual({ codeVerifier: 'abc', action: 'link', userId: 'user-123' });
+    });
+
+    it('should return null and not delete for an unknown state', async () => {
       redis.get.mockResolvedValue(null);
       const result = await store.validate('nonexistent-state');
-      expect(result).toBe(false);
+      expect(result).toBeNull();
       expect(redis.del).not.toHaveBeenCalled();
     });
   });

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
-import { OAuthStateStore } from '../stores/oauth-state.store';
+import { OAuthStateStore, OAuthStateData } from '../stores/oauth-state.store';
 import { Provider } from '../../users/enums/provider.enum';
 import { ErrorMessages } from '../../common/constants/error-messages';
 
@@ -73,9 +73,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     },
     done: VerifyCallback,
   ): Promise<void> {
-    // Validate OAuth state parameter (CSRF protection)
+    // Validate OAuth state parameter (CSRF protection) and retrieve action metadata
     const state = req.query?.state;
-    if (!state || !(await this.oauthStateStore.validate(state))) {
+    if (!state) {
+      done(new Error(ErrorMessages.auth.AUTHENTICATION_FAILED), undefined);
+      return;
+    }
+    const stateData: OAuthStateData | null = await this.oauthStateStore.validate(state);
+    if (!stateData) {
       done(new Error(ErrorMessages.auth.AUTHENTICATION_FAILED), undefined);
       return;
     }
@@ -92,20 +97,31 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         (req.headers?.['user-agent'] as string | undefined) || null,
     };
 
+    const oauthProfile = {
+      email,
+      provider: Provider.GOOGLE,
+      providerId: profile.id,
+      firstName: profile.name?.givenName,
+      lastName: profile.name?.familyName,
+      avatarUrl: profile.photos?.[0]?.value,
+    };
+
     try {
-      const result = await this.authService.validateOAuthUser(
-        {
-          email,
-          provider: Provider.GOOGLE,
-          providerId: profile.id,
-          firstName: profile.name?.givenName,
-          lastName: profile.name?.familyName,
-          avatarUrl: profile.photos?.[0]?.value,
-        },
-        requestMeta,
-        requestMeta,
-      );
-      done(null, result);
+      if (stateData.action === 'link' && stateData.userId) {
+        const result = await this.authService.validateOAuthLink(
+          stateData.userId,
+          oauthProfile,
+          requestMeta,
+        );
+        done(null, result);
+      } else {
+        const result = await this.authService.validateOAuthUser(
+          oauthProfile,
+          requestMeta,
+          requestMeta,
+        );
+        done(null, result);
+      }
     } catch (err) {
       done(err as Error, undefined);
     }

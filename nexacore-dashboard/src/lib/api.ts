@@ -171,9 +171,11 @@ class ApiClient {
 
     this.refreshPromise = (async () => {
       try {
+        const csrfToken = await getCsrfToken();
         const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
           method: 'POST',
           credentials: 'include',
+          headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
         });
         if (!res.ok) return null;
         const data = await res.json();

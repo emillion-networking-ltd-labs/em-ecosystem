@@ -151,25 +151,35 @@ export class UsersService {
 
     if (existingAccount) {
       const existingUser = existingAccount.user as User;
-      // Update profile fields if they were empty and OAuth provides them
-      const needsUpdate =
-        (!existingUser.firstName && profileData.firstName) ||
-        (!existingUser.lastName && profileData.lastName) ||
-        (!existingUser.avatarUrl && profileData.avatarUrl);
 
-      if (needsUpdate) {
-        const user = await this.prisma.user.update({
-          where: { id: existingUser.id },
-          data: {
-            ...(!existingUser.firstName && profileData.firstName && { firstName: profileData.firstName }),
-            ...(!existingUser.lastName && profileData.lastName && { lastName: profileData.lastName }),
-            ...(!existingUser.avatarUrl && profileData.avatarUrl && { avatarUrl: profileData.avatarUrl }),
-          },
-          include: { oauthAccounts: { select: { provider: true } } },
-        }) as User;
-        return { user, action: 'login' };
+      // If the linked user was deleted/deactivated, detach the stale OAuthAccount
+      // so the OAuth identity can be re-linked to an active or new user.
+      if (!existingUser.isActive) {
+        await this.prisma.oAuthAccount.delete({
+          where: { id: existingAccount.id },
+        });
+        // Fall through to email lookup / new user creation below
+      } else {
+        // Update profile fields if they were empty and OAuth provides them
+        const needsUpdate =
+          (!existingUser.firstName && profileData.firstName) ||
+          (!existingUser.lastName && profileData.lastName) ||
+          (!existingUser.avatarUrl && profileData.avatarUrl);
+
+        if (needsUpdate) {
+          const user = await this.prisma.user.update({
+            where: { id: existingUser.id },
+            data: {
+              ...(!existingUser.firstName && profileData.firstName && { firstName: profileData.firstName }),
+              ...(!existingUser.lastName && profileData.lastName && { lastName: profileData.lastName }),
+              ...(!existingUser.avatarUrl && profileData.avatarUrl && { avatarUrl: profileData.avatarUrl }),
+            },
+            include: { oauthAccounts: { select: { provider: true } } },
+          }) as User;
+          return { user, action: 'login' };
+        }
+        return { user: existingUser, action: 'login' };
       }
-      return { user: existingUser, action: 'login' };
     }
 
     // 2. Look up User by email
