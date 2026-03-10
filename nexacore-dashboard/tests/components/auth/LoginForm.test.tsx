@@ -68,6 +68,13 @@ jest.mock('@/components/auth/MfaTotpStep', () => {
   };
 });
 
+jest.mock('@/components/ui/TurnstileWidget', () => {
+  return function MockTurnstileWidget({ onToken }: { onToken: (t: string) => void }) {
+    onToken('mock-turnstile-token');
+    return <div data-testid="turnstile-widget" />;
+  };
+});
+
 // --- Tests ---
 
 describe('LoginForm — Conditional UI', () => {
