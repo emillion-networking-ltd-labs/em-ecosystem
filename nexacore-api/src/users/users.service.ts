@@ -254,6 +254,17 @@ export class UsersService {
     profile: OAuthProfile,
     ctx?: RequestContext,
   ): Promise<LinkedProvider> {
+    // Verify OAuth email matches user's account email (CWE-287)
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException(
+        ErrorMessages.auth.AUTHENTICATION_FAILED,
+      );
+    }
+    if (user.email.toLowerCase() !== profile.email.toLowerCase()) {
+      throw new BadRequestException(ErrorMessages.oauth.EMAIL_MISMATCH);
+    }
+
     // Check if this OAuth identity is already linked to any user
     const existingAccount = await this.prisma.oAuthAccount.findUnique({
       where: {
