@@ -42,6 +42,7 @@ async function bootstrap() {
     },
     methods: SecurityConfig.cors.methods,
     allowedHeaders: SecurityConfig.cors.allowedHeaders,
+    exposedHeaders: SecurityConfig.cors.exposedHeaders,
     credentials: SecurityConfig.cors.credentials,
     maxAge: SecurityConfig.cors.maxAge,
   });

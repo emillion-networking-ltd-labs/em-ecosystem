@@ -19,6 +19,12 @@ export const SecurityConfig = {
       'X-Requested-With',
       'X-Device-Fingerprint',
     ],
+    exposedHeaders: [
+      'Retry-After',
+      'X-RateLimit-Limit',
+      'X-RateLimit-Remaining',
+      'X-RateLimit-Reset',
+    ],
     credentials: true,
     maxAge: 86400,
   },

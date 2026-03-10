@@ -149,7 +149,7 @@ class ApiClient {
     try {
       const body = await response.json();
 
-      if (body?.error && response.status === 429) {
+      if (body?.error && (response.status === 429 || response.status === 401)) {
         const retryAfter = response.headers.get('Retry-After');
         if (retryAfter && !body.error.retryAfter) {
           body.error.retryAfter = parseInt(retryAfter, 10);
