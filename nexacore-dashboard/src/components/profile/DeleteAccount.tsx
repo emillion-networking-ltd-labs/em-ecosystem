@@ -7,17 +7,8 @@ import { useToast } from '@/context/ToastContext';
 import { deleteAccount } from '@/lib/delete-account-api';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
-
-type ApiError = { error?: { message?: string; statusCode?: number } };
-
-function extractMessage(err: unknown, fallback: string): string {
-  const e = err as ApiError;
-  if (e?.error?.statusCode === 429) return 'Too many requests. Try again later.';
-  if (e?.error?.statusCode === 403) return 'SUPERADMIN accounts cannot be deleted.';
-  if (e?.error?.statusCode === 401) return 'Incorrect password.';
-  const msg = e?.error?.message ?? fallback;
-  return msg.endsWith('.') ? msg : `${msg}.`;
-}
+import { extractMessageByStatus } from '@/lib/error-utils';
+import { HTTP_STATUS } from '@/lib/error-constants';
 
 export default function DeleteAccount() {
   const { user, logout } = useAuth();
@@ -49,7 +40,12 @@ export default function DeleteAccount() {
       await logout();
       router.push('/login');
     } catch (err: unknown) {
-      addToast({ variant: 'error', title: 'Delete failed', description: extractMessage(err, 'Failed to delete account.') });
+      const msg = extractMessageByStatus(err, {
+        [HTTP_STATUS.TOO_MANY_REQUESTS]: 'Too many requests. Try again later.',
+        [HTTP_STATUS.FORBIDDEN]: 'SUPERADMIN accounts cannot be deleted.',
+        [HTTP_STATUS.UNAUTHORIZED]: 'Incorrect password.',
+      }, 'Failed to delete account.');
+      addToast({ variant: 'error', title: 'Delete failed', description: msg });
     } finally {
       setLoading(false);
     }

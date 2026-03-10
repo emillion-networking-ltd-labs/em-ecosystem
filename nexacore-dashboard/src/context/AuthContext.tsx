@@ -16,6 +16,8 @@ import { getFingerprint } from '@/lib/fingerprint';
 import { useToast } from '@/context/ToastContext';
 import { RateLimitError } from '@/lib/types';
 import type { SafeUser, AuthResponse, LoginResponse, MessageResponse, RateLimitKind } from '@/lib/types';
+import { DETECTION_EMAIL_VERIFICATION, ERROR_CODE } from '@/lib/error-constants';
+import { extractErrorMessage } from '@/lib/error-utils';
 
 /* ===== State ===== */
 
@@ -99,19 +101,8 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 type ApiError = { error?: { message?: string; details?: string[]; retryAfter?: number; code?: string; statusCode?: number; lockoutLevel?: number } };
 
-function ensurePeriod(s: string): string {
-  return s.endsWith('.') ? s : `${s}.`;
-}
-
-function extractErrorMessage(err: unknown): string {
-  const errObj = err as ApiError;
-  const details = errObj?.error?.details;
-  if (Array.isArray(details) && details.length > 0) return ensurePeriod(details[0]);
-  return ensurePeriod(errObj?.error?.message ?? 'An unexpected error occurred.');
-}
-
 function detectRateLimitKind(errObj: ApiError): RateLimitKind {
-  return errObj?.error?.code === 'FORBIDDEN' ? 'lockout' : 'throttle';
+  return errObj?.error?.code === ERROR_CODE.FORBIDDEN ? 'lockout' : 'throttle';
 }
 
 /* ===== Provider ===== */
@@ -194,7 +185,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       const message = extractErrorMessage(err);
       addToast({ variant: 'error', title: 'Sign in failed', description: message });
-      if (message.toLowerCase().includes('verify your email')) {
+      if (message.toLowerCase().includes(DETECTION_EMAIL_VERIFICATION)) {
         dispatch({ type: 'AUTH_ERROR', payload: message });
       } else {
         dispatch({ type: 'AUTH_STOP' });

@@ -16,6 +16,7 @@ import { useToast } from '@/context/ToastContext';
 import { usePasskey } from '@/hooks/usePasskey';
 import { RateLimitError } from '@/lib/types';
 import type { RateLimitInfo } from '@/lib/types';
+import { DETECTION_EMAIL_VERIFICATION } from '@/lib/error-constants';
 
 type LoginStep = 'email' | 'password';
 
@@ -351,7 +352,7 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
 
   const emailInitial = email.charAt(0).toUpperCase();
   const activeError = passwordError || error;
-  const isVerificationError = !!error && error.toLowerCase().includes('verify your email');
+  const isVerificationError = !!error && error.toLowerCase().includes(DETECTION_EMAIL_VERIFICATION);
   const showNonVerificationError = !isVerificationError && !!activeError && !rateLimitInfo.isRateLimited;
   const showResend = isVerificationError && !rateLimitInfo.isRateLimited;
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;

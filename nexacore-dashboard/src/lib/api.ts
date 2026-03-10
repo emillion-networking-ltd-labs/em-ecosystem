@@ -1,4 +1,5 @@
 import { getCsrfToken, clearCsrfToken } from './csrf';
+import { DETECTION_CSRF_ERROR } from './error-constants';
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
 
@@ -57,7 +58,8 @@ class ApiClient {
     // Handle 403 CSRF token errors — clear and retry once
     if (response.status === 403) {
       const body = await response.clone().json().catch(() => null);
-      if (body?.message?.includes('CSRF') || body?.error?.message?.includes('CSRF')) {
+      const csrfMsg = (body?.message || body?.error?.message || '').toLowerCase();
+      if (csrfMsg.includes(DETECTION_CSRF_ERROR)) {
         clearCsrfToken();
         const newCsrfToken = await getCsrfToken();
         if (newCsrfToken) {

@@ -7,15 +7,8 @@ import { requestEmailChange } from '@/lib/email-change-api';
 import Input from '@/components/ui/Input';
 import Button from '@/components/ui/Button';
 import { Info } from 'lucide-react';
-
-type ApiError = { error?: { message?: string; statusCode?: number } };
-
-function extractMessage(err: unknown, fallback: string): string {
-  const e = err as ApiError;
-  if (e?.error?.statusCode === 429) return 'Too many requests. Try again later.';
-  const msg = e?.error?.message ?? fallback;
-  return msg.endsWith('.') ? msg : `${msg}.`;
-}
+import { extractMessageByStatus } from '@/lib/error-utils';
+import { HTTP_STATUS } from '@/lib/error-constants';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -48,7 +41,10 @@ export default function ChangeEmailForm() {
       setNewEmail('');
       setPassword('');
     } catch (err: unknown) {
-      addToast({ variant: 'error', title: 'Email change failed', description: extractMessage(err, 'Failed to request email change.') });
+      const msg = extractMessageByStatus(err, {
+        [HTTP_STATUS.TOO_MANY_REQUESTS]: 'Too many requests. Try again later.',
+      }, 'Failed to request email change.');
+      addToast({ variant: 'error', title: 'Email change failed', description: msg });
     } finally {
       setLoading(false);
     }
