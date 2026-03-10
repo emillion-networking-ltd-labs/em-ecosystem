@@ -1438,6 +1438,65 @@ describe('UsersService', () => {
     });
   });
 
+  // ─── linkOAuthProvider (SCRUM-169) ──────────────────────────────
+
+  describe('linkOAuthProvider', () => {
+    const oauthProfile = {
+      email: 'test@example.com',
+      provider: Provider.GOOGLE,
+      providerId: 'google-123',
+      firstName: 'Test',
+      lastName: 'User',
+      avatarUrl: undefined,
+    };
+    const ctx = { ipAddress: '10.0.0.1', userAgent: 'test-agent' };
+
+    it('rejects when OAuth email differs from user email', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        email: 'alice@example.com',
+      });
+
+      await expect(
+        usersService.linkOAuthProvider(
+          mockUser.id,
+          { ...oauthProfile, email: 'bob@different.com' },
+          ctx,
+        ),
+      ).rejects.toThrow(BadRequestException);
+    });
+
+    it('accepts matching email case-insensitively', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        email: 'Test@Example.COM',
+      });
+      prisma.oAuthAccount.findUnique.mockResolvedValue(null);
+      prisma.oAuthAccount.create.mockResolvedValue({
+        provider: Provider.GOOGLE,
+        providerId: 'google-123',
+        email: 'test@example.com',
+        createdAt: new Date(),
+      });
+
+      const result = await usersService.linkOAuthProvider(
+        mockUser.id,
+        { ...oauthProfile, email: 'test@example.com' },
+        ctx,
+      );
+
+      expect(result.provider).toBe(Provider.GOOGLE);
+    });
+
+    it('rejects when user not found', async () => {
+      prisma.user.findUnique.mockResolvedValue(null);
+
+      await expect(
+        usersService.linkOAuthProvider(mockUser.id, oauthProfile, ctx),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
   // ─── unlinkOAuth (SCRUM-111) ──────────────────────────────────
 
   describe('unlinkOAuth', () => {

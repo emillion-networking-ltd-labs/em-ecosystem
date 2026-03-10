@@ -37,6 +37,7 @@ export const ErrorMessages = {
     NOT_LINKED: 'No OAuth provider linked to this account',
     PASSWORD_REQUIRED_FOR_UNLINK: 'You must set a password before unlinking your OAuth provider',
     INVALID_PROVIDER: 'Invalid OAuth provider',
+    EMAIL_MISMATCH: 'OAuth account email must match your account email',
   },
   csrf: {
     VALIDATION_FAILED: 'CSRF validation failed',
