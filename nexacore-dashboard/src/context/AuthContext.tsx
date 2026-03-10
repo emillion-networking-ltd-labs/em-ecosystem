@@ -79,19 +79,19 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
 
 type AuthContextType = AuthState & {
   isAuthenticated: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, turnstileToken?: string) => Promise<void>;
   verifyMfaLogin: (code: string, isRecoveryCode?: boolean) => Promise<void>;
   cancelMfa: () => void;
-  register: (email: string, password: string) => Promise<boolean>;
+  register: (email: string, password: string, turnstileToken?: string) => Promise<boolean>;
   handleOAuthCallback: (code: string) => Promise<void>;
   passkeyLogin: (challengeId: string, credential: Record<string, unknown>) => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<void>;
-  forgotPassword: (email: string) => Promise<boolean>;
+  forgotPassword: (email: string, turnstileToken?: string) => Promise<boolean>;
   resetPassword: (token: string, newPassword: string) => Promise<boolean>;
   resendVerification: () => Promise<boolean>;
   validateResetToken: (token: string) => Promise<boolean>;
-  resendVerificationPublic: (email: string) => Promise<boolean>;
+  resendVerificationPublic: (email: string, turnstileToken?: string) => Promise<boolean>;
   clearError: () => void;
 };
 
@@ -148,6 +148,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Generate fingerprint then attempt silent refresh on mount (ref guard prevents StrictMode double-fire)
+  // Skip refresh on /auth/callback — the OAuth exchange handler will authenticate;
+  // running both causes a race condition where refresh's LOGOUT overwrites exchange's AUTH_SUCCESS.
   const mountedRef = useRef(false);
   useEffect(() => {
     if (mountedRef.current) return;
@@ -155,14 +157,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     (async () => {
       const fp = await getFingerprint();
       if (fp) apiClient.setDeviceFingerprint(fp);
+      if (window.location.pathname === '/auth/callback') {
+        dispatch({ type: 'AUTH_STOP' });
+        return;
+      }
       await refreshSession();
     })();
   }, [refreshSession]);
 
-  const login = useCallback(async (email: string, password: string) => {
+  const login = useCallback(async (email: string, password: string, turnstileToken?: string) => {
     dispatch({ type: 'AUTH_START' });
     try {
-      const data = await apiClient.post<LoginResponse>('/auth/login', { email, password });
+      const data = await apiClient.post<LoginResponse>('/auth/login', { email, password, turnstileToken });
 
       if (isMfaResponse(data)) {
         dispatch({ type: 'MFA_REQUIRED', payload: { mfaToken: data.mfaToken } });
@@ -193,10 +199,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [addToast]);
 
-  const register = useCallback(async (email: string, password: string): Promise<boolean> => {
+  const register = useCallback(async (email: string, password: string, turnstileToken?: string): Promise<boolean> => {
     dispatch({ type: 'AUTH_START' });
     try {
-      await apiClient.post<{ message: string }>('/auth/register', { email, password });
+      await apiClient.post<{ message: string }>('/auth/register', { email, password, turnstileToken });
       dispatch({ type: 'AUTH_STOP' });
       return true;
     } catch (err: unknown) {
@@ -307,10 +313,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: 'LOGOUT' });
   }, []);
 
-  const forgotPassword = useCallback(async (email: string): Promise<boolean> => {
+  const forgotPassword = useCallback(async (email: string, turnstileToken?: string): Promise<boolean> => {
     dispatch({ type: 'AUTH_START' });
     try {
-      await apiClient.post<MessageResponse>('/auth/forgot-password', { email });
+      await apiClient.post<MessageResponse>('/auth/forgot-password', { email, turnstileToken });
       dispatch({ type: 'AUTH_STOP' });
       return true;
     } catch (err: unknown) {
@@ -366,16 +372,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const validateResetToken = useCallback(async (token: string): Promise<boolean> => {
     try {
-      const data = await apiClient.get<{ valid: boolean }>(`/auth/validate-reset-token?token=${encodeURIComponent(token)}`);
+      const data = await apiClient.post<{ valid: boolean }>('/auth/validate-reset-token', { token });
       return data.valid;
     } catch {
       return false;
     }
   }, []);
 
-  const resendVerificationPublic = useCallback(async (email: string): Promise<boolean> => {
+  const resendVerificationPublic = useCallback(async (email: string, turnstileToken?: string): Promise<boolean> => {
     try {
-      await apiClient.post<MessageResponse>('/auth/resend-verification-public', { email });
+      await apiClient.post<MessageResponse>('/auth/resend-verification-public', { email, turnstileToken });
       return true;
     } catch {
       return false;

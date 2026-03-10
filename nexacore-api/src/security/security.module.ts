@@ -4,6 +4,8 @@ import { CsrfGuard } from '../common/guards/csrf.guard';
 import { AuditModule } from '../audit/audit.module';
 import { MailModule } from '../mail/mail.module';
 import { SuspiciousLoginService } from './suspicious-login.service';
+import { TurnstileService } from './turnstile.service';
+import { TurnstileGuard } from './turnstile.guard';
 
 @Module({
   imports: [AuditModule, MailModule],
@@ -13,7 +15,9 @@ import { SuspiciousLoginService } from './suspicious-login.service';
       useClass: CsrfGuard,
     },
     SuspiciousLoginService,
+    TurnstileService,
+    TurnstileGuard,
   ],
-  exports: [SuspiciousLoginService],
+  exports: [SuspiciousLoginService, TurnstileService, TurnstileGuard],
 })
 export class SecurityModule {}

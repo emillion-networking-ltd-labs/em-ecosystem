@@ -7,12 +7,13 @@ export function middleware(request: NextRequest) {
   const isDev = process.env.NODE_ENV === 'development';
 
   // In dev mode, webpack uses eval() for module loading and ws: for HMR
+  // Turnstile requires challenges.cloudflare.com in script-src and connect-src
   const scriptSrc = isDev
-    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval'`
-    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'`;
+    ? `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' 'unsafe-eval' https://challenges.cloudflare.com`
+    : `script-src 'self' 'nonce-${nonce}' 'strict-dynamic' https://challenges.cloudflare.com`;
   const connectSrc = isDev
-    ? `connect-src 'self' ${apiUrl} ws://localhost:3001`
-    : `connect-src 'self' ${apiUrl}`;
+    ? `connect-src 'self' ${apiUrl} ws://localhost:3001 https://challenges.cloudflare.com`
+    : `connect-src 'self' ${apiUrl} https://challenges.cloudflare.com`;
 
   const cspDirectives = [
     `default-src 'self'`,
@@ -21,7 +22,7 @@ export function middleware(request: NextRequest) {
     `img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com`,
     `font-src 'self'`,
     connectSrc,
-    `frame-src 'none'`,
+    `frame-src https://challenges.cloudflare.com`,
     `frame-ancestors 'none'`,
     `object-src 'none'`,
     `base-uri 'self'`,
