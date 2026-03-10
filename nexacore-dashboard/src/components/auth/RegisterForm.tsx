@@ -12,6 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRateLimit } from '@/hooks/useRateLimit';
 import { useToast } from '@/hooks/useToast';
 import { RateLimitError } from '@/lib/types';
+import TurnstileWidget from '@/components/ui/TurnstileWidget';
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
@@ -23,6 +24,8 @@ export default function RegisterForm() {
   const { register, isLoading, error, clearError } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const { addToast } = useToast();
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const router = useRouter();
 
   // Clear stale errors from other auth forms on mount
@@ -54,7 +57,7 @@ export default function RegisterForm() {
     setEmailError(null);
     setPasswordError(null);
     try {
-      const success = await register(formData.email, formData.password);
+      const success = await register(formData.email, formData.password, turnstileToken ?? undefined);
       if (success) {
         addToast({ variant: 'success', title: 'Account created', description: 'Check your inbox to verify your email.' });
         router.push('/activation/check-email');
@@ -63,6 +66,9 @@ export default function RegisterForm() {
       if (err instanceof RateLimitError) {
         setRateLimit(err.retryAfter, err.message);
       }
+    } finally {
+      setTurnstileToken(null);
+      setTurnstileResetKey(k => k + 1);
     }
   };
 
@@ -132,6 +138,9 @@ export default function RegisterForm() {
               </div>
             )}
           </div>
+
+          {/* Turnstile CAPTCHA */}
+          <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken(null)} resetKey={turnstileResetKey} />
 
           {/* Buttons Field — Figma: horizontal, itemSpacing 8 */}
           <div className="flex gap-2">

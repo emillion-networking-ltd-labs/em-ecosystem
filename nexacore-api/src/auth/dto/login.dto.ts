@@ -1,5 +1,5 @@
-import { IsEmail, IsString } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { IsEmail, IsString, IsOptional } from 'class-validator';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class LoginDto {
   @ApiProperty({
@@ -12,4 +12,9 @@ export class LoginDto {
   @ApiProperty({ description: 'User password', example: 'SecureP@ss1' })
   @IsString()
   password: string;
+
+  @ApiPropertyOptional({ description: 'Cloudflare Turnstile CAPTCHA token' })
+  @IsOptional()
+  @IsString()
+  turnstileToken?: string;
 }

@@ -12,6 +12,7 @@ import { SessionsService } from '../../sessions/sessions.service';
 import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
+import { TurnstileService } from '../../security/turnstile.service';
 import { Role } from '../../users/enums/role.enum';
 
 
@@ -135,6 +136,12 @@ describe('AuthController', () => {
             listTrustedDevices: jest.fn(),
             revokeDevice: jest.fn(),
             revokeAllDevices: jest.fn(),
+          },
+        },
+        {
+          provide: TurnstileService,
+          useValue: {
+            verify: jest.fn().mockResolvedValue(true),
           },
         },
       ],

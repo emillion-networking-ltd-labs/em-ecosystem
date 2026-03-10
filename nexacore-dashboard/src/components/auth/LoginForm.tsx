@@ -17,14 +17,14 @@ import { usePasskey } from '@/hooks/usePasskey';
 import { RateLimitError } from '@/lib/types';
 import type { RateLimitInfo } from '@/lib/types';
 import { DETECTION_EMAIL_VERIFICATION } from '@/lib/error-constants';
+import TurnstileWidget from '@/components/ui/TurnstileWidget';
 
 type LoginStep = 'email' | 'password';
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 
-// Module-level caches — survive component unmount/remount during SPA navigation
-const lockoutCache = new Map<string, { retryAfter: number; lockedAt: number }>();
+// Module-level cache — survives component unmount/remount during SPA navigation
 const resendCooldownCache = new Map<string, number>(); // email → timestamp when cooldown started
 
 export default function LoginForm() {
@@ -44,6 +44,8 @@ export default function LoginForm() {
   } = usePasskey();
   const { addToast } = useToast();
   const [passkeyError, setPasskeyError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const router = useRouter();
   const searchParams = useSearchParams();
   const oauthErrorShown = useRef(false);
@@ -115,34 +117,15 @@ export default function LoginForm() {
     }
     setPasswordError(null);
     try {
-      await login(formData.email, formData.password);
+      await login(formData.email, formData.password, turnstileToken ?? undefined);
     } catch (err) {
       if (err instanceof RateLimitError) {
-        if (err.kind === 'lockout') {
-          // Cache lockout for this email so it survives IP throttle overlap
-          lockoutCache.set(formData.email, {
-            retryAfter: err.retryAfter,
-            lockedAt: Date.now(),
-          });
-          setRateLimit(err.retryAfter, err.message, 'lockout');
-        } else {
-          // IP throttle — check if current email has a cached lockout still active
-          const cached = lockoutCache.get(formData.email);
-          if (cached) {
-            const elapsed = Math.floor((Date.now() - cached.lockedAt) / 1000);
-            const remaining = cached.retryAfter - elapsed;
-            if (remaining > 0) {
-              // Show the account lockout instead of the IP throttle
-              setRateLimit(remaining, 'Too many attempts. Account locked.', 'lockout');
-            } else {
-              lockoutCache.delete(formData.email);
-              setRateLimit(err.retryAfter, err.message, 'throttle');
-            }
-          } else {
-            setRateLimit(err.retryAfter, err.message, 'throttle');
-          }
-        }
+        setRateLimit(err.retryAfter, err.message, 'throttle');
+        addToast({ variant: 'warning', title: 'Too many attempts', description: 'If you are a registered user, please check your email for further instructions.' });
       }
+    } finally {
+      setTurnstileToken(null);
+      setTurnstileResetKey(k => k + 1);
     }
     // On AUTH_SUCCESS → isAuthenticated → useEffect redirects to /dashboard
   };
@@ -164,7 +147,9 @@ export default function LoginForm() {
         onSubmit={handleLogin}
         onChangeEmail={() => { clearError(); clearRateLimit(); setPasswordError(null); setStep('email'); }}
         onRateLimitExpired={clearRateLimit}
-        onResendVerification={resendVerificationPublic}
+        onResendVerification={(email) => resendVerificationPublic(email, turnstileToken ?? undefined)}
+        onTurnstileToken={setTurnstileToken}
+        turnstileResetKey={turnstileResetKey}
       />
     );
   }
@@ -292,9 +277,11 @@ type PasswordStepProps = {
   onChangeEmail: () => void;
   onRateLimitExpired: () => void;
   onResendVerification: (email: string) => Promise<boolean>;
+  onTurnstileToken: (token: string | null) => void;
+  turnstileResetKey: number;
 };
 
-function PasswordStep({ email, password, isLoading, error, passwordError, rateLimitInfo, onChange, onSubmit, onChangeEmail, onRateLimitExpired, onResendVerification }: PasswordStepProps) {
+function PasswordStep({ email, password, isLoading, error, passwordError, rateLimitInfo, onChange, onSubmit, onChangeEmail, onRateLimitExpired, onResendVerification, onTurnstileToken, turnstileResetKey }: PasswordStepProps) {
   const [isEmailOpen, setIsEmailOpen] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -477,6 +464,9 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
               </Link>
             </div>
           </div>
+
+          {/* Turnstile CAPTCHA — managed mode, Cloudflare decides when to show challenge */}
+          <TurnstileWidget onToken={onTurnstileToken} onExpire={() => onTurnstileToken(null)} resetKey={turnstileResetKey} />
 
           {/* Sign In button — Figma: full width 348px, primary button */}
           <button

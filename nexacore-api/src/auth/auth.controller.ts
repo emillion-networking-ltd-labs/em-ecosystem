@@ -53,6 +53,7 @@ import { OAuthLinkGuard } from './guards/oauth-link.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
 import { CsrfGuard } from '../common/guards/csrf.guard';
+import { TurnstileGuard } from '../security/turnstile.guard';
 import { SecurityConfig } from '../security/security.config';
 import { Role } from '../users/enums/role.enum';
 import { SafeUser } from '../users/entities/user.entity';
@@ -116,6 +117,7 @@ export class AuthController {
   }
 
   @Post('register')
+  @UseGuards(TurnstileGuard)
   @Throttle({
     global: {
       ttl: AUTH_RATE_LIMITS.register.ttl,
@@ -140,6 +142,7 @@ export class AuthController {
   }
 
   @Post('login')
+  @UseGuards(TurnstileGuard)
   @Throttle({
     global: {
       ttl: AUTH_RATE_LIMITS.login.ttl,
@@ -346,6 +349,7 @@ export class AuthController {
   }
 
   @Post('resend-verification-public')
+  @UseGuards(TurnstileGuard)
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
   @Throttle({
@@ -372,6 +376,7 @@ export class AuthController {
   // ── Password Reset Endpoints ──
 
   @Post('forgot-password')
+  @UseGuards(TurnstileGuard)
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
   @Throttle({

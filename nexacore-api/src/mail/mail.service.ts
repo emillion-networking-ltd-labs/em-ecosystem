@@ -124,6 +124,49 @@ export class MailService {
     }
   }
 
+  async sendAccountLockedEmail(
+    email: string,
+    failedAttempts: number,
+    lockoutMinutes: number,
+    firstName?: string | null,
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const resetUrl = `${frontendUrl}/forgot-password?email=${encodeURIComponent(email)}`;
+    const duration =
+      lockoutMinutes >= 60
+        ? `${Math.round(lockoutMinutes / 60)} hour${lockoutMinutes >= 120 ? 's' : ''}`
+        : `${lockoutMinutes} minutes`;
+    const unlocksAt = new Date(Date.now() + lockoutMinutes * 60 * 1000);
+    const unlocksAtFormatted = unlocksAt.toLocaleString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true,
+      timeZoneName: 'short',
+    });
+
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Your EM NexaCore account has been temporarily locked',
+        template: 'account-locked',
+        context: {
+          name: firstName || email.split('@')[0],
+          failedAttempts,
+          lockoutDuration: duration,
+          unlocksAt: unlocksAtFormatted,
+          resetUrl,
+          currentYear: new Date().getFullYear(),
+        },
+      });
+      this.logger.log(`Account locked notification sent to ${email}`);
+    } catch (error) {
+      this.logger.error(
+        `Failed to send account locked notification to ${email}`,
+        error,
+      );
+    }
+  }
+
   async sendLoginNotificationEmail(
     email: string,
     ipAddress: string,

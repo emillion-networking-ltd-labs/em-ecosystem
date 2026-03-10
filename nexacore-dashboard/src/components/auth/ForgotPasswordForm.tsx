@@ -11,11 +11,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useRateLimit } from '@/hooks/useRateLimit';
 import { useToast } from '@/context/ToastContext';
 import { RateLimitError } from '@/lib/types';
+import TurnstileWidget from '@/components/ui/TurnstileWidget';
 
 export default function ForgotPasswordForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState(searchParams.get('email') ?? '');
   const [emailError, setEmailError] = useState<string | null>(null);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [turnstileResetKey, setTurnstileResetKey] = useState(0);
   const { forgotPassword, isLoading, error, clearError } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const { addToast } = useToast();
@@ -33,7 +36,7 @@ export default function ForgotPasswordForm() {
     }
     setEmailError(null);
     try {
-      const success = await forgotPassword(email);
+      const success = await forgotPassword(email, turnstileToken ?? undefined);
       if (success) {
         addToast({ variant: 'success', title: 'Recovery email sent', description: 'Check your inbox for the password reset link.' });
         router.push('/password-reset/check-email');
@@ -42,6 +45,9 @@ export default function ForgotPasswordForm() {
       if (err instanceof RateLimitError) {
         setRateLimit(err.retryAfter, err.message);
       }
+    } finally {
+      setTurnstileToken(null);
+      setTurnstileResetKey(k => k + 1);
     }
   };
 
@@ -110,6 +116,9 @@ export default function ForgotPasswordForm() {
               </Link>
             </div>
           </div>
+
+          {/* Turnstile CAPTCHA */}
+          <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken(null)} resetKey={turnstileResetKey} />
 
           {/* Recovery Button — Figma: 348x40, primary, single button */}
           <button

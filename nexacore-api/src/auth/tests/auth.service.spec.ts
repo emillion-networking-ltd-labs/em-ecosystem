@@ -227,6 +227,7 @@ describe('AuthService', () => {
             sendEmailChangeVerificationEmail: jest.fn().mockResolvedValue(undefined),
             sendEmailChangeRequestNotification: jest.fn().mockResolvedValue(undefined),
             sendEmailChangedConfirmation: jest.fn().mockResolvedValue(undefined),
+            sendAccountLockedEmail: jest.fn().mockResolvedValue(undefined),
           },
         },
         {
@@ -507,12 +508,12 @@ describe('AuthService', () => {
         );
       });
 
-      it('should lock account after 5 failed attempts and throw UnauthorizedException (anti-enumeration)', async () => {
+      it('should lock account after 6 failed attempts and throw UnauthorizedException (anti-enumeration)', async () => {
         usersService.findByEmail.mockResolvedValue(mockUser);
         (bcrypt.compare as jest.Mock).mockResolvedValue(false);
         usersService.incrementFailedAttempts.mockResolvedValue({
           ...mockUser,
-          failedAttempts: 5,
+          failedAttempts: 6,
         });
         usersService.lockAccount.mockResolvedValue(undefined);
 
@@ -2014,7 +2015,7 @@ describe('AuthService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
       usersService.incrementFailedAttempts.mockResolvedValue({
         ...mockUser,
-        failedAttempts: 5, // MAX_FAILED_ATTEMPTS
+        failedAttempts: 6, // > MAX_FAILED_ATTEMPTS (5), lock on 6th
       });
       usersService.lockAccount.mockResolvedValue(undefined);
 

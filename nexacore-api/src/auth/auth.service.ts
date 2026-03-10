@@ -215,12 +215,10 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
-    // Account lockout check — CWE-203: same exception type as non-existing
-    // account to prevent enumeration via status code differences
+    // Account lockout check — CWE-203: same exception type and message as
+    // non-existing account to prevent enumeration. No retryAfter in response
+    // to avoid revealing lockout state to attackers (Microsoft model).
     if (user.lockedUntil && user.lockedUntil > new Date()) {
-      const remainingMs = user.lockedUntil.getTime() - Date.now();
-      const remainingSeconds = Math.ceil(remainingMs / 1000);
-
       this.auditService
         .log({
           action: AuditAction.LOGIN_FAILURE,
@@ -231,12 +229,7 @@ export class AuthService {
         })
         .catch(() => {});
 
-      throw new UnauthorizedException({
-        message: 'Invalid credentials',
-        error: 'Unauthorized',
-        statusCode: 401,
-        retryAfter: remainingSeconds,
-      });
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     // Expired lockout: reset failed attempts (but NOT lockoutCount)
@@ -269,11 +262,18 @@ export class AuthService {
     if (!isPasswordValid) {
       const updated = await this.usersService.incrementFailedAttempts(user.id);
 
-      if (updated.failedAttempts >= MAX_FAILED_ATTEMPTS) {
+      if (updated.failedAttempts > MAX_FAILED_ATTEMPTS) {
         await this.usersService.lockAccount(user.id, user.lockoutCount);
 
         const lockoutMinutes = getLockoutDurationMinutes(user.lockoutCount);
-        const lockoutSeconds = lockoutMinutes * 60;
+        this.mailService
+          .sendAccountLockedEmail(
+            user.email,
+            updated.failedAttempts,
+            lockoutMinutes,
+            user.firstName,
+          )
+          .catch(() => {});
 
         this.auditService
           .log({
@@ -288,12 +288,10 @@ export class AuthService {
           })
           .catch(() => {});
 
-        throw new UnauthorizedException({
-          message: 'Invalid credentials',
-          error: 'Unauthorized',
-          statusCode: 401,
-          retryAfter: lockoutSeconds,
-        });
+        // Silent lockout — same message as wrong password (CWE-203).
+        // No retryAfter to avoid revealing lockout state to attackers.
+        // User is notified via email (out-of-band) with reset link.
+        throw new UnauthorizedException('Invalid credentials');
       }
 
       this.auditService
@@ -1168,6 +1166,9 @@ export class AuthService {
 
     // Revoke all sessions (forces re-authentication)
     await this.sessionsService.revokeAllUserSessions(resetToken.userId);
+
+    // Unlock account — password reset proves email ownership, lockout no longer needed
+    await this.usersService.resetLockoutEscalation(resetToken.userId);
 
     this.auditService
       .log({
