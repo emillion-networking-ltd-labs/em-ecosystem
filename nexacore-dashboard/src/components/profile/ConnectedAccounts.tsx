@@ -5,8 +5,8 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/context/ToastContext';
 import { unlinkOAuth } from '@/lib/oauth-api';
 import Input from '@/components/ui/Input';
-
-type ApiError = { error?: { message?: string; statusCode?: number } };
+import { extractMessageByStatus } from '@/lib/error-utils';
+import { HTTP_STATUS } from '@/lib/error-constants';
 
 const providers = [
   {
@@ -72,16 +72,10 @@ export default function ConnectedAccounts() {
       addToast({ variant: 'success', title: 'Account disconnected', description: `${providerName} has been disconnected.` });
       await refreshSession();
     } catch (err: unknown) {
-      const e = err as ApiError;
-      let msg: string;
-      if (e?.error?.statusCode === 429) {
-        msg = 'Too many requests. Try again later.';
-      } else if (e?.error?.statusCode === 401) {
-        msg = 'Invalid password.';
-      } else {
-        const raw = e?.error?.message ?? 'Failed to unlink OAuth provider.';
-        msg = raw.endsWith('.') ? raw : `${raw}.`;
-      }
+      const msg = extractMessageByStatus(err, {
+        [HTTP_STATUS.TOO_MANY_REQUESTS]: 'Too many requests. Try again later.',
+        [HTTP_STATUS.UNAUTHORIZED]: 'Invalid password.',
+      }, 'Failed to unlink OAuth provider.');
       addToast({ variant: 'error', title: 'Disconnect failed', description: msg });
     } finally {
       setLoading(false);
