@@ -1,0 +1,25 @@
+{
+  "name": "@em-ecosystem/root",
+  "version": "0.0.1",
+  "private": true,
+  "description": "EM Ecosystem monorepo root — git hooks and workspace tooling",
+  "scripts": {
+    "prepare": "husky",
+    "lint:api": "cd nexacore-api && npx eslint \"{src}/**/*.ts\" --no-fix",
+    "lint:dashboard": "cd nexacore-dashboard && npx next lint",
+    "test:api": "cd nexacore-api && npm test",
+    "test:dashboard": "cd nexacore-dashboard && npm test"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.4.3"
+  },
+  "lint-staged": {
+    "nexacore-api/src/**/*.ts": [
+      "bash -c 'cd nexacore-api && npx eslint --no-fix --max-warnings 0'"
+    ],
+    "nexacore-dashboard/src/**/*.{ts,tsx}": [
+      "bash -c 'cd nexacore-dashboard && npx next lint'"
+    ]
+  }
+}

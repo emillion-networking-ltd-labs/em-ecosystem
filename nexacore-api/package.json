@@ -5,6 +5,10 @@
   "author": "EMillion Networking LTD",
   "private": true,
   "license": "PROPRIETARY",
+  "engines": {
+    "node": ">=22.0.0",
+    "npm": ">=10.0.0"
+  },
   "scripts": {
     "build": "nest build",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
@@ -20,7 +24,9 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "prisma:studio": "prisma studio"
+    "prisma:studio": "prisma studio",
+    "lint:security": "eslint \"{src}/**/*.ts\" --no-fix",
+    "audit:deps": "npm audit --audit-level=high && npm audit --omit=dev --audit-level=moderate"
   },
   "dependencies": {
     "@nestjs-modules/mailer": "^2.0.2",
@@ -76,6 +82,7 @@
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-prettier": "^5.2.2",
+    "eslint-plugin-security": "^3.0.1",
     "globals": "^16.0.0",
     "jest": "^30.0.0",
     "prettier": "^3.4.2",

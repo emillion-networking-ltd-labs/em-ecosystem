@@ -1,0 +1,32 @@
+#!/bin/sh
+
+# ============================================================================
+# Pre-push hook — EM NexaCore
+# ============================================================================
+# Runs tests and build verification before pushing.
+# Standards: SOC 2 CC8.2, ISO 25010
+# ============================================================================
+
+echo "Running pre-push checks..."
+
+# Backend tests
+echo "=== Backend Tests ==="
+cd nexacore-api
+npx prisma generate --no-hints 2>/dev/null
+npm test -- --passWithNoTests
+if [ $? -ne 0 ]; then
+  echo "ERROR: Backend tests failed. Push aborted."
+  exit 1
+fi
+
+# Backend build
+echo "=== Backend Build ==="
+npm run build
+if [ $? -ne 0 ]; then
+  echo "ERROR: Backend build failed. Push aborted."
+  exit 1
+fi
+
+cd ..
+
+echo "All pre-push checks passed."

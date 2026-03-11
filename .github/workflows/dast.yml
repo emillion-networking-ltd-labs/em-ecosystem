@@ -1,0 +1,96 @@
+# ============================================================================
+# EM NexaCore — DAST (Dynamic Application Security Testing)
+# ============================================================================
+# OWASP ZAP baseline scan against the running application.
+# Triggered manually or after deploy to staging.
+# Standards: OWASP A01-A10:2021, NIST SP 800-53 SA-11
+# ============================================================================
+
+name: DAST (OWASP ZAP)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target_url:
+        description: 'Target URL to scan (e.g., https://staging-api.nexacore.com)'
+        required: true
+        type: string
+      scan_type:
+        description: 'Scan type'
+        required: true
+        default: 'baseline'
+        type: choice
+        options:
+          - baseline
+          - full
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  # ==========================================================================
+  # OWASP ZAP Baseline Scan
+  # Passive scan — no active attacks, safe for staging
+  # ==========================================================================
+  zap-baseline:
+    name: 'ZAP Baseline Scan'
+    runs-on: ubuntu-latest
+    if: ${{ inputs.scan_type == 'baseline' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: OWASP ZAP Baseline Scan
+        uses: zaproxy/action-baseline@v0.14.0
+        with:
+          target: ${{ inputs.target_url }}
+          rules_file_name: '.github/zap-rules.tsv'
+          cmd_options: '-a -j -l WARN'
+          allow_issue_writing: true
+          fail_action: true
+          artifact_name: zap-baseline-report
+
+  # ==========================================================================
+  # OWASP ZAP Full Scan
+  # Active scan — includes attack payloads, use ONLY against owned infra
+  # ==========================================================================
+  zap-full:
+    name: 'ZAP Full Scan'
+    runs-on: ubuntu-latest
+    if: ${{ inputs.scan_type == 'full' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: OWASP ZAP Full Scan
+        uses: zaproxy/action-full-scan@v0.12.0
+        with:
+          target: ${{ inputs.target_url }}
+          rules_file_name: '.github/zap-rules.tsv'
+          cmd_options: '-a -j -l WARN'
+          allow_issue_writing: true
+          fail_action: true
+          artifact_name: zap-full-report
+
+  # ==========================================================================
+  # API Scan (OpenAPI spec-driven)
+  # Scans all endpoints defined in api-spec.yml
+  # ==========================================================================
+  zap-api:
+    name: 'ZAP API Scan'
+    runs-on: ubuntu-latest
+    if: ${{ inputs.scan_type == 'full' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: OWASP ZAP API Scan
+        uses: zaproxy/action-api-scan@v0.9.0
+        with:
+          target: ${{ inputs.target_url }}/api-docs-json
+          format: openapi
+          cmd_options: '-a -j -l WARN'
+          allow_issue_writing: true
+          fail_action: true
+          artifact_name: zap-api-report

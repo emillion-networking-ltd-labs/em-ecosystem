@@ -1,0 +1,69 @@
+# ============================================================================
+# Gitleaks Configuration — EM NexaCore
+# ============================================================================
+# Standard: CWE-798 (Hard-coded Credentials), OWASP A07:2021
+# Detects secrets, API keys, tokens, and credentials in git history.
+# ============================================================================
+
+title = "EM NexaCore Gitleaks Config"
+
+[extend]
+useDefault = true
+
+# Custom rules for project-specific patterns
+[[rules]]
+id = "jwt-secret-value"
+description = "JWT secret value detected"
+regex = '''JWT_SECRET\s*=\s*['\"]?[A-Za-z0-9+/=]{16,}['\"]?'''
+tags = ["secret", "jwt"]
+severity = "CRITICAL"
+
+[[rules]]
+id = "database-url"
+description = "Database connection string with credentials"
+regex = '''postgres(ql)?://[^:]+:[^@]+@[^/]+/\w+'''
+tags = ["secret", "database"]
+severity = "CRITICAL"
+
+[[rules]]
+id = "redis-password"
+description = "Redis password detected"
+regex = '''REDIS_PASSWORD\s*=\s*['\"]?.{8,}['\"]?'''
+tags = ["secret", "redis"]
+severity = "HIGH"
+
+[[rules]]
+id = "turnstile-secret"
+description = "Cloudflare Turnstile secret key"
+regex = '''TURNSTILE_SECRET_KEY\s*=\s*['\"]?0x[A-Za-z0-9_-]+['\"]?'''
+tags = ["secret", "captcha"]
+severity = "HIGH"
+
+[[rules]]
+id = "oauth-client-secret"
+description = "OAuth client secret detected"
+regex = '''(GOOGLE|GITHUB)_CLIENT_SECRET\s*=\s*['\"]?[A-Za-z0-9_-]{20,}['\"]?'''
+tags = ["secret", "oauth"]
+severity = "CRITICAL"
+
+# Allowlist — files that are expected to contain placeholder values
+[allowlist]
+paths = [
+  '''.env\.example$''',
+  '''.env\.template$''',
+  '''\.spec\.ts$''',
+  '''\.test\.ts$''',
+  '''\.test\.tsx$''',
+  '''tests/.*\.ts$''',
+  '''__mocks__/.*\.ts$''',
+  '''package-lock\.json$''',
+]
+
+# Specific patterns that are known false positives
+regexes = [
+  '''your[-_]?secret[-_]?here''',
+  '''changeme''',
+  '''placeholder''',
+  '''example\.com''',
+  '''localhost''',
+]

@@ -1,0 +1,369 @@
+# ============================================================================
+# EM NexaCore — Security CI Pipeline
+# ============================================================================
+# Runs on every push and PR to main/develop branches.
+# 5 layers: Secrets Detection, Dependency Audit, SAST, Tests, Build
+# Standards: OWASP A06:2021, NIST SA-11, SOC 2 CC8.2, CWE-798
+# ============================================================================
+
+name: Security Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+  security-events: write
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  # ==========================================================================
+  # Layer 1: Secrets Detection (Gitleaks)
+  # Standard: CWE-798 (Hard-coded Credentials), OWASP A07:2021
+  # ==========================================================================
+  secrets-scan:
+    name: 'Layer 1: Secrets Detection'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ==========================================================================
+  # Layer 2: Dependency Audit
+  # Standard: OWASP A06:2021 (Vulnerable Components), NIST SA-11
+  # ==========================================================================
+  dependency-audit:
+    name: 'Layer 2: Dependency Audit'
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [nexacore-api, nexacore-dashboard]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: ${{ matrix.package }}/package-lock.json
+
+      - name: Install dependencies (clean)
+        working-directory: ${{ matrix.package }}
+        run: npm ci
+
+      - name: npm audit (all dependencies)
+        working-directory: ${{ matrix.package }}
+        run: npm audit --audit-level=high
+
+      - name: npm audit (production only)
+        working-directory: ${{ matrix.package }}
+        run: npm audit --omit=dev --audit-level=moderate
+
+      - name: Check for outdated dependencies
+        working-directory: ${{ matrix.package }}
+        run: npm outdated || true
+
+      - name: Verify lock file integrity
+        working-directory: ${{ matrix.package }}
+        run: |
+          # Ensure no file: or git: protocol dependencies (supply chain risk)
+          if grep -E '"(file|git|git\+ssh|git\+https):' package-lock.json; then
+            echo "::error::Supply chain risk: file: or git: protocol dependency detected"
+            exit 1
+          fi
+
+      - name: Verify integrity hashes
+        working-directory: ${{ matrix.package }}
+        run: |
+          # Check that all packages in lock file have integrity hashes
+          MISSING=$(node -e "
+            const lock = require('./package-lock.json');
+            const missing = [];
+            function check(deps, path) {
+              for (const [name, info] of Object.entries(deps || {})) {
+                if (!info.integrity && !info.link) missing.push(path + name);
+                if (info.dependencies) check(info.dependencies, path + name + '/');
+              }
+            }
+            check(lock.packages, '');
+            if (missing.length > 0) {
+              console.log('Packages missing integrity hash: ' + missing.length);
+              missing.slice(0, 10).forEach(p => console.log('  - ' + p));
+              process.exit(1);
+            }
+            console.log('All packages have integrity hashes');
+          ")
+          echo "$MISSING"
+
+  # ==========================================================================
+  # Layer 3: Static Analysis (ESLint + Security Plugin)
+  # Standard: CWE-89, CWE-79, CWE-1333, OWASP A03:2021
+  # ==========================================================================
+  sast-backend:
+    name: 'Layer 3: SAST (Backend)'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nexacore-api/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nexacore-api
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: nexacore-api
+        run: npx prisma generate
+
+      - name: Run ESLint (with security plugin)
+        working-directory: nexacore-api
+        run: npx eslint "{src,apps,libs,test}/**/*.ts" --max-warnings 0
+
+      - name: Check for dangerous patterns
+        working-directory: nexacore-api
+        run: |
+          echo "=== Checking for eval/Function constructor ==="
+          if grep -rn "eval(" src/ --include="*.ts" | grep -v "node_modules" | grep -v ".spec.ts"; then
+            echo "::error::eval() usage detected in production code"
+            exit 1
+          fi
+
+          echo "=== Checking for child_process ==="
+          if grep -rn "child_process\|execSync\|spawnSync" src/ --include="*.ts" | grep -v "node_modules" | grep -v ".spec.ts"; then
+            echo "::error::child_process usage detected — potential command injection"
+            exit 1
+          fi
+
+          echo "=== Checking for __proto__ / constructor.prototype ==="
+          if grep -rn "__proto__\|constructor\[" src/ --include="*.ts" | grep -v "node_modules" | grep -v ".spec.ts"; then
+            echo "::error::Prototype pollution pattern detected"
+            exit 1
+          fi
+
+          echo "=== Checking for console.log in production ==="
+          if grep -rn "console\.log\|console\.debug" src/ --include="*.ts" | grep -v "node_modules" | grep -v ".spec.ts" | grep -v "main.ts"; then
+            echo "::warning::console.log detected in production code"
+          fi
+
+          echo "All dangerous pattern checks passed"
+
+  sast-frontend:
+    name: 'Layer 3: SAST (Frontend)'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nexacore-dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nexacore-dashboard
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: nexacore-dashboard
+        run: npx next lint --max-warnings 0
+
+      - name: Check for dangerous frontend patterns
+        working-directory: nexacore-dashboard
+        run: |
+          echo "=== Checking for dangerouslySetInnerHTML ==="
+          if grep -rn "dangerouslySetInnerHTML" src/ --include="*.tsx" --include="*.ts"; then
+            echo "::error::dangerouslySetInnerHTML detected — XSS risk"
+            exit 1
+          fi
+
+          echo "=== Checking for localStorage secrets ==="
+          if grep -rn "localStorage\.setItem.*token\|localStorage\.setItem.*password\|localStorage\.setItem.*secret" src/ --include="*.ts" --include="*.tsx"; then
+            echo "::error::Sensitive data in localStorage detected"
+            exit 1
+          fi
+
+          echo "All frontend pattern checks passed"
+
+  # ==========================================================================
+  # Layer 4: Tests + Coverage Gates
+  # Standard: ISO 25010 (Reliability), SOC 2 CC8.3
+  # ==========================================================================
+  tests-backend:
+    name: 'Layer 4: Tests (Backend)'
+    runs-on: ubuntu-latest
+    needs: [sast-backend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nexacore-api/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nexacore-api
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: nexacore-api
+        run: npx prisma generate
+
+      - name: Run tests with coverage
+        working-directory: nexacore-api
+        run: npm run test:cov
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: nexacore-api/coverage/
+          retention-days: 30
+
+  tests-frontend:
+    name: 'Layer 4: Tests (Frontend)'
+    runs-on: ubuntu-latest
+    needs: [sast-frontend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nexacore-dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nexacore-dashboard
+        run: npm ci
+
+      - name: Run tests with coverage
+        working-directory: nexacore-dashboard
+        run: npm run test:cov
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: nexacore-dashboard/coverage/
+          retention-days: 30
+
+  # ==========================================================================
+  # Layer 5: Build Verification
+  # Standard: SOC 2 CC8.2 (Change Management)
+  # ==========================================================================
+  build-backend:
+    name: 'Layer 5: Build (Backend)'
+    runs-on: ubuntu-latest
+    needs: [tests-backend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nexacore-api/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nexacore-api
+        run: npm ci
+
+      - name: Generate Prisma client
+        working-directory: nexacore-api
+        run: npx prisma generate
+
+      - name: Build
+        working-directory: nexacore-api
+        run: npm run build
+
+      - name: Verify dist output
+        working-directory: nexacore-api
+        run: |
+          if [ ! -f dist/main.js ]; then
+            echo "::error::Build output missing dist/main.js"
+            exit 1
+          fi
+          echo "Build verification passed"
+
+  build-frontend:
+    name: 'Layer 5: Build (Frontend)'
+    runs-on: ubuntu-latest
+    needs: [tests-frontend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: nexacore-dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nexacore-dashboard
+        run: npm ci
+
+      - name: Build
+        working-directory: nexacore-dashboard
+        run: npm run build
+
+  # ==========================================================================
+  # Pipeline Summary
+  # ==========================================================================
+  security-gate:
+    name: 'Security Gate (All Checks)'
+    runs-on: ubuntu-latest
+    needs: [secrets-scan, dependency-audit, build-backend, build-frontend]
+    if: always()
+    steps:
+      - name: Check all jobs passed
+        run: |
+          if [ "${{ needs.secrets-scan.result }}" != "success" ]; then
+            echo "::error::Secrets scan failed"
+            exit 1
+          fi
+          if [ "${{ needs.dependency-audit.result }}" != "success" ]; then
+            echo "::error::Dependency audit failed"
+            exit 1
+          fi
+          if [ "${{ needs.build-backend.result }}" != "success" ]; then
+            echo "::error::Backend build failed"
+            exit 1
+          fi
+          if [ "${{ needs.build-frontend.result }}" != "success" ]; then
+            echo "::error::Frontend build failed"
+            exit 1
+          fi
+          echo "All security gates passed"
