@@ -571,9 +571,15 @@ export class AuthService {
       this.handleTravelBlock(travelResult, user.id, requestMeta);
     }
 
+    const auditActionMap: Record<string, AuditAction> = {
+      login: AuditAction.OAUTH_LOGIN,
+      linked: AuditAction.OAUTH_LINKED,
+      created: AuditAction.OAUTH_REGISTER,
+    };
+
     this.auditService
       .log({
-        action: AuditAction.OAUTH_LOGIN,
+        action: auditActionMap[action] || AuditAction.OAUTH_LOGIN,
         userId: user.id,
         ipAddress: ctx?.ipAddress,
         userAgent: ctx?.userAgent,
