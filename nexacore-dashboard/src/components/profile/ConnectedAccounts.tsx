@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { Info } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/context/ToastContext';
 import { unlinkOAuth } from '@/lib/oauth-api';
 import Input from '@/components/ui/Input';
+import Tooltip from '@/components/ui/Tooltip';
 import { extractMessageByStatus } from '@/lib/error-utils';
 import { HTTP_STATUS } from '@/lib/error-constants';
 
@@ -138,12 +140,22 @@ export default function ConnectedAccounts() {
                     </button>
                   )
                 ) : (
-                  <button
-                    onClick={() => handleConnect(provider.id)}
-                    className="rounded-md border border-border-default px-4 py-1.5 text-caption text-content-primary hover:bg-surface-subtle"
-                  >
-                    Connect
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleConnect(provider.id)}
+                      className="rounded-md border border-border-default px-4 py-1.5 text-caption text-content-primary hover:bg-surface-subtle"
+                    >
+                      Connect
+                    </button>
+                    {provider.id === 'GITHUB' && (
+                      <Tooltip
+                        content="Your active GitHub session will be used. To link a different account, log out of github.com first."
+                        position="left"
+                      >
+                        <Info className="h-4 w-4 text-content-tertiary cursor-help" tabIndex={0} />
+                      </Tooltip>
+                    )}
+                  </div>
                 )}
               </div>
             );
