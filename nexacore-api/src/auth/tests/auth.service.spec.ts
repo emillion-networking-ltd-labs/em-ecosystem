@@ -14,6 +14,7 @@ import { Provider } from '../../users/enums/provider.enum';
 import { User } from '../../users/entities/user.entity';
 import { OAuthProfile } from '../../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from '../stores/oauth-code.store';
+import { AuditAction } from '../../audit/enums/audit-action.enum';
 import { PasswordBreachService } from '../password-breach.service';
 import { TrustedDeviceService } from '../trusted-device.service';
 import { ImpossibleTravelService } from '../../geolocation/impossible-travel.service';
@@ -1928,6 +1929,32 @@ describe('AuthService', () => {
       expect(result.accessToken).toBe('oauth-at');
       expect(result.user.email).toBe('oauth@example.com');
       expect(result.cookie.name).toBe('refresh_token');
+    });
+
+    it.each([
+      { actionValue: 'login', expected: AuditAction.OAUTH_LOGIN },
+      { actionValue: 'linked', expected: AuditAction.OAUTH_LINKED },
+      { actionValue: 'created', expected: AuditAction.OAUTH_REGISTER },
+    ])('should log $expected when action is $actionValue', async ({ actionValue, expected }) => {
+      const oauthUser = { ...mockUser, id: 'oauth-uuid' };
+      usersService.findOrCreateByOAuth.mockResolvedValue({ user: oauthUser, action: actionValue });
+      jwtService.sign.mockReturnValueOnce('at').mockReturnValueOnce('rt');
+      sessionsService.createSession.mockResolvedValue(mockSession);
+      sessionsService.updateSessionHash.mockResolvedValue(undefined);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
+      const audit = (authService as any).auditService;
+      audit.log.mockResolvedValue(undefined);
+
+      await authService.validateOAuthUser(
+        { email: 'o@e.com', provider: Provider.GOOGLE, providerId: 'g1' },
+        requestMeta,
+        requestMeta,
+      );
+      await new Promise(resolve => process.nextTick(resolve));
+
+      expect(audit.log).toHaveBeenCalledWith(
+        expect.objectContaining({ action: expected }),
+      );
     });
   });
 

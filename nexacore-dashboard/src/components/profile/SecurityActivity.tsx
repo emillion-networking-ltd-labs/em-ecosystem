@@ -30,6 +30,8 @@ const EVENT_CONFIG: Record<
   PASSKEY_DELETED: { label: 'Passkey Deleted', category: 'warning' },
   PASSKEY_AUTH_SUCCESS: { label: 'Passkey Login', category: 'success' },
   PASSKEY_AUTH_FAILURE: { label: 'Passkey Login Failed', category: 'danger' },
+  OAUTH_LINKED: { label: 'OAuth Linked', category: 'success' },
+  OAUTH_REGISTER: { label: 'OAuth Register', category: 'success' },
   OAUTH_UNLINKED: { label: 'OAuth Unlinked', category: 'warning' },
   EMAIL_CHANGE_REQUESTED: { label: 'Email Change Requested', category: 'info' },
   EMAIL_CHANGED: { label: 'Email Changed', category: 'warning' },
