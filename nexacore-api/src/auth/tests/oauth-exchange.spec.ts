@@ -7,8 +7,8 @@ import { TrustedDeviceService } from '../trusted-device.service';
 import { SessionsService } from '../../sessions/sessions.service';
 import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
+import { TurnstileService } from '../../security/turnstile.service';
 import { Role } from '../../users/enums/role.enum';
-
 
 describe('OAuth Exchange Flow (Integration)', () => {
   let controller: AuthController;
@@ -62,13 +62,11 @@ describe('OAuth Exchange Flow (Integration)', () => {
       logout: jest.fn(),
       logoutAll: jest.fn(),
       buildClearCookie: jest.fn(),
-      generateOAuthCode: jest
-        .fn()
-        .mockImplementation(async (payload) => {
-          const code = `code-${Date.now()}-${Math.random()}`;
-          codeMap.set(code, payload);
-          return code;
-        }),
+      generateOAuthCode: jest.fn().mockImplementation(async (payload) => {
+        const code = `code-${Date.now()}-${Math.random()}`;
+        codeMap.set(code, payload);
+        return code;
+      }),
       exchangeOAuthCode: jest.fn().mockImplementation(async (code) => {
         const result = codeMap.get(code) || null;
         codeMap.delete(code);
@@ -123,6 +121,12 @@ describe('OAuth Exchange Flow (Integration)', () => {
             listTrustedDevices: jest.fn(),
             revokeDevice: jest.fn(),
             revokeAllDevices: jest.fn(),
+          },
+        },
+        {
+          provide: TurnstileService,
+          useValue: {
+            verify: jest.fn().mockResolvedValue(true),
           },
         },
       ],

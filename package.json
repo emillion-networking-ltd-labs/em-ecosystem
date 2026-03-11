@@ -15,11 +15,7 @@
     "lint-staged": "^15.4.3"
   },
   "lint-staged": {
-    "nexacore-api/src/**/*.ts": [
-      "bash -c 'cd nexacore-api && npx eslint --no-fix --max-warnings 0'"
-    ],
-    "nexacore-dashboard/src/**/*.{ts,tsx}": [
-      "bash -c 'cd nexacore-dashboard && npx next lint'"
-    ]
+    "nexacore-api/src/**/*.ts": "npx prettier --check --config nexacore-api/.prettierrc",
+    "nexacore-dashboard/src/**/*.{ts,tsx}": "npx prettier --check"
   }
 }
