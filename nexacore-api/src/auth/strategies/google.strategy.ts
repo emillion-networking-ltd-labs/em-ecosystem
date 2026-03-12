@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { AuthService } from '../auth.service';
@@ -11,13 +12,12 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     private readonly authService: AuthService,
     private readonly oauthStateStore: OAuthStateStore,
+    configService: ConfigService,
   ) {
     super({
-      clientID: process.env.GOOGLE_CLIENT_ID || '',
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
-      callbackURL:
-        process.env.GOOGLE_CALLBACK_URL ||
-        'http://localhost:3000/auth/google/callback',
+      clientID: configService.get<string>('oauth.googleClientId')!,
+      clientSecret: configService.get<string>('oauth.googleClientSecret')!,
+      callbackURL: configService.get<string>('oauth.googleCallbackUrl')!,
       scope: ['email', 'profile'],
       passReqToCallback: true,
     });
@@ -79,7 +79,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       done(new Error(ErrorMessages.auth.AUTHENTICATION_FAILED), undefined);
       return;
     }
-    const stateData: OAuthStateData | null = await this.oauthStateStore.validate(state);
+    const stateData: OAuthStateData | null =
+      await this.oauthStateStore.validate(state);
     if (!stateData) {
       done(new Error(ErrorMessages.auth.AUTHENTICATION_FAILED), undefined);
       return;
@@ -93,8 +94,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
     const requestMeta = {
       ipAddress: req.ip || req.socket?.remoteAddress || 'unknown',
-      userAgent:
-        (req.headers?.['user-agent'] as string | undefined) || null,
+      userAgent: (req.headers?.['user-agent'] as string | undefined) || null,
     };
 
     const oauthProfile = {

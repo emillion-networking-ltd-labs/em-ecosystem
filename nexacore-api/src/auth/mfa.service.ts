@@ -4,6 +4,7 @@ import {
   BadRequestException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { generateSecret, generateURI, verify as otpVerify } from 'otplib';
 import * as QRCode from 'qrcode';
@@ -33,21 +34,25 @@ export class MfaService {
     private readonly jwtService: JwtService,
     private readonly auditService: AuditService,
     private readonly trustedDeviceService: TrustedDeviceService,
+    private readonly configService: ConfigService,
   ) {
-    this.appName = process.env.MFA_APP_NAME || 'EM NexaCore';
-    const jwtSecret =
-      process.env.JWT_SECRET || 'default-dev-secret-change-in-production';
+    this.appName = this.configService.get<string>('auth.mfaAppName')!;
+    const jwtSecret = this.configService.get<string>('auth.jwtSecret')!;
     this.mfaChallengeSecret = createHmac('sha256', jwtSecret)
       .update('mfa-challenge-token')
       .digest('hex');
   }
 
-  async setupMfa(
-    userId: string,
-  ): Promise<{ secret: string; qrCodeDataUrl: string; recoveryCodes: string[] }> {
+  async setupMfa(userId: string): Promise<{
+    secret: string;
+    qrCodeDataUrl: string;
+    recoveryCodes: string[];
+  }> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
     }
 
     if (user.mfaEnabled) {
@@ -88,7 +93,9 @@ export class MfaService {
   ): Promise<void> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
     }
 
     if (user.mfaEnabled) {
@@ -120,7 +127,10 @@ export class MfaService {
   generateMfaToken(user: User): string {
     return this.jwtService.sign(
       { sub: user.id, type: 'mfa-challenge' },
-      { expiresIn: MFA_TOKEN_EXPIRY as StringValue, secret: this.mfaChallengeSecret },
+      {
+        expiresIn: MFA_TOKEN_EXPIRY as StringValue,
+        secret: this.mfaChallengeSecret,
+      },
     );
   }
 
@@ -137,9 +147,12 @@ export class MfaService {
 
     let payload: { sub: string; type: string };
     try {
-      payload = this.jwtService.verify<{ sub: string; type: string }>(mfaToken, {
-        secret: this.mfaChallengeSecret,
-      });
+      payload = this.jwtService.verify<{ sub: string; type: string }>(
+        mfaToken,
+        {
+          secret: this.mfaChallengeSecret,
+        },
+      );
     } catch {
       throw new UnauthorizedException(ErrorMessages.mfa.INVALID_TOKEN);
     }
@@ -183,7 +196,9 @@ export class MfaService {
   ): Promise<void> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
     }
 
     if (!user.mfaEnabled) {
@@ -218,7 +233,9 @@ export class MfaService {
   ): Promise<string[]> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
     }
 
     if (!user.mfaEnabled) {
@@ -251,7 +268,9 @@ export class MfaService {
   ): Promise<{ mfaEnabled: boolean; recoveryCodesRemaining: number }> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
     }
 
     return {

@@ -5,6 +5,7 @@ import {
   BadRequestException,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -24,7 +25,10 @@ import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
 import { OAuthCodeStore } from './stores/oauth-code.store';
 import { PasswordBreachService } from './password-breach.service';
 import { TrustedDeviceService } from './trusted-device.service';
-import { TokenDenyListService, ACCESS_TOKEN_TTL_SECONDS } from './token-deny-list.service';
+import {
+  TokenDenyListService,
+  ACCESS_TOKEN_TTL_SECONDS,
+} from './token-deny-list.service';
 import { ImpossibleTravelService } from '../geolocation/impossible-travel.service';
 import { SuspiciousLoginService } from '../security/suspicious-login.service';
 import { ImpossibleTravelResult } from '../geolocation/interfaces/geolocation-result.interface';
@@ -118,12 +122,14 @@ export class AuthService {
     private readonly impossibleTravelService: ImpossibleTravelService,
     private readonly suspiciousLoginService: SuspiciousLoginService,
     private readonly tokenDenyListService: TokenDenyListService,
+    private readonly configService: ConfigService,
   ) {
     // OWASP ASVS V3.3.3 / NIST SP 800-63B §7.2: absolute timeout <= 12h at AAL2
-    this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '12h';
+    this.refreshExpiration = this.configService.get<string>(
+      'auth.jwtRefreshExpiration',
+    )!;
     this.refreshMaxAgeMs = parseDurationMs(this.refreshExpiration);
-    const jwtSecret =
-      process.env.JWT_SECRET || 'default-dev-secret-change-in-production';
+    const jwtSecret = this.configService.get<string>('auth.jwtSecret')!;
     this.mfaChallengeSecret = crypto
       .createHmac('sha256', jwtSecret)
       .update('mfa-challenge-token')
@@ -163,7 +169,9 @@ export class AuthService {
       return { message: ErrorMessages.auth.CHECK_EMAIL };
     }
 
-    const isBreached = await this.passwordBreachService.isBreached(dto.password);
+    const isBreached = await this.passwordBreachService.isBreached(
+      dto.password,
+    );
     if (isBreached) {
       throw new BadRequestException(
         'This password has appeared in a data breach. Please choose a different password.',
@@ -323,9 +331,7 @@ export class AuthService {
           metadata: { reason: 'email_not_verified' },
         })
         .catch(() => {});
-      throw new ForbiddenException(
-        ErrorMessages.auth.CHECK_EMAIL,
-      );
+      throw new ForbiddenException(ErrorMessages.auth.CHECK_EMAIL);
     }
 
     if (user.failedAttempts > 0 || user.lockoutCount > 0) {
@@ -357,7 +363,10 @@ export class AuthService {
             user,
             requestMeta,
           );
-          if (travelResult?.isAnomalous && travelResult.actionTaken === 'blocked') {
+          if (
+            travelResult?.isAnomalous &&
+            travelResult.actionTaken === 'blocked'
+          ) {
             this.handleTravelBlock(travelResult, user.id, requestMeta);
           }
 
@@ -511,8 +520,17 @@ export class AuthService {
 
     // Sign new tokens with actual session ID
     const newAccessToken = this.jwtService.sign(
-      { sub: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() } satisfies JwtPayload,
-      { expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as StringValue },
+      {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+        jti: crypto.randomUUID(),
+      } satisfies JwtPayload,
+      {
+        expiresIn: this.configService.get<string>(
+          'auth.jwtAccessExpiration',
+        ) as StringValue,
+      },
     );
 
     const newRefreshToken = this.jwtService.sign(
@@ -551,7 +569,8 @@ export class AuthService {
     requestMeta: { ipAddress: string; userAgent?: string | null },
     ctx?: RequestContext,
   ): Promise<AuthResult> {
-    const { user, action } = await this.usersService.findOrCreateByOAuth(profile);
+    const { user, action } =
+      await this.usersService.findOrCreateByOAuth(profile);
 
     // Reset lockout on successful OAuth login (proves account ownership)
     if (user.failedAttempts > 0 || user.lockoutCount > 0) {
@@ -639,9 +658,7 @@ export class AuthService {
   }> {
     const payload = await this.oauthCodeStore.exchange(code);
     if (!payload) {
-      throw new UnauthorizedException(
-        ErrorMessages.auth.AUTHENTICATION_FAILED,
-      );
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
     return payload;
   }
@@ -651,10 +668,11 @@ export class AuthService {
     ctx?: RequestContext,
   ): Promise<CookieConfig> {
     try {
-      const payload =
-        this.jwtService.verify<RefreshTokenPayload>(refreshToken);
+      const payload = this.jwtService.verify<RefreshTokenPayload>(refreshToken);
       await this.sessionsService.revokeSession(payload.sessionId, payload.sub);
-      this.tokenDenyListService.denyAllForUser(payload.sub, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
+      this.tokenDenyListService
+        .denyAllForUser(payload.sub, ACCESS_TOKEN_TTL_SECONDS)
+        .catch(() => {});
 
       this.auditService
         .log({
@@ -671,12 +689,11 @@ export class AuthService {
     return this.buildClearCookie();
   }
 
-  async logoutAll(
-    userId: string,
-    ctx?: RequestContext,
-  ): Promise<CookieConfig> {
+  async logoutAll(userId: string, ctx?: RequestContext): Promise<CookieConfig> {
     await this.sessionsService.revokeAllUserSessions(userId);
-    this.tokenDenyListService.denyAllForUser(userId, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
+    this.tokenDenyListService
+      .denyAllForUser(userId, ACCESS_TOKEN_TTL_SECONDS)
+      .catch(() => {});
 
     this.auditService
       .log({
@@ -697,7 +714,9 @@ export class AuthService {
   ): Promise<AuthResult> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
     }
     const { accessToken, refreshToken, sessionId } = await this.generateTokens(
       user,
@@ -724,8 +743,17 @@ export class AuthService {
     requestMeta: { ipAddress: string; userAgent?: string | null },
   ): Promise<{ accessToken: string; refreshToken: string; sessionId: string }> {
     const accessToken = this.jwtService.sign(
-      { sub: user.id, email: user.email, role: user.role, jti: crypto.randomUUID() } satisfies JwtPayload,
-      { expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as StringValue },
+      {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+        jti: crypto.randomUUID(),
+      } satisfies JwtPayload,
+      {
+        expiresIn: this.configService.get<string>(
+          'auth.jwtAccessExpiration',
+        ) as StringValue,
+      },
     );
 
     const tokenFamily = crypto.randomUUID();
@@ -969,7 +997,9 @@ export class AuthService {
 
     // Atomic: swap email + clear pendingEmail + mark token used
     // Delete all OAuthAccounts — the OAuth identity is tied to the old email
-    const hasOAuthAccounts = await this.prisma.oAuthAccount.count({ where: { userId: user.id } }) > 0;
+    const hasOAuthAccounts =
+      (await this.prisma.oAuthAccount.count({ where: { userId: user.id } })) >
+      0;
     await this.prisma.$transaction([
       this.prisma.user.update({
         where: { id: user.id },
@@ -1013,7 +1043,9 @@ export class AuthService {
   async resendVerificationEmail(userId: string): Promise<void> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
     }
 
     if (user.emailVerified) {
@@ -1235,7 +1267,7 @@ export class AuthService {
       value: refreshToken,
       options: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: !!this.configService.get<boolean>('app.isProduction'),
         sameSite: 'strict',
         path: '/',
         maxAge: Math.floor(this.refreshMaxAgeMs / 1000),
@@ -1249,7 +1281,7 @@ export class AuthService {
       value: '',
       options: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: !!this.configService.get<boolean>('app.isProduction'),
         sameSite: 'strict',
         path: '/',
         maxAge: 0,

@@ -26,6 +26,7 @@ import {
 } from '@nestjs/swagger';
 import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import {
   AuthService,
@@ -72,6 +73,7 @@ export class AuthController {
     private readonly jwtService: JwtService,
     private readonly permissionsService: PermissionsService,
     private readonly trustedDeviceService: TrustedDeviceService,
+    private readonly configService: ConfigService,
   ) {}
 
   private extractRequestMeta(req: any): {
@@ -306,7 +308,7 @@ export class AuthController {
     description: 'Redirects to frontend with status',
   })
   async verifyEmail(@Query('token') token: string, @Res() res: Response) {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
 
     if (!token) {
       return res.redirect(`${frontendUrl}/verify-email?status=invalid`);
@@ -328,7 +330,7 @@ export class AuthController {
     description: 'Redirects to frontend with status',
   })
   async verifyEmailChange(@Query('token') token: string, @Res() res: Response) {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
 
     if (!token) {
       return res.redirect(`${frontendUrl}/verify-email-change?status=invalid`);
@@ -681,8 +683,11 @@ export class AuthController {
   }
 
   private getValidatedFrontendUrl(): string {
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-    const allowedUrls = (process.env.OAUTH_ALLOWED_REDIRECT_URLS || frontendUrl)
+    const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
+    const allowedUrlsRaw = this.configService.get<string>(
+      'app.oauthAllowedRedirectUrls',
+    );
+    const allowedUrls = (allowedUrlsRaw || frontendUrl)
       .split(',')
       .map((u) => u.trim());
 

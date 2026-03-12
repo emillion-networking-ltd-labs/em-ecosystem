@@ -1,6 +1,13 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import {
+  authConfig,
+  oauthConfig,
+  appConfig,
+  configValidationSchema,
+} from './config';
 import { PrismaModule } from './prisma/prisma.module';
 import { AuthModule } from './auth/auth.module';
 import { UsersModule } from './users/users.module';
@@ -15,6 +22,12 @@ import { GeolocationModule } from './geolocation/geolocation.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [authConfig, oauthConfig, appConfig],
+      validationSchema: configValidationSchema,
+      validationOptions: { abortEarly: true },
+    }),
     RedisModule,
     ThrottlerModule.forRoot([
       {

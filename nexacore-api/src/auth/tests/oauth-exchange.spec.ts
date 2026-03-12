@@ -8,6 +8,7 @@ import { SessionsService } from '../../sessions/sessions.service';
 import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
 import { TurnstileService } from '../../security/turnstile.service';
+import { ConfigService } from '@nestjs/config';
 import { Role } from '../../users/enums/role.enum';
 
 describe('OAuth Exchange Flow (Integration)', () => {
@@ -127,6 +128,39 @@ describe('OAuth Exchange Flow (Integration)', () => {
           provide: TurnstileService,
           useValue: {
             verify: jest.fn().mockResolvedValue(true),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              const config: Record<string, any> = {
+                'auth.jwtSecret':
+                  'test-secret-that-is-at-least-32-characters-long',
+                'auth.jwtAccessExpiration': '15m',
+                'auth.jwtRefreshExpiration': '12h',
+                'auth.sessionIdleTimeoutHours': 0.5,
+                'auth.maxConcurrentSessions': 5,
+                'auth.trustedDeviceTtlDays': 30,
+                'auth.mfaAppName': 'EM NexaCore',
+                'auth.webauthnRpId': 'localhost',
+                'auth.webauthnRpName': 'EM NexaCore',
+                'auth.webauthnOrigin': 'http://localhost:3001',
+                'oauth.googleClientId': 'test-google-id',
+                'oauth.googleClientSecret': 'test-google-secret',
+                'oauth.googleCallbackUrl':
+                  'http://localhost:3000/auth/google/callback',
+                'oauth.githubClientId': 'test-github-id',
+                'oauth.githubClientSecret': 'test-github-secret',
+                'oauth.githubCallbackUrl':
+                  'http://localhost:3000/auth/github/callback',
+                'app.nodeEnv': 'test',
+                'app.frontendUrl': 'http://localhost:3001',
+                'app.oauthAllowedRedirectUrls': '',
+                'app.isProduction': false,
+              };
+              return config[key];
+            }),
           },
         },
       ],

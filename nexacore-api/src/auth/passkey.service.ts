@@ -6,6 +6,7 @@ import {
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import {
   generateRegistrationOptions,
   verifyRegistrationResponse,
@@ -45,18 +46,19 @@ export class PasskeyService {
     private readonly usersService: UsersService,
     private readonly auditService: AuditService,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
+    private readonly configService: ConfigService,
   ) {
-    this.rpId = process.env.WEBAUTHN_RP_ID || 'localhost';
-    this.rpName = process.env.WEBAUTHN_RP_NAME || 'EM NexaCore';
-    this.origin = process.env.WEBAUTHN_ORIGIN || 'http://localhost:3001';
+    this.rpId = this.configService.get<string>('auth.webauthnRpId')!;
+    this.rpName = this.configService.get<string>('auth.webauthnRpName')!;
+    this.origin = this.configService.get<string>('auth.webauthnOrigin')!;
   }
 
-  async generateRegOptions(
-    userId: string,
-  ): Promise<Record<string, unknown>> {
+  async generateRegOptions(userId: string): Promise<Record<string, unknown>> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
     }
 
     const count = await this.prisma.webAuthnCredential.count({
@@ -131,8 +133,11 @@ export class PasskeyService {
       throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
-    const { credential: regCredential, credentialDeviceType, credentialBackedUp } =
-      verification.registrationInfo;
+    const {
+      credential: regCredential,
+      credentialDeviceType,
+      credentialBackedUp,
+    } = verification.registrationInfo;
 
     const passkeyName = name || DEFAULT_PASSKEY_NAME;
 
@@ -165,7 +170,9 @@ export class PasskeyService {
   async generateAuthOptions(
     email?: string,
   ): Promise<{ options: Record<string, unknown>; challengeId: string }> {
-    let allowCredentials: { id: string; transports: AuthenticatorTransportFuture[] }[] | undefined;
+    let allowCredentials:
+      | { id: string; transports: AuthenticatorTransportFuture[] }[]
+      | undefined;
 
     if (email) {
       const user = await this.usersService.findByEmail(email);
@@ -337,9 +344,7 @@ export class PasskeyService {
     return storedCredential.userId;
   }
 
-  async listPasskeys(
-    userId: string,
-  ): Promise<
+  async listPasskeys(userId: string): Promise<
     {
       id: string;
       name: string | null;
@@ -394,7 +399,9 @@ export class PasskeyService {
   ): Promise<void> {
     const user = await this.usersService.findById(userId);
     if (!user) {
-      throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
     }
 
     if (user.passwordHash) {

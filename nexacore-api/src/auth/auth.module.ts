@@ -1,4 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
@@ -33,20 +34,25 @@ import { SecurityModule } from '../security/security.module';
     MailModule,
     SecurityModule,
     PassportModule.register({ defaultStrategy: 'jwt' }),
-    JwtModule.register({
-      secret:
-        process.env.JWT_SECRET || 'default-dev-secret-change-in-production',
-      signOptions: {
-        expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as StringValue,
-        issuer: 'nexacore-api',
-        audience: 'nexacore-api',
-        algorithm: 'HS256' as const,
-      },
-      verifyOptions: {
-        issuer: 'nexacore-api',
-        audience: 'nexacore-api',
-        algorithms: ['HS256'],
-      },
+    JwtModule.registerAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('auth.jwtSecret'),
+        signOptions: {
+          expiresIn: configService.get<string>(
+            'auth.jwtAccessExpiration',
+          ) as StringValue,
+          issuer: 'nexacore-api',
+          audience: 'nexacore-api',
+          algorithm: 'HS256' as const,
+        },
+        verifyOptions: {
+          issuer: 'nexacore-api',
+          audience: 'nexacore-api',
+          algorithms: ['HS256'],
+        },
+      }),
     }),
   ],
   controllers: [AuthController, MfaController, PasskeyController],
@@ -64,6 +70,11 @@ import { SecurityModule } from '../security/security.module';
     TrustedDeviceService,
     TokenDenyListService,
   ],
-  exports: [AuthService, PasswordBreachService, TrustedDeviceService, TokenDenyListService],
+  exports: [
+    AuthService,
+    PasswordBreachService,
+    TrustedDeviceService,
+    TokenDenyListService,
+  ],
 })
 export class AuthModule {}

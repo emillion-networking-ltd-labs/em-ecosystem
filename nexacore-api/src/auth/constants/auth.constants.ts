@@ -70,29 +70,23 @@ export const AUTH_RATE_LIMITS = {
  * Session idle timeout in hours.
  * Sessions with lastUsedAt older than this are rejected on refresh.
  * NIST SP 800-63B §7.2 / OWASP ASVS V3.3.2: idle timeout <= 30 min at AAL2.
- * Default: 0.5h (30 minutes). Override via SESSION_IDLE_TIMEOUT_HOURS env var.
+ * Default: 0.5h (30 minutes). Configurable via ConfigService 'auth.sessionIdleTimeoutHours'.
  */
-export const SESSION_IDLE_TIMEOUT_HOURS = parseFloat(
-  process.env.SESSION_IDLE_TIMEOUT_HOURS || '0.5',
-);
+export const SESSION_IDLE_TIMEOUT_HOURS = 0.5;
 
 /**
  * Maximum concurrent active (non-idle, non-revoked, non-expired) sessions per user.
  * Oldest evicted on overflow.
+ * Configurable via ConfigService 'auth.maxConcurrentSessions'.
  */
-export const MAX_CONCURRENT_SESSIONS = parseInt(
-  process.env.MAX_CONCURRENT_SESSIONS || '5',
-  10,
-);
+export const MAX_CONCURRENT_SESSIONS = 5;
 
 /**
  * Trusted device TTL in days.
  * After this period, the device must re-verify via MFA.
+ * Configurable via ConfigService 'auth.trustedDeviceTtlDays'.
  */
-export const TRUSTED_DEVICE_TTL_DAYS = parseInt(
-  process.env.TRUSTED_DEVICE_TTL_DAYS || '30',
-  10,
-);
+export const TRUSTED_DEVICE_TTL_DAYS = 30;
 
 /**
  * Maximum trusted devices per user.

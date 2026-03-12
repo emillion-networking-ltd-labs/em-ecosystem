@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersService } from '../../users/users.service';
@@ -12,12 +13,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private readonly usersService: UsersService,
     private readonly tokenDenyListService: TokenDenyListService,
+    configService: ConfigService,
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey:
-        process.env.JWT_SECRET || 'default-dev-secret-change-in-production',
+      secretOrKey: configService.get<string>('auth.jwtSecret')!,
       issuer: 'nexacore-api',
       audience: 'nexacore-api',
       algorithms: ['HS256'],
@@ -25,7 +26,11 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<SafeUser> {
-    const isDenied = await this.tokenDenyListService.isDenied(payload.jti, payload.sub, payload.iat);
+    const isDenied = await this.tokenDenyListService.isDenied(
+      payload.jti,
+      payload.sub,
+      payload.iat,
+    );
     if (isDenied) {
       throw new UnauthorizedException(ErrorMessages.auth.TOKEN_REVOKED);
     }

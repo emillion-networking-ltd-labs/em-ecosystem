@@ -1,11 +1,9 @@
-import {
-  BadRequestException,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { BadRequestException, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { MfaService } from '../mfa.service';
 import { TrustedDeviceService } from '../trusted-device.service';
+import { ConfigService } from '@nestjs/config';
 import { CryptoService } from '../../common/services/crypto.service';
 import { UsersService } from '../../users/users.service';
 import { Role } from '../../users/enums/role.enum';
@@ -15,7 +13,9 @@ import { User } from '../../users/entities/user.entity';
 const mockVerify = jest.fn();
 jest.mock('otplib', () => ({
   generateSecret: jest.fn().mockReturnValue('JBSWY3DPEHPK3PXP'),
-  generateURI: jest.fn().mockReturnValue('otpauth://totp/test?secret=JBSWY3DPEHPK3PXP'),
+  generateURI: jest
+    .fn()
+    .mockReturnValue('otpauth://totp/test?secret=JBSWY3DPEHPK3PXP'),
   verify: (...args: unknown[]) => mockVerify(...args),
 }));
 
@@ -68,7 +68,9 @@ describe('MfaService', () => {
 
     jwtService = {
       sign: jest.fn().mockReturnValue('mfa-token-jwt'),
-      verify: jest.fn().mockReturnValue({ sub: 'user-1', type: 'mfa-challenge' }),
+      verify: jest
+        .fn()
+        .mockReturnValue({ sub: 'user-1', type: 'mfa-challenge' }),
     };
 
     const auditService = {
@@ -79,12 +81,43 @@ describe('MfaService', () => {
       revokeAllDevices: jest.fn().mockResolvedValue(0),
     };
 
+    const mockConfigService = {
+      get: jest.fn((key: string) => {
+        const config: Record<string, any> = {
+          'auth.jwtSecret': 'test-secret-that-is-at-least-32-characters-long',
+          'auth.jwtAccessExpiration': '15m',
+          'auth.jwtRefreshExpiration': '12h',
+          'auth.sessionIdleTimeoutHours': 0.5,
+          'auth.maxConcurrentSessions': 5,
+          'auth.trustedDeviceTtlDays': 30,
+          'auth.mfaAppName': 'EM NexaCore',
+          'auth.webauthnRpId': 'localhost',
+          'auth.webauthnRpName': 'EM NexaCore',
+          'auth.webauthnOrigin': 'http://localhost:3001',
+          'oauth.googleClientId': 'test-google-id',
+          'oauth.googleClientSecret': 'test-google-secret',
+          'oauth.googleCallbackUrl':
+            'http://localhost:3000/auth/google/callback',
+          'oauth.githubClientId': 'test-github-id',
+          'oauth.githubClientSecret': 'test-github-secret',
+          'oauth.githubCallbackUrl':
+            'http://localhost:3000/auth/github/callback',
+          'app.nodeEnv': 'test',
+          'app.frontendUrl': 'http://localhost:3001',
+          'app.oauthAllowedRedirectUrls': '',
+          'app.isProduction': false,
+        };
+        return config[key];
+      }),
+    };
+
     service = new MfaService(
       usersService as unknown as UsersService,
       cryptoService as unknown as CryptoService,
       jwtService as unknown as JwtService,
       auditService as any,
       trustedDeviceService as unknown as TrustedDeviceService,
+      mockConfigService as unknown as ConfigService,
     );
   });
 
@@ -308,9 +341,9 @@ describe('MfaService', () => {
         mockUser({ mfaEnabled: false }),
       );
 
-      await expect(
-        service.disableMfa('user-1', 'password'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.disableMfa('user-1', 'password')).rejects.toThrow(
+        BadRequestException,
+      );
     });
 
     it('should throw if no password set (OAuth account)', async () => {
@@ -318,9 +351,9 @@ describe('MfaService', () => {
         mockUser({ mfaEnabled: true, passwordHash: null }),
       );
 
-      await expect(
-        service.disableMfa('user-1', 'password'),
-      ).rejects.toThrow(BadRequestException);
+      await expect(service.disableMfa('user-1', 'password')).rejects.toThrow(
+        BadRequestException,
+      );
     });
   });
 

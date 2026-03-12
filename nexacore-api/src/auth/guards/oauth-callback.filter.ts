@@ -1,4 +1,11 @@
-import { ExceptionFilter, Catch, ArgumentsHost, HttpException, Logger } from '@nestjs/common';
+import {
+  ExceptionFilter,
+  Catch,
+  ArgumentsHost,
+  HttpException,
+  Logger,
+} from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Response } from 'express';
 import { ErrorMessages } from '../../common/constants/error-messages';
 
@@ -10,9 +17,11 @@ import { ErrorMessages } from '../../common/constants/error-messages';
 export class OAuthCallbackFilter implements ExceptionFilter {
   private readonly logger = new Logger(OAuthCallbackFilter.name);
 
+  constructor(private readonly configService: ConfigService) {}
+
   catch(exception: unknown, host: ArgumentsHost) {
     const response = host.switchToHttp().getResponse<Response>();
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
 
     if (exception instanceof HttpException) {
       this.logger.warn(`OAuth callback failed: ${exception.message}`);
@@ -22,7 +31,9 @@ export class OAuthCallbackFilter implements ExceptionFilter {
       this.logger.warn('OAuth callback failed with unknown error');
     }
 
-    const encoded = encodeURIComponent(ErrorMessages.auth.AUTHENTICATION_FAILED);
+    const encoded = encodeURIComponent(
+      ErrorMessages.auth.AUTHENTICATION_FAILED,
+    );
     response.redirect(`${frontendUrl}/auth/callback?error=${encoded}`);
   }
 }
