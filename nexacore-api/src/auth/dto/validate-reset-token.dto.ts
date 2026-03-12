@@ -8,5 +8,5 @@ export class ValidateResetTokenDto {
   })
   @IsString()
   @IsNotEmpty({ message: 'Token is required' })
-  token: string;
+  token!: string;
 }

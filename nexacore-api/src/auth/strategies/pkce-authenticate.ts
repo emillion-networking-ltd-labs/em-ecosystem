@@ -1,10 +1,18 @@
 import { OAuthStateStore } from '../stores/oauth-state.store';
 
+interface OAuthClient {
+  getOAuthAccessToken: (
+    code: string,
+    params: Record<string, string>,
+    callback: (...args: unknown[]) => void,
+  ) => void;
+}
+
 export async function applyPkceAuthenticate(
-  strategy: any,
+  strategy: { _oauth2: OAuthClient },
   oauthStateStore: OAuthStateStore,
-  req: any,
-  options: any,
+  req: { query?: { code?: string; state?: string } },
+  options: Record<string, unknown>,
   superAuthenticate: Function,
 ): Promise<void> {
   if (req.query?.code && req.query?.state) {
@@ -15,7 +23,7 @@ export async function applyPkceAuthenticate(
       oauth2.getOAuthAccessToken = function (
         code: string,
         params: Record<string, string>,
-        callback: (...args: any[]) => void,
+        callback: (...args: unknown[]) => void,
       ) {
         params.code_verifier = codeVerifier;
         oauth2.getOAuthAccessToken = originalFn; // restore immediately

@@ -12,7 +12,7 @@ export class MfaVerifyLoginDto {
     description: 'Temporary MFA challenge token from login response',
   })
   @IsString()
-  mfaToken: string;
+  mfaToken!: string;
 
   @ApiPropertyOptional({
     description: '6-digit TOTP code from authenticator app',

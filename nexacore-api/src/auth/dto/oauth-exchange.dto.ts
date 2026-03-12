@@ -9,5 +9,5 @@ export class OAuthExchangeDto {
   })
   @IsString()
   @IsNotEmpty()
-  code: string;
+  code!: string;
 }

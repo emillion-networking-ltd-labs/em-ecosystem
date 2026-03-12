@@ -7,7 +7,7 @@ export class ForgotPasswordDto {
     example: 'user@example.com',
   })
   @IsEmail({}, { message: 'Invalid email format' })
-  email: string;
+  email!: string;
 
   @ApiPropertyOptional({ description: 'Cloudflare Turnstile CAPTCHA token' })
   @IsOptional()

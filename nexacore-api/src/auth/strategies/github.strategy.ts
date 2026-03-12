@@ -32,12 +32,17 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     return applyPkceAuthorizationParams(options, { login: '' });
   }
 
-  async authenticate(req: any, options?: any): Promise<void> {
+  async authenticate(
+    req: { query?: { code?: string; state?: string } },
+    options?: Record<string, unknown>,
+  ): Promise<void> {
     return applyPkceAuthenticate(
-      this,
+      this as unknown as {
+        _oauth2: { getOAuthAccessToken: (...args: unknown[]) => void };
+      },
       this.oauthStateStore,
       req,
-      options,
+      options ?? {},
       super.authenticate,
     );
   }

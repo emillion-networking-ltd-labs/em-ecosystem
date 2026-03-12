@@ -31,6 +31,7 @@ import { MfaRegenerateCodesDto } from './dto/mfa-regenerate-codes.dto';
 import { SafeUser } from '../users/entities/user.entity';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
 import { extractRequestMeta } from '../common/utils/request-meta';
+import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @ApiTags('auth')
 @UseInterceptors(NoCacheInterceptor)
@@ -71,7 +72,10 @@ export class MfaController {
   @ApiOperation({ summary: 'Verify TOTP code and enable MFA' })
   @ApiResponse({ status: 200, description: 'MFA enabled successfully' })
   @ApiResponse({ status: 400, description: 'Invalid verification code' })
-  async verifySetup(@Request() req: any, @Body() dto: MfaVerifySetupDto) {
+  async verifySetup(
+    @Request() req: AuthenticatedRequest,
+    @Body() dto: MfaVerifySetupDto,
+  ) {
     const meta = extractRequestMeta(req);
     await this.mfaService.verifySetup(req.user.id, dto.token, meta);
     return { message: 'MFA enabled successfully' };
@@ -90,7 +94,7 @@ export class MfaController {
   @ApiResponse({ status: 401, description: 'Invalid MFA code or token' })
   async verifyLogin(
     @Body() dto: MfaVerifyLoginDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
     const { user } = await this.mfaService.verifyLoginCode(
@@ -106,7 +110,8 @@ export class MfaController {
 
     // Trust device (fire-and-forget — failure must not block login)
     if (dto.trustDevice) {
-      const fingerprint = req.headers?.['x-device-fingerprint'];
+      const rawFp = req.headers?.['x-device-fingerprint'];
+      const fingerprint = Array.isArray(rawFp) ? rawFp[0] : rawFp;
       if (fingerprint) {
         this.trustedDeviceService
           .trustDevice(user.id, fingerprint, meta.ipAddress, meta.userAgent)
@@ -131,7 +136,10 @@ export class MfaController {
   @ApiResponse({ status: 200, description: 'MFA disabled successfully' })
   @ApiResponse({ status: 400, description: 'MFA is not enabled' })
   @ApiResponse({ status: 401, description: 'Invalid password' })
-  async disable(@Request() req: any, @Body() dto: MfaDisableDto) {
+  async disable(
+    @Request() req: AuthenticatedRequest,
+    @Body() dto: MfaDisableDto,
+  ) {
     const meta = extractRequestMeta(req);
     await this.mfaService.disableMfa(req.user.id, dto.password, meta);
     return { message: 'MFA disabled successfully' };

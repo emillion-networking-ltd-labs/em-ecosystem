@@ -7,5 +7,5 @@ export class RefreshTokenDto {
     example: 'eyJhbGciOiJIUzI1NiIs...',
   })
   @IsString()
-  refreshToken: string;
+  refreshToken!: string;
 }
