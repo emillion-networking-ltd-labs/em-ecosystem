@@ -1,25 +1,26 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { ChevronDown, AlertTriangle, SendHorizontal, Key } from 'lucide-react';
-import Input from '@/components/ui/Input';
-import InfinitySpinner from '@/components/ui/InfinitySpinner';
-import RateLimitBanner from '@/components/ui/RateLimitBanner';
-import CountdownTimer from '@/components/ui/CountdownTimer';
-import OAuthButtons from './OAuthButtons';
-import MfaTotpStep from './MfaTotpStep';
-import { useAuth } from '@/hooks/useAuth';
-import { useRateLimit } from '@/hooks/useRateLimit';
-import { useToast } from '@/context/ToastContext';
-import { usePasskey } from '@/hooks/usePasskey';
-import { RateLimitError } from '@/lib/types';
-import type { RateLimitInfo } from '@/lib/types';
-import { DETECTION_EMAIL_VERIFICATION } from '@/lib/error-constants';
-import TurnstileWidget from '@/components/ui/TurnstileWidget';
+import { useState, useRef, useEffect, useCallback } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { ChevronDown, AlertTriangle, SendHorizontal, Key } from "lucide-react";
+import Input from "@/components/ui/Input";
+import InfinitySpinner from "@/components/ui/InfinitySpinner";
+import RateLimitBanner from "@/components/ui/RateLimitBanner";
+import CountdownTimer from "@/components/ui/CountdownTimer";
+import OAuthButtons from "./OAuthButtons";
+import Divider from "@/components/ui/Divider";
+import MfaTotpStep from "./MfaTotpStep";
+import { useAuth } from "@/hooks/useAuth";
+import { useRateLimit } from "@/hooks/useRateLimit";
+import { useToast } from "@/context/ToastContext";
+import { usePasskey } from "@/hooks/usePasskey";
+import { RateLimitError } from "@/lib/types";
+import type { RateLimitInfo } from "@/lib/types";
+import { DETECTION_EMAIL_VERIFICATION } from "@/lib/error-constants";
+import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
-type LoginStep = 'email' | 'password';
+type LoginStep = "email" | "password";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
@@ -28,11 +29,19 @@ const isValidEmail = (email: string) =>
 const resendCooldownCache = new Map<string, number>(); // email → timestamp when cooldown started
 
 export default function LoginForm() {
-  const [step, setStep] = useState<LoginStep>('email');
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [step, setStep] = useState<LoginStep>("email");
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const { login, isLoading, isAuthenticated, error, clearError, mfaRequired, resendVerificationPublic } = useAuth();
+  const {
+    login,
+    isLoading,
+    isAuthenticated,
+    error,
+    clearError,
+    mfaRequired,
+    resendVerificationPublic,
+  } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const {
     isSupported: passkeySupported,
@@ -53,10 +62,14 @@ export default function LoginForm() {
   // Clear stale errors from other auth forms on mount + read OAuth error from URL
   useEffect(() => {
     clearError();
-    const oauthError = searchParams.get('oauth_error');
+    const oauthError = searchParams.get("oauth_error");
     if (oauthError && !oauthErrorShown.current) {
       oauthErrorShown.current = true;
-      addToast({ variant: 'error', title: 'Sign in failed', description: decodeURIComponent(oauthError) });
+      addToast({
+        variant: "error",
+        title: "Sign in failed",
+        description: decodeURIComponent(oauthError),
+      });
     }
   }, [clearError, searchParams, addToast]);
 
@@ -72,30 +85,30 @@ export default function LoginForm() {
 
   // Redirect away if already authenticated
   useEffect(() => {
-    if (isAuthenticated) router.replace('/dashboard');
+    if (isAuthenticated) router.replace("/dashboard");
   }, [isAuthenticated, router]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     clearError();
-    if (e.target.name === 'email') setEmailError(null);
-    if (e.target.name === 'password') setPasswordError(null);
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    if (e.target.name === "email") setEmailError(null);
+    if (e.target.name === "password") setPasswordError(null);
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleEmailNext = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email) {
-      setEmailError('Enter your email address');
+      setEmailError("Enter your email address");
       return;
     }
     if (!isValidEmail(formData.email)) {
-      setEmailError('Enter a valid email address');
+      setEmailError("Enter a valid email address");
       return;
     }
     setEmailError(null);
     clearError();
     abortConditionalUI();
-    setStep('password');
+    setStep("password");
   };
 
   const handlePasskeyLogin = async () => {
@@ -105,27 +118,36 @@ export default function LoginForm() {
     try {
       await loginWithPasskey(formData.email || undefined);
     } catch {
-      setPasskeyError('Passkey authentication failed. Please try again.');
+      setPasskeyError("Passkey authentication failed. Please try again.");
     }
   };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.password) {
-      setPasswordError('Enter your password');
+      setPasswordError("Enter your password");
       return;
     }
     setPasswordError(null);
     try {
-      await login(formData.email, formData.password, turnstileToken ?? undefined);
+      await login(
+        formData.email,
+        formData.password,
+        turnstileToken ?? undefined,
+      );
     } catch (err) {
       if (err instanceof RateLimitError) {
-        setRateLimit(err.retryAfter, err.message, 'throttle');
-        addToast({ variant: 'warning', title: 'Too many attempts', description: 'If you are a registered user, please check your email for further instructions.' });
+        setRateLimit(err.retryAfter, err.message, "throttle");
+        addToast({
+          variant: "warning",
+          title: "Too many attempts",
+          description:
+            "If you are a registered user, please check your email for further instructions.",
+        });
       }
     } finally {
       setTurnstileToken(null);
-      setTurnstileResetKey(k => k + 1);
+      setTurnstileResetKey((k) => k + 1);
     }
     // On AUTH_SUCCESS → isAuthenticated → useEffect redirects to /dashboard
   };
@@ -134,7 +156,7 @@ export default function LoginForm() {
     return <MfaTotpStep />;
   }
 
-  if (step === 'password') {
+  if (step === "password") {
     return (
       <PasswordStep
         email={formData.email}
@@ -145,9 +167,16 @@ export default function LoginForm() {
         rateLimitInfo={rateLimitInfo}
         onChange={handleChange}
         onSubmit={handleLogin}
-        onChangeEmail={() => { clearError(); clearRateLimit(); setPasswordError(null); setStep('email'); }}
+        onChangeEmail={() => {
+          clearError();
+          clearRateLimit();
+          setPasswordError(null);
+          setStep("email");
+        }}
         onRateLimitExpired={clearRateLimit}
-        onResendVerification={(email) => resendVerificationPublic(email, turnstileToken ?? undefined)}
+        onResendVerification={(email) =>
+          resendVerificationPublic(email, turnstileToken ?? undefined)
+        }
         onTurnstileToken={setTurnstileToken}
         turnstileResetKey={turnstileResetKey}
       />
@@ -191,11 +220,18 @@ export default function LoginForm() {
             {(() => {
               const activeError = emailError;
               return (
-                <div className={`flex items-center gap-2 ${activeError ? 'min-h-6' : 'h-6'}`}>
+                <div
+                  className={`flex items-center gap-2 ${activeError ? "min-h-6" : "h-6"}`}
+                >
                   {activeError && (
                     <>
-                      <AlertTriangle size={16} className="shrink-0 text-error" />
-                      <span className="flex-1 text-xs leading-6 text-error">{activeError}</span>
+                      <AlertTriangle
+                        size={16}
+                        className="shrink-0 text-error"
+                      />
+                      <span className="flex-1 text-xs leading-6 text-error">
+                        {activeError}
+                      </span>
                     </>
                   )}
                 </div>
@@ -222,12 +258,8 @@ export default function LoginForm() {
 
         {/* Passkey Login */}
         {passkeySupported && (
-          <div className="mt-2">
-            <div className="flex items-center gap-4 py-2">
-              <div className="h-px flex-1 bg-content-primary/10" />
-              <span className="text-xs text-content-tertiary">or</span>
-              <div className="h-px flex-1 bg-content-primary/10" />
-            </div>
+          <div>
+            <Divider label="OR" className="py-2" />
             <button
               type="button"
               onClick={handlePasskeyLogin}
@@ -235,8 +267,10 @@ export default function LoginForm() {
               aria-label="Sign in with passkey"
               className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-default bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
             >
-              <Key size={16} className={passkeyLoading ? 'opacity-30' : ''} />
-              <span className={passkeyLoading ? 'opacity-30' : ''}>Sign in with passkey</span>
+              <Key size={16} className={passkeyLoading ? "opacity-30" : ""} />
+              <span className={passkeyLoading ? "opacity-30" : ""}>
+                Sign in with passkey
+              </span>
               {passkeyLoading && (
                 <span className="absolute inset-0 flex items-center justify-center">
                   <InfinitySpinner />
@@ -252,10 +286,9 @@ export default function LoginForm() {
           </div>
         )}
 
-        {/* Actions — OR + OAuth */}
-        <div className="mt-2">
-          <OAuthButtons />
-        </div>
+        {/* Actions — OAuth */}
+        <Divider className="my-4" />
+        <OAuthButtons />
       </div>
     </div>
   );
@@ -281,7 +314,21 @@ type PasswordStepProps = {
   turnstileResetKey: number;
 };
 
-function PasswordStep({ email, password, isLoading, error, passwordError, rateLimitInfo, onChange, onSubmit, onChangeEmail, onRateLimitExpired, onResendVerification, onTurnstileToken, turnstileResetKey }: PasswordStepProps) {
+function PasswordStep({
+  email,
+  password,
+  isLoading,
+  error,
+  passwordError,
+  rateLimitInfo,
+  onChange,
+  onSubmit,
+  onChangeEmail,
+  onRateLimitExpired,
+  onResendVerification,
+  onTurnstileToken,
+  turnstileResetKey,
+}: PasswordStepProps) {
   const [isEmailOpen, setIsEmailOpen] = useState(false);
   const [resendCooldown, setResendCooldown] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -289,13 +336,17 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setIsEmailOpen(false);
       }
     }
     if (isEmailOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-      return () => document.removeEventListener('mousedown', handleClickOutside);
+      document.addEventListener("mousedown", handleClickOutside);
+      return () =>
+        document.removeEventListener("mousedown", handleClickOutside);
     }
   }, [isEmailOpen]);
 
@@ -317,7 +368,7 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
   useEffect(() => {
     if (resendCooldown <= 0) return;
     const timer = setInterval(() => {
-      setResendCooldown(prev => {
+      setResendCooldown((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
           return 0;
@@ -333,14 +384,20 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
     setResendCooldown(60);
     const ok = await onResendVerification(email);
     if (ok) {
-      addToast({ variant: 'success', title: 'Verification email sent', description: 'Check your inbox for the verification link.' });
+      addToast({
+        variant: "success",
+        title: "Verification email sent",
+        description: "Check your inbox for the verification link.",
+      });
     }
   }, [email, onResendVerification, addToast]);
 
   const emailInitial = email.charAt(0).toUpperCase();
   const activeError = passwordError || error;
-  const isVerificationError = !!error && error.toLowerCase().includes(DETECTION_EMAIL_VERIFICATION);
-  const showNonVerificationError = !isVerificationError && !!activeError && !rateLimitInfo.isRateLimited;
+  const isVerificationError =
+    !!error && error.toLowerCase().includes(DETECTION_EMAIL_VERIFICATION);
+  const showNonVerificationError =
+    !isVerificationError && !!activeError && !rateLimitInfo.isRateLimited;
   const showResend = isVerificationError && !rateLimitInfo.isRateLimited;
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
 
@@ -360,14 +417,14 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
               onClick={() => setIsEmailOpen(!isEmailOpen)}
               className={`flex h-10 items-center justify-center gap-2 rounded-full px-4 text-base font-medium transition-all ${
                 isEmailOpen
-                  ? 'border border-border-default bg-surface-primary text-content-primary'
-                  : 'border border-border-default bg-transparent text-content-primary'
+                  ? "border border-border-default bg-surface-primary text-content-primary"
+                  : "border border-border-default bg-transparent text-content-primary"
               }`}
             >
               <span className="whitespace-nowrap leading-none">{email}</span>
               <ChevronDown
                 size={16}
-                className={`shrink-0 transition-transform ${isEmailOpen ? 'rotate-180' : ''}`}
+                className={`shrink-0 transition-transform ${isEmailOpen ? "rotate-180" : ""}`}
               />
             </button>
 
@@ -381,7 +438,9 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
                     className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-tertiary px-2 font-medium text-content-primary transition-colors"
                   >
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
-                      <span className="text-xs font-semibold">{emailInitial}</span>
+                      <span className="text-xs font-semibold">
+                        {emailInitial}
+                      </span>
                     </div>
                     <span className="truncate text-[15px]">{email}</span>
                   </button>
@@ -421,7 +480,7 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
             {rateLimitInfo.isRateLimited && rateLimitInfo.retryAfter ? (
               <RateLimitBanner
                 retryAfter={rateLimitInfo.retryAfter}
-                message={rateLimitInfo.message ?? 'Too many attempts.'}
+                message={rateLimitInfo.message ?? "Too many attempts."}
                 kind={rateLimitInfo.kind ?? undefined}
                 onExpired={onRateLimitExpired}
               />
@@ -434,21 +493,27 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
                   disabled={resendCooldown > 0}
                   className={`inline-flex items-center gap-2 text-sm font-medium leading-[21px] transition-colors ${
                     resendCooldown > 0
-                      ? 'pointer-events-none text-error/50'
-                      : 'text-content-primary/75 hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted'
+                      ? "pointer-events-none text-error/50"
+                      : "text-content-primary/75 hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
                   }`}
                 >
                   <SendHorizontal size={14} className="shrink-0" />
                   Resend verification email
                 </button>
-                {resendCooldown > 0 && <CountdownTimer seconds={resendCooldown} />}
+                {resendCooldown > 0 && (
+                  <CountdownTimer seconds={resendCooldown} />
+                )}
               </div>
             ) : (
-              <div className={`flex items-center gap-2 ${showNonVerificationError ? 'min-h-6' : 'h-6'}`}>
+              <div
+                className={`flex items-center gap-2 ${showNonVerificationError ? "min-h-6" : "h-6"}`}
+              >
                 {showNonVerificationError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-xs leading-6 text-error">{activeError}</span>
+                    <span className="flex-1 text-xs leading-6 text-error">
+                      {activeError}
+                    </span>
                   </>
                 )}
               </div>
@@ -466,7 +531,11 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
           </div>
 
           {/* Turnstile CAPTCHA — managed mode, Cloudflare decides when to show challenge */}
-          <TurnstileWidget onToken={onTurnstileToken} onExpire={() => onTurnstileToken(null)} resetKey={turnstileResetKey} />
+          <TurnstileWidget
+            onToken={onTurnstileToken}
+            onExpire={() => onTurnstileToken(null)}
+            resetKey={turnstileResetKey}
+          />
 
           {/* Sign In button — Figma: full width 348px, primary button */}
           <button
@@ -474,7 +543,7 @@ function PasswordStep({ email, password, isLoading, error, passwordError, rateLi
             disabled={isDisabled}
             className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
-            <span className={isLoading ? 'opacity-30' : ''}>Sign In</span>
+            <span className={isLoading ? "opacity-30" : ""}>Sign In</span>
             {isLoading && (
               <span className="absolute inset-0 flex items-center justify-center">
                 <InfinitySpinner />

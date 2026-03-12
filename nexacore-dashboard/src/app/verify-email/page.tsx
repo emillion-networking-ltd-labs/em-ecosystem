@@ -1,14 +1,14 @@
-import { Suspense } from 'react';
-import AuthLayout from '@/components/layout/AuthLayout';
-import VerifyEmailStatus from '@/components/auth/VerifyEmailStatus';
+import { Suspense } from "react";
+import AuthLayout from "@/components/layout/AuthLayout";
+import VerifyEmailStatus from "@/components/auth/VerifyEmailStatus";
 
 export const metadata = {
-  title: 'Verify Email — EM NexaCore',
+  title: "Verify Email — EM NexaCore",
 };
 
 export default function VerifyEmailPage() {
   return (
-    <AuthLayout>
+    <AuthLayout narrow>
       <Suspense>
         <VerifyEmailStatus />
       </Suspense>

@@ -1,24 +1,25 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { AlertTriangle } from 'lucide-react';
-import Input from '@/components/ui/Input';
-import InfinitySpinner from '@/components/ui/InfinitySpinner';
-import RateLimitBanner from '@/components/ui/RateLimitBanner';
-import OAuthButtons from './OAuthButtons';
-import { useAuth } from '@/hooks/useAuth';
-import { useRateLimit } from '@/hooks/useRateLimit';
-import { useToast } from '@/hooks/useToast';
-import { RateLimitError } from '@/lib/types';
-import TurnstileWidget from '@/components/ui/TurnstileWidget';
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
+import Input from "@/components/ui/Input";
+import InfinitySpinner from "@/components/ui/InfinitySpinner";
+import RateLimitBanner from "@/components/ui/RateLimitBanner";
+import OAuthButtons from "./OAuthButtons";
+import Divider from "@/components/ui/Divider";
+import { useAuth } from "@/hooks/useAuth";
+import { useRateLimit } from "@/hooks/useRateLimit";
+import { useToast } from "@/hooks/useToast";
+import { RateLimitError } from "@/lib/types";
+import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 
 export default function RegisterForm() {
-  const [formData, setFormData] = useState({ email: '', password: '' });
+  const [formData, setFormData] = useState({ email: "", password: "" });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
   const { register, isLoading, error, clearError } = useAuth();
@@ -35,32 +36,40 @@ export default function RegisterForm() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     clearError();
-    if (e.target.name === 'email') setEmailError(null);
-    if (e.target.name === 'password') setPasswordError(null);
-    setFormData(prev => ({ ...prev, [e.target.name]: e.target.value }));
+    if (e.target.name === "email") setEmailError(null);
+    if (e.target.name === "password") setPasswordError(null);
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.email) {
-      setEmailError('Enter your email address');
+      setEmailError("Enter your email address");
       return;
     }
     if (!isValidEmail(formData.email)) {
-      setEmailError('Enter a valid email address');
+      setEmailError("Enter a valid email address");
       return;
     }
     if (!formData.password) {
-      setPasswordError('Enter your password');
+      setPasswordError("Enter your password");
       return;
     }
     setEmailError(null);
     setPasswordError(null);
     try {
-      const success = await register(formData.email, formData.password, turnstileToken ?? undefined);
+      const success = await register(
+        formData.email,
+        formData.password,
+        turnstileToken ?? undefined,
+      );
       if (success) {
-        addToast({ variant: 'success', title: 'Account created', description: 'Check your inbox to verify your email.' });
-        router.push('/activation/check-email');
+        addToast({
+          variant: "success",
+          title: "Account created",
+          description: "Check your inbox to verify your email.",
+        });
+        router.push("/activation/check-email");
       }
     } catch (err) {
       if (err instanceof RateLimitError) {
@@ -68,7 +77,7 @@ export default function RegisterForm() {
       }
     } finally {
       setTurnstileToken(null);
-      setTurnstileResetKey(k => k + 1);
+      setTurnstileResetKey((k) => k + 1);
     }
   };
 
@@ -128,11 +137,15 @@ export default function RegisterForm() {
                 onExpired={clearRateLimit}
               />
             ) : (
-              <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+              <div
+                className={`flex items-center gap-2 ${showError ? "min-h-6" : "h-6"}`}
+              >
                 {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="text-xs leading-6 text-error">{activeError}</span>
+                    <span className="text-xs leading-6 text-error">
+                      {activeError}
+                    </span>
                   </>
                 )}
               </div>
@@ -140,7 +153,11 @@ export default function RegisterForm() {
           </div>
 
           {/* Turnstile CAPTCHA */}
-          <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken(null)} resetKey={turnstileResetKey} />
+          <TurnstileWidget
+            onToken={setTurnstileToken}
+            onExpire={() => setTurnstileToken(null)}
+            resetKey={turnstileResetKey}
+          />
 
           {/* Buttons Field — Figma: horizontal, itemSpacing 8 */}
           <div className="flex gap-2">
@@ -155,7 +172,9 @@ export default function RegisterForm() {
               disabled={isDisabled}
               className="relative flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
             >
-              <span className={isLoading ? 'opacity-30' : ''}>Create Account</span>
+              <span className={isLoading ? "opacity-30" : ""}>
+                Create Account
+              </span>
               {isLoading && (
                 <span className="absolute inset-0 flex items-center justify-center">
                   <InfinitySpinner />
@@ -166,9 +185,8 @@ export default function RegisterForm() {
         </form>
 
         {/* Actions — OR + OAuth */}
-        <div className="mt-2">
-          <OAuthButtons />
-        </div>
+        <Divider label="OR" className="py-2" />
+        <OAuthButtons />
       </div>
     </div>
   );

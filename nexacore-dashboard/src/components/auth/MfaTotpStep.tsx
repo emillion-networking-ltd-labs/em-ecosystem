@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect, useCallback } from 'react';
-import { AlertTriangle, ArrowLeft } from 'lucide-react';
-import InfinitySpinner from '@/components/ui/InfinitySpinner';
-import RateLimitBanner from '@/components/ui/RateLimitBanner';
-import { useAuth } from '@/hooks/useAuth';
-import { useRateLimit } from '@/hooks/useRateLimit';
-import { RateLimitError } from '@/lib/types';
+import { useState, useRef, useEffect, useCallback } from "react";
+import { AlertTriangle, ArrowLeft } from "lucide-react";
+import InfinitySpinner from "@/components/ui/InfinitySpinner";
+import RateLimitBanner from "@/components/ui/RateLimitBanner";
+import { useAuth } from "@/hooks/useAuth";
+import { useRateLimit } from "@/hooks/useRateLimit";
+import { RateLimitError } from "@/lib/types";
 
 export default function MfaTotpStep() {
   const { verifyMfaLogin, cancelMfa, isLoading, error, clearError } = useAuth();
@@ -14,9 +14,9 @@ export default function MfaTotpStep() {
   const showRateLimit = rateLimitInfo.isRateLimited;
   const showError = !showRateLimit && !!error;
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
-  const [code, setCode] = useState<string[]>(Array(6).fill(''));
+  const [code, setCode] = useState<string[]>(Array(6).fill(""));
   const [useRecovery, setUseRecovery] = useState(false);
-  const [recoveryCode, setRecoveryCode] = useState('');
+  const [recoveryCode, setRecoveryCode] = useState("");
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -25,15 +25,18 @@ export default function MfaTotpStep() {
     }
   }, [useRecovery]);
 
-  const handleVerify = useCallback(async (codeStr: string, isRecovery: boolean) => {
-    try {
-      await verifyMfaLogin(codeStr, isRecovery);
-    } catch (err) {
-      if (err instanceof RateLimitError) {
-        setRateLimit(err.retryAfter, err.message);
+  const handleVerify = useCallback(
+    async (codeStr: string, isRecovery: boolean) => {
+      try {
+        await verifyMfaLogin(codeStr, isRecovery);
+      } catch (err) {
+        if (err instanceof RateLimitError) {
+          setRateLimit(err.retryAfter, err.message);
+        }
       }
-    }
-  }, [verifyMfaLogin, setRateLimit]);
+    },
+    [verifyMfaLogin, setRateLimit],
+  );
 
   const handleDigitChange = (index: number, value: string) => {
     clearError();
@@ -50,25 +53,31 @@ export default function MfaTotpStep() {
 
     // Auto-submit when all 6 digits are filled
     if (digit && index === 5) {
-      const full = updated.join('');
+      const full = updated.join("");
       if (full.length === 6) {
         handleVerify(full, false);
       }
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Backspace' && !code[index] && index > 0) {
+  const handleKeyDown = (
+    index: number,
+    e: React.KeyboardEvent<HTMLInputElement>,
+  ) => {
+    if (e.key === "Backspace" && !code[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
   const handlePaste = (e: React.ClipboardEvent) => {
     e.preventDefault();
-    const pasted = e.clipboardData.getData('text').replace(/\D/g, '').slice(0, 6);
+    const pasted = e.clipboardData
+      .getData("text")
+      .replace(/\D/g, "")
+      .slice(0, 6);
     if (!pasted) return;
 
-    const updated = Array(6).fill('');
+    const updated = Array(6).fill("");
     for (let i = 0; i < pasted.length; i++) {
       updated[i] = pasted[i];
     }
@@ -89,7 +98,7 @@ export default function MfaTotpStep() {
 
   const handleTotpSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const full = code.join('');
+    const full = code.join("");
     if (full.length !== 6) return;
     handleVerify(full, false);
   };
@@ -97,7 +106,7 @@ export default function MfaTotpStep() {
   if (useRecovery) {
     return (
       <div className="flex flex-col gap-6 md:flex-row">
-        <div className="flex w-full flex-col justify-center gap-2 md:w-[330px]">
+        <div className="flex w-full flex-col gap-2 md:w-[330px]">
           <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
             <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
               Recovery Code
@@ -118,7 +127,10 @@ export default function MfaTotpStep() {
                 <input
                   type="text"
                   value={recoveryCode}
-                  onChange={(e) => { clearError(); setRecoveryCode(e.target.value); }}
+                  onChange={(e) => {
+                    clearError();
+                    setRecoveryCode(e.target.value);
+                  }}
                   placeholder="xxxx-xxxx-xxxx"
                   className="flex-1 bg-transparent font-mono text-[15px] leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
                   autoFocus
@@ -132,45 +144,61 @@ export default function MfaTotpStep() {
                   onExpired={clearRateLimit}
                 />
               ) : (
-                <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+                <div
+                  className={`flex items-center gap-2 ${showError ? "min-h-6" : "h-6"}`}
+                >
                   {showError && (
                     <>
-                      <AlertTriangle size={16} className="shrink-0 text-error" />
-                      <span className="flex-1 text-xs leading-6 text-error">{error}</span>
+                      <AlertTriangle
+                        size={16}
+                        className="shrink-0 text-error"
+                      />
+                      <span className="flex-1 text-xs leading-6 text-error">
+                        {error}
+                      </span>
                     </>
                   )}
                 </div>
               )}
+
+              {/* Back link — right-aligned, same position as Forgot password? in login */}
+              <div className="flex items-center justify-end">
+                <button
+                  type="button"
+                  onClick={() => {
+                    clearError();
+                    clearRateLimit();
+                    setUseRecovery(false);
+                    setRecoveryCode("");
+                  }}
+                  className="flex items-center gap-1 whitespace-nowrap text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                >
+                  <ArrowLeft size={14} />
+                  Use authenticator app
+                </button>
+              </div>
             </div>
 
-            <button
-              type="submit"
-              disabled={isDisabled || !recoveryCode.trim()}
-              className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
-            >
-              <span className={isLoading ? 'opacity-30' : ''}>Verify</span>
-              {isLoading && (
-                <span className="absolute inset-0 flex items-center justify-center">
-                  <InfinitySpinner />
-                </span>
-              )}
-            </button>
-
-            <div className="mt-2 flex items-center justify-between">
-              <button
-                type="button"
-                onClick={() => { clearError(); clearRateLimit(); setUseRecovery(false); setRecoveryCode(''); }}
-                className="flex items-center gap-1 text-sm font-medium text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
-              >
-                <ArrowLeft size={14} />
-                Use authenticator app
-              </button>
+            {/* Buttons — Cancel (secondary) + Verify (primary) */}
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={cancelMfa}
-                className="text-sm font-medium text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
+                className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
               >
                 Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isDisabled || !recoveryCode.trim()}
+                className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+              >
+                <span className={isLoading ? "opacity-30" : ""}>Verify</span>
+                {isLoading && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <InfinitySpinner />
+                  </span>
+                )}
               </button>
             </div>
           </form>
@@ -181,13 +209,14 @@ export default function MfaTotpStep() {
 
   return (
     <div className="flex flex-col gap-6 md:flex-row">
-      <div className="flex w-full flex-col justify-center gap-2 md:w-[330px]">
+      <div className="flex w-full flex-col gap-2 md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
           <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
             Two-Factor Authentication
           </h1>
           <p className="text-justify text-sm leading-[21px] text-content-primary/50">
-            Enter the 6-digit code from your authenticator app to complete sign in.
+            Enter the 6-digit code from your authenticator app to complete sign
+            in.
           </p>
         </div>
       </div>
@@ -204,7 +233,9 @@ export default function MfaTotpStep() {
               {code.map((digit, i) => (
                 <input
                   key={i}
-                  ref={(el) => { inputRefs.current[i] = el; }}
+                  ref={(el) => {
+                    inputRefs.current[i] = el;
+                  }}
                   type="text"
                   inputMode="numeric"
                   maxLength={1}
@@ -224,44 +255,57 @@ export default function MfaTotpStep() {
                 onExpired={clearRateLimit}
               />
             ) : (
-              <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+              <div
+                className={`flex items-center gap-2 ${showError ? "min-h-6" : "h-6"}`}
+              >
                 {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-xs leading-6 text-error">{error}</span>
+                    <span className="flex-1 text-xs leading-6 text-error">
+                      {error}
+                    </span>
                   </>
                 )}
               </div>
             )}
+
+            {/* Recovery link — right-aligned, same position as Forgot password? in login */}
+            <div className="flex items-center justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  clearError();
+                  clearRateLimit();
+                  setUseRecovery(true);
+                  setCode(Array(6).fill(""));
+                }}
+                className="whitespace-nowrap text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+              >
+                Use recovery code
+              </button>
+            </div>
           </div>
 
-          <button
-            type="submit"
-            disabled={isDisabled || code.join('').length !== 6}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
-          >
-            <span className={isLoading ? 'opacity-30' : ''}>Verify</span>
-            {isLoading && (
-              <span className="absolute inset-0 flex items-center justify-center">
-                <InfinitySpinner />
-              </span>
-            )}
-          </button>
-
-          <div className="mt-2 flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() => { clearError(); clearRateLimit(); setUseRecovery(true); setCode(Array(6).fill('')); }}
-              className="text-sm font-medium text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
-            >
-              Use recovery code
-            </button>
+          {/* Buttons — Cancel (secondary) + Verify (primary) */}
+          <div className="flex gap-2">
             <button
               type="button"
               onClick={cancelMfa}
-              className="text-sm font-medium text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={isDisabled || code.join("").length !== 6}
+              className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            >
+              <span className={isLoading ? "opacity-30" : ""}>Verify</span>
+              {isLoading && (
+                <span className="absolute inset-0 flex items-center justify-center">
+                  <InfinitySpinner />
+                </span>
+              )}
             </button>
           </div>
         </form>

@@ -1,19 +1,20 @@
-'use client';
+"use client";
 
-import Image from 'next/image';
-import { SunDim, Moon } from 'lucide-react';
-import { useTheme } from '@/hooks/useTheme';
-import AuthFooter from '@/components/auth/AuthFooter';
-import AuthGridLines from '@/components/auth/AuthGridLines';
-import GoBackSection from '@/components/auth/GoBackSection';
+import Image from "next/image";
+import { SunDim, Moon } from "lucide-react";
+import { useTheme } from "@/hooks/useTheme";
+import AuthFooter from "@/components/auth/AuthFooter";
+import AuthGridLines from "@/components/auth/AuthGridLines";
+import GoBackSection from "@/components/auth/GoBackSection";
 
 type AuthLayoutProps = {
   children: React.ReactNode;
+  narrow?: boolean;
 };
 
-export default function AuthLayout({ children }: AuthLayoutProps) {
+export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
   const { theme, toggleTheme } = useTheme();
-  const isDark = theme === 'dark';
+  const isDark = theme === "dark";
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-surface-primary px-2 py-2">
@@ -21,9 +22,15 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
       <AuthGridLines />
 
       {/* Auth Card — Figma: Login Card / Register Card */}
-      <div className="auth-card">
+      <div
+        className="auth-card"
+        style={narrow ? { maxWidth: 350, overflow: "hidden" } : undefined}
+      >
         {/* Container — white inner area with padding */}
-        <div className="flex w-full flex-col gap-6 border border-border-default bg-surface-primary p-6" style={{ borderRadius: '24px 24px 0 0' }}>
+        <div
+          className="flex w-full flex-col gap-6 border border-border-default bg-surface-primary p-6"
+          style={{ borderRadius: narrow ? 0 : "24px 24px 0 0" }}
+        >
           {/* Header — Logo + Theme Toggle */}
           <div className="flex items-center gap-2.5">
             <Image
@@ -42,7 +49,11 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
                 onClick={toggleTheme}
                 className="text-content-primary/50 transition-colors hover:text-content-primary"
               >
-                {isDark ? <SunDim size={16} strokeWidth={2} /> : <Moon size={16} strokeWidth={2} />}
+                {isDark ? (
+                  <SunDim size={16} strokeWidth={2} />
+                ) : (
+                  <Moon size={16} strokeWidth={2} />
+                )}
               </button>
             </div>
           </div>
@@ -51,12 +62,16 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
           {children}
         </div>
 
-        {/* Footer — shared across all auth pages */}
-        <AuthFooter />
+        {/* Footer — Figma: 56px height, padding 8 */}
+        {narrow ? (
+          <div className="w-full p-2" style={{ height: 56 }} />
+        ) : (
+          <AuthFooter />
+        )}
       </div>
 
-      {/* Go Back Section — below the card */}
-      <GoBackSection />
+      {/* Go Back Section — below the card (not shown on narrow/status cards) */}
+      {!narrow && <GoBackSection />}
     </div>
   );
 }
