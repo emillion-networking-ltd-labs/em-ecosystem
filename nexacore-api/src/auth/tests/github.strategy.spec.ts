@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GitHubStrategy } from '../strategies/github.strategy';
-import { AuthService } from '../auth.service';
+import { OAuthAuthService } from '../oauth-auth.service';
 import { OAuthStateStore } from '../stores/oauth-state.store';
 import { ConfigService } from '@nestjs/config';
 import { Strategy as PassportGitHubStrategy } from 'passport-github2';
@@ -9,7 +9,7 @@ import { Role } from '../../users/enums/role.enum';
 
 describe('GitHubStrategy', () => {
   let strategy: GitHubStrategy;
-  let authService: jest.Mocked<AuthService>;
+  let authService: jest.Mocked<OAuthAuthService>;
   let oauthStateStore: jest.Mocked<OAuthStateStore>;
 
   const mockCookie = {
@@ -56,7 +56,7 @@ describe('GitHubStrategy', () => {
       providers: [
         GitHubStrategy,
         {
-          provide: AuthService,
+          provide: OAuthAuthService,
           useValue: {
             validateOAuthUser: jest.fn(),
           },
@@ -106,7 +106,7 @@ describe('GitHubStrategy', () => {
     }).compile();
 
     strategy = module.get<GitHubStrategy>(GitHubStrategy);
-    authService = module.get(AuthService);
+    authService = module.get(OAuthAuthService);
     oauthStateStore = module.get(OAuthStateStore);
   });
 

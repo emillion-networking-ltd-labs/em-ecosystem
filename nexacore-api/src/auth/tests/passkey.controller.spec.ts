@@ -13,7 +13,7 @@ jest.mock('@simplewebauthn/server', () => ({
 
 import { PasskeyController } from '../passkey.controller';
 import { PasskeyService } from '../passkey.service';
-import { AuthService } from '../auth.service';
+import { TokenService } from '../token.service';
 
 describe('PasskeyController', () => {
   let controller: PasskeyController;
@@ -26,7 +26,7 @@ describe('PasskeyController', () => {
     renamePasskey: jest.Mock;
     deletePasskey: jest.Mock;
   };
-  let authService: {
+  let tokenService: {
     generateTokensForMfa: jest.Mock;
   };
 
@@ -69,7 +69,7 @@ describe('PasskeyController', () => {
       deletePasskey: jest.fn(),
     };
 
-    authService = {
+    tokenService = {
       generateTokensForMfa: jest.fn(),
     };
 
@@ -77,7 +77,7 @@ describe('PasskeyController', () => {
       controllers: [PasskeyController],
       providers: [
         { provide: PasskeyService, useValue: passkeyService },
-        { provide: AuthService, useValue: authService },
+        { provide: TokenService, useValue: tokenService },
       ],
     }).compile();
 
@@ -93,7 +93,9 @@ describe('PasskeyController', () => {
 
       const result = await controller.registerOptions(mockReq);
 
-      expect(passkeyService.generateRegOptions).toHaveBeenCalledWith('uuid-123');
+      expect(passkeyService.generateRegOptions).toHaveBeenCalledWith(
+        'uuid-123',
+      );
       expect(result).toEqual(regOptions);
     });
   });
@@ -182,7 +184,7 @@ describe('PasskeyController', () => {
   describe('loginVerify', () => {
     it('should verify credential, generate tokens, and set cookie', async () => {
       passkeyService.verifyAuthentication.mockResolvedValue('user-id-1');
-      authService.generateTokensForMfa.mockResolvedValue({
+      tokenService.generateTokensForMfa.mockResolvedValue({
         accessToken: 'jwt-token',
         user: mockSafeUser,
         cookie: {
@@ -203,15 +205,13 @@ describe('PasskeyController', () => {
         { id: 'cred', response: {} },
         { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
       );
-      expect(authService.generateTokensForMfa).toHaveBeenCalledWith(
+      expect(tokenService.generateTokensForMfa).toHaveBeenCalledWith(
         'user-id-1',
         { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
       );
-      expect(mockRes.cookie).toHaveBeenCalledWith(
-        'refresh_token',
-        'rt-123',
-        { httpOnly: true },
-      );
+      expect(mockRes.cookie).toHaveBeenCalledWith('refresh_token', 'rt-123', {
+        httpOnly: true,
+      });
       expect(result).toEqual({
         accessToken: 'jwt-token',
         user: mockSafeUser,
@@ -220,7 +220,7 @@ describe('PasskeyController', () => {
 
     it('should pass correct request meta', async () => {
       passkeyService.verifyAuthentication.mockResolvedValue('user-id-1');
-      authService.generateTokensForMfa.mockResolvedValue({
+      tokenService.generateTokensForMfa.mockResolvedValue({
         accessToken: 'jwt',
         user: mockSafeUser,
         cookie: { name: 'rt', value: 'v', options: {} },

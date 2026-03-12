@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
-import { AuthService } from '../auth.service';
+import { OAuthAuthService } from '../oauth-auth.service';
 import { OAuthStateStore, OAuthStateData } from '../stores/oauth-state.store';
 import { Provider } from '../../users/enums/provider.enum';
 import { ErrorMessages } from '../../common/constants/error-messages';
@@ -10,7 +10,7 @@ import { ErrorMessages } from '../../common/constants/error-messages';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
-    private readonly authService: AuthService,
+    private readonly oauthAuthService: OAuthAuthService,
     private readonly oauthStateStore: OAuthStateStore,
     configService: ConfigService,
   ) {
@@ -108,14 +108,14 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
     try {
       if (stateData.action === 'link' && stateData.userId) {
-        const result = await this.authService.validateOAuthLink(
+        const result = await this.oauthAuthService.validateOAuthLink(
           stateData.userId,
           oauthProfile,
           requestMeta,
         );
         done(null, result);
       } else {
-        const result = await this.authService.validateOAuthUser(
+        const result = await this.oauthAuthService.validateOAuthUser(
           oauthProfile,
           requestMeta,
           requestMeta,

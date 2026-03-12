@@ -23,123 +23,34 @@ import { AuditService } from '../../audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
 import { TokenDenyListService } from '../token-deny-list.service';
-import { ConfigService } from '@nestjs/config';
+import { TokenService } from '../token.service';
+import { LoginService } from '../login.service';
+import { OAuthAuthService } from '../oauth-auth.service';
+import { EmailVerificationService } from '../email-verification.service';
+import { PasswordResetService } from '../password-reset.service';
+import { parseDurationMs } from '../utils/parse-duration';
 
 jest.mock('bcrypt');
 
-describe('parseDurationMs (via AuthService constructor)', () => {
-  const createServiceWithExpiry = async (expiry: string) => {
-    process.env.JWT_REFRESH_EXPIRATION = expiry;
-    const mod = await Test.createTestingModule({
-      providers: [
-        AuthService,
-        { provide: UsersService, useValue: { findByEmail: jest.fn() } },
-        { provide: SessionsService, useValue: {} },
-        {
-          provide: JwtService,
-          useValue: { sign: jest.fn(), verify: jest.fn() },
-        },
-        { provide: OAuthCodeStore, useValue: {} },
-        {
-          provide: AuditService,
-          useValue: { log: jest.fn().mockResolvedValue(undefined) },
-        },
-        {
-          provide: PasswordBreachService,
-          useValue: { isBreached: jest.fn().mockResolvedValue(false) },
-        },
-        { provide: PrismaService, useValue: {} },
-        { provide: MailService, useValue: {} },
-        {
-          provide: TrustedDeviceService,
-          useValue: { isTrustedDevice: jest.fn().mockResolvedValue(false) },
-        },
-        {
-          provide: ImpossibleTravelService,
-          useValue: {
-            detectImpossibleTravel: jest.fn().mockResolvedValue(null),
-          },
-        },
-        {
-          provide: SuspiciousLoginService,
-          useValue: {
-            analyzeLoginFailure: jest.fn().mockResolvedValue(undefined),
-            analyzeLoginSuccess: jest.fn().mockResolvedValue(undefined),
-          },
-        },
-        {
-          provide: TokenDenyListService,
-          useValue: {
-            denyToken: jest.fn(),
-            denyAllForUser: jest.fn(),
-            isDenied: jest.fn().mockResolvedValue(false),
-          },
-        },
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => {
-              const config: Record<string, any> = {
-                'auth.jwtSecret':
-                  'test-secret-that-is-at-least-32-characters-long',
-                'auth.jwtAccessExpiration': '15m',
-                'auth.jwtRefreshExpiration': expiry,
-                'auth.sessionIdleTimeoutHours': 0.5,
-                'auth.maxConcurrentSessions': 5,
-                'auth.trustedDeviceTtlDays': 30,
-                'auth.mfaAppName': 'EM NexaCore',
-                'auth.webauthnRpId': 'localhost',
-                'auth.webauthnRpName': 'EM NexaCore',
-                'auth.webauthnOrigin': 'http://localhost:3001',
-                'oauth.googleClientId': 'test-google-id',
-                'oauth.googleClientSecret': 'test-google-secret',
-                'oauth.googleCallbackUrl':
-                  'http://localhost:3000/auth/google/callback',
-                'oauth.githubClientId': 'test-github-id',
-                'oauth.githubClientSecret': 'test-github-secret',
-                'oauth.githubCallbackUrl':
-                  'http://localhost:3000/auth/github/callback',
-                'app.nodeEnv': 'test',
-                'app.frontendUrl': 'http://localhost:3001',
-                'app.oauthAllowedRedirectUrls': '',
-                'app.isProduction': false,
-              };
-              return config[key];
-            }),
-          },
-        },
-      ],
-    }).compile();
-    return mod.get<AuthService>(AuthService);
-  };
-
-  afterEach(() => {
-    delete process.env.JWT_REFRESH_EXPIRATION;
+describe('parseDurationMs', () => {
+  it('should parse seconds (30s)', () => {
+    expect(parseDurationMs('30s')).toBe(30000);
   });
 
-  it('should parse seconds (30s)', async () => {
-    const svc = await createServiceWithExpiry('30s');
-    expect((svc as any).refreshMaxAgeMs).toBe(30 * 1000);
+  it('should parse minutes (15m)', () => {
+    expect(parseDurationMs('15m')).toBe(900000);
   });
 
-  it('should parse minutes (15m)', async () => {
-    const svc = await createServiceWithExpiry('15m');
-    expect((svc as any).refreshMaxAgeMs).toBe(15 * 60 * 1000);
+  it('should parse hours (2h)', () => {
+    expect(parseDurationMs('2h')).toBe(7200000);
   });
 
-  it('should parse hours (2h)', async () => {
-    const svc = await createServiceWithExpiry('2h');
-    expect((svc as any).refreshMaxAgeMs).toBe(2 * 60 * 60 * 1000);
+  it('should parse days (7d)', () => {
+    expect(parseDurationMs('7d')).toBe(604800000);
   });
 
-  it('should parse days (7d)', async () => {
-    const svc = await createServiceWithExpiry('7d');
-    expect((svc as any).refreshMaxAgeMs).toBe(7 * 24 * 60 * 60 * 1000);
-  });
-
-  it('should fallback to 7 days for invalid format', async () => {
-    const svc = await createServiceWithExpiry('invalid');
-    expect((svc as any).refreshMaxAgeMs).toBe(7 * 24 * 60 * 60 * 1000);
+  it('should fallback to 7 days for invalid format', () => {
+    expect(parseDurationMs('invalid')).toBe(604800000);
   });
 });
 
@@ -154,6 +65,8 @@ describe('AuthService', () => {
   let impossibleTravelService: jest.Mocked<ImpossibleTravelService>;
   let suspiciousLoginService: jest.Mocked<SuspiciousLoginService>;
   let mailService: jest.Mocked<MailService>;
+  let prismaService: any;
+  let auditService: jest.Mocked<AuditService>;
 
   const mockUser: User = {
     id: 'uuid-123',
@@ -198,6 +111,11 @@ describe('AuthService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
+        TokenService,
+        LoginService,
+        OAuthAuthService,
+        EmailVerificationService,
+        PasswordResetService,
         {
           provide: UsersService,
           useValue: {
@@ -331,39 +249,6 @@ describe('AuthService', () => {
             isDenied: jest.fn().mockResolvedValue(false),
           },
         },
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => {
-              const config: Record<string, any> = {
-                'auth.jwtSecret':
-                  'test-secret-that-is-at-least-32-characters-long',
-                'auth.jwtAccessExpiration': '15m',
-                'auth.jwtRefreshExpiration': '12h',
-                'auth.sessionIdleTimeoutHours': 0.5,
-                'auth.maxConcurrentSessions': 5,
-                'auth.trustedDeviceTtlDays': 30,
-                'auth.mfaAppName': 'EM NexaCore',
-                'auth.webauthnRpId': 'localhost',
-                'auth.webauthnRpName': 'EM NexaCore',
-                'auth.webauthnOrigin': 'http://localhost:3001',
-                'oauth.googleClientId': 'test-google-id',
-                'oauth.googleClientSecret': 'test-google-secret',
-                'oauth.googleCallbackUrl':
-                  'http://localhost:3000/auth/google/callback',
-                'oauth.githubClientId': 'test-github-id',
-                'oauth.githubClientSecret': 'test-github-secret',
-                'oauth.githubCallbackUrl':
-                  'http://localhost:3000/auth/github/callback',
-                'app.nodeEnv': 'test',
-                'app.frontendUrl': 'http://localhost:3001',
-                'app.oauthAllowedRedirectUrls': '',
-                'app.isProduction': false,
-              };
-              return config[key];
-            }),
-          },
-        },
       ],
     }).compile();
 
@@ -377,6 +262,8 @@ describe('AuthService', () => {
     impossibleTravelService = module.get(ImpossibleTravelService);
     suspiciousLoginService = module.get(SuspiciousLoginService);
     mailService = module.get(MailService);
+    prismaService = module.get(PrismaService);
+    auditService = module.get(AuditService);
   });
 
   describe('register', () => {
@@ -951,12 +838,6 @@ describe('AuthService', () => {
   // ─── verifyEmail ──────────────────────────────────────────────
 
   describe('verifyEmail', () => {
-    let prismaService: any;
-
-    beforeEach(() => {
-      prismaService = (authService as any).prisma;
-    });
-
     it('should return invalid when token not found', async () => {
       prismaService.emailVerificationToken.findUnique.mockResolvedValue(null);
 
@@ -1052,16 +933,6 @@ describe('AuthService', () => {
   // ─── verifyEmailChange ─────────────────────────────────────────
 
   describe('verifyEmailChange', () => {
-    let prismaService: any;
-    let mailService: any;
-    let auditService: any;
-
-    beforeEach(() => {
-      prismaService = (authService as any).prisma;
-      mailService = (authService as any).mailService;
-      auditService = (authService as any).auditService;
-    });
-
     it('should return invalid when token not found', async () => {
       prismaService.emailVerificationToken.findUnique.mockResolvedValue(null);
 
@@ -1308,12 +1179,6 @@ describe('AuthService', () => {
   // ─── resendVerificationEmail ──────────────────────────────────
 
   describe('resendVerificationEmail', () => {
-    let prismaService: any;
-
-    beforeEach(() => {
-      prismaService = (authService as any).prisma;
-    });
-
     it('should throw UnauthorizedException when user not found', async () => {
       usersService.findById.mockResolvedValue(null);
 
@@ -1359,7 +1224,6 @@ describe('AuthService', () => {
 
       await authService.resendVerificationEmail('uuid-123');
 
-      const mailService = (authService as any).mailService;
       expect(mailService.sendVerificationEmail).toHaveBeenCalled();
     });
 
@@ -1373,7 +1237,6 @@ describe('AuthService', () => {
 
       await authService.resendVerificationEmail('uuid-123');
 
-      const mailService = (authService as any).mailService;
       expect(mailService.sendVerificationEmail).toHaveBeenCalled();
     });
   });
@@ -1381,12 +1244,6 @@ describe('AuthService', () => {
   // ─── forgotPassword ───────────────────────────────────────────
 
   describe('forgotPassword', () => {
-    let prismaService: any;
-
-    beforeEach(() => {
-      prismaService = (authService as any).prisma;
-    });
-
     it('should return silently when user not found (prevent enumeration)', async () => {
       usersService.findByEmail.mockResolvedValue(null);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
@@ -1436,7 +1293,6 @@ describe('AuthService', () => {
       });
       expect(prismaService.passwordResetToken.create).toHaveBeenCalled();
 
-      const mailService = (authService as any).mailService;
       expect(mailService.sendPasswordResetEmail).toHaveBeenCalledWith(
         'test@example.com',
         expect.any(String),
@@ -1466,12 +1322,6 @@ describe('AuthService', () => {
   // ─── resetPassword ────────────────────────────────────────────
 
   describe('resetPassword', () => {
-    let prismaService: any;
-
-    beforeEach(() => {
-      prismaService = (authService as any).prisma;
-    });
-
     it('should throw BadRequestException when token not found', async () => {
       prismaService.passwordResetToken.findUnique.mockResolvedValue(null);
 
@@ -1597,12 +1447,6 @@ describe('AuthService', () => {
   // ─── validateResetToken ─────────────────────────────────────────
 
   describe('validateResetToken', () => {
-    let prismaService: any;
-
-    beforeEach(() => {
-      prismaService = (authService as any).prisma;
-    });
-
     it('should return { valid: false } when token not found', async () => {
       prismaService.passwordResetToken.findUnique.mockResolvedValue(null);
 
@@ -1657,12 +1501,6 @@ describe('AuthService', () => {
   // ─── resendVerificationByEmail ──────────────────────────────────
 
   describe('resendVerificationByEmail', () => {
-    let prismaService: any;
-
-    beforeEach(() => {
-      prismaService = (authService as any).prisma;
-    });
-
     it('should return silently when user not found (anti-enumeration)', async () => {
       usersService.findByEmail.mockResolvedValue(null);
 
@@ -1720,7 +1558,6 @@ describe('AuthService', () => {
 
       await authService.resendVerificationByEmail('test@example.com');
 
-      const mailService = (authService as any).mailService;
       expect(mailService.sendVerificationEmail).toHaveBeenCalled();
     });
 
@@ -1734,7 +1571,6 @@ describe('AuthService', () => {
 
       await authService.resendVerificationByEmail('test@example.com');
 
-      const mailService = (authService as any).mailService;
       expect(mailService.sendVerificationEmail).toHaveBeenCalled();
     });
   });
@@ -1859,11 +1695,8 @@ describe('AuthService', () => {
   // auditService.log reject. Service methods should still succeed.
 
   describe('fire-and-forget resilience', () => {
-    let auditSvc: jest.Mocked<AuditService>;
-
     beforeEach(() => {
-      auditSvc = (authService as any).auditService;
-      auditSvc.log.mockRejectedValue(new Error('audit write failed'));
+      auditService.log.mockRejectedValue(new Error('audit write failed'));
     });
 
     it('register should succeed even when audit fails', async () => {
@@ -1982,21 +1815,19 @@ describe('AuthService', () => {
 
     it('forgotPassword should succeed even when mail/audit fails', async () => {
       usersService.findByEmail.mockResolvedValue(mockUser);
-      const prismaService = (authService as any).prisma;
+
       prismaService.passwordResetToken.updateMany.mockResolvedValue({
         count: 0,
       });
       prismaService.passwordResetToken.create.mockResolvedValue({});
-      const mailSvc = (authService as any).mailService;
-      mailSvc.sendPasswordResetEmail.mockResolvedValue(undefined);
+      mailService.sendPasswordResetEmail.mockResolvedValue(undefined);
 
       await authService.forgotPassword({ email: 'test@example.com' });
 
-      expect(mailSvc.sendPasswordResetEmail).toHaveBeenCalled();
+      expect(mailService.sendPasswordResetEmail).toHaveBeenCalled();
     });
 
     it('resetPassword should succeed even when audit fails', async () => {
-      const prismaService = (authService as any).prisma;
       prismaService.passwordResetToken.findUnique.mockResolvedValue({
         id: 'rt-1',
         tokenHash: 'hash',
@@ -2028,7 +1859,7 @@ describe('AuthService', () => {
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
 
       // Make the verification email path fail
-      const prismaService = (authService as any).prisma;
+
       prismaService.emailVerificationToken.create.mockRejectedValue(
         new Error('DB error'),
       );
@@ -2102,8 +1933,7 @@ describe('AuthService', () => {
         sessionsService.createSession.mockResolvedValue(mockSession);
         sessionsService.updateSessionHash.mockResolvedValue(undefined);
         (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
-        const audit = (authService as any).auditService;
-        audit.log.mockResolvedValue(undefined);
+        auditService.log.mockResolvedValue(undefined);
 
         await authService.validateOAuthUser(
           { email: 'o@e.com', provider: Provider.GOOGLE, providerId: 'g1' },
@@ -2112,7 +1942,7 @@ describe('AuthService', () => {
         );
         await new Promise((resolve) => process.nextTick(resolve));
 
-        expect(audit.log).toHaveBeenCalledWith(
+        expect(auditService.log).toHaveBeenCalledWith(
           expect.objectContaining({ action: expected }),
         );
       },
@@ -2273,13 +2103,7 @@ describe('AuthService', () => {
   });
 
   describe('notifyIfNewDevice (via login)', () => {
-    let prismaService: any;
-    let mailService: any;
-
     beforeEach(() => {
-      prismaService = (authService as any).prisma;
-      mailService = (authService as any).mailService;
-
       usersService.findByEmail.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
@@ -2379,13 +2203,7 @@ describe('AuthService', () => {
   // ─── refreshTokens — idle timeout ──────────────────────────────
 
   describe('refreshTokens - idle timeout', () => {
-    let prismaService: any;
-    let auditServiceMock: any;
-
     beforeEach(() => {
-      prismaService = (authService as any).prisma;
-      auditServiceMock = (authService as any).auditService;
-
       jwtService.verify.mockReturnValue({
         sub: 'uuid-123',
         sessionId: 'session-uuid',
@@ -2437,7 +2255,7 @@ describe('AuthService', () => {
         data: { isRevoked: true },
       });
 
-      expect(auditServiceMock.log).toHaveBeenCalledWith(
+      expect(auditService.log).toHaveBeenCalledWith(
         expect.objectContaining({
           action: 'SESSION_IDLE_REVOKED',
           userId: 'uuid-123',
@@ -2619,7 +2437,6 @@ describe('AuthService', () => {
     });
 
     it('should log audit with travel metadata when blocking', async () => {
-      const auditSvc = (authService as any).auditService;
       impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
         isAnomalous: true,
         previousLocation: {
@@ -2647,7 +2464,7 @@ describe('AuthService', () => {
         ForbiddenException,
       );
 
-      expect(auditSvc.log).toHaveBeenCalledWith(
+      expect(auditService.log).toHaveBeenCalledWith(
         expect.objectContaining({
           action: 'LOGIN_BLOCKED_TRAVEL',
           userId: 'uuid-123',
@@ -2845,7 +2662,6 @@ describe('AuthService', () => {
     it('should log audit event with mfaSetupRequired metadata', async () => {
       const adminUser = { ...mockUser, role: Role.ADMIN, mfaEnabled: false };
       usersService.findByEmail.mockResolvedValue(adminUser);
-      const auditService = (authService as any).auditService;
 
       await authService.login(loginDto, requestMeta, requestMeta);
 
@@ -2860,7 +2676,6 @@ describe('AuthService', () => {
     });
 
     it('should still return mfaSetupRequired when audit log rejects (fire-and-forget)', async () => {
-      const auditService = (authService as any).auditService;
       auditService.log.mockRejectedValue(new Error('Audit DB down'));
       const adminUser = { ...mockUser, role: Role.ADMIN, mfaEnabled: false };
       usersService.findByEmail.mockResolvedValue(adminUser);
@@ -2878,13 +2693,6 @@ describe('AuthService', () => {
   describe('fire-and-forget resilience (audit log rejection)', () => {
     const flushPromises = () =>
       new Promise((resolve) => process.nextTick(resolve));
-    let auditService: any;
-    let mailService: any;
-
-    beforeEach(() => {
-      auditService = (authService as any).auditService;
-      mailService = (authService as any).mailService;
-    });
 
     it('should still throw UnauthorizedException when audit rejects on locked account', async () => {
       auditService.log.mockRejectedValue(new Error('Audit DB down'));
@@ -3123,7 +2931,6 @@ describe('AuthService', () => {
     });
 
     it('should still succeed verifyEmailChange when mail and audit reject', async () => {
-      const prismaService = (authService as any).prisma;
       mailService.sendEmailChangedConfirmation.mockRejectedValue(
         new Error('SMTP down'),
       );

@@ -23,7 +23,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { PasskeyService } from './passkey.service';
-import { AuthService } from './auth.service';
+import { TokenService } from './token.service';
 import { AUTH_RATE_LIMITS } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { PasskeyRegisterVerifyDto } from './dto/passkey-register-verify.dto';
@@ -40,7 +40,7 @@ import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor'
 export class PasskeyController {
   constructor(
     private readonly passkeyService: PasskeyService,
-    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
   ) {}
 
   private extractRequestMeta(req: any): {
@@ -136,7 +136,7 @@ export class PasskeyController {
       meta,
     );
 
-    const result = await this.authService.generateTokensForMfa(userId, meta);
+    const result = await this.tokenService.generateTokensForMfa(userId, meta);
 
     res.cookie(result.cookie.name, result.cookie.value, result.cookie.options);
 
