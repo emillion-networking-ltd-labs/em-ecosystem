@@ -1,0 +1,237 @@
+import {
+  Controller,
+  Post,
+  Get,
+  Body,
+  HttpCode,
+  HttpStatus,
+  UseGuards,
+  Request,
+  Res,
+  Redirect,
+  UnauthorizedException,
+  UseFilters,
+  UseInterceptors,
+} from '@nestjs/common';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+} from '@nestjs/swagger';
+import { Throttle, SkipThrottle } from '@nestjs/throttler';
+import type { Response } from 'express';
+import { ConfigService } from '@nestjs/config';
+import { AuthService, CookieConfig } from './auth.service';
+import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
+import { AUTH_RATE_LIMITS } from './constants/auth.constants';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { GitHubAuthGuard } from './guards/github-auth.guard';
+import { OAuthCallbackFilter } from './guards/oauth-callback.filter';
+import { OAuthLinkGuard } from './guards/oauth-link.guard';
+import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
+import { SafeUser } from '../users/entities/user.entity';
+import { ErrorMessages } from '../common/constants/error-messages';
+import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
+
+@ApiTags('auth')
+@UseInterceptors(NoCacheInterceptor)
+@Controller('auth')
+export class OAuthController {
+  constructor(
+    private readonly authService: AuthService,
+    private readonly configService: ConfigService,
+  ) {}
+
+  private setCookie(res: Response, cookie: CookieConfig): void {
+    res.cookie(cookie.name, cookie.value, cookie.options);
+  }
+
+  @Get('google')
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.oauth.ttl,
+      limit: AUTH_RATE_LIMITS.oauth.limit,
+    },
+  })
+  @UseGuards(GoogleAuthGuard)
+  @ApiOperation({ summary: 'Initiate Google OAuth login' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to Google consent screen',
+  })
+  googleAuth() {
+    // Guard redirects to Google
+  }
+
+  @Get('google/callback')
+  @SkipThrottle()
+  @UseGuards(GoogleAuthGuard)
+  @UseFilters(OAuthCallbackFilter)
+  @Redirect()
+  @ApiOperation({ summary: 'Google OAuth callback' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend with ephemeral authorization code',
+  })
+  async googleAuthCallback(
+    @Request()
+    req: {
+      user: {
+        accessToken: string;
+        user: SafeUser;
+        cookie: CookieConfig;
+        oauthAction?: 'login' | 'created' | 'linked';
+      };
+    },
+  ) {
+    const code = await this.authService.generateOAuthCode(req.user);
+    const frontendUrl = this.getValidatedFrontendUrl();
+    return {
+      url: `${frontendUrl}/auth/callback?code=${code}`,
+    };
+  }
+
+  @Get('github')
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.oauth.ttl,
+      limit: AUTH_RATE_LIMITS.oauth.limit,
+    },
+  })
+  @UseGuards(GitHubAuthGuard)
+  @ApiOperation({ summary: 'Initiate GitHub OAuth login' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to GitHub authorization',
+  })
+  githubAuth() {
+    // Guard redirects to GitHub
+  }
+
+  @Get('github/callback')
+  @SkipThrottle()
+  @UseGuards(GitHubAuthGuard)
+  @UseFilters(OAuthCallbackFilter)
+  @Redirect()
+  @ApiOperation({ summary: 'GitHub OAuth callback' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend with ephemeral authorization code',
+  })
+  async githubAuthCallback(
+    @Request()
+    req: {
+      user: {
+        accessToken: string;
+        user: SafeUser;
+        cookie: CookieConfig;
+        oauthAction?: 'login' | 'created' | 'linked';
+      };
+    },
+  ) {
+    const code = await this.authService.generateOAuthCode(req.user);
+    const frontendUrl = this.getValidatedFrontendUrl();
+    return {
+      url: `${frontendUrl}/auth/callback?code=${code}`,
+    };
+  }
+
+  @Post('oauth/exchange')
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.oauth.ttl,
+      limit: AUTH_RATE_LIMITS.oauth.limit,
+    },
+  })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Exchange ephemeral OAuth code for tokens' })
+  @ApiResponse({ status: 200, description: 'Tokens returned successfully' })
+  @ApiResponse({ status: 400, description: 'Invalid request body' })
+  @ApiResponse({
+    status: 401,
+    description: 'Invalid or expired authorization code',
+  })
+  @ApiResponse({
+    status: 429,
+    description:
+      'Too many exchange attempts — rate limited (10 req/60s per IP)',
+  })
+  async exchangeOAuthCode(
+    @Body() dto: OAuthExchangeDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    const result = await this.authService.exchangeOAuthCode(dto.code);
+    this.setCookie(res, result.cookie);
+    return {
+      accessToken: result.accessToken,
+      user: result.user,
+      ...(result.oauthAction &&
+        result.oauthAction !== 'login' && { oauthAction: result.oauthAction }),
+    };
+  }
+
+  // ── OAuth Link Endpoints ───────────────────────────────────────────
+
+  @Get('link/google')
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.oauth.ttl,
+      limit: AUTH_RATE_LIMITS.oauth.limit,
+    },
+  })
+  @UseGuards(OAuthLinkGuard, GoogleAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Link Google account to authenticated user' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to Google consent screen',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized — valid JWT required',
+  })
+  googleLinkAuth() {
+    // OAuthLinkGuard validates JWT and sets req.oauthAction='link' + req.user.id
+    // GoogleAuthGuard then generates state with action=link and userId, redirects to Google
+  }
+
+  @Get('link/github')
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.oauth.ttl,
+      limit: AUTH_RATE_LIMITS.oauth.limit,
+    },
+  })
+  @UseGuards(OAuthLinkGuard, GitHubAuthGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Link GitHub account to authenticated user' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to GitHub authorization',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized — valid JWT required',
+  })
+  githubLinkAuth() {
+    // OAuthLinkGuard validates JWT and sets req.oauthAction='link' + req.user.id
+    // GitHubAuthGuard then generates state with action=link and userId, redirects to GitHub
+  }
+
+  private getValidatedFrontendUrl(): string {
+    const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
+    const allowedUrlsRaw = this.configService.get<string>(
+      'app.oauthAllowedRedirectUrls',
+    );
+    const allowedUrls = (allowedUrlsRaw || frontendUrl)
+      .split(',')
+      .map((u) => u.trim());
+
+    if (!allowedUrls.includes(frontendUrl)) {
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
+    }
+
+    return frontendUrl;
+  }
+}

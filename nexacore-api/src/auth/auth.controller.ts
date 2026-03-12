@@ -2,19 +2,13 @@ import {
   Controller,
   Post,
   Get,
-  Delete,
   Body,
-  Param,
-  Query,
   HttpCode,
   HttpStatus,
   UseGuards,
   Request,
   Res,
-  Redirect,
   UnauthorizedException,
-  ParseUUIDPipe,
-  UseFilters,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -22,36 +16,20 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiQuery,
 } from '@nestjs/swagger';
-import { Throttle, SkipThrottle } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
-import { JwtService } from '@nestjs/jwt';
 import {
   AuthService,
   CookieConfig,
   MfaChallengeResult,
   MfaSetupRequiredResult,
 } from './auth.service';
-import { TrustedDeviceService } from './trusted-device.service';
-import { TrustDeviceDto } from './dto/trust-device.dto';
-import { SessionsService } from '../sessions/sessions.service';
-import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
-import { AUTH_RATE_LIMITS } from './constants/auth.constants';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
-import { ForgotPasswordDto } from './dto/forgot-password.dto';
-import { ResetPasswordDto } from './dto/reset-password.dto';
-import { ValidateResetTokenDto } from './dto/validate-reset-token.dto';
-import { ResendVerificationPublicDto } from './dto/resend-verification-public.dto';
+import { AUTH_RATE_LIMITS } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
-import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { GitHubAuthGuard } from './guards/github-auth.guard';
-import { OAuthCallbackFilter } from './guards/oauth-callback.filter';
-import { OAuthLinkGuard } from './guards/oauth-link.guard';
 import { Roles } from '../common/decorators/roles.decorator';
 import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
 import { CsrfGuard } from '../common/guards/csrf.guard';
@@ -71,26 +49,11 @@ import type { AuthenticatedRequest } from '../common/interfaces/authenticated-re
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly sessionsService: SessionsService,
-    private readonly jwtService: JwtService,
     private readonly permissionsService: PermissionsService,
-    private readonly trustedDeviceService: TrustedDeviceService,
-    private readonly configService: ConfigService,
   ) {}
 
   private setCookie(res: Response, cookie: CookieConfig): void {
     res.cookie(cookie.name, cookie.value, cookie.options);
-  }
-
-  private getCurrentSessionId(req: AuthenticatedRequest): string | undefined {
-    const refreshToken = req.cookies?.['refresh_token'];
-    if (!refreshToken) return undefined;
-    try {
-      const payload = this.jwtService.verify<RefreshTokenPayload>(refreshToken);
-      return payload.sessionId;
-    } catch {
-      return undefined;
-    }
   }
 
   @Get('csrf-token')
@@ -251,34 +214,6 @@ export class AuthController {
     return { message: 'All sessions revoked' };
   }
 
-  @Get('sessions')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'List active sessions for current user' })
-  @ApiResponse({ status: 200, description: 'Returns list of active sessions' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getSessions(@Request() req: AuthenticatedRequest) {
-    const currentSessionId = this.getCurrentSessionId(req);
-    return this.sessionsService.getActiveSessions(
-      req.user.id,
-      currentSessionId,
-    );
-  }
-
-  @Delete('sessions/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Revoke a specific session' })
-  @ApiResponse({ status: 200, description: 'Session revoked' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async revokeSession(
-    @Param('id', ParseUUIDPipe) sessionId: string,
-    @Request() req: AuthenticatedRequest,
-  ) {
-    await this.sessionsService.revokeSession(sessionId, req.user.id);
-    return { message: 'Session revoked' };
-  }
-
   @Get('me')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
@@ -293,143 +228,6 @@ export class AuthController {
       req.user.role,
     );
     return { ...req.user, permissions };
-  }
-
-  // ── Email Verification Endpoints ──
-
-  @Get('verify-email')
-  @ApiOperation({ summary: 'Verify email address via token from email link' })
-  @ApiQuery({
-    name: 'token',
-    required: true,
-    description: 'Verification token',
-  })
-  @ApiResponse({
-    status: 302,
-    description: 'Redirects to frontend with status',
-  })
-  async verifyEmail(@Query('token') token: string, @Res() res: Response) {
-    const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
-
-    if (!token) {
-      return res.redirect(`${frontendUrl}/verify-email?status=invalid`);
-    }
-
-    const result = await this.authService.verifyEmail(token);
-    return res.redirect(`${frontendUrl}/verify-email?status=${result.status}`);
-  }
-
-  @Get('verify-email-change')
-  @ApiOperation({ summary: 'Verify email change via token from email link' })
-  @ApiQuery({
-    name: 'token',
-    required: true,
-    description: 'Email change verification token',
-  })
-  @ApiResponse({
-    status: 302,
-    description: 'Redirects to frontend with status',
-  })
-  async verifyEmailChange(@Query('token') token: string, @Res() res: Response) {
-    const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
-
-    if (!token) {
-      return res.redirect(`${frontendUrl}/verify-email-change?status=invalid`);
-    }
-
-    const result = await this.authService.verifyEmailChange(token);
-    return res.redirect(
-      `${frontendUrl}/verify-email-change?status=${result.status}`,
-    );
-  }
-
-  @Post('resend-verification')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Resend email verification link' })
-  @ApiResponse({ status: 200, description: 'Verification email sent' })
-  @ApiResponse({
-    status: 400,
-    description: 'Email already verified or rate limited',
-  })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async resendVerification(@Request() req: AuthenticatedRequest) {
-    await this.authService.resendVerificationEmail(req.user.id);
-    return { message: 'Verification email sent' };
-  }
-
-  @Post('resend-verification-public')
-  @UseGuards(TurnstileGuard)
-  @HttpCode(HttpStatus.OK)
-  @SkipCsrf()
-  @Throttle({
-    global: { ttl: 900000, limit: 3 },
-  })
-  @ApiOperation({
-    summary: 'Resend email verification (public, no auth required)',
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'Generic success message (anti-enumeration)',
-  })
-  @ApiResponse({ status: 429, description: 'Too many requests' })
-  async resendVerificationPublic(@Body() dto: ResendVerificationPublicDto) {
-    await this.authService.resendVerificationByEmail(dto.email);
-    return {
-      message:
-        'If an account exists and needs verification, we have sent an email',
-    };
-  }
-
-  // ── Password Reset Endpoints ──
-
-  @Post('forgot-password')
-  @UseGuards(TurnstileGuard)
-  @HttpCode(HttpStatus.OK)
-  @SkipCsrf()
-  @Throttle({
-    global: { ttl: 900000, limit: 3 },
-  })
-  @ApiOperation({ summary: 'Request password reset email' })
-  @ApiResponse({
-    status: 200,
-    description: 'Reset email sent (if account exists)',
-  })
-  @ApiResponse({ status: 429, description: 'Too many requests' })
-  async forgotPassword(@Body() dto: ForgotPasswordDto) {
-    await this.authService.forgotPassword(dto);
-    return { message: 'If an account exists, a reset email has been sent' };
-  }
-
-  @Post('reset-password')
-  @HttpCode(HttpStatus.OK)
-  @SkipCsrf()
-  @Throttle({ global: { ttl: 60_000, limit: 5 } })
-  @ApiOperation({ summary: 'Reset password using token from email' })
-  @ApiResponse({ status: 200, description: 'Password reset successfully' })
-  @ApiResponse({
-    status: 400,
-    description: 'Invalid or expired token, or validation error',
-  })
-  async resetPassword(
-    @Body() dto: ResetPasswordDto,
-    @Request() req: AuthenticatedRequest,
-  ) {
-    const meta = extractRequestMeta(req);
-    await this.authService.resetPassword(dto, meta);
-    return { message: 'Password reset successfully' };
-  }
-
-  @Post('validate-reset-token')
-  @HttpCode(HttpStatus.OK)
-  @SkipCsrf()
-  @ApiOperation({
-    summary: 'Validate a password reset token without consuming it',
-  })
-  @ApiResponse({ status: 200, description: 'Token validity status' })
-  async validateResetToken(@Body() dto: ValidateResetTokenDto) {
-    return this.authService.validateResetToken(dto.token);
   }
 
   // ── Admin Endpoints ──
@@ -447,261 +245,5 @@ export class AuthController {
   })
   getAdminDashboard() {
     return { message: 'Admin access granted' };
-  }
-
-  @Get('google')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
-  @UseGuards(GoogleAuthGuard)
-  @ApiOperation({ summary: 'Initiate Google OAuth login' })
-  @ApiResponse({
-    status: 302,
-    description: 'Redirects to Google consent screen',
-  })
-  googleAuth() {
-    // Guard redirects to Google
-  }
-
-  @Get('google/callback')
-  @SkipThrottle()
-  @UseGuards(GoogleAuthGuard)
-  @UseFilters(OAuthCallbackFilter)
-  @Redirect()
-  @ApiOperation({ summary: 'Google OAuth callback' })
-  @ApiResponse({
-    status: 302,
-    description: 'Redirects to frontend with ephemeral authorization code',
-  })
-  async googleAuthCallback(
-    @Request()
-    req: {
-      user: {
-        accessToken: string;
-        user: SafeUser;
-        cookie: CookieConfig;
-        oauthAction?: 'login' | 'created' | 'linked';
-      };
-    },
-  ) {
-    const code = await this.authService.generateOAuthCode(req.user);
-    const frontendUrl = this.getValidatedFrontendUrl();
-    return {
-      url: `${frontendUrl}/auth/callback?code=${code}`,
-    };
-  }
-
-  @Get('github')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
-  @UseGuards(GitHubAuthGuard)
-  @ApiOperation({ summary: 'Initiate GitHub OAuth login' })
-  @ApiResponse({
-    status: 302,
-    description: 'Redirects to GitHub authorization',
-  })
-  githubAuth() {
-    // Guard redirects to GitHub
-  }
-
-  @Get('github/callback')
-  @SkipThrottle()
-  @UseGuards(GitHubAuthGuard)
-  @UseFilters(OAuthCallbackFilter)
-  @Redirect()
-  @ApiOperation({ summary: 'GitHub OAuth callback' })
-  @ApiResponse({
-    status: 302,
-    description: 'Redirects to frontend with ephemeral authorization code',
-  })
-  async githubAuthCallback(
-    @Request()
-    req: {
-      user: {
-        accessToken: string;
-        user: SafeUser;
-        cookie: CookieConfig;
-        oauthAction?: 'login' | 'created' | 'linked';
-      };
-    },
-  ) {
-    const code = await this.authService.generateOAuthCode(req.user);
-    const frontendUrl = this.getValidatedFrontendUrl();
-    return {
-      url: `${frontendUrl}/auth/callback?code=${code}`,
-    };
-  }
-
-  @Post('oauth/exchange')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Exchange ephemeral OAuth code for tokens' })
-  @ApiResponse({ status: 200, description: 'Tokens returned successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid request body' })
-  @ApiResponse({
-    status: 401,
-    description: 'Invalid or expired authorization code',
-  })
-  @ApiResponse({
-    status: 429,
-    description:
-      'Too many exchange attempts — rate limited (10 req/60s per IP)',
-  })
-  async exchangeOAuthCode(
-    @Body() dto: OAuthExchangeDto,
-    @Res({ passthrough: true }) res: Response,
-  ) {
-    const result = await this.authService.exchangeOAuthCode(dto.code);
-    this.setCookie(res, result.cookie);
-    return {
-      accessToken: result.accessToken,
-      user: result.user,
-      ...(result.oauthAction &&
-        result.oauthAction !== 'login' && { oauthAction: result.oauthAction }),
-    };
-  }
-
-  // ── Trusted Device Endpoints ──────────────────────────────────────
-
-  @Post('trusted-devices')
-  @HttpCode(HttpStatus.CREATED)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @Throttle({ global: { ttl: 60_000, limit: 5 } })
-  @ApiOperation({
-    summary: 'Mark current device as trusted (skips MFA on future logins)',
-  })
-  @ApiResponse({ status: 201, description: 'Device trusted' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 429, description: 'Too many requests' })
-  async trustDevice(
-    @Body() dto: TrustDeviceDto,
-    @Request() req: AuthenticatedRequest,
-  ) {
-    const meta = extractRequestMeta(req);
-    const device = await this.trustedDeviceService.trustDevice(
-      req.user.id,
-      dto.fingerprint,
-      meta.ipAddress,
-      meta.userAgent,
-    );
-    return {
-      id: device.id,
-      deviceName: device.deviceName,
-      expiresAt: device.expiresAt,
-    };
-  }
-
-  @Get('trusted-devices')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'List trusted devices for current user' })
-  @ApiResponse({ status: 200, description: 'List of trusted devices' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async listTrustedDevices(@Request() req: AuthenticatedRequest) {
-    return this.trustedDeviceService.listTrustedDevices(req.user.id);
-  }
-
-  @Delete('trusted-devices')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Revoke all trusted devices' })
-  @ApiResponse({ status: 200, description: 'All trusted devices revoked' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async revokeAllTrustedDevices(@Request() req: AuthenticatedRequest) {
-    const count = await this.trustedDeviceService.revokeAllDevices(req.user.id);
-    return { message: 'All trusted devices revoked', count };
-  }
-
-  @Delete('trusted-devices/:id')
-  @UseGuards(JwtAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Revoke trust for a specific device' })
-  @ApiResponse({ status: 200, description: 'Device trust revoked' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @ApiResponse({ status: 404, description: 'Device not found' })
-  async revokeTrustedDevice(
-    @Param('id', ParseUUIDPipe) deviceId: string,
-    @Request() req: AuthenticatedRequest,
-  ) {
-    await this.trustedDeviceService.revokeDevice(req.user.id, deviceId);
-    return { message: 'Device trust revoked' };
-  }
-
-  // ── OAuth Link Endpoints ───────────────────────────────────────────
-
-  @Get('link/google')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
-  @UseGuards(OAuthLinkGuard, GoogleAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Link Google account to authenticated user' })
-  @ApiResponse({
-    status: 302,
-    description: 'Redirects to Google consent screen',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized — valid JWT required',
-  })
-  googleLinkAuth() {
-    // OAuthLinkGuard validates JWT and sets req.oauthAction='link' + req.user.id
-    // GoogleAuthGuard then generates state with action=link and userId, redirects to Google
-  }
-
-  @Get('link/github')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
-  @UseGuards(OAuthLinkGuard, GitHubAuthGuard)
-  @ApiBearerAuth()
-  @ApiOperation({ summary: 'Link GitHub account to authenticated user' })
-  @ApiResponse({
-    status: 302,
-    description: 'Redirects to GitHub authorization',
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'Unauthorized — valid JWT required',
-  })
-  githubLinkAuth() {
-    // OAuthLinkGuard validates JWT and sets req.oauthAction='link' + req.user.id
-    // GitHubAuthGuard then generates state with action=link and userId, redirects to GitHub
-  }
-
-  private getValidatedFrontendUrl(): string {
-    const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
-    const allowedUrlsRaw = this.configService.get<string>(
-      'app.oauthAllowedRedirectUrls',
-    );
-    const allowedUrls = (allowedUrlsRaw || frontendUrl)
-      .split(',')
-      .map((u) => u.trim());
-
-    if (!allowedUrls.includes(frontendUrl)) {
-      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
-    }
-
-    return frontendUrl;
   }
 }
