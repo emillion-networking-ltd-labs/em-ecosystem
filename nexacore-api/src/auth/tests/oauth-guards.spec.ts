@@ -1,8 +1,9 @@
+import { createOAuthAuthGuard } from '../guards/base-oauth-auth.guard';
 import { GoogleAuthGuard } from '../guards/google-auth.guard';
 import { GitHubAuthGuard } from '../guards/github-auth.guard';
 import { OAuthStateStore } from '../stores/oauth-state.store';
 
-describe('OAuth Guards — getAuthenticateOptions', () => {
+describe('OAuth Guards', () => {
   let stateStore: { generate: jest.Mock; validate: jest.Mock };
 
   beforeEach(() => {
@@ -22,8 +23,27 @@ describe('OAuth Guards — getAuthenticateOptions', () => {
       }),
     }) as any;
 
+  describe('createOAuthAuthGuard factory', () => {
+    it('should return a constructor function', () => {
+      const Guard = createOAuthAuthGuard('test');
+      expect(typeof Guard).toBe('function');
+    });
+
+    it('should return different classes for different strategy names', () => {
+      const GuardA = createOAuthAuthGuard('strategyA');
+      const GuardB = createOAuthAuthGuard('strategyB');
+      expect(GuardA).not.toBe(GuardB);
+    });
+
+    it('should create an instance with getAuthenticateOptions method', () => {
+      const Guard = createOAuthAuthGuard('test');
+      const instance = new Guard(stateStore as unknown as OAuthStateStore);
+      expect(typeof instance.getAuthenticateOptions).toBe('function');
+    });
+  });
+
   describe('GoogleAuthGuard', () => {
-    let guard: GoogleAuthGuard;
+    let guard: InstanceType<typeof GoogleAuthGuard>;
 
     beforeEach(() => {
       guard = new GoogleAuthGuard(stateStore as unknown as OAuthStateStore);
@@ -53,7 +73,7 @@ describe('OAuth Guards — getAuthenticateOptions', () => {
   });
 
   describe('GitHubAuthGuard', () => {
-    let guard: GitHubAuthGuard;
+    let guard: InstanceType<typeof GitHubAuthGuard>;
 
     beforeEach(() => {
       guard = new GitHubAuthGuard(stateStore as unknown as OAuthStateStore);
