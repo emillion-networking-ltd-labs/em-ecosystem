@@ -13,6 +13,7 @@ jest.mock('otplib', () => ({
 import { MfaController } from '../mfa.controller';
 import { MfaService } from '../mfa.service';
 import { AuthService } from '../auth.service';
+import { TrustedDeviceService } from '../trusted-device.service';
 
 describe('MfaController', () => {
   let controller: MfaController;
@@ -26,6 +27,9 @@ describe('MfaController', () => {
   };
   let authService: {
     generateTokensForMfa: jest.Mock;
+  };
+  let trustedDeviceService: {
+    trustDevice: jest.Mock;
   };
 
   const mockSafeUser: SafeUser = {
@@ -69,11 +73,16 @@ describe('MfaController', () => {
       generateTokensForMfa: jest.fn(),
     };
 
+    trustedDeviceService = {
+      trustDevice: jest.fn().mockResolvedValue({ id: 'device-1' }),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [MfaController],
       providers: [
         { provide: MfaService, useValue: mfaService },
         { provide: AuthService, useValue: authService },
+        { provide: TrustedDeviceService, useValue: trustedDeviceService },
       ],
     }).compile();
 
@@ -127,7 +136,13 @@ describe('MfaController', () => {
         cookie: {
           name: 'refresh_token',
           value: 'mfa-refresh',
-          options: { httpOnly: true, secure: false, sameSite: 'strict', path: '/', maxAge: 604800 },
+          options: {
+            httpOnly: true,
+            secure: false,
+            sameSite: 'strict',
+            path: '/',
+            maxAge: 604800,
+          },
         },
       };
       authService.generateTokensForMfa.mockResolvedValue(mockAuthResult);
@@ -181,6 +196,92 @@ describe('MfaController', () => {
         'recovery-123',
       );
     });
+
+    it('should trust device when trustDevice=true and fingerprint header present', async () => {
+      mfaService.verifyLoginCode.mockResolvedValue({ user: mockSafeUser });
+      authService.generateTokensForMfa.mockResolvedValue({
+        accessToken: 'token',
+        user: mockSafeUser,
+        cookie: { name: 'refresh_token', value: 'v', options: {} },
+      });
+      const mockRes = { cookie: jest.fn() } as any;
+      const reqWithFp = {
+        ...mockReq,
+        headers: { ...mockReq.headers, 'x-device-fingerprint': 'fp-abc123' },
+      };
+
+      await controller.verifyLogin(
+        { mfaToken: 'jwt', code: '123456', trustDevice: true },
+        reqWithFp,
+        mockRes,
+      );
+
+      expect(trustedDeviceService.trustDevice).toHaveBeenCalledWith(
+        'uuid-123',
+        'fp-abc123',
+        '127.0.0.1',
+        'test-agent',
+      );
+    });
+
+    it('should not trust device when trustDevice is false or omitted', async () => {
+      mfaService.verifyLoginCode.mockResolvedValue({ user: mockSafeUser });
+      authService.generateTokensForMfa.mockResolvedValue({
+        accessToken: 'token',
+        user: mockSafeUser,
+        cookie: { name: 'refresh_token', value: 'v', options: {} },
+      });
+      const mockRes = { cookie: jest.fn() } as any;
+
+      await controller.verifyLogin(
+        { mfaToken: 'jwt', code: '123456' },
+        mockReq,
+        mockRes,
+      );
+
+      expect(trustedDeviceService.trustDevice).not.toHaveBeenCalled();
+    });
+
+    it('should not trust device when fingerprint header is missing', async () => {
+      mfaService.verifyLoginCode.mockResolvedValue({ user: mockSafeUser });
+      authService.generateTokensForMfa.mockResolvedValue({
+        accessToken: 'token',
+        user: mockSafeUser,
+        cookie: { name: 'refresh_token', value: 'v', options: {} },
+      });
+      const mockRes = { cookie: jest.fn() } as any;
+
+      await controller.verifyLogin(
+        { mfaToken: 'jwt', code: '123456', trustDevice: true },
+        mockReq,
+        mockRes,
+      );
+
+      expect(trustedDeviceService.trustDevice).not.toHaveBeenCalled();
+    });
+
+    it('should not block login when trust device fails', async () => {
+      mfaService.verifyLoginCode.mockResolvedValue({ user: mockSafeUser });
+      authService.generateTokensForMfa.mockResolvedValue({
+        accessToken: 'token',
+        user: mockSafeUser,
+        cookie: { name: 'refresh_token', value: 'v', options: {} },
+      });
+      trustedDeviceService.trustDevice.mockRejectedValue(new Error('DB error'));
+      const mockRes = { cookie: jest.fn() } as any;
+      const reqWithFp = {
+        ...mockReq,
+        headers: { ...mockReq.headers, 'x-device-fingerprint': 'fp-abc123' },
+      };
+
+      const result = await controller.verifyLogin(
+        { mfaToken: 'jwt', code: '123456', trustDevice: true },
+        reqWithFp,
+        mockRes,
+      );
+
+      expect(result).toEqual({ accessToken: 'token', user: mockSafeUser });
+    });
   });
 
   // ─── DELETE /auth/mfa ───────────────────────────────────────
@@ -189,7 +290,9 @@ describe('MfaController', () => {
     it('should delegate to mfaService.disableMfa and return success', async () => {
       mfaService.disableMfa.mockResolvedValue(undefined);
 
-      const result = await controller.disable(mockReq, { password: 'MyPass1!' });
+      const result = await controller.disable(mockReq, {
+        password: 'MyPass1!',
+      });
 
       expect(mfaService.disableMfa).toHaveBeenCalledWith(
         'uuid-123',
@@ -204,9 +307,15 @@ describe('MfaController', () => {
 
   describe('regenerateCodes', () => {
     it('should return new recovery codes', async () => {
-      mfaService.regenerateRecoveryCodes.mockResolvedValue(['code1', 'code2', 'code3']);
+      mfaService.regenerateRecoveryCodes.mockResolvedValue([
+        'code1',
+        'code2',
+        'code3',
+      ]);
 
-      const result = await controller.regenerateCodes(mockReq, { password: 'MyPass1!' });
+      const result = await controller.regenerateCodes(mockReq, {
+        password: 'MyPass1!',
+      });
 
       expect(mfaService.regenerateRecoveryCodes).toHaveBeenCalledWith(
         'uuid-123',

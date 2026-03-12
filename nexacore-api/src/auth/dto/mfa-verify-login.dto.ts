@@ -1,4 +1,10 @@
-import { IsString, IsOptional, Length, Matches } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  Length,
+  Matches,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
 export class MfaVerifyLoginDto {
@@ -25,4 +31,13 @@ export class MfaVerifyLoginDto {
   @IsOptional()
   @IsString()
   recoveryCode?: string;
+
+  @ApiPropertyOptional({
+    description:
+      'Mark this device as trusted to skip MFA on future logins (30 days)',
+    default: false,
+  })
+  @IsOptional()
+  @IsBoolean()
+  trustDevice?: boolean;
 }
