@@ -7,11 +7,11 @@ export class LoginDto {
     example: 'user@example.com',
   })
   @IsEmail({}, { message: 'Invalid email format' })
-  email: string;
+  email!: string;
 
   @ApiProperty({ description: 'User password', example: 'SecureP@ss1' })
   @IsString()
-  password: string;
+  password!: string;
 
   @ApiPropertyOptional({ description: 'Cloudflare Turnstile CAPTCHA token' })
   @IsOptional()

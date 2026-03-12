@@ -34,6 +34,7 @@ import { PasskeyDeleteDto } from './dto/passkey-delete.dto';
 import { SafeUser } from '../users/entities/user.entity';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
 import { extractRequestMeta } from '../common/utils/request-meta';
+import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @ApiTags('auth')
 @UseInterceptors(NoCacheInterceptor)
@@ -74,7 +75,7 @@ export class PasskeyController {
   @ApiResponse({ status: 201, description: 'Passkey registered successfully' })
   @ApiResponse({ status: 401, description: 'Verification failed' })
   async registerVerify(
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Body() dto: PasskeyRegisterVerifyDto,
   ) {
     const meta = extractRequestMeta(req);
@@ -117,7 +118,7 @@ export class PasskeyController {
   @ApiResponse({ status: 403, description: 'Account deactivated' })
   async loginVerify(
     @Body() dto: PasskeyLoginVerifyDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
     const meta = extractRequestMeta(req);
@@ -175,7 +176,7 @@ export class PasskeyController {
   @ApiResponse({ status: 401, description: 'Invalid password' })
   @ApiResponse({ status: 404, description: 'Passkey not found' })
   async remove(
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: PasskeyDeleteDto,
   ) {

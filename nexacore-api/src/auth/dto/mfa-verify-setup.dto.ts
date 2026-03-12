@@ -9,5 +9,5 @@ export class MfaVerifySetupDto {
   @IsString()
   @Length(6, 6, { message: 'TOTP code must be exactly 6 digits' })
   @Matches(/^\d{6}$/, { message: 'TOTP code must contain only digits' })
-  token: string;
+  token!: string;
 }

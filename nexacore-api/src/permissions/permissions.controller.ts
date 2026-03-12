@@ -22,6 +22,7 @@ import { RequirePermissions } from '../common/decorators/permissions.decorator';
 import { Role } from '../users/enums/role.enum';
 import { PermissionsService } from './permissions.service';
 import { SetRolePermissionsDto } from './dto/set-role-permissions.dto';
+import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @ApiTags('permissions')
 @Controller('permissions')
@@ -75,7 +76,7 @@ export class PermissionsController {
   async setForRole(
     @Param('role') role: string,
     @Body() dto: SetRolePermissionsDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     await this.permissionsService.setPermissionsForRole(
       this.parseRole(role),

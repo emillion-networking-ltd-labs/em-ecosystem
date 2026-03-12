@@ -63,6 +63,7 @@ import { PermissionsService } from '../permissions/permissions.service';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
 import { extractRequestMeta } from '../common/utils/request-meta';
+import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
 @ApiTags('auth')
 @UseInterceptors(NoCacheInterceptor)
@@ -81,7 +82,7 @@ export class AuthController {
     res.cookie(cookie.name, cookie.value, cookie.options);
   }
 
-  private getCurrentSessionId(req: any): string | undefined {
+  private getCurrentSessionId(req: AuthenticatedRequest): string | undefined {
     const refreshToken = req.cookies?.['refresh_token'];
     if (!refreshToken) return undefined;
     try {
@@ -127,7 +128,10 @@ export class AuthController {
   })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
-  async register(@Body() registerDto: RegisterDto, @Request() req: any) {
+  async register(
+    @Body() registerDto: RegisterDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
     const meta = extractRequestMeta(req);
     const result = await this.authService.register(registerDto, meta, meta);
     return { message: result.message };
@@ -149,11 +153,14 @@ export class AuthController {
   @ApiResponse({ status: 429, description: 'Too many requests' })
   async login(
     @Body() loginDto: LoginDto,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
     const meta = extractRequestMeta(req);
-    const fingerprint = req.headers?.['x-device-fingerprint'] || undefined;
+    const rawFingerprint = req.headers?.['x-device-fingerprint'];
+    const fingerprint = Array.isArray(rawFingerprint)
+      ? rawFingerprint[0]
+      : rawFingerprint;
     const result = await this.authService.login(
       loginDto,
       meta,
@@ -191,7 +198,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 429, description: 'Too many requests' })
   async refresh(
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
     const refreshToken = req.cookies?.['refresh_token'];
@@ -212,7 +219,10 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout and invalidate current session' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
-  async logout(@Request() req: any, @Res({ passthrough: true }) res: Response) {
+  async logout(
+    @Request() req: AuthenticatedRequest,
+    @Res({ passthrough: true }) res: Response,
+  ) {
     const refreshToken = req.cookies?.['refresh_token'];
     const meta = extractRequestMeta(req);
     if (refreshToken) {
@@ -232,7 +242,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'All sessions revoked' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async logoutAll(
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
     const meta = extractRequestMeta(req);
@@ -247,7 +257,7 @@ export class AuthController {
   @ApiOperation({ summary: 'List active sessions for current user' })
   @ApiResponse({ status: 200, description: 'Returns list of active sessions' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async getSessions(@Request() req: any) {
+  async getSessions(@Request() req: AuthenticatedRequest) {
     const currentSessionId = this.getCurrentSessionId(req);
     return this.sessionsService.getActiveSessions(
       req.user.id,
@@ -263,7 +273,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async revokeSession(
     @Param('id', ParseUUIDPipe) sessionId: string,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     await this.sessionsService.revokeSession(sessionId, req.user.id);
     return { message: 'Session revoked' };
@@ -344,7 +354,7 @@ export class AuthController {
     description: 'Email already verified or rate limited',
   })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async resendVerification(@Request() req: any) {
+  async resendVerification(@Request() req: AuthenticatedRequest) {
     await this.authService.resendVerificationEmail(req.user.id);
     return { message: 'Verification email sent' };
   }
@@ -402,7 +412,10 @@ export class AuthController {
     status: 400,
     description: 'Invalid or expired token, or validation error',
   })
-  async resetPassword(@Body() dto: ResetPasswordDto, @Request() req: any) {
+  async resetPassword(
+    @Body() dto: ResetPasswordDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
     const meta = extractRequestMeta(req);
     await this.authService.resetPassword(dto, meta);
     return { message: 'Password reset successfully' };
@@ -573,7 +586,10 @@ export class AuthController {
   @ApiResponse({ status: 201, description: 'Device trusted' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
-  async trustDevice(@Body() dto: TrustDeviceDto, @Request() req: any) {
+  async trustDevice(
+    @Body() dto: TrustDeviceDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
     const meta = extractRequestMeta(req);
     const device = await this.trustedDeviceService.trustDevice(
       req.user.id,
@@ -594,7 +610,7 @@ export class AuthController {
   @ApiOperation({ summary: 'List trusted devices for current user' })
   @ApiResponse({ status: 200, description: 'List of trusted devices' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async listTrustedDevices(@Request() req: any) {
+  async listTrustedDevices(@Request() req: AuthenticatedRequest) {
     return this.trustedDeviceService.listTrustedDevices(req.user.id);
   }
 
@@ -605,7 +621,7 @@ export class AuthController {
   @ApiOperation({ summary: 'Revoke all trusted devices' })
   @ApiResponse({ status: 200, description: 'All trusted devices revoked' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async revokeAllTrustedDevices(@Request() req: any) {
+  async revokeAllTrustedDevices(@Request() req: AuthenticatedRequest) {
     const count = await this.trustedDeviceService.revokeAllDevices(req.user.id);
     return { message: 'All trusted devices revoked', count };
   }
@@ -619,7 +635,7 @@ export class AuthController {
   @ApiResponse({ status: 404, description: 'Device not found' })
   async revokeTrustedDevice(
     @Param('id', ParseUUIDPipe) deviceId: string,
-    @Request() req: any,
+    @Request() req: AuthenticatedRequest,
   ) {
     await this.trustedDeviceService.revokeDevice(req.user.id, deviceId);
     return { message: 'Device trust revoked' };

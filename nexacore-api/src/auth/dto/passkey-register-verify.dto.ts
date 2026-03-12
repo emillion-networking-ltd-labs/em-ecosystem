@@ -2,7 +2,7 @@ import { IsObject, IsOptional, IsString, MaxLength } from 'class-validator';
 
 export class PasskeyRegisterVerifyDto {
   @IsObject()
-  credential: Record<string, unknown>;
+  credential!: Record<string, unknown>;
 
   @IsOptional()
   @IsString()

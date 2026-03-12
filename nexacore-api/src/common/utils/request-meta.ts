@@ -6,7 +6,7 @@ export interface RequestMeta {
 export function extractRequestMeta(req: {
   ip?: string;
   socket?: { remoteAddress?: string };
-  headers?: Record<string, string | string[]>;
+  headers?: Record<string, string | string[] | undefined>;
 }): RequestMeta {
   return {
     ipAddress: req.ip || req.socket?.remoteAddress || 'unknown',

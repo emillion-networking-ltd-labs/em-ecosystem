@@ -7,5 +7,5 @@ export class MfaDisableDto {
     example: 'SecureP@ss1',
   })
   @IsString()
-  password: string;
+  password!: string;
 }

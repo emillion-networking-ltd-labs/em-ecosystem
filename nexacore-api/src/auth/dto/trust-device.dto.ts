@@ -5,5 +5,5 @@ export class TrustDeviceDto {
   @IsNotEmpty()
   @MinLength(16)
   @MaxLength(512)
-  fingerprint: string;
+  fingerprint!: string;
 }

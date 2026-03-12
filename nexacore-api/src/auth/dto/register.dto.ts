@@ -13,7 +13,7 @@ export class RegisterDto {
     example: 'user@example.com',
   })
   @IsEmail({}, { message: 'Invalid email format' })
-  email: string;
+  email!: string;
 
   @ApiProperty({
     description: 'Password — minimum 8 characters',
@@ -22,7 +22,7 @@ export class RegisterDto {
   @IsString()
   @MinLength(8, { message: 'Password must be at least 8 characters' })
   @MaxLength(128, { message: 'Password must not exceed 128 characters' })
-  password: string;
+  password!: string;
 
   @ApiPropertyOptional({ description: 'Cloudflare Turnstile CAPTCHA token' })
   @IsOptional()

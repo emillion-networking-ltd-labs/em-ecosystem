@@ -9,5 +9,5 @@ export class SetRolePermissionsDto {
   })
   @IsArray()
   @IsString({ each: true })
-  permissionKeys: string[];
+  permissionKeys!: string[];
 }
