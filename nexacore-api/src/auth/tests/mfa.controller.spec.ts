@@ -12,7 +12,7 @@ jest.mock('otplib', () => ({
 
 import { MfaController } from '../mfa.controller';
 import { MfaService } from '../mfa.service';
-import { AuthService } from '../auth.service';
+import { TokenService } from '../token.service';
 import { TrustedDeviceService } from '../trusted-device.service';
 
 describe('MfaController', () => {
@@ -25,7 +25,7 @@ describe('MfaController', () => {
     regenerateRecoveryCodes: jest.Mock;
     getMfaStatus: jest.Mock;
   };
-  let authService: {
+  let tokenService: {
     generateTokensForMfa: jest.Mock;
   };
   let trustedDeviceService: {
@@ -69,7 +69,7 @@ describe('MfaController', () => {
       getMfaStatus: jest.fn(),
     };
 
-    authService = {
+    tokenService = {
       generateTokensForMfa: jest.fn(),
     };
 
@@ -81,7 +81,7 @@ describe('MfaController', () => {
       controllers: [MfaController],
       providers: [
         { provide: MfaService, useValue: mfaService },
-        { provide: AuthService, useValue: authService },
+        { provide: TokenService, useValue: tokenService },
         { provide: TrustedDeviceService, useValue: trustedDeviceService },
       ],
     }).compile();
@@ -145,7 +145,7 @@ describe('MfaController', () => {
           },
         },
       };
-      authService.generateTokensForMfa.mockResolvedValue(mockAuthResult);
+      tokenService.generateTokensForMfa.mockResolvedValue(mockAuthResult);
 
       const mockRes = { cookie: jest.fn() } as any;
 
@@ -160,7 +160,7 @@ describe('MfaController', () => {
         '123456',
         undefined,
       );
-      expect(authService.generateTokensForMfa).toHaveBeenCalledWith(
+      expect(tokenService.generateTokensForMfa).toHaveBeenCalledWith(
         'uuid-123',
         { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
       );
@@ -177,7 +177,7 @@ describe('MfaController', () => {
 
     it('should pass recoveryCode when provided', async () => {
       mfaService.verifyLoginCode.mockResolvedValue({ user: mockSafeUser });
-      authService.generateTokensForMfa.mockResolvedValue({
+      tokenService.generateTokensForMfa.mockResolvedValue({
         accessToken: 'token',
         user: mockSafeUser,
         cookie: { name: 'refresh_token', value: 'v', options: {} },
@@ -199,7 +199,7 @@ describe('MfaController', () => {
 
     it('should trust device when trustDevice=true and fingerprint header present', async () => {
       mfaService.verifyLoginCode.mockResolvedValue({ user: mockSafeUser });
-      authService.generateTokensForMfa.mockResolvedValue({
+      tokenService.generateTokensForMfa.mockResolvedValue({
         accessToken: 'token',
         user: mockSafeUser,
         cookie: { name: 'refresh_token', value: 'v', options: {} },
@@ -226,7 +226,7 @@ describe('MfaController', () => {
 
     it('should not trust device when trustDevice is false or omitted', async () => {
       mfaService.verifyLoginCode.mockResolvedValue({ user: mockSafeUser });
-      authService.generateTokensForMfa.mockResolvedValue({
+      tokenService.generateTokensForMfa.mockResolvedValue({
         accessToken: 'token',
         user: mockSafeUser,
         cookie: { name: 'refresh_token', value: 'v', options: {} },
@@ -244,7 +244,7 @@ describe('MfaController', () => {
 
     it('should not trust device when fingerprint header is missing', async () => {
       mfaService.verifyLoginCode.mockResolvedValue({ user: mockSafeUser });
-      authService.generateTokensForMfa.mockResolvedValue({
+      tokenService.generateTokensForMfa.mockResolvedValue({
         accessToken: 'token',
         user: mockSafeUser,
         cookie: { name: 'refresh_token', value: 'v', options: {} },
@@ -262,7 +262,7 @@ describe('MfaController', () => {
 
     it('should not block login when trust device fails', async () => {
       mfaService.verifyLoginCode.mockResolvedValue({ user: mockSafeUser });
-      authService.generateTokensForMfa.mockResolvedValue({
+      tokenService.generateTokensForMfa.mockResolvedValue({
         accessToken: 'token',
         user: mockSafeUser,
         cookie: { name: 'refresh_token', value: 'v', options: {} },

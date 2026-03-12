@@ -20,7 +20,7 @@ import {
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { MfaService } from './mfa.service';
-import { AuthService } from './auth.service';
+import { TokenService } from './token.service';
 import { TrustedDeviceService } from './trusted-device.service';
 import { AUTH_RATE_LIMITS } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -37,7 +37,7 @@ import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor'
 export class MfaController {
   constructor(
     private readonly mfaService: MfaService,
-    private readonly authService: AuthService,
+    private readonly tokenService: TokenService,
     private readonly trustedDeviceService: TrustedDeviceService,
   ) {}
 
@@ -109,7 +109,7 @@ export class MfaController {
     );
 
     const meta = this.extractRequestMeta(req);
-    const result = await this.authService.generateTokensForMfa(user.id, meta);
+    const result = await this.tokenService.generateTokensForMfa(user.id, meta);
 
     res.cookie(result.cookie.name, result.cookie.value, result.cookie.options);
 

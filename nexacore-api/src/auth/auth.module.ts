@@ -5,6 +5,11 @@ import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
+import { TokenService } from './token.service';
+import { LoginService } from './login.service';
+import { OAuthAuthService } from './oauth-auth.service';
+import { EmailVerificationService } from './email-verification.service';
+import { PasswordResetService } from './password-reset.service';
 import { MfaController } from './mfa.controller';
 import { MfaService } from './mfa.service';
 import { PasskeyController } from './passkey.controller';
@@ -58,6 +63,11 @@ import { SecurityModule } from '../security/security.module';
   controllers: [AuthController, MfaController, PasskeyController],
   providers: [
     AuthService,
+    TokenService,
+    LoginService,
+    OAuthAuthService,
+    EmailVerificationService,
+    PasswordResetService,
     MfaService,
     PasskeyService,
     JwtStrategy,
@@ -72,6 +82,7 @@ import { SecurityModule } from '../security/security.module';
   ],
   exports: [
     AuthService,
+    TokenService,
     PasswordBreachService,
     TrustedDeviceService,
     TokenDenyListService,

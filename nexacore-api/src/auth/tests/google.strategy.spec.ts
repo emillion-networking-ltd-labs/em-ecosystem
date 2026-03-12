@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { GoogleStrategy } from '../strategies/google.strategy';
-import { AuthService } from '../auth.service';
+import { OAuthAuthService } from '../oauth-auth.service';
 import { OAuthStateStore } from '../stores/oauth-state.store';
 import { ConfigService } from '@nestjs/config';
 import { Strategy as PassportGoogleStrategy } from 'passport-google-oauth20';
@@ -9,7 +9,7 @@ import { Role } from '../../users/enums/role.enum';
 
 describe('GoogleStrategy', () => {
   let strategy: GoogleStrategy;
-  let authService: jest.Mocked<AuthService>;
+  let authService: jest.Mocked<OAuthAuthService>;
   let oauthStateStore: jest.Mocked<OAuthStateStore>;
 
   const mockCookie = {
@@ -56,7 +56,7 @@ describe('GoogleStrategy', () => {
       providers: [
         GoogleStrategy,
         {
-          provide: AuthService,
+          provide: OAuthAuthService,
           useValue: {
             validateOAuthUser: jest.fn(),
           },
@@ -106,7 +106,7 @@ describe('GoogleStrategy', () => {
     }).compile();
 
     strategy = module.get<GoogleStrategy>(GoogleStrategy);
-    authService = module.get(AuthService);
+    authService = module.get(OAuthAuthService);
     oauthStateStore = module.get(OAuthStateStore);
   });
 
