@@ -21,6 +21,7 @@ import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { MfaService } from './mfa.service';
 import { AuthService } from './auth.service';
+import { TrustedDeviceService } from './trusted-device.service';
 import { AUTH_RATE_LIMITS } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { MfaVerifySetupDto } from './dto/mfa-verify-setup.dto';
@@ -37,6 +38,7 @@ export class MfaController {
   constructor(
     private readonly mfaService: MfaService,
     private readonly authService: AuthService,
+    private readonly trustedDeviceService: TrustedDeviceService,
   ) {}
 
   private extractRequestMeta(req: any): {
@@ -110,6 +112,16 @@ export class MfaController {
     const result = await this.authService.generateTokensForMfa(user.id, meta);
 
     res.cookie(result.cookie.name, result.cookie.value, result.cookie.options);
+
+    // Trust device (fire-and-forget — failure must not block login)
+    if (dto.trustDevice) {
+      const fingerprint = req.headers?.['x-device-fingerprint'];
+      if (fingerprint) {
+        this.trustedDeviceService
+          .trustDevice(user.id, fingerprint, meta.ipAddress, meta.userAgent)
+          .catch(() => {});
+      }
+    }
 
     return { accessToken: result.accessToken, user: result.user };
   }

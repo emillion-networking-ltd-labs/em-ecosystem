@@ -17,6 +17,7 @@ export default function MfaTotpStep() {
   const [code, setCode] = useState<string[]>(Array(6).fill(""));
   const [useRecovery, setUseRecovery] = useState(false);
   const [recoveryCode, setRecoveryCode] = useState("");
+  const [trustDevice, setTrustDevice] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
@@ -28,14 +29,14 @@ export default function MfaTotpStep() {
   const handleVerify = useCallback(
     async (codeStr: string, isRecovery: boolean) => {
       try {
-        await verifyMfaLogin(codeStr, isRecovery);
+        await verifyMfaLogin(codeStr, isRecovery, trustDevice);
       } catch (err) {
         if (err instanceof RateLimitError) {
           setRateLimit(err.retryAfter, err.message);
         }
       }
     },
-    [verifyMfaLogin, setRateLimit],
+    [verifyMfaLogin, setRateLimit, trustDevice],
   );
 
   const handleDigitChange = (index: number, value: string) => {
@@ -161,6 +162,19 @@ export default function MfaTotpStep() {
                 </div>
               )}
 
+              {/* Trust device checkbox */}
+              <label className="flex cursor-pointer items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={trustDevice}
+                  onChange={(e) => setTrustDevice(e.target.checked)}
+                  className="h-4 w-4 rounded border-border-default accent-surface-inverse"
+                />
+                <span className="text-sm leading-[21px] text-content-primary/75">
+                  Trust this device for 30 days
+                </span>
+              </label>
+
               {/* Back link — right-aligned, same position as Forgot password? in login */}
               <div className="flex items-center justify-end">
                 <button
@@ -268,6 +282,19 @@ export default function MfaTotpStep() {
                 )}
               </div>
             )}
+
+            {/* Trust device checkbox */}
+            <label className="flex cursor-pointer items-center gap-2">
+              <input
+                type="checkbox"
+                checked={trustDevice}
+                onChange={(e) => setTrustDevice(e.target.checked)}
+                className="h-4 w-4 rounded border-border-default accent-surface-inverse"
+              />
+              <span className="text-sm leading-[21px] text-content-primary/75">
+                Trust this device for 30 days
+              </span>
+            </label>
 
             {/* Recovery link — right-aligned, same position as Forgot password? in login */}
             <div className="flex items-center justify-end">
