@@ -33,6 +33,7 @@ import { PasskeyRenameDto } from './dto/passkey-rename.dto';
 import { PasskeyDeleteDto } from './dto/passkey-delete.dto';
 import { SafeUser } from '../users/entities/user.entity';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
+import { extractRequestMeta } from '../common/utils/request-meta';
 
 @ApiTags('auth')
 @UseInterceptors(NoCacheInterceptor)
@@ -42,16 +43,6 @@ export class PasskeyController {
     private readonly passkeyService: PasskeyService,
     private readonly tokenService: TokenService,
   ) {}
-
-  private extractRequestMeta(req: any): {
-    ipAddress: string;
-    userAgent: string | null;
-  } {
-    return {
-      ipAddress: req.ip || req.socket?.remoteAddress || 'unknown',
-      userAgent: req.headers?.['user-agent'] || null,
-    };
-  }
 
   @Post('register/options')
   @UseGuards(JwtAuthGuard)
@@ -86,7 +77,7 @@ export class PasskeyController {
     @Request() req: any,
     @Body() dto: PasskeyRegisterVerifyDto,
   ) {
-    const meta = this.extractRequestMeta(req);
+    const meta = extractRequestMeta(req);
     return this.passkeyService.verifyRegistration(
       req.user.id,
       dto.credential,
@@ -129,7 +120,7 @@ export class PasskeyController {
     @Request() req: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const meta = this.extractRequestMeta(req);
+    const meta = extractRequestMeta(req);
     const userId = await this.passkeyService.verifyAuthentication(
       dto.challengeId,
       dto.credential,
@@ -188,7 +179,7 @@ export class PasskeyController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: PasskeyDeleteDto,
   ) {
-    const meta = this.extractRequestMeta(req);
+    const meta = extractRequestMeta(req);
     await this.passkeyService.deletePasskey(
       req.user.id,
       id,

@@ -33,6 +33,7 @@ import { AdminUpdateUserDto } from './dto/admin-update-user.dto';
 import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { ListSecurityActivityQueryDto } from './dto/list-security-activity-query.dto';
 import { ErrorMessages } from '../common/constants/error-messages';
+import { extractRequestMeta } from '../common/utils/request-meta';
 
 @Controller('users')
 export class UsersController {
@@ -44,13 +45,18 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async updateProfile(
     @Request()
-    req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
+    req: {
+      user: { id: string };
+      ip?: string;
+      headers?: Record<string, string>;
+    },
     @Body() dto: UpdateProfileDto,
   ) {
-    return this.usersService.updateProfile(req.user.id, dto, {
-      ipAddress: req.ip || null,
-      userAgent: req.headers?.['user-agent'] || null,
-    });
+    return this.usersService.updateProfile(
+      req.user.id,
+      dto,
+      extractRequestMeta(req),
+    );
   }
 
   @Patch('me/password')
@@ -58,13 +64,18 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async changePassword(
     @Request()
-    req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
+    req: {
+      user: { id: string };
+      ip?: string;
+      headers?: Record<string, string>;
+    },
     @Body() dto: ChangePasswordDto,
   ) {
-    await this.usersService.changePassword(req.user.id, dto, {
-      ipAddress: req.ip || null,
-      userAgent: req.headers?.['user-agent'] || null,
-    });
+    await this.usersService.changePassword(
+      req.user.id,
+      dto,
+      extractRequestMeta(req),
+    );
     return { message: 'Password changed successfully' };
   }
 
@@ -74,13 +85,18 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async requestEmailChange(
     @Request()
-    req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
+    req: {
+      user: { id: string };
+      ip?: string;
+      headers?: Record<string, string>;
+    },
     @Body() dto: ChangeEmailDto,
   ) {
-    return this.usersService.requestEmailChange(req.user.id, dto, {
-      ipAddress: req.ip || null,
-      userAgent: req.headers?.['user-agent'] || null,
-    });
+    return this.usersService.requestEmailChange(
+      req.user.id,
+      dto,
+      extractRequestMeta(req),
+    );
   }
 
   @Delete('me')
@@ -88,13 +104,18 @@ export class UsersController {
   @HttpCode(HttpStatus.OK)
   async deleteOwnAccount(
     @Request()
-    req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
+    req: {
+      user: { id: string };
+      ip?: string;
+      headers?: Record<string, string>;
+    },
     @Body() dto: DeleteAccountDto,
   ) {
-    return this.usersService.selfDeleteAccount(req.user.id, dto, {
-      ipAddress: req.ip || null,
-      userAgent: req.headers?.['user-agent'] || null,
-    });
+    return this.usersService.selfDeleteAccount(
+      req.user.id,
+      dto,
+      extractRequestMeta(req),
+    );
   }
 
   @Get('me/oauth')
@@ -110,7 +131,11 @@ export class UsersController {
   async unlinkOAuth(
     @Param('provider') provider: string,
     @Request()
-    req: { user: { id: string }; ip?: string; headers?: Record<string, string> },
+    req: {
+      user: { id: string };
+      ip?: string;
+      headers?: Record<string, string>;
+    },
     @Body() dto: UnlinkOAuthDto,
   ) {
     const validProviders = ['GOOGLE', 'GITHUB'];
@@ -118,10 +143,12 @@ export class UsersController {
     if (!validProviders.includes(normalizedProvider)) {
       throw new BadRequestException(ErrorMessages.oauth.INVALID_PROVIDER);
     }
-    return this.usersService.unlinkOAuth(req.user.id, normalizedProvider, dto, {
-      ipAddress: req.ip || null,
-      userAgent: req.headers?.['user-agent'] || null,
-    });
+    return this.usersService.unlinkOAuth(
+      req.user.id,
+      normalizedProvider,
+      dto,
+      extractRequestMeta(req),
+    );
   }
 
   @Get('me/security-activity')
@@ -173,10 +200,12 @@ export class UsersController {
       headers?: Record<string, string>;
     },
   ) {
-    return this.usersService.adminUpdateUser(id, dto, req.user, {
-      ipAddress: req.ip || null,
-      userAgent: req.headers?.['user-agent'] || null,
-    });
+    return this.usersService.adminUpdateUser(
+      id,
+      dto,
+      req.user,
+      extractRequestMeta(req),
+    );
   }
 
   @Delete(':id')
@@ -193,10 +222,11 @@ export class UsersController {
       headers?: Record<string, string>;
     },
   ) {
-    await this.usersService.softDelete(id, req.user.id, {
-      ipAddress: req.ip || null,
-      userAgent: req.headers?.['user-agent'] || null,
-    });
+    await this.usersService.softDelete(
+      id,
+      req.user.id,
+      extractRequestMeta(req),
+    );
     return { message: 'User deactivated successfully' };
   }
 }

@@ -62,6 +62,7 @@ import { SafeUser } from '../users/entities/user.entity';
 import { PermissionsService } from '../permissions/permissions.service';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
+import { extractRequestMeta } from '../common/utils/request-meta';
 
 @ApiTags('auth')
 @UseInterceptors(NoCacheInterceptor)
@@ -75,16 +76,6 @@ export class AuthController {
     private readonly trustedDeviceService: TrustedDeviceService,
     private readonly configService: ConfigService,
   ) {}
-
-  private extractRequestMeta(req: any): {
-    ipAddress: string;
-    userAgent: string | null;
-  } {
-    return {
-      ipAddress: req.ip || req.socket?.remoteAddress || 'unknown',
-      userAgent: req.headers?.['user-agent'] || null,
-    };
-  }
 
   private setCookie(res: Response, cookie: CookieConfig): void {
     res.cookie(cookie.name, cookie.value, cookie.options);
@@ -137,7 +128,7 @@ export class AuthController {
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
   async register(@Body() registerDto: RegisterDto, @Request() req: any) {
-    const meta = this.extractRequestMeta(req);
+    const meta = extractRequestMeta(req);
     const result = await this.authService.register(registerDto, meta, meta);
     return { message: result.message };
   }
@@ -161,7 +152,7 @@ export class AuthController {
     @Request() req: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const meta = this.extractRequestMeta(req);
+    const meta = extractRequestMeta(req);
     const fingerprint = req.headers?.['x-device-fingerprint'] || undefined;
     const result = await this.authService.login(
       loginDto,
@@ -207,7 +198,7 @@ export class AuthController {
     if (!refreshToken) {
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
-    const meta = this.extractRequestMeta(req);
+    const meta = extractRequestMeta(req);
     const result = await this.authService.refreshTokens(
       refreshToken,
       meta,
@@ -223,7 +214,7 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
   async logout(@Request() req: any, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.['refresh_token'];
-    const meta = this.extractRequestMeta(req);
+    const meta = extractRequestMeta(req);
     if (refreshToken) {
       const clearCookie = await this.authService.logout(refreshToken, meta);
       this.setCookie(res, clearCookie);
@@ -244,7 +235,7 @@ export class AuthController {
     @Request() req: any,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const meta = this.extractRequestMeta(req);
+    const meta = extractRequestMeta(req);
     const clearCookie = await this.authService.logoutAll(req.user.id, meta);
     this.setCookie(res, clearCookie);
     return { message: 'All sessions revoked' };
@@ -412,7 +403,7 @@ export class AuthController {
     description: 'Invalid or expired token, or validation error',
   })
   async resetPassword(@Body() dto: ResetPasswordDto, @Request() req: any) {
-    const meta = this.extractRequestMeta(req);
+    const meta = extractRequestMeta(req);
     await this.authService.resetPassword(dto, meta);
     return { message: 'Password reset successfully' };
   }
@@ -583,7 +574,7 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
   async trustDevice(@Body() dto: TrustDeviceDto, @Request() req: any) {
-    const meta = this.extractRequestMeta(req);
+    const meta = extractRequestMeta(req);
     const device = await this.trustedDeviceService.trustDevice(
       req.user.id,
       dto.fingerprint,
