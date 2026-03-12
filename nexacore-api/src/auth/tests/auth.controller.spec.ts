@@ -1,24 +1,16 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException, ForbiddenException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { NotFoundException } from '@nestjs/common';
 import { AuthController } from '../auth.controller';
 import { AuthService } from '../auth.service';
-import { TrustedDeviceService } from '../trusted-device.service';
-import { SessionsService } from '../../sessions/sessions.service';
-import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { TurnstileService } from '../../security/turnstile.service';
-import { ConfigService } from '@nestjs/config';
+import { AuditService } from '../../audit/audit.service';
 import { Role } from '../../users/enums/role.enum';
 
 describe('AuthController', () => {
   let controller: AuthController;
   let authService: jest.Mocked<AuthService>;
-  let sessionsService: jest.Mocked<SessionsService>;
-  let jwtSvc: jest.Mocked<JwtService>;
-  let trustedDeviceService: jest.Mocked<TrustedDeviceService>;
 
   const mockCookie = {
     name: 'refresh_token',
@@ -84,38 +76,7 @@ describe('AuthController', () => {
             refreshTokens: jest.fn(),
             logout: jest.fn(),
             logoutAll: jest.fn(),
-            generateOAuthCode: jest
-              .fn()
-              .mockResolvedValue('ephemeral-code-uuid'),
-            exchangeOAuthCode: jest.fn(),
             buildClearCookie: jest.fn().mockReturnValue(mockClearCookie),
-            verifyEmail: jest.fn(),
-            resendVerificationEmail: jest.fn(),
-            forgotPassword: jest.fn(),
-            resetPassword: jest.fn(),
-            validateResetToken: jest.fn(),
-            resendVerificationByEmail: jest.fn(),
-            verifyEmailChange: jest.fn(),
-          },
-        },
-        {
-          provide: SessionsService,
-          useValue: {
-            getActiveSessions: jest.fn(),
-            revokeSession: jest.fn(),
-          },
-        },
-        {
-          provide: JwtService,
-          useValue: {
-            sign: jest.fn(),
-            verify: jest.fn(),
-          },
-        },
-        {
-          provide: AuditService,
-          useValue: {
-            log: jest.fn().mockResolvedValue(undefined),
           },
         },
         {
@@ -127,12 +88,9 @@ describe('AuthController', () => {
           },
         },
         {
-          provide: TrustedDeviceService,
+          provide: AuditService,
           useValue: {
-            trustDevice: jest.fn(),
-            listTrustedDevices: jest.fn(),
-            revokeDevice: jest.fn(),
-            revokeAllDevices: jest.fn(),
+            log: jest.fn().mockResolvedValue(undefined),
           },
         },
         {
@@ -141,47 +99,11 @@ describe('AuthController', () => {
             verify: jest.fn().mockResolvedValue(true),
           },
         },
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => {
-              const config: Record<string, any> = {
-                'auth.jwtSecret':
-                  'test-secret-that-is-at-least-32-characters-long',
-                'auth.jwtAccessExpiration': '15m',
-                'auth.jwtRefreshExpiration': '12h',
-                'auth.sessionIdleTimeoutHours': 0.5,
-                'auth.maxConcurrentSessions': 5,
-                'auth.trustedDeviceTtlDays': 30,
-                'auth.mfaAppName': 'EM NexaCore',
-                'auth.webauthnRpId': 'localhost',
-                'auth.webauthnRpName': 'EM NexaCore',
-                'auth.webauthnOrigin': 'http://localhost:3001',
-                'oauth.googleClientId': 'test-google-id',
-                'oauth.googleClientSecret': 'test-google-secret',
-                'oauth.googleCallbackUrl':
-                  'http://localhost:3000/auth/google/callback',
-                'oauth.githubClientId': 'test-github-id',
-                'oauth.githubClientSecret': 'test-github-secret',
-                'oauth.githubCallbackUrl':
-                  'http://localhost:3000/auth/github/callback',
-                'app.nodeEnv': 'test',
-                'app.frontendUrl': 'http://localhost:3001',
-                'app.oauthAllowedRedirectUrls': '',
-                'app.isProduction': false,
-              };
-              return config[key];
-            }),
-          },
-        },
       ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
     authService = module.get(AuthService);
-    sessionsService = module.get(SessionsService);
-    jwtSvc = module.get(JwtService);
-    trustedDeviceService = module.get(TrustedDeviceService);
   });
 
   const mockReq = {
@@ -261,6 +183,42 @@ describe('AuthController', () => {
     });
   });
 
+  describe('login - MFA challenge branch', () => {
+    it('should return MFA challenge without setting cookie', async () => {
+      const mfaResult = { mfaRequired: true as const, mfaToken: 'mfa-jwt' };
+      authService.login.mockResolvedValue(mfaResult);
+
+      const result = await controller.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        mockReq,
+        mockRes as any,
+      );
+
+      expect(result).toEqual(mfaResult);
+      expect(mockRes.cookie).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('login - MFA setup required branch', () => {
+    it('should return mfaSetupRequired without setting cookie', async () => {
+      const mfaSetupResult = {
+        mfaSetupRequired: true as const,
+        message:
+          'MFA setup is required for administrator accounts. Please enable MFA to continue.',
+      };
+      authService.login.mockResolvedValue(mfaSetupResult);
+
+      const result = await controller.login(
+        { email: 'admin@example.com', password: 'StrongPass1!' },
+        mockReq,
+        mockRes as any,
+      );
+
+      expect(result).toEqual(mfaSetupResult);
+      expect(mockRes.cookie).not.toHaveBeenCalled();
+    });
+  });
+
   describe('refresh', () => {
     it('should read refresh token from cookie and return new accessToken', async () => {
       const reqWithCookie = {
@@ -331,48 +289,6 @@ describe('AuthController', () => {
     });
   });
 
-  describe('getSessions', () => {
-    it('should return active sessions for the current user', async () => {
-      const mockSessions = [
-        {
-          id: 'sess-1',
-          deviceInfo: null,
-          ipAddress: '127.0.0.1',
-          userAgent: 'test',
-          createdAt: new Date().toISOString(),
-          lastUsedAt: new Date().toISOString(),
-          expiresAt: new Date().toISOString(),
-          isCurrent: false,
-        },
-      ];
-      const reqWithUser = { ...mockReq, user: { id: 'uuid-123' } };
-      sessionsService.getActiveSessions.mockResolvedValue(mockSessions as any);
-
-      const result = await controller.getSessions(reqWithUser);
-
-      expect(sessionsService.getActiveSessions).toHaveBeenCalledWith(
-        'uuid-123',
-        undefined,
-      );
-      expect(result).toEqual(mockSessions);
-    });
-  });
-
-  describe('revokeSession', () => {
-    it('should revoke the specified session', async () => {
-      const reqWithUser = { ...mockReq, user: { id: 'uuid-123' } };
-      sessionsService.revokeSession.mockResolvedValue(undefined);
-
-      const result = await controller.revokeSession('session-id', reqWithUser);
-
-      expect(sessionsService.revokeSession).toHaveBeenCalledWith(
-        'session-id',
-        'uuid-123',
-      );
-      expect(result.message).toBe('Session revoked');
-    });
-  });
-
   describe('getMe', () => {
     it('should return the user with permissions from the request', async () => {
       const req = { user: mockAuthResult.user };
@@ -394,127 +310,6 @@ describe('AuthController', () => {
     });
   });
 
-  describe('googleAuthCallback', () => {
-    it('should return redirect URL with ephemeral code', async () => {
-      const req = {
-        user: {
-          accessToken: 'google-access',
-          user: mockAuthResult.user,
-          cookie: mockCookie,
-        },
-      };
-
-      const result = await controller.googleAuthCallback(req);
-
-      expect(result.url).toBe(
-        'http://localhost:3001/auth/callback?code=ephemeral-code-uuid',
-      );
-      expect(result.url).not.toContain('accessToken');
-      expect(authService.generateOAuthCode).toHaveBeenCalledWith(req.user);
-    });
-  });
-
-  describe('githubAuthCallback', () => {
-    it('should return redirect URL with ephemeral code', async () => {
-      const req = {
-        user: {
-          accessToken: 'github-access',
-          user: mockAuthResult.user,
-          cookie: mockCookie,
-        },
-      };
-
-      const result = await controller.githubAuthCallback(req);
-
-      expect(result.url).toBe(
-        'http://localhost:3001/auth/callback?code=ephemeral-code-uuid',
-      );
-      expect(result.url).not.toContain('accessToken');
-      expect(authService.generateOAuthCode).toHaveBeenCalledWith(req.user);
-    });
-  });
-
-  describe('exchangeOAuthCode', () => {
-    it('should have @Throttle decorator', () => {
-      const limitMeta = Reflect.getMetadata(
-        'THROTTLER:LIMITglobal',
-        controller.exchangeOAuthCode,
-      );
-      const ttlMeta = Reflect.getMetadata(
-        'THROTTLER:TTLglobal',
-        controller.exchangeOAuthCode,
-      );
-      expect(limitMeta).toBeDefined();
-      expect(ttlMeta).toBeDefined();
-    });
-
-    it('should set cookie and return accessToken + user for a valid code', async () => {
-      authService.exchangeOAuthCode.mockResolvedValue(mockAuthResult as any);
-
-      const result = await controller.exchangeOAuthCode(
-        { code: 'valid-code' },
-        mockRes as any,
-      );
-
-      expect(authService.exchangeOAuthCode).toHaveBeenCalledWith('valid-code');
-      expect(result.accessToken).toBe('access-token-123');
-      expect(result.user.email).toBe('test@example.com');
-      expect(mockRes.cookie).toHaveBeenCalled();
-    });
-
-    it('should propagate UnauthorizedException for invalid code', async () => {
-      authService.exchangeOAuthCode.mockRejectedValue(
-        new UnauthorizedException('Invalid or expired authorization code'),
-      );
-
-      await expect(
-        controller.exchangeOAuthCode({ code: 'invalid-code' }, mockRes as any),
-      ).rejects.toThrow(UnauthorizedException);
-    });
-  });
-
-  // ─── LOGIN MFA BRANCH ──────────────────────────────────────
-
-  describe('login - MFA challenge branch', () => {
-    it('should return MFA challenge without setting cookie', async () => {
-      const mfaResult = { mfaRequired: true as const, mfaToken: 'mfa-jwt' };
-      authService.login.mockResolvedValue(mfaResult);
-
-      const result = await controller.login(
-        { email: 'test@example.com', password: 'StrongPass1!' },
-        mockReq,
-        mockRes as any,
-      );
-
-      expect(result).toEqual(mfaResult);
-      expect(mockRes.cookie).not.toHaveBeenCalled();
-    });
-  });
-
-  // ─── SCRUM-119: MFA setup required branch ───────────────────
-
-  describe('login - MFA setup required branch', () => {
-    it('should return mfaSetupRequired without setting cookie', async () => {
-      const mfaSetupResult = {
-        mfaSetupRequired: true as const,
-        message:
-          'MFA setup is required for administrator accounts. Please enable MFA to continue.',
-      };
-      authService.login.mockResolvedValue(mfaSetupResult);
-
-      const result = await controller.login(
-        { email: 'admin@example.com', password: 'StrongPass1!' },
-        mockReq,
-        mockRes as any,
-      );
-
-      expect(result).toEqual(mfaSetupResult);
-      expect(mockRes.cookie).not.toHaveBeenCalled();
-    });
-  });
-
-  // ─── GET /auth/csrf-token ──────────────────────────────────
-
   describe('getCsrfToken', () => {
     it('should set CSRF cookie and return token', () => {
       jest.spyOn(CsrfGuard, 'generateToken').mockReturnValue('csrf-token-123');
@@ -523,295 +318,6 @@ describe('AuthController', () => {
 
       expect(result).toEqual({ csrfToken: 'csrf-token-123' });
       expect(mockRes.cookie).toHaveBeenCalled();
-    });
-  });
-
-  // ─── GET /auth/verify-email ────────────────────────────────
-
-  describe('verifyEmail', () => {
-    it('should redirect with success status on valid token', async () => {
-      authService.verifyEmail.mockResolvedValue({ status: 'success' });
-      const res = { redirect: jest.fn() };
-
-      await controller.verifyEmail('valid-token', res as any);
-
-      expect(authService.verifyEmail).toHaveBeenCalledWith('valid-token');
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('status=success'),
-      );
-    });
-
-    it('should redirect with invalid status on missing token', async () => {
-      const res = { redirect: jest.fn() };
-
-      await controller.verifyEmail('', res as any);
-
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('status=invalid'),
-      );
-    });
-
-    it('should redirect with invalid status on bad token', async () => {
-      authService.verifyEmail.mockResolvedValue({ status: 'invalid' });
-      const res = { redirect: jest.fn() };
-
-      await controller.verifyEmail('bad-token', res as any);
-
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('status=invalid'),
-      );
-    });
-  });
-
-  // ─── POST /auth/resend-verification ────────────────────────
-
-  describe('resendVerification', () => {
-    it('should delegate to authService and return success message', async () => {
-      authService.resendVerificationEmail.mockResolvedValue(undefined);
-      const reqWithUser = { ...mockReq, user: { id: 'uuid-123' } };
-
-      const result = await controller.resendVerification(reqWithUser);
-
-      expect(authService.resendVerificationEmail).toHaveBeenCalledWith(
-        'uuid-123',
-      );
-      expect(result).toEqual({ message: 'Verification email sent' });
-    });
-  });
-
-  // ─── POST /auth/forgot-password ───────────────────────────
-
-  describe('forgotPassword', () => {
-    it('should delegate to authService and return success message', async () => {
-      authService.forgotPassword.mockResolvedValue(undefined);
-      const dto = { email: 'test@example.com' };
-
-      const result = await controller.forgotPassword(dto);
-
-      expect(authService.forgotPassword).toHaveBeenCalledWith(dto);
-      expect(result).toEqual({
-        message: 'If an account exists, a reset email has been sent',
-      });
-    });
-  });
-
-  // ─── POST /auth/reset-password ─────────────────────────────
-
-  describe('resetPassword', () => {
-    it('should delegate to authService and return success message', async () => {
-      authService.resetPassword.mockResolvedValue(undefined);
-      const dto = { token: 'reset-token', newPassword: 'NewPass1!' };
-
-      const result = await controller.resetPassword(dto, mockReq);
-
-      expect(authService.resetPassword).toHaveBeenCalledWith(
-        dto,
-        expect.objectContaining({ ipAddress: '127.0.0.1' }),
-      );
-      expect(result).toEqual({ message: 'Password reset successfully' });
-    });
-  });
-
-  // ─── POST /auth/validate-reset-token ──────────────────────────
-
-  describe('validateResetToken', () => {
-    it('should delegate to authService and return validity', async () => {
-      authService.validateResetToken.mockResolvedValue({ valid: true });
-
-      const result = await controller.validateResetToken({
-        token: 'some-token',
-      });
-
-      expect(authService.validateResetToken).toHaveBeenCalledWith('some-token');
-      expect(result).toEqual({ valid: true });
-    });
-  });
-
-  // ─── POST /auth/resend-verification-public ─────────────────
-
-  describe('resendVerificationPublic', () => {
-    it('should delegate to authService and return generic message', async () => {
-      authService.resendVerificationByEmail.mockResolvedValue(undefined);
-      const dto = { email: 'test@example.com' };
-
-      const result = await controller.resendVerificationPublic(dto);
-
-      expect(authService.resendVerificationByEmail).toHaveBeenCalledWith(
-        'test@example.com',
-      );
-      expect(result).toEqual({
-        message:
-          'If an account exists and needs verification, we have sent an email',
-      });
-    });
-  });
-
-  // ─── googleAuth / githubAuth (empty body handlers) ─────────
-
-  describe('googleAuth', () => {
-    it('should be defined (guard handles redirect)', () => {
-      expect(controller.googleAuth()).toBeUndefined();
-    });
-  });
-
-  describe('githubAuth', () => {
-    it('should be defined (guard handles redirect)', () => {
-      expect(controller.githubAuth()).toBeUndefined();
-    });
-  });
-
-  // ─── getSessions with current session ID ───────────────────
-
-  describe('getSessions - with refresh token cookie', () => {
-    it('should extract current session ID from cookie', async () => {
-      jwtSvc.verify.mockReturnValue({
-        sub: 'uuid-123',
-        sessionId: 'current-sess',
-        family: 'fam-1',
-      });
-      sessionsService.getActiveSessions.mockResolvedValue([]);
-      const reqWithCookieAndUser = {
-        ...mockReq,
-        cookies: { refresh_token: 'some-jwt' },
-        user: { id: 'uuid-123' },
-      };
-
-      await controller.getSessions(reqWithCookieAndUser);
-
-      expect(sessionsService.getActiveSessions).toHaveBeenCalledWith(
-        'uuid-123',
-        'current-sess',
-      );
-    });
-  });
-
-  // ─── GET /auth/verify-email-change ──────────────────────────
-
-  describe('verifyEmailChange', () => {
-    it('should redirect to frontend with status=invalid when no token provided', async () => {
-      const res = { redirect: jest.fn() };
-
-      await controller.verifyEmailChange('', res as any);
-
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('status=invalid'),
-      );
-    });
-
-    it('should redirect to frontend with verification result status on success', async () => {
-      authService.verifyEmailChange.mockResolvedValue({ status: 'success' });
-      const res = { redirect: jest.fn() };
-
-      await controller.verifyEmailChange('valid-token', res as any);
-
-      expect(authService.verifyEmailChange).toHaveBeenCalledWith('valid-token');
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('status=success'),
-      );
-    });
-  });
-
-  // ─── Trusted Device Endpoints ─────────────────────────────────
-
-  describe('trustDevice', () => {
-    const mockAuthReq = {
-      ...mockReq,
-      user: { id: 'uuid-123' },
-    };
-
-    it('should trust device and return id, deviceName, expiresAt', async () => {
-      const mockDevice = {
-        id: 'device-1',
-        deviceName: 'Chrome on Windows',
-        expiresAt: new Date('2026-04-02'),
-      };
-      trustedDeviceService.trustDevice.mockResolvedValue(mockDevice as any);
-
-      const result = await controller.trustDevice(
-        { fingerprint: 'abcdef1234567890' },
-        mockAuthReq,
-      );
-
-      expect(result).toEqual({
-        id: 'device-1',
-        deviceName: 'Chrome on Windows',
-        expiresAt: mockDevice.expiresAt,
-      });
-      expect(trustedDeviceService.trustDevice).toHaveBeenCalledWith(
-        'uuid-123',
-        'abcdef1234567890',
-        '127.0.0.1',
-        'test-agent',
-      );
-    });
-  });
-
-  describe('listTrustedDevices', () => {
-    const mockAuthReq = {
-      ...mockReq,
-      user: { id: 'uuid-123' },
-    };
-
-    it('should return list of trusted devices', async () => {
-      const devices = [{ id: 'device-1', deviceName: 'Chrome on Windows' }];
-      trustedDeviceService.listTrustedDevices.mockResolvedValue(devices as any);
-
-      const result = await controller.listTrustedDevices(mockAuthReq);
-
-      expect(result).toEqual(devices);
-      expect(trustedDeviceService.listTrustedDevices).toHaveBeenCalledWith(
-        'uuid-123',
-      );
-    });
-  });
-
-  describe('revokeAllTrustedDevices', () => {
-    const mockAuthReq = {
-      ...mockReq,
-      user: { id: 'uuid-123' },
-    };
-
-    it('should revoke all devices and return count', async () => {
-      trustedDeviceService.revokeAllDevices.mockResolvedValue(3);
-
-      const result = await controller.revokeAllTrustedDevices(mockAuthReq);
-
-      expect(result).toEqual({
-        message: 'All trusted devices revoked',
-        count: 3,
-      });
-    });
-  });
-
-  describe('revokeTrustedDevice', () => {
-    const mockAuthReq = {
-      ...mockReq,
-      user: { id: 'uuid-123' },
-    };
-
-    it('should revoke a specific device', async () => {
-      trustedDeviceService.revokeDevice.mockResolvedValue(undefined);
-
-      const result = await controller.revokeTrustedDevice(
-        'device-uuid',
-        mockAuthReq,
-      );
-
-      expect(result).toEqual({ message: 'Device trust revoked' });
-      expect(trustedDeviceService.revokeDevice).toHaveBeenCalledWith(
-        'uuid-123',
-        'device-uuid',
-      );
-    });
-
-    it('should propagate NotFoundException when device not found', async () => {
-      trustedDeviceService.revokeDevice.mockRejectedValue(
-        new NotFoundException('Trusted device not found'),
-      );
-
-      await expect(
-        controller.revokeTrustedDevice('unknown-id', mockAuthReq),
-      ).rejects.toThrow(NotFoundException);
     });
   });
 });

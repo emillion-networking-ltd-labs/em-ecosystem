@@ -1,18 +1,14 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { AuthController } from '../auth.controller';
+import { OAuthController } from '../oauth.controller';
 import { AuthService } from '../auth.service';
-import { TrustedDeviceService } from '../trusted-device.service';
-import { SessionsService } from '../../sessions/sessions.service';
-import { AuditService } from '../../audit/audit.service';
-import { PermissionsService } from '../../permissions/permissions.service';
 import { TurnstileService } from '../../security/turnstile.service';
 import { ConfigService } from '@nestjs/config';
 import { Role } from '../../users/enums/role.enum';
 
 describe('OAuth Exchange Flow (Integration)', () => {
-  let controller: AuthController;
+  let controller: OAuthController;
   let authService: { [key: string]: jest.Mock };
 
   /** In-memory store that simulates the Redis-backed OAuthCodeStore */
@@ -57,12 +53,6 @@ describe('OAuth Exchange Flow (Integration)', () => {
     codeMap.clear();
 
     authService = {
-      register: jest.fn(),
-      login: jest.fn(),
-      refreshTokens: jest.fn(),
-      logout: jest.fn(),
-      logoutAll: jest.fn(),
-      buildClearCookie: jest.fn(),
       generateOAuthCode: jest.fn().mockImplementation(async (payload) => {
         const code = `code-${Date.now()}-${Math.random()}`;
         codeMap.set(code, payload);
@@ -81,47 +71,17 @@ describe('OAuth Exchange Flow (Integration)', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      controllers: [AuthController],
+      controllers: [OAuthController],
       providers: [
         {
           provide: AuthService,
           useValue: authService,
         },
         {
-          provide: SessionsService,
-          useValue: {
-            getActiveSessions: jest.fn(),
-            revokeSession: jest.fn(),
-          },
-        },
-        {
           provide: JwtService,
           useValue: {
             sign: jest.fn(),
             verify: jest.fn(),
-          },
-        },
-        {
-          provide: AuditService,
-          useValue: {
-            log: jest.fn().mockResolvedValue(undefined),
-          },
-        },
-        {
-          provide: PermissionsService,
-          useValue: {
-            getPermissionKeysForRole: jest
-              .fn()
-              .mockResolvedValue(['dashboard:read']),
-          },
-        },
-        {
-          provide: TrustedDeviceService,
-          useValue: {
-            trustDevice: jest.fn(),
-            listTrustedDevices: jest.fn(),
-            revokeDevice: jest.fn(),
-            revokeAllDevices: jest.fn(),
           },
         },
         {
@@ -135,29 +95,8 @@ describe('OAuth Exchange Flow (Integration)', () => {
           useValue: {
             get: jest.fn((key: string) => {
               const config: Record<string, any> = {
-                'auth.jwtSecret':
-                  'test-secret-that-is-at-least-32-characters-long',
-                'auth.jwtAccessExpiration': '15m',
-                'auth.jwtRefreshExpiration': '12h',
-                'auth.sessionIdleTimeoutHours': 0.5,
-                'auth.maxConcurrentSessions': 5,
-                'auth.trustedDeviceTtlDays': 30,
-                'auth.mfaAppName': 'EM NexaCore',
-                'auth.webauthnRpId': 'localhost',
-                'auth.webauthnRpName': 'EM NexaCore',
-                'auth.webauthnOrigin': 'http://localhost:3001',
-                'oauth.googleClientId': 'test-google-id',
-                'oauth.googleClientSecret': 'test-google-secret',
-                'oauth.googleCallbackUrl':
-                  'http://localhost:3000/auth/google/callback',
-                'oauth.githubClientId': 'test-github-id',
-                'oauth.githubClientSecret': 'test-github-secret',
-                'oauth.githubCallbackUrl':
-                  'http://localhost:3000/auth/github/callback',
-                'app.nodeEnv': 'test',
                 'app.frontendUrl': 'http://localhost:3001',
                 'app.oauthAllowedRedirectUrls': '',
-                'app.isProduction': false,
               };
               return config[key];
             }),
@@ -166,7 +105,7 @@ describe('OAuth Exchange Flow (Integration)', () => {
       ],
     }).compile();
 
-    controller = module.get<AuthController>(AuthController);
+    controller = module.get<OAuthController>(OAuthController);
   });
 
   it('should complete the full OAuth code exchange cycle', async () => {

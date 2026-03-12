@@ -4,6 +4,9 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
 import { AuthController } from './auth.controller';
+import { OAuthController } from './oauth.controller';
+import { AccountController } from './account.controller';
+import { SessionController } from './session.controller';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { LoginService } from './login.service';
@@ -60,7 +63,14 @@ import { SecurityModule } from '../security/security.module';
       }),
     }),
   ],
-  controllers: [AuthController, MfaController, PasskeyController],
+  controllers: [
+    AuthController,
+    OAuthController,
+    AccountController,
+    SessionController,
+    MfaController,
+    PasskeyController,
+  ],
   providers: [
     AuthService,
     TokenService,
