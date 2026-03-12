@@ -105,7 +105,7 @@ export class EmailVerificationService {
       return { status: 'invalid' };
     }
 
-    const user = verificationToken.user as any;
+    const user = verificationToken.user;
 
     // Ensure pendingEmail is still set (request not cancelled)
     if (!user.pendingEmail) {
