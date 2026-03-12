@@ -12,6 +12,7 @@ import {
   Request,
   Res,
   ParseUUIDPipe,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -31,8 +32,10 @@ import { PasskeyLoginVerifyDto } from './dto/passkey-login-verify.dto';
 import { PasskeyRenameDto } from './dto/passkey-rename.dto';
 import { PasskeyDeleteDto } from './dto/passkey-delete.dto';
 import { SafeUser } from '../users/entities/user.entity';
+import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
 
 @ApiTags('auth')
+@UseInterceptors(NoCacheInterceptor)
 @Controller('auth/passkeys')
 export class PasskeyController {
   constructor(
@@ -115,7 +118,10 @@ export class PasskeyController {
     },
   })
   @ApiOperation({ summary: 'Verify WebAuthn authentication and issue tokens' })
-  @ApiResponse({ status: 200, description: 'Authentication successful, tokens issued' })
+  @ApiResponse({
+    status: 200,
+    description: 'Authentication successful, tokens issued',
+  })
   @ApiResponse({ status: 401, description: 'Authentication failed' })
   @ApiResponse({ status: 403, description: 'Account deactivated' })
   async loginVerify(
@@ -170,7 +176,9 @@ export class PasskeyController {
       limit: AUTH_RATE_LIMITS.mfa.limit,
     },
   })
-  @ApiOperation({ summary: 'Delete a passkey (password confirmation may be required)' })
+  @ApiOperation({
+    summary: 'Delete a passkey (password confirmation may be required)',
+  })
   @ApiResponse({ status: 200, description: 'Passkey deleted' })
   @ApiResponse({ status: 400, description: 'Password required' })
   @ApiResponse({ status: 401, description: 'Invalid password' })

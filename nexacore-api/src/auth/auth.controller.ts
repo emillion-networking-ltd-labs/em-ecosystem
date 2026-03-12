@@ -15,6 +15,7 @@ import {
   UnauthorizedException,
   ParseUUIDPipe,
   UseFilters,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -59,8 +60,10 @@ import { Role } from '../users/enums/role.enum';
 import { SafeUser } from '../users/entities/user.entity';
 import { PermissionsService } from '../permissions/permissions.service';
 import { ErrorMessages } from '../common/constants/error-messages';
+import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
 
 @ApiTags('auth')
+@UseInterceptors(NoCacheInterceptor)
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -89,8 +92,7 @@ export class AuthController {
     const refreshToken = req.cookies?.['refresh_token'];
     if (!refreshToken) return undefined;
     try {
-      const payload =
-        this.jwtService.verify<RefreshTokenPayload>(refreshToken);
+      const payload = this.jwtService.verify<RefreshTokenPayload>(refreshToken);
       return payload.sessionId;
     } catch {
       return undefined;
@@ -132,10 +134,7 @@ export class AuthController {
   })
   @ApiResponse({ status: 400, description: 'Validation error' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
-  async register(
-    @Body() registerDto: RegisterDto,
-    @Request() req: any,
-  ) {
+  async register(@Body() registerDto: RegisterDto, @Request() req: any) {
     const meta = this.extractRequestMeta(req);
     const result = await this.authService.register(registerDto, meta, meta);
     return { message: result.message };
@@ -162,7 +161,12 @@ export class AuthController {
   ) {
     const meta = this.extractRequestMeta(req);
     const fingerprint = req.headers?.['x-device-fingerprint'] || undefined;
-    const result = await this.authService.login(loginDto, meta, meta, fingerprint);
+    const result = await this.authService.login(
+      loginDto,
+      meta,
+      meta,
+      fingerprint,
+    );
 
     // MFA challenge — don't set cookie, return challenge token
     if ('mfaRequired' in result) {
@@ -215,10 +219,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Logout and invalidate current session' })
   @ApiResponse({ status: 200, description: 'Logged out successfully' })
-  async logout(
-    @Request() req: any,
-    @Res({ passthrough: true }) res: Response,
-  ) {
+  async logout(@Request() req: any, @Res({ passthrough: true }) res: Response) {
     const refreshToken = req.cookies?.['refresh_token'];
     const meta = this.extractRequestMeta(req);
     if (refreshToken) {
@@ -255,7 +256,10 @@ export class AuthController {
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getSessions(@Request() req: any) {
     const currentSessionId = this.getCurrentSessionId(req);
-    return this.sessionsService.getActiveSessions(req.user.id, currentSessionId);
+    return this.sessionsService.getActiveSessions(
+      req.user.id,
+      currentSessionId,
+    );
   }
 
   @Delete('sessions/:id')
@@ -276,11 +280,15 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current authenticated user profile' })
-  @ApiResponse({ status: 200, description: 'Returns user profile with permissions' })
+  @ApiResponse({
+    status: 200,
+    description: 'Returns user profile with permissions',
+  })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async getMe(@Request() req: { user: SafeUser }) {
-    const permissions =
-      await this.permissionsService.getPermissionKeysForRole(req.user.role);
+    const permissions = await this.permissionsService.getPermissionKeysForRole(
+      req.user.role,
+    );
     return { ...req.user, permissions };
   }
 
@@ -293,11 +301,11 @@ export class AuthController {
     required: true,
     description: 'Verification token',
   })
-  @ApiResponse({ status: 302, description: 'Redirects to frontend with status' })
-  async verifyEmail(
-    @Query('token') token: string,
-    @Res() res: Response,
-  ) {
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend with status',
+  })
+  async verifyEmail(@Query('token') token: string, @Res() res: Response) {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
 
     if (!token) {
@@ -315,11 +323,11 @@ export class AuthController {
     required: true,
     description: 'Email change verification token',
   })
-  @ApiResponse({ status: 302, description: 'Redirects to frontend with status' })
-  async verifyEmailChange(
-    @Query('token') token: string,
-    @Res() res: Response,
-  ) {
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to frontend with status',
+  })
+  async verifyEmailChange(@Query('token') token: string, @Res() res: Response) {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
 
     if (!token) {
@@ -363,9 +371,7 @@ export class AuthController {
     description: 'Generic success message (anti-enumeration)',
   })
   @ApiResponse({ status: 429, description: 'Too many requests' })
-  async resendVerificationPublic(
-    @Body() dto: ResendVerificationPublicDto,
-  ) {
+  async resendVerificationPublic(@Body() dto: ResendVerificationPublicDto) {
     await this.authService.resendVerificationByEmail(dto.email);
     return {
       message:
@@ -403,10 +409,7 @@ export class AuthController {
     status: 400,
     description: 'Invalid or expired token, or validation error',
   })
-  async resetPassword(
-    @Body() dto: ResetPasswordDto,
-    @Request() req: any,
-  ) {
+  async resetPassword(@Body() dto: ResetPasswordDto, @Request() req: any) {
     const meta = this.extractRequestMeta(req);
     await this.authService.resetPassword(dto, meta);
     return { message: 'Password reset successfully' };
@@ -470,7 +473,12 @@ export class AuthController {
   async googleAuthCallback(
     @Request()
     req: {
-      user: { accessToken: string; user: SafeUser; cookie: CookieConfig; oauthAction?: 'login' | 'created' | 'linked' };
+      user: {
+        accessToken: string;
+        user: SafeUser;
+        cookie: CookieConfig;
+        oauthAction?: 'login' | 'created' | 'linked';
+      };
     },
   ) {
     const code = await this.authService.generateOAuthCode(req.user);
@@ -510,7 +518,12 @@ export class AuthController {
   async githubAuthCallback(
     @Request()
     req: {
-      user: { accessToken: string; user: SafeUser; cookie: CookieConfig; oauthAction?: 'login' | 'created' | 'linked' };
+      user: {
+        accessToken: string;
+        user: SafeUser;
+        cookie: CookieConfig;
+        oauthAction?: 'login' | 'created' | 'linked';
+      };
     },
   ) {
     const code = await this.authService.generateOAuthCode(req.user);
@@ -537,7 +550,8 @@ export class AuthController {
   })
   @ApiResponse({
     status: 429,
-    description: 'Too many exchange attempts — rate limited (10 req/60s per IP)',
+    description:
+      'Too many exchange attempts — rate limited (10 req/60s per IP)',
   })
   async exchangeOAuthCode(
     @Body() dto: OAuthExchangeDto,
@@ -548,7 +562,8 @@ export class AuthController {
     return {
       accessToken: result.accessToken,
       user: result.user,
-      ...(result.oauthAction && result.oauthAction !== 'login' && { oauthAction: result.oauthAction }),
+      ...(result.oauthAction &&
+        result.oauthAction !== 'login' && { oauthAction: result.oauthAction }),
     };
   }
 
@@ -629,8 +644,14 @@ export class AuthController {
   @UseGuards(OAuthLinkGuard, GoogleAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Link Google account to authenticated user' })
-  @ApiResponse({ status: 302, description: 'Redirects to Google consent screen' })
-  @ApiResponse({ status: 401, description: 'Unauthorized — valid JWT required' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to Google consent screen',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized — valid JWT required',
+  })
   googleLinkAuth() {
     // OAuthLinkGuard validates JWT and sets req.oauthAction='link' + req.user.id
     // GoogleAuthGuard then generates state with action=link and userId, redirects to Google
@@ -646,8 +667,14 @@ export class AuthController {
   @UseGuards(OAuthLinkGuard, GitHubAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Link GitHub account to authenticated user' })
-  @ApiResponse({ status: 302, description: 'Redirects to GitHub authorization' })
-  @ApiResponse({ status: 401, description: 'Unauthorized — valid JWT required' })
+  @ApiResponse({
+    status: 302,
+    description: 'Redirects to GitHub authorization',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Unauthorized — valid JWT required',
+  })
   githubLinkAuth() {
     // OAuthLinkGuard validates JWT and sets req.oauthAction='link' + req.user.id
     // GitHubAuthGuard then generates state with action=link and userId, redirects to GitHub
@@ -655,9 +682,7 @@ export class AuthController {
 
   private getValidatedFrontendUrl(): string {
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-    const allowedUrls = (
-      process.env.OAUTH_ALLOWED_REDIRECT_URLS || frontendUrl
-    )
+    const allowedUrls = (process.env.OAUTH_ALLOWED_REDIRECT_URLS || frontendUrl)
       .split(',')
       .map((u) => u.trim());
 
