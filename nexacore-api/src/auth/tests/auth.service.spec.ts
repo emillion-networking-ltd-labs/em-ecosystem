@@ -23,6 +23,7 @@ import { AuditService } from '../../audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
 import { TokenDenyListService } from '../token-deny-list.service';
+import { ConfigService } from '@nestjs/config';
 
 jest.mock('bcrypt');
 
@@ -34,16 +35,79 @@ describe('parseDurationMs (via AuthService constructor)', () => {
         AuthService,
         { provide: UsersService, useValue: { findByEmail: jest.fn() } },
         { provide: SessionsService, useValue: {} },
-        { provide: JwtService, useValue: { sign: jest.fn(), verify: jest.fn() } },
+        {
+          provide: JwtService,
+          useValue: { sign: jest.fn(), verify: jest.fn() },
+        },
         { provide: OAuthCodeStore, useValue: {} },
-        { provide: AuditService, useValue: { log: jest.fn().mockResolvedValue(undefined) } },
-        { provide: PasswordBreachService, useValue: { isBreached: jest.fn().mockResolvedValue(false) } },
+        {
+          provide: AuditService,
+          useValue: { log: jest.fn().mockResolvedValue(undefined) },
+        },
+        {
+          provide: PasswordBreachService,
+          useValue: { isBreached: jest.fn().mockResolvedValue(false) },
+        },
         { provide: PrismaService, useValue: {} },
         { provide: MailService, useValue: {} },
-        { provide: TrustedDeviceService, useValue: { isTrustedDevice: jest.fn().mockResolvedValue(false) } },
-        { provide: ImpossibleTravelService, useValue: { detectImpossibleTravel: jest.fn().mockResolvedValue(null) } },
-        { provide: SuspiciousLoginService, useValue: { analyzeLoginFailure: jest.fn().mockResolvedValue(undefined), analyzeLoginSuccess: jest.fn().mockResolvedValue(undefined) } },
-        { provide: TokenDenyListService, useValue: { denyToken: jest.fn(), denyAllForUser: jest.fn(), isDenied: jest.fn().mockResolvedValue(false) } },
+        {
+          provide: TrustedDeviceService,
+          useValue: { isTrustedDevice: jest.fn().mockResolvedValue(false) },
+        },
+        {
+          provide: ImpossibleTravelService,
+          useValue: {
+            detectImpossibleTravel: jest.fn().mockResolvedValue(null),
+          },
+        },
+        {
+          provide: SuspiciousLoginService,
+          useValue: {
+            analyzeLoginFailure: jest.fn().mockResolvedValue(undefined),
+            analyzeLoginSuccess: jest.fn().mockResolvedValue(undefined),
+          },
+        },
+        {
+          provide: TokenDenyListService,
+          useValue: {
+            denyToken: jest.fn(),
+            denyAllForUser: jest.fn(),
+            isDenied: jest.fn().mockResolvedValue(false),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              const config: Record<string, any> = {
+                'auth.jwtSecret':
+                  'test-secret-that-is-at-least-32-characters-long',
+                'auth.jwtAccessExpiration': '15m',
+                'auth.jwtRefreshExpiration': expiry,
+                'auth.sessionIdleTimeoutHours': 0.5,
+                'auth.maxConcurrentSessions': 5,
+                'auth.trustedDeviceTtlDays': 30,
+                'auth.mfaAppName': 'EM NexaCore',
+                'auth.webauthnRpId': 'localhost',
+                'auth.webauthnRpName': 'EM NexaCore',
+                'auth.webauthnOrigin': 'http://localhost:3001',
+                'oauth.googleClientId': 'test-google-id',
+                'oauth.googleClientSecret': 'test-google-secret',
+                'oauth.googleCallbackUrl':
+                  'http://localhost:3000/auth/google/callback',
+                'oauth.githubClientId': 'test-github-id',
+                'oauth.githubClientSecret': 'test-github-secret',
+                'oauth.githubCallbackUrl':
+                  'http://localhost:3000/auth/github/callback',
+                'app.nodeEnv': 'test',
+                'app.frontendUrl': 'http://localhost:3001',
+                'app.oauthAllowedRedirectUrls': '',
+                'app.isProduction': false,
+              };
+              return config[key];
+            }),
+          },
+        },
       ],
     }).compile();
     return mod.get<AuthService>(AuthService);
@@ -222,12 +286,20 @@ describe('AuthService', () => {
           provide: MailService,
           useValue: {
             sendVerificationEmail: jest.fn().mockResolvedValue(undefined),
-            sendRegistrationAttemptNotification: jest.fn().mockResolvedValue(undefined),
+            sendRegistrationAttemptNotification: jest
+              .fn()
+              .mockResolvedValue(undefined),
             sendPasswordResetEmail: jest.fn().mockResolvedValue(undefined),
             sendLoginNotificationEmail: jest.fn().mockResolvedValue(undefined),
-            sendEmailChangeVerificationEmail: jest.fn().mockResolvedValue(undefined),
-            sendEmailChangeRequestNotification: jest.fn().mockResolvedValue(undefined),
-            sendEmailChangedConfirmation: jest.fn().mockResolvedValue(undefined),
+            sendEmailChangeVerificationEmail: jest
+              .fn()
+              .mockResolvedValue(undefined),
+            sendEmailChangeRequestNotification: jest
+              .fn()
+              .mockResolvedValue(undefined),
+            sendEmailChangedConfirmation: jest
+              .fn()
+              .mockResolvedValue(undefined),
             sendAccountLockedEmail: jest.fn().mockResolvedValue(undefined),
           },
         },
@@ -257,6 +329,39 @@ describe('AuthService', () => {
             denyToken: jest.fn().mockResolvedValue(undefined),
             denyAllForUser: jest.fn().mockResolvedValue(undefined),
             isDenied: jest.fn().mockResolvedValue(false),
+          },
+        },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              const config: Record<string, any> = {
+                'auth.jwtSecret':
+                  'test-secret-that-is-at-least-32-characters-long',
+                'auth.jwtAccessExpiration': '15m',
+                'auth.jwtRefreshExpiration': '12h',
+                'auth.sessionIdleTimeoutHours': 0.5,
+                'auth.maxConcurrentSessions': 5,
+                'auth.trustedDeviceTtlDays': 30,
+                'auth.mfaAppName': 'EM NexaCore',
+                'auth.webauthnRpId': 'localhost',
+                'auth.webauthnRpName': 'EM NexaCore',
+                'auth.webauthnOrigin': 'http://localhost:3001',
+                'oauth.googleClientId': 'test-google-id',
+                'oauth.googleClientSecret': 'test-google-secret',
+                'oauth.googleCallbackUrl':
+                  'http://localhost:3000/auth/google/callback',
+                'oauth.githubClientId': 'test-github-id',
+                'oauth.githubClientSecret': 'test-github-secret',
+                'oauth.githubCallbackUrl':
+                  'http://localhost:3000/auth/github/callback',
+                'app.nodeEnv': 'test',
+                'app.frontendUrl': 'http://localhost:3001',
+                'app.oauthAllowedRedirectUrls': '',
+                'app.isProduction': false,
+              };
+              return config[key];
+            }),
           },
         },
       ],
@@ -334,7 +439,9 @@ describe('AuthService', () => {
 
         expect(bcrypt.compare).toHaveBeenCalledTimes(1);
         // First argument is the submitted password (timing parity with bcrypt.hash)
-        expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe(registerDto.password);
+        expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe(
+          registerDto.password,
+        );
       });
 
       it('should NOT create a new user', async () => {
@@ -346,10 +453,9 @@ describe('AuthService', () => {
       it('should send registration attempt notification to existing user', async () => {
         await authService.register(registerDto, requestMeta);
 
-        expect(mailService.sendRegistrationAttemptNotification).toHaveBeenCalledWith(
-          mockUser.email,
-          mockUser.firstName,
-        );
+        expect(
+          mailService.sendRegistrationAttemptNotification,
+        ).toHaveBeenCalledWith(mockUser.email, mockUser.firstName);
       });
     });
 
@@ -417,9 +523,9 @@ describe('AuthService', () => {
         usersService.findByEmail.mockResolvedValue(null);
         (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-        await expect(
-          authService.login(loginDto, requestMeta),
-        ).rejects.toThrow(UnauthorizedException);
+        await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(
+          UnauthorizedException,
+        );
         expect(bcrypt.compare).toHaveBeenCalled();
       });
 
@@ -429,9 +535,9 @@ describe('AuthService', () => {
           lockedUntil: new Date(Date.now() + 60000),
         });
 
-        await expect(
-          authService.login(loginDto, requestMeta),
-        ).rejects.toThrow(UnauthorizedException);
+        await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(
+          UnauthorizedException,
+        );
       });
 
       it('should throw ForbiddenException when user with password has unverified email', async () => {
@@ -441,9 +547,9 @@ describe('AuthService', () => {
         });
         (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-        await expect(
-          authService.login(loginDto, requestMeta),
-        ).rejects.toThrow(ForbiddenException);
+        await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(
+          ForbiddenException,
+        );
       });
 
       it('should reset lockout when lock has expired', async () => {
@@ -472,9 +578,9 @@ describe('AuthService', () => {
         });
         (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
-        await expect(
-          authService.login(loginDto, requestMeta),
-        ).rejects.toThrow(UnauthorizedException);
+        await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(
+          UnauthorizedException,
+        );
         expect(bcrypt.compare).toHaveBeenCalled();
         expect(usersService.incrementFailedAttempts).not.toHaveBeenCalled();
       });
@@ -487,9 +593,9 @@ describe('AuthService', () => {
           failedAttempts: 1,
         });
 
-        await expect(
-          authService.login(loginDto, requestMeta),
-        ).rejects.toThrow(UnauthorizedException);
+        await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(
+          UnauthorizedException,
+        );
       });
 
       it('should increment failed attempts on wrong password', async () => {
@@ -518,9 +624,9 @@ describe('AuthService', () => {
         });
         usersService.lockAccount.mockResolvedValue(undefined);
 
-        await expect(
-          authService.login(loginDto, requestMeta),
-        ).rejects.toThrow(UnauthorizedException);
+        await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(
+          UnauthorizedException,
+        );
         expect(usersService.lockAccount).toHaveBeenCalledWith('uuid-123', 0);
       });
     });
@@ -625,7 +731,10 @@ describe('AuthService', () => {
     };
 
     it('should find or create user and return accessToken, cookie, and SafeUser', async () => {
-      usersService.findOrCreateByOAuth.mockResolvedValue({ user: mockOAuthUser, action: 'login' });
+      usersService.findOrCreateByOAuth.mockResolvedValue({
+        user: mockOAuthUser,
+        action: 'login',
+      });
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
       jwtService.sign
         .mockReturnValueOnce('oauth-access-token')
@@ -649,7 +758,10 @@ describe('AuthService', () => {
     });
 
     it('should create a session via SessionsService', async () => {
-      usersService.findOrCreateByOAuth.mockResolvedValue({ user: mockOAuthUser, action: 'login' });
+      usersService.findOrCreateByOAuth.mockResolvedValue({
+        user: mockOAuthUser,
+        action: 'login',
+      });
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
       jwtService.sign.mockReturnValue('token');
       sessionsService.createSession.mockResolvedValue(mockSession);
@@ -754,9 +866,9 @@ describe('AuthService', () => {
     it('should throw UnauthorizedException for invalid or expired code', async () => {
       oauthCodeStore.exchange.mockResolvedValue(null);
 
-      await expect(authService.exchangeOAuthCode('invalid-code')).rejects.toThrow(
-        UnauthorizedException,
-      );
+      await expect(
+        authService.exchangeOAuthCode('invalid-code'),
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -1138,7 +1250,9 @@ describe('AuthService', () => {
 
       await authService.verifyEmailChange('valid-token');
 
-      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith('uuid-123');
+      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith(
+        'uuid-123',
+      );
     });
 
     it('should send confirmation to old email on success', async () => {
@@ -1283,7 +1397,9 @@ describe('AuthService', () => {
 
       // CWE-203: bcrypt.compare must be called for timing protection
       expect(bcrypt.compare).toHaveBeenCalled();
-      expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe('nonexistent@example.com');
+      expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe(
+        'nonexistent@example.com',
+      );
     });
 
     it('should return silently for OAuth-only accounts (no passwordHash)', async () => {
@@ -1300,12 +1416,16 @@ describe('AuthService', () => {
       expect(prismaService.passwordResetToken.create).not.toHaveBeenCalled();
       // CWE-203: bcrypt.compare must be called for timing protection
       expect(bcrypt.compare).toHaveBeenCalled();
-      expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe('test@example.com');
+      expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe(
+        'test@example.com',
+      );
     });
 
     it('should invalidate existing tokens and create new reset token', async () => {
       usersService.findByEmail.mockResolvedValue(mockUser);
-      prismaService.passwordResetToken.updateMany.mockResolvedValue({ count: 1 });
+      prismaService.passwordResetToken.updateMany.mockResolvedValue({
+        count: 1,
+      });
       prismaService.passwordResetToken.create.mockResolvedValue({});
 
       await authService.forgotPassword({ email: 'test@example.com' });
@@ -1356,7 +1476,10 @@ describe('AuthService', () => {
       prismaService.passwordResetToken.findUnique.mockResolvedValue(null);
 
       await expect(
-        authService.resetPassword({ token: 'invalid', newPassword: 'NewPass1!' }),
+        authService.resetPassword({
+          token: 'invalid',
+          newPassword: 'NewPass1!',
+        }),
       ).rejects.toThrow('Invalid or expired reset token');
     });
 
@@ -1386,7 +1509,10 @@ describe('AuthService', () => {
       });
 
       await expect(
-        authService.resetPassword({ token: 'expired', newPassword: 'NewPass1!' }),
+        authService.resetPassword({
+          token: 'expired',
+          newPassword: 'NewPass1!',
+        }),
       ).rejects.toThrow('Invalid or expired reset token');
     });
 
@@ -1402,10 +1528,16 @@ describe('AuthService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       await expect(
-        authService.resetPassword({ token: 'valid', newPassword: 'SamePass1!' }),
+        authService.resetPassword({
+          token: 'valid',
+          newPassword: 'SamePass1!',
+        }),
       ).rejects.toThrow('New password must be different from current password');
 
-      expect(bcrypt.compare).toHaveBeenCalledWith('SamePass1!', mockUser.passwordHash);
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'SamePass1!',
+        mockUser.passwordHash,
+      );
       expect(prismaService.$transaction).not.toHaveBeenCalled();
     });
 
@@ -1422,7 +1554,10 @@ describe('AuthService', () => {
       passwordBreachService.isBreached.mockResolvedValue(true);
 
       await expect(
-        authService.resetPassword({ token: 'valid', newPassword: 'BreachedPass1!' }),
+        authService.resetPassword({
+          token: 'valid',
+          newPassword: 'BreachedPass1!',
+        }),
       ).rejects.toThrow('This password has appeared in a data breach');
 
       expect(prismaService.$transaction).not.toHaveBeenCalled();
@@ -1442,12 +1577,20 @@ describe('AuthService', () => {
       (bcrypt.hash as jest.Mock).mockResolvedValue('new-hashed-password');
       sessionsService.revokeAllUserSessions.mockResolvedValue(undefined);
 
-      await authService.resetPassword({ token: 'valid', newPassword: 'NewPass1!' });
+      await authService.resetPassword({
+        token: 'valid',
+        newPassword: 'NewPass1!',
+      });
 
-      expect(bcrypt.compare).toHaveBeenCalledWith('NewPass1!', mockUser.passwordHash);
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'NewPass1!',
+        mockUser.passwordHash,
+      );
       expect(bcrypt.hash).toHaveBeenCalledWith('NewPass1!', 12);
       expect(prismaService.$transaction).toHaveBeenCalled();
-      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith('uuid-123');
+      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith(
+        'uuid-123',
+      );
     });
   });
 
@@ -1527,7 +1670,9 @@ describe('AuthService', () => {
         authService.resendVerificationByEmail('nonexistent@example.com'),
       ).resolves.toBeUndefined();
 
-      expect(prismaService.emailVerificationToken.create).not.toHaveBeenCalled();
+      expect(
+        prismaService.emailVerificationToken.create,
+      ).not.toHaveBeenCalled();
     });
 
     it('should return silently when email already verified', async () => {
@@ -1540,7 +1685,9 @@ describe('AuthService', () => {
         authService.resendVerificationByEmail('test@example.com'),
       ).resolves.toBeUndefined();
 
-      expect(prismaService.emailVerificationToken.create).not.toHaveBeenCalled();
+      expect(
+        prismaService.emailVerificationToken.create,
+      ).not.toHaveBeenCalled();
     });
 
     it('should return silently when cooldown not expired', async () => {
@@ -1556,7 +1703,9 @@ describe('AuthService', () => {
         authService.resendVerificationByEmail('test@example.com'),
       ).resolves.toBeUndefined();
 
-      expect(prismaService.emailVerificationToken.create).not.toHaveBeenCalled();
+      expect(
+        prismaService.emailVerificationToken.create,
+      ).not.toHaveBeenCalled();
     });
 
     it('should send verification email when cooldown expired', async () => {
@@ -1751,10 +1900,7 @@ describe('AuthService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(
-        authService.login(
-          { email: 'x@x.com', password: 'pass' },
-          requestMeta,
-        ),
+        authService.login({ email: 'x@x.com', password: 'pass' }, requestMeta),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -1821,7 +1967,9 @@ describe('AuthService', () => {
       usersService.findById.mockResolvedValue(mockUser);
       sessionsService.rotateRefreshToken.mockResolvedValue(mockSession);
       (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
-      jwtService.sign.mockReturnValueOnce('new-at').mockReturnValueOnce('new-rt');
+      jwtService.sign
+        .mockReturnValueOnce('new-at')
+        .mockReturnValueOnce('new-rt');
       sessionsService.updateSessionHash.mockResolvedValue(undefined);
 
       const result = await authService.refreshTokens(
@@ -1835,7 +1983,9 @@ describe('AuthService', () => {
     it('forgotPassword should succeed even when mail/audit fails', async () => {
       usersService.findByEmail.mockResolvedValue(mockUser);
       const prismaService = (authService as any).prisma;
-      prismaService.passwordResetToken.updateMany.mockResolvedValue({ count: 0 });
+      prismaService.passwordResetToken.updateMany.mockResolvedValue({
+        count: 0,
+      });
       prismaService.passwordResetToken.create.mockResolvedValue({});
       const mailSvc = (authService as any).mailService;
       mailSvc.sendPasswordResetEmail.mockResolvedValue(undefined);
@@ -1912,8 +2062,13 @@ describe('AuthService', () => {
         email: 'oauth@example.com',
       };
 
-      usersService.findOrCreateByOAuth.mockResolvedValue({ user: oauthUser, action: 'login' });
-      jwtService.sign.mockReturnValueOnce('oauth-at').mockReturnValueOnce('oauth-rt');
+      usersService.findOrCreateByOAuth.mockResolvedValue({
+        user: oauthUser,
+        action: 'login',
+      });
+      jwtService.sign
+        .mockReturnValueOnce('oauth-at')
+        .mockReturnValueOnce('oauth-rt');
       sessionsService.createSession.mockResolvedValue({
         ...mockSession,
         userId: 'oauth-uuid',
@@ -1935,27 +2090,33 @@ describe('AuthService', () => {
       { actionValue: 'login', expected: AuditAction.OAUTH_LOGIN },
       { actionValue: 'linked', expected: AuditAction.OAUTH_LINKED },
       { actionValue: 'created', expected: AuditAction.OAUTH_REGISTER },
-    ])('should log $expected when action is $actionValue', async ({ actionValue, expected }) => {
-      const oauthUser = { ...mockUser, id: 'oauth-uuid' };
-      usersService.findOrCreateByOAuth.mockResolvedValue({ user: oauthUser, action: actionValue });
-      jwtService.sign.mockReturnValueOnce('at').mockReturnValueOnce('rt');
-      sessionsService.createSession.mockResolvedValue(mockSession);
-      sessionsService.updateSessionHash.mockResolvedValue(undefined);
-      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
-      const audit = (authService as any).auditService;
-      audit.log.mockResolvedValue(undefined);
+    ])(
+      'should log $expected when action is $actionValue',
+      async ({ actionValue, expected }) => {
+        const oauthUser = { ...mockUser, id: 'oauth-uuid' };
+        usersService.findOrCreateByOAuth.mockResolvedValue({
+          user: oauthUser,
+          action: actionValue,
+        });
+        jwtService.sign.mockReturnValueOnce('at').mockReturnValueOnce('rt');
+        sessionsService.createSession.mockResolvedValue(mockSession);
+        sessionsService.updateSessionHash.mockResolvedValue(undefined);
+        (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
+        const audit = (authService as any).auditService;
+        audit.log.mockResolvedValue(undefined);
 
-      await authService.validateOAuthUser(
-        { email: 'o@e.com', provider: Provider.GOOGLE, providerId: 'g1' },
-        requestMeta,
-        requestMeta,
-      );
-      await new Promise(resolve => process.nextTick(resolve));
+        await authService.validateOAuthUser(
+          { email: 'o@e.com', provider: Provider.GOOGLE, providerId: 'g1' },
+          requestMeta,
+          requestMeta,
+        );
+        await new Promise((resolve) => process.nextTick(resolve));
 
-      expect(audit.log).toHaveBeenCalledWith(
-        expect.objectContaining({ action: expected }),
-      );
-    });
+        expect(audit.log).toHaveBeenCalledWith(
+          expect.objectContaining({ action: expected }),
+        );
+      },
+    );
   });
 
   // ─── login edge cases ──────────────────────────────────────────
@@ -1997,7 +2158,9 @@ describe('AuthService', () => {
       );
 
       expect(usersService.resetFailedAttempts).toHaveBeenCalledWith('uuid-123');
-      expect(usersService.resetLockoutEscalation).toHaveBeenCalledWith('uuid-123');
+      expect(usersService.resetLockoutEscalation).toHaveBeenCalledWith(
+        'uuid-123',
+      );
       expect(result).toHaveProperty('accessToken');
     });
   });
@@ -2064,7 +2227,10 @@ describe('AuthService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(
-        authService.login({ email: 'nobody@example.com', password: 'pass' }, requestMeta),
+        authService.login(
+          { email: 'nobody@example.com', password: 'pass' },
+          requestMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
 
       // Locked account
@@ -2075,7 +2241,10 @@ describe('AuthService', () => {
       });
 
       await expect(
-        authService.login({ email: 'test@example.com', password: 'pass' }, requestMeta),
+        authService.login(
+          { email: 'test@example.com', password: 'pass' },
+          requestMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
@@ -2097,7 +2266,9 @@ describe('AuthService', () => {
         requestMeta,
       );
 
-      expect(usersService.resetLockoutEscalation).toHaveBeenCalledWith('uuid-123');
+      expect(usersService.resetLockoutEscalation).toHaveBeenCalledWith(
+        'uuid-123',
+      );
     });
   });
 
@@ -2311,7 +2482,10 @@ describe('AuthService', () => {
     });
 
     it('should call enforceSessionLimit on OAuth login', async () => {
-      usersService.findOrCreateByOAuth.mockResolvedValue({ user: mockUser, action: 'login' });
+      usersService.findOrCreateByOAuth.mockResolvedValue({
+        user: mockUser,
+        action: 'login',
+      });
 
       await authService.validateOAuthUser(
         {
@@ -2353,7 +2527,10 @@ describe('AuthService', () => {
     });
 
     it('should pass ipAddress and userAgent to enforceSessionLimit', async () => {
-      const customMeta = { ipAddress: '192.168.1.100', userAgent: 'Custom-Agent/1.0' };
+      const customMeta = {
+        ipAddress: '192.168.1.100',
+        userAgent: 'Custom-Agent/1.0',
+      };
 
       await authService.login(
         { email: 'test@example.com', password: 'StrongPass1!' },
@@ -2393,7 +2570,13 @@ describe('AuthService', () => {
       impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
         isAnomalous: false,
         previousLocation: null,
-        currentLocation: { city: 'Madrid', country: 'Spain', countryCode: 'ES', latitude: 40.4168, longitude: -3.7038 },
+        currentLocation: {
+          city: 'Madrid',
+          country: 'Spain',
+          countryCode: 'ES',
+          latitude: 40.4168,
+          longitude: -3.7038,
+        },
         distanceKm: 5762,
         elapsedHours: 10,
         requiredSpeedKmh: 576,
@@ -2409,8 +2592,20 @@ describe('AuthService', () => {
     it('should throw ForbiddenException when travel action is blocked', async () => {
       impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
         isAnomalous: true,
-        previousLocation: { city: 'Madrid', country: 'Spain', countryCode: 'ES', latitude: 40.4168, longitude: -3.7038 },
-        currentLocation: { city: 'New York', country: 'United States', countryCode: 'US', latitude: 40.7128, longitude: -74.006 },
+        previousLocation: {
+          city: 'Madrid',
+          country: 'Spain',
+          countryCode: 'ES',
+          latitude: 40.4168,
+          longitude: -3.7038,
+        },
+        currentLocation: {
+          city: 'New York',
+          country: 'United States',
+          countryCode: 'US',
+          latitude: 40.7128,
+          longitude: -74.006,
+        },
         distanceKm: 5762,
         elapsedHours: 0.5,
         requiredSpeedKmh: 11524,
@@ -2418,17 +2613,29 @@ describe('AuthService', () => {
         actionTaken: 'blocked',
       });
 
-      await expect(
-        authService.login(loginDto, requestMeta),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should log audit with travel metadata when blocking', async () => {
       const auditSvc = (authService as any).auditService;
       impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
         isAnomalous: true,
-        previousLocation: { city: 'Madrid', country: 'Spain', countryCode: 'ES', latitude: 40.4168, longitude: -3.7038 },
-        currentLocation: { city: 'New York', country: 'United States', countryCode: 'US', latitude: 40.7128, longitude: -74.006 },
+        previousLocation: {
+          city: 'Madrid',
+          country: 'Spain',
+          countryCode: 'ES',
+          latitude: 40.4168,
+          longitude: -3.7038,
+        },
+        currentLocation: {
+          city: 'New York',
+          country: 'United States',
+          countryCode: 'US',
+          latitude: 40.7128,
+          longitude: -74.006,
+        },
         distanceKm: 5762,
         elapsedHours: 0.5,
         requiredSpeedKmh: 11524,
@@ -2436,7 +2643,9 @@ describe('AuthService', () => {
         actionTaken: 'blocked',
       });
 
-      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(ForbiddenException);
+      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(
+        ForbiddenException,
+      );
 
       expect(auditSvc.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2468,7 +2677,9 @@ describe('AuthService', () => {
     beforeEach(() => {
       usersService.findByEmail.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
       sessionsService.createSession.mockResolvedValue({
         id: 'session-uuid',
         userId: 'uuid-123',
@@ -2486,9 +2697,14 @@ describe('AuthService', () => {
 
     it('should call analyzeLoginFailure after failed password', async () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
-      usersService.incrementFailedAttempts.mockResolvedValue({ failedAttempts: 1, lockedUntil: null });
+      usersService.incrementFailedAttempts.mockResolvedValue({
+        failedAttempts: 1,
+        lockedUntil: null,
+      });
 
-      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(UnauthorizedException);
+      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(
+        UnauthorizedException,
+      );
 
       expect(suspiciousLoginService.analyzeLoginFailure).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2511,14 +2727,23 @@ describe('AuthService', () => {
 
     it('should not block login when analyzeLoginFailure throws (fail-open)', async () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
-      usersService.incrementFailedAttempts.mockResolvedValue({ failedAttempts: 1, lockedUntil: null });
-      suspiciousLoginService.analyzeLoginFailure.mockRejectedValue(new Error('Detection service down'));
+      usersService.incrementFailedAttempts.mockResolvedValue({
+        failedAttempts: 1,
+        lockedUntil: null,
+      });
+      suspiciousLoginService.analyzeLoginFailure.mockRejectedValue(
+        new Error('Detection service down'),
+      );
 
-      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(UnauthorizedException);
+      await expect(authService.login(loginDto, requestMeta)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
 
     it('should not block login when analyzeLoginSuccess throws (fail-open)', async () => {
-      suspiciousLoginService.analyzeLoginSuccess.mockRejectedValue(new Error('Detection service down'));
+      suspiciousLoginService.analyzeLoginSuccess.mockRejectedValue(
+        new Error('Detection service down'),
+      );
 
       const result = await authService.login(loginDto, requestMeta);
 
@@ -2563,7 +2788,9 @@ describe('AuthService', () => {
     beforeEach(() => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
-      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
       sessionsService.createSession.mockResolvedValue(mockSession);
       sessionsService.updateSessionHash.mockResolvedValue(undefined);
     });
@@ -2580,7 +2807,11 @@ describe('AuthService', () => {
     });
 
     it('should return mfaSetupRequired for SUPERADMIN without MFA', async () => {
-      const superadminUser = { ...mockUser, role: Role.SUPERADMIN, mfaEnabled: false };
+      const superadminUser = {
+        ...mockUser,
+        role: Role.SUPERADMIN,
+        mfaEnabled: false,
+      };
       usersService.findByEmail.mockResolvedValue(superadminUser);
 
       const result = await authService.login(loginDto, requestMeta);
@@ -2620,7 +2851,10 @@ describe('AuthService', () => {
 
       expect(auditService.log).toHaveBeenCalledWith(
         expect.objectContaining({
-          metadata: expect.objectContaining({ mfaSetupRequired: true, role: 'ADMIN' }),
+          metadata: expect.objectContaining({
+            mfaSetupRequired: true,
+            role: 'ADMIN',
+          }),
         }),
       );
     });
@@ -2642,7 +2876,8 @@ describe('AuthService', () => {
   // Covers anonymous .catch(() => {}) handlers for function coverage.
 
   describe('fire-and-forget resilience (audit log rejection)', () => {
-    const flushPromises = () => new Promise(resolve => process.nextTick(resolve));
+    const flushPromises = () =>
+      new Promise((resolve) => process.nextTick(resolve));
     let auditService: any;
     let mailService: any;
 
@@ -2661,7 +2896,10 @@ describe('AuthService', () => {
       usersService.findByEmail.mockResolvedValue(lockedUser);
 
       await expect(
-        authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
+        authService.login(
+          { email: 'test@example.com', password: 'StrongPass1!' },
+          requestMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
       await flushPromises();
     });
@@ -2673,7 +2911,10 @@ describe('AuthService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
       await expect(
-        authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
+        authService.login(
+          { email: 'test@example.com', password: 'StrongPass1!' },
+          requestMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
       await flushPromises();
     });
@@ -2682,11 +2923,17 @@ describe('AuthService', () => {
       auditService.log.mockRejectedValue(new Error('Audit DB down'));
       usersService.findByEmail.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
-      usersService.incrementFailedAttempts.mockResolvedValue({ failedAttempts: 5, lockedUntil: null });
+      usersService.incrementFailedAttempts.mockResolvedValue({
+        failedAttempts: 5,
+        lockedUntil: null,
+      });
       usersService.lockAccount.mockResolvedValue(undefined);
 
       await expect(
-        authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
+        authService.login(
+          { email: 'test@example.com', password: 'StrongPass1!' },
+          requestMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
       await flushPromises();
     });
@@ -2698,7 +2945,10 @@ describe('AuthService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       await expect(
-        authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
+        authService.login(
+          { email: 'test@example.com', password: 'StrongPass1!' },
+          requestMeta,
+        ),
       ).rejects.toThrow(ForbiddenException);
       await flushPromises();
     });
@@ -2723,7 +2973,9 @@ describe('AuthService', () => {
       usersService.findByEmail.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
-      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
       sessionsService.createSession.mockResolvedValue(mockSession);
       sessionsService.updateSessionHash.mockResolvedValue(undefined);
 
@@ -2743,7 +2995,9 @@ describe('AuthService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
       trustedDeviceService.isTrustedDevice.mockResolvedValue(true);
-      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
       sessionsService.createSession.mockResolvedValue(mockSession);
       sessionsService.updateSessionHash.mockResolvedValue(undefined);
 
@@ -2760,7 +3014,11 @@ describe('AuthService', () => {
 
     it('should still throw on idle session when audit rejects during refreshTokens', async () => {
       auditService.log.mockRejectedValue(new Error('Audit DB down'));
-      jwtService.verify.mockReturnValue({ sub: 'uuid-123', sessionId: 'session-uuid', tokenFamily: 'family-uuid' });
+      jwtService.verify.mockReturnValue({
+        sub: 'uuid-123',
+        sessionId: 'session-uuid',
+        tokenFamily: 'family-uuid',
+      });
       sessionsService.findById.mockResolvedValue({
         ...mockSession,
         lastUsedAt: new Date(Date.now() - 2 * 60 * 60 * 1000),
@@ -2779,14 +3037,23 @@ describe('AuthService', () => {
         ...mockUser,
         id: 'uuid-oauth',
       };
-      usersService.findOrCreateByOAuth.mockResolvedValue({ user: oauthUser, action: 'login' });
+      usersService.findOrCreateByOAuth.mockResolvedValue({
+        user: oauthUser,
+        action: 'login',
+      });
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
-      jwtService.sign.mockReturnValueOnce('oauth-access').mockReturnValueOnce('oauth-refresh');
+      jwtService.sign
+        .mockReturnValueOnce('oauth-access')
+        .mockReturnValueOnce('oauth-refresh');
       sessionsService.createSession.mockResolvedValue(mockSession);
       sessionsService.updateSessionHash.mockResolvedValue(undefined);
 
       const result = await authService.validateOAuthUser(
-        { email: 'oauth@example.com', provider: Provider.GOOGLE, providerId: 'gid' },
+        {
+          email: 'oauth@example.com',
+          provider: Provider.GOOGLE,
+          providerId: 'gid',
+        },
         requestMeta,
       );
 
@@ -2798,11 +3065,16 @@ describe('AuthService', () => {
       auditService.log.mockRejectedValue(new Error('Audit DB down'));
       usersService.findById.mockResolvedValue(mockUser);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
-      jwtService.sign.mockReturnValueOnce('mfa-access').mockReturnValueOnce('mfa-refresh');
+      jwtService.sign
+        .mockReturnValueOnce('mfa-access')
+        .mockReturnValueOnce('mfa-refresh');
       sessionsService.createSession.mockResolvedValue(mockSession);
       sessionsService.updateSessionHash.mockResolvedValue(undefined);
 
-      const result = await authService.generateTokensForMfa('uuid-123', requestMeta);
+      const result = await authService.generateTokensForMfa(
+        'uuid-123',
+        requestMeta,
+      );
 
       expect(result.accessToken).toBe('mfa-access');
       await flushPromises();
@@ -2813,13 +3085,27 @@ describe('AuthService', () => {
       usersService.findByEmail.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
-      jwtService.sign.mockReturnValueOnce('access-token').mockReturnValueOnce('refresh-token');
+      jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
       sessionsService.createSession.mockResolvedValue(mockSession);
       sessionsService.updateSessionHash.mockResolvedValue(undefined);
       impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
         isAnomalous: true,
-        previousLocation: { city: 'Madrid', country: 'Spain', countryCode: 'ES', latitude: 40.4, longitude: -3.7 },
-        currentLocation: { city: 'Tokyo', country: 'Japan', countryCode: 'JP', latitude: 35.6, longitude: 139.6 },
+        previousLocation: {
+          city: 'Madrid',
+          country: 'Spain',
+          countryCode: 'ES',
+          latitude: 40.4,
+          longitude: -3.7,
+        },
+        currentLocation: {
+          city: 'Tokyo',
+          country: 'Japan',
+          countryCode: 'JP',
+          latitude: 35.6,
+          longitude: 139.6,
+        },
         distanceKm: 10500,
         elapsedHours: 0.5,
         requiredSpeedKmh: 21000,
@@ -2828,14 +3114,19 @@ describe('AuthService', () => {
       });
 
       await expect(
-        authService.login({ email: 'test@example.com', password: 'StrongPass1!' }, requestMeta),
+        authService.login(
+          { email: 'test@example.com', password: 'StrongPass1!' },
+          requestMeta,
+        ),
       ).rejects.toThrow(ForbiddenException);
       await flushPromises();
     });
 
     it('should still succeed verifyEmailChange when mail and audit reject', async () => {
       const prismaService = (authService as any).prisma;
-      mailService.sendEmailChangedConfirmation.mockRejectedValue(new Error('SMTP down'));
+      mailService.sendEmailChangedConfirmation.mockRejectedValue(
+        new Error('SMTP down'),
+      );
       auditService.log.mockRejectedValue(new Error('Audit DB down'));
       const userWithPending = { ...mockUser, pendingEmail: 'new@example.com' };
       prismaService.emailVerificationToken.findUnique.mockResolvedValue({

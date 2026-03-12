@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { PasskeyService } from '../passkey.service';
+import { ConfigService } from '@nestjs/config';
 import { UsersService } from '../../users/users.service';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
 import { Role } from '../../users/enums/role.enum';
@@ -103,11 +104,42 @@ describe('PasskeyService', () => {
       },
     };
 
+    const mockConfigService = {
+      get: jest.fn((key: string) => {
+        const config: Record<string, any> = {
+          'auth.jwtSecret': 'test-secret-that-is-at-least-32-characters-long',
+          'auth.jwtAccessExpiration': '15m',
+          'auth.jwtRefreshExpiration': '12h',
+          'auth.sessionIdleTimeoutHours': 0.5,
+          'auth.maxConcurrentSessions': 5,
+          'auth.trustedDeviceTtlDays': 30,
+          'auth.mfaAppName': 'EM NexaCore',
+          'auth.webauthnRpId': 'localhost',
+          'auth.webauthnRpName': 'EM NexaCore',
+          'auth.webauthnOrigin': 'http://localhost:3001',
+          'oauth.googleClientId': 'test-google-id',
+          'oauth.googleClientSecret': 'test-google-secret',
+          'oauth.googleCallbackUrl':
+            'http://localhost:3000/auth/google/callback',
+          'oauth.githubClientId': 'test-github-id',
+          'oauth.githubClientSecret': 'test-github-secret',
+          'oauth.githubCallbackUrl':
+            'http://localhost:3000/auth/github/callback',
+          'app.nodeEnv': 'test',
+          'app.frontendUrl': 'http://localhost:3001',
+          'app.oauthAllowedRedirectUrls': '',
+          'app.isProduction': false,
+        };
+        return config[key];
+      }),
+    };
+
     service = new PasskeyService(
       prisma as any,
       usersService as unknown as UsersService,
       auditService as any,
       redis as any,
+      mockConfigService as unknown as ConfigService,
     );
   });
 
@@ -117,7 +149,11 @@ describe('PasskeyService', () => {
     const mockOptions = {
       challenge: 'random-challenge-base64url',
       rp: { name: 'EM NexaCore', id: 'localhost' },
-      user: { id: 'user-1', name: 'test@example.com', displayName: 'test@example.com' },
+      user: {
+        id: 'user-1',
+        name: 'test@example.com',
+        displayName: 'test@example.com',
+      },
       pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
     };
 
@@ -269,7 +305,12 @@ describe('PasskeyService', () => {
       redis.get.mockResolvedValue(null);
 
       await expect(
-        service.verifyRegistration('user-1', mockCredential, undefined, mockMeta),
+        service.verifyRegistration(
+          'user-1',
+          mockCredential,
+          undefined,
+          mockMeta,
+        ),
       ).rejects.toThrow(BadRequestException);
     });
 
@@ -278,7 +319,12 @@ describe('PasskeyService', () => {
       mockVerifyRegistrationResponse.mockRejectedValue(new Error('bad'));
 
       await expect(
-        service.verifyRegistration('user-1', mockCredential, undefined, mockMeta),
+        service.verifyRegistration(
+          'user-1',
+          mockCredential,
+          undefined,
+          mockMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -290,7 +336,12 @@ describe('PasskeyService', () => {
       });
 
       await expect(
-        service.verifyRegistration('user-1', mockCredential, undefined, mockMeta),
+        service.verifyRegistration(
+          'user-1',
+          mockCredential,
+          undefined,
+          mockMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -302,7 +353,12 @@ describe('PasskeyService', () => {
         name: 'My Key',
       });
 
-      await service.verifyRegistration('user-1', mockCredential, 'My Key', mockMeta);
+      await service.verifyRegistration(
+        'user-1',
+        mockCredential,
+        'My Key',
+        mockMeta,
+      );
 
       expect(auditService.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -369,7 +425,12 @@ describe('PasskeyService', () => {
         name: DEFAULT_PASSKEY_NAME,
       });
 
-      await service.verifyRegistration('user-1', mockCredential, undefined, mockMeta);
+      await service.verifyRegistration(
+        'user-1',
+        mockCredential,
+        undefined,
+        mockMeta,
+      );
 
       expect(prisma.webAuthnCredential.create).toHaveBeenCalledWith({
         data: expect.objectContaining({ transports: [] }),
@@ -453,8 +514,14 @@ describe('PasskeyService', () => {
   // ─── verifyAuthentication ───────────────────────────────────
 
   describe('verifyAuthentication', () => {
-    const mockAuthCredential = { id: 'cred-id', response: {}, type: 'public-key' };
-    const storedAuthOptions = JSON.stringify({ challenge: 'auth-challenge-123' });
+    const mockAuthCredential = {
+      id: 'cred-id',
+      response: {},
+      type: 'public-key',
+    };
+    const storedAuthOptions = JSON.stringify({
+      challenge: 'auth-challenge-123',
+    });
     const storedDbCredential = {
       id: 'db-cred-1',
       userId: 'user-1',
@@ -467,7 +534,9 @@ describe('PasskeyService', () => {
 
     it('should return userId on successful authentication', async () => {
       redis.get.mockResolvedValue(storedAuthOptions);
-      prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
+      prisma.webAuthnCredential.findUnique.mockResolvedValue(
+        storedDbCredential,
+      );
       mockVerifyAuthenticationResponse.mockResolvedValue({
         verified: true,
         authenticationInfo: { newCounter: 6 },
@@ -491,7 +560,11 @@ describe('PasskeyService', () => {
       redis.get.mockResolvedValue(null);
 
       await expect(
-        service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
+        service.verifyAuthentication(
+          'challenge-id',
+          mockAuthCredential,
+          mockMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -500,7 +573,11 @@ describe('PasskeyService', () => {
       prisma.webAuthnCredential.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
+        service.verifyAuthentication(
+          'challenge-id',
+          mockAuthCredential,
+          mockMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -509,7 +586,11 @@ describe('PasskeyService', () => {
       prisma.webAuthnCredential.findUnique.mockResolvedValue(null);
 
       await expect(
-        service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
+        service.verifyAuthentication(
+          'challenge-id',
+          mockAuthCredential,
+          mockMeta,
+        ),
       ).rejects.toThrow();
 
       expect(auditService.log).toHaveBeenCalledWith(
@@ -528,7 +609,11 @@ describe('PasskeyService', () => {
       });
 
       await expect(
-        service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
+        service.verifyAuthentication(
+          'challenge-id',
+          mockAuthCredential,
+          mockMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -540,7 +625,11 @@ describe('PasskeyService', () => {
       });
 
       await expect(
-        service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
+        service.verifyAuthentication(
+          'challenge-id',
+          mockAuthCredential,
+          mockMeta,
+        ),
       ).rejects.toThrow();
 
       expect(auditService.log).toHaveBeenCalledWith(
@@ -553,24 +642,36 @@ describe('PasskeyService', () => {
 
     it('should throw UnauthorizedException if verification throws', async () => {
       redis.get.mockResolvedValue(storedAuthOptions);
-      prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
+      prisma.webAuthnCredential.findUnique.mockResolvedValue(
+        storedDbCredential,
+      );
       mockVerifyAuthenticationResponse.mockRejectedValue(new Error('fail'));
 
       await expect(
-        service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
+        service.verifyAuthentication(
+          'challenge-id',
+          mockAuthCredential,
+          mockMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should throw UnauthorizedException if verified is false', async () => {
       redis.get.mockResolvedValue(storedAuthOptions);
-      prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
+      prisma.webAuthnCredential.findUnique.mockResolvedValue(
+        storedDbCredential,
+      );
       mockVerifyAuthenticationResponse.mockResolvedValue({
         verified: false,
         authenticationInfo: { newCounter: 6 },
       });
 
       await expect(
-        service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
+        service.verifyAuthentication(
+          'challenge-id',
+          mockAuthCredential,
+          mockMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -588,7 +689,9 @@ describe('PasskeyService', () => {
 
     it('should handle verification failure without ctx', async () => {
       redis.get.mockResolvedValue(storedAuthOptions);
-      prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
+      prisma.webAuthnCredential.findUnique.mockResolvedValue(
+        storedDbCredential,
+      );
       mockVerifyAuthenticationResponse.mockRejectedValue(new Error('fail'));
 
       await expect(
@@ -598,7 +701,9 @@ describe('PasskeyService', () => {
 
     it('should handle verified=false without ctx', async () => {
       redis.get.mockResolvedValue(storedAuthOptions);
-      prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
+      prisma.webAuthnCredential.findUnique.mockResolvedValue(
+        storedDbCredential,
+      );
       mockVerifyAuthenticationResponse.mockResolvedValue({
         verified: false,
         authenticationInfo: { newCounter: 6 },
@@ -637,7 +742,11 @@ describe('PasskeyService', () => {
       });
 
       await expect(
-        service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
+        service.verifyAuthentication(
+          'challenge-id',
+          mockAuthCredential,
+          mockMeta,
+        ),
       ).rejects.toThrow(UnauthorizedException);
     });
 
@@ -664,14 +773,20 @@ describe('PasskeyService', () => {
 
     it('should audit PASSKEY_AUTH_SUCCESS on success', async () => {
       redis.get.mockResolvedValue(storedAuthOptions);
-      prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
+      prisma.webAuthnCredential.findUnique.mockResolvedValue(
+        storedDbCredential,
+      );
       mockVerifyAuthenticationResponse.mockResolvedValue({
         verified: true,
         authenticationInfo: { newCounter: 6 },
       });
       prisma.webAuthnCredential.update.mockResolvedValue({});
 
-      await service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta);
+      await service.verifyAuthentication(
+        'challenge-id',
+        mockAuthCredential,
+        mockMeta,
+      );
 
       expect(auditService.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -694,7 +809,11 @@ describe('PasskeyService', () => {
       });
 
       await expect(
-        service.verifyAuthentication('challenge-id', mockAuthCredential, mockMeta),
+        service.verifyAuthentication(
+          'challenge-id',
+          mockAuthCredential,
+          mockMeta,
+        ),
       ).rejects.toThrow();
 
       expect(auditService.log).toHaveBeenCalledWith(
@@ -707,7 +826,9 @@ describe('PasskeyService', () => {
 
     it('should use null for audit fields when ctx is undefined', async () => {
       redis.get.mockResolvedValue(storedAuthOptions);
-      prisma.webAuthnCredential.findUnique.mockResolvedValue(storedDbCredential);
+      prisma.webAuthnCredential.findUnique.mockResolvedValue(
+        storedDbCredential,
+      );
       mockVerifyAuthenticationResponse.mockResolvedValue({
         verified: true,
         authenticationInfo: { newCounter: 6 },

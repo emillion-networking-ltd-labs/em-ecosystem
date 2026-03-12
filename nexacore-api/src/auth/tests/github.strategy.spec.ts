@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GitHubStrategy } from '../strategies/github.strategy';
 import { AuthService } from '../auth.service';
 import { OAuthStateStore } from '../stores/oauth-state.store';
+import { ConfigService } from '@nestjs/config';
 import { Strategy as PassportGitHubStrategy } from 'passport-github2';
 import { Provider } from '../../users/enums/provider.enum';
 import { Role } from '../../users/enums/role.enum';
@@ -68,6 +69,39 @@ describe('GitHubStrategy', () => {
             getCodeVerifier: jest.fn(),
           },
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              const config: Record<string, any> = {
+                'auth.jwtSecret':
+                  'test-secret-that-is-at-least-32-characters-long',
+                'auth.jwtAccessExpiration': '15m',
+                'auth.jwtRefreshExpiration': '12h',
+                'auth.sessionIdleTimeoutHours': 0.5,
+                'auth.maxConcurrentSessions': 5,
+                'auth.trustedDeviceTtlDays': 30,
+                'auth.mfaAppName': 'EM NexaCore',
+                'auth.webauthnRpId': 'localhost',
+                'auth.webauthnRpName': 'EM NexaCore',
+                'auth.webauthnOrigin': 'http://localhost:3001',
+                'oauth.googleClientId': 'test-google-id',
+                'oauth.googleClientSecret': 'test-google-secret',
+                'oauth.googleCallbackUrl':
+                  'http://localhost:3000/auth/google/callback',
+                'oauth.githubClientId': 'test-github-id',
+                'oauth.githubClientSecret': 'test-github-secret',
+                'oauth.githubCallbackUrl':
+                  'http://localhost:3000/auth/github/callback',
+                'app.nodeEnv': 'test',
+                'app.frontendUrl': 'http://localhost:3001',
+                'app.oauthAllowedRedirectUrls': '',
+                'app.isProduction': false,
+              };
+              return config[key];
+            }),
+          },
+        },
       ],
     }).compile();
 
@@ -89,7 +123,10 @@ describe('GitHubStrategy', () => {
     };
 
     it('should call authService.validateOAuthUser with GitHub profile and requestMeta', async () => {
-      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
 
@@ -115,7 +152,10 @@ describe('GitHubStrategy', () => {
     });
 
     it('should call done with error when no email is provided', async () => {
-      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
       const done = jest.fn();
 
       await strategy.validate(
@@ -133,7 +173,10 @@ describe('GitHubStrategy', () => {
     });
 
     it('should call done with error when emails array is undefined', async () => {
-      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
       const done = jest.fn();
 
       await strategy.validate(
@@ -189,7 +232,10 @@ describe('GitHubStrategy', () => {
     });
 
     it('should pass firstName and lastName as undefined when displayName is absent', async () => {
-      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
 
@@ -213,7 +259,10 @@ describe('GitHubStrategy', () => {
     });
 
     it('should parse single-word displayName as firstName only', async () => {
-      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
 
@@ -240,7 +289,10 @@ describe('GitHubStrategy', () => {
     });
 
     it('should parse multi-word displayName into firstName and lastName', async () => {
-      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
       authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
       const done = jest.fn();
 
@@ -267,10 +319,11 @@ describe('GitHubStrategy', () => {
     });
 
     it('should call done with error when validateOAuthUser throws', async () => {
-      oauthStateStore.validate.mockResolvedValue({ codeVerifier: 'test', action: 'login' });
-      authService.validateOAuthUser.mockRejectedValue(
-        new Error('OAuth error'),
-      );
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
+      authService.validateOAuthUser.mockRejectedValue(new Error('OAuth error'));
       const done = jest.fn();
 
       await strategy.validate(
@@ -367,7 +420,9 @@ describe('GitHubStrategy', () => {
     it('should not monkey-patch when no codeVerifier exists', async () => {
       const originalFn = jest.fn();
       (strategy as any)._oauth2 = { getOAuthAccessToken: originalFn };
-      (oauthStateStore.getCodeVerifier as jest.Mock).mockResolvedValue(undefined);
+      (oauthStateStore.getCodeVerifier as jest.Mock).mockResolvedValue(
+        undefined,
+      );
 
       await strategy.authenticate(
         { query: { code: 'auth-code', state: 'test-state' } },

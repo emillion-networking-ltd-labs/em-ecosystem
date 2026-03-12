@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { createHmac } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
@@ -15,9 +16,9 @@ export class TrustedDeviceService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
+    private readonly configService: ConfigService,
   ) {
-    const jwtSecret =
-      process.env.JWT_SECRET || 'default-dev-secret-change-in-production';
+    const jwtSecret = this.configService.get<string>('auth.jwtSecret')!;
     this.fingerprintSecret = createHmac('sha256', jwtSecret)
       .update('device-fingerprint-key')
       .digest('hex');
@@ -91,10 +92,7 @@ export class TrustedDeviceService {
     return device;
   }
 
-  async isTrustedDevice(
-    userId: string,
-    fingerprint: string,
-  ): Promise<boolean> {
+  async isTrustedDevice(userId: string, fingerprint: string): Promise<boolean> {
     const fingerprintHash = this.hashFingerprint(userId, fingerprint);
 
     const device = await this.prisma.trustedDevice.findFirst({
@@ -189,10 +187,7 @@ export class TrustedDeviceService {
     // Browser detection
     if (userAgent.includes('Firefox/')) {
       browser = 'Firefox';
-    } else if (
-      userAgent.includes('Edg/') ||
-      userAgent.includes('Edge/')
-    ) {
+    } else if (userAgent.includes('Edg/') || userAgent.includes('Edge/')) {
       browser = 'Edge';
     } else if (userAgent.includes('Chrome/')) {
       browser = 'Chrome';

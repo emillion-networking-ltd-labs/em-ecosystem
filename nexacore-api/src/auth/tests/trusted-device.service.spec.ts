@@ -1,4 +1,5 @@
 import { NotFoundException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { TrustedDeviceService } from '../trusted-device.service';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
 
@@ -47,9 +48,40 @@ describe('TrustedDeviceService', () => {
       log: jest.fn().mockResolvedValue(undefined),
     };
 
+    const mockConfigService = {
+      get: jest.fn((key: string) => {
+        const config: Record<string, any> = {
+          'auth.jwtSecret': 'test-secret-that-is-at-least-32-characters-long',
+          'auth.jwtAccessExpiration': '15m',
+          'auth.jwtRefreshExpiration': '12h',
+          'auth.sessionIdleTimeoutHours': 0.5,
+          'auth.maxConcurrentSessions': 5,
+          'auth.trustedDeviceTtlDays': 30,
+          'auth.mfaAppName': 'EM NexaCore',
+          'auth.webauthnRpId': 'localhost',
+          'auth.webauthnRpName': 'EM NexaCore',
+          'auth.webauthnOrigin': 'http://localhost:3001',
+          'oauth.googleClientId': 'test-google-id',
+          'oauth.googleClientSecret': 'test-google-secret',
+          'oauth.googleCallbackUrl':
+            'http://localhost:3000/auth/google/callback',
+          'oauth.githubClientId': 'test-github-id',
+          'oauth.githubClientSecret': 'test-github-secret',
+          'oauth.githubCallbackUrl':
+            'http://localhost:3000/auth/github/callback',
+          'app.nodeEnv': 'test',
+          'app.frontendUrl': 'http://localhost:3001',
+          'app.oauthAllowedRedirectUrls': '',
+          'app.isProduction': false,
+        };
+        return config[key];
+      }),
+    };
+
     service = new TrustedDeviceService(
       prisma as any,
       auditService as any,
+      mockConfigService as unknown as ConfigService,
     );
   });
 
@@ -128,12 +160,7 @@ describe('TrustedDeviceService', () => {
         id: 'oldest-device',
       });
 
-      await service.trustDevice(
-        'user-1',
-        'fingerprint-abc',
-        '127.0.0.1',
-        null,
-      );
+      await service.trustDevice('user-1', 'fingerprint-abc', '127.0.0.1', null);
 
       expect(prisma.trustedDevice.update).toHaveBeenCalledWith({
         where: { id: 'oldest-device' },
@@ -144,12 +171,7 @@ describe('TrustedDeviceService', () => {
     it('should not revoke when under limit', async () => {
       prisma.trustedDevice.count.mockResolvedValue(3);
 
-      await service.trustDevice(
-        'user-1',
-        'fingerprint-abc',
-        '127.0.0.1',
-        null,
-      );
+      await service.trustDevice('user-1', 'fingerprint-abc', '127.0.0.1', null);
 
       // update called only by upsert, not for revoking oldest
       expect(prisma.trustedDevice.findFirst).not.toHaveBeenCalledWith(
@@ -338,7 +360,12 @@ describe('TrustedDeviceService', () => {
       prisma.trustedDevice.count.mockResolvedValue(0);
       prisma.trustedDevice.upsert.mockResolvedValue(mockDevice);
 
-      const result = await service.trustDevice('user-1', 'fingerprint', '127.0.0.1', 'Chrome UA');
+      const result = await service.trustDevice(
+        'user-1',
+        'fingerprint',
+        '127.0.0.1',
+        'Chrome UA',
+      );
 
       expect(result).toBeDefined();
       expect(result.id).toBe('device-1');
@@ -347,7 +374,10 @@ describe('TrustedDeviceService', () => {
     it('revokeDevice should succeed even when audit log rejects', async () => {
       auditService.log.mockRejectedValue(new Error('audit write failed'));
       prisma.trustedDevice.findFirst.mockResolvedValue(mockDevice);
-      prisma.trustedDevice.update.mockResolvedValue({ ...mockDevice, isRevoked: true });
+      prisma.trustedDevice.update.mockResolvedValue({
+        ...mockDevice,
+        isRevoked: true,
+      });
 
       await expect(
         service.revokeDevice('user-1', 'device-1'),
@@ -458,7 +488,8 @@ describe('TrustedDeviceService', () => {
 
   // ─── Fire-and-forget resilience ─────────────────────────────
   describe('fire-and-forget resilience (audit log rejection)', () => {
-    const flushPromises = () => new Promise(resolve => process.nextTick(resolve));
+    const flushPromises = () =>
+      new Promise((resolve) => process.nextTick(resolve));
 
     it('should still trust device when audit log rejects', async () => {
       auditService.log.mockRejectedValue(new Error('Audit DB down'));

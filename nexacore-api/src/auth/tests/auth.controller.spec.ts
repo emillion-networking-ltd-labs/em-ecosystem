@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  UnauthorizedException,
-  ForbiddenException,
-} from '@nestjs/common';
+import { UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { NotFoundException } from '@nestjs/common';
 import { AuthController } from '../auth.controller';
@@ -13,8 +10,8 @@ import { AuditService } from '../../audit/audit.service';
 import { PermissionsService } from '../../permissions/permissions.service';
 import { CsrfGuard } from '../../common/guards/csrf.guard';
 import { TurnstileService } from '../../security/turnstile.service';
+import { ConfigService } from '@nestjs/config';
 import { Role } from '../../users/enums/role.enum';
-
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -144,6 +141,39 @@ describe('AuthController', () => {
             verify: jest.fn().mockResolvedValue(true),
           },
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              const config: Record<string, any> = {
+                'auth.jwtSecret':
+                  'test-secret-that-is-at-least-32-characters-long',
+                'auth.jwtAccessExpiration': '15m',
+                'auth.jwtRefreshExpiration': '12h',
+                'auth.sessionIdleTimeoutHours': 0.5,
+                'auth.maxConcurrentSessions': 5,
+                'auth.trustedDeviceTtlDays': 30,
+                'auth.mfaAppName': 'EM NexaCore',
+                'auth.webauthnRpId': 'localhost',
+                'auth.webauthnRpName': 'EM NexaCore',
+                'auth.webauthnOrigin': 'http://localhost:3001',
+                'oauth.googleClientId': 'test-google-id',
+                'oauth.googleClientSecret': 'test-google-secret',
+                'oauth.googleCallbackUrl':
+                  'http://localhost:3000/auth/google/callback',
+                'oauth.githubClientId': 'test-github-id',
+                'oauth.githubClientSecret': 'test-github-secret',
+                'oauth.githubCallbackUrl':
+                  'http://localhost:3000/auth/github/callback',
+                'app.nodeEnv': 'test',
+                'app.frontendUrl': 'http://localhost:3001',
+                'app.oauthAllowedRedirectUrls': '',
+                'app.isProduction': false,
+              };
+              return config[key];
+            }),
+          },
+        },
       ],
     }).compile();
 
@@ -199,11 +229,7 @@ describe('AuthController', () => {
     it('should set cookie and return accessToken + user on valid credentials', async () => {
       authService.login.mockResolvedValue(mockAuthResult);
 
-      const result = await controller.login(
-        loginDto,
-        mockReq,
-        mockRes as any,
-      );
+      const result = await controller.login(loginDto, mockReq, mockRes as any);
 
       expect(result.accessToken).toBe('access-token-123');
       expect(result.user.email).toBe('test@example.com');
@@ -258,9 +284,9 @@ describe('AuthController', () => {
     });
 
     it('should throw UnauthorizedException when no cookie present', async () => {
-      await expect(
-        controller.refresh(mockReq, mockRes as any),
-      ).rejects.toThrow(UnauthorizedException);
+      await expect(controller.refresh(mockReq, mockRes as any)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 
@@ -337,10 +363,7 @@ describe('AuthController', () => {
       const reqWithUser = { ...mockReq, user: { id: 'uuid-123' } };
       sessionsService.revokeSession.mockResolvedValue(undefined);
 
-      const result = await controller.revokeSession(
-        'session-id',
-        reqWithUser,
-      );
+      const result = await controller.revokeSession('session-id', reqWithUser);
 
       expect(sessionsService.revokeSession).toHaveBeenCalledWith(
         'session-id',
@@ -441,16 +464,11 @@ describe('AuthController', () => {
 
     it('should propagate UnauthorizedException for invalid code', async () => {
       authService.exchangeOAuthCode.mockRejectedValue(
-        new UnauthorizedException(
-          'Invalid or expired authorization code',
-        ),
+        new UnauthorizedException('Invalid or expired authorization code'),
       );
 
       await expect(
-        controller.exchangeOAuthCode(
-          { code: 'invalid-code' },
-          mockRes as any,
-        ),
+        controller.exchangeOAuthCode({ code: 'invalid-code' }, mockRes as any),
       ).rejects.toThrow(UnauthorizedException);
     });
   });
@@ -479,7 +497,8 @@ describe('AuthController', () => {
     it('should return mfaSetupRequired without setting cookie', async () => {
       const mfaSetupResult = {
         mfaSetupRequired: true as const,
-        message: 'MFA setup is required for administrator accounts. Please enable MFA to continue.',
+        message:
+          'MFA setup is required for administrator accounts. Please enable MFA to continue.',
       };
       authService.login.mockResolvedValue(mfaSetupResult);
 
@@ -599,7 +618,9 @@ describe('AuthController', () => {
     it('should delegate to authService and return validity', async () => {
       authService.validateResetToken.mockResolvedValue({ valid: true });
 
-      const result = await controller.validateResetToken({ token: 'some-token' });
+      const result = await controller.validateResetToken({
+        token: 'some-token',
+      });
 
       expect(authService.validateResetToken).toHaveBeenCalledWith('some-token');
       expect(result).toEqual({ valid: true });
@@ -615,9 +636,12 @@ describe('AuthController', () => {
 
       const result = await controller.resendVerificationPublic(dto);
 
-      expect(authService.resendVerificationByEmail).toHaveBeenCalledWith('test@example.com');
+      expect(authService.resendVerificationByEmail).toHaveBeenCalledWith(
+        'test@example.com',
+      );
       expect(result).toEqual({
-        message: 'If an account exists and needs verification, we have sent an email',
+        message:
+          'If an account exists and needs verification, we have sent an email',
       });
     });
   });
@@ -729,9 +753,7 @@ describe('AuthController', () => {
     };
 
     it('should return list of trusted devices', async () => {
-      const devices = [
-        { id: 'device-1', deviceName: 'Chrome on Windows' },
-      ];
+      const devices = [{ id: 'device-1', deviceName: 'Chrome on Windows' }];
       trustedDeviceService.listTrustedDevices.mockResolvedValue(devices as any);
 
       const result = await controller.listTrustedDevices(mockAuthReq);

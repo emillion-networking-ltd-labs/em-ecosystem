@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy } from 'passport-github2';
 import { AuthService } from '../auth.service';
@@ -11,13 +12,12 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(
     private readonly authService: AuthService,
     private readonly oauthStateStore: OAuthStateStore,
+    configService: ConfigService,
   ) {
     super({
-      clientID: process.env.GITHUB_CLIENT_ID || '',
-      clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
-      callbackURL:
-        process.env.GITHUB_CALLBACK_URL ||
-        'http://localhost:3000/auth/github/callback',
+      clientID: configService.get<string>('oauth.githubClientId')!,
+      clientSecret: configService.get<string>('oauth.githubClientSecret')!,
+      callbackURL: configService.get<string>('oauth.githubCallbackUrl')!,
       scope: ['user:email'],
       passReqToCallback: true,
     });
@@ -79,7 +79,8 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
       done(new Error(ErrorMessages.auth.AUTHENTICATION_FAILED));
       return;
     }
-    const stateData: OAuthStateData | null = await this.oauthStateStore.validate(state);
+    const stateData: OAuthStateData | null =
+      await this.oauthStateStore.validate(state);
     if (!stateData) {
       done(new Error(ErrorMessages.auth.AUTHENTICATION_FAILED));
       return;
@@ -102,8 +103,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
 
     const requestMeta = {
       ipAddress: req.ip || req.socket?.remoteAddress || 'unknown',
-      userAgent:
-        (req.headers?.['user-agent'] as string | undefined) || null,
+      userAgent: (req.headers?.['user-agent'] as string | undefined) || null,
     };
 
     const oauthProfile = {

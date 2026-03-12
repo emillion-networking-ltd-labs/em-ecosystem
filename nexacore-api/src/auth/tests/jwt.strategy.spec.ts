@@ -3,6 +3,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { JwtStrategy } from '../strategies/jwt.strategy';
 import { UsersService } from '../../users/users.service';
 import { TokenDenyListService } from '../token-deny-list.service';
+import { ConfigService } from '@nestjs/config';
 import { Role } from '../../users/enums/role.enum';
 
 import { User } from '../../users/entities/user.entity';
@@ -50,6 +51,39 @@ describe('JwtStrategy', () => {
             isDenied: jest.fn().mockResolvedValue(false),
           },
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn((key: string) => {
+              const config: Record<string, any> = {
+                'auth.jwtSecret':
+                  'test-secret-that-is-at-least-32-characters-long',
+                'auth.jwtAccessExpiration': '15m',
+                'auth.jwtRefreshExpiration': '12h',
+                'auth.sessionIdleTimeoutHours': 0.5,
+                'auth.maxConcurrentSessions': 5,
+                'auth.trustedDeviceTtlDays': 30,
+                'auth.mfaAppName': 'EM NexaCore',
+                'auth.webauthnRpId': 'localhost',
+                'auth.webauthnRpName': 'EM NexaCore',
+                'auth.webauthnOrigin': 'http://localhost:3001',
+                'oauth.googleClientId': 'test-google-id',
+                'oauth.googleClientSecret': 'test-google-secret',
+                'oauth.googleCallbackUrl':
+                  'http://localhost:3000/auth/google/callback',
+                'oauth.githubClientId': 'test-github-id',
+                'oauth.githubClientSecret': 'test-github-secret',
+                'oauth.githubCallbackUrl':
+                  'http://localhost:3000/auth/github/callback',
+                'app.nodeEnv': 'test',
+                'app.frontendUrl': 'http://localhost:3001',
+                'app.oauthAllowedRedirectUrls': '',
+                'app.isProduction': false,
+              };
+              return config[key];
+            }),
+          },
+        },
       ],
     }).compile();
 
@@ -74,7 +108,11 @@ describe('JwtStrategy', () => {
       expect(result.email).toBe('test@example.com');
       expect(result).not.toHaveProperty('passwordHash');
       expect(result).not.toHaveProperty('refreshToken');
-      expect(tokenDenyListService.isDenied).toHaveBeenCalledWith('test-jti-123', 'uuid-123', expect.any(Number));
+      expect(tokenDenyListService.isDenied).toHaveBeenCalledWith(
+        'test-jti-123',
+        'uuid-123',
+        expect.any(Number),
+      );
     });
 
     it('should throw UnauthorizedException when user not found', async () => {
