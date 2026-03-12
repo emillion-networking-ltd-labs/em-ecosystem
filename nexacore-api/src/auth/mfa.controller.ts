@@ -9,6 +9,7 @@ import {
   UseGuards,
   Request,
   Res,
+  UseInterceptors,
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,8 +28,10 @@ import { MfaVerifyLoginDto } from './dto/mfa-verify-login.dto';
 import { MfaDisableDto } from './dto/mfa-disable.dto';
 import { MfaRegenerateCodesDto } from './dto/mfa-regenerate-codes.dto';
 import { SafeUser } from '../users/entities/user.entity';
+import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
 
 @ApiTags('auth')
+@UseInterceptors(NoCacheInterceptor)
 @Controller('auth/mfa')
 export class MfaController {
   constructor(
@@ -75,10 +78,7 @@ export class MfaController {
   @ApiOperation({ summary: 'Verify TOTP code and enable MFA' })
   @ApiResponse({ status: 200, description: 'MFA enabled successfully' })
   @ApiResponse({ status: 400, description: 'Invalid verification code' })
-  async verifySetup(
-    @Request() req: any,
-    @Body() dto: MfaVerifySetupDto,
-  ) {
+  async verifySetup(@Request() req: any, @Body() dto: MfaVerifySetupDto) {
     const meta = this.extractRequestMeta(req);
     await this.mfaService.verifySetup(req.user.id, dto.token, meta);
     return { message: 'MFA enabled successfully' };
@@ -128,10 +128,7 @@ export class MfaController {
   @ApiResponse({ status: 200, description: 'MFA disabled successfully' })
   @ApiResponse({ status: 400, description: 'MFA is not enabled' })
   @ApiResponse({ status: 401, description: 'Invalid password' })
-  async disable(
-    @Request() req: any,
-    @Body() dto: MfaDisableDto,
-  ) {
+  async disable(@Request() req: any, @Body() dto: MfaDisableDto) {
     const meta = this.extractRequestMeta(req);
     await this.mfaService.disableMfa(req.user.id, dto.password, meta);
     return { message: 'MFA disabled successfully' };
