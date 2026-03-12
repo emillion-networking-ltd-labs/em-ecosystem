@@ -208,6 +208,7 @@ describe('GitHubStrategy', () => {
         expect.objectContaining({
           message: 'Authentication failed',
         }),
+        undefined,
       );
       expect(authService.validateOAuthUser).not.toHaveBeenCalled();
     });
@@ -227,6 +228,7 @@ describe('GitHubStrategy', () => {
         expect.objectContaining({
           message: 'Authentication failed',
         }),
+        undefined,
       );
       expect(authService.validateOAuthUser).not.toHaveBeenCalled();
     });
@@ -336,6 +338,7 @@ describe('GitHubStrategy', () => {
 
       expect(done).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'OAuth error' }),
+        undefined,
       );
     });
   });

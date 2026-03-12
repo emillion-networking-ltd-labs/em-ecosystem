@@ -3,14 +3,13 @@ import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { OAuthAuthService } from '../oauth-auth.service';
-import { OAuthStateStore, OAuthStateData } from '../stores/oauth-state.store';
+import { OAuthStateStore } from '../stores/oauth-state.store';
 import { Provider } from '../../users/enums/provider.enum';
-import { ErrorMessages } from '../../common/constants/error-messages';
 import {
   applyPkceAuthenticate,
   applyPkceAuthorizationParams,
 } from './pkce-authenticate';
-import { extractRequestMeta } from '../../common/utils/request-meta';
+import { validateOAuthCallback } from './oauth-validate.helper';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
@@ -64,54 +63,25 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     },
     done: VerifyCallback,
   ): Promise<void> {
-    // Validate OAuth state parameter (CSRF protection) and retrieve action metadata
-    const state = req.query?.state;
-    if (!state) {
-      done(new Error(ErrorMessages.auth.AUTHENTICATION_FAILED), undefined);
-      return;
-    }
-    const stateData: OAuthStateData | null =
-      await this.oauthStateStore.validate(state);
-    if (!stateData) {
-      done(new Error(ErrorMessages.auth.AUTHENTICATION_FAILED), undefined);
-      return;
-    }
-
     const email = profile.emails?.[0]?.value;
     if (!email) {
       done(new Error('No email provided by Google'), undefined);
       return;
     }
 
-    const requestMeta = extractRequestMeta(req);
-
-    const oauthProfile = {
-      email,
-      provider: Provider.GOOGLE,
-      providerId: profile.id,
-      firstName: profile.name?.givenName,
-      lastName: profile.name?.familyName,
-      avatarUrl: profile.photos?.[0]?.value,
-    };
-
-    try {
-      if (stateData.action === 'link' && stateData.userId) {
-        const result = await this.oauthAuthService.validateOAuthLink(
-          stateData.userId,
-          oauthProfile,
-          requestMeta,
-        );
-        done(null, result);
-      } else {
-        const result = await this.oauthAuthService.validateOAuthUser(
-          oauthProfile,
-          requestMeta,
-          requestMeta,
-        );
-        done(null, result);
-      }
-    } catch (err) {
-      done(err as Error, undefined);
-    }
+    await validateOAuthCallback(
+      this.oauthStateStore,
+      this.oauthAuthService,
+      req,
+      {
+        email,
+        provider: Provider.GOOGLE,
+        providerId: profile.id,
+        firstName: profile.name?.givenName,
+        lastName: profile.name?.familyName,
+        avatarUrl: profile.photos?.[0]?.value,
+      },
+      done as (error: Error | null, user?: unknown) => void,
+    );
   }
 }
