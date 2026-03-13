@@ -1,27 +1,29 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { AlertTriangle } from 'lucide-react';
-import Input from '@/components/ui/Input';
-import InfinitySpinner from '@/components/ui/InfinitySpinner';
-import RateLimitBanner from '@/components/ui/RateLimitBanner';
-import { useAuth } from '@/hooks/useAuth';
-import { useRateLimit } from '@/hooks/useRateLimit';
-import { useToast } from '@/context/ToastContext';
-import { RateLimitError } from '@/lib/types';
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
+import Input from "@/components/ui/Input";
+import InfinitySpinner from "@/components/ui/InfinitySpinner";
+import RateLimitBanner from "@/components/ui/RateLimitBanner";
+import { useAuth } from "@/hooks/useAuth";
+import { useRateLimit } from "@/hooks/useRateLimit";
+import { useToast } from "@/context/ToastContext";
+import { RateLimitError } from "@/lib/types";
+import { validatePassword } from "@/lib/validation";
 
 export default function ResetPasswordForm() {
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [localError, setLocalError] = useState<string | null>(null);
-  const { resetPassword, validateResetToken, isLoading, error, clearError } = useAuth();
+  const { resetPassword, validateResetToken, isLoading, error, clearError } =
+    useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const { addToast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const token = searchParams.get('token');
+  const token = searchParams.get("token");
 
   useEffect(() => {
     clearError();
@@ -32,20 +34,30 @@ export default function ResetPasswordForm() {
     let cancelled = false;
 
     if (!token) {
-      addToast({ variant: 'warning', title: 'Missing reset token', description: 'Please request a new password reset link.' });
-      router.replace('/forgot-password');
+      addToast({
+        variant: "warning",
+        title: "Missing reset token",
+        description: "Please request a new password reset link.",
+      });
+      router.replace("/forgot-password");
       return;
     }
 
     validateResetToken(token).then((valid) => {
       if (cancelled) return;
       if (!valid) {
-        addToast({ variant: 'warning', title: 'Expired or invalid link', description: 'Your reset link has expired. Request a new one.' });
-        router.replace('/forgot-password');
+        addToast({
+          variant: "warning",
+          title: "Expired or invalid link",
+          description: "Your reset link has expired. Request a new one.",
+        });
+        router.replace("/forgot-password");
       }
     });
 
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
   }, [token, validateResetToken, addToast, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -53,27 +65,32 @@ export default function ResetPasswordForm() {
     setLocalError(null);
 
     if (!token) {
-      setLocalError('Invalid or missing reset token.');
+      setLocalError("Invalid or missing reset token.");
       return;
     }
-    if (!password) {
-      setLocalError('Enter a new password.');
+    const pwError = validatePassword(password);
+    if (pwError) {
+      setLocalError(pwError);
       return;
     }
     if (!confirmPassword) {
-      setLocalError('Confirm your password.');
+      setLocalError("Confirm your password.");
       return;
     }
     if (password !== confirmPassword) {
-      setLocalError('Passwords do not match.');
+      setLocalError("Passwords do not match.");
       return;
     }
 
     try {
       const ok = await resetPassword(token, password);
       if (ok) {
-        addToast({ variant: 'success', title: 'Password updated', description: 'Your password has been reset. Sign in now.' });
-        router.replace('/login');
+        addToast({
+          variant: "success",
+          title: "Password updated",
+          description: "Your password has been reset. Sign in now.",
+        });
+        router.replace("/login");
       }
     } catch (err) {
       if (err instanceof RateLimitError) {
@@ -111,7 +128,11 @@ export default function ResetPasswordForm() {
               type="password"
               name="password"
               value={password}
-              onChange={e => { clearError(); setLocalError(null); setPassword(e.target.value); }}
+              onChange={(e) => {
+                clearError();
+                setLocalError(null);
+                setPassword(e.target.value);
+              }}
               placeholder="Enter your password"
               hasError={showError}
               autoFocus
@@ -122,7 +143,11 @@ export default function ResetPasswordForm() {
               type="password"
               name="confirmPassword"
               value={confirmPassword}
-              onChange={e => { clearError(); setLocalError(null); setConfirmPassword(e.target.value); }}
+              onChange={(e) => {
+                clearError();
+                setLocalError(null);
+                setConfirmPassword(e.target.value);
+              }}
               placeholder="Enter your password"
               hasError={showError}
             />
@@ -134,11 +159,15 @@ export default function ResetPasswordForm() {
                 onExpired={clearRateLimit}
               />
             ) : (
-              <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+              <div
+                className={`flex items-center gap-2 ${showError ? "min-h-6" : "h-6"}`}
+              >
                 {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="text-xs leading-6 text-error">{activeError}</span>
+                    <span className="text-xs leading-6 text-error">
+                      {activeError}
+                    </span>
                   </>
                 )}
               </div>
@@ -161,7 +190,9 @@ export default function ResetPasswordForm() {
             disabled={isDisabled}
             className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
-            <span className={isLoading ? 'opacity-30' : ''}>Reset Password</span>
+            <span className={isLoading ? "opacity-30" : ""}>
+              Reset Password
+            </span>
             {isLoading && (
               <span className="absolute inset-0 flex items-center justify-center">
                 <InfinitySpinner />

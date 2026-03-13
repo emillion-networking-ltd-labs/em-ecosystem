@@ -14,6 +14,7 @@ import { useRateLimit } from "@/hooks/useRateLimit";
 import { useToast } from "@/hooks/useToast";
 import { RateLimitError } from "@/lib/types";
 import TurnstileWidget from "@/components/ui/TurnstileWidget";
+import { validatePassword } from "@/lib/validation";
 
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
@@ -51,8 +52,9 @@ export default function RegisterForm() {
       setEmailError("Enter a valid email address");
       return;
     }
-    if (!formData.password) {
-      setPasswordError("Enter your password");
+    const pwError = validatePassword(formData.password);
+    if (pwError) {
+      setPasswordError(pwError);
       return;
     }
     setEmailError(null);
