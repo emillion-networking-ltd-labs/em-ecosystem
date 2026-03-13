@@ -7,6 +7,7 @@ import { AuditAction } from '../audit/enums/audit-action.enum';
 import {
   TRUSTED_DEVICE_TTL_DAYS,
   MAX_TRUSTED_DEVICES_PER_USER,
+  DEVICE_FINGERPRINT_HMAC_LABEL,
 } from './constants/auth.constants';
 
 @Injectable()
@@ -20,7 +21,7 @@ export class TrustedDeviceService {
   ) {
     const jwtSecret = this.configService.get<string>('auth.jwtSecret')!;
     this.fingerprintSecret = createHmac('sha256', jwtSecret)
-      .update('device-fingerprint-key')
+      .update(DEVICE_FINGERPRINT_HMAC_LABEL)
       .digest('hex');
   }
 

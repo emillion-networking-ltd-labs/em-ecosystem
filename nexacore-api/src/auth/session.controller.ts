@@ -26,6 +26,7 @@ import { TrustDeviceDto } from './dto/trust-device.dto';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
+import { REFRESH_TOKEN_COOKIE_NAME } from './constants/auth.constants';
 import { extractRequestMeta } from '../common/utils/request-meta';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
@@ -40,7 +41,7 @@ export class SessionController {
   ) {}
 
   private getCurrentSessionId(req: AuthenticatedRequest): string | undefined {
-    const refreshToken = req.cookies?.['refresh_token'];
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE_NAME];
     if (!refreshToken) return undefined;
     try {
       const payload = this.jwtService.verify<RefreshTokenPayload>(refreshToken);

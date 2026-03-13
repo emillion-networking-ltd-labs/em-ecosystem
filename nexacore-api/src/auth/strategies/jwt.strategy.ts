@@ -7,6 +7,7 @@ import { TokenDenyListService } from '../token-deny-list.service';
 import { JwtPayload } from '../../common/interfaces/jwt-payload.interface';
 import { SafeUser, toSafeUser } from '../../users/entities/user.entity';
 import { ErrorMessages } from '../../common/constants/error-messages';
+import { JWT_ISSUER, JWT_AUDIENCE } from '../constants/auth.constants';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -19,8 +20,8 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
       secretOrKey: configService.get<string>('auth.jwtSecret')!,
-      issuer: 'nexacore-api',
-      audience: 'nexacore-api',
+      issuer: JWT_ISSUER,
+      audience: JWT_AUDIENCE,
       algorithms: ['HS256'],
     });
   }

@@ -93,3 +93,25 @@ export const TRUSTED_DEVICE_TTL_DAYS = 30;
  * Oldest revoked when exceeded.
  */
 export const MAX_TRUSTED_DEVICES_PER_USER = 10;
+
+/** HMAC derivation label for MFA challenge token secret. */
+export const MFA_CHALLENGE_HMAC_LABEL = 'mfa-challenge-token';
+
+/** JWT payload type for MFA challenge tokens. */
+export const MFA_CHALLENGE_TOKEN_TYPE = 'mfa-challenge';
+
+/** MFA challenge token expiry duration. */
+export const MFA_CHALLENGE_EXPIRY = '5m';
+
+/** HMAC derivation label for device fingerprint secret. */
+export const DEVICE_FINGERPRINT_HMAC_LABEL = 'device-fingerprint-key';
+
+/** HTTP header name for device fingerprint (lowercase for req.headers lookup). */
+export const DEVICE_FINGERPRINT_HEADER = 'x-device-fingerprint';
+
+/** Cookie name for refresh tokens. */
+export const REFRESH_TOKEN_COOKIE_NAME = 'refresh_token';
+
+/** JWT issuer and audience identifier. */
+export const JWT_ISSUER = 'nexacore-api';
+export const JWT_AUDIENCE = 'nexacore-api';

@@ -17,11 +17,15 @@ import { TrustedDeviceService } from './trusted-device.service';
 import { User } from '../users/entities/user.entity';
 import type { StringValue } from 'ms';
 import { ErrorMessages } from '../common/constants/error-messages';
+import {
+  MFA_CHALLENGE_HMAC_LABEL,
+  MFA_CHALLENGE_TOKEN_TYPE,
+  MFA_CHALLENGE_EXPIRY,
+} from './constants/auth.constants';
 
 const BCRYPT_ROUNDS_RECOVERY = 10;
 const RECOVERY_CODE_COUNT = 10;
 const RECOVERY_CODE_LENGTH = 10;
-const MFA_TOKEN_EXPIRY = '5m';
 
 @Injectable()
 export class MfaService {
@@ -39,7 +43,7 @@ export class MfaService {
     this.appName = this.configService.get<string>('auth.mfaAppName')!;
     const jwtSecret = this.configService.get<string>('auth.jwtSecret')!;
     this.mfaChallengeSecret = createHmac('sha256', jwtSecret)
-      .update('mfa-challenge-token')
+      .update(MFA_CHALLENGE_HMAC_LABEL)
       .digest('hex');
   }
 
@@ -126,9 +130,9 @@ export class MfaService {
 
   generateMfaToken(user: User): string {
     return this.jwtService.sign(
-      { sub: user.id, type: 'mfa-challenge' },
+      { sub: user.id, type: MFA_CHALLENGE_TOKEN_TYPE },
       {
-        expiresIn: MFA_TOKEN_EXPIRY as StringValue,
+        expiresIn: MFA_CHALLENGE_EXPIRY as StringValue,
         secret: this.mfaChallengeSecret,
       },
     );
@@ -157,7 +161,7 @@ export class MfaService {
       throw new UnauthorizedException(ErrorMessages.mfa.INVALID_TOKEN);
     }
 
-    if (payload.type !== 'mfa-challenge') {
+    if (payload.type !== MFA_CHALLENGE_TOKEN_TYPE) {
       throw new UnauthorizedException(ErrorMessages.mfa.INVALID_TOKEN);
     }
 

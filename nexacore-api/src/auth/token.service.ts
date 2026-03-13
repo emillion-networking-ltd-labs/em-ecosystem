@@ -30,6 +30,10 @@ import { parseDurationMs } from './utils/parse-duration';
 import {
   BCRYPT_ROUNDS,
   SESSION_IDLE_TIMEOUT_HOURS,
+  MFA_CHALLENGE_HMAC_LABEL,
+  MFA_CHALLENGE_TOKEN_TYPE,
+  MFA_CHALLENGE_EXPIRY,
+  REFRESH_TOKEN_COOKIE_NAME,
 } from './constants/auth.constants';
 import type { StringValue } from 'ms';
 
@@ -58,7 +62,7 @@ export class TokenService {
       process.env.JWT_SECRET || 'default-dev-secret-change-in-production';
     this.mfaChallengeSecret = crypto
       .createHmac('sha256', jwtSecret)
-      .update('mfa-challenge-token')
+      .update(MFA_CHALLENGE_HMAC_LABEL)
       .digest('hex');
   }
 
@@ -248,14 +252,17 @@ export class TokenService {
 
   signMfaChallengeToken(userId: string): string {
     return this.jwtService.sign(
-      { sub: userId, type: 'mfa-challenge' },
-      { expiresIn: '5m' as StringValue, secret: this.mfaChallengeSecret },
+      { sub: userId, type: MFA_CHALLENGE_TOKEN_TYPE },
+      {
+        expiresIn: MFA_CHALLENGE_EXPIRY as StringValue,
+        secret: this.mfaChallengeSecret,
+      },
     );
   }
 
   buildRefreshCookie(refreshToken: string): CookieConfig {
     return {
-      name: 'refresh_token',
+      name: REFRESH_TOKEN_COOKIE_NAME,
       value: refreshToken,
       options: {
         httpOnly: true,
@@ -269,7 +276,7 @@ export class TokenService {
 
   buildClearCookie(): CookieConfig {
     return {
-      name: 'refresh_token',
+      name: REFRESH_TOKEN_COOKIE_NAME,
       value: '',
       options: {
         httpOnly: true,
