@@ -9,7 +9,10 @@ describe('PermissionsGuard', () => {
   let reflector: jest.Mocked<Reflector>;
   let permissionsService: jest.Mocked<PermissionsService>;
 
-  function createMockContext(user?: { id: string; role: Role }): ExecutionContext {
+  function createMockContext(user?: {
+    id: string;
+    role: Role;
+  }): ExecutionContext {
     return {
       switchToHttp: () => ({
         getRequest: () => ({ user }),
@@ -20,6 +23,7 @@ describe('PermissionsGuard', () => {
   }
 
   beforeEach(() => {
+    jest.clearAllMocks();
     reflector = {
       getAllAndOverride: jest.fn(),
     } as any;

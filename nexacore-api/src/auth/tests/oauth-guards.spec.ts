@@ -7,6 +7,7 @@ describe('OAuth Guards', () => {
   let stateStore: { generate: jest.Mock; validate: jest.Mock };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     stateStore = {
       generate: jest.fn().mockResolvedValue({
         state: 'random-state-value',

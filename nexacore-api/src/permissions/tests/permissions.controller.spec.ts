@@ -10,6 +10,7 @@ describe('PermissionsController', () => {
   let service: jest.Mocked<PermissionsService>;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       controllers: [PermissionsController],
       providers: [
@@ -111,9 +112,13 @@ describe('PermissionsController', () => {
       service.setPermissionsForRole.mockResolvedValue(undefined);
 
       const mockReq = { user: { role: Role.ADMIN } } as any;
-      const result = await controller.setForRole('USER', {
-        permissionKeys: ['dashboard:read'],
-      }, mockReq);
+      const result = await controller.setForRole(
+        'USER',
+        {
+          permissionKeys: ['dashboard:read'],
+        },
+        mockReq,
+      );
 
       expect(result).toEqual({ message: 'Permissions updated successfully' });
       expect(service.setPermissionsForRole).toHaveBeenCalledWith(

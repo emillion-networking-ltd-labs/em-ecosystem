@@ -50,6 +50,7 @@ describe('OAuth Exchange Flow (Integration)', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     codeMap.clear();
 
     authService = {

@@ -25,6 +25,7 @@ describe('CsrfGuard', () => {
   let reflector: Reflector;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     reflector = new Reflector();
     guard = new CsrfGuard(reflector);
   });

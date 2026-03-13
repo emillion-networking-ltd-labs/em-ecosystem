@@ -11,6 +11,7 @@ describe('PermissionsService', () => {
   let cache: PermissionsCache;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         PermissionsService,
@@ -177,10 +178,7 @@ describe('PermissionsService', () => {
     it('should return false when role lacks the permission', async () => {
       cache.set(Role.USER, ['dashboard:read']);
 
-      const result = await service.roleHasPermission(
-        Role.USER,
-        'users:delete',
-      );
+      const result = await service.roleHasPermission(Role.USER, 'users:delete');
       expect(result).toBe(false);
     });
   });
@@ -230,7 +228,9 @@ describe('PermissionsService', () => {
 
       // Should upsert for each DEFAULT_PERMISSIONS entry (9 permissions)
       expect(prisma.permission.upsert).toHaveBeenCalled();
-      expect(prisma.permission.upsert.mock.calls.length).toBeGreaterThanOrEqual(9);
+      expect(prisma.permission.upsert.mock.calls.length).toBeGreaterThanOrEqual(
+        9,
+      );
     });
 
     it('should skip seeding role permissions when role already has assignments', async () => {
@@ -272,8 +272,18 @@ describe('PermissionsService', () => {
   describe('findAll', () => {
     it('should return all permissions ordered by resource and action', async () => {
       const mockPermissions = [
-        { id: 'p1', key: 'audit-logs:read', resource: 'audit-logs', action: 'read' },
-        { id: 'p2', key: 'dashboard:read', resource: 'dashboard', action: 'read' },
+        {
+          id: 'p1',
+          key: 'audit-logs:read',
+          resource: 'audit-logs',
+          action: 'read',
+        },
+        {
+          id: 'p2',
+          key: 'dashboard:read',
+          resource: 'dashboard',
+          action: 'read',
+        },
       ];
       prisma.permission.findMany.mockResolvedValue(mockPermissions as any);
 
