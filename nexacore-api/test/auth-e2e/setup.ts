@@ -69,6 +69,7 @@ export interface MockSession {
   lastUsedAt: Date;
   expiresAt: Date;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface MockEmailVerificationToken {
@@ -262,6 +263,7 @@ export function createMockPrisma(store: MockStore) {
           lastUsedAt: new Date(),
           expiresAt: data.expiresAt,
           createdAt: new Date(),
+          updatedAt: new Date(),
         };
         store.sessions.push(session);
         return Promise.resolve({ ...session });
