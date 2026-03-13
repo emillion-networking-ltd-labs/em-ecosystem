@@ -32,6 +32,7 @@ import { SessionsModule } from '../sessions/sessions.module';
 import { CryptoModule } from '../common/services/crypto.module';
 import { MailModule } from '../mail/mail.module';
 import { SecurityModule } from '../security/security.module';
+import { JWT_ISSUER, JWT_AUDIENCE } from './constants/auth.constants';
 
 @Module({
   imports: [
@@ -51,13 +52,13 @@ import { SecurityModule } from '../security/security.module';
           expiresIn: configService.get<string>(
             'auth.jwtAccessExpiration',
           ) as StringValue,
-          issuer: 'nexacore-api',
-          audience: 'nexacore-api',
+          issuer: JWT_ISSUER,
+          audience: JWT_AUDIENCE,
           algorithm: 'HS256' as const,
         },
         verifyOptions: {
-          issuer: 'nexacore-api',
-          audience: 'nexacore-api',
+          issuer: JWT_ISSUER,
+          audience: JWT_AUDIENCE,
           algorithms: ['HS256'],
         },
       }),

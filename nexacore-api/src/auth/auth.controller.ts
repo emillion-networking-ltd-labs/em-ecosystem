@@ -27,7 +27,11 @@ import {
 } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
-import { AUTH_RATE_LIMITS } from './constants/auth.constants';
+import {
+  AUTH_RATE_LIMITS,
+  DEVICE_FINGERPRINT_HEADER,
+  REFRESH_TOKEN_COOKIE_NAME,
+} from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { Roles } from '../common/decorators/roles.decorator';
@@ -120,7 +124,7 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ) {
     const meta = extractRequestMeta(req);
-    const rawFingerprint = req.headers?.['x-device-fingerprint'];
+    const rawFingerprint = req.headers?.[DEVICE_FINGERPRINT_HEADER];
     const fingerprint = Array.isArray(rawFingerprint)
       ? rawFingerprint[0]
       : rawFingerprint;
@@ -164,7 +168,7 @@ export class AuthController {
     @Request() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies?.['refresh_token'];
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE_NAME];
     if (!refreshToken) {
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
@@ -186,7 +190,7 @@ export class AuthController {
     @Request() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies?.['refresh_token'];
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE_NAME];
     const meta = extractRequestMeta(req);
     if (refreshToken) {
       const clearCookie = await this.authService.logout(refreshToken, meta);

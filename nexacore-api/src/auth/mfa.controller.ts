@@ -22,7 +22,10 @@ import type { Response } from 'express';
 import { MfaService } from './mfa.service';
 import { TokenService } from './token.service';
 import { TrustedDeviceService } from './trusted-device.service';
-import { AUTH_RATE_LIMITS } from './constants/auth.constants';
+import {
+  AUTH_RATE_LIMITS,
+  DEVICE_FINGERPRINT_HEADER,
+} from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { MfaVerifySetupDto } from './dto/mfa-verify-setup.dto';
 import { MfaVerifyLoginDto } from './dto/mfa-verify-login.dto';
@@ -110,7 +113,7 @@ export class MfaController {
 
     // Trust device (fire-and-forget — failure must not block login)
     if (dto.trustDevice) {
-      const rawFp = req.headers?.['x-device-fingerprint'];
+      const rawFp = req.headers?.[DEVICE_FINGERPRINT_HEADER];
       const fingerprint = Array.isArray(rawFp) ? rawFp[0] : rawFp;
       if (fingerprint) {
         this.trustedDeviceService
