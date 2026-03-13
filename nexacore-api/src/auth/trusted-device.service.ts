@@ -9,6 +9,7 @@ import {
   TRUSTED_DEVICE_TTL_DAYS,
   MAX_TRUSTED_DEVICES_PER_USER,
   DEVICE_FINGERPRINT_HMAC_LABEL,
+  daysToMs,
 } from './constants/auth.constants';
 
 @Injectable()
@@ -40,9 +41,7 @@ export class TrustedDeviceService {
   ) {
     const fingerprintHash = this.hashFingerprint(userId, fingerprint);
     const deviceName = this.parseDeviceName(userAgent);
-    const expiresAt = new Date(
-      Date.now() + TRUSTED_DEVICE_TTL_DAYS * 24 * 60 * 60 * 1000,
-    );
+    const expiresAt = new Date(Date.now() + daysToMs(TRUSTED_DEVICE_TTL_DAYS));
 
     // Enforce max trusted devices limit — revoke oldest if exceeded
     const activeCount = await this.prisma.trustedDevice.count({

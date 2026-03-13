@@ -2,7 +2,7 @@ import { Injectable, Inject, Logger } from '@nestjs/common';
 import Redis from 'ioredis';
 import { REDIS_CLIENT } from '../common/services/redis.constants';
 
-export const ACCESS_TOKEN_TTL_SECONDS = 900; // 15 minutes
+export { ACCESS_TOKEN_TTL_SECONDS } from './constants/auth.constants';
 
 @Injectable()
 export class TokenDenyListService {
@@ -14,7 +14,9 @@ export class TokenDenyListService {
     try {
       await this.redis.set(`deny:jti:${jti}`, '1', 'EX', ttlSeconds);
     } catch (err) {
-      this.logger.warn(`Failed to deny token jti=${jti}: ${(err as Error).message}`);
+      this.logger.warn(
+        `Failed to deny token jti=${jti}: ${(err as Error).message}`,
+      );
     }
   }
 
@@ -23,7 +25,9 @@ export class TokenDenyListService {
       const denyBefore = Math.floor(Date.now() / 1000).toString();
       await this.redis.set(`deny:user:${userId}`, denyBefore, 'EX', ttlSeconds);
     } catch (err) {
-      this.logger.warn(`Failed to deny user=${userId}: ${(err as Error).message}`);
+      this.logger.warn(
+        `Failed to deny user=${userId}: ${(err as Error).message}`,
+      );
     }
   }
 

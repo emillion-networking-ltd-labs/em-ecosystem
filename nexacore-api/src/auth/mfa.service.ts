@@ -21,11 +21,10 @@ import {
   MFA_CHALLENGE_HMAC_LABEL,
   MFA_CHALLENGE_TOKEN_TYPE,
   MFA_CHALLENGE_EXPIRY,
+  BCRYPT_ROUNDS_RECOVERY,
+  RECOVERY_CODE_COUNT,
+  RECOVERY_CODE_LENGTH,
 } from './constants/auth.constants';
-
-const BCRYPT_ROUNDS_RECOVERY = 10;
-const RECOVERY_CODE_COUNT = 10;
-const RECOVERY_CODE_LENGTH = 10;
 
 @Injectable()
 export class MfaService {

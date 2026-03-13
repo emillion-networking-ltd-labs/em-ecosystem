@@ -15,9 +15,11 @@ import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
 import { User } from '../users/entities/user.entity';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { hashToken } from './utils/hash-token';
-
-const VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
-const RESEND_COOLDOWN_SECONDS = 60;
+import {
+  VERIFICATION_TOKEN_EXPIRY_HOURS,
+  RESEND_COOLDOWN_SECONDS,
+  hoursToMs,
+} from './constants/auth.constants';
 
 @Injectable()
 export class EmailVerificationService {
@@ -225,7 +227,7 @@ export class EmailVerificationService {
     const plainToken = crypto.randomBytes(32).toString('hex');
     const tokenHash = hashToken(plainToken);
     const expiresAt = new Date(
-      Date.now() + VERIFICATION_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000,
+      Date.now() + hoursToMs(VERIFICATION_TOKEN_EXPIRY_HOURS),
     );
 
     await this.prisma.emailVerificationToken.create({
