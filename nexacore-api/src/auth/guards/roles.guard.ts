@@ -19,15 +19,13 @@ export class RolesGuard implements CanActivate {
   ) {}
 
   canActivate(context: ExecutionContext): boolean {
-    const request = context
-      .switchToHttp()
-      .getRequest<{
-        user?: { id: string; role: Role };
-        ip?: string;
-        headers?: Record<string, string>;
-        route?: { path?: string };
-        method?: string;
-      }>();
+    const request = context.switchToHttp().getRequest<{
+      user?: { id: string; role: Role };
+      ip?: string;
+      headers?: Record<string, string>;
+      route?: { path?: string };
+      method?: string;
+    }>();
     const user = request.user;
 
     const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
@@ -63,7 +61,7 @@ export class RolesGuard implements CanActivate {
     }
 
     if (!requiredRoles.includes(user.role)) {
-      throw new ForbiddenException(ErrorMessages.permission.INSUFFICIENT_ROLE);
+      throw new ForbiddenException(ErrorMessages.permission.ACCESS_DENIED);
     }
 
     return true;

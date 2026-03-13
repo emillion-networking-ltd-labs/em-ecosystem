@@ -86,9 +86,7 @@ describe('PermissionsGuard', () => {
     await expect(guard.canActivate(context)).rejects.toThrow(
       ForbiddenException,
     );
-    await expect(guard.canActivate(context)).rejects.toThrow(
-      'Insufficient permissions',
-    );
+    await expect(guard.canActivate(context)).rejects.toThrow('Access denied');
   });
 
   it('should check ALL required permissions (AND logic)', async () => {

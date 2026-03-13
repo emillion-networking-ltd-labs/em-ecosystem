@@ -41,14 +41,13 @@ export class PermissionsGuard implements CanActivate {
       return true;
     }
 
-    const hasPermissions =
-      await this.permissionsService.roleHasAllPermissions(
-        user.role,
-        requiredPermissions,
-      );
+    const hasPermissions = await this.permissionsService.roleHasAllPermissions(
+      user.role,
+      requiredPermissions,
+    );
 
     if (!hasPermissions) {
-      throw new ForbiddenException(ErrorMessages.permission.INSUFFICIENT_PERMISSIONS);
+      throw new ForbiddenException(ErrorMessages.permission.ACCESS_DENIED);
     }
 
     return true;
