@@ -1,21 +1,21 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import Link from 'next/link';
-import { AlertTriangle } from 'lucide-react';
-import Input from '@/components/ui/Input';
-import InfinitySpinner from '@/components/ui/InfinitySpinner';
-import RateLimitBanner from '@/components/ui/RateLimitBanner';
-import { useAuth } from '@/hooks/useAuth';
-import { useRateLimit } from '@/hooks/useRateLimit';
-import { useToast } from '@/context/ToastContext';
-import { RateLimitError } from '@/lib/types';
-import TurnstileWidget from '@/components/ui/TurnstileWidget';
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
+import Input from "@/components/ui/Input";
+import InfinitySpinner from "@/components/ui/InfinitySpinner";
+import RateLimitBanner from "@/components/ui/RateLimitBanner";
+import { useAuth } from "@/hooks/useAuth";
+import { useRateLimit } from "@/hooks/useRateLimit";
+import { useToast } from "@/context/ToastContext";
+import { RateLimitError } from "@/lib/types";
+import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
 export default function ForgotPasswordForm() {
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState(searchParams.get('email') ?? '');
+  const [email, setEmail] = useState(searchParams.get("email") ?? "");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const [turnstileResetKey, setTurnstileResetKey] = useState(0);
@@ -31,15 +31,19 @@ export default function ForgotPasswordForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email) {
-      setEmailError('Enter your email address');
+      setEmailError("Enter your email address");
       return;
     }
     setEmailError(null);
     try {
       const success = await forgotPassword(email, turnstileToken ?? undefined);
       if (success) {
-        addToast({ variant: 'success', title: 'Recovery email sent', description: 'Check your inbox for the password reset link.' });
-        router.push('/password-reset/check-email');
+        addToast({
+          variant: "success",
+          title: "Recovery email sent",
+          description: "Check your inbox for the password reset link.",
+        });
+        router.push("/password-reset/check-email");
       }
     } catch (err) {
       if (err instanceof RateLimitError) {
@@ -47,7 +51,7 @@ export default function ForgotPasswordForm() {
       }
     } finally {
       setTurnstileToken(null);
-      setTurnstileResetKey(k => k + 1);
+      setTurnstileResetKey((k) => k + 1);
     }
   };
 
@@ -82,7 +86,11 @@ export default function ForgotPasswordForm() {
               type="email"
               name="email"
               value={email}
-              onChange={e => { clearError(); setEmailError(null); setEmail(e.target.value); }}
+              onChange={(e) => {
+                clearError();
+                setEmailError(null);
+                setEmail(e.target.value);
+              }}
               placeholder="your@email.com"
               hasError={showError || !!emailError}
               autoFocus
@@ -96,11 +104,17 @@ export default function ForgotPasswordForm() {
                 onExpired={clearRateLimit}
               />
             ) : (
-              <div className={`flex items-center gap-2 ${showError ? 'min-h-6' : 'h-6'}`}>
+              <div
+                role="alert"
+                aria-live="polite"
+                className={`flex items-center gap-2 ${showError ? "min-h-6" : "h-6"}`}
+              >
                 {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-xs leading-6 text-error">{activeError}</span>
+                    <span className="flex-1 text-xs leading-6 text-error">
+                      {activeError}
+                    </span>
                   </>
                 )}
               </div>
@@ -118,7 +132,11 @@ export default function ForgotPasswordForm() {
           </div>
 
           {/* Turnstile CAPTCHA */}
-          <TurnstileWidget onToken={setTurnstileToken} onExpire={() => setTurnstileToken(null)} resetKey={turnstileResetKey} />
+          <TurnstileWidget
+            onToken={setTurnstileToken}
+            onExpire={() => setTurnstileToken(null)}
+            resetKey={turnstileResetKey}
+          />
 
           {/* Recovery Button — Figma: 348x40, primary, single button */}
           <button
@@ -126,7 +144,9 @@ export default function ForgotPasswordForm() {
             disabled={isDisabled}
             className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
-            <span className={isLoading ? 'opacity-30' : ''}>Send Recovery Email</span>
+            <span className={isLoading ? "opacity-30" : ""}>
+              Send Recovery Email
+            </span>
             {isLoading && (
               <span className="absolute inset-0 flex items-center justify-center">
                 <InfinitySpinner />

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useCallback } from "react";
 
 type ConfirmModalProps = {
   open: boolean;
@@ -10,7 +10,7 @@ type ConfirmModalProps = {
   description: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  variant?: 'primary' | 'danger';
+  variant?: "primary" | "danger";
   loading?: boolean;
   children?: React.ReactNode;
 };
@@ -21,22 +21,67 @@ export default function ConfirmModal({
   onConfirm,
   title,
   description,
-  confirmLabel = 'Confirm',
-  cancelLabel = 'Cancel',
-  variant = 'primary',
+  confirmLabel = "Confirm",
+  cancelLabel = "Cancel",
+  variant = "primary",
   loading = false,
   children,
 }: ConfirmModalProps) {
   const overlayRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  // Save previous focus and focus first element on open
+  useEffect(() => {
+    if (!open) return;
+    previousFocusRef.current = document.activeElement as HTMLElement;
+    // Focus the first focusable element in the panel
+    const panel = panelRef.current;
+    if (panel) {
+      const focusable = panel.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+      );
+      if (focusable.length > 0) focusable[0].focus();
+    }
+    return () => {
+      // Restore focus on close
+      previousFocusRef.current?.focus();
+    };
+  }, [open]);
+
+  // Keyboard handler: Escape + focus trap
+  const handleKeyDown = useCallback(
+    (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key === "Tab") {
+        const panel = panelRef.current;
+        if (!panel) return;
+        const focusable = panel.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    },
+    [onClose],
+  );
 
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
-  }, [open, onClose]);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
+  }, [open, handleKeyDown]);
 
   if (!open) return null;
 
@@ -48,12 +93,25 @@ export default function ConfirmModal({
         if (e.target === overlayRef.current) onClose();
       }}
     >
-      <div className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary shadow-card">
+      <div
+        ref={panelRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="confirm-modal-title"
+        className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary shadow-card"
+      >
         {/* Top section */}
         <div className="flex gap-4 border-b border-border-default bg-surface-primary p-6">
           <div className="flex-1">
-            <h2 className="text-heading-md text-content-primary">{title}</h2>
-            <p className="mt-2 text-body-sm text-content-secondary">{description}</p>
+            <h2
+              id="confirm-modal-title"
+              className="text-heading-md text-content-primary"
+            >
+              {title}
+            </h2>
+            <p className="mt-2 text-body-sm text-content-secondary">
+              {description}
+            </p>
             {children}
           </div>
         </div>
@@ -71,12 +129,12 @@ export default function ConfirmModal({
             onClick={onConfirm}
             disabled={loading}
             className={`h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] transition-colors disabled:opacity-50 ${
-              variant === 'danger'
-                ? 'bg-error text-white hover:opacity-90'
-                : 'bg-surface-inverse text-content-inverse hover:opacity-90'
+              variant === "danger"
+                ? "bg-error text-white hover:opacity-90"
+                : "bg-surface-inverse text-content-inverse hover:opacity-90"
             }`}
           >
-            {loading ? 'Loading...' : confirmLabel}
+            {loading ? "Loading..." : confirmLabel}
           </button>
         </div>
       </div>

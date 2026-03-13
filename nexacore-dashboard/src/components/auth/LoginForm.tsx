@@ -221,6 +221,8 @@ export default function LoginForm() {
               const activeError = emailError;
               return (
                 <div
+                  role="alert"
+                  aria-live="polite"
                   className={`flex items-center gap-2 ${activeError ? "min-h-6" : "h-6"}`}
                 >
                   {activeError && (
@@ -278,7 +280,7 @@ export default function LoginForm() {
               )}
             </button>
             {passkeyError && (
-              <div className="mt-2 flex items-center gap-2">
+              <div role="alert" className="mt-2 flex items-center gap-2">
                 <AlertTriangle size={14} className="shrink-0 text-error" />
                 <span className="text-xs text-error">{passkeyError}</span>
               </div>
@@ -506,6 +508,8 @@ function PasswordStep({
               </div>
             ) : (
               <div
+                role="alert"
+                aria-live="polite"
                 className={`flex items-center gap-2 ${showNonVerificationError ? "min-h-6" : "h-6"}`}
               >
                 {showNonVerificationError && (

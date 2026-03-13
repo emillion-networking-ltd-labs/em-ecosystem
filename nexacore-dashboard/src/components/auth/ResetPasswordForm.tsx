@@ -160,6 +160,8 @@ export default function ResetPasswordForm() {
               />
             ) : (
               <div
+                role="alert"
+                aria-live="polite"
                 className={`flex items-center gap-2 ${showError ? "min-h-6" : "h-6"}`}
               >
                 {showError && (
