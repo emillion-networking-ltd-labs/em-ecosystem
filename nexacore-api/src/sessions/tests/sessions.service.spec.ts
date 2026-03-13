@@ -1,8 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  UnauthorizedException,
-  NotFoundException,
-} from '@nestjs/common';
+import { UnauthorizedException, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { SessionsService } from '../sessions.service';
@@ -50,6 +47,7 @@ describe('SessionsService', () => {
     latitude: null,
     longitude: null,
     createdAt: now,
+    updatedAt: now,
     lastUsedAt: now,
     expiresAt: futureDate,
   };
@@ -350,9 +348,16 @@ describe('SessionsService', () => {
       prisma.session.findUnique.mockResolvedValue(mockSession);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       (bcrypt.hash as jest.Mock).mockResolvedValue('new-hashed-token');
-      prisma.session.update.mockResolvedValue({ ...mockSession, isRevoked: true });
+      prisma.session.update.mockResolvedValue({
+        ...mockSession,
+        isRevoked: true,
+      });
 
-      const newSession = { ...mockSession, id: 'session-2', refreshTokenHash: 'new-hashed-token' };
+      const newSession = {
+        ...mockSession,
+        id: 'session-2',
+        refreshTokenHash: 'new-hashed-token',
+      };
       prisma.session.create.mockResolvedValue(newSession);
 
       const result = await sessionsService.rotateRefreshToken(rotateParams);
@@ -381,8 +386,14 @@ describe('SessionsService', () => {
       prisma.session.findUnique.mockResolvedValue(mockSession);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       (bcrypt.hash as jest.Mock).mockResolvedValue('new-hashed-token');
-      prisma.session.update.mockResolvedValue({ ...mockSession, isRevoked: true });
-      prisma.session.create.mockResolvedValue({ ...mockSession, id: 'session-2' });
+      prisma.session.update.mockResolvedValue({
+        ...mockSession,
+        isRevoked: true,
+      });
+      prisma.session.create.mockResolvedValue({
+        ...mockSession,
+        id: 'session-2',
+      });
 
       await sessionsService.rotateRefreshToken({
         ...rotateParams,
@@ -417,7 +428,10 @@ describe('SessionsService', () => {
   describe('revokeSession', () => {
     it('should revoke session when it belongs to the user', async () => {
       prisma.session.findUnique.mockResolvedValue(mockSession);
-      prisma.session.update.mockResolvedValue({ ...mockSession, isRevoked: true });
+      prisma.session.update.mockResolvedValue({
+        ...mockSession,
+        isRevoked: true,
+      });
 
       await sessionsService.revokeSession('session-1', 'user-1');
 
@@ -582,10 +596,7 @@ describe('SessionsService', () => {
     });
 
     it('should return sessions as Session[]', async () => {
-      const sessions = [
-        mockSession,
-        { ...mockSession, id: 'session-2' },
-      ];
+      const sessions = [mockSession, { ...mockSession, id: 'session-2' }];
       prisma.session.findMany.mockResolvedValue(sessions);
 
       const result = await sessionsService.getActiveNonIdleSessions('user-1');
@@ -624,7 +635,10 @@ describe('SessionsService', () => {
     it('should revoke oldest session when at limit', async () => {
       const sessions = makeSessions(5);
       prisma.session.findMany.mockResolvedValue(sessions);
-      prisma.session.update.mockResolvedValue({ ...sessions[0], isRevoked: true });
+      prisma.session.update.mockResolvedValue({
+        ...sessions[0],
+        isRevoked: true,
+      });
 
       await sessionsService.enforceSessionLimit('user-1');
 

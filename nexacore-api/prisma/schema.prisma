@@ -110,6 +110,7 @@ model Session {
   longitude        Float?
   isRevoked        Boolean  @default(false)
   createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
   lastUsedAt       DateTime @default(now())
   expiresAt        DateTime
 
@@ -199,6 +200,7 @@ model WebAuthnCredential {
   name         String?
   lastUsedAt   DateTime?
   createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

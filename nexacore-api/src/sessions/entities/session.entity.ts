@@ -12,6 +12,7 @@ export interface Session {
   longitude: number | null;
   isRevoked: boolean;
   createdAt: Date;
+  updatedAt: Date;
   lastUsedAt: Date;
   expiresAt: Date;
 }
