@@ -1,14 +1,11 @@
 import {
   Controller,
   Post,
-  Get,
   Body,
-  Query,
   HttpCode,
   HttpStatus,
   UseGuards,
   Request,
-  Res,
   UseInterceptors,
 } from '@nestjs/common';
 import {
@@ -16,15 +13,14 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBearerAuth,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
-import type { Response } from 'express';
-import { ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ValidateResetTokenDto } from './dto/validate-reset-token.dto';
+import { VerifyEmailDto } from './dto/verify-email.dto';
+import { VerifyEmailChangeDto } from './dto/verify-email-change.dto';
 import { ResendVerificationPublicDto } from './dto/resend-verification-public.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
@@ -37,57 +33,30 @@ import type { AuthenticatedRequest } from '../common/interfaces/authenticated-re
 @UseInterceptors(NoCacheInterceptor)
 @Controller('auth')
 export class AccountController {
-  constructor(
-    private readonly authService: AuthService,
-    private readonly configService: ConfigService,
-  ) {}
+  constructor(private readonly authService: AuthService) {}
 
   // ── Email Verification Endpoints ──
 
-  @Get('verify-email')
-  @ApiOperation({ summary: 'Verify email address via token from email link' })
-  @ApiQuery({
-    name: 'token',
-    required: true,
-    description: 'Verification token',
-  })
-  @ApiResponse({
-    status: 302,
-    description: 'Redirects to frontend with status',
-  })
-  async verifyEmail(@Query('token') token: string, @Res() res: Response) {
-    const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
-
-    if (!token) {
-      return res.redirect(`${frontendUrl}/verify-email?status=invalid`);
-    }
-
-    const result = await this.authService.verifyEmail(token);
-    return res.redirect(`${frontendUrl}/verify-email?status=${result.status}`);
+  @Post('verify-email')
+  @HttpCode(HttpStatus.OK)
+  @SkipCsrf()
+  @Throttle({ global: { ttl: 60_000, limit: 10 } })
+  @ApiOperation({ summary: 'Verify email address via token (POST body)' })
+  @ApiResponse({ status: 200, description: 'Verification result' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  async verifyEmail(@Body() dto: VerifyEmailDto) {
+    return this.authService.verifyEmail(dto.token);
   }
 
-  @Get('verify-email-change')
-  @ApiOperation({ summary: 'Verify email change via token from email link' })
-  @ApiQuery({
-    name: 'token',
-    required: true,
-    description: 'Email change verification token',
-  })
-  @ApiResponse({
-    status: 302,
-    description: 'Redirects to frontend with status',
-  })
-  async verifyEmailChange(@Query('token') token: string, @Res() res: Response) {
-    const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
-
-    if (!token) {
-      return res.redirect(`${frontendUrl}/verify-email-change?status=invalid`);
-    }
-
-    const result = await this.authService.verifyEmailChange(token);
-    return res.redirect(
-      `${frontendUrl}/verify-email-change?status=${result.status}`,
-    );
+  @Post('verify-email-change')
+  @HttpCode(HttpStatus.OK)
+  @SkipCsrf()
+  @Throttle({ global: { ttl: 60_000, limit: 10 } })
+  @ApiOperation({ summary: 'Verify email change via token (POST body)' })
+  @ApiResponse({ status: 200, description: 'Verification result' })
+  @ApiResponse({ status: 400, description: 'Validation error' })
+  async verifyEmailChange(@Body() dto: VerifyEmailChangeDto) {
+    return this.authService.verifyEmailChange(dto.token);
   }
 
   @Post('resend-verification')

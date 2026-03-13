@@ -81,7 +81,7 @@ describe('MailService', () => {
 
       const call = mailerService.sendMail.mock.calls[0][0];
       expect(call.context.verificationUrl).toContain(
-        '/auth/verify-email?token=abc123',
+        '/verify-email?token=abc123',
       );
     });
   });
@@ -115,9 +115,7 @@ describe('MailService', () => {
       );
 
       const call = mailerService.sendMail.mock.calls[0][0];
-      expect(call.context.resetUrl).toContain(
-        '/reset-password?token=xyz789',
-      );
+      expect(call.context.resetUrl).toContain('/reset-password?token=xyz789');
     });
 
     it('should not throw when mailer fails', async () => {
@@ -189,10 +187,22 @@ describe('MailService', () => {
 
     it('should parse common user agents into readable device strings', async () => {
       const cases = [
-        { ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36', expected: 'Chrome on Windows' },
-        { ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15', expected: 'Safari on macOS' },
-        { ua: 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/121.0', expected: 'Firefox on Linux' },
-        { ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36 Edg/120.0', expected: 'Edge on Windows' },
+        {
+          ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36',
+          expected: 'Chrome on Windows',
+        },
+        {
+          ua: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15',
+          expected: 'Safari on macOS',
+        },
+        {
+          ua: 'Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/121.0',
+          expected: 'Firefox on Linux',
+        },
+        {
+          ua: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0 Safari/537.36 Edg/120.0',
+          expected: 'Edge on Windows',
+        },
       ];
 
       for (const { ua, expected } of cases) {
@@ -250,7 +260,7 @@ describe('MailService', () => {
 
       const call = mailerService.sendMail.mock.calls[0][0];
       expect(call.context.verificationUrl).toContain(
-        '/auth/verify-email-change?token=abc123',
+        '/verify-email-change?token=abc123',
       );
     });
 
@@ -348,7 +358,8 @@ describe('MailService', () => {
       elapsedHours: 0.5,
       requiredSpeedKmh: 11524.6,
       ipAddress: '203.0.113.1',
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+      userAgent:
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
       actionTaken: 'allowed' as const,
     };
 
@@ -418,10 +429,7 @@ describe('MailService', () => {
       mailerService.sendMail.mockRejectedValueOnce(new Error('SMTP error'));
 
       await expect(
-        mailService.sendAccountDeletionConfirmation(
-          'user@example.com',
-          null,
-        ),
+        mailService.sendAccountDeletionConfirmation('user@example.com', null),
       ).resolves.toBeUndefined();
     });
   });
@@ -478,7 +486,8 @@ describe('MailService', () => {
         newCountry: 'JP',
         previousCountries: ['ES', 'US'],
         ipAddress: '203.0.113.1',
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
       });
 
       expect(mailerService.sendMail).toHaveBeenCalledWith(

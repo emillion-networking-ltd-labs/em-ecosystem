@@ -12,9 +12,8 @@ export class MailService {
     token: string,
     firstName?: string | null,
   ): Promise<void> {
-    const apiUrl = process.env.API_URL || 'http://localhost:3000';
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-    const verificationUrl = `${apiUrl}/auth/verify-email?token=${token}`;
+    const verificationUrl = `${frontendUrl}/verify-email?token=${token}`;
 
     try {
       await this.mailerService.sendMail({
@@ -31,10 +30,7 @@ export class MailService {
       });
       this.logger.log(`Verification email sent to ${email}`);
     } catch (error) {
-      this.logger.error(
-        `Failed to send verification email to ${email}`,
-        error,
-      );
+      this.logger.error(`Failed to send verification email to ${email}`, error);
       // Do not throw — registration should succeed even if email fails
     }
   }
@@ -205,9 +201,8 @@ export class MailService {
     token: string,
     firstName?: string | null,
   ): Promise<void> {
-    const apiUrl = process.env.API_URL || 'http://localhost:3000';
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
-    const verificationUrl = `${apiUrl}/auth/verify-email-change?token=${token}`;
+    const verificationUrl = `${frontendUrl}/verify-email-change?token=${token}`;
 
     try {
       await this.mailerService.sendMail({
@@ -451,10 +446,7 @@ export class MailService {
     }
   }
 
-  private formatLocation(
-    city: string | null,
-    country: string | null,
-  ): string {
+  private formatLocation(city: string | null, country: string | null): string {
     if (city && country) return `${city}, ${country}`;
     if (city) return city;
     if (country) return country;
@@ -473,7 +465,8 @@ export class MailService {
     if (ua.includes('Edg/')) browser = 'Edge';
     else if (ua.includes('Chrome/')) browser = 'Chrome';
     else if (ua.includes('Firefox/')) browser = 'Firefox';
-    else if (ua.includes('Safari/') && !ua.includes('Chrome/')) browser = 'Safari';
+    else if (ua.includes('Safari/') && !ua.includes('Chrome/'))
+      browser = 'Safari';
 
     let os = 'Unknown OS';
     if (ua.includes('Windows')) os = 'Windows';
