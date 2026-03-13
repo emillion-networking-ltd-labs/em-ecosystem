@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { OAuthController } from '../oauth.controller';
 import { AuthService } from '../auth.service';
+import { OAuthLinkCodeStore } from '../stores/oauth-link-code.store';
 import { TurnstileService } from '../../security/turnstile.service';
 import { ConfigService } from '@nestjs/config';
 import { Role } from '../../users/enums/role.enum';
@@ -65,10 +65,10 @@ describe('OAuthController', () => {
           },
         },
         {
-          provide: JwtService,
+          provide: OAuthLinkCodeStore,
           useValue: {
-            sign: jest.fn(),
-            verify: jest.fn(),
+            generate: jest.fn().mockResolvedValue('test-link-code'),
+            consume: jest.fn().mockResolvedValue('uuid-123'),
           },
         },
         {

@@ -1,19 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
-import { Info } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/context/ToastContext';
-import { unlinkOAuth } from '@/lib/oauth-api';
-import Input from '@/components/ui/Input';
-import Tooltip from '@/components/ui/Tooltip';
-import { extractMessageByStatus } from '@/lib/error-utils';
-import { HTTP_STATUS } from '@/lib/error-constants';
+import { useState, useEffect, useRef } from "react";
+import { Info } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/context/ToastContext";
+import { unlinkOAuth, generateLinkCode } from "@/lib/oauth-api";
+import Input from "@/components/ui/Input";
+import Tooltip from "@/components/ui/Tooltip";
+import { extractMessageByStatus } from "@/lib/error-utils";
+import { HTTP_STATUS } from "@/lib/error-constants";
 
 const providers = [
   {
-    id: 'GOOGLE' as const,
-    name: 'Google',
+    id: "GOOGLE" as const,
+    name: "Google",
     icon: (
       <svg viewBox="0 0 24 24" className="h-6 w-6">
         <path
@@ -36,8 +36,8 @@ const providers = [
     ),
   },
   {
-    id: 'GITHUB' as const,
-    name: 'GitHub',
+    id: "GITHUB" as const,
+    name: "GitHub",
     icon: (
       <svg viewBox="0 0 24 24" className="h-6 w-6 fill-content-primary">
         <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
@@ -47,12 +47,14 @@ const providers = [
 ];
 
 export default function ConnectedAccounts() {
-  const { user, accessToken, refreshSession } = useAuth();
+  const { user, refreshSession } = useAuth();
   const { addToast } = useToast();
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  const [disconnectingProvider, setDisconnectingProvider] = useState<string | null>(null);
-  const [password, setPassword] = useState('');
+  const [disconnectingProvider, setDisconnectingProvider] = useState<
+    string | null
+  >(null);
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   const canConfirm = password.length >= 8 && !loading;
@@ -60,7 +62,7 @@ export default function ConnectedAccounts() {
   const handleClose = () => {
     if (loading) return;
     setDisconnectingProvider(null);
-    setPassword('');
+    setPassword("");
   };
 
   const handleUnlink = async () => {
@@ -68,17 +70,32 @@ export default function ConnectedAccounts() {
     setLoading(true);
     try {
       await unlinkOAuth(disconnectingProvider, password);
-      const providerName = providers.find((p) => p.id === disconnectingProvider)?.name ?? disconnectingProvider;
+      const providerName =
+        providers.find((p) => p.id === disconnectingProvider)?.name ??
+        disconnectingProvider;
       setDisconnectingProvider(null);
-      setPassword('');
-      addToast({ variant: 'success', title: 'Account disconnected', description: `${providerName} has been disconnected.` });
+      setPassword("");
+      addToast({
+        variant: "success",
+        title: "Account disconnected",
+        description: `${providerName} has been disconnected.`,
+      });
       await refreshSession();
     } catch (err: unknown) {
-      const msg = extractMessageByStatus(err, {
-        [HTTP_STATUS.TOO_MANY_REQUESTS]: 'Too many requests. Try again later.',
-        [HTTP_STATUS.UNAUTHORIZED]: 'Invalid password.',
-      }, 'Failed to unlink OAuth provider.');
-      addToast({ variant: 'error', title: 'Disconnect failed', description: msg });
+      const msg = extractMessageByStatus(
+        err,
+        {
+          [HTTP_STATUS.TOO_MANY_REQUESTS]:
+            "Too many requests. Try again later.",
+          [HTTP_STATUS.UNAUTHORIZED]: "Invalid password.",
+        },
+        "Failed to unlink OAuth provider.",
+      );
+      addToast({
+        variant: "error",
+        title: "Disconnect failed",
+        description: msg,
+      });
     } finally {
       setLoading(false);
     }
@@ -87,24 +104,40 @@ export default function ConnectedAccounts() {
   useEffect(() => {
     if (!disconnectingProvider) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleClose();
+      if (e.key === "Escape") handleClose();
     };
-    document.addEventListener('keydown', handler);
-    return () => document.removeEventListener('keydown', handler);
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
   });
 
   if (!user) return null;
 
-  const handleConnect = (providerId: string) => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-    window.location.href = `${apiUrl}/auth/link/${providerId.toLowerCase()}?token=${encodeURIComponent(accessToken || '')}`;
+  const [connecting, setConnecting] = useState(false);
+
+  const handleConnect = async (providerId: string) => {
+    setConnecting(true);
+    try {
+      const { code } = await generateLinkCode();
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+      window.location.href = `${apiUrl}/auth/link/${providerId.toLowerCase()}?code=${encodeURIComponent(code)}`;
+    } catch {
+      addToast({
+        variant: "error",
+        title: "Connection failed",
+        description: "Could not initiate account linking. Please try again.",
+      });
+      setConnecting(false);
+    }
   };
 
   const activeProvider = providers.find((p) => p.id === disconnectingProvider);
 
   return (
     <>
-      <div id="connected-accounts" className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card">
+      <div
+        id="connected-accounts"
+        className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card"
+      >
         <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
           Connected Accounts
         </h2>
@@ -112,7 +145,8 @@ export default function ConnectedAccounts() {
         <div className="space-y-3">
           {providers.map((provider) => {
             const isConnected = user.oauthProviders.includes(provider.id);
-            const isLastAuthMethod = !user.hasPassword && user.oauthProviders.length === 1;
+            const isLastAuthMethod =
+              !user.hasPassword && user.oauthProviders.length === 1;
 
             return (
               <div
@@ -143,16 +177,20 @@ export default function ConnectedAccounts() {
                   <div className="flex items-center gap-2">
                     <button
                       onClick={() => handleConnect(provider.id)}
-                      className="rounded-md border border-border-default px-4 py-1.5 text-caption text-content-primary hover:bg-surface-subtle"
+                      disabled={connecting}
+                      className="rounded-md border border-border-default px-4 py-1.5 text-caption text-content-primary hover:bg-surface-subtle disabled:opacity-50"
                     >
-                      Connect
+                      {connecting ? "Connecting..." : "Connect"}
                     </button>
-                    {provider.id === 'GITHUB' && (
+                    {provider.id === "GITHUB" && (
                       <Tooltip
                         content="Your active GitHub session will be used. To link a different account, log out of github.com first."
                         position="left"
                       >
-                        <Info className="h-4 w-4 text-content-tertiary cursor-help" tabIndex={0} />
+                        <Info
+                          className="h-4 w-4 text-content-tertiary cursor-help"
+                          tabIndex={0}
+                        />
                       </Tooltip>
                     )}
                   </div>
@@ -179,7 +217,8 @@ export default function ConnectedAccounts() {
                 Disconnect {activeProvider?.name}
               </h2>
               <p className="mt-2 text-body-sm text-content-secondary">
-                This provider will be removed from your account. You can reconnect it later.
+                This provider will be removed from your account. You can
+                reconnect it later.
               </p>
 
               <div className="mt-4">
@@ -192,7 +231,6 @@ export default function ConnectedAccounts() {
                   placeholder="Enter your password"
                 />
               </div>
-
             </div>
 
             {/* Bottom section — buttons */}
@@ -209,7 +247,7 @@ export default function ConnectedAccounts() {
                 disabled={!canConfirm}
                 className="h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
               >
-                {loading ? 'Disconnecting...' : 'Disconnect'}
+                {loading ? "Disconnecting..." : "Disconnect"}
               </button>
             </div>
           </div>

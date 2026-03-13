@@ -8,14 +8,13 @@ import { mockUser } from '../../helpers/profile-mocks';
 const mockAddToast = jest.fn();
 const mockRefreshSession = jest.fn().mockResolvedValue(undefined);
 const mockUnlinkOAuth = jest.fn();
+const mockGenerateLinkCode = jest.fn();
 
 let mockUserValue = mockUser();
-let mockAccessToken = 'test-token';
 
 jest.mock('@/hooks/useAuth', () => ({
   useAuth: () => ({
     user: mockUserValue,
-    accessToken: mockAccessToken,
     refreshSession: mockRefreshSession,
   }),
 }));
@@ -26,6 +25,7 @@ jest.mock('@/context/ToastContext', () => ({
 
 jest.mock('@/lib/oauth-api', () => ({
   unlinkOAuth: (...args: unknown[]) => mockUnlinkOAuth(...args),
+  generateLinkCode: (...args: unknown[]) => mockGenerateLinkCode(...args),
 }));
 
 // Mock window.location
@@ -53,7 +53,7 @@ describe('ConnectedAccounts', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockUserValue = mockUser();
-    mockAccessToken = 'test-token';
+    mockGenerateLinkCode.mockResolvedValue({ code: 'test-link-code' });
     window.location.href = '';
   });
 
@@ -78,7 +78,7 @@ describe('ConnectedAccounts', () => {
     expect(connectButtons).toHaveLength(2);
   });
 
-  it('connect button sets window.location.href', async () => {
+  it('connect button calls generateLinkCode and sets window.location.href with code', async () => {
     mockUserValue = mockUser({ oauthProviders: [] });
 
     render(<ConnectedAccounts />);
@@ -86,8 +86,27 @@ describe('ConnectedAccounts', () => {
     const connectButtons = screen.getAllByText('Connect');
     await user.click(connectButtons[0]); // Google
 
-    expect(window.location.href).toContain('/auth/link/google');
-    expect(window.location.href).toContain('token=test-token');
+    await waitFor(() => {
+      expect(mockGenerateLinkCode).toHaveBeenCalled();
+      expect(window.location.href).toContain('/auth/link/google');
+      expect(window.location.href).toContain('code=test-link-code');
+    });
+  });
+
+  it('shows error toast when generateLinkCode fails', async () => {
+    mockUserValue = mockUser({ oauthProviders: [] });
+    mockGenerateLinkCode.mockRejectedValue(new Error('Unauthorized'));
+
+    render(<ConnectedAccounts />);
+
+    const connectButtons = screen.getAllByText('Connect');
+    await user.click(connectButtons[0]);
+
+    await waitFor(() => {
+      expect(mockAddToast).toHaveBeenCalledWith(
+        expect.objectContaining({ variant: 'error', title: 'Connection failed' }),
+      );
+    });
   });
 
   it('disconnect button shows password modal', async () => {

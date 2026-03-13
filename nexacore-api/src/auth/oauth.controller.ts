@@ -25,10 +25,12 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService, CookieConfig } from './auth.service';
 import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
 import { AUTH_RATE_LIMITS } from './constants/auth.constants';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
 import { OAuthCallbackFilter } from './guards/oauth-callback.filter';
 import { OAuthLinkGuard } from './guards/oauth-link.guard';
+import { OAuthLinkCodeStore } from './stores/oauth-link-code.store';
 import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
 import { SafeUser } from '../users/entities/user.entity';
 import { ErrorMessages } from '../common/constants/error-messages';
@@ -41,6 +43,7 @@ export class OAuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService,
+    private readonly oauthLinkCodeStore: OAuthLinkCodeStore,
   ) {}
 
   private setCookie(res: Response, cookie: CookieConfig): void {
@@ -173,6 +176,20 @@ export class OAuthController {
 
   // ── OAuth Link Endpoints ───────────────────────────────────────────
 
+  @Post('link/code')
+  @UseGuards(JwtAuthGuard)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Generate short-lived code for OAuth account linking',
+  })
+  @ApiResponse({ status: 201, description: 'Link code generated' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  async generateLinkCode(@Request() req: { user: { id: string } }) {
+    const code = await this.oauthLinkCodeStore.generate(req.user.id);
+    return { code };
+  }
+
   @Get('link/google')
   @Throttle({
     global: {
@@ -189,10 +206,10 @@ export class OAuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Unauthorized — valid JWT required',
+    description: 'Unauthorized — invalid or expired link code',
   })
   googleLinkAuth() {
-    // OAuthLinkGuard validates JWT and sets req.oauthAction='link' + req.user.id
+    // OAuthLinkGuard validates link code and sets req.oauthAction='link' + req.user.id
     // GoogleAuthGuard then generates state with action=link and userId, redirects to Google
   }
 
@@ -212,10 +229,10 @@ export class OAuthController {
   })
   @ApiResponse({
     status: 401,
-    description: 'Unauthorized — valid JWT required',
+    description: 'Unauthorized — invalid or expired link code',
   })
   githubLinkAuth() {
-    // OAuthLinkGuard validates JWT and sets req.oauthAction='link' + req.user.id
+    // OAuthLinkGuard validates link code and sets req.oauthAction='link' + req.user.id
     // GitHubAuthGuard then generates state with action=link and userId, redirects to GitHub
   }
 

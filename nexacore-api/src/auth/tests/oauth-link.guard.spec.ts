@@ -1,24 +1,20 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
 import { OAuthLinkGuard } from '../guards/oauth-link.guard';
+import { OAuthLinkCodeStore } from '../stores/oauth-link-code.store';
 import { ErrorMessages } from '../../common/constants/error-messages';
 
 describe('OAuthLinkGuard', () => {
   let guard: OAuthLinkGuard;
-  let jwtService: { verify: jest.Mock };
+  let store: { generate: jest.Mock; consume: jest.Mock };
 
   beforeEach(() => {
     jest.clearAllMocks();
-    jwtService = { verify: jest.fn() };
-    guard = new OAuthLinkGuard(jwtService as unknown as JwtService);
+    store = { generate: jest.fn(), consume: jest.fn() };
+    guard = new OAuthLinkGuard(store as unknown as OAuthLinkCodeStore);
   });
 
-  const createMockContext = (
-    headers: Record<string, string> = {},
-    query: Record<string, string> = {},
-  ) => {
+  const createMockContext = (query: Record<string, string> = {}) => {
     const request = {
-      headers,
       query,
       user: undefined as any,
       oauthAction: undefined as any,
@@ -31,71 +27,43 @@ describe('OAuthLinkGuard', () => {
     } as unknown as ExecutionContext & { _request: typeof request };
   };
 
-  it('should return true and set req.user + req.oauthAction with valid JWT in Authorization header', () => {
-    jwtService.verify.mockReturnValue({ sub: 'user-123' });
-    const context = createMockContext({ authorization: 'Bearer valid-token' });
+  it('should return true and set req.user + req.oauthAction with valid link code', async () => {
+    store.consume.mockResolvedValue('user-123');
+    const context = createMockContext({ code: 'valid-code' });
 
-    const result = guard.canActivate(context);
+    const result = await guard.canActivate(context);
 
     expect(result).toBe(true);
-    expect(jwtService.verify).toHaveBeenCalledWith('valid-token');
+    expect(store.consume).toHaveBeenCalledWith('valid-code');
     expect((context as any)._request.user).toEqual({ id: 'user-123' });
     expect((context as any)._request.oauthAction).toBe('link');
   });
 
-  it('should return true and set req.user + req.oauthAction with valid JWT in ?token= query param', () => {
-    jwtService.verify.mockReturnValue({ sub: 'user-456' });
-    const context = createMockContext({}, { token: 'query-token' });
-
-    const result = guard.canActivate(context);
-
-    expect(result).toBe(true);
-    expect(jwtService.verify).toHaveBeenCalledWith('query-token');
-    expect((context as any)._request.user).toEqual({ id: 'user-456' });
-    expect((context as any)._request.oauthAction).toBe('link');
-  });
-
-  it('should prefer Authorization header over query param when both present', () => {
-    jwtService.verify.mockReturnValue({ sub: 'user-789' });
-    const context = createMockContext(
-      { authorization: 'Bearer header-token' },
-      { token: 'query-token' },
-    );
-
-    guard.canActivate(context);
-
-    expect(jwtService.verify).toHaveBeenCalledWith('header-token');
-  });
-
-  it('should throw UnauthorizedException when no token provided', () => {
+  it('should throw UnauthorizedException when code is missing', async () => {
     const context = createMockContext();
 
-    expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
-    expect(() => guard.canActivate(context)).toThrow(
-      ErrorMessages.auth.AUTHENTICATION_FAILED,
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      UnauthorizedException,
     );
+    expect(store.consume).not.toHaveBeenCalled();
   });
 
-  it('should throw UnauthorizedException when JWT verification fails', () => {
-    jwtService.verify.mockImplementation(() => {
-      throw new Error('jwt expired');
-    });
-    const context = createMockContext({
-      authorization: 'Bearer expired-token',
-    });
+  it('should throw UnauthorizedException when code is invalid or expired', async () => {
+    store.consume.mockResolvedValue(null);
+    const context = createMockContext({ code: 'invalid-code' });
 
-    expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
-    expect(() => guard.canActivate(context)).toThrow(
-      ErrorMessages.auth.AUTHENTICATION_FAILED,
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      UnauthorizedException,
     );
+    expect(store.consume).toHaveBeenCalledWith('invalid-code');
   });
 
-  it('should throw UnauthorizedException when Authorization header is not Bearer scheme', () => {
-    const context = createMockContext({ authorization: 'Basic xyz123' });
+  it('should throw UnauthorizedException when code has already been consumed', async () => {
+    store.consume.mockResolvedValue(null);
+    const context = createMockContext({ code: 'already-used-code' });
 
-    expect(() => guard.canActivate(context)).toThrow(UnauthorizedException);
-    expect(() => guard.canActivate(context)).toThrow(
-      ErrorMessages.auth.AUTHENTICATION_FAILED,
+    await expect(guard.canActivate(context)).rejects.toThrow(
+      UnauthorizedException,
     );
   });
 });

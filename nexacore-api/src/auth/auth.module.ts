@@ -22,6 +22,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { GitHubStrategy } from './strategies/github.strategy';
 import { OAuthStateStore } from './stores/oauth-state.store';
 import { OAuthCodeStore } from './stores/oauth-code.store';
+import { OAuthLinkCodeStore } from './stores/oauth-link-code.store';
 import { OAuthLinkGuard } from './guards/oauth-link.guard';
 import { PasswordBreachService } from './password-breach.service';
 import { TrustedDeviceService } from './trusted-device.service';
@@ -86,6 +87,7 @@ import { JWT_ISSUER, JWT_AUDIENCE } from './constants/auth.constants';
     GitHubStrategy,
     OAuthStateStore,
     OAuthCodeStore,
+    OAuthLinkCodeStore,
     OAuthLinkGuard,
     PasswordBreachService,
     TrustedDeviceService,
