@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { AlertTriangle, Lock } from 'lucide-react';
-import CountdownTimer from './CountdownTimer';
-import type { RateLimitKind } from '@/lib/types';
+import { useState, useEffect } from "react";
+import { AlertTriangle, Lock } from "lucide-react";
+import CountdownTimer from "./CountdownTimer";
+import type { RateLimitKind } from "@/lib/types";
 
 type RateLimitBannerProps = {
   retryAfter: number;
@@ -12,7 +12,12 @@ type RateLimitBannerProps = {
   onExpired?: () => void;
 };
 
-export default function RateLimitBanner({ retryAfter, message, kind, onExpired }: RateLimitBannerProps) {
+export default function RateLimitBanner({
+  retryAfter,
+  message,
+  kind,
+  onExpired,
+}: RateLimitBannerProps) {
   const [secondsLeft, setSecondsLeft] = useState(retryAfter);
 
   useEffect(() => {
@@ -26,7 +31,7 @@ export default function RateLimitBanner({ retryAfter, message, kind, onExpired }
     }
 
     const timer = setInterval(() => {
-      setSecondsLeft(prev => {
+      setSecondsLeft((prev) => {
         if (prev <= 1) {
           clearInterval(timer);
           onExpired?.();
@@ -39,10 +44,10 @@ export default function RateLimitBanner({ retryAfter, message, kind, onExpired }
     return () => clearInterval(timer);
   }, [secondsLeft, onExpired]);
 
-  const Icon = kind === 'lockout' ? Lock : AlertTriangle;
+  const Icon = kind === "lockout" ? Lock : AlertTriangle;
 
   return (
-    <div className="flex items-start gap-2">
+    <div role="alert" className="flex items-start gap-2">
       <Icon size={16} className="mt-1 shrink-0 text-error" />
       <div className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1">
         <span className="text-xs leading-6 text-error">{message}</span>
