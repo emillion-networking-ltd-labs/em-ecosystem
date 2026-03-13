@@ -13,9 +13,12 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { hashToken } from './utils/hash-token';
-import { BCRYPT_ROUNDS, DUMMY_PASSWORD_HASH } from './constants/auth.constants';
-
-const RESET_TOKEN_EXPIRY_HOURS = 1;
+import {
+  BCRYPT_ROUNDS,
+  DUMMY_PASSWORD_HASH,
+  RESET_TOKEN_EXPIRY_HOURS,
+  hoursToMs,
+} from './constants/auth.constants';
 
 @Injectable()
 export class PasswordResetService {
@@ -58,7 +61,7 @@ export class PasswordResetService {
     const plainToken = crypto.randomBytes(32).toString('hex');
     const tokenHash = hashToken(plainToken);
     const expiresAt = new Date(
-      Date.now() + RESET_TOKEN_EXPIRY_HOURS * 60 * 60 * 1000,
+      Date.now() + hoursToMs(RESET_TOKEN_EXPIRY_HOURS),
     );
 
     await this.prisma.passwordResetToken.create({

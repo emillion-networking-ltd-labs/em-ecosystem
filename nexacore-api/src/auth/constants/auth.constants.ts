@@ -115,3 +115,34 @@ export const REFRESH_TOKEN_COOKIE_NAME = 'refresh_token';
 /** JWT issuer and audience identifier. */
 export const JWT_ISSUER = 'nexacore-api';
 export const JWT_AUDIENCE = 'nexacore-api';
+
+/** Access token TTL in seconds (15 minutes). Used for deny-list expiry. */
+export const ACCESS_TOKEN_TTL_SECONDS = 900;
+
+/** Email verification token expiry in hours. */
+export const VERIFICATION_TOKEN_EXPIRY_HOURS = 24;
+
+/** Minimum seconds between resend-verification requests. */
+export const RESEND_COOLDOWN_SECONDS = 60;
+
+/** Password reset token expiry in hours. */
+export const RESET_TOKEN_EXPIRY_HOURS = 1;
+
+/** Bcrypt rounds for MFA recovery code hashing (lower than password for UX). */
+export const BCRYPT_ROUNDS_RECOVERY = 10;
+
+/** Number of MFA recovery codes generated per setup. */
+export const RECOVERY_CODE_COUNT = 10;
+
+/** Character length of each MFA recovery code. */
+export const RECOVERY_CODE_LENGTH = 10;
+
+/** Convert hours to milliseconds. */
+export function hoursToMs(hours: number): number {
+  return hours * 60 * 60 * 1000;
+}
+
+/** Convert days to milliseconds. */
+export function daysToMs(days: number): number {
+  return days * 24 * 60 * 60 * 1000;
+}
