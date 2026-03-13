@@ -5,6 +5,7 @@ describe('CustomThrottlerGuard', () => {
   let guard: CustomThrottlerGuard;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     // Create guard without DI — we'll test methods directly
     guard = Object.create(CustomThrottlerGuard.prototype);
   });
@@ -98,8 +99,14 @@ describe('CustomThrottlerGuard', () => {
       } as any);
 
       expect(result).toBe(true);
-      expect(mockResponse.setHeader).toHaveBeenCalledWith('X-RateLimit-Limit', 100);
-      expect(mockResponse.setHeader).toHaveBeenCalledWith('X-RateLimit-Remaining', 95);
+      expect(mockResponse.setHeader).toHaveBeenCalledWith(
+        'X-RateLimit-Limit',
+        100,
+      );
+      expect(mockResponse.setHeader).toHaveBeenCalledWith(
+        'X-RateLimit-Remaining',
+        95,
+      );
       expect(mockResponse.setHeader).toHaveBeenCalledWith(
         'X-RateLimit-Reset',
         expect.any(Number),
@@ -127,14 +134,19 @@ describe('CustomThrottlerGuard', () => {
         fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
-        expect((error as HttpException).getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
+        expect((error as HttpException).getStatus()).toBe(
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
 
         const body = (error as HttpException).getResponse() as any;
         expect(body.error.code).toBe('RATE_LIMIT_EXCEEDED');
         expect(body.error.retryAfter).toBe(60);
       }
 
-      expect(mockResponse.setHeader).toHaveBeenCalledWith('X-RateLimit-Remaining', 0);
+      expect(mockResponse.setHeader).toHaveBeenCalledWith(
+        'X-RateLimit-Remaining',
+        0,
+      );
       expect(mockResponse.setHeader).toHaveBeenCalledWith('Retry-After', 60);
     });
 
@@ -159,13 +171,18 @@ describe('CustomThrottlerGuard', () => {
         fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
-        expect((error as HttpException).getStatus()).toBe(HttpStatus.TOO_MANY_REQUESTS);
+        expect((error as HttpException).getStatus()).toBe(
+          HttpStatus.TOO_MANY_REQUESTS,
+        );
 
         const body = (error as HttpException).getResponse() as any;
         expect(body.error.retryAfter).toBe(45);
       }
 
-      expect(mockResponse.setHeader).toHaveBeenCalledWith('X-RateLimit-Remaining', 0);
+      expect(mockResponse.setHeader).toHaveBeenCalledWith(
+        'X-RateLimit-Remaining',
+        0,
+      );
       expect(mockResponse.setHeader).toHaveBeenCalledWith('Retry-After', 45);
     });
 

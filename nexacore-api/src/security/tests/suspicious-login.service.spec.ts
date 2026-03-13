@@ -24,6 +24,7 @@ describe('SuspiciousLoginService', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     auditService = {
       countRecentActions: jest.fn().mockResolvedValue(0),
       countRecentActionsByIp: jest.fn().mockResolvedValue(0),
@@ -260,7 +261,9 @@ describe('SuspiciousLoginService', () => {
     it('should fire UNUSUAL_LOGIN_HOURS when login is far from mean', async () => {
       // All logins around 10 AM UTC (consistent pattern)
       const logins = Array.from({ length: 10 }, (_, i) => ({
-        createdAt: new Date(`2026-02-${String(i + 10).padStart(2, '0')}T10:00:00Z`),
+        createdAt: new Date(
+          `2026-02-${String(i + 10).padStart(2, '0')}T10:00:00Z`,
+        ),
       }));
       prisma.auditLog.findMany.mockResolvedValue(logins);
 
@@ -277,7 +280,9 @@ describe('SuspiciousLoginService', () => {
 
     it('should not send email (audit only)', async () => {
       const logins = Array.from({ length: 10 }, (_, i) => ({
-        createdAt: new Date(`2026-02-${String(i + 10).padStart(2, '0')}T10:00:00Z`),
+        createdAt: new Date(
+          `2026-02-${String(i + 10).padStart(2, '0')}T10:00:00Z`,
+        ),
       }));
       prisma.auditLog.findMany.mockResolvedValue(logins);
 
@@ -366,9 +371,7 @@ describe('SuspiciousLoginService', () => {
 
     it('should skip for first-ever login (no previous sessions with country data)', async () => {
       prisma.session.findFirst.mockResolvedValue({ locationCountry: 'US' });
-      prisma.session.findMany.mockResolvedValue([
-        { locationCountry: 'US' },
-      ]);
+      prisma.session.findMany.mockResolvedValue([{ locationCountry: 'US' }]);
 
       await service.analyzeLoginSuccess(successParams);
 

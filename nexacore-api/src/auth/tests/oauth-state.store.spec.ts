@@ -7,6 +7,7 @@ describe('OAuthStateStore', () => {
   let redis: { get: jest.Mock; set: jest.Mock; del: jest.Mock };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     redis = {
       get: jest.fn(),
       set: jest.fn().mockResolvedValue('OK'),
@@ -14,10 +15,7 @@ describe('OAuthStateStore', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        OAuthStateStore,
-        { provide: REDIS_CLIENT, useValue: redis },
-      ],
+      providers: [OAuthStateStore, { provide: REDIS_CLIENT, useValue: redis }],
     }).compile();
 
     store = module.get<OAuthStateStore>(OAuthStateStore);
@@ -61,7 +59,9 @@ describe('OAuthStateStore', () => {
 
   describe('validate', () => {
     it('should return state data and delete key for an existing state', async () => {
-      redis.get.mockResolvedValue(JSON.stringify({ codeVerifier: 'abc', action: 'login' }));
+      redis.get.mockResolvedValue(
+        JSON.stringify({ codeVerifier: 'abc', action: 'login' }),
+      );
       const result = await store.validate('test-state');
       expect(result).toEqual({ codeVerifier: 'abc', action: 'login' });
       expect(redis.get).toHaveBeenCalledWith('oauth:state:test-state');
@@ -69,9 +69,19 @@ describe('OAuthStateStore', () => {
     });
 
     it('should return state data with link action and userId', async () => {
-      redis.get.mockResolvedValue(JSON.stringify({ codeVerifier: 'abc', action: 'link', userId: 'user-123' }));
+      redis.get.mockResolvedValue(
+        JSON.stringify({
+          codeVerifier: 'abc',
+          action: 'link',
+          userId: 'user-123',
+        }),
+      );
       const result = await store.validate('test-state');
-      expect(result).toEqual({ codeVerifier: 'abc', action: 'link', userId: 'user-123' });
+      expect(result).toEqual({
+        codeVerifier: 'abc',
+        action: 'link',
+        userId: 'user-123',
+      });
     });
 
     it('should return null and not delete for an unknown state', async () => {
@@ -84,7 +94,9 @@ describe('OAuthStateStore', () => {
 
   describe('getCodeVerifier', () => {
     it('should return code verifier for a valid state', async () => {
-      redis.get.mockResolvedValue(JSON.stringify({ codeVerifier: 'test-verifier' }));
+      redis.get.mockResolvedValue(
+        JSON.stringify({ codeVerifier: 'test-verifier' }),
+      );
       const verifier = await store.getCodeVerifier('test-state');
       expect(verifier).toBe('test-verifier');
       expect(redis.get).toHaveBeenCalledWith('oauth:state:test-state');

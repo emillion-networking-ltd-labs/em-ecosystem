@@ -8,6 +8,7 @@ describe('OAuthLinkGuard', () => {
   let jwtService: { verify: jest.Mock };
 
   beforeEach(() => {
+    jest.clearAllMocks();
     jwtService = { verify: jest.fn() };
     guard = new OAuthLinkGuard(jwtService as unknown as JwtService);
   });

@@ -9,6 +9,7 @@ describe('NoCacheInterceptor', () => {
   let mockNext: CallHandler;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     interceptor = new NoCacheInterceptor();
 
     mockResponse = { setHeader: jest.fn() };

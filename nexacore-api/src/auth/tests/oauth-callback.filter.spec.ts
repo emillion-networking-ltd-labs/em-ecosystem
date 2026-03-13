@@ -14,6 +14,7 @@ describe('OAuthCallbackFilter', () => {
   const EXPECTED_REDIRECT = `${FRONTEND_URL}/auth/callback?error=${encodeURIComponent(ErrorMessages.auth.AUTHENTICATION_FAILED)}`;
 
   beforeEach(() => {
+    jest.clearAllMocks();
     configService = { get: jest.fn().mockReturnValue(FRONTEND_URL) };
     response = { redirect: jest.fn() };
     host = {

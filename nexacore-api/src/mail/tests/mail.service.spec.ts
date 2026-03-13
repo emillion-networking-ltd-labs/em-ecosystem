@@ -7,6 +7,7 @@ describe('MailService', () => {
   let mailerService: jest.Mocked<MailerService>;
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         MailService,

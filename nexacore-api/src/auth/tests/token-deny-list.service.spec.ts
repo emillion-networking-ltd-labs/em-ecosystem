@@ -15,6 +15,7 @@ describe('TokenDenyListService', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     mockPipeline = {
       exists: jest.fn().mockReturnThis(),
       get: jest.fn().mockReturnThis(),
@@ -43,7 +44,12 @@ describe('TokenDenyListService', () => {
     it('should call Redis SET with correct key and TTL', async () => {
       await service.denyToken('test-jti', 900);
 
-      expect(redis.set).toHaveBeenCalledWith('deny:jti:test-jti', '1', 'EX', 900);
+      expect(redis.set).toHaveBeenCalledWith(
+        'deny:jti:test-jti',
+        '1',
+        'EX',
+        900,
+      );
     });
 
     it('should not throw when Redis fails (fail-open)', async () => {
@@ -73,15 +79,17 @@ describe('TokenDenyListService', () => {
     it('should not throw when Redis fails (fail-open)', async () => {
       redis.set.mockRejectedValue(new Error('Redis connection lost'));
 
-      await expect(service.denyAllForUser('user-123', 900)).resolves.toBeUndefined();
+      await expect(
+        service.denyAllForUser('user-123', 900),
+      ).resolves.toBeUndefined();
     });
   });
 
   describe('isDenied', () => {
     it('should return true when jti key exists', async () => {
       mockPipeline.exec.mockResolvedValue([
-        [null, 1],     // jti exists
-        [null, null],  // no user deny
+        [null, 1], // jti exists
+        [null, null], // no user deny
       ]);
 
       const result = await service.isDenied('test-jti', 'user-123', 1000);
@@ -93,8 +101,8 @@ describe('TokenDenyListService', () => {
 
     it('should return true when token iat is before user deny timestamp', async () => {
       mockPipeline.exec.mockResolvedValue([
-        [null, 0],       // jti does not exist
-        [null, '2000'],  // user denied at timestamp 2000
+        [null, 0], // jti does not exist
+        [null, '2000'], // user denied at timestamp 2000
       ]);
 
       const result = await service.isDenied('test-jti', 'user-123', 1500);
@@ -104,8 +112,8 @@ describe('TokenDenyListService', () => {
 
     it('should return false when token iat is after user deny timestamp', async () => {
       mockPipeline.exec.mockResolvedValue([
-        [null, 0],       // jti does not exist
-        [null, '2000'],  // user denied at timestamp 2000
+        [null, 0], // jti does not exist
+        [null, '2000'], // user denied at timestamp 2000
       ]);
 
       const result = await service.isDenied('test-jti', 'user-123', 2001);

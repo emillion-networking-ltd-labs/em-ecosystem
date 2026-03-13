@@ -43,6 +43,7 @@ describe('OAuthCodeStore', () => {
   };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     redis = {
       get: jest.fn(),
       set: jest.fn().mockResolvedValue('OK'),
@@ -50,10 +51,7 @@ describe('OAuthCodeStore', () => {
     };
 
     const module: TestingModule = await Test.createTestingModule({
-      providers: [
-        OAuthCodeStore,
-        { provide: REDIS_CLIENT, useValue: redis },
-      ],
+      providers: [OAuthCodeStore, { provide: REDIS_CLIENT, useValue: redis }],
     }).compile();
 
     store = module.get<OAuthCodeStore>(OAuthCodeStore);

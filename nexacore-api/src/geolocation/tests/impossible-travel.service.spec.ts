@@ -13,10 +13,13 @@ describe('ImpossibleTravelService', () => {
   let mailService: { sendImpossibleTravelAlert: jest.Mock };
 
   beforeEach(async () => {
+    jest.clearAllMocks();
     geolocationService = { lookupIp: jest.fn() };
     prisma = { session: { findFirst: jest.fn() } };
     auditService = { log: jest.fn().mockResolvedValue(undefined) };
-    mailService = { sendImpossibleTravelAlert: jest.fn().mockResolvedValue(undefined) };
+    mailService = {
+      sendImpossibleTravelAlert: jest.fn().mockResolvedValue(undefined),
+    };
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -58,17 +61,29 @@ describe('ImpossibleTravelService', () => {
 
   describe('haversineDistance', () => {
     it('should return 0 for same coordinates', () => {
-      expect(service.haversineDistance(40.4168, -3.7038, 40.4168, -3.7038)).toBe(0);
+      expect(
+        service.haversineDistance(40.4168, -3.7038, 40.4168, -3.7038),
+      ).toBe(0);
     });
 
     it('should calculate correct distance Madrid to New York (~5762 km)', () => {
-      const distance = service.haversineDistance(40.4168, -3.7038, 40.7128, -74.006);
+      const distance = service.haversineDistance(
+        40.4168,
+        -3.7038,
+        40.7128,
+        -74.006,
+      );
       expect(distance).toBeGreaterThan(5700);
       expect(distance).toBeLessThan(5800);
     });
 
     it('should calculate correct distance London to Tokyo (~9561 km)', () => {
-      const distance = service.haversineDistance(51.5074, -0.1278, 35.6762, 139.6503);
+      const distance = service.haversineDistance(
+        51.5074,
+        -0.1278,
+        35.6762,
+        139.6503,
+      );
       expect(distance).toBeGreaterThan(9500);
       expect(distance).toBeLessThan(9600);
     });
