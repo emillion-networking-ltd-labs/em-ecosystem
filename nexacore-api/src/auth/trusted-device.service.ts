@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { createHmac } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { ErrorMessages } from '../common/constants/error-messages';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import {
   TRUSTED_DEVICE_TTL_DAYS,
@@ -143,7 +144,7 @@ export class TrustedDeviceService {
     });
 
     if (!device) {
-      throw new NotFoundException('Trusted device not found');
+      throw new NotFoundException(ErrorMessages.device.NOT_FOUND);
     }
 
     await this.prisma.trustedDevice.update({

@@ -35,9 +35,23 @@ export const ErrorMessages = {
   oauth: {
     LINK_FAILED: 'Unable to link this provider',
     NOT_LINKED: 'No OAuth provider linked to this account',
-    PASSWORD_REQUIRED_FOR_UNLINK: 'You must set a password before unlinking your OAuth provider',
+    PASSWORD_REQUIRED_FOR_UNLINK:
+      'You must set a password before unlinking your OAuth provider',
     INVALID_PROVIDER: 'Invalid OAuth provider',
     EMAIL_MISMATCH: 'OAuth account email must match your account email',
+  },
+  passkey: {
+    NOT_FOUND: 'Passkey not found',
+  },
+  device: {
+    NOT_FOUND: 'Device not found',
+  },
+  audit: {
+    NOT_FOUND: 'Audit log not found',
+  },
+  security: {
+    VERIFICATION_REQUIRED: 'Verification required',
+    VERIFICATION_FAILED: 'Verification failed. Please try again.',
   },
   csrf: {
     VALIDATION_FAILED: 'CSRF validation failed',

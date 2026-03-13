@@ -6,6 +6,7 @@ import { SessionsService } from '../../sessions/sessions.service';
 import { TrustedDeviceService } from '../trusted-device.service';
 import { AuditService } from '../../audit/audit.service';
 import { TurnstileService } from '../../security/turnstile.service';
+import { ErrorMessages } from '../../common/constants/error-messages';
 
 describe('SessionController', () => {
   let controller: SessionController;
@@ -229,7 +230,7 @@ describe('SessionController', () => {
 
     it('should propagate NotFoundException when device not found', async () => {
       trustedDeviceService.revokeDevice.mockRejectedValue(
-        new NotFoundException('Trusted device not found'),
+        new NotFoundException(ErrorMessages.device.NOT_FOUND),
       );
 
       await expect(
