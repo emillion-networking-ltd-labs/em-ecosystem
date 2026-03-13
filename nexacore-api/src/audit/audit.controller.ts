@@ -14,6 +14,7 @@ import {
   ApiBearerAuth,
 } from '@nestjs/swagger';
 import { AuditService } from './audit.service';
+import { ErrorMessages } from '../common/constants/error-messages';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { PermissionsGuard } from '../auth/guards/permissions.guard';
@@ -55,7 +56,7 @@ export class AuditLogController {
   async getAuditLog(@Param('id', ParseUUIDPipe) id: string) {
     const log = await this.auditService.findById(id);
     if (!log) {
-      throw new NotFoundException('Audit log not found');
+      throw new NotFoundException(ErrorMessages.audit.NOT_FOUND);
     }
     return log;
   }

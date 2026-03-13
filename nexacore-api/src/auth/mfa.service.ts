@@ -107,9 +107,7 @@ export class MfaService {
     }
 
     if (!user.mfaSecret) {
-      throw new BadRequestException(
-        'MFA setup not initiated. Call POST /auth/mfa/setup first',
-      );
+      throw new BadRequestException(ErrorMessages.mfa.OPERATION_NOT_AVAILABLE);
     }
 
     const secret = this.cryptoService.decrypt(user.mfaSecret);
@@ -144,9 +142,7 @@ export class MfaService {
     recoveryCode?: string,
   ): Promise<{ user: User }> {
     if (!code && !recoveryCode) {
-      throw new BadRequestException(
-        'Either code or recoveryCode must be provided',
-      );
+      throw new BadRequestException(ErrorMessages.mfa.INVALID_CODE);
     }
 
     let payload: { sub: string; type: string };

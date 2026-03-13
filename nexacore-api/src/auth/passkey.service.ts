@@ -380,7 +380,7 @@ export class PasskeyService {
     });
 
     if (!passkey) {
-      throw new NotFoundException('Passkey not found');
+      throw new NotFoundException(ErrorMessages.passkey.NOT_FOUND);
     }
 
     await this.prisma.webAuthnCredential.update({
@@ -421,7 +421,7 @@ export class PasskeyService {
     });
 
     if (!passkey) {
-      throw new NotFoundException('Passkey not found');
+      throw new NotFoundException(ErrorMessages.passkey.NOT_FOUND);
     }
 
     await this.prisma.webAuthnCredential.delete({
