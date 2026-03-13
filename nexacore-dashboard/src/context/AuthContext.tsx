@@ -22,10 +22,7 @@ import type {
   MessageResponse,
   RateLimitKind,
 } from "@/lib/types";
-import {
-  DETECTION_EMAIL_VERIFICATION,
-  ERROR_CODE,
-} from "@/lib/error-constants";
+import { ERROR_CODE } from "@/lib/error-constants";
 import { extractErrorMessage } from "@/lib/error-utils";
 
 /* ===== State ===== */
@@ -264,11 +261,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           title: "Sign in failed",
           description: message,
         });
-        if (message.toLowerCase().includes(DETECTION_EMAIL_VERIFICATION)) {
-          dispatch({ type: "AUTH_ERROR", payload: message });
-        } else {
-          dispatch({ type: "AUTH_STOP" });
-        }
+        dispatch({ type: "AUTH_STOP" });
       }
     },
     [addToast],

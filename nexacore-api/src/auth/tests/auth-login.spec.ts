@@ -193,7 +193,7 @@ describe('AuthService — Login Edge Cases', () => {
   // ─── login - email not verified ────────────────────────────────
 
   describe('login - email not verified', () => {
-    it('should throw ForbiddenException for unverified account with password', async () => {
+    it('should throw UnauthorizedException for unverified account with password (anti-enumeration)', async () => {
       ctx.usersService.findByEmail.mockResolvedValue({
         ...mockUser,
         emailVerified: false,
@@ -205,7 +205,7 @@ describe('AuthService — Login Edge Cases', () => {
           { email: 'test@example.com', password: 'StrongPass1!' },
           requestMeta,
         ),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(UnauthorizedException);
     });
   });
 
@@ -787,7 +787,7 @@ describe('AuthService — Login Edge Cases', () => {
       await flushPromises();
     });
 
-    it('should still throw ForbiddenException when audit rejects on email not verified', async () => {
+    it('should still throw UnauthorizedException when audit rejects on email not verified (anti-enumeration)', async () => {
       ctx.auditService.log.mockRejectedValue(new Error('Audit DB down'));
       const unverifiedUser = { ...mockUser, emailVerified: false };
       ctx.usersService.findByEmail.mockResolvedValue(unverifiedUser);
@@ -798,7 +798,7 @@ describe('AuthService — Login Edge Cases', () => {
           { email: 'test@example.com', password: 'StrongPass1!' },
           requestMeta,
         ),
-      ).rejects.toThrow(ForbiddenException);
+      ).rejects.toThrow(UnauthorizedException);
       await flushPromises();
     });
 

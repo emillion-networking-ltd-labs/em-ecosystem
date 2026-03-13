@@ -1,13 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, AlertTriangle, SendHorizontal, Key } from "lucide-react";
+import { ChevronDown, AlertTriangle, Key } from "lucide-react";
 import Input from "@/components/ui/Input";
 import InfinitySpinner from "@/components/ui/InfinitySpinner";
 import RateLimitBanner from "@/components/ui/RateLimitBanner";
-import CountdownTimer from "@/components/ui/CountdownTimer";
 import OAuthButtons from "./OAuthButtons";
 import Divider from "@/components/ui/Divider";
 import MfaTotpStep from "./MfaTotpStep";
@@ -17,7 +16,6 @@ import { useToast } from "@/context/ToastContext";
 import { usePasskey } from "@/hooks/usePasskey";
 import { RateLimitError } from "@/lib/types";
 import type { RateLimitInfo } from "@/lib/types";
-import { DETECTION_EMAIL_VERIFICATION } from "@/lib/error-constants";
 import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
 type LoginStep = "email" | "password";
@@ -25,23 +23,13 @@ type LoginStep = "email" | "password";
 const isValidEmail = (email: string) =>
   /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 
-// Module-level cache — survives component unmount/remount during SPA navigation
-const resendCooldownCache = new Map<string, number>(); // email → timestamp when cooldown started
-
 export default function LoginForm() {
   const [step, setStep] = useState<LoginStep>("email");
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const {
-    login,
-    isLoading,
-    isAuthenticated,
-    error,
-    clearError,
-    mfaRequired,
-    resendVerificationPublic,
-  } = useAuth();
+  const { login, isLoading, isAuthenticated, error, clearError, mfaRequired } =
+    useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const {
     isSupported: passkeySupported,
@@ -174,9 +162,6 @@ export default function LoginForm() {
           setStep("email");
         }}
         onRateLimitExpired={clearRateLimit}
-        onResendVerification={(email) =>
-          resendVerificationPublic(email, turnstileToken ?? undefined)
-        }
         onTurnstileToken={setTurnstileToken}
         turnstileResetKey={turnstileResetKey}
       />
@@ -311,7 +296,6 @@ type PasswordStepProps = {
   onSubmit: (e: React.FormEvent) => void;
   onChangeEmail: () => void;
   onRateLimitExpired: () => void;
-  onResendVerification: (email: string) => Promise<boolean>;
   onTurnstileToken: (token: string | null) => void;
   turnstileResetKey: number;
 };
@@ -327,14 +311,11 @@ function PasswordStep({
   onSubmit,
   onChangeEmail,
   onRateLimitExpired,
-  onResendVerification,
   onTurnstileToken,
   turnstileResetKey,
 }: PasswordStepProps) {
   const [isEmailOpen, setIsEmailOpen] = useState(false);
-  const [resendCooldown, setResendCooldown] = useState(0);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const { addToast } = useToast();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -352,55 +333,9 @@ function PasswordStep({
     }
   }, [isEmailOpen]);
 
-  // Restore cooldown from module-level cache on mount
-  useEffect(() => {
-    const cachedAt = resendCooldownCache.get(email);
-    if (cachedAt) {
-      const elapsed = Math.floor((Date.now() - cachedAt) / 1000);
-      const remaining = 60 - elapsed;
-      if (remaining > 0) {
-        setResendCooldown(remaining);
-      } else {
-        resendCooldownCache.delete(email);
-      }
-    }
-  }, [email]);
-
-  // Countdown timer for resend cooldown
-  useEffect(() => {
-    if (resendCooldown <= 0) return;
-    const timer = setInterval(() => {
-      setResendCooldown((prev) => {
-        if (prev <= 1) {
-          clearInterval(timer);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [resendCooldown]);
-
-  const handleResendVerification = useCallback(async () => {
-    resendCooldownCache.set(email, Date.now());
-    setResendCooldown(60);
-    const ok = await onResendVerification(email);
-    if (ok) {
-      addToast({
-        variant: "success",
-        title: "Verification email sent",
-        description: "Check your inbox for the verification link.",
-      });
-    }
-  }, [email, onResendVerification, addToast]);
-
   const emailInitial = email.charAt(0).toUpperCase();
   const activeError = passwordError || error;
-  const isVerificationError =
-    !!error && error.toLowerCase().includes(DETECTION_EMAIL_VERIFICATION);
-  const showNonVerificationError =
-    !isVerificationError && !!activeError && !rateLimitInfo.isRateLimited;
-  const showResend = isVerificationError && !rateLimitInfo.isRateLimited;
+  const showError = !!activeError && !rateLimitInfo.isRateLimited;
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
 
   return (
@@ -474,11 +409,11 @@ function PasswordStep({
               value={password}
               onChange={onChange}
               placeholder="Enter your password"
-              hasError={showNonVerificationError}
+              hasError={showError}
               autoFocus
             />
 
-            {/* System Message — rate limit banner, resend verification, or error */}
+            {/* System Message — rate limit banner or error */}
             {rateLimitInfo.isRateLimited && rateLimitInfo.retryAfter ? (
               <RateLimitBanner
                 retryAfter={rateLimitInfo.retryAfter}
@@ -486,33 +421,13 @@ function PasswordStep({
                 kind={rateLimitInfo.kind ?? undefined}
                 onExpired={onRateLimitExpired}
               />
-            ) : showResend ? (
-              /* Resend verification — no inline error (toast covers it), just button + CountdownTimer */
-              <div className="flex h-6 items-center gap-2">
-                <button
-                  type="button"
-                  onClick={handleResendVerification}
-                  disabled={resendCooldown > 0}
-                  className={`inline-flex items-center gap-2 text-sm font-medium leading-[21px] transition-colors ${
-                    resendCooldown > 0
-                      ? "pointer-events-none text-error/50"
-                      : "text-content-primary/75 hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
-                  }`}
-                >
-                  <SendHorizontal size={14} className="shrink-0" />
-                  Resend verification email
-                </button>
-                {resendCooldown > 0 && (
-                  <CountdownTimer seconds={resendCooldown} />
-                )}
-              </div>
             ) : (
               <div
                 role="alert"
                 aria-live="polite"
-                className={`flex items-center gap-2 ${showNonVerificationError ? "min-h-6" : "h-6"}`}
+                className={`flex items-center gap-2 ${showError ? "min-h-6" : "h-6"}`}
               >
-                {showNonVerificationError && (
+                {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
                     <span className="flex-1 text-xs leading-6 text-error">

@@ -1,8 +1,4 @@
-import {
-  UnauthorizedException,
-  ForbiddenException,
-  BadRequestException,
-} from '@nestjs/common';
+import { UnauthorizedException, BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import {
   createAuthTestModule,
@@ -205,7 +201,7 @@ describe('AuthService', () => {
         ).rejects.toThrow(UnauthorizedException);
       });
 
-      it('should throw ForbiddenException when user with password has unverified email', async () => {
+      it('should throw UnauthorizedException when user with password has unverified email (anti-enumeration)', async () => {
         ctx.usersService.findByEmail.mockResolvedValue({
           ...mockUser,
           emailVerified: false,
@@ -214,7 +210,7 @@ describe('AuthService', () => {
 
         await expect(
           ctx.authService.login(loginDto, requestMeta),
-        ).rejects.toThrow(ForbiddenException);
+        ).rejects.toThrow(UnauthorizedException);
       });
 
       it('should reset lockout when lock has expired', async () => {

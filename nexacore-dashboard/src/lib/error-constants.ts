@@ -10,11 +10,8 @@
 
 // --- String detection (used with message.toLowerCase().includes()) ---
 
-/** Backend: ErrorMessages.auth.CHECK_EMAIL = 'Please check your email to continue' */
-export const DETECTION_EMAIL_VERIFICATION = 'check your email';
-
 /** Backend: ErrorMessages.csrf.VALIDATION_FAILED = 'CSRF validation failed' */
-export const DETECTION_CSRF_ERROR = 'csrf';
+export const DETECTION_CSRF_ERROR = "csrf";
 
 // --- HTTP status code constants ---
 export const HTTP_STATUS = {
@@ -25,5 +22,5 @@ export const HTTP_STATUS = {
 
 // --- Backend error.code values ---
 export const ERROR_CODE = {
-  FORBIDDEN: 'FORBIDDEN',
+  FORBIDDEN: "FORBIDDEN",
 } as const;

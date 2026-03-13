@@ -1,7 +1,6 @@
 import {
   Injectable,
   UnauthorizedException,
-  ForbiddenException,
   BadRequestException,
   Logger,
 } from '@nestjs/common';
@@ -163,7 +162,8 @@ export class LoginService {
 
     await this.validateCredentials(dto, user, requestMeta, ctx);
 
-    // Email verification check — accounts with password must verify before login
+    // Email verification check — CWE-203: same exception type and message as
+    // all other login failures to prevent account state enumeration
     if (user.passwordHash && !user.emailVerified) {
       this.auditService
         .log({
@@ -174,7 +174,11 @@ export class LoginService {
           metadata: { reason: 'email_not_verified' },
         })
         .catch(() => {});
-      throw new ForbiddenException(ErrorMessages.auth.CHECK_EMAIL);
+      // Silently re-send verification email (fire-and-forget)
+      this.emailVerificationService
+        .createAndSendVerificationEmail(user)
+        .catch(() => {});
+      throw new UnauthorizedException('Invalid credentials');
     }
 
     if (user.failedAttempts > 0 || user.lockoutCount > 0) {
