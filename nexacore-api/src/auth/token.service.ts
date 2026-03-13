@@ -4,6 +4,7 @@ import {
   ForbiddenException,
   Logger,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
@@ -43,6 +44,8 @@ export class TokenService {
   private readonly refreshExpiration: string;
   private readonly refreshMaxAgeMs: number;
   private readonly mfaChallengeSecret: string;
+  private readonly accessExpiration: string;
+  private readonly isProduction: boolean;
 
   constructor(
     private readonly jwtService: JwtService,
@@ -54,12 +57,18 @@ export class TokenService {
     private readonly auditService: AuditService,
     private readonly impossibleTravelService: ImpossibleTravelService,
     private readonly suspiciousLoginService: SuspiciousLoginService,
+    private readonly configService: ConfigService,
   ) {
     // OWASP ASVS V3.3.3 / NIST SP 800-63B §7.2: absolute timeout <= 12h at AAL2
-    this.refreshExpiration = process.env.JWT_REFRESH_EXPIRATION || '12h';
+    this.refreshExpiration = this.configService.get<string>(
+      'auth.jwtRefreshExpiration',
+    )!;
     this.refreshMaxAgeMs = parseDurationMs(this.refreshExpiration);
-    const jwtSecret =
-      process.env.JWT_SECRET || 'default-dev-secret-change-in-production';
+    this.accessExpiration = this.configService.get<string>(
+      'auth.jwtAccessExpiration',
+    )!;
+    this.isProduction = this.configService.get<boolean>('app.isProduction')!;
+    const jwtSecret = this.configService.get<string>('auth.jwtSecret')!;
     this.mfaChallengeSecret = crypto
       .createHmac('sha256', jwtSecret)
       .update(MFA_CHALLENGE_HMAC_LABEL)
@@ -78,7 +87,7 @@ export class TokenService {
         jti: crypto.randomUUID(),
       } satisfies JwtPayload,
       {
-        expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as StringValue,
+        expiresIn: this.accessExpiration as StringValue,
       },
     );
 
@@ -185,7 +194,7 @@ export class TokenService {
         jti: crypto.randomUUID(),
       } satisfies JwtPayload,
       {
-        expiresIn: (process.env.JWT_ACCESS_EXPIRATION || '15m') as StringValue,
+        expiresIn: this.accessExpiration as StringValue,
       },
     );
 
@@ -266,7 +275,7 @@ export class TokenService {
       value: refreshToken,
       options: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: this.isProduction,
         sameSite: 'strict',
         path: '/',
         maxAge: Math.floor(this.refreshMaxAgeMs / 1000),
@@ -280,7 +289,7 @@ export class TokenService {
       value: '',
       options: {
         httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
+        secure: this.isProduction,
         sameSite: 'strict',
         path: '/',
         maxAge: 0,

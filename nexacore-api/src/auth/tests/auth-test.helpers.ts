@@ -1,4 +1,5 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { AuthService } from '../auth.service';
 import { UsersService } from '../../users/users.service';
@@ -215,6 +216,23 @@ export async function createAuthTestModule(): Promise<AuthTestContext> {
           denyToken: jest.fn().mockResolvedValue(undefined),
           denyAllForUser: jest.fn().mockResolvedValue(undefined),
           isDenied: jest.fn().mockResolvedValue(false),
+        },
+      },
+      {
+        provide: ConfigService,
+        useValue: {
+          get: jest.fn((key: string) => {
+            const config: Record<string, unknown> = {
+              'auth.jwtSecret': 'test-jwt-secret-at-least-32-characters',
+              'auth.jwtAccessExpiration': '15m',
+              'auth.jwtRefreshExpiration': '12h',
+              'auth.mfaAppName': 'EM NexaCore',
+              'app.nodeEnv': 'test',
+              'app.isProduction': false,
+              'app.frontendUrl': 'http://localhost:3001',
+            };
+            return config[key];
+          }),
         },
       },
     ],
