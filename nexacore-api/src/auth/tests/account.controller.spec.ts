@@ -2,7 +2,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AccountController } from '../account.controller';
 import { AuthService } from '../auth.service';
 import { TurnstileService } from '../../security/turnstile.service';
-import { ConfigService } from '@nestjs/config';
 
 describe('AccountController', () => {
   let controller: AccountController;
@@ -38,17 +37,6 @@ describe('AccountController', () => {
             verify: jest.fn().mockResolvedValue(true),
           },
         },
-        {
-          provide: ConfigService,
-          useValue: {
-            get: jest.fn((key: string) => {
-              const config: Record<string, string> = {
-                'app.frontendUrl': 'http://localhost:3001',
-              };
-              return config[key];
-            }),
-          },
-        },
       ],
     }).compile();
 
@@ -59,61 +47,44 @@ describe('AccountController', () => {
   // ─── Email Verification ─────────────────────────────────────
 
   describe('verifyEmail', () => {
-    it('should redirect with success status on valid token', async () => {
+    it('should return success status on valid token', async () => {
       authService.verifyEmail.mockResolvedValue({ status: 'success' });
-      const res = { redirect: jest.fn() };
 
-      await controller.verifyEmail('valid-token', res as any);
+      const result = await controller.verifyEmail({ token: 'valid-token' });
 
       expect(authService.verifyEmail).toHaveBeenCalledWith('valid-token');
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('status=success'),
-      );
+      expect(result).toEqual({ status: 'success' });
     });
 
-    it('should redirect with invalid status on missing token', async () => {
-      const res = { redirect: jest.fn() };
-
-      await controller.verifyEmail('', res as any);
-
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('status=invalid'),
-      );
-    });
-
-    it('should redirect with invalid status on bad token', async () => {
+    it('should return invalid status on bad token', async () => {
       authService.verifyEmail.mockResolvedValue({ status: 'invalid' });
-      const res = { redirect: jest.fn() };
 
-      await controller.verifyEmail('bad-token', res as any);
+      const result = await controller.verifyEmail({ token: 'bad-token' });
 
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('status=invalid'),
-      );
+      expect(result).toEqual({ status: 'invalid' });
     });
   });
 
   describe('verifyEmailChange', () => {
-    it('should redirect to frontend with status=invalid when no token provided', async () => {
-      const res = { redirect: jest.fn() };
-
-      await controller.verifyEmailChange('', res as any);
-
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('status=invalid'),
-      );
-    });
-
-    it('should redirect to frontend with verification result status on success', async () => {
+    it('should return success status on valid token', async () => {
       authService.verifyEmailChange.mockResolvedValue({ status: 'success' });
-      const res = { redirect: jest.fn() };
 
-      await controller.verifyEmailChange('valid-token', res as any);
+      const result = await controller.verifyEmailChange({
+        token: 'valid-token',
+      });
 
       expect(authService.verifyEmailChange).toHaveBeenCalledWith('valid-token');
-      expect(res.redirect).toHaveBeenCalledWith(
-        expect.stringContaining('status=success'),
-      );
+      expect(result).toEqual({ status: 'success' });
+    });
+
+    it('should return invalid status on bad token', async () => {
+      authService.verifyEmailChange.mockResolvedValue({ status: 'invalid' });
+
+      const result = await controller.verifyEmailChange({
+        token: 'bad-token',
+      });
+
+      expect(result).toEqual({ status: 'invalid' });
     });
   });
 

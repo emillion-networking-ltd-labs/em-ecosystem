@@ -1,12 +1,38 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { CircleCheck, CircleX } from "lucide-react";
+import { CircleCheck, CircleX, Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/api";
 
 export default function VerifyEmailStatus() {
   const searchParams = useSearchParams();
-  const status = searchParams.get("status");
+  const token = searchParams.get("token");
+  const [status, setStatus] = useState<"loading" | "success" | "invalid">(
+    token ? "loading" : "invalid",
+  );
+
+  useEffect(() => {
+    if (!token) return;
+
+    apiClient
+      .post<{ status: "success" | "invalid" }>("/auth/verify-email", { token })
+      .then((res) => setStatus(res.status))
+      .catch(() => setStatus("invalid"));
+  }, [token]);
+
+  if (status === "loading") {
+    return (
+      <div className="flex flex-col items-center gap-2">
+        <Loader2 size={48} className="animate-spin text-content-secondary" />
+        <p className="text-sm leading-[21px] text-content-primary/50">
+          Verifying your email...
+        </p>
+      </div>
+    );
+  }
+
   const isSuccess = status === "success";
 
   return (
