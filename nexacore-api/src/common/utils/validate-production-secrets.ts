@@ -91,4 +91,18 @@ export function validateProductionSecrets(): void {
       );
     }
   }
+
+  // OWASP ASVS V8.3.7: Database connections must use TLS in production
+  const databaseUrl = process.env.DATABASE_URL;
+  if (!databaseUrl) {
+    throw new Error('FATAL: DATABASE_URL must be set in production');
+  }
+  const sslModeMatch = databaseUrl.match(/[?&]sslmode=([^&]*)/);
+  const sslMode = sslModeMatch?.[1];
+  const SECURE_SSL_MODES = ['require', 'verify-ca', 'verify-full'];
+  if (!sslMode || !SECURE_SSL_MODES.includes(sslMode)) {
+    throw new Error(
+      'FATAL: DATABASE_URL must include sslmode=require (or verify-ca/verify-full) in production (OWASP ASVS V8.3.7)',
+    );
+  }
 }

@@ -8,6 +8,8 @@ describe('validateProductionSecrets', () => {
     GOOGLE_CALLBACK_URL: 'https://myapp.com/auth/google/callback',
     GITHUB_CALLBACK_URL: 'https://myapp.com/auth/github/callback',
     JWT_ACCESS_EXPIRATION: '15m',
+    DATABASE_URL:
+      'postgresql://user:pass@db.prod.com:5432/em_ecosystem?schema=public&sslmode=require',
   };
 
   beforeEach(() => {
@@ -24,7 +26,8 @@ describe('validateProductionSecrets', () => {
   });
 
   function loadValidator(): () => void {
-    return require('../common/utils/validate-production-secrets').validateProductionSecrets;
+    return require('../common/utils/validate-production-secrets')
+      .validateProductionSecrets;
   }
 
   // ─── Non-production bypass ──────────────────────────────────────
@@ -75,8 +78,7 @@ describe('validateProductionSecrets', () => {
     });
 
     it('should throw when MFA_ENCRYPTION_KEY is the dev default', () => {
-      process.env.MFA_ENCRYPTION_KEY =
-        'dev-mfa-key-change-in-production-32ch';
+      process.env.MFA_ENCRYPTION_KEY = 'dev-mfa-key-change-in-production-32ch';
 
       const validate = loadValidator();
       expect(() => validate()).toThrow('FATAL: MFA_ENCRYPTION_KEY');
@@ -120,8 +122,7 @@ describe('validateProductionSecrets', () => {
 
   describe('GOOGLE_CALLBACK_URL', () => {
     it('should throw when GOOGLE_CALLBACK_URL uses HTTP', () => {
-      process.env.GOOGLE_CALLBACK_URL =
-        'http://myapp.com/auth/google/callback';
+      process.env.GOOGLE_CALLBACK_URL = 'http://myapp.com/auth/google/callback';
 
       const validate = loadValidator();
       expect(() => validate()).toThrow('FATAL: GOOGLE_CALLBACK_URL');
@@ -139,8 +140,7 @@ describe('validateProductionSecrets', () => {
 
   describe('GITHUB_CALLBACK_URL', () => {
     it('should throw when GITHUB_CALLBACK_URL uses HTTP', () => {
-      process.env.GITHUB_CALLBACK_URL =
-        'http://myapp.com/auth/github/callback';
+      process.env.GITHUB_CALLBACK_URL = 'http://myapp.com/auth/github/callback';
 
       const validate = loadValidator();
       expect(() => validate()).toThrow('FATAL: GITHUB_CALLBACK_URL');
@@ -190,6 +190,71 @@ describe('validateProductionSecrets', () => {
 
       const validate = loadValidator();
       expect(() => validate()).toThrow('FATAL: JWT_ACCESS_EXPIRATION');
+    });
+  });
+
+  // ─── DATABASE_URL ─────────────────────────────────────────────
+
+  describe('DATABASE_URL', () => {
+    it('should throw when DATABASE_URL is missing', () => {
+      delete process.env.DATABASE_URL;
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: DATABASE_URL');
+    });
+
+    it('should throw when DATABASE_URL has no sslmode', () => {
+      process.env.DATABASE_URL =
+        'postgresql://user:pass@db:5432/em?schema=public';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow(
+        'FATAL: DATABASE_URL must include sslmode',
+      );
+    });
+
+    it('should throw when sslmode=prefer (insecure)', () => {
+      process.env.DATABASE_URL =
+        'postgresql://user:pass@db:5432/em?schema=public&sslmode=prefer';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow(
+        'FATAL: DATABASE_URL must include sslmode',
+      );
+    });
+
+    it('should throw when sslmode=disable (insecure)', () => {
+      process.env.DATABASE_URL =
+        'postgresql://user:pass@db:5432/em?schema=public&sslmode=disable';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow(
+        'FATAL: DATABASE_URL must include sslmode',
+      );
+    });
+
+    it('should not throw when sslmode=require', () => {
+      process.env.DATABASE_URL =
+        'postgresql://user:pass@db:5432/em?schema=public&sslmode=require';
+
+      const validate = loadValidator();
+      expect(() => validate()).not.toThrow();
+    });
+
+    it('should not throw when sslmode=verify-ca', () => {
+      process.env.DATABASE_URL =
+        'postgresql://user:pass@db:5432/em?schema=public&sslmode=verify-ca';
+
+      const validate = loadValidator();
+      expect(() => validate()).not.toThrow();
+    });
+
+    it('should not throw when sslmode=verify-full', () => {
+      process.env.DATABASE_URL =
+        'postgresql://user:pass@db:5432/em?schema=public&sslmode=verify-full';
+
+      const validate = loadValidator();
+      expect(() => validate()).not.toThrow();
     });
   });
 
