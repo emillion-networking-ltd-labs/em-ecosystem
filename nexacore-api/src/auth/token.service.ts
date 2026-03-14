@@ -155,19 +155,11 @@ export class TokenService {
         data: { isRevoked: true },
       });
 
-      this.auditService
-        .log({
-          action: AuditAction.SESSION_IDLE_REVOKED,
-          userId: payload.sub,
-          ipAddress: ctx?.ipAddress,
-          userAgent: ctx?.userAgent,
-          metadata: {
-            sessionId: payload.sessionId,
-            lastUsedAt: oldSession.lastUsedAt.toISOString(),
-            idleTimeoutHours: SESSION_IDLE_TIMEOUT_HOURS,
-          },
-        })
-        .catch(() => {});
+      this.logAuditEvent(AuditAction.SESSION_IDLE_REVOKED, ctx, payload.sub, {
+        sessionId: payload.sessionId,
+        lastUsedAt: oldSession.lastUsedAt.toISOString(),
+        idleTimeoutHours: SESSION_IDLE_TIMEOUT_HOURS,
+      });
 
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
@@ -214,14 +206,7 @@ export class TokenService {
       refreshTokenHash,
     );
 
-    this.auditService
-      .log({
-        action: AuditAction.TOKEN_REFRESH,
-        userId: user.id,
-        ipAddress: ctx?.ipAddress,
-        userAgent: ctx?.userAgent,
-      })
-      .catch(() => {});
+    this.logAuditEvent(AuditAction.TOKEN_REFRESH, ctx, user.id);
 
     return {
       accessToken: newAccessToken,
@@ -359,21 +344,13 @@ export class TokenService {
     userId: string,
     requestMeta: { ipAddress: string; userAgent?: string | null },
   ): void {
-    this.auditService
-      .log({
-        action: AuditAction.LOGIN_BLOCKED_TRAVEL,
-        userId,
-        ipAddress: requestMeta.ipAddress,
-        userAgent: requestMeta.userAgent,
-        metadata: {
-          previousLocation: travelResult.previousLocation,
-          currentLocation: travelResult.currentLocation,
-          distanceKm: travelResult.distanceKm,
-          elapsedHours: travelResult.elapsedHours,
-          requiredSpeedKmh: travelResult.requiredSpeedKmh,
-        },
-      })
-      .catch(() => {});
+    this.logAuditEvent(AuditAction.LOGIN_BLOCKED_TRAVEL, requestMeta, userId, {
+      previousLocation: travelResult.previousLocation,
+      currentLocation: travelResult.currentLocation,
+      distanceKm: travelResult.distanceKm,
+      elapsedHours: travelResult.elapsedHours,
+      requiredSpeedKmh: travelResult.requiredSpeedKmh,
+    });
     throw new ForbiddenException(
       'Login blocked due to suspicious location activity. Please try again later or contact support.',
     );
@@ -391,6 +368,23 @@ export class TokenService {
         ipAddress: requestMeta.ipAddress,
         userAgent: requestMeta.userAgent ?? null,
         loginTime: new Date(),
+      })
+      .catch(() => {});
+  }
+
+  private logAuditEvent(
+    action: AuditAction,
+    ctx?: { ipAddress?: string | null; userAgent?: string | null },
+    userId?: string,
+    metadata?: Record<string, unknown>,
+  ): void {
+    this.auditService
+      .log({
+        action,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        ...(metadata && { metadata }),
       })
       .catch(() => {});
   }

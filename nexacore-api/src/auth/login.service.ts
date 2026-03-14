@@ -70,15 +70,10 @@ export class LoginService {
         )
         .catch(() => {});
 
-      this.auditService
-        .log({
-          action: AuditAction.REGISTER,
-          userId: existingUser.id,
-          ipAddress: ctx?.ipAddress,
-          userAgent: ctx?.userAgent,
-          metadata: { email: dto.email, outcome: 'existing_email' },
-        })
-        .catch(() => {});
+      this.logAuditEvent(AuditAction.REGISTER, ctx, existingUser.id, {
+        email: dto.email,
+        outcome: 'existing_email',
+      });
 
       return { message: ErrorMessages.auth.CHECK_EMAIL };
     }
@@ -104,15 +99,10 @@ export class LoginService {
       .createAndSendVerificationEmail(user)
       .catch(() => {});
 
-    this.auditService
-      .log({
-        action: AuditAction.REGISTER,
-        userId: user.id,
-        ipAddress: ctx?.ipAddress,
-        userAgent: ctx?.userAgent,
-        metadata: { email: dto.email, outcome: 'new_account' },
-      })
-      .catch(() => {});
+    this.logAuditEvent(AuditAction.REGISTER, ctx, user.id, {
+      email: dto.email,
+      outcome: 'new_account',
+    });
 
     return { message: ErrorMessages.auth.CHECK_EMAIL };
   }
@@ -128,29 +118,19 @@ export class LoginService {
     // Timing attack protection: constant-time response when user not found
     if (!user) {
       await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
-      this.auditService
-        .log({
-          action: AuditAction.LOGIN_FAILURE,
-          ipAddress: ctx?.ipAddress,
-          userAgent: ctx?.userAgent,
-          metadata: { email: dto.email, reason: 'user_not_found' },
-        })
-        .catch(() => {});
+      this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, undefined, {
+        email: dto.email,
+        reason: 'user_not_found',
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
     // Account lockout check — CWE-203: same exception type and message as
     // non-existing account to prevent enumeration
     if (user.lockedUntil && user.lockedUntil > new Date()) {
-      this.auditService
-        .log({
-          action: AuditAction.LOGIN_FAILURE,
-          userId: user.id,
-          ipAddress: ctx?.ipAddress,
-          userAgent: ctx?.userAgent,
-          metadata: { reason: 'account_locked' },
-        })
-        .catch(() => {});
+      this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, user.id, {
+        reason: 'account_locked',
+      });
 
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -165,15 +145,9 @@ export class LoginService {
     // Email verification check — CWE-203: same exception type and message as
     // all other login failures to prevent account state enumeration
     if (user.passwordHash && !user.emailVerified) {
-      this.auditService
-        .log({
-          action: AuditAction.LOGIN_FAILURE,
-          userId: user.id,
-          ipAddress: ctx?.ipAddress,
-          userAgent: ctx?.userAgent,
-          metadata: { reason: 'email_not_verified' },
-        })
-        .catch(() => {});
+      this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, user.id, {
+        reason: 'email_not_verified',
+      });
       // Silently re-send verification email (fire-and-forget)
       this.emailVerificationService
         .createAndSendVerificationEmail(user)
@@ -210,15 +184,9 @@ export class LoginService {
     // OAuth-only account (no password set) — constant timing, NO lockout.
     if (!user.passwordHash) {
       await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
-      this.auditService
-        .log({
-          action: AuditAction.LOGIN_FAILURE,
-          userId: user.id,
-          ipAddress: ctx?.ipAddress,
-          userAgent: ctx?.userAgent,
-          metadata: { reason: 'no_password_set' },
-        })
-        .catch(() => {});
+      this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, user.id, {
+        reason: 'no_password_set',
+      });
       throw new UnauthorizedException('Invalid credentials');
     }
 
@@ -242,34 +210,18 @@ export class LoginService {
           )
           .catch(() => {});
 
-        this.auditService
-          .log({
-            action: AuditAction.ACCOUNT_LOCKED,
-            userId: user.id,
-            ipAddress: ctx?.ipAddress,
-            userAgent: ctx?.userAgent,
-            metadata: {
-              reason: 'max_failed_attempts',
-              failedAttempts: MAX_FAILED_ATTEMPTS,
-            },
-          })
-          .catch(() => {});
+        this.logAuditEvent(AuditAction.ACCOUNT_LOCKED, ctx, user.id, {
+          reason: 'max_failed_attempts',
+          failedAttempts: MAX_FAILED_ATTEMPTS,
+        });
 
         throw new UnauthorizedException('Invalid credentials');
       }
 
-      this.auditService
-        .log({
-          action: AuditAction.LOGIN_FAILURE,
-          userId: user.id,
-          ipAddress: ctx?.ipAddress,
-          userAgent: ctx?.userAgent,
-          metadata: {
-            reason: 'invalid_password',
-            failedAttempts: updated.failedAttempts,
-          },
-        })
-        .catch(() => {});
+      this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, user.id, {
+        reason: 'invalid_password',
+        failedAttempts: updated.failedAttempts,
+      });
 
       this.checkSuspiciousLoginFailure(user.id, requestMeta);
 
@@ -292,15 +244,10 @@ export class LoginService {
         const { accessToken, refreshToken, sessionId } =
           await this.tokenService.generateTokens(user, requestMeta);
 
-        this.auditService
-          .log({
-            action: AuditAction.LOGIN_SUCCESS,
-            userId: user.id,
-            ipAddress: ctx?.ipAddress,
-            userAgent: ctx?.userAgent,
-            metadata: { mfaSkipped: true, trustedDevice: true },
-          })
-          .catch(() => {});
+        this.logAuditEvent(AuditAction.LOGIN_SUCCESS, ctx, user.id, {
+          mfaSkipped: true,
+          trustedDevice: true,
+        });
 
         const travelResult = await this.tokenService.checkImpossibleTravel(
           user,
@@ -332,15 +279,9 @@ export class LoginService {
 
     const mfaToken = this.tokenService.signMfaChallengeToken(user.id);
 
-    this.auditService
-      .log({
-        action: AuditAction.LOGIN_SUCCESS,
-        userId: user.id,
-        ipAddress: ctx?.ipAddress,
-        userAgent: ctx?.userAgent,
-        metadata: { mfaChallengeIssued: true },
-      })
-      .catch(() => {});
+    this.logAuditEvent(AuditAction.LOGIN_SUCCESS, ctx, user.id, {
+      mfaChallengeIssued: true,
+    });
 
     return { mfaRequired: true, mfaToken };
   }
@@ -349,15 +290,10 @@ export class LoginService {
     user: User,
     ctx?: RequestContext,
   ): MfaSetupRequiredResult {
-    this.auditService
-      .log({
-        action: AuditAction.LOGIN_SUCCESS,
-        userId: user.id,
-        ipAddress: ctx?.ipAddress,
-        userAgent: ctx?.userAgent,
-        metadata: { mfaSetupRequired: true, role: user.role },
-      })
-      .catch(() => {});
+    this.logAuditEvent(AuditAction.LOGIN_SUCCESS, ctx, user.id, {
+      mfaSetupRequired: true,
+      role: user.role,
+    });
 
     return {
       mfaSetupRequired: true,
@@ -390,14 +326,7 @@ export class LoginService {
       }
     }
 
-    this.auditService
-      .log({
-        action: AuditAction.LOGIN_SUCCESS,
-        userId: user.id,
-        ipAddress: ctx?.ipAddress,
-        userAgent: ctx?.userAgent,
-      })
-      .catch(() => {});
+    this.logAuditEvent(AuditAction.LOGIN_SUCCESS, ctx, user.id);
 
     this.tokenService
       .notifyIfNewDevice(user, sessionId, requestMeta)
@@ -421,6 +350,23 @@ export class LoginService {
         userId,
         ipAddress: requestMeta.ipAddress,
         userAgent: requestMeta.userAgent ?? null,
+      })
+      .catch(() => {});
+  }
+
+  private logAuditEvent(
+    action: AuditAction,
+    ctx?: { ipAddress?: string | null; userAgent?: string | null },
+    userId?: string,
+    metadata?: Record<string, unknown>,
+  ): void {
+    this.auditService
+      .log({
+        action,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        ...(metadata && { metadata }),
       })
       .catch(() => {});
   }
