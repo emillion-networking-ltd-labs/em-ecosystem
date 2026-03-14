@@ -87,9 +87,7 @@ export class LoginService {
       dto.password,
     );
     if (isBreached) {
-      throw new BadRequestException(
-        'This password has appeared in a data breach. Please choose a different password.',
-      );
+      throw new BadRequestException(ErrorMessages.auth.PASSWORD_BREACHED);
     }
 
     const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);

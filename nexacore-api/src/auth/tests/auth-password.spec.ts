@@ -1,5 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
+import { ErrorMessages } from '../../common/constants/error-messages';
 import {
   createAuthTestModule,
   AuthTestContext,
@@ -175,7 +176,7 @@ describe('AuthService — Password Reset', () => {
           token: 'valid',
           newPassword: 'SamePass1!',
         }),
-      ).rejects.toThrow('New password must be different from current password');
+      ).rejects.toThrow(ErrorMessages.auth.PASSWORD_MUST_DIFFER);
 
       expect(bcrypt.compare).toHaveBeenCalledWith(
         'SamePass1!',
@@ -201,7 +202,7 @@ describe('AuthService — Password Reset', () => {
           token: 'valid',
           newPassword: 'BreachedPass1!',
         }),
-      ).rejects.toThrow('This password has appeared in a data breach');
+      ).rejects.toThrow(ErrorMessages.auth.PASSWORD_BREACHED);
 
       expect(ctx.prismaService.$transaction).not.toHaveBeenCalled();
     });

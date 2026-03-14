@@ -407,7 +407,7 @@ export class PasskeyService {
     if (user.passwordHash) {
       if (!password) {
         throw new BadRequestException(
-          'Password confirmation required to delete passkey',
+          ErrorMessages.passkey.PASSWORD_REQUIRED_FOR_DELETE,
         );
       }
       const isValid = await bcrypt.compare(password, user.passwordHash);

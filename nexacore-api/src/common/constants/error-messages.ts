@@ -8,12 +8,18 @@ export const ErrorMessages = {
     TOO_MANY_ATTEMPTS: 'Too many attempts. Please try again later.',
     INVALID_REFRESH_TOKEN: 'Invalid or expired refresh token',
     INVALID_RESET_TOKEN: 'Invalid or expired reset token',
+    PASSWORD_BREACHED:
+      'This password has appeared in a data breach. Please choose a different password.',
+    PASSWORD_MUST_DIFFER:
+      'New password must be different from current password',
   },
   mfa: {
     OPERATION_NOT_AVAILABLE: 'MFA operation not available',
     INVALID_CODE: 'Invalid verification code',
     INVALID_TOKEN: 'Invalid or expired MFA token',
     AUTHENTICATION_REQUIRED: 'Authentication required',
+    PASSWORD_REQUIRED_NO_PASSWORD:
+      'Password confirmation required but no password set',
   },
   session: {
     NOT_FOUND: 'Session not found',
@@ -38,6 +44,8 @@ export const ErrorMessages = {
   },
   passkey: {
     NOT_FOUND: 'Passkey not found',
+    PASSWORD_REQUIRED_FOR_DELETE:
+      'Password confirmation required to delete passkey',
   },
   device: {
     NOT_FOUND: 'Device not found',

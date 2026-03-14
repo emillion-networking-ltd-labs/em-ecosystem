@@ -206,7 +206,7 @@ export class MfaService {
 
     if (!user.passwordHash) {
       throw new BadRequestException(
-        'Password confirmation required but no password set',
+        ErrorMessages.mfa.PASSWORD_REQUIRED_NO_PASSWORD,
       );
     }
 
@@ -243,7 +243,7 @@ export class MfaService {
 
     if (!user.passwordHash) {
       throw new BadRequestException(
-        'Password confirmation required but no password set',
+        ErrorMessages.mfa.PASSWORD_REQUIRED_NO_PASSWORD,
       );
     }
 

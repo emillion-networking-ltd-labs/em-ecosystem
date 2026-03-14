@@ -109,9 +109,7 @@ export class PasswordResetService {
         resetToken.user.passwordHash,
       );
       if (isSamePassword) {
-        throw new BadRequestException(
-          'New password must be different from current password',
-        );
+        throw new BadRequestException(ErrorMessages.auth.PASSWORD_MUST_DIFFER);
       }
     }
 
@@ -119,9 +117,7 @@ export class PasswordResetService {
       dto.newPassword,
     );
     if (isBreached) {
-      throw new BadRequestException(
-        'This password has appeared in a data breach. Please choose a different password.',
-      );
+      throw new BadRequestException(ErrorMessages.auth.PASSWORD_BREACHED);
     }
 
     const newPasswordHash = await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS);
