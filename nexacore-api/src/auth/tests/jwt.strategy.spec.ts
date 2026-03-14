@@ -157,7 +157,7 @@ describe('JwtStrategy', () => {
           jti: 'denied-jti',
           iat: Math.floor(Date.now() / 1000),
         }),
-      ).rejects.toThrow(new UnauthorizedException('Token has been revoked'));
+      ).rejects.toThrow(new UnauthorizedException('Authentication failed'));
     });
   });
 });

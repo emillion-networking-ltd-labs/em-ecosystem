@@ -7,8 +7,7 @@ export const ErrorMessages = {
     CHECK_EMAIL: 'Please check your email to continue',
     TOO_MANY_ATTEMPTS: 'Too many attempts. Please try again later.',
     INVALID_REFRESH_TOKEN: 'Invalid or expired refresh token',
-    TOKEN_REVOKED: 'Token has been revoked',
-    SESSION_EXPIRED: 'Session expired due to inactivity',
+    TOKEN_REVOKED: 'Authentication failed',
     INVALID_RESET_TOKEN: 'Invalid or expired reset token',
   },
   mfa: {
