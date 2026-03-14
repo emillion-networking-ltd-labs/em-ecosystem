@@ -33,7 +33,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       payload.iat,
     );
     if (isDenied) {
-      throw new UnauthorizedException(ErrorMessages.auth.TOKEN_REVOKED);
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     const user = await this.usersService.findById(payload.sub);
