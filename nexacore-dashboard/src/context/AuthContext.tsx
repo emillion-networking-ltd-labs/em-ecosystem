@@ -122,7 +122,7 @@ type AuthContextType = AuthState & {
     password: string,
     turnstileToken?: string,
   ) => Promise<boolean>;
-  handleOAuthCallback: (code: string) => Promise<void>;
+  handleOAuthCallback: () => Promise<void>;
   passkeyLogin: (
     challengeId: string,
     credential: Record<string, unknown>,
@@ -305,55 +305,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [addToast],
   );
 
-  const handleOAuthCallback = useCallback(
-    async (code: string) => {
-      dispatch({ type: "AUTH_START" });
-      try {
-        const data = await apiClient.post<AuthResponse>(
-          "/auth/oauth/exchange",
-          {
-            code,
-          },
-        );
-        apiClient.setAccessToken(data.accessToken);
-        const user = await apiClient.get<SafeUser>("/auth/me");
-        dispatch({
-          type: "AUTH_SUCCESS",
-          payload: { user, accessToken: data.accessToken },
-        });
-        if (data.oauthAction === "created") {
-          addToast({
-            variant: "success",
-            title: "Account created",
-            description: "Your account has been created successfully.",
-          });
-        } else if (data.oauthAction === "linked") {
-          const lastProvider =
-            user.oauthProviders[user.oauthProviders.length - 1];
-          const providerName =
-            lastProvider === "GOOGLE"
-              ? "Google"
-              : lastProvider === "GITHUB"
-                ? "GitHub"
-                : lastProvider;
-          addToast({
-            variant: "success",
-            title: "Account linked",
-            description: `Your account has been linked to ${providerName}.`,
-          });
-        }
-      } catch (err: unknown) {
-        apiClient.clearAccessToken();
+  const handleOAuthCallback = useCallback(async () => {
+    dispatch({ type: "AUTH_START" });
+    try {
+      const data = await apiClient.post<AuthResponse>(
+        "/auth/oauth/exchange",
+        {},
+      );
+      apiClient.setAccessToken(data.accessToken);
+      const user = await apiClient.get<SafeUser>("/auth/me");
+      dispatch({
+        type: "AUTH_SUCCESS",
+        payload: { user, accessToken: data.accessToken },
+      });
+      if (data.oauthAction === "created") {
         addToast({
-          variant: "error",
-          title: "Authentication failed",
-          description: extractErrorMessage(err),
+          variant: "success",
+          title: "Account created",
+          description: "Your account has been created successfully.",
         });
-        dispatch({ type: "AUTH_STOP" });
+      } else if (data.oauthAction === "linked") {
+        const lastProvider =
+          user.oauthProviders[user.oauthProviders.length - 1];
+        const providerName =
+          lastProvider === "GOOGLE"
+            ? "Google"
+            : lastProvider === "GITHUB"
+              ? "GitHub"
+              : lastProvider;
+        addToast({
+          variant: "success",
+          title: "Account linked",
+          description: `Your account has been linked to ${providerName}.`,
+        });
       }
-    },
-    [addToast],
-  );
+    } catch (err: unknown) {
+      apiClient.clearAccessToken();
+      addToast({
+        variant: "error",
+        title: "Authentication failed",
+        description: extractErrorMessage(err),
+      });
+      dispatch({ type: "AUTH_STOP" });
+    }
+  }, [addToast]);
 
   const passkeyLogin = useCallback(
     async (challengeId: string, credential: Record<string, unknown>) => {

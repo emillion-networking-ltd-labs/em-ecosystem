@@ -39,6 +39,7 @@ describe('OAuthController', () => {
       failedAttempts: 0,
       lockedUntil: null,
       lockoutCount: 0,
+      mfaEnabled: false,
       createdAt: new Date(),
       updatedAt: new Date(),
     },
@@ -47,6 +48,7 @@ describe('OAuthController', () => {
 
   const mockRes = {
     cookie: jest.fn(),
+    clearCookie: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -84,6 +86,7 @@ describe('OAuthController', () => {
               const config: Record<string, string> = {
                 'app.frontendUrl': 'http://localhost:3001',
                 'app.oauthAllowedRedirectUrls': '',
+                'app.nodeEnv': 'development',
               };
               return config[key];
             }),
@@ -109,7 +112,7 @@ describe('OAuthController', () => {
   });
 
   describe('googleAuthCallback', () => {
-    it('should return redirect URL with ephemeral code', async () => {
+    it('should set oauth_code cookie and redirect without code in URL', async () => {
       const req = {
         user: {
           accessToken: 'google-access',
@@ -118,18 +121,27 @@ describe('OAuthController', () => {
         },
       };
 
-      const result = await controller.googleAuthCallback(req);
+      const result = await controller.googleAuthCallback(req, mockRes as any);
 
-      expect(result.url).toBe(
-        'http://localhost:3001/auth/callback?code=ephemeral-code-uuid',
-      );
+      expect(result.url).toBe('http://localhost:3001/auth/callback');
+      expect(result.url).not.toContain('?code=');
       expect(result.url).not.toContain('accessToken');
+      expect(mockRes.cookie).toHaveBeenCalledWith(
+        'oauth_code',
+        'ephemeral-code-uuid',
+        expect.objectContaining({
+          httpOnly: true,
+          sameSite: 'strict',
+          path: '/',
+          maxAge: 30_000,
+        }),
+      );
       expect(authService.generateOAuthCode).toHaveBeenCalledWith(req.user);
     });
   });
 
   describe('githubAuthCallback', () => {
-    it('should return redirect URL with ephemeral code', async () => {
+    it('should set oauth_code cookie and redirect without code in URL', async () => {
       const req = {
         user: {
           accessToken: 'github-access',
@@ -138,12 +150,21 @@ describe('OAuthController', () => {
         },
       };
 
-      const result = await controller.githubAuthCallback(req);
+      const result = await controller.githubAuthCallback(req, mockRes as any);
 
-      expect(result.url).toBe(
-        'http://localhost:3001/auth/callback?code=ephemeral-code-uuid',
-      );
+      expect(result.url).toBe('http://localhost:3001/auth/callback');
+      expect(result.url).not.toContain('?code=');
       expect(result.url).not.toContain('accessToken');
+      expect(mockRes.cookie).toHaveBeenCalledWith(
+        'oauth_code',
+        'ephemeral-code-uuid',
+        expect.objectContaining({
+          httpOnly: true,
+          sameSite: 'strict',
+          path: '/',
+          maxAge: 30_000,
+        }),
+      );
       expect(authService.generateOAuthCode).toHaveBeenCalledWith(req.user);
     });
   });
@@ -162,27 +183,45 @@ describe('OAuthController', () => {
       expect(ttlMeta).toBeDefined();
     });
 
-    it('should set cookie and return accessToken + user for a valid code', async () => {
+    it('should read code from cookie, clear it, and return tokens', async () => {
       authService.exchangeOAuthCode.mockResolvedValue(mockAuthResult as any);
+      const req = { cookies: { oauth_code: 'valid-code' } };
 
-      const result = await controller.exchangeOAuthCode(
-        { code: 'valid-code' },
-        mockRes as any,
-      );
+      const result = await controller.exchangeOAuthCode(req, mockRes as any);
 
       expect(authService.exchangeOAuthCode).toHaveBeenCalledWith('valid-code');
+      expect(mockRes.clearCookie).toHaveBeenCalledWith('oauth_code', {
+        path: '/',
+      });
       expect(result.accessToken).toBe('access-token-123');
       expect(result.user.email).toBe('test@example.com');
       expect(mockRes.cookie).toHaveBeenCalled();
+    });
+
+    it('should throw UnauthorizedException when cookie is missing', async () => {
+      const req = { cookies: {} };
+
+      await expect(
+        controller.exchangeOAuthCode(req, mockRes as any),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw UnauthorizedException when cookies object is undefined', async () => {
+      const req = {};
+
+      await expect(
+        controller.exchangeOAuthCode(req, mockRes as any),
+      ).rejects.toThrow(UnauthorizedException);
     });
 
     it('should propagate UnauthorizedException for invalid code', async () => {
       authService.exchangeOAuthCode.mockRejectedValue(
         new UnauthorizedException('Invalid or expired authorization code'),
       );
+      const req = { cookies: { oauth_code: 'invalid-code' } };
 
       await expect(
-        controller.exchangeOAuthCode({ code: 'invalid-code' }, mockRes as any),
+        controller.exchangeOAuthCode(req, mockRes as any),
       ).rejects.toThrow(UnauthorizedException);
     });
   });

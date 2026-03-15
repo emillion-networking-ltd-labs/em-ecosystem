@@ -2,7 +2,6 @@ import {
   Controller,
   Post,
   Get,
-  Body,
   HttpCode,
   HttpStatus,
   UseGuards,
@@ -23,7 +22,6 @@ import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthService, CookieConfig } from './auth.service';
-import { OAuthExchangeDto } from './dto/oauth-exchange.dto';
 import { AUTH_RATE_LIMITS } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
@@ -75,7 +73,7 @@ export class OAuthController {
   @ApiOperation({ summary: 'Google OAuth callback' })
   @ApiResponse({
     status: 302,
-    description: 'Redirects to frontend with ephemeral authorization code',
+    description: 'Redirects to frontend with ephemeral code in httpOnly cookie',
   })
   async googleAuthCallback(
     @Request()
@@ -87,11 +85,13 @@ export class OAuthController {
         oauthAction?: 'login' | 'created' | 'linked';
       };
     },
+    @Res({ passthrough: true }) res: Response,
   ) {
     const code = await this.authService.generateOAuthCode(req.user);
     const frontendUrl = this.getValidatedFrontendUrl();
+    this.setOAuthCodeCookie(res, code);
     return {
-      url: `${frontendUrl}/auth/callback?code=${code}`,
+      url: `${frontendUrl}/auth/callback`,
     };
   }
 
@@ -120,7 +120,7 @@ export class OAuthController {
   @ApiOperation({ summary: 'GitHub OAuth callback' })
   @ApiResponse({
     status: 302,
-    description: 'Redirects to frontend with ephemeral authorization code',
+    description: 'Redirects to frontend with ephemeral code in httpOnly cookie',
   })
   async githubAuthCallback(
     @Request()
@@ -132,11 +132,13 @@ export class OAuthController {
         oauthAction?: 'login' | 'created' | 'linked';
       };
     },
+    @Res({ passthrough: true }) res: Response,
   ) {
     const code = await this.authService.generateOAuthCode(req.user);
     const frontendUrl = this.getValidatedFrontendUrl();
+    this.setOAuthCodeCookie(res, code);
     return {
-      url: `${frontendUrl}/auth/callback?code=${code}`,
+      url: `${frontendUrl}/auth/callback`,
     };
   }
 
@@ -150,7 +152,6 @@ export class OAuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Exchange ephemeral OAuth code for tokens' })
   @ApiResponse({ status: 200, description: 'Tokens returned successfully' })
-  @ApiResponse({ status: 400, description: 'Invalid request body' })
   @ApiResponse({
     status: 401,
     description: 'Invalid or expired authorization code',
@@ -161,10 +162,15 @@ export class OAuthController {
       'Too many exchange attempts — rate limited (10 req/60s per IP)',
   })
   async exchangeOAuthCode(
-    @Body() dto: OAuthExchangeDto,
+    @Request() req: { cookies?: Record<string, string> },
     @Res({ passthrough: true }) res: Response,
   ) {
-    const result = await this.authService.exchangeOAuthCode(dto.code);
+    const code = req.cookies?.['oauth_code'];
+    if (!code) {
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
+    }
+    res.clearCookie('oauth_code', { path: '/' });
+    const result = await this.authService.exchangeOAuthCode(code);
     this.setCookie(res, result.cookie);
     return {
       accessToken: result.accessToken,
@@ -234,6 +240,16 @@ export class OAuthController {
   githubLinkAuth() {
     // OAuthLinkGuard validates link code and sets req.oauthAction='link' + req.user.id
     // GitHubAuthGuard then generates state with action=link and userId, redirects to GitHub
+  }
+
+  private setOAuthCodeCookie(res: Response, code: string): void {
+    res.cookie('oauth_code', code, {
+      httpOnly: true,
+      secure: this.configService.get<string>('app.nodeEnv') === 'production',
+      sameSite: 'strict',
+      path: '/',
+      maxAge: 30_000,
+    });
   }
 
   private getValidatedFrontendUrl(): string {
