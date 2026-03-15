@@ -12,6 +12,8 @@ export const ErrorMessages = {
       'This password has appeared in a data breach. Please choose a different password.',
     PASSWORD_MUST_DIFFER:
       'New password must be different from current password',
+    EMAIL_ALREADY_VERIFIED: 'Email already verified',
+    RESEND_COOLDOWN: 'Please wait before requesting another email',
   },
   mfa: {
     OPERATION_NOT_AVAILABLE: 'MFA operation not available',
@@ -20,6 +22,7 @@ export const ErrorMessages = {
     AUTHENTICATION_REQUIRED: 'Authentication required',
     PASSWORD_REQUIRED_NO_PASSWORD:
       'Password confirmation required but no password set',
+    SETUP_REQUIRED: 'MFA setup is required. Please enable MFA to continue.',
   },
   session: {
     NOT_FOUND: 'Resource not found',
@@ -46,6 +49,8 @@ export const ErrorMessages = {
     NOT_FOUND: 'Resource not found',
     PASSWORD_REQUIRED_FOR_DELETE:
       'Password confirmation required to delete passkey',
+    LIMIT_REACHED: 'Maximum number of passkeys reached',
+    CHALLENGE_EXPIRED: 'Challenge not found or expired',
   },
   device: {
     NOT_FOUND: 'Resource not found',

@@ -53,9 +53,4 @@ export class OAuthStateStore {
     await this.redis.del(key);
     return JSON.parse(data) as OAuthStateData;
   }
-
-  /** No-op — Redis TTL handles expiration automatically. */
-  cleanup(): void {
-    // Redis TTL handles expiration
-  }
 }

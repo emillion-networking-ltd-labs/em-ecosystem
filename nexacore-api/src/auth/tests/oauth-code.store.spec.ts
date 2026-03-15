@@ -120,13 +120,4 @@ describe('OAuthCodeStore', () => {
       expect(result!.user.createdAt.toISOString()).toBe(mockDate.toISOString());
     });
   });
-
-  describe('cleanup', () => {
-    it('should be a no-op (Redis TTL handles expiration)', () => {
-      store.cleanup();
-      expect(redis.get).not.toHaveBeenCalled();
-      expect(redis.set).not.toHaveBeenCalled();
-      expect(redis.del).not.toHaveBeenCalled();
-    });
-  });
 });

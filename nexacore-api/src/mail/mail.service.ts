@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { MailerService } from '@nestjs-modules/mailer';
+import { pseudonymizeEmail } from '../common/utils/pseudonymize-email';
 
 @Injectable()
 export class MailService {
@@ -28,9 +29,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Verification email sent to ${email}`);
+      this.logger.log(`Verification email sent to ${pseudonymizeEmail(email)}`);
     } catch (error) {
-      this.logger.error(`Failed to send verification email to ${email}`, error);
+      this.logger.error(
+        `Failed to send verification email to ${pseudonymizeEmail(email)}`,
+        error,
+      );
       // Do not throw — registration should succeed even if email fails
     }
   }
@@ -53,10 +57,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Registration attempt notification sent to ${email}`);
+      this.logger.log(
+        `Registration attempt notification sent to ${pseudonymizeEmail(email)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send registration attempt notification to ${email}`,
+        `Failed to send registration attempt notification to ${pseudonymizeEmail(email)}`,
         error,
       );
     }
@@ -83,10 +89,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Password reset email sent to ${email}`);
+      this.logger.log(
+        `Password reset email sent to ${pseudonymizeEmail(email)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send password reset email to ${email}`,
+        `Failed to send password reset email to ${pseudonymizeEmail(email)}`,
         error,
       );
       // Do not throw — always return 200 to prevent enumeration
@@ -111,10 +119,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Password change notification sent to ${email}`);
+      this.logger.log(
+        `Password change notification sent to ${pseudonymizeEmail(email)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send password change notification to ${email}`,
+        `Failed to send password change notification to ${pseudonymizeEmail(email)}`,
         error,
       );
     }
@@ -154,10 +164,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Account locked notification sent to ${email}`);
+      this.logger.log(
+        `Account locked notification sent to ${pseudonymizeEmail(email)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send account locked notification to ${email}`,
+        `Failed to send account locked notification to ${pseudonymizeEmail(email)}`,
         error,
       );
     }
@@ -187,10 +199,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Login notification email sent to ${email}`);
+      this.logger.log(
+        `Login notification email sent to ${pseudonymizeEmail(email)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send login notification email to ${email}`,
+        `Failed to send login notification email to ${pseudonymizeEmail(email)}`,
         error,
       );
     }
@@ -217,10 +231,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Email change verification sent to ${newEmail}`);
+      this.logger.log(
+        `Email change verification sent to ${pseudonymizeEmail(newEmail)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send email change verification to ${newEmail}`,
+        `Failed to send email change verification to ${pseudonymizeEmail(newEmail)}`,
         error,
       );
     }
@@ -246,10 +262,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Email change notification sent to ${oldEmail}`);
+      this.logger.log(
+        `Email change notification sent to ${pseudonymizeEmail(oldEmail)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send email change notification to ${oldEmail}`,
+        `Failed to send email change notification to ${pseudonymizeEmail(oldEmail)}`,
         error,
       );
     }
@@ -275,10 +293,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Email changed confirmation sent to ${oldEmail}`);
+      this.logger.log(
+        `Email changed confirmation sent to ${pseudonymizeEmail(oldEmail)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send email changed confirmation to ${oldEmail}`,
+        `Failed to send email changed confirmation to ${pseudonymizeEmail(oldEmail)}`,
         error,
       );
     }
@@ -302,10 +322,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Account deletion confirmation sent to ${email}`);
+      this.logger.log(
+        `Account deletion confirmation sent to ${pseudonymizeEmail(email)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send account deletion confirmation to ${email}`,
+        `Failed to send account deletion confirmation to ${pseudonymizeEmail(email)}`,
         error,
       );
     }
@@ -356,10 +378,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`Impossible travel alert sent to ${email}`);
+      this.logger.log(
+        `Impossible travel alert sent to ${pseudonymizeEmail(email)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send impossible travel alert to ${email}`,
+        `Failed to send impossible travel alert to ${pseudonymizeEmail(email)}`,
         error,
       );
     }
@@ -401,7 +425,7 @@ export class MailService {
         });
       } catch (error) {
         this.logger.error(
-          `Failed to send security alert to ${adminEmail}`,
+          `Failed to send security alert to ${pseudonymizeEmail(adminEmail)}`,
           error,
         );
       }
@@ -437,10 +461,12 @@ export class MailService {
           currentYear: new Date().getFullYear(),
         },
       });
-      this.logger.log(`New country login alert sent to ${email}`);
+      this.logger.log(
+        `New country login alert sent to ${pseudonymizeEmail(email)}`,
+      );
     } catch (error) {
       this.logger.error(
-        `Failed to send new country login alert to ${email}`,
+        `Failed to send new country login alert to ${pseudonymizeEmail(email)}`,
         error,
       );
     }

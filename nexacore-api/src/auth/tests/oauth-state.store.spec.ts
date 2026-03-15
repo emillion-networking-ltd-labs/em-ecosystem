@@ -114,13 +114,4 @@ describe('OAuthStateStore', () => {
       expect(redis.del).not.toHaveBeenCalled();
     });
   });
-
-  describe('cleanup', () => {
-    it('should be a no-op (Redis TTL handles expiration)', () => {
-      store.cleanup();
-      expect(redis.get).not.toHaveBeenCalled();
-      expect(redis.set).not.toHaveBeenCalled();
-      expect(redis.del).not.toHaveBeenCalled();
-    });
-  });
 });

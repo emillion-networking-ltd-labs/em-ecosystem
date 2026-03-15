@@ -295,8 +295,7 @@ export class LoginService {
 
     return {
       mfaSetupRequired: true,
-      message:
-        'MFA setup is required for administrator accounts. Please enable MFA to continue.',
+      message: ErrorMessages.mfa.SETUP_REQUIRED,
     };
   }
 

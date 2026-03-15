@@ -26,11 +26,14 @@ import { TrustDeviceDto } from './dto/trust-device.dto';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
-import { REFRESH_TOKEN_COOKIE_NAME } from './constants/auth.constants';
+import {
+  AUTH_RATE_LIMITS,
+  REFRESH_TOKEN_COOKIE_NAME,
+} from './constants/auth.constants';
 import { extractRequestMeta } from '../common/utils/request-meta';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
-@ApiTags('auth')
+@ApiTags('Sessions')
 @UseInterceptors(NoCacheInterceptor)
 @Controller('auth')
 export class SessionController {
@@ -87,7 +90,12 @@ export class SessionController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({ global: { ttl: 60_000, limit: 5 } })
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.trust_device.ttl,
+      limit: AUTH_RATE_LIMITS.trust_device.limit,
+    },
+  })
   @ApiOperation({
     summary: 'Mark current device as trusted (skips MFA on future logins)',
   })

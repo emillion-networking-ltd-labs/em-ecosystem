@@ -34,7 +34,7 @@ import { SafeUser } from '../users/entities/user.entity';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
 
-@ApiTags('auth')
+@ApiTags('OAuth')
 @UseInterceptors(NoCacheInterceptor)
 @Controller('auth')
 export class OAuthController {

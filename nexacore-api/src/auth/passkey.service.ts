@@ -17,6 +17,8 @@ import type {
   RegistrationResponseJSON,
   AuthenticationResponseJSON,
   AuthenticatorTransportFuture,
+  PublicKeyCredentialCreationOptionsJSON,
+  PublicKeyCredentialRequestOptionsJSON,
 } from '@simplewebauthn/types';
 import * as bcrypt from 'bcrypt';
 import Redis from 'ioredis';
@@ -33,6 +35,14 @@ import {
   DEFAULT_PASSKEY_NAME,
 } from './constants/passkey.constants';
 import { ErrorMessages } from '../common/constants/error-messages';
+
+function toWebAuthnRecord(
+  options:
+    | PublicKeyCredentialCreationOptionsJSON
+    | PublicKeyCredentialRequestOptionsJSON,
+): Record<string, unknown> {
+  return options as unknown as Record<string, unknown>;
+}
 
 @Injectable()
 export class PasskeyService {
@@ -65,9 +75,7 @@ export class PasskeyService {
       where: { userId },
     });
     if (count >= MAX_PASSKEYS_PER_USER) {
-      throw new BadRequestException(
-        `Maximum of ${MAX_PASSKEYS_PER_USER} passkeys reached`,
-      );
+      throw new BadRequestException(ErrorMessages.passkey.LIMIT_REACHED);
     }
 
     const existingCredentials = await this.prisma.webAuthnCredential.findMany({
@@ -97,7 +105,7 @@ export class PasskeyService {
       WEBAUTHN_CHALLENGE_TTL_SECONDS,
     );
 
-    return options as unknown as Record<string, unknown>;
+    return toWebAuthnRecord(options);
   }
 
   async verifyRegistration(
@@ -109,9 +117,7 @@ export class PasskeyService {
     const regKey = `${WEBAUTHN_REG_KEY_PREFIX}${userId}`;
     const stored = await this.redis.get(regKey);
     if (!stored) {
-      throw new BadRequestException(
-        'Registration challenge not found or expired',
-      );
+      throw new BadRequestException(ErrorMessages.passkey.CHALLENGE_EXPIRED);
     }
     await this.redis.del(regKey);
 
@@ -207,7 +213,7 @@ export class PasskeyService {
     );
 
     return {
-      options: options as unknown as Record<string, unknown>,
+      options: toWebAuthnRecord(options),
       challengeId,
     };
   }
@@ -220,9 +226,7 @@ export class PasskeyService {
     const authKey = `${WEBAUTHN_AUTH_KEY_PREFIX}${challengeId}`;
     const stored = await this.redis.get(authKey);
     if (!stored) {
-      throw new UnauthorizedException(
-        'Authentication challenge not found or expired',
-      );
+      throw new UnauthorizedException(ErrorMessages.passkey.CHALLENGE_EXPIRED);
     }
     await this.redis.del(authKey);
 

@@ -177,7 +177,7 @@ export class EmailVerificationService {
     }
 
     if (user.emailVerified) {
-      throw new BadRequestException('Email already verified');
+      throw new BadRequestException(ErrorMessages.auth.EMAIL_ALREADY_VERIFIED);
     }
 
     // Rate limiting: check last token creation time
@@ -190,9 +190,7 @@ export class EmailVerificationService {
       const secondsSinceLastToken =
         (Date.now() - lastToken.createdAt.getTime()) / 1000;
       if (secondsSinceLastToken < RESEND_COOLDOWN_SECONDS) {
-        throw new BadRequestException(
-          'Please wait before requesting another email',
-        );
+        throw new BadRequestException(ErrorMessages.auth.RESEND_COOLDOWN);
       }
     }
 

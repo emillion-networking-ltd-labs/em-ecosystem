@@ -22,6 +22,7 @@ import { ValidateResetTokenDto } from './dto/validate-reset-token.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { VerifyEmailChangeDto } from './dto/verify-email-change.dto';
 import { ResendVerificationPublicDto } from './dto/resend-verification-public.dto';
+import { AUTH_RATE_LIMITS } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
 import { TurnstileGuard } from '../security/turnstile.guard';
@@ -29,7 +30,7 @@ import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor'
 import { extractRequestMeta } from '../common/utils/request-meta';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
-@ApiTags('auth')
+@ApiTags('Email Verification')
 @UseInterceptors(NoCacheInterceptor)
 @Controller('auth')
 export class AccountController {
@@ -40,7 +41,12 @@ export class AccountController {
   @Post('verify-email')
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
-  @Throttle({ global: { ttl: 60_000, limit: 10 } })
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.verify_email.ttl,
+      limit: AUTH_RATE_LIMITS.verify_email.limit,
+    },
+  })
   @ApiOperation({ summary: 'Verify email address via token (POST body)' })
   @ApiResponse({ status: 200, description: 'Verification result' })
   @ApiResponse({ status: 400, description: 'Validation error' })
@@ -51,7 +57,12 @@ export class AccountController {
   @Post('verify-email-change')
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
-  @Throttle({ global: { ttl: 60_000, limit: 10 } })
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.verify_email.ttl,
+      limit: AUTH_RATE_LIMITS.verify_email.limit,
+    },
+  })
   @ApiOperation({ summary: 'Verify email change via token (POST body)' })
   @ApiResponse({ status: 200, description: 'Verification result' })
   @ApiResponse({ status: 400, description: 'Validation error' })
@@ -121,7 +132,12 @@ export class AccountController {
   @Post('reset-password')
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
-  @Throttle({ global: { ttl: 60_000, limit: 5 } })
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.reset_password.ttl,
+      limit: AUTH_RATE_LIMITS.reset_password.limit,
+    },
+  })
   @ApiOperation({ summary: 'Reset password using token from email' })
   @ApiResponse({ status: 200, description: 'Password reset successfully' })
   @ApiResponse({

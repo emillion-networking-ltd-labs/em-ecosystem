@@ -36,7 +36,7 @@ import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor'
 import { extractRequestMeta } from '../common/utils/request-meta';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
-@ApiTags('auth')
+@ApiTags('MFA')
 @UseInterceptors(NoCacheInterceptor)
 @Controller('auth/mfa')
 export class MfaController {
@@ -47,6 +47,7 @@ export class MfaController {
   ) {}
 
   @Post('setup')
+  @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @Throttle({

@@ -47,7 +47,7 @@ import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor'
 import { extractRequestMeta } from '../common/utils/request-meta';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
 
-@ApiTags('auth')
+@ApiTags('Authentication')
 @UseInterceptors(NoCacheInterceptor)
 @Controller('auth')
 export class AuthController {

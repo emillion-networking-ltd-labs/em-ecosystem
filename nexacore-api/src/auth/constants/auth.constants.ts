@@ -64,6 +64,9 @@ export const AUTH_RATE_LIMITS = {
   refresh: { ttl: 60_000, limit: 30 },
   oauth: { ttl: 60_000, limit: 10 },
   mfa: { ttl: 60_000, limit: 5 },
+  verify_email: { ttl: 60_000, limit: 10 },
+  reset_password: { ttl: 60_000, limit: 5 },
+  trust_device: { ttl: 60_000, limit: 5 },
 };
 
 /**

@@ -11,6 +11,10 @@ import {
 } from './pkce-authenticate';
 import { validateOAuthCallback } from './oauth-validate.helper';
 
+interface PassportOAuth2Internals {
+  _oauth2: { getOAuthAccessToken: (...args: unknown[]) => void };
+}
+
 @Injectable()
 export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
   constructor(
@@ -36,9 +40,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     options?: Record<string, unknown>,
   ): Promise<void> {
     return applyPkceAuthenticate(
-      this as unknown as {
-        _oauth2: { getOAuthAccessToken: (...args: unknown[]) => void };
-      },
+      this as unknown as PassportOAuth2Internals,
       this.oauthStateStore,
       req,
       options ?? {},

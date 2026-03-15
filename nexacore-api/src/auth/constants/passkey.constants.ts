@@ -10,8 +10,5 @@ export const WEBAUTHN_CHALLENGE_TTL_SECONDS = 300;
 /** Maximum passkeys per user. */
 export const MAX_PASSKEYS_PER_USER = 10;
 
-/** Maximum length for passkey display name. */
-export const PASSKEY_NAME_MAX_LENGTH = 64;
-
 /** Default passkey display name when none provided. */
 export const DEFAULT_PASSKEY_NAME = 'Passkey';

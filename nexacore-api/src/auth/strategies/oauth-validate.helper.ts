@@ -1,17 +1,10 @@
 import { OAuthStateStore, OAuthStateData } from '../stores/oauth-state.store';
 import { OAuthAuthService } from '../oauth-auth.service';
-import { Provider } from '../../users/enums/provider.enum';
 import { ErrorMessages } from '../../common/constants/error-messages';
 import { extractRequestMeta } from '../../common/utils/request-meta';
+import { OAuthProfile } from '../../common/interfaces/oauth-profile.interface';
 
-export interface OAuthProfile {
-  email: string;
-  provider: Provider;
-  providerId: string;
-  firstName?: string;
-  lastName?: string;
-  avatarUrl?: string;
-}
+export type { OAuthProfile };
 
 export async function validateOAuthCallback(
   oauthStateStore: OAuthStateStore,

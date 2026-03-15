@@ -203,8 +203,7 @@ describe('AuthController', () => {
     it('should return mfaSetupRequired without setting cookie', async () => {
       const mfaSetupResult = {
         mfaSetupRequired: true as const,
-        message:
-          'MFA setup is required for administrator accounts. Please enable MFA to continue.',
+        message: 'MFA setup is required. Please enable MFA to continue.',
       };
       authService.login.mockResolvedValue(mfaSetupResult);
 

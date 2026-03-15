@@ -39,9 +39,4 @@ export class OAuthCodeStore {
     payload.user.updatedAt = new Date(payload.user.updatedAt);
     return payload;
   }
-
-  /** No-op — Redis TTL handles expiration automatically. */
-  cleanup(): void {
-    // Redis TTL handles expiration
-  }
 }
