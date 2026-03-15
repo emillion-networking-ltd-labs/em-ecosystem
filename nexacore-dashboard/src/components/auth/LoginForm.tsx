@@ -15,6 +15,7 @@ import { useRateLimit } from "@/hooks/useRateLimit";
 import { useToast } from "@/context/ToastContext";
 import { usePasskey } from "@/hooks/usePasskey";
 import { RateLimitError } from "@/lib/types";
+import { validatePassword } from "@/lib/validation";
 import type { RateLimitInfo } from "@/lib/types";
 import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
@@ -112,8 +113,9 @@ export default function LoginForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.password) {
-      setPasswordError("Enter your password");
+    const pwError = validatePassword(formData.password);
+    if (pwError) {
+      setPasswordError(pwError);
       return;
     }
     setPasswordError(null);

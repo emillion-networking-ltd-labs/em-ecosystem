@@ -450,7 +450,7 @@ describe('SessionsService', () => {
 
       await expect(
         sessionsService.revokeSession('nonexistent', 'user-1'),
-      ).rejects.toThrow('Session not found');
+      ).rejects.toThrow('Resource not found');
     });
 
     it('should throw NotFoundException when session belongs to another user', async () => {

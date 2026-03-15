@@ -22,10 +22,10 @@ export const ErrorMessages = {
       'Password confirmation required but no password set',
   },
   session: {
-    NOT_FOUND: 'Session not found',
+    NOT_FOUND: 'Resource not found',
   },
   user: {
-    NOT_FOUND: 'User not found',
+    NOT_FOUND: 'Resource not found',
     INVALID_PASSWORD: 'Invalid password',
     PASSWORD_REQUIRED: 'Current password is required',
     OPERATION_NOT_PERMITTED: 'Operation not permitted',
@@ -43,15 +43,15 @@ export const ErrorMessages = {
     EMAIL_MISMATCH: 'OAuth account email must match your account email',
   },
   passkey: {
-    NOT_FOUND: 'Passkey not found',
+    NOT_FOUND: 'Resource not found',
     PASSWORD_REQUIRED_FOR_DELETE:
       'Password confirmation required to delete passkey',
   },
   device: {
-    NOT_FOUND: 'Device not found',
+    NOT_FOUND: 'Resource not found',
   },
   audit: {
-    NOT_FOUND: 'Audit log not found',
+    NOT_FOUND: 'Resource not found',
   },
   security: {
     VERIFICATION_REQUIRED: 'Verification required',
