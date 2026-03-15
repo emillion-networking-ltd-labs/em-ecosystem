@@ -20,6 +20,7 @@ import { LoginService } from '../login.service';
 import { OAuthAuthService } from '../oauth-auth.service';
 import { EmailVerificationService } from '../email-verification.service';
 import { PasswordResetService } from '../password-reset.service';
+import { PasskeyService } from '../passkey.service';
 
 // ─── Shared Fixtures ─────────────────────────────────────────
 
@@ -252,4 +253,118 @@ export async function createAuthTestModule(): Promise<AuthTestContext> {
     prismaService: module.get(PrismaService),
     auditService: module.get(AuditService),
   };
+}
+
+// ─── Passkey Test Helpers ───────────────────────────────────
+
+export const mockPasskeyUser = (overrides: Partial<User> = {}): User => ({
+  id: 'user-1',
+  email: 'test@example.com',
+  passwordHash: '$2b$12$hashedpassword',
+  firstName: null,
+  lastName: null,
+  avatarUrl: null,
+  role: Role.USER,
+  emailVerified: true,
+  pendingEmail: null,
+  isActive: true,
+  failedAttempts: 0,
+  lockedUntil: null,
+  lockoutCount: 0,
+  mfaEnabled: false,
+  mfaSecret: null,
+  mfaRecoveryCodes: [],
+  createdAt: new Date(),
+  updatedAt: new Date(),
+  ...overrides,
+});
+
+export const mockPasskeyMeta = {
+  ipAddress: '127.0.0.1',
+  userAgent: 'test-agent',
+};
+
+export interface PasskeyTestContext {
+  service: PasskeyService;
+  usersService: jest.Mocked<Partial<UsersService>>;
+  auditService: { log: jest.Mock };
+  redis: { set: jest.Mock; get: jest.Mock; del: jest.Mock };
+  prisma: {
+    webAuthnCredential: {
+      count: jest.Mock;
+      findMany: jest.Mock;
+      findUnique: jest.Mock;
+      findFirst: jest.Mock;
+      create: jest.Mock;
+      update: jest.Mock;
+      delete: jest.Mock;
+    };
+  };
+}
+
+export function createPasskeyTestSetup(): PasskeyTestContext {
+  const usersService: jest.Mocked<Partial<UsersService>> = {
+    findById: jest.fn() as any,
+    findByEmail: jest.fn() as any,
+  };
+
+  const auditService = {
+    log: jest.fn().mockResolvedValue(undefined),
+  };
+
+  const redis = {
+    set: jest.fn().mockResolvedValue('OK'),
+    get: jest.fn(),
+    del: jest.fn().mockResolvedValue(1),
+  };
+
+  const prisma = {
+    webAuthnCredential: {
+      count: jest.fn(),
+      findMany: jest.fn(),
+      findUnique: jest.fn(),
+      findFirst: jest.fn(),
+      create: jest.fn(),
+      update: jest.fn(),
+      delete: jest.fn(),
+    },
+  };
+
+  const mockConfigService = {
+    get: jest.fn((key: string) => {
+      const config: Record<string, any> = {
+        'auth.jwtSecret': 'test-secret-that-is-at-least-32-characters-long',
+        'auth.jwtAccessExpiration': '15m',
+        'auth.jwtRefreshExpiration': '12h',
+        'auth.sessionIdleTimeoutHours': 0.5,
+        'auth.maxConcurrentSessions': 5,
+        'auth.trustedDeviceTtlDays': 30,
+        'auth.mfaAppName': 'EM NexaCore',
+        'auth.webauthnRpId': 'localhost',
+        'auth.webauthnRpName': 'EM NexaCore',
+        'auth.webauthnOrigin': 'http://localhost:3001',
+        'oauth.googleClientId': 'test-google-id',
+        'oauth.googleClientSecret': 'test-google-secret',
+        'oauth.googleCallbackUrl': 'http://localhost:3000/auth/google/callback',
+        'oauth.githubClientId': 'test-github-id',
+        'oauth.githubClientSecret': 'test-github-secret',
+        'oauth.githubCallbackUrl': 'http://localhost:3000/auth/github/callback',
+        'app.nodeEnv': 'test',
+        'app.frontendUrl': 'http://localhost:3001',
+        'app.oauthAllowedRedirectUrls': '',
+        'app.isProduction': false,
+      };
+      return config[key];
+    }),
+  };
+
+  const service = new PasskeyService(
+    prisma as any,
+    usersService as unknown as UsersService,
+    auditService as any,
+    redis as any,
+    mockConfigService as unknown as ConfigService,
+  );
+
+  return { service, usersService, auditService, redis, prisma };
 }
