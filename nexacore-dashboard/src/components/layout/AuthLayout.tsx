@@ -23,13 +23,11 @@ export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
 
       {/* Auth Card — Figma: Login Card / Register Card */}
       <div
-        className="auth-card"
-        style={narrow ? { maxWidth: 350, overflow: "hidden" } : undefined}
+        className={`auth-card ${narrow ? "max-w-[350px] overflow-hidden" : ""}`}
       >
         {/* Container — white inner area with padding */}
         <div
-          className="flex w-full flex-col gap-6 border border-border-default bg-surface-primary p-6"
-          style={{ borderRadius: narrow ? 0 : "24px 24px 0 0" }}
+          className={`flex w-full flex-col gap-6 border border-border-default bg-surface-primary p-6 ${narrow ? "rounded-none" : "rounded-t-3xl"}`}
         >
           {/* Header — Logo + Theme Toggle */}
           <div className="flex items-center gap-2.5">
@@ -63,11 +61,7 @@ export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
         </div>
 
         {/* Footer — Figma: 56px height, padding 8 */}
-        {narrow ? (
-          <div className="w-full p-2" style={{ height: 56 }} />
-        ) : (
-          <AuthFooter />
-        )}
+        {narrow ? <div className="h-14 w-full p-2" /> : <AuthFooter />}
       </div>
 
       {/* Go Back Section — below the card (not shown on narrow/status cards) */}

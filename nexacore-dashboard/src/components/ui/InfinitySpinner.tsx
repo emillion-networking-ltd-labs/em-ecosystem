@@ -18,7 +18,7 @@
  * Usage: <InfinitySpinner /> or <InfinitySpinner size="lg" />
  */
 
-type SpinnerSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
+type SpinnerSize = "xs" | "sm" | "md" | "lg" | "xl";
 
 const SIZES: Record<SpinnerSize, number> = {
   xs: 16,
@@ -28,7 +28,11 @@ const SIZES: Record<SpinnerSize, number> = {
   xl: 32,
 };
 
-export default function InfinitySpinner({ size = 'md' }: { size?: SpinnerSize }) {
+export default function InfinitySpinner({
+  size = "md",
+}: {
+  size?: SpinnerSize;
+}) {
   const px = SIZES[size];
   return (
     <svg
@@ -52,8 +56,7 @@ export default function InfinitySpinner({ size = 'md' }: { size?: SpinnerSize })
         vectorEffect="non-scaling-stroke"
         strokeLinecap="round"
         strokeDasharray="205.271 51.318"
-        style={{ transform: 'scale(0.8)', transformOrigin: '50px 50px' }}
-        className="infinity-spinner"
+        className="infinity-spinner scale-[0.8] origin-[50px_50px]"
       />
     </svg>
   );

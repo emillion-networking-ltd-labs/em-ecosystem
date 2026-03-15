@@ -1,29 +1,92 @@
-'use client';
+"use client";
 
 import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
   Tooltip,
-} from 'recharts';
-import ChartCard from './ChartCard';
+  Filler,
+} from "chart.js";
+import { Line } from "react-chartjs-2";
+import ChartCard from "./ChartCard";
 
-const data = [
-  { month: 'Jan', thisYear: 10000, lastYear: 8000 },
-  { month: 'Feb', thisYear: 15000, lastYear: 12000 },
-  { month: 'Mar', thisYear: 12000, lastYear: 11000 },
-  { month: 'Apr', thisYear: 25000, lastYear: 15000 },
-  { month: 'May', thisYear: 20000, lastYear: 18000 },
-  { month: 'Jun', thisYear: 28000, lastYear: 20000 },
-  { month: 'Jul', thisYear: 22000, lastYear: 19000 },
-];
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  Tooltip,
+  Filler,
+);
 
-const formatYAxis = (value: number) => {
-  if (value >= 1000) return `${value / 1000}K`;
-  return String(value);
+const labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
+const thisYearData = [10000, 15000, 12000, 25000, 20000, 28000, 22000];
+const lastYearData = [8000, 12000, 11000, 15000, 18000, 20000, 19000];
+
+const formatYAxis = (value: number | string) => {
+  const num = Number(value);
+  if (num >= 1000) return `${num / 1000}K`;
+  return String(num);
+};
+
+const data = {
+  labels,
+  datasets: [
+    {
+      label: "This year",
+      data: thisYearData,
+      borderColor: "rgb(28, 28, 28)",
+      borderWidth: 2,
+      pointRadius: 0,
+      tension: 0.4,
+    },
+    {
+      label: "Last year",
+      data: lastYearData,
+      borderColor: "#a0bce8",
+      borderWidth: 2,
+      borderDash: [5, 5],
+      pointRadius: 0,
+      tension: 0.4,
+    },
+  ],
+};
+
+const options = {
+  responsive: true,
+  maintainAspectRatio: false,
+  scales: {
+    x: {
+      grid: { display: false },
+      border: { display: false },
+      ticks: { font: { size: 12 }, color: "rgba(28, 28, 28, 0.4)" },
+    },
+    y: {
+      grid: { color: "rgba(28, 28, 28, 0.08)", drawTicks: false },
+      border: { display: false, dash: [3, 3] },
+      ticks: {
+        font: { size: 12 },
+        color: "rgba(28, 28, 28, 0.4)",
+        callback: formatYAxis,
+        padding: 8,
+      },
+    },
+  },
+  plugins: {
+    tooltip: {
+      backgroundColor: "#ffffff",
+      titleColor: "#1c1c1c",
+      bodyColor: "#1c1c1c",
+      borderColor: "rgba(28, 28, 28, 0.08)",
+      borderWidth: 1,
+      cornerRadius: 8,
+      bodyFont: { size: 12 },
+      titleFont: { size: 12 },
+      padding: 10,
+    },
+  },
 };
 
 export default function TotalUsersChart() {
@@ -34,57 +97,22 @@ export default function TotalUsersChart() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-content-primary" />
-            <span className="text-caption text-content-tertiary">This year</span>
+            <span className="text-caption text-content-tertiary">
+              This year
+            </span>
           </div>
           <span className="text-body-sm text-content-primary/20">|</span>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-[#a0bce8]" />
-            <span className="text-caption text-content-tertiary">Last year</span>
+            <span className="text-caption text-content-tertiary">
+              Last year
+            </span>
           </div>
         </div>
       }
     >
       <div className="h-[250px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="var(--border-default)" />
-            <XAxis
-              dataKey="month"
-              tick={{ fontSize: 12, fill: 'var(--content-tertiary)' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tickFormatter={formatYAxis}
-              tick={{ fontSize: 12, fill: 'var(--content-tertiary)' }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: 'var(--surface-primary)',
-                border: '1px solid var(--border-default)',
-                borderRadius: '8px',
-                fontSize: '12px',
-              }}
-            />
-            <Line
-              type="monotone"
-              dataKey="thisYear"
-              stroke="rgb(var(--content-primary))"
-              strokeWidth={2}
-              dot={false}
-            />
-            <Line
-              type="monotone"
-              dataKey="lastYear"
-              stroke="#a0bce8"
-              strokeWidth={2}
-              dot={false}
-              strokeDasharray="5 5"
-            />
-          </LineChart>
-        </ResponsiveContainer>
+        <Line data={data} options={options} />
       </div>
     </ChartCard>
   );

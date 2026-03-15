@@ -41,8 +41,8 @@
   --hover-bg: rgba(251, 251, 251, 0.75);
 
   /* Accent */
-  --accent: #1B5E20;
-  --accent-light: #2E7D32;
+  --accent: #1b5e20;
+  --accent-light: #2e7d32;
 
   /* Input states */
   --input-border-focus: #1c1c1c;
@@ -89,8 +89,8 @@
 
   --hover-bg: rgba(255, 255, 255, 0.06);
 
-  --accent: #2E7D32;
-  --accent-light: #43A047;
+  --accent: #2e7d32;
+  --accent-light: #43a047;
 
   --input-border-focus: #f5f5f5;
   --input-bg-disabled: #2d2d2d;
@@ -111,7 +111,11 @@
   }
 
   html {
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-family:
+      "Inter",
+      system-ui,
+      -apple-system,
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
@@ -170,8 +174,12 @@ input:-webkit-autofill:focus {
      dashoffset animation: 0 → 256.589  (= 205.271 + 51.318, one full cycle)
      duration: 2s linear infinite  (matches DaisyUI SMIL <animate dur="2s">) */
 @keyframes infinity-spin {
-  0%   { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: 256.589; }
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 256.589;
+  }
 }
 
 .infinity-spinner {
@@ -242,6 +250,88 @@ input:-webkit-autofill:focus {
 
 .animate-toast-out {
   animation: toast-out 300ms ease-in forwards;
+}
+
+/* ===== Global Error Boundary ===== */
+/* Styles for global-error.tsx — extracted from inline styles so CSP
+   style-src can use nonce instead of unsafe-inline. These classes are
+   available even when JS chunks fail to load (loaded via <link>). */
+.global-error-body {
+  margin: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family:
+    Inter,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    Roboto,
+    sans-serif;
+  background-color: #ffffff;
+  color: #1c1c1c;
+}
+
+.global-error-container {
+  max-width: 400px;
+  width: 100%;
+  padding: 0 16px;
+  text-align: center;
+}
+
+.global-error-icon {
+  margin: 0 auto 16px;
+}
+
+.global-error-title {
+  font-size: 20px;
+  font-weight: 600;
+  margin: 0 0 8px;
+  color: #1c1c1c;
+}
+
+.global-error-message {
+  font-size: 14px;
+  color: rgba(28, 28, 28, 0.5);
+  margin: 0 0 24px;
+  line-height: 1.5;
+}
+
+.global-error-digest {
+  font-size: 12px;
+  color: rgba(28, 28, 28, 0.4);
+  margin: 0 0 24px;
+}
+
+.global-error-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.global-error-btn-primary {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #1c1c1c;
+  color: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.global-error-btn-secondary {
+  padding: 10px 24px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #f2f2f2;
+  color: rgba(28, 28, 28, 0.5);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
 }
 
 /* ===== Utility Layer ===== */

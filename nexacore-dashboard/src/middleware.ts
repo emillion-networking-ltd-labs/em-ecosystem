@@ -1,10 +1,10 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(request: NextRequest) {
   const nonce = generateNonce();
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
-  const isDev = process.env.NODE_ENV === 'development';
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+  const isDev = process.env.NODE_ENV === "development";
 
   // In dev mode, webpack uses eval() for module loading and ws: for HMR
   // Turnstile requires challenges.cloudflare.com in script-src and connect-src
@@ -18,7 +18,7 @@ export function middleware(request: NextRequest) {
   const cspDirectives = [
     `default-src 'self'`,
     scriptSrc,
-    `style-src 'self' 'unsafe-inline'`,
+    `style-src 'self' 'nonce-${nonce}'`,
     `img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com`,
     `font-src 'self'`,
     connectSrc,
@@ -30,10 +30,10 @@ export function middleware(request: NextRequest) {
     `upgrade-insecure-requests`,
   ];
 
-  const cspHeaderValue = cspDirectives.join('; ');
+  const cspHeaderValue = cspDirectives.join("; ");
 
   const requestHeaders = new Headers(request.headers);
-  requestHeaders.set('x-nonce', nonce);
+  requestHeaders.set("x-nonce", nonce);
 
   const response = NextResponse.next({
     request: {
@@ -41,8 +41,8 @@ export function middleware(request: NextRequest) {
     },
   });
 
-  response.headers.set('Content-Security-Policy', cspHeaderValue);
-  response.headers.set('x-nonce', nonce);
+  response.headers.set("Content-Security-Policy", cspHeaderValue);
+  response.headers.set("x-nonce", nonce);
 
   return response;
 }
@@ -55,6 +55,6 @@ function generateNonce(): string {
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    "/((?!_next/static|_next/image|favicon\\.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)",
   ],
 };
