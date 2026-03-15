@@ -92,6 +92,43 @@ export function validateProductionSecrets(): void {
     }
   }
 
+  // OWASP ASVS V2.10.1: OAuth client secrets must not be placeholders
+  const defaultGoogleSecret = 'your-google-client-secret';
+  if (
+    !process.env.GOOGLE_CLIENT_SECRET ||
+    process.env.GOOGLE_CLIENT_SECRET === defaultGoogleSecret ||
+    process.env.GOOGLE_CLIENT_SECRET.length < 20
+  ) {
+    throw new Error(
+      'FATAL: GOOGLE_CLIENT_SECRET must be set to a real value of at least 20 characters in production',
+    );
+  }
+
+  const defaultGithubSecret = 'your-github-client-secret';
+  if (
+    !process.env.GITHUB_CLIENT_SECRET ||
+    process.env.GITHUB_CLIENT_SECRET === defaultGithubSecret ||
+    process.env.GITHUB_CLIENT_SECRET.length < 20
+  ) {
+    throw new Error(
+      'FATAL: GITHUB_CLIENT_SECRET must be set to a real value of at least 20 characters in production',
+    );
+  }
+
+  // SMTP is required for email verification in production
+  if (!process.env.SMTP_PASSWORD) {
+    throw new Error(
+      'FATAL: SMTP_PASSWORD must be set in production (required for email verification)',
+    );
+  }
+
+  // REDIS_PASSWORD: warn but do not block (local Redis may not require auth)
+  if (!process.env.REDIS_PASSWORD) {
+    console.warn(
+      'WARNING: REDIS_PASSWORD is empty in production — cloud Redis providers typically require authentication',
+    );
+  }
+
   // OWASP ASVS V8.3.7: Database connections must use TLS in production
   const databaseUrl = process.env.DATABASE_URL;
   if (!databaseUrl) {

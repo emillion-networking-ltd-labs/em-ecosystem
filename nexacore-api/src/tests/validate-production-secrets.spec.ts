@@ -7,6 +7,10 @@ describe('validateProductionSecrets', () => {
     CSRF_SECRET: 'production-csrf-secret-at-least-32-chars-long',
     GOOGLE_CALLBACK_URL: 'https://myapp.com/auth/google/callback',
     GITHUB_CALLBACK_URL: 'https://myapp.com/auth/github/callback',
+    GOOGLE_CLIENT_SECRET: 'real-google-oauth-client-secret-value',
+    GITHUB_CLIENT_SECRET: 'real-github-oauth-client-secret-value',
+    SMTP_PASSWORD: 'real-smtp-password',
+    REDIS_PASSWORD: 'real-redis-password',
     JWT_ACCESS_EXPIRATION: '15m',
     DATABASE_URL:
       'postgresql://user:pass@db.prod.com:5432/em_ecosystem?schema=public&sslmode=require',
@@ -255,6 +259,102 @@ describe('validateProductionSecrets', () => {
 
       const validate = loadValidator();
       expect(() => validate()).not.toThrow();
+    });
+  });
+
+  // ─── GOOGLE_CLIENT_SECRET ─────────────────────────────────────
+
+  describe('GOOGLE_CLIENT_SECRET', () => {
+    it('should throw when GOOGLE_CLIENT_SECRET is missing', () => {
+      delete process.env.GOOGLE_CLIENT_SECRET;
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: GOOGLE_CLIENT_SECRET');
+    });
+
+    it('should throw when GOOGLE_CLIENT_SECRET is the placeholder', () => {
+      process.env.GOOGLE_CLIENT_SECRET = 'your-google-client-secret';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: GOOGLE_CLIENT_SECRET');
+    });
+
+    it('should throw when GOOGLE_CLIENT_SECRET is shorter than 20 chars', () => {
+      process.env.GOOGLE_CLIENT_SECRET = 'short';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: GOOGLE_CLIENT_SECRET');
+    });
+  });
+
+  // ─── GITHUB_CLIENT_SECRET ─────────────────────────────────────
+
+  describe('GITHUB_CLIENT_SECRET', () => {
+    it('should throw when GITHUB_CLIENT_SECRET is missing', () => {
+      delete process.env.GITHUB_CLIENT_SECRET;
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: GITHUB_CLIENT_SECRET');
+    });
+
+    it('should throw when GITHUB_CLIENT_SECRET is the placeholder', () => {
+      process.env.GITHUB_CLIENT_SECRET = 'your-github-client-secret';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: GITHUB_CLIENT_SECRET');
+    });
+
+    it('should throw when GITHUB_CLIENT_SECRET is shorter than 20 chars', () => {
+      process.env.GITHUB_CLIENT_SECRET = 'short';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: GITHUB_CLIENT_SECRET');
+    });
+  });
+
+  // ─── SMTP_PASSWORD ────────────────────────────────────────────
+
+  describe('SMTP_PASSWORD', () => {
+    it('should throw when SMTP_PASSWORD is missing', () => {
+      delete process.env.SMTP_PASSWORD;
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: SMTP_PASSWORD');
+    });
+
+    it('should throw when SMTP_PASSWORD is empty', () => {
+      process.env.SMTP_PASSWORD = '';
+
+      const validate = loadValidator();
+      expect(() => validate()).toThrow('FATAL: SMTP_PASSWORD');
+    });
+  });
+
+  // ─── REDIS_PASSWORD ───────────────────────────────────────────
+
+  describe('REDIS_PASSWORD', () => {
+    it('should warn but not throw when REDIS_PASSWORD is empty', () => {
+      process.env.REDIS_PASSWORD = '';
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      const validate = loadValidator();
+      expect(() => validate()).not.toThrow();
+      expect(warnSpy).toHaveBeenCalledWith(
+        expect.stringContaining('REDIS_PASSWORD'),
+      );
+
+      warnSpy.mockRestore();
+    });
+
+    it('should not warn when REDIS_PASSWORD is set', () => {
+      process.env.REDIS_PASSWORD = 'some-password';
+      const warnSpy = jest.spyOn(console, 'warn').mockImplementation();
+
+      const validate = loadValidator();
+      expect(() => validate()).not.toThrow();
+      expect(warnSpy).not.toHaveBeenCalled();
+
+      warnSpy.mockRestore();
     });
   });
 
