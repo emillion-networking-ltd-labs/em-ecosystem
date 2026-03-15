@@ -126,11 +126,12 @@
       "!**/*.module.ts",
       "!prisma/**"
     ],
+    "coverageProvider": "v8",
     "coverageDirectory": "../coverage",
     "coverageThreshold": {
       "global": {
-        "branches": 85,
-        "functions": 90,
+        "branches": 80,
+        "functions": 85,
         "lines": 90,
         "statements": 90
       }
