@@ -27,6 +27,7 @@ import { OAuthLinkGuard } from './guards/oauth-link.guard';
 import { PasswordBreachService } from './password-breach.service';
 import { TrustedDeviceService } from './trusted-device.service';
 import { TokenDenyListService } from './token-deny-list.service';
+import { LoginSecurityService } from './login-security.service';
 import { UsersModule } from '../users/users.module';
 import { AuditModule } from '../audit/audit.module';
 import { SessionsModule } from '../sessions/sessions.module';
@@ -92,6 +93,7 @@ import { JWT_ISSUER, JWT_AUDIENCE } from './constants/auth.constants';
     PasswordBreachService,
     TrustedDeviceService,
     TokenDenyListService,
+    LoginSecurityService,
   ],
   exports: [
     AuthService,

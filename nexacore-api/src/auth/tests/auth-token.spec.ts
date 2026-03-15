@@ -197,10 +197,9 @@ describe('AuthService — Token Lifecycle', () => {
 
       await new Promise((r) => setTimeout(r, 50));
 
-      expect(ctx.prismaService.session.update).toHaveBeenCalledWith({
-        where: { id: 'session-uuid' },
-        data: { isRevoked: true },
-      });
+      expect(ctx.sessionsService.revokeSessionDirect).toHaveBeenCalledWith(
+        'session-uuid',
+      );
 
       expect(ctx.auditService.log).toHaveBeenCalledWith(
         expect.objectContaining({

@@ -1,11 +1,11 @@
-import { Injectable, UnauthorizedException, Logger } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { OAuthCodeStore } from './stores/oauth-code.store';
 import { TokenService } from './token.service';
+import { LoginSecurityService } from './login-security.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
-import { SuspiciousLoginService } from '../security/suspicious-login.service';
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
 import { SafeUser, toSafeUser } from '../users/entities/user.entity';
 import { AuthResult, CookieConfig } from './interfaces/auth.interfaces';
@@ -13,14 +13,12 @@ import { ErrorMessages } from '../common/constants/error-messages';
 
 @Injectable()
 export class OAuthAuthService {
-  private readonly logger = new Logger(OAuthAuthService.name);
-
   constructor(
     private readonly usersService: UsersService,
     private readonly oauthCodeStore: OAuthCodeStore,
     private readonly tokenService: TokenService,
+    private readonly loginSecurityService: LoginSecurityService,
     private readonly auditService: AuditService,
-    private readonly suspiciousLoginService: SuspiciousLoginService,
   ) {}
 
   async validateOAuthUser(
@@ -39,12 +37,16 @@ export class OAuthAuthService {
     const { accessToken, refreshToken, sessionId } =
       await this.tokenService.generateTokens(user, requestMeta);
 
-    const travelResult = await this.tokenService.checkImpossibleTravel(
+    const travelResult = await this.loginSecurityService.checkImpossibleTravel(
       { ...user, mfaEnabled: user.mfaEnabled ?? false },
       requestMeta,
     );
     if (travelResult?.isAnomalous && travelResult.actionTaken === 'blocked') {
-      this.tokenService.handleTravelBlock(travelResult, user.id, requestMeta);
+      this.loginSecurityService.handleTravelBlock(
+        travelResult,
+        user.id,
+        requestMeta,
+      );
     }
 
     const auditActionMap: Record<string, AuditAction> = {
@@ -63,10 +65,10 @@ export class OAuthAuthService {
       })
       .catch(() => {});
 
-    this.tokenService
+    this.loginSecurityService
       .notifyIfNewDevice(user, sessionId, requestMeta)
       .catch(() => {});
-    this.tokenService.checkSuspiciousLoginSuccess(user, requestMeta);
+    this.loginSecurityService.checkSuspiciousLoginSuccess(user, requestMeta);
 
     return {
       accessToken,

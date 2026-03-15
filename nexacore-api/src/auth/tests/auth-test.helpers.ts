@@ -15,6 +15,7 @@ import { AuditService } from '../../audit/audit.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { MailService } from '../../mail/mail.service';
 import { TokenDenyListService } from '../token-deny-list.service';
+import { LoginSecurityService } from '../login-security.service';
 import { TokenService } from '../token.service';
 import { LoginService } from '../login.service';
 import { OAuthAuthService } from '../oauth-auth.service';
@@ -77,6 +78,7 @@ export interface AuthTestContext {
   mailService: jest.Mocked<MailService>;
   prismaService: any;
   auditService: jest.Mocked<AuditService>;
+  loginSecurityService: LoginSecurityService;
 }
 
 export async function createAuthTestModule(): Promise<AuthTestContext> {
@@ -85,6 +87,7 @@ export async function createAuthTestModule(): Promise<AuthTestContext> {
       AuthService,
       TokenService,
       LoginService,
+      LoginSecurityService,
       OAuthAuthService,
       EmailVerificationService,
       PasswordResetService,
@@ -114,6 +117,8 @@ export async function createAuthTestModule(): Promise<AuthTestContext> {
           isSessionIdle: jest.fn().mockReturnValue(false),
           getActiveNonIdleSessions: jest.fn().mockResolvedValue([]),
           enforceSessionLimit: jest.fn().mockResolvedValue(undefined),
+          revokeSessionDirect: jest.fn().mockResolvedValue(undefined),
+          findPreviousActiveSessions: jest.fn().mockResolvedValue([]),
         },
       },
       {
@@ -252,6 +257,7 @@ export async function createAuthTestModule(): Promise<AuthTestContext> {
     mailService: module.get(MailService),
     prismaService: module.get(PrismaService),
     auditService: module.get(AuditService),
+    loginSecurityService: module.get(LoginSecurityService),
   };
 }
 

@@ -1,17 +1,10 @@
-import {
-  Injectable,
-  UnauthorizedException,
-  ForbiddenException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import * as crypto from 'crypto';
 import { SessionsService } from '../sessions/sessions.service';
 import { UsersService } from '../users/users.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { MailService } from '../mail/mail.service';
 import {
   TokenDenyListService,
   ACCESS_TOKEN_TTL_SECONDS,
@@ -19,15 +12,14 @@ import {
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
-import { ImpossibleTravelService } from '../geolocation/impossible-travel.service';
-import { SuspiciousLoginService } from '../security/suspicious-login.service';
-import { ImpossibleTravelResult } from '../geolocation/interfaces/geolocation-result.interface';
+import { LoginSecurityService } from './login-security.service';
 import { User, toSafeUser } from '../users/entities/user.entity';
 import { JwtPayload } from '../common/interfaces/jwt-payload.interface';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
 import { CookieConfig, AuthResult } from './interfaces/auth.interfaces';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { parseDurationMs } from './utils/parse-duration';
+import { createAuditLogger, AuditLogger } from './utils/audit-log.helper';
 import {
   BCRYPT_ROUNDS,
   SESSION_IDLE_TIMEOUT_HOURS,
@@ -40,24 +32,21 @@ import type { StringValue } from 'ms';
 
 @Injectable()
 export class TokenService {
-  private readonly logger = new Logger(TokenService.name);
   private readonly refreshExpiration: string;
   private readonly refreshMaxAgeMs: number;
   private readonly mfaChallengeSecret: string;
   private readonly accessExpiration: string;
   private readonly isProduction: boolean;
+  private readonly logAuditEvent: AuditLogger;
 
   constructor(
     private readonly jwtService: JwtService,
     private readonly sessionsService: SessionsService,
     private readonly usersService: UsersService,
-    private readonly prisma: PrismaService,
-    private readonly mailService: MailService,
     private readonly tokenDenyListService: TokenDenyListService,
     private readonly auditService: AuditService,
-    private readonly impossibleTravelService: ImpossibleTravelService,
-    private readonly suspiciousLoginService: SuspiciousLoginService,
     private readonly configService: ConfigService,
+    private readonly loginSecurityService: LoginSecurityService,
   ) {
     // OWASP ASVS V3.3.3 / NIST SP 800-63B §7.2: absolute timeout <= 12h at AAL2
     this.refreshExpiration = this.configService.get<string>(
@@ -73,6 +62,7 @@ export class TokenService {
       .createHmac('sha256', jwtSecret)
       .update(MFA_CHALLENGE_HMAC_LABEL)
       .digest('hex');
+    this.logAuditEvent = createAuditLogger(this.auditService);
   }
 
   async generateTokens(
@@ -150,10 +140,7 @@ export class TokenService {
       !oldSession.isRevoked &&
       this.sessionsService.isSessionIdle(oldSession.lastUsedAt)
     ) {
-      await this.prisma.session.update({
-        where: { id: payload.sessionId },
-        data: { isRevoked: true },
-      });
+      await this.sessionsService.revokeSessionDirect(payload.sessionId);
 
       this.logAuditEvent(AuditAction.SESSION_IDLE_REVOKED, ctx, payload.sub, {
         sessionId: payload.sessionId,
@@ -229,13 +216,22 @@ export class TokenService {
       requestMeta,
     );
 
-    const travelResult = await this.checkImpossibleTravel(user, requestMeta);
+    const travelResult = await this.loginSecurityService.checkImpossibleTravel(
+      user,
+      requestMeta,
+    );
     if (travelResult?.isAnomalous && travelResult.actionTaken === 'blocked') {
-      this.handleTravelBlock(travelResult, user.id, requestMeta);
+      this.loginSecurityService.handleTravelBlock(
+        travelResult,
+        user.id,
+        requestMeta,
+      );
     }
 
-    this.notifyIfNewDevice(user, sessionId, requestMeta).catch(() => {});
-    this.checkSuspiciousLoginSuccess(user, requestMeta);
+    this.loginSecurityService
+      .notifyIfNewDevice(user, sessionId, requestMeta)
+      .catch(() => {});
+    this.loginSecurityService.checkSuspiciousLoginSuccess(user, requestMeta);
 
     return {
       accessToken,
@@ -282,110 +278,35 @@ export class TokenService {
     };
   }
 
-  async notifyIfNewDevice(
-    user: { id: string; email: string; firstName: string | null },
-    sessionId: string,
-    requestMeta: { ipAddress: string; userAgent?: string | null },
-  ): Promise<void> {
-    const previousSessions = await this.prisma.session.findMany({
-      where: {
-        userId: user.id,
-        id: { not: sessionId },
-        isRevoked: false,
-        expiresAt: { gt: new Date() },
-      },
-      select: { ipAddress: true, userAgent: true },
-    });
-
-    if (previousSessions.length === 0) return;
-
-    const knownIp = previousSessions.some(
-      (s) => s.ipAddress === requestMeta.ipAddress,
-    );
-    const knownUa = previousSessions.some(
-      (s) => s.userAgent === (requestMeta.userAgent || null),
-    );
-
-    if (!knownIp || !knownUa) {
-      await this.mailService.sendLoginNotificationEmail(
-        user.email,
-        requestMeta.ipAddress,
-        requestMeta.userAgent || null,
-        user.firstName,
-      );
-    }
-  }
-
-  async checkImpossibleTravel(
-    user: {
-      id: string;
-      email: string;
-      firstName: string | null;
-      mfaEnabled: boolean;
-    },
-    requestMeta: { ipAddress: string; userAgent?: string | null },
-  ): Promise<ImpossibleTravelResult | null> {
+  async logout(
+    refreshToken: string,
+    ctx?: RequestContext,
+  ): Promise<CookieConfig> {
     try {
-      return await this.impossibleTravelService.detectImpossibleTravel({
-        userId: user.id,
-        ipAddress: requestMeta.ipAddress,
-        email: user.email,
-        firstName: user.firstName,
-        userAgent: requestMeta.userAgent || null,
-        mfaEnabled: user.mfaEnabled,
-      });
+      const payload = this.jwtService.verify<RefreshTokenPayload>(refreshToken);
+      await this.sessionsService.revokeSession(payload.sessionId, payload.sub);
+      this.tokenDenyListService
+        .denyAllForUser(payload.sub, ACCESS_TOKEN_TTL_SECONDS)
+        .catch(() => {});
+
+      this.logAuditEvent(AuditAction.LOGOUT, ctx, payload.sub);
     } catch {
-      return null;
+      // Token is invalid/expired — just clear the cookie
     }
+
+    return this.buildClearCookie();
   }
 
-  handleTravelBlock(
-    travelResult: ImpossibleTravelResult,
-    userId: string,
-    requestMeta: { ipAddress: string; userAgent?: string | null },
-  ): void {
-    this.logAuditEvent(AuditAction.LOGIN_BLOCKED_TRAVEL, requestMeta, userId, {
-      previousLocation: travelResult.previousLocation,
-      currentLocation: travelResult.currentLocation,
-      distanceKm: travelResult.distanceKm,
-      elapsedHours: travelResult.elapsedHours,
-      requiredSpeedKmh: travelResult.requiredSpeedKmh,
+  async logoutAll(userId: string, ctx?: RequestContext): Promise<CookieConfig> {
+    await this.sessionsService.revokeAllUserSessions(userId);
+    this.tokenDenyListService
+      .denyAllForUser(userId, ACCESS_TOKEN_TTL_SECONDS)
+      .catch(() => {});
+
+    this.logAuditEvent(AuditAction.LOGOUT, ctx, userId, {
+      scope: 'all_sessions',
     });
-    throw new ForbiddenException(
-      'Login blocked due to suspicious location activity. Please try again later or contact support.',
-    );
-  }
 
-  checkSuspiciousLoginSuccess(
-    user: { id: string; email: string; firstName?: string | null },
-    requestMeta: { ipAddress: string; userAgent?: string | null },
-  ): void {
-    this.suspiciousLoginService
-      .analyzeLoginSuccess({
-        userId: user.id,
-        email: user.email,
-        firstName: user.firstName ?? null,
-        ipAddress: requestMeta.ipAddress,
-        userAgent: requestMeta.userAgent ?? null,
-        loginTime: new Date(),
-      })
-      .catch(() => {});
-  }
-
-  private logAuditEvent(
-    action: AuditAction,
-    ctx?: { ipAddress?: string | null; userAgent?: string | null },
-    userId?: string,
-    metadata?: Record<string, unknown>,
-  ): void {
-    this.auditService
-      .log({
-        action,
-        userId,
-        ipAddress: ctx?.ipAddress,
-        userAgent: ctx?.userAgent,
-        ...(metadata && { metadata }),
-      })
-      .catch(() => {});
+    return this.buildClearCookie();
   }
 }

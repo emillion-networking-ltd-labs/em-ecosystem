@@ -2,7 +2,6 @@ import {
   Injectable,
   UnauthorizedException,
   BadRequestException,
-  Logger,
 } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { UsersService } from '../users/users.service';
@@ -13,8 +12,7 @@ import { TrustedDeviceService } from './trusted-device.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
-import { ImpossibleTravelService } from '../geolocation/impossible-travel.service';
-import { SuspiciousLoginService } from '../security/suspicious-login.service';
+import { LoginSecurityService } from './login-security.service';
 import { MailService } from '../mail/mail.service';
 import { User, toSafeUser } from '../users/entities/user.entity';
 import { Role } from '../users/enums/role.enum';
@@ -27,6 +25,7 @@ import {
   MfaSetupRequiredResult,
 } from './interfaces/auth.interfaces';
 import { ErrorMessages } from '../common/constants/error-messages';
+import { createAuditLogger, AuditLogger } from './utils/audit-log.helper';
 import {
   BCRYPT_ROUNDS,
   MAX_FAILED_ATTEMPTS,
@@ -36,7 +35,7 @@ import {
 
 @Injectable()
 export class LoginService {
-  private readonly logger = new Logger(LoginService.name);
+  private readonly logAuditEvent: AuditLogger;
 
   constructor(
     private readonly usersService: UsersService,
@@ -44,11 +43,12 @@ export class LoginService {
     private readonly emailVerificationService: EmailVerificationService,
     private readonly passwordBreachService: PasswordBreachService,
     private readonly trustedDeviceService: TrustedDeviceService,
-    private readonly impossibleTravelService: ImpossibleTravelService,
-    private readonly suspiciousLoginService: SuspiciousLoginService,
+    private readonly loginSecurityService: LoginSecurityService,
     private readonly auditService: AuditService,
     private readonly mailService: MailService,
-  ) {}
+  ) {
+    this.logAuditEvent = createAuditLogger(this.auditService);
+  }
 
   async register(
     dto: RegisterDto,
@@ -221,7 +221,10 @@ export class LoginService {
         failedAttempts: updated.failedAttempts,
       });
 
-      this.checkSuspiciousLoginFailure(user.id, requestMeta);
+      this.loginSecurityService.checkSuspiciousLoginFailure(
+        user.id,
+        requestMeta,
+      );
 
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -247,25 +250,29 @@ export class LoginService {
           trustedDevice: true,
         });
 
-        const travelResult = await this.tokenService.checkImpossibleTravel(
-          user,
-          requestMeta,
-        );
+        const travelResult =
+          await this.loginSecurityService.checkImpossibleTravel(
+            user,
+            requestMeta,
+          );
         if (
           travelResult?.isAnomalous &&
           travelResult.actionTaken === 'blocked'
         ) {
-          this.tokenService.handleTravelBlock(
+          this.loginSecurityService.handleTravelBlock(
             travelResult,
             user.id,
             requestMeta,
           );
         }
 
-        this.tokenService
+        this.loginSecurityService
           .notifyIfNewDevice(user, sessionId, requestMeta)
           .catch(() => {});
-        this.tokenService.checkSuspiciousLoginSuccess(user, requestMeta);
+        this.loginSecurityService.checkSuspiciousLoginSuccess(
+          user,
+          requestMeta,
+        );
 
         return {
           accessToken,
@@ -307,13 +314,17 @@ export class LoginService {
     const { accessToken, refreshToken, sessionId } =
       await this.tokenService.generateTokens(user, requestMeta);
 
-    const travelResult = await this.tokenService.checkImpossibleTravel(
+    const travelResult = await this.loginSecurityService.checkImpossibleTravel(
       user,
       requestMeta,
     );
     if (travelResult?.isAnomalous) {
       if (travelResult.actionTaken === 'blocked') {
-        this.tokenService.handleTravelBlock(travelResult, user.id, requestMeta);
+        this.loginSecurityService.handleTravelBlock(
+          travelResult,
+          user.id,
+          requestMeta,
+        );
       }
       if (travelResult.actionTaken === 'challenged' && user.mfaEnabled) {
         const mfaChallengeToken = this.tokenService.signMfaChallengeToken(
@@ -325,46 +336,15 @@ export class LoginService {
 
     this.logAuditEvent(AuditAction.LOGIN_SUCCESS, ctx, user.id);
 
-    this.tokenService
+    this.loginSecurityService
       .notifyIfNewDevice(user, sessionId, requestMeta)
       .catch(() => {});
-    this.tokenService.checkSuspiciousLoginSuccess(user, requestMeta);
+    this.loginSecurityService.checkSuspiciousLoginSuccess(user, requestMeta);
 
     return {
       accessToken,
       user: toSafeUser(user),
       cookie: this.tokenService.buildRefreshCookie(refreshToken),
     };
-  }
-
-  private checkSuspiciousLoginFailure(
-    userId: string | undefined,
-    requestMeta: { ipAddress: string; userAgent?: string | null },
-  ): void {
-    if (!userId) return;
-    this.suspiciousLoginService
-      .analyzeLoginFailure({
-        userId,
-        ipAddress: requestMeta.ipAddress,
-        userAgent: requestMeta.userAgent ?? null,
-      })
-      .catch(() => {});
-  }
-
-  private logAuditEvent(
-    action: AuditAction,
-    ctx?: { ipAddress?: string | null; userAgent?: string | null },
-    userId?: string,
-    metadata?: Record<string, unknown>,
-  ): void {
-    this.auditService
-      .log({
-        action,
-        userId,
-        ipAddress: ctx?.ipAddress,
-        userAgent: ctx?.userAgent,
-        ...(metadata && { metadata }),
-      })
-      .catch(() => {});
   }
 }

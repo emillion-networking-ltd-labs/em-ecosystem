@@ -33,7 +33,7 @@ describe('AuthService — Login Device & Travel', () => {
     });
 
     it('should send login notification when IP is new', async () => {
-      ctx.prismaService.session.findMany.mockResolvedValue([
+      ctx.sessionsService.findPreviousActiveSessions.mockResolvedValue([
         { ipAddress: '10.0.0.99', userAgent: 'test-agent' },
       ]);
 
@@ -53,7 +53,7 @@ describe('AuthService — Login Device & Travel', () => {
     });
 
     it('should send login notification when userAgent is new', async () => {
-      ctx.prismaService.session.findMany.mockResolvedValue([
+      ctx.sessionsService.findPreviousActiveSessions.mockResolvedValue([
         { ipAddress: '127.0.0.1', userAgent: 'different-agent' },
       ]);
 
@@ -73,7 +73,7 @@ describe('AuthService — Login Device & Travel', () => {
     });
 
     it('should NOT send notification on first-ever login (no previous sessions)', async () => {
-      ctx.prismaService.session.findMany.mockResolvedValue([]);
+      ctx.sessionsService.findPreviousActiveSessions.mockResolvedValue([]);
 
       await ctx.authService.login(
         { email: 'test@example.com', password: 'StrongPass1!' },
@@ -86,7 +86,7 @@ describe('AuthService — Login Device & Travel', () => {
     });
 
     it('should NOT send notification when IP and UA are both known', async () => {
-      ctx.prismaService.session.findMany.mockResolvedValue([
+      ctx.sessionsService.findPreviousActiveSessions.mockResolvedValue([
         { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
       ]);
 
@@ -101,7 +101,7 @@ describe('AuthService — Login Device & Travel', () => {
     });
 
     it('should not fail login when notification email fails', async () => {
-      ctx.prismaService.session.findMany.mockResolvedValue([
+      ctx.sessionsService.findPreviousActiveSessions.mockResolvedValue([
         { ipAddress: '10.0.0.99', userAgent: 'other-agent' },
       ]);
       ctx.mailService.sendLoginNotificationEmail.mockRejectedValueOnce(

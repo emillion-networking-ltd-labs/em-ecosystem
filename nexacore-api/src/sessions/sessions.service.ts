@@ -263,4 +263,26 @@ export class SessionsService {
         .catch(() => {});
     }
   }
+
+  async revokeSessionDirect(sessionId: string): Promise<void> {
+    await this.prisma.session.update({
+      where: { id: sessionId },
+      data: { isRevoked: true },
+    });
+  }
+
+  async findPreviousActiveSessions(
+    userId: string,
+    excludeSessionId: string,
+  ): Promise<{ ipAddress: string | null; userAgent: string | null }[]> {
+    return this.prisma.session.findMany({
+      where: {
+        userId,
+        id: { not: excludeSessionId },
+        isRevoked: false,
+        expiresAt: { gt: new Date() },
+      },
+      select: { ipAddress: true, userAgent: true },
+    });
+  }
 }

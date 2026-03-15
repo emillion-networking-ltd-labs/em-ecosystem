@@ -26,6 +26,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { UsersService } from '../users/users.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
+import { createAuditLogger, AuditLogger } from './utils/audit-log.helper';
 import { REDIS_CLIENT } from '../common/services/redis.constants';
 import {
   WEBAUTHN_REG_KEY_PREFIX,
@@ -49,7 +50,7 @@ export class PasskeyService {
   private readonly rpId: string;
   private readonly rpName: string;
   private readonly origin: string;
-  private readonly auditNoop = () => {};
+  private readonly logAuditEvent: AuditLogger;
 
   constructor(
     private readonly prisma: PrismaService,
@@ -61,6 +62,7 @@ export class PasskeyService {
     this.rpId = this.configService.get<string>('auth.webauthnRpId')!;
     this.rpName = this.configService.get<string>('auth.webauthnRpName')!;
     this.origin = this.configService.get<string>('auth.webauthnOrigin')!;
+    this.logAuditEvent = createAuditLogger(this.auditService);
   }
 
   async generateRegOptions(userId: string): Promise<Record<string, unknown>> {
@@ -160,15 +162,10 @@ export class PasskeyService {
       },
     });
 
-    this.auditService
-      .log({
-        action: AuditAction.PASSKEY_REGISTERED,
-        userId,
-        ipAddress: ctx?.ipAddress ?? null,
-        userAgent: ctx?.userAgent ?? null,
-        metadata: { passkeyId: record.id, name: passkeyName },
-      })
-      .catch(this.auditNoop);
+    this.logAuditEvent(AuditAction.PASSKEY_REGISTERED, ctx, userId, {
+      passkeyId: record.id,
+      name: passkeyName,
+    });
 
     return { id: record.id, name: passkeyName };
   }
@@ -239,29 +236,15 @@ export class PasskeyService {
     });
 
     if (!storedCredential) {
-      this.auditService
-        .log({
-          action: AuditAction.PASSKEY_AUTH_FAILURE,
-          userId: null,
-          ipAddress: ctx?.ipAddress ?? null,
-          userAgent: ctx?.userAgent ?? null,
-          metadata: { reason: 'credential_not_found' },
-        })
-        .catch(this.auditNoop);
-      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
+      return this.failPasskeyAuth(ctx, undefined, 'credential_not_found');
     }
 
     if (!storedCredential.user.isActive) {
-      this.auditService
-        .log({
-          action: AuditAction.PASSKEY_AUTH_FAILURE,
-          userId: storedCredential.userId,
-          ipAddress: ctx?.ipAddress ?? null,
-          userAgent: ctx?.userAgent ?? null,
-          metadata: { reason: 'account_deactivated' },
-        })
-        .catch(this.auditNoop);
-      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
+      return this.failPasskeyAuth(
+        ctx,
+        storedCredential.userId,
+        'account_deactivated',
+      );
     }
 
     let verification;
@@ -280,29 +263,19 @@ export class PasskeyService {
         },
       });
     } catch {
-      this.auditService
-        .log({
-          action: AuditAction.PASSKEY_AUTH_FAILURE,
-          userId: storedCredential.userId,
-          ipAddress: ctx?.ipAddress ?? null,
-          userAgent: ctx?.userAgent ?? null,
-          metadata: { reason: 'verification_failed' },
-        })
-        .catch(this.auditNoop);
-      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
+      return this.failPasskeyAuth(
+        ctx,
+        storedCredential.userId,
+        'verification_failed',
+      );
     }
 
     if (!verification.verified) {
-      this.auditService
-        .log({
-          action: AuditAction.PASSKEY_AUTH_FAILURE,
-          userId: storedCredential.userId,
-          ipAddress: ctx?.ipAddress ?? null,
-          userAgent: ctx?.userAgent ?? null,
-          metadata: { reason: 'verification_not_verified' },
-        })
-        .catch(this.auditNoop);
-      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
+      return this.failPasskeyAuth(
+        ctx,
+        storedCredential.userId,
+        'verification_not_verified',
+      );
     }
 
     // Sign count replay detection (skip if both are 0 — some authenticators don't track)
@@ -311,20 +284,15 @@ export class PasskeyService {
       storedCredential.signCount > 0 &&
       newSignCount <= storedCredential.signCount
     ) {
-      this.auditService
-        .log({
-          action: AuditAction.PASSKEY_AUTH_FAILURE,
-          userId: storedCredential.userId,
-          ipAddress: ctx?.ipAddress ?? null,
-          userAgent: ctx?.userAgent ?? null,
-          metadata: {
-            reason: 'sign_count_replay',
-            expected: storedCredential.signCount,
-            received: newSignCount,
-          },
-        })
-        .catch(this.auditNoop);
-      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
+      return this.failPasskeyAuth(
+        ctx,
+        storedCredential.userId,
+        'sign_count_replay',
+        {
+          expected: storedCredential.signCount,
+          received: newSignCount,
+        },
+      );
     }
 
     await this.prisma.webAuthnCredential.update({
@@ -335,15 +303,12 @@ export class PasskeyService {
       },
     });
 
-    this.auditService
-      .log({
-        action: AuditAction.PASSKEY_AUTH_SUCCESS,
-        userId: storedCredential.userId,
-        ipAddress: ctx?.ipAddress ?? null,
-        userAgent: ctx?.userAgent ?? null,
-        metadata: { passkeyId: storedCredential.id },
-      })
-      .catch(this.auditNoop);
+    this.logAuditEvent(
+      AuditAction.PASSKEY_AUTH_SUCCESS,
+      ctx,
+      storedCredential.userId,
+      { passkeyId: storedCredential.id },
+    );
 
     return storedCredential.userId;
   }
@@ -432,14 +397,22 @@ export class PasskeyService {
       where: { id: passkeyId },
     });
 
-    this.auditService
-      .log({
-        action: AuditAction.PASSKEY_DELETED,
-        userId,
-        ipAddress: ctx?.ipAddress ?? null,
-        userAgent: ctx?.userAgent ?? null,
-        metadata: { passkeyId, name: passkey.name },
-      })
-      .catch(this.auditNoop);
+    this.logAuditEvent(AuditAction.PASSKEY_DELETED, ctx, userId, {
+      passkeyId,
+      name: passkey.name,
+    });
+  }
+
+  private failPasskeyAuth(
+    ctx: { ipAddress: string; userAgent: string | null } | undefined,
+    userId: string | undefined,
+    reason: string,
+    extra?: Record<string, unknown>,
+  ): never {
+    this.logAuditEvent(AuditAction.PASSKEY_AUTH_FAILURE, ctx, userId, {
+      reason,
+      ...extra,
+    });
+    throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
   }
 }

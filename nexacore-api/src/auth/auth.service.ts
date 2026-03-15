@@ -1,13 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
-import { SessionsService } from '../sessions/sessions.service';
-import {
-  TokenDenyListService,
-  ACCESS_TOKEN_TTL_SECONDS,
-} from './token-deny-list.service';
-import { AuditService } from '../audit/audit.service';
-import { AuditAction } from '../audit/enums/audit-action.enum';
-import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
+import { Injectable } from '@nestjs/common';
 import { LoginService } from './login.service';
 import { TokenService } from './token.service';
 import { OAuthAuthService } from './oauth-auth.service';
@@ -19,7 +10,7 @@ import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { OAuthProfile } from '../common/interfaces/oauth-profile.interface';
 import { SafeUser } from '../users/entities/user.entity';
-import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
+import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
 import {
   CookieConfig,
   AuthResult,
@@ -39,18 +30,12 @@ export type {
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-
   constructor(
     private readonly loginService: LoginService,
     private readonly tokenService: TokenService,
     private readonly oauthAuthService: OAuthAuthService,
     private readonly emailVerificationService: EmailVerificationService,
     private readonly passwordResetService: PasswordResetService,
-    private readonly sessionsService: SessionsService,
-    private readonly tokenDenyListService: TokenDenyListService,
-    private readonly auditService: AuditService,
-    private readonly jwtService: JwtService,
   ) {}
 
   // ── Registration & Login ──
@@ -133,51 +118,17 @@ export class AuthService {
     return this.oauthAuthService.exchangeOAuthCode(code);
   }
 
-  // ── Session Management (direct implementations) ──
+  // ── Session Management ──
 
   async logout(
     refreshToken: string,
     ctx?: RequestContext,
   ): Promise<CookieConfig> {
-    try {
-      const payload = this.jwtService.verify<RefreshTokenPayload>(refreshToken);
-      await this.sessionsService.revokeSession(payload.sessionId, payload.sub);
-      this.tokenDenyListService
-        .denyAllForUser(payload.sub, ACCESS_TOKEN_TTL_SECONDS)
-        .catch(() => {});
-
-      this.auditService
-        .log({
-          action: AuditAction.LOGOUT,
-          userId: payload.sub,
-          ipAddress: ctx?.ipAddress,
-          userAgent: ctx?.userAgent,
-        })
-        .catch(() => {});
-    } catch {
-      // Token is invalid/expired — just clear the cookie
-    }
-
-    return this.tokenService.buildClearCookie();
+    return this.tokenService.logout(refreshToken, ctx);
   }
 
   async logoutAll(userId: string, ctx?: RequestContext): Promise<CookieConfig> {
-    await this.sessionsService.revokeAllUserSessions(userId);
-    this.tokenDenyListService
-      .denyAllForUser(userId, ACCESS_TOKEN_TTL_SECONDS)
-      .catch(() => {});
-
-    this.auditService
-      .log({
-        action: AuditAction.LOGOUT,
-        userId,
-        ipAddress: ctx?.ipAddress,
-        userAgent: ctx?.userAgent,
-        metadata: { scope: 'all_sessions' },
-      })
-      .catch(() => {});
-
-    return this.tokenService.buildClearCookie();
+    return this.tokenService.logoutAll(userId, ctx);
   }
 
   // ── Email Verification ──
