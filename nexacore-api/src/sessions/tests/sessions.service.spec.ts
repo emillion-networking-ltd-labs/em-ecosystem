@@ -704,4 +704,79 @@ describe('SessionsService', () => {
       expect(prisma.session.update).toHaveBeenCalledTimes(1);
     });
   });
+
+  // ─── revokeSessionDirect ────────────────────────────────────────
+
+  describe('revokeSessionDirect', () => {
+    it('should call prisma.session.update with isRevoked: true', async () => {
+      prisma.session.update.mockResolvedValue({
+        ...mockSession,
+        isRevoked: true,
+      });
+
+      await sessionsService.revokeSessionDirect('session-1');
+
+      expect(prisma.session.update).toHaveBeenCalledWith({
+        where: { id: 'session-1' },
+        data: { isRevoked: true },
+      });
+    });
+
+    it('should resolve without error', async () => {
+      prisma.session.update.mockResolvedValue({
+        ...mockSession,
+        isRevoked: true,
+      });
+
+      await expect(
+        sessionsService.revokeSessionDirect('session-1'),
+      ).resolves.toBeUndefined();
+    });
+  });
+
+  // ─── findPreviousActiveSessions ─────────────────────────────────
+
+  describe('findPreviousActiveSessions', () => {
+    it('should query with correct where clause and select', async () => {
+      prisma.session.findMany.mockResolvedValue([]);
+
+      await sessionsService.findPreviousActiveSessions('user-1', 'session-1');
+
+      expect(prisma.session.findMany).toHaveBeenCalledWith({
+        where: {
+          userId: 'user-1',
+          id: { not: 'session-1' },
+          isRevoked: false,
+          expiresAt: { gt: expect.any(Date) },
+        },
+        select: { ipAddress: true, userAgent: true },
+      });
+    });
+
+    it('should return matching sessions', async () => {
+      const previousSessions = [
+        { ipAddress: '10.0.0.1', userAgent: 'Firefox' },
+        { ipAddress: '192.168.1.1', userAgent: 'Chrome' },
+      ];
+      prisma.session.findMany.mockResolvedValue(previousSessions);
+
+      const result = await sessionsService.findPreviousActiveSessions(
+        'user-1',
+        'session-1',
+      );
+
+      expect(result).toEqual(previousSessions);
+    });
+
+    it('should return empty array when no matching sessions', async () => {
+      prisma.session.findMany.mockResolvedValue([]);
+
+      const result = await sessionsService.findPreviousActiveSessions(
+        'user-1',
+        'session-1',
+      );
+
+      expect(result).toEqual([]);
+    });
+  });
 });
