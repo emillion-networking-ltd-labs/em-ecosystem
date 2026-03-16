@@ -69,9 +69,13 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   private sanitizeValidationDetails(details: string[]): string[] {
     return details.map((detail) => {
-      // class-validator format: "fieldName constraint message"
-      // Strip the leading field name to prevent DTO structure disclosure (CWE-209)
-      const stripped = detail.replace(/^[a-zA-Z_][a-zA-Z0-9_]* /, '');
+      // Handle "property fieldName should not exist" (forbidNonWhitelisted)
+      if (/^property \S+ should not exist$/i.test(detail)) {
+        return 'Unknown property is not allowed';
+      }
+      // class-validator format: "fieldName constraint message" or "nested.field constraint message"
+      // Strip the leading field name (including dotted paths) to prevent DTO structure disclosure (CWE-209)
+      const stripped = detail.replace(/^[a-zA-Z_][a-zA-Z0-9_.]*\s+/, '');
       return stripped.charAt(0).toUpperCase() + stripped.slice(1);
     });
   }
