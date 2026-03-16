@@ -9,11 +9,9 @@ import { TokenService } from './token.service';
 import { EmailVerificationService } from './email-verification.service';
 import { PasswordBreachService } from './password-breach.service';
 import { TrustedDeviceService } from './trusted-device.service';
-import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
 import { LoginSecurityService } from './login-security.service';
-import { MailService } from '../mail/mail.service';
 import { User, toSafeUser } from '../users/entities/user.entity';
 import { Role } from '../users/enums/role.enum';
 import { RegisterDto } from './dto/register.dto';
@@ -25,7 +23,6 @@ import {
   MfaSetupRequiredResult,
 } from './interfaces/auth.interfaces';
 import { ErrorMessages } from '../common/constants/error-messages';
-import { createAuditLogger, AuditLogger } from './utils/audit-log.helper';
 import {
   BCRYPT_ROUNDS,
   MAX_FAILED_ATTEMPTS,
@@ -35,8 +32,6 @@ import {
 
 @Injectable()
 export class LoginService {
-  private readonly logAuditEvent: AuditLogger;
-
   constructor(
     private readonly usersService: UsersService,
     private readonly tokenService: TokenService,
@@ -44,11 +39,7 @@ export class LoginService {
     private readonly passwordBreachService: PasswordBreachService,
     private readonly trustedDeviceService: TrustedDeviceService,
     private readonly loginSecurityService: LoginSecurityService,
-    private readonly auditService: AuditService,
-    private readonly mailService: MailService,
-  ) {
-    this.logAuditEvent = createAuditLogger(this.auditService);
-  }
+  ) {}
 
   async register(
     dto: RegisterDto,
@@ -62,18 +53,17 @@ export class LoginService {
       // time as bcrypt.hash() so response latency doesn't reveal email existence
       await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
 
-      // Notify existing user of registration attempt (non-blocking)
-      this.mailService
-        .sendRegistrationAttemptNotification(
-          existingUser.email,
-          existingUser.firstName,
-        )
-        .catch(() => {});
+      this.loginSecurityService.sendRegistrationAttemptNotification(
+        existingUser.email,
+        existingUser.firstName,
+      );
 
-      this.logAuditEvent(AuditAction.REGISTER, ctx, existingUser.id, {
-        email: dto.email,
-        outcome: 'existing_email',
-      });
+      this.loginSecurityService.logAudit(
+        AuditAction.REGISTER,
+        ctx,
+        existingUser.id,
+        { email: dto.email, outcome: 'existing_email' },
+      );
 
       return { message: ErrorMessages.auth.CHECK_EMAIL };
     }
@@ -97,7 +87,7 @@ export class LoginService {
       .createAndSendVerificationEmail(user)
       .catch(() => {});
 
-    this.logAuditEvent(AuditAction.REGISTER, ctx, user.id, {
+    this.loginSecurityService.logAudit(AuditAction.REGISTER, ctx, user.id, {
       email: dto.email,
       outcome: 'new_account',
     });
@@ -113,56 +103,34 @@ export class LoginService {
   ): Promise<AuthResult | MfaChallengeResult | MfaSetupRequiredResult> {
     const user = await this.usersService.findByEmail(dto.email);
 
-    // Timing attack protection: constant-time response when user not found
     if (!user) {
       await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
-      this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, undefined, {
-        email: dto.email,
-        reason: 'user_not_found',
-      });
+      this.loginSecurityService.logAudit(
+        AuditAction.LOGIN_FAILURE,
+        ctx,
+        undefined,
+        { email: dto.email, reason: 'user_not_found' },
+      );
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
     }
 
-    // Account lockout check — CWE-203: same exception type and message as
-    // non-existing account to prevent enumeration
-    if (user.lockedUntil && user.lockedUntil > new Date()) {
-      this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, user.id, {
-        reason: 'account_locked',
-      });
+    this.checkAccountLockout(user, ctx);
 
-      throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
-    }
-
-    // Expired lockout: reset failed attempts (but NOT lockoutCount)
     if (user.lockedUntil && user.lockedUntil <= new Date()) {
       await this.usersService.resetFailedAttempts(user.id);
     }
 
     await this.validateCredentials(dto, user, requestMeta, ctx);
-
-    // Email verification check — CWE-203: same exception type and message as
-    // all other login failures to prevent account state enumeration
-    if (user.passwordHash && !user.emailVerified) {
-      this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, user.id, {
-        reason: 'email_not_verified',
-      });
-      // Silently re-send verification email (fire-and-forget)
-      this.emailVerificationService
-        .createAndSendVerificationEmail(user)
-        .catch(() => {});
-      throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
-    }
+    this.checkEmailVerification(user, ctx);
 
     if (user.failedAttempts > 0 || user.lockoutCount > 0) {
       await this.usersService.resetLockoutEscalation(user.id);
     }
 
-    // MFA check — skip if device is trusted, otherwise return challenge token
     if (user.mfaEnabled) {
       return this.handleMfaLogin(user, requestMeta, ctx, fingerprint);
     }
 
-    // OWASP ASVS V2.7.2: Admin/SUPERADMIN must have MFA enabled
     if (
       (user.role === Role.ADMIN || user.role === Role.SUPERADMIN) &&
       !user.mfaEnabled
@@ -173,18 +141,47 @@ export class LoginService {
     return this.handleLoginSuccess(user, requestMeta, ctx);
   }
 
+  private checkAccountLockout(user: User, ctx?: RequestContext): void {
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      this.loginSecurityService.logAudit(
+        AuditAction.LOGIN_FAILURE,
+        ctx,
+        user.id,
+        { reason: 'account_locked' },
+      );
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
+    }
+  }
+
+  private checkEmailVerification(user: User, ctx?: RequestContext): void {
+    if (user.passwordHash && !user.emailVerified) {
+      this.loginSecurityService.logAudit(
+        AuditAction.LOGIN_FAILURE,
+        ctx,
+        user.id,
+        { reason: 'email_not_verified' },
+      );
+      this.emailVerificationService
+        .createAndSendVerificationEmail(user)
+        .catch(() => {});
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
+    }
+  }
+
   private async validateCredentials(
     dto: LoginDto,
     user: User,
     requestMeta: { ipAddress: string; userAgent?: string | null },
     ctx?: RequestContext,
   ): Promise<void> {
-    // OAuth-only account (no password set) — constant timing, NO lockout.
     if (!user.passwordHash) {
       await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
-      this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, user.id, {
-        reason: 'no_password_set',
-      });
+      this.loginSecurityService.logAudit(
+        AuditAction.LOGIN_FAILURE,
+        ctx,
+        user.id,
+        { reason: 'no_password_set' },
+      );
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
     }
 
@@ -193,41 +190,45 @@ export class LoginService {
       user.passwordHash,
     );
     if (!isPasswordValid) {
-      const updated = await this.usersService.incrementFailedAttempts(user.id);
+      await this.handleInvalidPassword(user, requestMeta, ctx);
+    }
+  }
 
-      if (updated.failedAttempts > MAX_FAILED_ATTEMPTS) {
-        await this.usersService.lockAccount(user.id, user.lockoutCount);
+  private async handleInvalidPassword(
+    user: User,
+    requestMeta: { ipAddress: string; userAgent?: string | null },
+    ctx?: RequestContext,
+  ): Promise<never> {
+    const updated = await this.usersService.incrementFailedAttempts(user.id);
 
-        const lockoutMinutes = getLockoutDurationMinutes(user.lockoutCount);
-        this.mailService
-          .sendAccountLockedEmail(
-            user.email,
-            updated.failedAttempts,
-            lockoutMinutes,
-            user.firstName,
-          )
-          .catch(() => {});
-
-        this.logAuditEvent(AuditAction.ACCOUNT_LOCKED, ctx, user.id, {
-          reason: 'max_failed_attempts',
-          failedAttempts: MAX_FAILED_ATTEMPTS,
-        });
-
-        throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
-      }
-
-      this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, user.id, {
-        reason: 'invalid_password',
-        failedAttempts: updated.failedAttempts,
-      });
-
-      this.loginSecurityService.checkSuspiciousLoginFailure(
-        user.id,
-        requestMeta,
+    if (updated.failedAttempts > MAX_FAILED_ATTEMPTS) {
+      await this.usersService.lockAccount(user.id, user.lockoutCount);
+      const lockoutMinutes = getLockoutDurationMinutes(user.lockoutCount);
+      this.loginSecurityService.sendAccountLockedEmail(
+        user.email,
+        updated.failedAttempts,
+        lockoutMinutes,
+        user.firstName,
       );
-
+      this.loginSecurityService.logAudit(
+        AuditAction.ACCOUNT_LOCKED,
+        ctx,
+        user.id,
+        { reason: 'max_failed_attempts', failedAttempts: MAX_FAILED_ATTEMPTS },
+      );
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
     }
+
+    this.loginSecurityService.logAudit(
+      AuditAction.LOGIN_FAILURE,
+      ctx,
+      user.id,
+      { reason: 'invalid_password', failedAttempts: updated.failedAttempts },
+    );
+
+    this.loginSecurityService.checkSuspiciousLoginFailure(user.id, requestMeta);
+
+    throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
   }
 
   private async handleMfaLogin(
@@ -242,63 +243,77 @@ export class LoginService {
         fingerprint,
       );
       if (isTrusted) {
-        const { accessToken, refreshToken, sessionId } =
-          await this.tokenService.generateTokens(user, requestMeta);
-
-        this.logAuditEvent(AuditAction.LOGIN_SUCCESS, ctx, user.id, {
-          mfaSkipped: true,
-          trustedDevice: true,
-        });
-
-        const travelResult =
-          await this.loginSecurityService.checkImpossibleTravel(
-            user,
-            requestMeta,
-          );
-        if (
-          travelResult?.isAnomalous &&
-          travelResult.actionTaken === 'blocked'
-        ) {
-          this.loginSecurityService.handleTravelBlock(
-            travelResult,
-            user.id,
-            requestMeta,
-          );
-        }
-
-        this.loginSecurityService
-          .notifyIfNewDevice(user, sessionId, requestMeta)
-          .catch(() => {});
-        this.loginSecurityService.checkSuspiciousLoginSuccess(
-          user,
-          requestMeta,
-        );
-
-        return {
-          accessToken,
-          user: toSafeUser(user),
-          cookie: this.tokenService.buildRefreshCookie(refreshToken),
-        };
+        return this.completeTrustedDeviceLogin(user, requestMeta, ctx);
       }
     }
 
     const mfaToken = this.tokenService.signMfaChallengeToken(user.id);
-
-    this.logAuditEvent(AuditAction.LOGIN_SUCCESS, ctx, user.id, {
-      mfaChallengeIssued: true,
-    });
-
+    this.loginSecurityService.logAudit(
+      AuditAction.LOGIN_SUCCESS,
+      ctx,
+      user.id,
+      {
+        mfaChallengeIssued: true,
+      },
+    );
     return { mfaRequired: true, mfaToken };
+  }
+
+  private async completeTrustedDeviceLogin(
+    user: User,
+    requestMeta: { ipAddress: string; userAgent?: string | null },
+    ctx?: RequestContext,
+  ): Promise<AuthResult> {
+    const { accessToken, refreshToken, sessionId } =
+      await this.tokenService.generateTokens(user, requestMeta);
+
+    this.loginSecurityService.logAudit(
+      AuditAction.LOGIN_SUCCESS,
+      ctx,
+      user.id,
+      {
+        mfaSkipped: true,
+        trustedDevice: true,
+      },
+    );
+
+    const travelResult = await this.loginSecurityService.checkImpossibleTravel(
+      user,
+      requestMeta,
+    );
+    if (travelResult?.isAnomalous && travelResult.actionTaken === 'blocked') {
+      this.loginSecurityService.handleTravelBlock(
+        travelResult,
+        user.id,
+        requestMeta,
+      );
+    }
+
+    this.loginSecurityService
+      .notifyIfNewDevice(user, sessionId, requestMeta)
+      .catch(() => {});
+    this.loginSecurityService.checkSuspiciousLoginSuccess(user, requestMeta);
+
+    return {
+      accessToken,
+      user: toSafeUser(user),
+      cookie: this.tokenService.buildRefreshCookie(refreshToken),
+    };
   }
 
   private handleMfaSetupRequired(
     user: User,
     ctx?: RequestContext,
   ): MfaSetupRequiredResult {
-    this.logAuditEvent(AuditAction.LOGIN_SUCCESS, ctx, user.id, {
-      mfaSetupRequired: true,
-      role: user.role,
-    });
+    this.loginSecurityService.logAudit(
+      AuditAction.LOGIN_SUCCESS,
+      ctx,
+      user.id,
+      {
+        mfaSetupRequired: true,
+        role: user.role,
+      },
+    );
 
     return {
       mfaSetupRequired: true,
@@ -334,7 +349,7 @@ export class LoginService {
       }
     }
 
-    this.logAuditEvent(AuditAction.LOGIN_SUCCESS, ctx, user.id);
+    this.loginSecurityService.logAudit(AuditAction.LOGIN_SUCCESS, ctx, user.id);
 
     this.loginSecurityService
       .notifyIfNewDevice(user, sessionId, requestMeta)
