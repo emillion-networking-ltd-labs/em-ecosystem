@@ -128,7 +128,9 @@ describe('UsersService', () => {
     };
 
     auditService = { log: jest.fn().mockResolvedValue(undefined) };
-    sessionsService = { revokeAllUserSessions: jest.fn().mockResolvedValue(undefined) };
+    sessionsService = {
+      revokeAllUserSessions: jest.fn().mockResolvedValue(undefined),
+    };
     passwordBreachService = { isBreached: jest.fn().mockResolvedValue(false) };
     trustedDeviceService = { revokeAllDevices: jest.fn().mockResolvedValue(0) };
 
@@ -150,11 +152,21 @@ describe('UsersService', () => {
         {
           provide: MailService,
           useValue: {
-            sendPasswordChangeNotification: jest.fn().mockResolvedValue(undefined),
-            sendEmailChangeVerificationEmail: jest.fn().mockResolvedValue(undefined),
-            sendEmailChangeRequestNotification: jest.fn().mockResolvedValue(undefined),
-            sendEmailChangedConfirmation: jest.fn().mockResolvedValue(undefined),
-            sendAccountDeletionConfirmation: jest.fn().mockResolvedValue(undefined),
+            sendPasswordChangeNotification: jest
+              .fn()
+              .mockResolvedValue(undefined),
+            sendEmailChangeVerificationEmail: jest
+              .fn()
+              .mockResolvedValue(undefined),
+            sendEmailChangeRequestNotification: jest
+              .fn()
+              .mockResolvedValue(undefined),
+            sendEmailChangedConfirmation: jest
+              .fn()
+              .mockResolvedValue(undefined),
+            sendAccountDeletionConfirmation: jest
+              .fn()
+              .mockResolvedValue(undefined),
           },
         },
         {
@@ -167,7 +179,10 @@ describe('UsersService', () => {
         },
         {
           provide: TokenDenyListService,
-          useValue: { denyToken: jest.fn().mockResolvedValue(undefined), denyAllForUser: jest.fn().mockResolvedValue(undefined) },
+          useValue: {
+            denyToken: jest.fn().mockResolvedValue(undefined),
+            denyAllForUser: jest.fn().mockResolvedValue(undefined),
+          },
         },
       ],
     }).compile();
@@ -348,7 +363,9 @@ describe('UsersService', () => {
             providerId: 'google-id-123',
           },
         },
-        include: { user: { include: { oauthAccounts: { select: { provider: true } } } } },
+        include: {
+          user: { include: { oauthAccounts: { select: { provider: true } } } },
+        },
       });
       expect(prisma.user.update).not.toHaveBeenCalled();
       expect(prisma.user.create).not.toHaveBeenCalled();
@@ -494,7 +511,10 @@ describe('UsersService', () => {
 
   describe('findAll', () => {
     it('should return paginated users with meta', async () => {
-      const users = [mockUser, { ...mockUser, id: 'uuid-456', email: 'other@example.com' }];
+      const users = [
+        mockUser,
+        { ...mockUser, id: 'uuid-456', email: 'other@example.com' },
+      ];
       prisma.user.findMany.mockResolvedValue(users);
       prisma.user.count.mockResolvedValue(2);
 
@@ -734,8 +754,12 @@ describe('UsersService', () => {
         where: { id: 'uuid-123' },
         data: { passwordHash: 'new-hashed-password' },
       });
-      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith('uuid-123');
-      expect(trustedDeviceService.revokeAllDevices).toHaveBeenCalledWith('uuid-123');
+      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith(
+        'uuid-123',
+      );
+      expect(trustedDeviceService.revokeAllDevices).toHaveBeenCalledWith(
+        'uuid-123',
+      );
     });
 
     it('should fire audit log on successful password change', async () => {
@@ -783,7 +807,11 @@ describe('UsersService', () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
       await expect(
-        usersService.adminUpdateUser('nonexistent', { role: Role.ADMIN }, actingSuperadmin),
+        usersService.adminUpdateUser(
+          'nonexistent',
+          { role: Role.ADMIN },
+          actingSuperadmin,
+        ),
       ).rejects.toThrow(NotFoundException);
     });
 
@@ -794,7 +822,11 @@ describe('UsersService', () => {
       });
 
       await expect(
-        usersService.adminUpdateUser('uuid-123', { isActive: false }, actingSuperadmin),
+        usersService.adminUpdateUser(
+          'uuid-123',
+          { isActive: false },
+          actingSuperadmin,
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -802,7 +834,11 @@ describe('UsersService', () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
 
       await expect(
-        usersService.adminUpdateUser('uuid-123', { role: Role.ADMIN }, actingAdmin),
+        usersService.adminUpdateUser(
+          'uuid-123',
+          { role: Role.ADMIN },
+          actingAdmin,
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -810,7 +846,11 @@ describe('UsersService', () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
 
       await expect(
-        usersService.adminUpdateUser('uuid-123', { role: Role.SUPERADMIN }, actingAdmin),
+        usersService.adminUpdateUser(
+          'uuid-123',
+          { role: Role.SUPERADMIN },
+          actingAdmin,
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -933,7 +973,9 @@ describe('UsersService', () => {
         actingSuperadmin,
       );
 
-      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith('uuid-123');
+      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith(
+        'uuid-123',
+      );
     });
 
     it('should NOT revoke sessions when activating a user', async () => {
@@ -970,9 +1012,9 @@ describe('UsersService', () => {
     it('should throw NotFoundException when target not found', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
 
-      await expect(
-        usersService.softDelete('nonexistent'),
-      ).rejects.toThrow(NotFoundException);
+      await expect(usersService.softDelete('nonexistent')).rejects.toThrow(
+        NotFoundException,
+      );
     });
 
     it('should throw ForbiddenException when target is SUPERADMIN', async () => {
@@ -981,9 +1023,9 @@ describe('UsersService', () => {
         role: Role.SUPERADMIN,
       });
 
-      await expect(
-        usersService.softDelete('uuid-123'),
-      ).rejects.toThrow(ForbiddenException);
+      await expect(usersService.softDelete('uuid-123')).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should set isActive=false and fire audit log', async () => {
@@ -1004,7 +1046,7 @@ describe('UsersService', () => {
           action: AuditAction.USER_DELETED,
           userId: 'admin-1',
           targetUserId: 'uuid-123',
-          metadata: { email: 'test@example.com' },
+          metadata: { email: 't***@example.com' },
         }),
       );
     });
@@ -1028,7 +1070,9 @@ describe('UsersService', () => {
 
       await usersService.softDelete('uuid-123', 'admin-1');
 
-      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith('uuid-123');
+      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith(
+        'uuid-123',
+      );
     });
   });
 
@@ -1038,11 +1082,10 @@ describe('UsersService', () => {
     it('should update mfaSecret and mfaRecoveryCodes', async () => {
       prisma.user.update.mockResolvedValue(mockUser);
 
-      await usersService.updateMfaSetupData(
-        'uuid-123',
-        'encrypted-secret',
-        ['code1-hash', 'code2-hash'],
-      );
+      await usersService.updateMfaSetupData('uuid-123', 'encrypted-secret', [
+        'code1-hash',
+        'code2-hash',
+      ]);
 
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: 'uuid-123' },
@@ -1103,7 +1146,10 @@ describe('UsersService', () => {
   // ─── requestEmailChange ─────────────────────────────────────────
 
   describe('requestEmailChange', () => {
-    const changeEmailDto = { newEmail: 'new@example.com', password: 'StrongPass1!' };
+    const changeEmailDto = {
+      newEmail: 'new@example.com',
+      password: 'StrongPass1!',
+    };
 
     it('should throw UnauthorizedException when user not found (CWE-200)', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
@@ -1149,7 +1195,11 @@ describe('UsersService', () => {
       // findById returns the user, then findByEmail returns an existing user
       prisma.user.findUnique
         .mockResolvedValueOnce(mockUser)
-        .mockResolvedValueOnce({ ...mockUser, id: 'uuid-other', email: 'new@example.com' });
+        .mockResolvedValueOnce({
+          ...mockUser,
+          id: 'uuid-other',
+          email: 'new@example.com',
+        });
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       await expect(
@@ -1163,7 +1213,10 @@ describe('UsersService', () => {
         .mockResolvedValueOnce(mockUser)
         .mockResolvedValueOnce(null);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      prisma.user.update.mockResolvedValue({ ...mockUser, pendingEmail: 'new@example.com' });
+      prisma.user.update.mockResolvedValue({
+        ...mockUser,
+        pendingEmail: 'new@example.com',
+      });
 
       await usersService.requestEmailChange('uuid-123', changeEmailDto);
 
@@ -1186,7 +1239,10 @@ describe('UsersService', () => {
         .mockResolvedValueOnce(mockUser)
         .mockResolvedValueOnce(null);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      prisma.user.update.mockResolvedValue({ ...mockUser, pendingEmail: 'new@example.com' });
+      prisma.user.update.mockResolvedValue({
+        ...mockUser,
+        pendingEmail: 'new@example.com',
+      });
 
       await usersService.requestEmailChange('uuid-123', changeEmailDto);
 
@@ -1195,7 +1251,9 @@ describe('UsersService', () => {
         expect.any(String),
         mockUser.firstName,
       );
-      expect(mailService.sendEmailChangeRequestNotification).toHaveBeenCalledWith(
+      expect(
+        mailService.sendEmailChangeRequestNotification,
+      ).toHaveBeenCalledWith(
         mockUser.email,
         'new@example.com',
         mockUser.firstName,
@@ -1207,7 +1265,10 @@ describe('UsersService', () => {
         .mockResolvedValueOnce(mockUser)
         .mockResolvedValueOnce(null);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      prisma.user.update.mockResolvedValue({ ...mockUser, pendingEmail: 'new@example.com' });
+      prisma.user.update.mockResolvedValue({
+        ...mockUser,
+        pendingEmail: 'new@example.com',
+      });
 
       await usersService.requestEmailChange('uuid-123', changeEmailDto, {
         ipAddress: '10.0.0.1',
@@ -1229,16 +1290,25 @@ describe('UsersService', () => {
         .mockResolvedValueOnce(mockUser)
         .mockResolvedValueOnce(null);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
-      prisma.user.update.mockResolvedValue({ ...mockUser, pendingEmail: 'new@example.com' });
-
-      const result = await usersService.requestEmailChange('uuid-123', changeEmailDto, {
-        ipAddress: '10.0.0.1',
-        userAgent: 'test-agent',
+      prisma.user.update.mockResolvedValue({
+        ...mockUser,
+        pendingEmail: 'new@example.com',
       });
+
+      const result = await usersService.requestEmailChange(
+        'uuid-123',
+        changeEmailDto,
+        {
+          ipAddress: '10.0.0.1',
+          userAgent: 'test-agent',
+        },
+      );
 
       await new Promise(process.nextTick);
 
-      expect(result).toEqual({ message: 'Verification email sent to new address' });
+      expect(result).toEqual({
+        message: 'Verification email sent to new address',
+      });
     });
   });
 
@@ -1288,7 +1358,11 @@ describe('UsersService', () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      const result = await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+      const result = await usersService.selfDeleteAccount(
+        'uuid-123',
+        deleteDto,
+        ctx,
+      );
 
       expect(result).toEqual({ message: 'Account deleted successfully' });
     });
@@ -1313,7 +1387,8 @@ describe('UsersService', () => {
         null,
       );
       // Email should be called before $transaction
-      const emailCallOrder = mailService.sendAccountDeletionConfirmation.mock.invocationCallOrder[0];
+      const emailCallOrder =
+        mailService.sendAccountDeletionConfirmation.mock.invocationCallOrder[0];
       const txCallOrder = prisma.$transaction.mock.invocationCallOrder[0];
       expect(emailCallOrder).toBeLessThan(txCallOrder);
     });
@@ -1430,7 +1505,11 @@ describe('UsersService', () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
-      const result = await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
+      const result = await usersService.selfDeleteAccount(
+        'uuid-123',
+        deleteDto,
+        ctx,
+      );
 
       await new Promise(process.nextTick);
 
@@ -1537,9 +1616,16 @@ describe('UsersService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
 
-      const result = await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx);
+      const result = await usersService.unlinkOAuth(
+        'uuid-123',
+        'GOOGLE',
+        unlinkDto,
+        ctx,
+      );
 
-      expect(result).toEqual({ message: 'OAuth provider unlinked successfully' });
+      expect(result).toEqual({
+        message: 'OAuth provider unlinked successfully',
+      });
       expect(prisma.oAuthAccount.delete).toHaveBeenCalledWith({
         where: { id: googleAccount.id },
       });
@@ -1552,9 +1638,16 @@ describe('UsersService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       prisma.oAuthAccount.delete.mockResolvedValue(githubAccount);
 
-      const result = await usersService.unlinkOAuth('uuid-123', 'GITHUB', unlinkDto, ctx);
+      const result = await usersService.unlinkOAuth(
+        'uuid-123',
+        'GITHUB',
+        unlinkDto,
+        ctx,
+      );
 
-      expect(result).toEqual({ message: 'OAuth provider unlinked successfully' });
+      expect(result).toEqual({
+        message: 'OAuth provider unlinked successfully',
+      });
       expect(prisma.oAuthAccount.delete).toHaveBeenCalledWith({
         where: { id: githubAccount.id },
       });
@@ -1609,7 +1702,10 @@ describe('UsersService', () => {
     });
 
     it('should throw BadRequestException if provider not linked', async () => {
-      prisma.user.findUnique.mockResolvedValue({ ...mockUser, oauthAccounts: [] });
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        oauthAccounts: [],
+      });
       prisma.oAuthAccount.findUnique.mockResolvedValue(null);
 
       await expect(
@@ -1644,11 +1740,18 @@ describe('UsersService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
 
-      const result = await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto, ctx);
+      const result = await usersService.unlinkOAuth(
+        'uuid-123',
+        'GOOGLE',
+        unlinkDto,
+        ctx,
+      );
 
       await new Promise(process.nextTick);
 
-      expect(result).toEqual({ message: 'OAuth provider unlinked successfully' });
+      expect(result).toEqual({
+        message: 'OAuth provider unlinked successfully',
+      });
     });
 
     it('should pass ipAddress and userAgent from ctx to audit', async () => {
@@ -1676,9 +1779,15 @@ describe('UsersService', () => {
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
       prisma.oAuthAccount.delete.mockResolvedValue(googleAccount);
 
-      const result = await usersService.unlinkOAuth('uuid-123', 'GOOGLE', unlinkDto);
+      const result = await usersService.unlinkOAuth(
+        'uuid-123',
+        'GOOGLE',
+        unlinkDto,
+      );
 
-      expect(result).toEqual({ message: 'OAuth provider unlinked successfully' });
+      expect(result).toEqual({
+        message: 'OAuth provider unlinked successfully',
+      });
       expect(auditService.log).toHaveBeenCalledWith(
         expect.objectContaining({
           ipAddress: undefined,

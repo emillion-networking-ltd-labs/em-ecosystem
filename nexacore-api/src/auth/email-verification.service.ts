@@ -15,6 +15,7 @@ import { RequestContext } from '../audit/interfaces/audit-log-entry.interface';
 import { User } from '../users/entities/user.entity';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { hashToken } from './utils/hash-token';
+import { pseudonymizeEmail } from '../common/utils/pseudonymize-email';
 import {
   VERIFICATION_TOKEN_EXPIRY_HOURS,
   RESEND_COOLDOWN_SECONDS,
@@ -106,7 +107,10 @@ export class EmailVerificationService {
         userId: user.id,
         ipAddress: ctx?.ipAddress,
         userAgent: ctx?.userAgent,
-        metadata: { oldEmail, newEmail },
+        metadata: {
+          oldEmail: pseudonymizeEmail(oldEmail),
+          newEmail: pseudonymizeEmail(newEmail),
+        },
       })
       .catch(() => {});
 
