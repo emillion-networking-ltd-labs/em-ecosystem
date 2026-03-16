@@ -210,10 +210,18 @@ export default function ConnectedAccounts() {
             if (e.target === overlayRef.current) handleClose();
           }}
         >
-          <div className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary shadow-card">
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="disconnect-title"
+            className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary shadow-card"
+          >
             {/* Top section */}
             <div className="border-b border-border-default bg-surface-primary p-6">
-              <h2 className="text-heading-md text-content-primary">
+              <h2
+                id="disconnect-title"
+                className="text-heading-md text-content-primary"
+              >
                 Disconnect {activeProvider?.name}
               </h2>
               <p className="mt-2 text-body-sm text-content-secondary">

@@ -121,11 +121,15 @@ export default function MfaTotpStep() {
         <div className="w-full md:w-[348px]">
           <form onSubmit={handleRecoverySubmit} className="flex flex-col gap-2">
             <div className="flex min-h-[116px] flex-col gap-2">
-              <label className="text-[15px] font-semibold leading-[22px] text-content-primary">
+              <label
+                htmlFor="recovery-code"
+                className="text-[15px] font-semibold leading-[22px] text-content-primary"
+              >
                 Recovery Code
               </label>
               <div className="flex h-12 items-center rounded-lg border border-border-default bg-transparent px-4 outline outline-2 outline-offset-2 outline-transparent transition-colors focus-within:outline-content-primary/75">
                 <input
+                  id="recovery-code"
                   type="text"
                   value={recoveryCode}
                   onChange={(e) => {
@@ -165,8 +169,12 @@ export default function MfaTotpStep() {
               )}
 
               {/* Trust device checkbox */}
-              <label className="flex cursor-pointer items-center gap-2">
+              <label
+                htmlFor="trust-recovery"
+                className="flex cursor-pointer items-center gap-2"
+              >
                 <input
+                  id="trust-recovery"
                   type="checkbox"
                   checked={trustDevice}
                   onChange={(e) => setTrustDevice(e.target.checked)}
@@ -245,7 +253,12 @@ export default function MfaTotpStep() {
             </label>
 
             {/* 6-digit code input */}
-            <div className="flex gap-2" onPaste={handlePaste}>
+            <div
+              className="flex gap-2"
+              role="group"
+              aria-label="Verification code digits"
+              onPaste={handlePaste}
+            >
               {code.map((digit, i) => (
                 <input
                   key={i}
@@ -288,8 +301,12 @@ export default function MfaTotpStep() {
             )}
 
             {/* Trust device checkbox */}
-            <label className="flex cursor-pointer items-center gap-2">
+            <label
+              htmlFor="trust-totp"
+              className="flex cursor-pointer items-center gap-2"
+            >
               <input
+                id="trust-totp"
                 type="checkbox"
                 checked={trustDevice}
                 onChange={(e) => setTrustDevice(e.target.checked)}
