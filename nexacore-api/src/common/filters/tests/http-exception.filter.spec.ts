@@ -116,10 +116,51 @@ describe('HttpExceptionFilter', () => {
     ]);
   });
 
+  it('should sanitize forbidNonWhitelisted messages completely', () => {
+    const exception = new HttpException(
+      {
+        message: [
+          'property unknownField should not exist',
+          'property anotherField should not exist',
+        ],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+
+    filter.catch(exception, mockHost);
+
+    const callArg = mockJson.mock.calls[0][0];
+    expect(callArg.error.details).toEqual([
+      'Unknown property is not allowed',
+      'Unknown property is not allowed',
+    ]);
+  });
+
+  it('should sanitize dotted nested property paths', () => {
+    const exception = new HttpException(
+      {
+        message: ['address.zipCode must be a string'],
+        error: 'Bad Request',
+        statusCode: 400,
+      },
+      HttpStatus.BAD_REQUEST,
+    );
+
+    filter.catch(exception, mockHost);
+
+    const callArg = mockJson.mock.calls[0][0];
+    expect(callArg.error.details).toEqual(['Must be a string']);
+  });
+
   it('should capitalize messages that have no field name prefix', () => {
     const exception = new HttpException(
       {
-        message: ['each value in items must be a string', 'should not be empty'],
+        message: [
+          'each value in items must be a string',
+          'should not be empty',
+        ],
         error: 'Bad Request',
         statusCode: 400,
       },
