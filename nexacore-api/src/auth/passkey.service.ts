@@ -116,36 +116,17 @@ export class PasskeyService {
     name?: string,
     ctx?: { ipAddress: string; userAgent: string | null },
   ): Promise<{ id: string; name: string }> {
-    const regKey = `${WEBAUTHN_REG_KEY_PREFIX}${userId}`;
-    const stored = await this.redis.get(regKey);
-    if (!stored) {
-      throw new BadRequestException(ErrorMessages.passkey.CHALLENGE_EXPIRED);
-    }
-    await this.redis.del(regKey);
-
-    const expectedOptions = JSON.parse(stored);
-
-    let verification;
-    try {
-      verification = await verifyRegistrationResponse({
-        response: credential as unknown as RegistrationResponseJSON,
-        expectedChallenge: expectedOptions.challenge,
-        expectedOrigin: this.origin,
-        expectedRPID: this.rpId,
-      });
-    } catch {
-      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
-    }
-
-    if (!verification.verified || !verification.registrationInfo) {
-      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
-    }
+    const expectedOptions = await this.retrieveAndDeleteRegChallenge(userId);
+    const registrationInfo = await this.performRegistrationVerification(
+      credential,
+      expectedOptions,
+    );
 
     const {
       credential: regCredential,
       credentialDeviceType,
       credentialBackedUp,
-    } = verification.registrationInfo;
+    } = registrationInfo;
 
     const passkeyName = name || DEFAULT_PASSKEY_NAME;
 
@@ -368,6 +349,41 @@ export class PasskeyService {
       passkeyId,
       name: passkey.name,
     });
+  }
+
+  private async retrieveAndDeleteRegChallenge(
+    userId: string,
+  ): Promise<Record<string, unknown>> {
+    const regKey = `${WEBAUTHN_REG_KEY_PREFIX}${userId}`;
+    const stored = await this.redis.get(regKey);
+    if (!stored) {
+      throw new BadRequestException(ErrorMessages.passkey.CHALLENGE_EXPIRED);
+    }
+    await this.redis.del(regKey);
+    return JSON.parse(stored);
+  }
+
+  private async performRegistrationVerification(
+    credential: Record<string, unknown>,
+    expectedOptions: Record<string, unknown>,
+  ) {
+    let verification;
+    try {
+      verification = await verifyRegistrationResponse({
+        response: credential as unknown as RegistrationResponseJSON,
+        expectedChallenge: expectedOptions.challenge as string,
+        expectedOrigin: this.origin,
+        expectedRPID: this.rpId,
+      });
+    } catch {
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
+    }
+
+    if (!verification.verified || !verification.registrationInfo) {
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
+    }
+
+    return verification.registrationInfo;
   }
 
   private async retrieveAndDeleteChallenge(

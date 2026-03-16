@@ -10,7 +10,7 @@ import { createAuditLogger, AuditLogger } from './utils/audit-log.helper';
 
 @Injectable()
 export class LoginSecurityService {
-  private readonly logAuditEvent: AuditLogger;
+  readonly logAudit: AuditLogger;
 
   constructor(
     private readonly impossibleTravelService: ImpossibleTravelService,
@@ -19,7 +19,27 @@ export class LoginSecurityService {
     private readonly sessionsService: SessionsService,
     private readonly auditService: AuditService,
   ) {
-    this.logAuditEvent = createAuditLogger(this.auditService);
+    this.logAudit = createAuditLogger(this.auditService);
+  }
+
+  sendAccountLockedEmail(
+    email: string,
+    failedAttempts: number,
+    lockoutMinutes: number,
+    firstName?: string | null,
+  ): void {
+    this.mailService
+      .sendAccountLockedEmail(email, failedAttempts, lockoutMinutes, firstName)
+      .catch(() => {});
+  }
+
+  sendRegistrationAttemptNotification(
+    email: string,
+    firstName?: string | null,
+  ): void {
+    this.mailService
+      .sendRegistrationAttemptNotification(email, firstName)
+      .catch(() => {});
   }
 
   async checkImpossibleTravel(
@@ -50,7 +70,7 @@ export class LoginSecurityService {
     userId: string,
     requestMeta: { ipAddress: string; userAgent?: string | null },
   ): void {
-    this.logAuditEvent(AuditAction.LOGIN_BLOCKED_TRAVEL, requestMeta, userId, {
+    this.logAudit(AuditAction.LOGIN_BLOCKED_TRAVEL, requestMeta, userId, {
       previousLocation: travelResult.previousLocation,
       currentLocation: travelResult.currentLocation,
       distanceKm: travelResult.distanceKm,
