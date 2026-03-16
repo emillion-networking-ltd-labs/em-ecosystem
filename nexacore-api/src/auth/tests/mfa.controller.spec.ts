@@ -282,6 +282,36 @@ describe('MfaController', () => {
 
       expect(result).toEqual({ accessToken: 'token', user: mockSafeUser });
     });
+
+    it('should extract first element when fingerprint header is an array', async () => {
+      mfaService.verifyLoginCode.mockResolvedValue({ user: mockSafeUser });
+      tokenService.generateTokensForMfa.mockResolvedValue({
+        accessToken: 'token',
+        user: mockSafeUser,
+        cookie: { name: 'refresh_token', value: 'v', options: {} },
+      });
+      const mockRes = { cookie: jest.fn() } as any;
+      const reqWithArrayFp = {
+        ...mockReq,
+        headers: {
+          ...mockReq.headers,
+          'x-device-fingerprint': ['fp-first', 'fp-second'],
+        },
+      };
+
+      await controller.verifyLogin(
+        { mfaToken: 'jwt', code: '123456', trustDevice: true },
+        reqWithArrayFp,
+        mockRes,
+      );
+
+      expect(trustedDeviceService.trustDevice).toHaveBeenCalledWith(
+        'uuid-123',
+        'fp-first',
+        '127.0.0.1',
+        'test-agent',
+      );
+    });
   });
 
   // ─── DELETE /auth/mfa ───────────────────────────────────────

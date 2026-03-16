@@ -258,6 +258,33 @@ describe('AuthService — Password Reset', () => {
 
       expect(ctx.sessionsService.revokeAllUserSessions).toHaveBeenCalled();
     });
+
+    it('should pass ctx ipAddress and userAgent to audit log when provided', async () => {
+      ctx.prismaService.passwordResetToken.findUnique.mockResolvedValue({
+        id: 'rt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 3600000),
+        user: mockUser,
+      });
+      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      ctx.prismaService.$transaction.mockResolvedValue(undefined);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
+      ctx.sessionsService.revokeAllUserSessions.mockResolvedValue(undefined);
+
+      await ctx.authService.resetPassword(
+        { token: 'valid', newPassword: 'NewPass1!' },
+        { ipAddress: '10.0.0.1', userAgent: 'Firefox' },
+      );
+
+      expect(ctx.auditService.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ipAddress: '10.0.0.1',
+          userAgent: 'Firefox',
+        }),
+      );
+    });
   });
 
   // ─── validateResetToken ────────────────────────────────────────

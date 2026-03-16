@@ -71,6 +71,22 @@ describe('OAuth Guards', () => {
       expect(options).toEqual({});
       expect(stateStore.generate).not.toHaveBeenCalled();
     });
+
+    it('should pass userId from request.user to stateStore.generate for link action', async () => {
+      const context = {
+        switchToHttp: () => ({
+          getRequest: () => ({
+            query: {},
+            oauthAction: 'link',
+            user: { id: 'user-123' },
+          }),
+        }),
+      } as any;
+
+      await guard.getAuthenticateOptions(context);
+
+      expect(stateStore.generate).toHaveBeenCalledWith('link', 'user-123');
+    });
   });
 
   describe('GitHubAuthGuard', () => {

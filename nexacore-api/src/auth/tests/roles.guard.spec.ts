@@ -113,5 +113,56 @@ describe('RolesGuard', () => {
       expect(result).toBe(true);
       expect(auditService.log).not.toHaveBeenCalled();
     });
+
+    it('should coalesce missing ip to null in SUPERADMIN audit log', () => {
+      reflector.getAllAndOverride.mockReturnValue([Role.ADMIN]);
+      const context = {
+        getHandler: jest.fn(),
+        getClass: jest.fn(),
+        switchToHttp: jest.fn().mockReturnValue({
+          getRequest: jest.fn().mockReturnValue({
+            user: { id: 'sa-1', role: Role.SUPERADMIN },
+            headers: {},
+            method: 'POST',
+            route: { path: '/admin' },
+          }),
+        }),
+      };
+
+      guard.canActivate(context as never);
+
+      expect(auditService.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ipAddress: null,
+          userAgent: null,
+        }),
+      );
+    });
+
+    it('should coalesce missing headers/method/route in SUPERADMIN audit log', () => {
+      reflector.getAllAndOverride.mockReturnValue([Role.ADMIN]);
+      const context = {
+        getHandler: jest.fn(),
+        getClass: jest.fn(),
+        switchToHttp: jest.fn().mockReturnValue({
+          getRequest: jest.fn().mockReturnValue({
+            user: { id: 'sa-1', role: Role.SUPERADMIN },
+          }),
+        }),
+      };
+
+      guard.canActivate(context as never);
+
+      expect(auditService.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ipAddress: null,
+          userAgent: null,
+          metadata: {
+            requiredRoles: [Role.ADMIN],
+            endpoint: ' ',
+          },
+        }),
+      );
+    });
   });
 });

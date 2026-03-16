@@ -111,6 +111,28 @@ describe('OAuthController', () => {
     });
   });
 
+  describe('generateLinkCode', () => {
+    it('should return a link code from the store', async () => {
+      const result = await controller.generateLinkCode({
+        user: { id: 'uuid-123' },
+      });
+
+      expect(result).toEqual({ code: 'test-link-code' });
+    });
+  });
+
+  describe('googleLinkAuth', () => {
+    it('should be defined (guards handle redirect)', () => {
+      expect(controller.googleLinkAuth()).toBeUndefined();
+    });
+  });
+
+  describe('githubLinkAuth', () => {
+    it('should be defined (guards handle redirect)', () => {
+      expect(controller.githubLinkAuth()).toBeUndefined();
+    });
+  });
+
   describe('googleAuthCallback', () => {
     it('should set oauth_code cookie and redirect without code in URL', async () => {
       const req = {
@@ -223,6 +245,163 @@ describe('OAuthController', () => {
       await expect(
         controller.exchangeOAuthCode(req, mockRes as any),
       ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should include oauthAction when action is created', async () => {
+      authService.exchangeOAuthCode.mockResolvedValue({
+        ...mockAuthResult,
+        oauthAction: 'created',
+      } as any);
+      const req = { cookies: { oauth_code: 'valid-code' } };
+
+      const result = await controller.exchangeOAuthCode(req, mockRes as any);
+
+      expect(result.oauthAction).toBe('created');
+    });
+
+    it('should include oauthAction when action is linked', async () => {
+      authService.exchangeOAuthCode.mockResolvedValue({
+        ...mockAuthResult,
+        oauthAction: 'linked',
+      } as any);
+      const req = { cookies: { oauth_code: 'valid-code' } };
+
+      const result = await controller.exchangeOAuthCode(req, mockRes as any);
+
+      expect(result.oauthAction).toBe('linked');
+    });
+
+    it('should NOT include oauthAction when action is login', async () => {
+      authService.exchangeOAuthCode.mockResolvedValue({
+        ...mockAuthResult,
+        oauthAction: 'login',
+      } as any);
+      const req = { cookies: { oauth_code: 'valid-code' } };
+
+      const result = await controller.exchangeOAuthCode(req, mockRes as any);
+
+      expect(result.oauthAction).toBeUndefined();
+    });
+
+    it('should NOT include oauthAction when it is undefined', async () => {
+      authService.exchangeOAuthCode.mockResolvedValue(mockAuthResult as any);
+      const req = { cookies: { oauth_code: 'valid-code' } };
+
+      const result = await controller.exchangeOAuthCode(req, mockRes as any);
+
+      expect(result.oauthAction).toBeUndefined();
+    });
+  });
+
+  // ─── getValidatedFrontendUrl ────────────────────────────────────
+
+  describe('getValidatedFrontendUrl', () => {
+    it('should throw when frontendUrl is not in allowed list', async () => {
+      const module = await Test.createTestingModule({
+        controllers: [OAuthController],
+        providers: [
+          {
+            provide: AuthService,
+            useValue: {
+              generateOAuthCode: jest.fn().mockResolvedValue('code'),
+              exchangeOAuthCode: jest.fn(),
+            },
+          },
+          {
+            provide: OAuthLinkCodeStore,
+            useValue: { generate: jest.fn(), consume: jest.fn() },
+          },
+          {
+            provide: TurnstileService,
+            useValue: { verify: jest.fn() },
+          },
+          {
+            provide: ConfigService,
+            useValue: {
+              get: jest.fn((key: string) => {
+                const config: Record<string, string> = {
+                  'app.frontendUrl': 'http://localhost:3001',
+                  'app.oauthAllowedRedirectUrls':
+                    'http://other-site.com,http://another-site.com',
+                  'app.nodeEnv': 'development',
+                };
+                return config[key];
+              }),
+            },
+          },
+        ],
+      }).compile();
+
+      const ctrl = module.get<OAuthController>(OAuthController);
+      const req = {
+        user: {
+          accessToken: 'at',
+          user: mockAuthResult.user,
+          cookie: mockCookie,
+        },
+      };
+
+      await expect(
+        ctrl.googleAuthCallback(req, mockRes as any),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+  });
+
+  // ─── Production secure cookie ──────────────────────────────────
+
+  describe('setOAuthCodeCookie — production mode', () => {
+    it('should set secure=true when nodeEnv is production', async () => {
+      const module = await Test.createTestingModule({
+        controllers: [OAuthController],
+        providers: [
+          {
+            provide: AuthService,
+            useValue: {
+              generateOAuthCode: jest.fn().mockResolvedValue('code'),
+              exchangeOAuthCode: jest.fn(),
+            },
+          },
+          {
+            provide: OAuthLinkCodeStore,
+            useValue: { generate: jest.fn(), consume: jest.fn() },
+          },
+          {
+            provide: TurnstileService,
+            useValue: { verify: jest.fn() },
+          },
+          {
+            provide: ConfigService,
+            useValue: {
+              get: jest.fn((key: string) => {
+                const config: Record<string, string> = {
+                  'app.frontendUrl': 'http://localhost:3001',
+                  'app.oauthAllowedRedirectUrls': '',
+                  'app.nodeEnv': 'production',
+                };
+                return config[key];
+              }),
+            },
+          },
+        ],
+      }).compile();
+
+      const ctrl = module.get<OAuthController>(OAuthController);
+      const prodRes = { cookie: jest.fn(), clearCookie: jest.fn() };
+      const req = {
+        user: {
+          accessToken: 'at',
+          user: mockAuthResult.user,
+          cookie: mockCookie,
+        },
+      };
+
+      await ctrl.googleAuthCallback(req, prodRes as any);
+
+      expect(prodRes.cookie).toHaveBeenCalledWith(
+        'oauth_code',
+        'code',
+        expect.objectContaining({ secure: true }),
+      );
     });
   });
 });

@@ -183,6 +183,32 @@ describe('AuthController', () => {
     });
   });
 
+  describe('login — fingerprint header as array', () => {
+    it('should extract first element when x-device-fingerprint is an array', async () => {
+      authService.login.mockResolvedValue(mockAuthResult);
+      const reqWithArrayFp = {
+        ...mockReq,
+        headers: {
+          ...mockReq.headers,
+          'x-device-fingerprint': ['fp-first', 'fp-second'],
+        },
+      };
+
+      await controller.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        reqWithArrayFp,
+        mockRes as any,
+      );
+
+      expect(authService.login).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.anything(),
+        'fp-first',
+      );
+    });
+  });
+
   describe('login - MFA challenge branch', () => {
     it('should return MFA challenge without setting cookie', async () => {
       const mfaResult = { mfaRequired: true as const, mfaToken: 'mfa-jwt' };

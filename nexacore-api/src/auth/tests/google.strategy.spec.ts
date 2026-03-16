@@ -256,6 +256,124 @@ describe('GoogleStrategy', () => {
         undefined,
       );
     });
+
+    it('should extract firstName and lastName from profile.name', async () => {
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
+      authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'google-access-token',
+        'google-refresh-token',
+        {
+          emails: [{ value: 'google@example.com' }],
+          id: 'google-id-123',
+          name: { givenName: 'John', familyName: 'Doe' },
+        },
+        done,
+      );
+
+      expect(authService.validateOAuthUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: 'John',
+          lastName: 'Doe',
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
+    it('should extract avatarUrl from profile.photos array', async () => {
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
+      authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'google-access-token',
+        'google-refresh-token',
+        {
+          emails: [{ value: 'google@example.com' }],
+          id: 'google-id-123',
+          photos: [{ value: 'https://lh3.google.com/photo.jpg' }],
+        },
+        done,
+      );
+
+      expect(authService.validateOAuthUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          avatarUrl: 'https://lh3.google.com/photo.jpg',
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
+    it('should handle missing profile.name gracefully', async () => {
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
+      authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'google-access-token',
+        'google-refresh-token',
+        {
+          emails: [{ value: 'google@example.com' }],
+          id: 'google-id-123',
+          // name is undefined
+        },
+        done,
+      );
+
+      expect(authService.validateOAuthUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: undefined,
+          lastName: undefined,
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
+    it('should handle missing profile.photos gracefully', async () => {
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
+      authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'google-access-token',
+        'google-refresh-token',
+        {
+          emails: [{ value: 'google@example.com' }],
+          id: 'google-id-123',
+          // photos is undefined
+        },
+        done,
+      );
+
+      expect(authService.validateOAuthUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          avatarUrl: undefined,
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
   });
 
   describe('authorizationParams', () => {
@@ -353,6 +471,12 @@ describe('GoogleStrategy', () => {
       await strategy.authenticate({ query: {} }, {});
 
       expect(oauthStateStore.getCodeVerifier).not.toHaveBeenCalled();
+      expect(superAuthSpy).toHaveBeenCalled();
+    });
+
+    it('should default options to empty object when undefined', async () => {
+      await strategy.authenticate({ query: {} });
+
       expect(superAuthSpy).toHaveBeenCalled();
     });
 

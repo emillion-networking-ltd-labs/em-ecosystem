@@ -253,5 +253,116 @@ describe('LoginSecurityService', () => {
         'Test',
       );
     });
+
+    it('should not send email when IP known in session 1 and UA known in session 2', async () => {
+      sessionsService.findPreviousActiveSessions.mockResolvedValue([
+        { ipAddress: '127.0.0.1', userAgent: 'other-agent' },
+        { ipAddress: '10.0.0.1', userAgent: 'test-agent' },
+      ]);
+
+      await service.notifyIfNewDevice(mockUser, 'session-1', requestMeta);
+
+      expect(mailService.sendLoginNotificationEmail).not.toHaveBeenCalled();
+    });
+
+    it('should handle null userAgent by coalescing to null for comparison', async () => {
+      sessionsService.findPreviousActiveSessions.mockResolvedValue([
+        { ipAddress: '127.0.0.1', userAgent: null },
+      ]);
+
+      await service.notifyIfNewDevice(mockUser, 'session-1', {
+        ipAddress: '127.0.0.1',
+        userAgent: null,
+      });
+
+      expect(mailService.sendLoginNotificationEmail).not.toHaveBeenCalled();
+    });
+
+    it('should treat undefined userAgent as null for comparison', async () => {
+      sessionsService.findPreviousActiveSessions.mockResolvedValue([
+        { ipAddress: '127.0.0.1', userAgent: null },
+      ]);
+
+      await service.notifyIfNewDevice(mockUser, 'session-1', {
+        ipAddress: '127.0.0.1',
+        userAgent: undefined,
+      });
+
+      expect(mailService.sendLoginNotificationEmail).not.toHaveBeenCalled();
+    });
+
+    it('should coalesce undefined userAgent to null when sending notification email', async () => {
+      sessionsService.findPreviousActiveSessions.mockResolvedValue([
+        { ipAddress: '10.0.0.1', userAgent: 'other-agent' },
+      ]);
+
+      await service.notifyIfNewDevice(mockUser, 'session-1', {
+        ipAddress: '127.0.0.1',
+        userAgent: undefined,
+      });
+
+      expect(mailService.sendLoginNotificationEmail).toHaveBeenCalledWith(
+        'test@example.com',
+        '127.0.0.1',
+        null,
+        'Test',
+      );
+    });
+  });
+
+  // ─── checkSuspiciousLoginSuccess — edge cases ────────────────────
+
+  describe('checkSuspiciousLoginSuccess — edge cases', () => {
+    it('should coalesce null firstName to null', () => {
+      const userWithNullName = { ...mockUser, firstName: null };
+      service.checkSuspiciousLoginSuccess(userWithNullName, requestMeta);
+
+      expect(suspiciousLoginService.analyzeLoginSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: null,
+        }),
+      );
+    });
+
+    it('should coalesce undefined firstName to null', () => {
+      const userNoName = { id: 'user-1', email: 'test@example.com' };
+      service.checkSuspiciousLoginSuccess(userNoName, requestMeta);
+
+      expect(suspiciousLoginService.analyzeLoginSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({
+          firstName: null,
+        }),
+      );
+    });
+
+    it('should coalesce null userAgent to null in requestMeta', () => {
+      service.checkSuspiciousLoginSuccess(mockUser, {
+        ipAddress: '127.0.0.1',
+        userAgent: null,
+      });
+
+      expect(suspiciousLoginService.analyzeLoginSuccess).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userAgent: null,
+        }),
+      );
+    });
+  });
+
+  // ─── checkSuspiciousLoginFailure — edge cases ────────────────────
+
+  describe('checkSuspiciousLoginFailure — edge cases', () => {
+    it('should coalesce null userAgent to null', () => {
+      service.checkSuspiciousLoginFailure('user-1', {
+        ipAddress: '127.0.0.1',
+        userAgent: null,
+      });
+
+      expect(suspiciousLoginService.analyzeLoginFailure).toHaveBeenCalledWith({
+        userId: 'user-1',
+        ipAddress: '127.0.0.1',
+        userAgent: null,
+      });
+    });
   });
 });

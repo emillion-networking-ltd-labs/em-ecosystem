@@ -237,6 +237,80 @@ describe('AuthService — Login Security', () => {
     });
   });
 
+  // ─── handleMfaLogin — impossible travel on trusted device ──────
+
+  describe('handleMfaLogin — trusted device impossible travel', () => {
+    it('should throw ForbiddenException when trusted device triggers travel block', async () => {
+      const mfaUser = { ...mockUser, mfaEnabled: true };
+      ctx.usersService.findByEmail.mockResolvedValue(mfaUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      ctx.trustedDeviceService.isTrustedDevice.mockResolvedValue(true);
+      ctx.jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
+      ctx.sessionsService.createSession.mockResolvedValue(mockSession);
+      ctx.sessionsService.updateSessionHash.mockResolvedValue(undefined);
+      ctx.impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
+        isAnomalous: true,
+        actionTaken: 'blocked',
+        previousLocation: {
+          city: 'Madrid',
+          country: 'Spain',
+          countryCode: 'ES',
+          latitude: 40.4,
+          longitude: -3.7,
+        },
+        currentLocation: {
+          city: 'Tokyo',
+          country: 'Japan',
+          countryCode: 'JP',
+          latitude: 35.6,
+          longitude: 139.6,
+        },
+        distanceKm: 10500,
+        elapsedHours: 0.5,
+        requiredSpeedKmh: 21000,
+        strategy: 'block',
+      });
+
+      await expect(
+        ctx.authService.login(
+          { email: 'test@example.com', password: 'StrongPass1!' },
+          requestMeta,
+          undefined,
+          'fp-123',
+        ),
+      ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should not throw when travel is anomalous but not blocked on trusted device', async () => {
+      const mfaUser = { ...mockUser, mfaEnabled: true };
+      ctx.usersService.findByEmail.mockResolvedValue(mfaUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      ctx.trustedDeviceService.isTrustedDevice.mockResolvedValue(true);
+      ctx.jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
+      ctx.sessionsService.createSession.mockResolvedValue(mockSession);
+      ctx.sessionsService.updateSessionHash.mockResolvedValue(undefined);
+      ctx.impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
+        isAnomalous: true,
+        actionTaken: 'challenged',
+      });
+
+      const result = await ctx.authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+        undefined,
+        'fp-123',
+      );
+
+      expect(result.accessToken).toBe('access-token');
+    });
+  });
+
   // ─── fire-and-forget resilience ────────────────────────────────
 
   describe('fire-and-forget resilience (audit log rejection)', () => {
@@ -409,6 +483,40 @@ describe('AuthService — Login Security', () => {
         ),
       ).rejects.toThrow(ForbiddenException);
       await flushPromises();
+    });
+  });
+
+  // ─── login — impossible travel challenged (non-MFA user) ──────
+
+  describe('login — impossible travel challenged (non-MFA user)', () => {
+    it('should proceed normally when travel is challenged but user has no MFA', async () => {
+      const noMfaUser = { ...mockUser, mfaEnabled: false };
+      ctx.usersService.findByEmail.mockResolvedValue(noMfaUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+      ctx.jwtService.sign
+        .mockReturnValueOnce('access-token')
+        .mockReturnValueOnce('refresh-token');
+      ctx.sessionsService.createSession.mockResolvedValue(mockSession);
+      ctx.sessionsService.updateSessionHash.mockResolvedValue(undefined);
+      ctx.impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
+        isAnomalous: true,
+        actionTaken: 'challenged',
+        previousLocation: { city: 'Madrid', country: 'Spain' },
+        currentLocation: { city: 'London', country: 'UK' },
+        distanceKm: 1200,
+        elapsedHours: 1,
+        requiredSpeedKmh: 1200,
+        strategy: 'challenge',
+      });
+
+      const result = await ctx.authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        requestMeta,
+      );
+
+      // Non-MFA user proceeds normally even when challenged
+      expect(result).toHaveProperty('accessToken');
+      expect(result).not.toHaveProperty('mfaRequired');
     });
   });
 });
