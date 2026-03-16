@@ -56,6 +56,7 @@ export default function ConnectedAccounts() {
   >(null);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [connecting, setConnecting] = useState(false);
 
   const canConfirm = password.length >= 8 && !loading;
 
@@ -111,8 +112,6 @@ export default function ConnectedAccounts() {
   });
 
   if (!user) return null;
-
-  const [connecting, setConnecting] = useState(false);
 
   const handleConnect = async (providerId: string) => {
     setConnecting(true);
