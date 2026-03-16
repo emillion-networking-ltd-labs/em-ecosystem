@@ -120,7 +120,7 @@ export class LoginService {
         email: dto.email,
         reason: 'user_not_found',
       });
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
     }
 
     // Account lockout check — CWE-203: same exception type and message as
@@ -130,7 +130,7 @@ export class LoginService {
         reason: 'account_locked',
       });
 
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
     }
 
     // Expired lockout: reset failed attempts (but NOT lockoutCount)
@@ -150,7 +150,7 @@ export class LoginService {
       this.emailVerificationService
         .createAndSendVerificationEmail(user)
         .catch(() => {});
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
     }
 
     if (user.failedAttempts > 0 || user.lockoutCount > 0) {
@@ -185,7 +185,7 @@ export class LoginService {
       this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, user.id, {
         reason: 'no_password_set',
       });
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -213,7 +213,7 @@ export class LoginService {
           failedAttempts: MAX_FAILED_ATTEMPTS,
         });
 
-        throw new UnauthorizedException('Invalid credentials');
+        throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
       }
 
       this.logAuditEvent(AuditAction.LOGIN_FAILURE, ctx, user.id, {
@@ -226,7 +226,7 @@ export class LoginService {
         requestMeta,
       );
 
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
     }
   }
 
