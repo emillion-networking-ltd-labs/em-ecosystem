@@ -91,7 +91,10 @@ export class AccountController {
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
   @Throttle({
-    global: { ttl: 900000, limit: 3 },
+    global: {
+      ttl: AUTH_RATE_LIMITS.sensitive_action.ttl,
+      limit: AUTH_RATE_LIMITS.sensitive_action.limit,
+    },
   })
   @ApiOperation({
     summary: 'Resend email verification (public, no auth required)',
@@ -116,7 +119,10 @@ export class AccountController {
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
   @Throttle({
-    global: { ttl: 900000, limit: 3 },
+    global: {
+      ttl: AUTH_RATE_LIMITS.sensitive_action.ttl,
+      limit: AUTH_RATE_LIMITS.sensitive_action.limit,
+    },
   })
   @ApiOperation({ summary: 'Request password reset email' })
   @ApiResponse({

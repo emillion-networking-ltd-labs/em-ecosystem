@@ -34,6 +34,7 @@ import { ListUsersQueryDto } from './dto/list-users-query.dto';
 import { ListSecurityActivityQueryDto } from './dto/list-security-activity-query.dto';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { extractRequestMeta } from '../common/utils/request-meta';
+import { AUTH_RATE_LIMITS } from '../auth/constants/auth.constants';
 
 @Controller('users')
 export class UsersController {
@@ -81,7 +82,12 @@ export class UsersController {
 
   @Post('me/email')
   @UseGuards(JwtAuthGuard)
-  @Throttle({ global: { ttl: 60_000, limit: 5 } })
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.user_settings.ttl,
+      limit: AUTH_RATE_LIMITS.user_settings.limit,
+    },
+  })
   @HttpCode(HttpStatus.OK)
   async requestEmailChange(
     @Request()
@@ -126,7 +132,12 @@ export class UsersController {
 
   @Delete('me/oauth/:provider')
   @UseGuards(JwtAuthGuard)
-  @Throttle({ global: { ttl: 60_000, limit: 5 } })
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.user_settings.ttl,
+      limit: AUTH_RATE_LIMITS.user_settings.limit,
+    },
+  })
   @HttpCode(HttpStatus.OK)
   async unlinkOAuth(
     @Param('provider') provider: string,

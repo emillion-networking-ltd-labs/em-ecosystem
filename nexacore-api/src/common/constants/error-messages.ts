@@ -20,8 +20,7 @@ export const ErrorMessages = {
     INVALID_CODE: 'Invalid verification code',
     INVALID_TOKEN: 'Invalid or expired MFA token',
     AUTHENTICATION_REQUIRED: 'Authentication required',
-    PASSWORD_REQUIRED_NO_PASSWORD:
-      'Password confirmation required but no password set',
+    PASSWORD_REQUIRED_NO_PASSWORD: 'Password confirmation required',
     SETUP_REQUIRED: 'MFA setup is required. Please enable MFA to continue.',
   },
   session: {

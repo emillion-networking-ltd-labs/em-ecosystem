@@ -21,10 +21,10 @@ import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import {
   AuthService,
-  CookieConfig,
   MfaChallengeResult,
   MfaSetupRequiredResult,
 } from './auth.service';
+import { setCookieFromConfig } from '../common/utils/cookie.util';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import {
@@ -55,10 +55,6 @@ export class AuthController {
     private readonly authService: AuthService,
     private readonly permissionsService: PermissionsService,
   ) {}
-
-  private setCookie(res: Response, cookie: CookieConfig): void {
-    res.cookie(cookie.name, cookie.value, cookie.options);
-  }
 
   @Get('csrf-token')
   @SkipCsrf()
@@ -145,7 +141,7 @@ export class AuthController {
       return result as MfaSetupRequiredResult;
     }
 
-    this.setCookie(res, result.cookie);
+    setCookieFromConfig(res, result.cookie);
     return { accessToken: result.accessToken, user: result.user };
   }
 
@@ -178,7 +174,7 @@ export class AuthController {
       meta,
       meta,
     );
-    this.setCookie(res, result.cookie);
+    setCookieFromConfig(res, result.cookie);
     return { accessToken: result.accessToken };
   }
 
@@ -194,9 +190,9 @@ export class AuthController {
     const meta = extractRequestMeta(req);
     if (refreshToken) {
       const clearCookie = await this.authService.logout(refreshToken, meta);
-      this.setCookie(res, clearCookie);
+      setCookieFromConfig(res, clearCookie);
     } else {
-      this.setCookie(res, this.authService.buildClearCookie());
+      setCookieFromConfig(res, this.authService.buildClearCookie());
     }
     return { message: 'Logged out successfully' };
   }
@@ -214,7 +210,7 @@ export class AuthController {
   ) {
     const meta = extractRequestMeta(req);
     const clearCookie = await this.authService.logoutAll(req.user.id, meta);
-    this.setCookie(res, clearCookie);
+    setCookieFromConfig(res, clearCookie);
     return { message: 'All sessions revoked' };
   }
 

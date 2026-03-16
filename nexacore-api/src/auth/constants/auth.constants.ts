@@ -67,6 +67,8 @@ export const AUTH_RATE_LIMITS = {
   verify_email: { ttl: 60_000, limit: 10 },
   reset_password: { ttl: 60_000, limit: 5 },
   trust_device: { ttl: 60_000, limit: 5 },
+  sensitive_action: { ttl: 900_000, limit: 3 }, // 15 min, 3 req (email resend, password reset)
+  user_settings: { ttl: 60_000, limit: 5 }, // 60s, 5 req (email change, oauth unlink)
 };
 
 /**
@@ -114,6 +116,9 @@ export const DEVICE_FINGERPRINT_HEADER = 'x-device-fingerprint';
 
 /** Cookie name for refresh tokens. */
 export const REFRESH_TOKEN_COOKIE_NAME = 'refresh_token';
+
+/** OAuth code cookie max age in milliseconds (30 seconds). */
+export const OAUTH_CODE_COOKIE_MAX_AGE_MS = 30_000;
 
 /** JWT issuer and audience identifier. */
 export const JWT_ISSUER = 'nexacore-api';

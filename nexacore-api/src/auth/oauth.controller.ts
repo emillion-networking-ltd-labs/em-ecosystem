@@ -22,7 +22,11 @@ import { Throttle, SkipThrottle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { ConfigService } from '@nestjs/config';
 import { AuthService, CookieConfig } from './auth.service';
-import { AUTH_RATE_LIMITS } from './constants/auth.constants';
+import { setCookieFromConfig } from '../common/utils/cookie.util';
+import {
+  AUTH_RATE_LIMITS,
+  OAUTH_CODE_COOKIE_MAX_AGE_MS,
+} from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
@@ -43,10 +47,6 @@ export class OAuthController {
     private readonly configService: ConfigService,
     private readonly oauthLinkCodeStore: OAuthLinkCodeStore,
   ) {}
-
-  private setCookie(res: Response, cookie: CookieConfig): void {
-    res.cookie(cookie.name, cookie.value, cookie.options);
-  }
 
   @Get('google')
   @Throttle({
@@ -171,7 +171,7 @@ export class OAuthController {
     }
     res.clearCookie('oauth_code', { path: '/' });
     const result = await this.authService.exchangeOAuthCode(code);
-    this.setCookie(res, result.cookie);
+    setCookieFromConfig(res, result.cookie);
     return {
       accessToken: result.accessToken,
       user: result.user,
@@ -248,7 +248,7 @@ export class OAuthController {
       secure: this.configService.get<string>('app.nodeEnv') === 'production',
       sameSite: 'strict',
       path: '/',
-      maxAge: 30_000,
+      maxAge: OAUTH_CODE_COOKIE_MAX_AGE_MS,
     });
   }
 
