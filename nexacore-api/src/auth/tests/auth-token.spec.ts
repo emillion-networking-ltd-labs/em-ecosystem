@@ -308,6 +308,133 @@ describe('AuthService — Token Lifecycle', () => {
     });
   });
 
+  // ─── logout ─────────────────────────────────────────────────────
+
+  describe('logout', () => {
+    it('should return clear cookie even when JWT verify fails', async () => {
+      ctx.jwtService.verify.mockImplementation(() => {
+        throw new Error('Token expired');
+      });
+
+      const result = await ctx.authService.logout('expired-token');
+
+      expect(result.name).toBe('refresh_token');
+      expect(result.value).toBe('');
+      expect(result.options.maxAge).toBe(0);
+      expect(ctx.sessionsService.revokeSession).not.toHaveBeenCalled();
+    });
+
+    it('should revoke session and deny tokens when JWT is valid', async () => {
+      ctx.jwtService.verify.mockReturnValue({
+        sub: 'uuid-123',
+        sessionId: 'session-uuid',
+        family: 'family-uuid',
+      });
+
+      const result = await ctx.authService.logout('valid-token');
+
+      expect(ctx.sessionsService.revokeSession).toHaveBeenCalledWith(
+        'session-uuid',
+        'uuid-123',
+      );
+      expect(result.options.maxAge).toBe(0);
+    });
+  });
+
+  // ─── validateSessionNotIdle — revoked session ───────────────────
+
+  describe('validateSessionNotIdle — revoked session', () => {
+    beforeEach(() => {
+      ctx.jwtService.verify.mockReturnValue({
+        sub: 'uuid-123',
+        sessionId: 'session-uuid',
+        family: 'family-uuid',
+      });
+      ctx.usersService.findById.mockResolvedValue(mockUser);
+      ctx.sessionsService.rotateRefreshToken.mockResolvedValue(mockSession);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed');
+      ctx.sessionsService.updateSessionHash.mockResolvedValue(undefined);
+      ctx.jwtService.sign.mockReturnValue('token');
+    });
+
+    it('should skip idle check when session is revoked', async () => {
+      ctx.sessionsService.findById.mockResolvedValue({
+        ...mockSession,
+        isRevoked: true,
+      });
+
+      const result = await ctx.authService.refreshTokens(
+        'valid-token',
+        requestMeta,
+      );
+
+      expect(result.accessToken).toBe('token');
+      expect(ctx.sessionsService.revokeSessionDirect).not.toHaveBeenCalled();
+    });
+
+    it('should skip idle check when session not found', async () => {
+      ctx.sessionsService.findById.mockResolvedValue(null);
+
+      const result = await ctx.authService.refreshTokens(
+        'valid-token',
+        requestMeta,
+      );
+
+      expect(result.accessToken).toBe('token');
+      expect(ctx.sessionsService.revokeSessionDirect).not.toHaveBeenCalled();
+    });
+  });
+
+  // ─── generateTokensForMfa — impossible travel ──────────────────
+
+  describe('generateTokensForMfa — impossible travel', () => {
+    it('should throw ForbiddenException when travel is anomalous and blocked', async () => {
+      ctx.usersService.findById.mockResolvedValue(mockUser);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      ctx.jwtService.sign
+        .mockReturnValueOnce('mfa-access')
+        .mockReturnValueOnce('mfa-refresh');
+      ctx.sessionsService.createSession.mockResolvedValue(mockSession);
+      ctx.sessionsService.updateSessionHash.mockResolvedValue(undefined);
+
+      ctx.impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
+        isAnomalous: true,
+        actionTaken: 'blocked',
+        previousLocation: { city: 'Madrid' },
+        currentLocation: { city: 'Tokyo' },
+        distanceKm: 10500,
+        elapsedHours: 0.5,
+        requiredSpeedKmh: 21000,
+      });
+
+      await expect(
+        ctx.authService.generateTokensForMfa('uuid-123', requestMeta),
+      ).rejects.toThrow('Login blocked due to suspicious location activity');
+    });
+
+    it('should NOT call handleTravelBlock when travel is not blocked', async () => {
+      ctx.usersService.findById.mockResolvedValue(mockUser);
+      (bcrypt.hash as jest.Mock).mockResolvedValue('hashed-refresh');
+      ctx.jwtService.sign
+        .mockReturnValueOnce('mfa-access')
+        .mockReturnValueOnce('mfa-refresh');
+      ctx.sessionsService.createSession.mockResolvedValue(mockSession);
+      ctx.sessionsService.updateSessionHash.mockResolvedValue(undefined);
+
+      ctx.impossibleTravelService.detectImpossibleTravel.mockResolvedValue({
+        isAnomalous: true,
+        actionTaken: 'challenged',
+      });
+
+      const result = await ctx.authService.generateTokensForMfa(
+        'uuid-123',
+        requestMeta,
+      );
+
+      expect(result.accessToken).toBe('mfa-access');
+    });
+  });
+
   // ─── fire-and-forget resilience (token-related) ────────────────
 
   describe('fire-and-forget resilience (token-related)', () => {
@@ -372,6 +499,55 @@ describe('AuthService — Token Lifecycle', () => {
       );
 
       expect(result.accessToken).toBe('new-at');
+    });
+  });
+
+  // ─── generateTokens / refreshTokens — null userAgent coalescing ──
+
+  describe('token service — null userAgent coalescing', () => {
+    it('should coalesce undefined userAgent to null in generateTokens', async () => {
+      ctx.usersService.findByEmail.mockResolvedValue(mockUser);
+      (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+
+      const metaNoAgent = { ipAddress: '127.0.0.1', userAgent: undefined };
+      const result = await ctx.authService.login(
+        { email: 'test@example.com', password: 'StrongPass1!' },
+        metaNoAgent,
+      );
+
+      expect(result).toHaveProperty('accessToken');
+      expect(ctx.sessionsService.createSession).toHaveBeenCalledWith(
+        expect.objectContaining({ userAgent: null }),
+      );
+    });
+
+    it('should coalesce undefined userAgent to null in refreshTokens', async () => {
+      ctx.jwtService.verify.mockReturnValue({
+        sub: 'uuid-123',
+        sessionId: 'session-uuid',
+        family: 'family-uuid',
+      });
+      ctx.usersService.findById.mockResolvedValue(mockUser);
+      ctx.sessionsService.rotateRefreshToken.mockResolvedValue({
+        ...mockSession,
+        id: 'new-session-id',
+      });
+      (bcrypt.hash as jest.Mock).mockResolvedValue('new-hash');
+      ctx.jwtService.sign
+        .mockReturnValueOnce('new-at')
+        .mockReturnValueOnce('new-rt');
+      ctx.sessionsService.updateSessionHash.mockResolvedValue(undefined);
+
+      const metaNoAgent = { ipAddress: '127.0.0.1', userAgent: undefined };
+      const result = await ctx.authService.refreshTokens(
+        'old-refresh',
+        metaNoAgent,
+      );
+
+      expect(result.accessToken).toBe('new-at');
+      expect(ctx.sessionsService.rotateRefreshToken).toHaveBeenCalledWith(
+        expect.objectContaining({ userAgent: null }),
+      );
     });
   });
 });

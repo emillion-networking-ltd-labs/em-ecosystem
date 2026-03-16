@@ -320,6 +320,63 @@ describe('GitHubStrategy', () => {
       );
     });
 
+    it('should extract avatarUrl from profile.photos', async () => {
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
+      authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'github-access-token',
+        'github-refresh-token',
+        {
+          emails: [{ value: 'github@example.com' }],
+          id: 'gh-5',
+          photos: [{ value: 'https://avatar.example.com/photo.jpg' }],
+        },
+        done,
+      );
+
+      expect(authService.validateOAuthUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          avatarUrl: 'https://avatar.example.com/photo.jpg',
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
+    it('should handle missing photos gracefully', async () => {
+      oauthStateStore.validate.mockResolvedValue({
+        codeVerifier: 'test',
+        action: 'login',
+      });
+      authService.validateOAuthUser.mockResolvedValue(mockOAuthResult);
+      const done = jest.fn();
+
+      await strategy.validate(
+        validReq,
+        'github-access-token',
+        'github-refresh-token',
+        {
+          emails: [{ value: 'github@example.com' }],
+          id: 'gh-6',
+        },
+        done,
+      );
+
+      expect(authService.validateOAuthUser).toHaveBeenCalledWith(
+        expect.objectContaining({
+          avatarUrl: undefined,
+        }),
+        expect.anything(),
+        expect.anything(),
+      );
+    });
+
     it('should call done with error when validateOAuthUser throws', async () => {
       oauthStateStore.validate.mockResolvedValue({
         codeVerifier: 'test',
@@ -440,6 +497,12 @@ describe('GitHubStrategy', () => {
       await strategy.authenticate({ query: {} }, {});
 
       expect(oauthStateStore.getCodeVerifier).not.toHaveBeenCalled();
+      expect(superAuthSpy).toHaveBeenCalled();
+    });
+
+    it('should default options to empty object when undefined', async () => {
+      await strategy.authenticate({ query: {} });
+
       expect(superAuthSpy).toHaveBeenCalled();
     });
 

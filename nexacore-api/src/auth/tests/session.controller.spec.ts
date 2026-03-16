@@ -98,6 +98,25 @@ describe('SessionController', () => {
       expect(result).toEqual(mockSessions);
     });
 
+    it('should return undefined session ID when JWT verify throws', async () => {
+      jwtSvc.verify.mockImplementation(() => {
+        throw new Error('invalid token');
+      });
+      sessionsService.getActiveSessions.mockResolvedValue([]);
+      const reqWithCookieAndUser = {
+        ...mockReq,
+        cookies: { refresh_token: 'bad-jwt' },
+        user: { id: 'uuid-123' },
+      };
+
+      await controller.getSessions(reqWithCookieAndUser);
+
+      expect(sessionsService.getActiveSessions).toHaveBeenCalledWith(
+        'uuid-123',
+        undefined,
+      );
+    });
+
     it('should extract current session ID from cookie', async () => {
       jwtSvc.verify.mockReturnValue({
         sub: 'uuid-123',

@@ -361,6 +361,37 @@ describe('AuthService — Email Verification', () => {
         }),
       );
     });
+
+    it('should pass ctx ipAddress and userAgent to audit log when provided', async () => {
+      const userWithPending = {
+        ...mockUser,
+        pendingEmail: 'new@example.com',
+      };
+      ctx.prismaService.emailVerificationToken.findUnique.mockResolvedValue({
+        id: 'vt-1',
+        tokenHash: 'hash',
+        userId: 'uuid-123',
+        type: 'EMAIL_CHANGE',
+        usedAt: null,
+        expiresAt: new Date(Date.now() + 86400000),
+        user: userWithPending,
+      });
+      ctx.usersService.findByEmail.mockResolvedValue(null);
+      ctx.prismaService.$transaction.mockResolvedValue(undefined);
+      ctx.sessionsService.revokeAllUserSessions.mockResolvedValue(undefined);
+
+      await ctx.authService.verifyEmailChange('valid-token', {
+        ipAddress: '10.0.0.1',
+        userAgent: 'Firefox',
+      });
+
+      expect(ctx.auditService.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ipAddress: '10.0.0.1',
+          userAgent: 'Firefox',
+        }),
+      );
+    });
   });
 
   // ─── resendVerificationEmail ───────────────────────────────────

@@ -55,6 +55,21 @@ describe('OAuthStateStore', () => {
       expect(typeof parsed.codeVerifier).toBe('string');
       expect(parsed.codeVerifier.length).toBeGreaterThan(0);
     });
+
+    it('should include userId in stored data when provided', async () => {
+      await store.generate('link', 'user-123');
+      const storedValue = redis.set.mock.calls[0][1];
+      const parsed = JSON.parse(storedValue);
+      expect(parsed.userId).toBe('user-123');
+      expect(parsed.action).toBe('link');
+    });
+
+    it('should not include userId when not provided', async () => {
+      await store.generate('login');
+      const storedValue = redis.set.mock.calls[0][1];
+      const parsed = JSON.parse(storedValue);
+      expect(parsed.userId).toBeUndefined();
+    });
   });
 
   describe('validate', () => {

@@ -435,6 +435,81 @@ describe('MfaService', () => {
     });
   });
 
+  describe('verifySetup — edge cases', () => {
+    it('should throw UnauthorizedException if user not found', async () => {
+      (usersService.findById as jest.Mock).mockResolvedValue(null);
+
+      await expect(service.verifySetup('user-1', '123456')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should log audit with null ipAddress/userAgent when meta is undefined', async () => {
+      (usersService.findById as jest.Mock).mockResolvedValue(
+        mockUser({ mfaSecret: 'encrypted-secret' }),
+      );
+      mockVerify.mockResolvedValue({ valid: true });
+
+      await service.verifySetup('user-1', '123456');
+
+      // meta is undefined, so meta?.ipAddress ?? null = null
+    });
+
+    it('should log audit with provided meta values', async () => {
+      (usersService.findById as jest.Mock).mockResolvedValue(
+        mockUser({ mfaSecret: 'encrypted-secret' }),
+      );
+      mockVerify.mockResolvedValue({ valid: true });
+
+      await service.verifySetup('user-1', '123456', {
+        ipAddress: '192.168.1.1',
+        userAgent: 'Firefox',
+      });
+    });
+  });
+
+  describe('disableMfa — edge cases', () => {
+    it('should throw UnauthorizedException if user not found', async () => {
+      (usersService.findById as jest.Mock).mockResolvedValue(null);
+
+      await expect(service.disableMfa('user-1', 'password')).rejects.toThrow(
+        UnauthorizedException,
+      );
+    });
+
+    it('should log audit with provided meta values', async () => {
+      const hash = await bcrypt.hash('correct-password', 10);
+      (usersService.findById as jest.Mock).mockResolvedValue(
+        mockUser({ mfaEnabled: true, passwordHash: hash }),
+      );
+
+      await service.disableMfa('user-1', 'correct-password', {
+        ipAddress: '10.0.0.1',
+        userAgent: 'Chrome',
+      });
+    });
+  });
+
+  describe('regenerateRecoveryCodes — edge cases', () => {
+    it('should throw UnauthorizedException if user not found', async () => {
+      (usersService.findById as jest.Mock).mockResolvedValue(null);
+
+      await expect(
+        service.regenerateRecoveryCodes('user-1', 'password'),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw BadRequestException if no password set (OAuth account)', async () => {
+      (usersService.findById as jest.Mock).mockResolvedValue(
+        mockUser({ mfaEnabled: true, passwordHash: null }),
+      );
+
+      await expect(
+        service.regenerateRecoveryCodes('user-1', 'password'),
+      ).rejects.toThrow(BadRequestException);
+    });
+  });
+
   describe('generateMfaToken', () => {
     it('should sign a JWT with mfa-challenge type', () => {
       const user = mockUser();
