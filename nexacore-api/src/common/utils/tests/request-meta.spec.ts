@@ -67,6 +67,28 @@ describe('extractRequestMeta', () => {
     expect(result.userAgent).toBeNull();
   });
 
+  it('should strip newline characters from user-agent header (CWE-117)', () => {
+    const req = {
+      ip: '127.0.0.1',
+      headers: { 'user-agent': 'Mozilla/5.0\nINJECTED\r\nLINE' },
+    };
+
+    const result = extractRequestMeta(req);
+
+    expect(result.userAgent).toBe('Mozilla/5.0INJECTEDLINE');
+  });
+
+  it('should strip carriage return from user-agent header', () => {
+    const req = {
+      ip: '127.0.0.1',
+      headers: { 'user-agent': 'Agent\rEvil' },
+    };
+
+    const result = extractRequestMeta(req);
+
+    expect(result.userAgent).toBe('AgentEvil');
+  });
+
   it('should return correct RequestMeta type', () => {
     const req = {
       ip: '192.168.1.1',

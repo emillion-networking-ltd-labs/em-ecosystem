@@ -10,6 +10,10 @@ export function extractRequestMeta(req: {
 }): RequestMeta {
   return {
     ipAddress: req.ip || req.socket?.remoteAddress || 'unknown',
-    userAgent: (req.headers?.['user-agent'] as string | undefined) || null,
+    userAgent:
+      (req.headers?.['user-agent'] as string | undefined)?.replace(
+        /[\r\n]/g,
+        '',
+      ) || null,
   };
 }
