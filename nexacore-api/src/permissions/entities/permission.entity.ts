@@ -15,6 +15,7 @@ export interface RolePermission {
   permissionId: string;
   permission?: Permission;
   createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface RolePermissionsResponse {
