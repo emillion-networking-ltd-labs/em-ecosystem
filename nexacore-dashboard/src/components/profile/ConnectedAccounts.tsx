@@ -50,6 +50,8 @@ export default function ConnectedAccounts() {
   const { user, refreshSession } = useAuth();
   const { addToast } = useToast();
   const overlayRef = useRef<HTMLDivElement>(null);
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const [disconnectingProvider, setDisconnectingProvider] = useState<
     string | null
@@ -110,6 +112,46 @@ export default function ConnectedAccounts() {
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   });
+
+  // Focus trap: capture focus on open, cycle Tab within dialog, restore on close
+  useEffect(() => {
+    if (!disconnectingProvider) return;
+
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+
+    const focusableSelector =
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+
+    // Focus first focusable element on open
+    const firstFocusable = dialog.querySelector<HTMLElement>(focusableSelector);
+    firstFocusable?.focus();
+
+    const handleTab = (e: KeyboardEvent) => {
+      if (e.key !== "Tab") return;
+      const focusable = dialog.querySelectorAll<HTMLElement>(focusableSelector);
+      if (focusable.length === 0) return;
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleTab);
+    return () => {
+      document.removeEventListener("keydown", handleTab);
+      previousFocusRef.current?.focus();
+    };
+  }, [disconnectingProvider]);
 
   if (!user) return null;
 
@@ -210,6 +252,7 @@ export default function ConnectedAccounts() {
           }}
         >
           <div
+            ref={dialogRef}
             role="dialog"
             aria-modal="true"
             aria-labelledby="disconnect-title"

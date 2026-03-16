@@ -124,7 +124,15 @@ export default function ChangePasswordForm() {
           }
         />
 
-        {localError && <p className="text-caption text-error">{localError}</p>}
+        {localError && (
+          <p
+            className="text-caption text-error"
+            role="alert"
+            aria-live="polite"
+          >
+            {localError}
+          </p>
+        )}
 
         <div className="flex justify-end">
           <Button type="submit" size="md" fullWidth={false} loading={loading}>

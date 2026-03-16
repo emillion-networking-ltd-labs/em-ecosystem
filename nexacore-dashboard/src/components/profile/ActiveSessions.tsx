@@ -1,30 +1,34 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Monitor, Smartphone, Globe, Trash2 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
-import { useToast } from '@/hooks/useToast';
-import type { SessionResponse } from '@/lib/types';
-import Button from '@/components/ui/Button';
+import { useState, useEffect, useCallback } from "react";
+import { Monitor, Smartphone, Globe, Trash2 } from "lucide-react";
+import { apiClient } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
+import type { SessionResponse } from "@/lib/types";
+import Button from "@/components/ui/Button";
 
-function parseUserAgent(ua: string | null): { label: string; isMobile: boolean } {
-  if (!ua) return { label: 'Unknown device', isMobile: false };
+function parseUserAgent(ua: string | null): {
+  label: string;
+  isMobile: boolean;
+} {
+  if (!ua) return { label: "Unknown device", isMobile: false };
 
   const isMobile = /mobile|android|iphone|ipad/i.test(ua);
 
-  let browser = 'Browser';
-  if (ua.includes('Edg/')) browser = 'Edge';
-  else if (ua.includes('OPR/') || ua.includes('Opera')) browser = 'Opera';
-  else if (ua.includes('Chrome/') && !ua.includes('Chromium')) browser = 'Chrome';
-  else if (ua.includes('Firefox/')) browser = 'Firefox';
-  else if (ua.includes('Safari/') && !ua.includes('Chrome')) browser = 'Safari';
+  let browser = "Browser";
+  if (ua.includes("Edg/")) browser = "Edge";
+  else if (ua.includes("OPR/") || ua.includes("Opera")) browser = "Opera";
+  else if (ua.includes("Chrome/") && !ua.includes("Chromium"))
+    browser = "Chrome";
+  else if (ua.includes("Firefox/")) browser = "Firefox";
+  else if (ua.includes("Safari/") && !ua.includes("Chrome")) browser = "Safari";
 
-  let os = '';
-  if (ua.includes('Windows')) os = 'Windows';
-  else if (ua.includes('Mac OS X') || ua.includes('Macintosh')) os = 'macOS';
-  else if (ua.includes('Android')) os = 'Android';
-  else if (ua.includes('iPhone') || ua.includes('iPad')) os = 'iOS';
-  else if (ua.includes('Linux')) os = 'Linux';
+  let os = "";
+  if (ua.includes("Windows")) os = "Windows";
+  else if (ua.includes("Mac OS X") || ua.includes("Macintosh")) os = "macOS";
+  else if (ua.includes("Android")) os = "Android";
+  else if (ua.includes("iPhone") || ua.includes("iPad")) os = "iOS";
+  else if (ua.includes("Linux")) os = "Linux";
 
   return {
     label: os ? `${browser} on ${os}` : browser,
@@ -35,13 +39,16 @@ function parseUserAgent(ua: string | null): { label: string; isMobile: boolean }
 function formatRelativeTime(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return 'Just now';
+  if (minutes < 1) return "Just now";
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
   const days = Math.floor(hours / 24);
   if (days < 30) return `${days}d ago`;
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+  });
 }
 
 export default function ActiveSessions() {
@@ -55,7 +62,7 @@ export default function ActiveSessions() {
   const fetchSessions = useCallback(async () => {
     try {
       setLoadError(false);
-      const data = await apiClient.get<SessionResponse[]>('/auth/sessions');
+      const data = await apiClient.get<SessionResponse[]>("/auth/sessions");
       setSessions(data);
     } catch {
       setLoadError(true);
@@ -74,7 +81,11 @@ export default function ActiveSessions() {
       await apiClient.delete(`/auth/sessions/${sessionId}`);
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     } catch {
-      addToast({ variant: 'error', title: 'Revoke failed', description: 'Could not revoke the session.' });
+      addToast({
+        variant: "error",
+        title: "Revoke failed",
+        description: "Could not revoke the session.",
+      });
     } finally {
       setRevoking(null);
     }
@@ -83,10 +94,14 @@ export default function ActiveSessions() {
   const revokeAllOtherSessions = async () => {
     setRevokingAll(true);
     try {
-      await apiClient.post('/auth/logout-all', {});
+      await apiClient.post("/auth/logout-all", {});
       setSessions((prev) => prev.filter((s) => s.isCurrent));
     } catch {
-      addToast({ variant: 'error', title: 'Revoke failed', description: 'Could not revoke other sessions.' });
+      addToast({
+        variant: "error",
+        title: "Revoke failed",
+        description: "Could not revoke other sessions.",
+      });
     } finally {
       setRevokingAll(false);
     }
@@ -118,7 +133,11 @@ export default function ActiveSessions() {
           <div className="h-5 w-5 animate-spin rounded-full border-2 border-content-disabled border-t-content-primary" />
         </div>
       ) : loadError ? (
-        <p className="py-4 text-center text-body-sm text-error">
+        <p
+          className="py-4 text-center text-body-sm text-error"
+          role="alert"
+          aria-live="polite"
+        >
           Failed to load sessions.
         </p>
       ) : sessions.length === 0 ? (
@@ -137,8 +156,8 @@ export default function ActiveSessions() {
                 key={session.id}
                 className={`flex items-center gap-4 rounded-xl border p-4 ${
                   session.isCurrent
-                    ? 'border-status-success/30 bg-status-success/5'
-                    : 'border-border-default'
+                    ? "border-status-success/30 bg-status-success/5"
+                    : "border-border-default"
                 }`}
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-subtle">
@@ -160,7 +179,9 @@ export default function ActiveSessions() {
                     <Globe size={12} />
                     <span>{session.ipAddress}</span>
                     <span className="text-content-disabled">·</span>
-                    <span>Last active {formatRelativeTime(session.lastUsedAt)}</span>
+                    <span>
+                      Last active {formatRelativeTime(session.lastUsedAt)}
+                    </span>
                   </div>
                 </div>
 
