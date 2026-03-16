@@ -133,23 +133,7 @@ export class TokenService {
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
 
-    // Idle timeout check: reject refresh if session inactive too long
-    const oldSession = await this.sessionsService.findById(payload.sessionId);
-    if (
-      oldSession &&
-      !oldSession.isRevoked &&
-      this.sessionsService.isSessionIdle(oldSession.lastUsedAt)
-    ) {
-      await this.sessionsService.revokeSessionDirect(payload.sessionId);
-
-      this.logAuditEvent(AuditAction.SESSION_IDLE_REVOKED, ctx, payload.sub, {
-        sessionId: payload.sessionId,
-        lastUsedAt: oldSession.lastUsedAt.toISOString(),
-        idleTimeoutHours: SESSION_IDLE_TIMEOUT_HOURS,
-      });
-
-      throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
-    }
+    await this.validateSessionNotIdle(payload, ctx);
 
     // Rotate: validates old session, detects theft, creates new session
     const expiresAt = new Date(Date.now() + this.refreshMaxAgeMs);
@@ -164,27 +148,8 @@ export class TokenService {
       expiresAt,
     });
 
-    // Sign new tokens with actual session ID
-    const newAccessToken = this.jwtService.sign(
-      {
-        sub: user.id,
-        email: user.email,
-        role: user.role,
-        jti: crypto.randomUUID(),
-      } satisfies JwtPayload,
-      {
-        expiresIn: this.accessExpiration as StringValue,
-      },
-    );
-
-    const newRefreshToken = this.jwtService.sign(
-      {
-        sub: user.id,
-        sessionId: newSession.id,
-        family: payload.family,
-      } satisfies RefreshTokenPayload,
-      { expiresIn: this.refreshExpiration as StringValue },
-    );
+    const { accessToken: newAccessToken, refreshToken: newRefreshToken } =
+      this.signTokenPair(user, newSession.id, payload.family);
 
     // Update session hash with actual signed token
     const refreshTokenHash = await bcrypt.hash(newRefreshToken, BCRYPT_ROUNDS);
@@ -248,6 +213,55 @@ export class TokenService {
         secret: this.mfaChallengeSecret,
       },
     );
+  }
+
+  private async validateSessionNotIdle(
+    payload: RefreshTokenPayload,
+    ctx?: RequestContext,
+  ): Promise<void> {
+    const oldSession = await this.sessionsService.findById(payload.sessionId);
+    if (
+      oldSession &&
+      !oldSession.isRevoked &&
+      this.sessionsService.isSessionIdle(oldSession.lastUsedAt)
+    ) {
+      await this.sessionsService.revokeSessionDirect(payload.sessionId);
+
+      this.logAuditEvent(AuditAction.SESSION_IDLE_REVOKED, ctx, payload.sub, {
+        sessionId: payload.sessionId,
+        lastUsedAt: oldSession.lastUsedAt.toISOString(),
+        idleTimeoutHours: SESSION_IDLE_TIMEOUT_HOURS,
+      });
+
+      throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
+    }
+  }
+
+  private signTokenPair(
+    user: Pick<User, 'id' | 'email' | 'role'>,
+    newSessionId: string,
+    family: string,
+  ): { accessToken: string; refreshToken: string } {
+    const accessToken = this.jwtService.sign(
+      {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+        jti: crypto.randomUUID(),
+      } satisfies JwtPayload,
+      { expiresIn: this.accessExpiration as StringValue },
+    );
+
+    const refreshToken = this.jwtService.sign(
+      {
+        sub: user.id,
+        sessionId: newSessionId,
+        family,
+      } satisfies RefreshTokenPayload,
+      { expiresIn: this.refreshExpiration as StringValue },
+    );
+
+    return { accessToken, refreshToken };
   }
 
   buildRefreshCookie(refreshToken: string): CookieConfig {

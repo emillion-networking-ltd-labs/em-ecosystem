@@ -82,69 +82,14 @@ export class EmailVerificationService {
     token: string,
     ctx?: RequestContext,
   ): Promise<{ status: 'success' | 'invalid' }> {
-    const tokenHash = hashToken(token);
-
-    const verificationToken =
-      await this.prisma.emailVerificationToken.findUnique({
-        where: { tokenHash },
-        include: { user: true },
-      });
-
-    if (!verificationToken) {
+    const result = await this.validateEmailChangeToken(token);
+    if (!result.valid) {
       return { status: 'invalid' };
     }
 
-    // Cross-flow guard: only accept EMAIL_CHANGE tokens
-    if (verificationToken.type !== 'EMAIL_CHANGE') {
-      return { status: 'invalid' };
-    }
+    const { verificationToken, user, oldEmail, newEmail } = result;
 
-    if (verificationToken.usedAt) {
-      return { status: 'invalid' };
-    }
-
-    if (verificationToken.expiresAt < new Date()) {
-      return { status: 'invalid' };
-    }
-
-    const user = verificationToken.user;
-
-    // Ensure pendingEmail is still set (request not cancelled)
-    if (!user.pendingEmail) {
-      return { status: 'invalid' };
-    }
-
-    // Race condition guard: check the pending email is still available
-    const existingUser = await this.usersService.findByEmail(user.pendingEmail);
-    if (existingUser && existingUser.id !== user.id) {
-      return { status: 'invalid' };
-    }
-
-    const oldEmail = user.email;
-    const newEmail = user.pendingEmail;
-
-    // Atomic: swap email + clear pendingEmail + mark token used
-    // Delete all OAuthAccounts — the OAuth identity is tied to the old email
-    const hasOAuthAccounts =
-      (await this.prisma.oAuthAccount.count({ where: { userId: user.id } })) >
-      0;
-    await this.prisma.$transaction([
-      this.prisma.user.update({
-        where: { id: user.id },
-        data: {
-          email: newEmail,
-          pendingEmail: null,
-          emailVerified: true,
-        },
-      }),
-      this.prisma.emailVerificationToken.update({
-        where: { id: verificationToken.id },
-        data: { usedAt: new Date() },
-      }),
-      ...(hasOAuthAccounts
-        ? [this.prisma.oAuthAccount.deleteMany({ where: { userId: user.id } })]
-        : []),
-    ]);
+    await this.executeEmailSwap(user.id, newEmail, verificationToken.id);
 
     // Revoke all sessions — forces re-login with new email
     await this.sessionsService.revokeAllUserSessions(user.id);
@@ -241,5 +186,94 @@ export class EmailVerificationService {
       plainToken,
       user.firstName,
     );
+  }
+
+  private async validateEmailChangeToken(token: string): Promise<
+    | {
+        valid: true;
+        verificationToken: { id: string };
+        user: {
+          id: string;
+          email: string;
+          firstName: string | null;
+          pendingEmail: string | null;
+        };
+        oldEmail: string;
+        newEmail: string;
+      }
+    | { valid: false }
+  > {
+    const tokenHash = hashToken(token);
+
+    const verificationToken =
+      await this.prisma.emailVerificationToken.findUnique({
+        where: { tokenHash },
+        include: { user: true },
+      });
+
+    if (!verificationToken) {
+      return { valid: false };
+    }
+
+    // Cross-flow guard: only accept EMAIL_CHANGE tokens
+    if (verificationToken.type !== 'EMAIL_CHANGE') {
+      return { valid: false };
+    }
+
+    if (verificationToken.usedAt) {
+      return { valid: false };
+    }
+
+    if (verificationToken.expiresAt < new Date()) {
+      return { valid: false };
+    }
+
+    const user = verificationToken.user;
+
+    // Ensure pendingEmail is still set (request not cancelled)
+    if (!user.pendingEmail) {
+      return { valid: false };
+    }
+
+    // Race condition guard: check the pending email is still available
+    const existingUser = await this.usersService.findByEmail(user.pendingEmail);
+    if (existingUser && existingUser.id !== user.id) {
+      return { valid: false };
+    }
+
+    return {
+      valid: true,
+      verificationToken: { id: verificationToken.id },
+      user,
+      oldEmail: user.email,
+      newEmail: user.pendingEmail,
+    };
+  }
+
+  private async executeEmailSwap(
+    userId: string,
+    newEmail: string,
+    tokenId: string,
+  ): Promise<void> {
+    const hasOAuthAccounts =
+      (await this.prisma.oAuthAccount.count({ where: { userId } })) > 0;
+
+    await this.prisma.$transaction([
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          email: newEmail,
+          pendingEmail: null,
+          emailVerified: true,
+        },
+      }),
+      this.prisma.emailVerificationToken.update({
+        where: { id: tokenId },
+        data: { usedAt: new Date() },
+      }),
+      ...(hasOAuthAccounts
+        ? [this.prisma.oAuthAccount.deleteMany({ where: { userId } })]
+        : []),
+    ]);
   }
 }

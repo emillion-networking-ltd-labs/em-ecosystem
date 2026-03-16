@@ -220,15 +220,8 @@ export class PasskeyService {
     credential: Record<string, unknown>,
     ctx?: { ipAddress: string; userAgent: string | null },
   ): Promise<string> {
-    const authKey = `${WEBAUTHN_AUTH_KEY_PREFIX}${challengeId}`;
-    const stored = await this.redis.get(authKey);
-    if (!stored) {
-      throw new UnauthorizedException(ErrorMessages.passkey.CHALLENGE_EXPIRED);
-    }
-    await this.redis.del(authKey);
-
-    const expectedOptions = JSON.parse(stored);
-    const authResponse = credential as unknown as AuthenticationResponseJSON;
+    const { expectedOptions, authResponse } =
+      await this.retrieveAndDeleteChallenge(challengeId, credential);
 
     const storedCredential = await this.prisma.webAuthnCredential.findUnique({
       where: { credentialId: authResponse.id },
@@ -278,36 +271,10 @@ export class PasskeyService {
       );
     }
 
-    // Sign count replay detection (skip if both are 0 — some authenticators don't track)
-    const newSignCount = verification.authenticationInfo.newCounter;
-    if (
-      storedCredential.signCount > 0 &&
-      newSignCount <= storedCredential.signCount
-    ) {
-      return this.failPasskeyAuth(
-        ctx,
-        storedCredential.userId,
-        'sign_count_replay',
-        {
-          expected: storedCredential.signCount,
-          received: newSignCount,
-        },
-      );
-    }
-
-    await this.prisma.webAuthnCredential.update({
-      where: { id: storedCredential.id },
-      data: {
-        signCount: newSignCount,
-        lastUsedAt: new Date(),
-      },
-    });
-
-    this.logAuditEvent(
-      AuditAction.PASSKEY_AUTH_SUCCESS,
+    await this.verifySignCountAndUpdate(
+      storedCredential,
+      verification.authenticationInfo.newCounter,
       ctx,
-      storedCredential.userId,
-      { passkeyId: storedCredential.id },
     );
 
     return storedCredential.userId;
@@ -401,6 +368,59 @@ export class PasskeyService {
       passkeyId,
       name: passkey.name,
     });
+  }
+
+  private async retrieveAndDeleteChallenge(
+    challengeId: string,
+    credential: Record<string, unknown>,
+  ): Promise<{
+    expectedOptions: PublicKeyCredentialRequestOptionsJSON;
+    authResponse: AuthenticationResponseJSON;
+  }> {
+    const authKey = `${WEBAUTHN_AUTH_KEY_PREFIX}${challengeId}`;
+    const stored = await this.redis.get(authKey);
+    if (!stored) {
+      throw new UnauthorizedException(ErrorMessages.passkey.CHALLENGE_EXPIRED);
+    }
+    await this.redis.del(authKey);
+
+    const expectedOptions = JSON.parse(
+      stored,
+    ) as PublicKeyCredentialRequestOptionsJSON;
+    const authResponse = credential as unknown as AuthenticationResponseJSON;
+    return { expectedOptions, authResponse };
+  }
+
+  private async verifySignCountAndUpdate(
+    storedCredential: { id: string; signCount: number; userId: string },
+    newSignCount: number,
+    ctx?: { ipAddress: string; userAgent: string | null },
+  ): Promise<void> {
+    // Sign count replay detection (skip if both are 0 — some authenticators don't track)
+    if (
+      storedCredential.signCount > 0 &&
+      newSignCount <= storedCredential.signCount
+    ) {
+      this.failPasskeyAuth(ctx, storedCredential.userId, 'sign_count_replay', {
+        expected: storedCredential.signCount,
+        received: newSignCount,
+      });
+    }
+
+    await this.prisma.webAuthnCredential.update({
+      where: { id: storedCredential.id },
+      data: {
+        signCount: newSignCount,
+        lastUsedAt: new Date(),
+      },
+    });
+
+    this.logAuditEvent(
+      AuditAction.PASSKEY_AUTH_SUCCESS,
+      ctx,
+      storedCredential.userId,
+      { passkeyId: storedCredential.id },
+    );
   }
 
   private failPasskeyAuth(
