@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import type { LucideIcon } from "lucide-react";
 import {
   PieChart,
@@ -29,9 +30,19 @@ const mainItems = [
 ];
 
 const adminItems = [
-  { href: "/admin", label: "Admin", icon: Shield },
-  { href: "/admin/audit-logs", label: "Audit Logs", icon: ScrollText },
-  { href: "/admin/permissions", label: "Permissions", icon: Key },
+  { href: "/admin", label: "Admin", icon: Shield, permission: "users:read" },
+  {
+    href: "/admin/audit-logs",
+    label: "Audit Logs",
+    icon: ScrollText,
+    permission: "audit-logs:read",
+  },
+  {
+    href: "/admin/permissions",
+    label: "Permissions",
+    icon: Key,
+    permission: "permissions:read",
+  },
 ];
 
 const accountItems = [
@@ -47,7 +58,7 @@ export default function Sidebar({
   const pathname = usePathname();
   const { user } = useAuth();
 
-  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPERADMIN";
+  const { hasPermission } = usePermissions();
 
   // When mobileVisible is defined, sidebar is in mobile mode: always 212px, slide via transform
   const isMobileMode = mobileVisible !== undefined;
@@ -104,8 +115,11 @@ export default function Sidebar({
               onNavigate={onNavigate}
             />
           ))}
-          {isAdmin &&
-            adminItems.map((item) => (
+          {adminItems
+            .filter(
+              (item) => !item.permission || hasPermission(item.permission),
+            )
+            .map((item) => (
               <NavItem
                 key={item.href}
                 {...item}

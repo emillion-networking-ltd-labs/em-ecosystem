@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import {
@@ -38,7 +39,7 @@ export default function NavBar({
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPERADMIN";
+  const { hasPermission } = usePermissions();
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -156,7 +157,7 @@ export default function NavBar({
                 <User size={16} />
                 Profile
               </Link>
-              {isAdmin && (
+              {hasPermission("users:read") && (
                 <Link
                   href="/admin"
                   onClick={() => setDropdownOpen(false)}
