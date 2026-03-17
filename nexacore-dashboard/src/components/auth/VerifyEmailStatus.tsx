@@ -38,9 +38,17 @@ export default function VerifyEmailStatus() {
   return (
     <div className="flex flex-col items-center gap-2">
       {isSuccess ? (
-        <CircleCheck size={48} className="text-[#166534]" strokeWidth={1.5} />
+        <CircleCheck
+          size={48}
+          className="icon-success text-[#166534]"
+          strokeWidth={1.5}
+        />
       ) : (
-        <CircleX size={48} className="text-[#8a1111]" strokeWidth={1.5} />
+        <CircleX
+          size={48}
+          className="icon-error text-[#8a1111]"
+          strokeWidth={1.5}
+        />
       )}
 
       {isSuccess ? (
@@ -57,7 +65,7 @@ export default function VerifyEmailStatus() {
 
       <Link
         href={isSuccess ? "/dashboard" : "/login"}
-        className="flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+        className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
       >
         {isSuccess ? "Go to Dashboard" : "Go to Sign In"}
       </Link>
