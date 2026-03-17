@@ -6,6 +6,7 @@ import { SessionsService } from '../sessions/sessions.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { ImpossibleTravelResult } from '../geolocation/interfaces/geolocation-result.interface';
+import { ErrorMessages } from '../common/constants/error-messages';
 import { createAuditLogger, AuditLogger } from './utils/audit-log.helper';
 
 @Injectable()
@@ -77,9 +78,7 @@ export class LoginSecurityService {
       elapsedHours: travelResult.elapsedHours,
       requiredSpeedKmh: travelResult.requiredSpeedKmh,
     });
-    throw new ForbiddenException(
-      'Login blocked due to suspicious location activity. Please try again later or contact support.',
-    );
+    throw new ForbiddenException(ErrorMessages.auth.LOGIN_BLOCKED_SUSPICIOUS);
   }
 
   checkSuspiciousLoginSuccess(
