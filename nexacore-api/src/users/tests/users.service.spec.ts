@@ -1280,7 +1280,7 @@ describe('UsersService', () => {
         userId: 'uuid-123',
         ipAddress: '10.0.0.1',
         userAgent: 'test-agent',
-        metadata: { newEmail: 'new@example.com' },
+        metadata: { newEmail: 'n***@example.com' },
       });
     });
 

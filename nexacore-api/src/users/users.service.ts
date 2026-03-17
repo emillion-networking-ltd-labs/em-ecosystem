@@ -738,7 +738,7 @@ export class UsersService {
         userId,
         ipAddress: ctx?.ipAddress,
         userAgent: ctx?.userAgent,
-        metadata: { newEmail: normalizedNewEmail },
+        metadata: { newEmail: pseudonymizeEmail(normalizedNewEmail) },
       })
       .catch(() => {});
 
