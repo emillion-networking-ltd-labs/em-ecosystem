@@ -1,15 +1,19 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Save, RotateCcw, Loader2 } from 'lucide-react';
-import { apiClient } from '@/lib/api';
-import { useToast } from '@/hooks/useToast';
-import Can from '@/components/guards/Can';
-import type { Permission, RolePermissionsResponse, UserRole } from '@/lib/types';
+import { useState, useEffect, useCallback } from "react";
+import { Save, RotateCcw, Loader2 } from "lucide-react";
+import { apiClient } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
+import Can from "@/components/guards/Can";
+import type {
+  Permission,
+  RolePermissionsResponse,
+  UserRole,
+} from "@/lib/types";
 
 type RolePermMap = Record<string, Set<string>>;
 
-const EDITABLE_ROLES: UserRole[] = ['USER', 'ADMIN'];
+const EDITABLE_ROLES: UserRole[] = ["USER", "ADMIN"];
 
 function groupByResource(permissions: Permission[]): Map<string, Permission[]> {
   const map = new Map<string, Permission[]>();
@@ -35,9 +39,9 @@ export default function PermissionsMatrix() {
     setLoadError(false);
     try {
       const [allPerms, userPerms, adminPerms] = await Promise.all([
-        apiClient.get<Permission[]>('/permissions'),
-        apiClient.get<RolePermissionsResponse>('/permissions/roles/USER'),
-        apiClient.get<RolePermissionsResponse>('/permissions/roles/ADMIN'),
+        apiClient.get<Permission[]>("/permissions"),
+        apiClient.get<RolePermissionsResponse>("/permissions/roles/USER"),
+        apiClient.get<RolePermissionsResponse>("/permissions/roles/ADMIN"),
       ]);
 
       setPermissions(allPerms);
@@ -101,9 +105,17 @@ export default function PermissionsMatrix() {
         ...prev,
         [role]: new Set(current[role]),
       }));
-      addToast({ variant: 'success', title: 'Permissions saved', description: `${role} permissions updated successfully.` });
+      addToast({
+        variant: "success",
+        title: "Permissions saved",
+        description: `${role} permissions updated successfully.`,
+      });
     } catch {
-      addToast({ variant: 'error', title: 'Save failed', description: `Could not save ${role} permissions.` });
+      addToast({
+        variant: "error",
+        title: "Save failed",
+        description: `Could not save ${role} permissions.`,
+      });
     } finally {
       setSaving(null);
     }
@@ -120,7 +132,9 @@ export default function PermissionsMatrix() {
   if (loadError && permissions.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center rounded-2xl border border-border-default bg-surface-primary">
-        <p className="text-body-sm text-error">Failed to load permissions data.</p>
+        <p className="text-body-sm text-error">
+          Failed to load permissions data.
+        </p>
       </div>
     );
   }
@@ -130,7 +144,7 @@ export default function PermissionsMatrix() {
   return (
     <div className="space-y-6">
       {/* Matrix table */}
-      <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary">
+      <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary shadow-card">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border-default">
@@ -170,14 +184,17 @@ export default function PermissionsMatrix() {
                     </td>
                     {EDITABLE_ROLES.map((role) => (
                       <td key={role} className="px-6 py-3 text-center">
-                        <Can permission="permissions:write" fallback={
-                          <input
-                            type="checkbox"
-                            checked={current[role]?.has(perm.key) ?? false}
-                            disabled
-                            className="h-4 w-4 cursor-not-allowed accent-brand-primary opacity-50"
-                          />
-                        }>
+                        <Can
+                          permission="permissions:write"
+                          fallback={
+                            <input
+                              type="checkbox"
+                              checked={current[role]?.has(perm.key) ?? false}
+                              disabled
+                              className="h-4 w-4 cursor-not-allowed accent-brand-primary opacity-50"
+                            />
+                          }
+                        >
                           <input
                             type="checkbox"
                             checked={current[role]?.has(perm.key) ?? false}

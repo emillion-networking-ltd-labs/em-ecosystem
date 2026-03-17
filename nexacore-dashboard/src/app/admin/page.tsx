@@ -1,45 +1,70 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { Search } from 'lucide-react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
-import AdminRoute from '@/components/guards/AdminRoute';
-import UsersTable from '@/components/admin/UsersTable';
-import Pagination from '@/components/ui/Pagination';
-import ConfirmModal from '@/components/ui/ConfirmModal';
-import { apiClient } from '@/lib/api';
-import { useToast } from '@/hooks/useToast';
-import type { SafeUser, PaginatedResponse, UserRole, AdminUpdateUserDto } from '@/lib/types';
+import { useState, useEffect, useCallback } from "react";
+import { Search } from "lucide-react";
+import DashboardLayout from "@/components/layout/DashboardLayout";
+import AdminRoute from "@/components/guards/AdminRoute";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import UsersTable from "@/components/admin/UsersTable";
+import Pagination from "@/components/ui/Pagination";
+import ConfirmModal from "@/components/ui/ConfirmModal";
+import { apiClient } from "@/lib/api";
+import { useToast } from "@/hooks/useToast";
+import type {
+  SafeUser,
+  PaginatedResponse,
+  UserRole,
+  AdminUpdateUserDto,
+} from "@/lib/types";
 
 const LIMIT = 10;
 
 export default function AdminPage() {
   const { addToast } = useToast();
   const [users, setUsers] = useState<SafeUser[]>([]);
-  const [meta, setMeta] = useState({ total: 0, page: 1, limit: LIMIT, totalPages: 1 });
-  const [search, setSearch] = useState('');
+  const [meta, setMeta] = useState({
+    total: 0,
+    page: 1,
+    limit: LIMIT,
+    totalPages: 1,
+  });
+  const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
 
   // Modal state
-  const [modalType, setModalType] = useState<'role' | 'lock' | 'unlock' | 'delete' | null>(null);
+  const [modalType, setModalType] = useState<
+    "role" | "lock" | "unlock" | "delete" | null
+  >(null);
   const [selectedUser, setSelectedUser] = useState<SafeUser | null>(null);
-  const [selectedRole, setSelectedRole] = useState<UserRole>('USER');
+  const [selectedRole, setSelectedRole] = useState<UserRole>("USER");
   const [modalLoading, setModalLoading] = useState(false);
 
-  const fetchUsers = useCallback(async (page: number) => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams({ page: String(page), limit: String(LIMIT) });
-      if (search) params.set('search', search);
-      const res = await apiClient.get<PaginatedResponse<SafeUser>>(`/users?${params}`);
-      setUsers(res.data);
-      setMeta(res.meta);
-    } catch {
-      addToast({ variant: 'error', title: 'Load users failed', description: 'Could not retrieve the user list.' });
-    } finally {
-      setLoading(false);
-    }
-  }, [search, addToast]);
+  const fetchUsers = useCallback(
+    async (page: number) => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: String(LIMIT),
+        });
+        if (search) params.set("search", search);
+        const res = await apiClient.get<PaginatedResponse<SafeUser>>(
+          `/users?${params}`,
+        );
+        setUsers(res.data);
+        setMeta(res.meta);
+      } catch {
+        addToast({
+          variant: "error",
+          title: "Load users failed",
+          description: "Could not retrieve the user list.",
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [search, addToast],
+  );
 
   useEffect(() => {
     fetchUsers(1);
@@ -48,17 +73,17 @@ export default function AdminPage() {
   const handleChangeRole = (user: SafeUser) => {
     setSelectedUser(user);
     setSelectedRole(user.role);
-    setModalType('role');
+    setModalType("role");
   };
 
   const handleToggleLock = (user: SafeUser) => {
     setSelectedUser(user);
-    setModalType(user.isActive ? 'lock' : 'unlock');
+    setModalType(user.isActive ? "lock" : "unlock");
   };
 
   const handleDelete = (user: SafeUser) => {
     setSelectedUser(user);
-    setModalType('delete');
+    setModalType("delete");
   };
 
   const closeModal = () => {
@@ -72,47 +97,57 @@ export default function AdminPage() {
     setModalLoading(true);
 
     try {
-      if (modalType === 'role') {
-        await apiClient.patch<SafeUser>(`/users/${selectedUser.id}`, { role: selectedRole } as AdminUpdateUserDto);
-      } else if (modalType === 'lock') {
-        await apiClient.patch<SafeUser>(`/users/${selectedUser.id}`, { isActive: false } as AdminUpdateUserDto);
-      } else if (modalType === 'unlock') {
-        await apiClient.patch<SafeUser>(`/users/${selectedUser.id}`, { isActive: true } as AdminUpdateUserDto);
-      } else if (modalType === 'delete') {
+      if (modalType === "role") {
+        await apiClient.patch<SafeUser>(`/users/${selectedUser.id}`, {
+          role: selectedRole,
+        } as AdminUpdateUserDto);
+      } else if (modalType === "lock") {
+        await apiClient.patch<SafeUser>(`/users/${selectedUser.id}`, {
+          isActive: false,
+        } as AdminUpdateUserDto);
+      } else if (modalType === "unlock") {
+        await apiClient.patch<SafeUser>(`/users/${selectedUser.id}`, {
+          isActive: true,
+        } as AdminUpdateUserDto);
+      } else if (modalType === "delete") {
         await apiClient.delete(`/users/${selectedUser.id}`);
       }
       await fetchUsers(meta.page);
       closeModal();
     } catch {
-      addToast({ variant: 'error', title: 'Action failed', description: `Could not ${modalType} user.` });
+      addToast({
+        variant: "error",
+        title: "Action failed",
+        description: `Could not ${modalType} user.`,
+      });
       setModalLoading(false);
     }
   };
 
   const modalConfig = {
     role: {
-      title: 'Change user role',
-      description: `Change role for ${selectedUser?.email || ''}`,
-      confirmLabel: 'Change Role',
-      variant: 'primary' as const,
+      title: "Change user role",
+      description: `Change role for ${selectedUser?.email || ""}`,
+      confirmLabel: "Change Role",
+      variant: "primary" as const,
     },
     lock: {
-      title: 'Lock user account',
-      description: `This will prevent ${selectedUser?.email || ''} from logging in.`,
-      confirmLabel: 'Lock Account',
-      variant: 'danger' as const,
+      title: "Lock user account",
+      description: `This will prevent ${selectedUser?.email || ""} from logging in.`,
+      confirmLabel: "Lock Account",
+      variant: "danger" as const,
     },
     unlock: {
-      title: 'Unlock user account',
-      description: `This will restore login access for ${selectedUser?.email || ''}.`,
-      confirmLabel: 'Unlock',
-      variant: 'primary' as const,
+      title: "Unlock user account",
+      description: `This will restore login access for ${selectedUser?.email || ""}.`,
+      confirmLabel: "Unlock",
+      variant: "primary" as const,
     },
     delete: {
-      title: 'Delete user',
-      description: `This will permanently delete ${selectedUser?.email || ''}. This action cannot be undone.`,
-      confirmLabel: 'Delete',
-      variant: 'danger' as const,
+      title: "Delete user",
+      description: `This will permanently delete ${selectedUser?.email || ""}. This action cannot be undone.`,
+      confirmLabel: "Delete",
+      variant: "danger" as const,
     },
   };
 
@@ -121,9 +156,22 @@ export default function AdminPage() {
   return (
     <AdminRoute>
       <DashboardLayout>
+        {/* Breadcrumbs */}
+        <div className="mb-6">
+          <Breadcrumbs
+            items={[
+              { label: "Dashboards", href: "/dashboard" },
+              { label: "Admin", href: "/admin" },
+              { label: "User Management" },
+            ]}
+          />
+        </div>
+
         {/* Page header */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-body-sm font-semibold text-content-primary">User Management</h1>
+          <h1 className="text-heading-lg font-semibold text-content-primary">
+            User Management
+          </h1>
           <div className="flex w-64 items-center gap-2 rounded-full border border-border-default bg-surface-secondary px-4">
             <Search size={16} className="text-content-tertiary" />
             <input
@@ -139,11 +187,15 @@ export default function AdminPage() {
         {/* Table */}
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <p className="text-body-sm text-content-tertiary">Loading users...</p>
+            <p className="text-body-sm text-content-tertiary">
+              Loading users...
+            </p>
           </div>
         ) : users.length === 0 ? (
           <div className="flex h-64 items-center justify-center rounded-2xl border border-border-default bg-surface-primary">
-            <p className="text-body-sm text-content-tertiary">No users found.</p>
+            <p className="text-body-sm text-content-tertiary">
+              No users found.
+            </p>
           </div>
         ) : (
           <>
@@ -170,13 +222,13 @@ export default function AdminPage() {
           open={!!modalType}
           onClose={closeModal}
           onConfirm={handleConfirm}
-          title={currentModal?.title || ''}
-          description={currentModal?.description || ''}
+          title={currentModal?.title || ""}
+          description={currentModal?.description || ""}
           confirmLabel={currentModal?.confirmLabel}
           variant={currentModal?.variant}
           loading={modalLoading}
         >
-          {modalType === 'role' && (
+          {modalType === "role" && (
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value as UserRole)}
