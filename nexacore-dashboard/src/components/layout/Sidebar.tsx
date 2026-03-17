@@ -14,6 +14,7 @@ import {
   FileText,
   ScrollText,
   Key,
+  Settings,
 } from "lucide-react";
 
 type SidebarProps = {
@@ -46,6 +47,12 @@ const adminItems = [
 ];
 
 const accountItems = [
+  {
+    href: "/settings",
+    label: "Settings",
+    icon: Settings,
+    permission: "settings:read",
+  },
   { href: "/docs", label: "Documentation", icon: FileText, external: true },
 ];
 
@@ -134,15 +141,24 @@ export default function Sidebar({
 
         {/* ACCOUNT section */}
         <NavSection label={collapsed ? "" : "Account"} className="mt-2">
-          {accountItems.map((item) => (
-            <NavItem
-              key={item.href}
-              {...item}
-              active={false}
-              collapsed={collapsed}
-              onNavigate={onNavigate}
-            />
-          ))}
+          {accountItems
+            .filter(
+              (item) =>
+                !("permission" in item) ||
+                !item.permission ||
+                hasPermission(item.permission),
+            )
+            .map((item) => (
+              <NavItem
+                key={item.href}
+                {...item}
+                active={
+                  pathname === item.href || pathname.startsWith(item.href + "/")
+                }
+                collapsed={collapsed}
+                onNavigate={onNavigate}
+              />
+            ))}
         </NavSection>
 
         {/* Spacer */}
