@@ -24,6 +24,8 @@ import { OAuthStateStore } from './stores/oauth-state.store';
 import { OAuthCodeStore } from './stores/oauth-code.store';
 import { OAuthLinkCodeStore } from './stores/oauth-link-code.store';
 import { OAuthLinkGuard } from './guards/oauth-link.guard';
+import { MfaSetupGuard } from './guards/mfa-setup.guard';
+import { JwtOrMfaSetupGuard } from './guards/jwt-or-mfa-setup.guard';
 import { PasswordBreachService } from './password-breach.service';
 import { TrustedDeviceService } from './trusted-device.service';
 import { TokenDenyListService } from './token-deny-list.service';
@@ -90,6 +92,8 @@ import { JWT_ISSUER, JWT_AUDIENCE } from './constants/auth.constants';
     OAuthCodeStore,
     OAuthLinkCodeStore,
     OAuthLinkGuard,
+    MfaSetupGuard,
+    JwtOrMfaSetupGuard,
     PasswordBreachService,
     TrustedDeviceService,
     TokenDenyListService,

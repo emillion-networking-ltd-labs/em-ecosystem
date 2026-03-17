@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect } from "react";
-import Button from "@/components/ui/Button";
+import Link from "next/link";
+import { CircleX } from "lucide-react";
+import AuthLayout from "@/components/layout/AuthLayout";
 
 interface AuthErrorFallbackProps {
   error: Error & { digest?: string };
@@ -11,7 +13,6 @@ interface AuthErrorFallbackProps {
 
 export default function AuthErrorFallback({
   error,
-  reset,
   context = "authentication",
 }: AuthErrorFallbackProps) {
   useEffect(() => {
@@ -19,50 +20,27 @@ export default function AuthErrorFallback({
   }, [error, context]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-surface-primary px-4">
-      <div className="w-full max-w-md text-center">
-        <svg
-          width="48"
-          height="48"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.5"
-          className="mx-auto mb-4 text-error"
-          role="img"
-          aria-label="Error"
-        >
-          <circle cx="12" cy="12" r="10" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
+    <AuthLayout narrow>
+      <div className="flex flex-col items-center gap-2">
+        <CircleX
+          size={48}
+          className="icon-error text-[#8a1111]"
+          strokeWidth={1.5}
+        />
 
-        <h1 className="mb-2 text-heading-md text-content-primary">
-          Something went wrong
-        </h1>
-
-        <p className="mb-6 text-body-sm text-content-secondary">
-          {process.env.NODE_ENV === "development"
-            ? error.message
-            : `An error occurred during ${context}. Please try again.`}
+        <p className="text-center text-sm leading-[21px] text-content-primary/50">
+          Something went wrong!
+          <br />
+          An unexpected error occurred. Please try again.
         </p>
 
-        {error.digest && (
-          <p className="mb-6 text-caption text-content-tertiary">
-            Reference: {error.digest}
-          </p>
-        )}
-
-        <div className="flex justify-center gap-3">
-          <Button onClick={reset}>Try again</Button>
-          <Button
-            variant="secondary"
-            onClick={() => (window.location.href = "/login")}
-          >
-            Go to login
-          </Button>
-        </div>
+        <Link
+          href="/login"
+          className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+        >
+          Go to Sign In
+        </Link>
       </div>
-    </div>
+    </AuthLayout>
   );
 }

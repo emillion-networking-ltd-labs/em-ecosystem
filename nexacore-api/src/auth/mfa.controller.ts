@@ -27,6 +27,7 @@ import {
   DEVICE_FINGERPRINT_HEADER,
 } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { JwtOrMfaSetupGuard } from './guards/jwt-or-mfa-setup.guard';
 import { MfaVerifySetupDto } from './dto/mfa-verify-setup.dto';
 import { MfaVerifyLoginDto } from './dto/mfa-verify-login.dto';
 import { MfaDisableDto } from './dto/mfa-disable.dto';
@@ -48,7 +49,7 @@ export class MfaController {
 
   @Post('setup')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOrMfaSetupGuard)
   @ApiBearerAuth()
   @Throttle({
     global: {
@@ -65,7 +66,7 @@ export class MfaController {
 
   @Post('verify-setup')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(JwtAuthGuard)
+  @UseGuards(JwtOrMfaSetupGuard)
   @ApiBearerAuth()
   @Throttle({
     global: {

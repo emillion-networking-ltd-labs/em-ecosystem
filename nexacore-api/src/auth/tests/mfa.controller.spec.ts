@@ -1,5 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { Role } from '../../users/enums/role.enum';
+import { CanActivate } from '@nestjs/common';
 
 import { SafeUser } from '../../users/entities/user.entity';
 
@@ -14,6 +15,21 @@ import { MfaController } from '../mfa.controller';
 import { MfaService } from '../mfa.service';
 import { TokenService } from '../token.service';
 import { TrustedDeviceService } from '../trusted-device.service';
+import { MfaSetupGuard } from '../guards/mfa-setup.guard';
+import { JwtOrMfaSetupGuard } from '../guards/jwt-or-mfa-setup.guard';
+
+// Mock the new guards
+class MockMfaSetupGuard implements CanActivate {
+  canActivate() {
+    return true;
+  }
+}
+
+class MockJwtOrMfaSetupGuard implements CanActivate {
+  canActivate() {
+    return true;
+  }
+}
 
 describe('MfaController', () => {
   let controller: MfaController;
@@ -83,6 +99,8 @@ describe('MfaController', () => {
         { provide: MfaService, useValue: mfaService },
         { provide: TokenService, useValue: tokenService },
         { provide: TrustedDeviceService, useValue: trustedDeviceService },
+        { provide: MfaSetupGuard, useClass: MockMfaSetupGuard },
+        { provide: JwtOrMfaSetupGuard, useClass: MockJwtOrMfaSetupGuard },
       ],
     }).compile();
 

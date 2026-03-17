@@ -108,6 +108,15 @@ export const MFA_CHALLENGE_TOKEN_TYPE = 'mfa-challenge';
 /** MFA challenge token expiry duration. */
 export const MFA_CHALLENGE_EXPIRY = '5m';
 
+/** HMAC derivation label for MFA setup token secret. */
+export const MFA_SETUP_HMAC_LABEL = 'mfa-setup-token';
+
+/** JWT payload type for MFA setup tokens (scoped: only /auth/mfa/setup & verify-setup). */
+export const MFA_SETUP_TOKEN_TYPE = 'mfa-setup';
+
+/** MFA setup token expiry duration. */
+export const MFA_SETUP_EXPIRY = '10m';
+
 /** HMAC derivation label for device fingerprint secret. */
 export const DEVICE_FINGERPRINT_HMAC_LABEL = 'device-fingerprint-key';
 

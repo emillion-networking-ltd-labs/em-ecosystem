@@ -1,4 +1,4 @@
-export type UserRole = 'SUPERADMIN' | 'ADMIN' | 'USER';
+export type UserRole = "SUPERADMIN" | "ADMIN" | "USER";
 
 export type SafeUser = {
   id: string;
@@ -27,12 +27,13 @@ export type LinkedProvider = {
 export type AuthResponse = {
   user: SafeUser;
   accessToken: string;
-  oauthAction?: 'created' | 'linked';
+  oauthAction?: "created" | "linked";
 };
 
 export type LoginResponse =
   | AuthResponse
-  | { mfaRequired: true; mfaToken: string };
+  | { mfaRequired: true; mfaToken: string }
+  | { mfaSetupRequired: true; setupToken: string; message: string };
 
 export type MfaSetupResponse = {
   secret: string;
@@ -70,7 +71,7 @@ export type ErrorResponse = {
   };
 };
 
-export type RateLimitKind = 'throttle' | 'lockout';
+export type RateLimitKind = "throttle" | "lockout";
 
 export type RateLimitInfo = {
   isRateLimited: boolean;
@@ -83,9 +84,13 @@ export class RateLimitError extends Error {
   retryAfter: number;
   kind: RateLimitKind;
 
-  constructor(retryAfter: number, message: string, kind: RateLimitKind = 'throttle') {
+  constructor(
+    retryAfter: number,
+    message: string,
+    kind: RateLimitKind = "throttle",
+  ) {
     super(message);
-    this.name = 'RateLimitError';
+    this.name = "RateLimitError";
     this.retryAfter = retryAfter;
     this.kind = kind;
     Object.setPrototypeOf(this, RateLimitError.prototype);
@@ -132,24 +137,24 @@ export type AdminUpdateUserDto = {
 };
 
 export type AuditAction =
-  | 'LOGIN_SUCCESS'
-  | 'LOGIN_FAILURE'
-  | 'LOGOUT'
-  | 'REGISTER'
-  | 'TOKEN_REFRESH'
-  | 'OAUTH_LOGIN'
-  | 'OAUTH_LINKED'
-  | 'OAUTH_REGISTER'
-  | 'OAUTH_UNLINKED'
-  | 'ACCOUNT_LOCKED'
-  | 'ACCOUNT_UNLOCKED'
-  | 'PASSWORD_CHANGE'
-  | 'PROFILE_UPDATE'
-  | 'USER_ROLE_CHANGE'
-  | 'USER_DEACTIVATED'
-  | 'USER_ACTIVATED'
-  | 'USER_DELETED'
-  | 'SUPERADMIN_BYPASS';
+  | "LOGIN_SUCCESS"
+  | "LOGIN_FAILURE"
+  | "LOGOUT"
+  | "REGISTER"
+  | "TOKEN_REFRESH"
+  | "OAUTH_LOGIN"
+  | "OAUTH_LINKED"
+  | "OAUTH_REGISTER"
+  | "OAUTH_UNLINKED"
+  | "ACCOUNT_LOCKED"
+  | "ACCOUNT_UNLOCKED"
+  | "PASSWORD_CHANGE"
+  | "PROFILE_UPDATE"
+  | "USER_ROLE_CHANGE"
+  | "USER_DEACTIVATED"
+  | "USER_ACTIVATED"
+  | "USER_DELETED"
+  | "SUPERADMIN_BYPASS";
 
 export type AuditLogUser = {
   id: string;

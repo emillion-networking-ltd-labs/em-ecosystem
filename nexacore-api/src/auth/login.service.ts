@@ -316,8 +316,11 @@ export class LoginService {
       },
     );
 
+    const setupToken = this.tokenService.signMfaSetupToken(user.id);
+
     return {
       mfaSetupRequired: true,
+      setupToken,
       message: ErrorMessages.mfa.SETUP_REQUIRED,
     };
   }

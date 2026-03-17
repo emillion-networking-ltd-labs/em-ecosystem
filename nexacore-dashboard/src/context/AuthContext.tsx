@@ -35,6 +35,8 @@ type AuthState = {
   error: string | null;
   mfaRequired: boolean;
   mfaToken: string | null;
+  mfaSetupRequired: boolean;
+  mfaSetupToken: string | null;
 };
 
 type AuthAction =
@@ -43,6 +45,7 @@ type AuthAction =
   | { type: "AUTH_ERROR"; payload: string }
   | { type: "AUTH_STOP" }
   | { type: "MFA_REQUIRED"; payload: { mfaToken: string } }
+  | { type: "MFA_SETUP_REQUIRED"; payload: { setupToken: string } }
   | { type: "LOGOUT" }
   | { type: "CLEAR_ERROR" };
 
@@ -59,6 +62,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         error: null,
         mfaRequired: false,
         mfaToken: null,
+        mfaSetupRequired: false,
+        mfaSetupToken: null,
       };
     case "AUTH_ERROR":
       return {
@@ -68,6 +73,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         error: action.payload,
         mfaRequired: false,
         mfaToken: null,
+        mfaSetupRequired: false,
+        mfaSetupToken: null,
       };
     case "AUTH_STOP":
       return {
@@ -76,6 +83,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         isInitialized: true,
         mfaRequired: false,
         mfaToken: null,
+        mfaSetupRequired: false,
+        mfaSetupToken: null,
       };
     case "MFA_REQUIRED":
       return {
@@ -84,6 +93,14 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         error: null,
         mfaRequired: true,
         mfaToken: action.payload.mfaToken,
+      };
+    case "MFA_SETUP_REQUIRED":
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        mfaSetupRequired: true,
+        mfaSetupToken: action.payload.setupToken,
       };
     case "LOGOUT":
       return {
@@ -94,6 +111,8 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         error: null,
         mfaRequired: false,
         mfaToken: null,
+        mfaSetupRequired: false,
+        mfaSetupToken: null,
       };
     case "CLEAR_ERROR":
       return { ...state, error: null };
@@ -116,6 +135,12 @@ type AuthContextType = AuthState & {
     isRecoveryCode?: boolean,
     trustDevice?: boolean,
   ) => Promise<void>;
+  setupMfa: () => Promise<{
+    secret: string;
+    qrCodeDataUrl: string;
+    recoveryCodes: string[];
+  }>;
+  verifyMfaSetup: (code: string) => Promise<void>;
   cancelMfa: () => void;
   register: (
     email: string,
@@ -167,6 +192,12 @@ function isMfaResponse(
   return "mfaRequired" in data && data.mfaRequired === true;
 }
 
+function isMfaSetupResponse(
+  data: LoginResponse,
+): data is { mfaSetupRequired: true; setupToken: string; message: string } {
+  return "mfaSetupRequired" in data && data.mfaSetupRequired === true;
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { addToast } = useToast();
   const [state, dispatch] = useReducer(authReducer, {
@@ -177,6 +208,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     error: null,
     mfaRequired: false,
     mfaToken: null,
+    mfaSetupRequired: false,
+    mfaSetupToken: null,
   });
 
   const refreshSession = useCallback(async () => {
@@ -233,6 +266,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           dispatch({
             type: "MFA_REQUIRED",
             payload: { mfaToken: data.mfaToken },
+          });
+          return;
+        }
+
+        if (isMfaSetupResponse(data)) {
+          dispatch({
+            type: "MFA_SETUP_REQUIRED",
+            payload: { setupToken: data.setupToken },
           });
           return;
         }
@@ -439,6 +480,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [state.mfaToken, addToast],
   );
 
+  const setupMfa = useCallback(async () => {
+    const tokenHeader = state.mfaSetupToken
+      ? { headers: { Authorization: `Bearer ${state.mfaSetupToken}` } }
+      : undefined;
+    const data = await apiClient.post<{
+      secret: string;
+      qrCodeDataUrl: string;
+      recoveryCodes: string[];
+    }>("/auth/mfa/setup", {}, tokenHeader);
+    return data;
+  }, [state.mfaSetupToken]);
+
+  const verifyMfaSetup = useCallback(
+    async (code: string) => {
+      const tokenHeader = state.mfaSetupToken
+        ? { headers: { Authorization: `Bearer ${state.mfaSetupToken}` } }
+        : undefined;
+      await apiClient.post<{ message: string }>(
+        "/auth/mfa/verify-setup",
+        { token: code },
+        tokenHeader,
+      );
+      // MFA is now enabled — user must re-login to get a full session
+      addToast({
+        variant: "success",
+        title: "MFA enabled",
+        description:
+          "Two-factor authentication is now active. Please sign in again.",
+      });
+      dispatch({ type: "LOGOUT" });
+    },
+    [state.mfaSetupToken, addToast],
+  );
+
   const cancelMfa = useCallback(() => {
     dispatch({ type: "LOGOUT" });
   }, []);
@@ -577,6 +652,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!state.user && !!state.accessToken,
         login,
         verifyMfaLogin,
+        setupMfa,
+        verifyMfaSetup,
         cancelMfa,
         register,
         handleOAuthCallback,

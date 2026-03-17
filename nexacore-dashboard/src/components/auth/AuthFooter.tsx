@@ -1,5 +1,5 @@
-import Link from 'next/link';
-import LanguageSelector from '@/components/ui/LanguageSelector';
+import Link from "next/link";
+import LanguageSelector from "@/components/ui/LanguageSelector";
 
 export default function AuthFooter() {
   return (
@@ -11,13 +11,22 @@ export default function AuthFooter() {
 
       {/* Right — Nav Links (Figma: auto width, gap 24, px 16) */}
       <div className="flex items-center gap-6 px-4">
-        <Link href="#" className="text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary">
+        <Link
+          href="#"
+          className="text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary"
+        >
           Help
         </Link>
-        <Link href="#" className="text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary">
+        <Link
+          href="#"
+          className="text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary"
+        >
           Privacy
         </Link>
-        <Link href="#" className="text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary">
+        <Link
+          href="#"
+          className="text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary"
+        >
           Terms
         </Link>
       </div>

@@ -10,6 +10,7 @@ import RateLimitBanner from "@/components/ui/RateLimitBanner";
 import OAuthButtons from "./OAuthButtons";
 import Divider from "@/components/ui/Divider";
 import MfaTotpStep from "./MfaTotpStep";
+import MfaSetupStep from "./MfaSetupStep";
 import { useAuth } from "@/hooks/useAuth";
 import { useRateLimit } from "@/hooks/useRateLimit";
 import { useToast } from "@/context/ToastContext";
@@ -32,8 +33,15 @@ export default function LoginForm() {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
-  const { login, isLoading, isAuthenticated, error, clearError, mfaRequired } =
-    useAuth();
+  const {
+    login,
+    isLoading,
+    isAuthenticated,
+    error,
+    clearError,
+    mfaRequired,
+    mfaSetupRequired,
+  } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const {
     isSupported: passkeySupported,
@@ -145,6 +153,10 @@ export default function LoginForm() {
     }
     // On AUTH_SUCCESS → isAuthenticated → useEffect redirects to /dashboard
   };
+
+  if (mfaSetupRequired) {
+    return <MfaSetupStep />;
+  }
 
   if (mfaRequired) {
     return <MfaTotpStep />;

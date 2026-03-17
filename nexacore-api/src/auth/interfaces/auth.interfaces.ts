@@ -30,5 +30,6 @@ export interface MfaChallengeResult {
 
 export interface MfaSetupRequiredResult {
   mfaSetupRequired: true;
+  setupToken: string;
   message: string;
 }

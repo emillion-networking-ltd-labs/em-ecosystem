@@ -26,6 +26,9 @@ import {
   MFA_CHALLENGE_HMAC_LABEL,
   MFA_CHALLENGE_TOKEN_TYPE,
   MFA_CHALLENGE_EXPIRY,
+  MFA_SETUP_HMAC_LABEL,
+  MFA_SETUP_TOKEN_TYPE,
+  MFA_SETUP_EXPIRY,
   REFRESH_TOKEN_COOKIE_NAME,
 } from './constants/auth.constants';
 import type { StringValue } from 'ms';
@@ -35,6 +38,7 @@ export class TokenService {
   private readonly refreshExpiration: string;
   private readonly refreshMaxAgeMs: number;
   private readonly mfaChallengeSecret: string;
+  private readonly mfaSetupSecret: string;
   private readonly accessExpiration: string;
   private readonly isProduction: boolean;
   private readonly logAuditEvent: AuditLogger;
@@ -61,6 +65,10 @@ export class TokenService {
     this.mfaChallengeSecret = crypto
       .createHmac('sha256', jwtSecret)
       .update(MFA_CHALLENGE_HMAC_LABEL)
+      .digest('hex');
+    this.mfaSetupSecret = crypto
+      .createHmac('sha256', jwtSecret)
+      .update(MFA_SETUP_HMAC_LABEL)
       .digest('hex');
     this.logAuditEvent = createAuditLogger(this.auditService);
   }
@@ -213,6 +221,27 @@ export class TokenService {
         secret: this.mfaChallengeSecret,
       },
     );
+  }
+
+  signMfaSetupToken(userId: string): string {
+    return this.jwtService.sign(
+      { sub: userId, type: MFA_SETUP_TOKEN_TYPE },
+      {
+        expiresIn: MFA_SETUP_EXPIRY as StringValue,
+        secret: this.mfaSetupSecret,
+      },
+    );
+  }
+
+  verifyMfaSetupToken(token: string): { sub: string } {
+    const payload = this.jwtService.verify<{ sub: string; type: string }>(
+      token,
+      { secret: this.mfaSetupSecret },
+    );
+    if (payload.type !== MFA_SETUP_TOKEN_TYPE) {
+      throw new UnauthorizedException('Invalid setup token');
+    }
+    return { sub: payload.sub };
   }
 
   private async validateSessionNotIdle(
