@@ -142,7 +142,7 @@ export default function ForgotPasswordForm() {
           <button
             type="submit"
             disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? "opacity-30" : ""}>
               Send Recovery Email

@@ -51,7 +51,7 @@ export default function Input({
       )}
       <div
         className={`
-          flex h-12 items-center gap-2 rounded-lg border border-border-default bg-transparent px-4
+          flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-transparent px-4
           outline outline-2 outline-offset-2 transition-colors
           ${outlineClass}
           ${disabled ? "cursor-not-allowed opacity-60" : "cursor-text"}

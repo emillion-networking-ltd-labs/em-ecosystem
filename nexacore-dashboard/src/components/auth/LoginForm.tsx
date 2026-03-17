@@ -26,6 +26,9 @@ const isValidEmail = (email: string) =>
 
 export default function LoginForm() {
   const [step, setStep] = useState<LoginStep>("email");
+  const [stepDirection, setStepDirection] = useState<"forward" | "back">(
+    "forward",
+  );
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [emailError, setEmailError] = useState<string | null>(null);
   const [passwordError, setPasswordError] = useState<string | null>(null);
@@ -97,6 +100,7 @@ export default function LoginForm() {
     setEmailError(null);
     clearError();
     abortConditionalUI();
+    setStepDirection("forward");
     setStep("password");
   };
 
@@ -161,18 +165,22 @@ export default function LoginForm() {
           clearError();
           clearRateLimit();
           setPasswordError(null);
+          setStepDirection("back");
           setStep("email");
         }}
         onRateLimitExpired={clearRateLimit}
         onTurnstileToken={setTurnstileToken}
         turnstileResetKey={turnstileResetKey}
+        direction="forward"
       />
     );
   }
 
   return (
     /* Body — Figma: layoutMode HORIZONTAL, itemSpacing 24 */
-    <div className="flex flex-col gap-6 md:flex-row">
+    <div
+      className={`flex flex-col gap-6 md:flex-row ${stepDirection === "back" ? "auth-step-back" : ""}`}
+    >
       {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top) */}
       <div className="flex w-full flex-col gap-2 md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
@@ -232,13 +240,13 @@ export default function LoginForm() {
           <div className="flex gap-2">
             <Link
               href="/register"
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-default bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Create Account
             </Link>
             <button
               type="submit"
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90"
+              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90"
             >
               Next
             </button>
@@ -254,9 +262,12 @@ export default function LoginForm() {
               onClick={handlePasskeyLogin}
               disabled={passkeyLoading}
               aria-label="Sign in with passkey"
-              className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-default bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
+              className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
             >
-              <Key size={16} className={passkeyLoading ? "opacity-30" : ""} />
+              <Key
+                size={16}
+                className={`text-content-primary/50 ${passkeyLoading ? "opacity-30" : ""}`}
+              />
               <span className={passkeyLoading ? "opacity-30" : ""}>
                 Sign in with passkey
               </span>
@@ -300,6 +311,7 @@ type PasswordStepProps = {
   onRateLimitExpired: () => void;
   onTurnstileToken: (token: string | null) => void;
   turnstileResetKey: number;
+  direction: "forward" | "back";
 };
 
 function PasswordStep({
@@ -315,6 +327,7 @@ function PasswordStep({
   onRateLimitExpired,
   onTurnstileToken,
   turnstileResetKey,
+  direction,
 }: PasswordStepProps) {
   const [isEmailOpen, setIsEmailOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -341,7 +354,9 @@ function PasswordStep({
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
 
   return (
-    <div className="flex flex-col gap-6 md:flex-row">
+    <div
+      className={`flex flex-col gap-6 md:flex-row ${direction === "forward" ? "auth-step-forward" : "auth-step-back"}`}
+    >
       {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top), inner 300px */}
       <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
@@ -356,8 +371,8 @@ function PasswordStep({
               onClick={() => setIsEmailOpen(!isEmailOpen)}
               className={`flex h-10 items-center justify-center gap-2 rounded-full px-4 text-base font-medium transition-all ${
                 isEmailOpen
-                  ? "border border-border-default bg-surface-primary text-content-primary"
-                  : "border border-border-default bg-transparent text-content-primary"
+                  ? "border border-border-strong bg-surface-primary text-content-primary"
+                  : "border border-border-strong bg-transparent text-content-primary"
               }`}
             >
               <span className="whitespace-nowrap leading-none">{email}</span>
@@ -370,7 +385,7 @@ function PasswordStep({
             {/* Email Dropdown — same visual pattern as LanguageSelector */}
             {isEmailOpen && (
               <div className="absolute left-0 top-full z-50 mt-1 w-[300px]">
-                <div className="rounded-3xl border border-border-default bg-surface-primary p-4 shadow-card">
+                <div className="rounded-3xl border border-border-strong bg-surface-primary p-4 shadow-card">
                   <button
                     type="button"
                     onClick={() => setIsEmailOpen(false)}
@@ -462,7 +477,7 @@ function PasswordStep({
           <button
             type="submit"
             disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? "opacity-30" : ""}>Sign In</span>
             {isLoading && (

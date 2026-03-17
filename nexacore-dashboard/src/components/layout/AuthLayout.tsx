@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { SunDim, Moon } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
@@ -15,53 +16,79 @@ type AuthLayoutProps = {
 export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
   const { theme, toggleTheme } = useTheme();
   const isDark = theme === "dark";
+  const cardRef = useRef<HTMLDivElement>(null);
+  const contentRef = useRef<HTMLDivElement>(null);
+
+  const syncHeight = useCallback(() => {
+    const card = cardRef.current;
+    const content = contentRef.current;
+    if (!card || !content) return;
+    const targetHeight = content.scrollHeight;
+    if (card.style.height && Math.abs(card.offsetHeight - targetHeight) > 1) {
+      card.style.height = `${targetHeight}px`;
+    } else {
+      card.style.height = `${targetHeight}px`;
+    }
+  }, []);
+
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content) return;
+    const observer = new ResizeObserver(syncHeight);
+    observer.observe(content);
+    syncHeight();
+    return () => observer.disconnect();
+  }, [syncHeight]);
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center bg-surface-primary px-2 py-2">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-surface-tertiary px-2 py-2">
       {/* Decorative background grid — Figma: "Frame BG Lines" */}
       <AuthGridLines />
 
       {/* Auth Card — Figma: Login Card / Register Card */}
       <div
-        className={`auth-card ${narrow ? "max-w-[350px] overflow-hidden" : ""}`}
+        ref={cardRef}
+        className={`auth-card auth-card-enter overflow-hidden transition-[height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${narrow ? "max-w-[350px]" : ""}`}
       >
-        {/* Container — white inner area with padding */}
-        <div
-          className={`flex w-full flex-col gap-6 border border-border-default bg-surface-primary p-6 ${narrow ? "rounded-none" : "rounded-t-3xl"}`}
-        >
-          {/* Header — Logo + Theme Toggle */}
-          <div className="flex items-center gap-2.5">
-            <Image
-              src="/em-icon.png"
-              alt="EM NexaCore"
-              width={60}
-              height={24}
-              priority
-              className="dark:invert"
-            />
+        <div ref={contentRef} className="w-full">
+          {/* Container — Figma: fill #ffffff, stroke rgba(0,0,0,0.05) 1px INSIDE, p=24, gap=24 */}
+          <div
+            className={`flex w-full flex-col gap-6 border-b border-border-strong bg-surface-primary p-6 ${narrow ? "rounded-none" : "rounded-t-3xl"}`}
+          >
+            {/* Header — Logo + Theme Toggle */}
+            <div className="flex items-center gap-2.5">
+              <Image
+                src="/em-icon.png"
+                alt="EM NexaCore"
+                width={60}
+                height={24}
+                priority
+                className="dark:invert"
+              />
 
-            {/* Figma: "Ligth / Dark" — flex-1, justify-end, p=10 */}
-            <div className="flex flex-1 items-center justify-end p-2.5">
-              <button
-                type="button"
-                onClick={toggleTheme}
-                className="text-content-primary/50 transition-colors hover:text-content-primary"
-              >
-                {isDark ? (
-                  <SunDim size={16} strokeWidth={2} />
-                ) : (
-                  <Moon size={16} strokeWidth={2} />
-                )}
-              </button>
+              {/* Figma: "Ligth / Dark" — flex-1, justify-end, p=10 */}
+              <div className="flex flex-1 items-center justify-end p-2.5">
+                <button
+                  type="button"
+                  onClick={toggleTheme}
+                  className="text-content-primary/50 transition-colors hover:text-content-primary"
+                >
+                  {isDark ? (
+                    <SunDim size={16} strokeWidth={2} />
+                  ) : (
+                    <Moon size={16} strokeWidth={2} />
+                  )}
+                </button>
+              </div>
             </div>
+
+            {/* Body — provided by each page (LoginForm / RegisterForm) */}
+            {children}
           </div>
 
-          {/* Body — provided by each page (LoginForm / RegisterForm) */}
-          {children}
+          {/* Footer — Figma: 56px height, padding 8 */}
+          {narrow ? <div className="h-14 w-full p-2" /> : <AuthFooter />}
         </div>
-
-        {/* Footer — Figma: 56px height, padding 8 */}
-        {narrow ? <div className="h-14 w-full p-2" /> : <AuthFooter />}
       </div>
 
       {/* Go Back Section — below the card (not shown on narrow/status cards) */}
