@@ -190,7 +190,7 @@ export default function ActiveSessions() {
                     onClick={() => revokeSession(session.id)}
                     disabled={revoking === session.id}
                     className="shrink-0 rounded-lg p-2 text-content-tertiary transition-colors hover:bg-error/10 hover:text-error disabled:opacity-50"
-                    title="Revoke session"
+                    aria-label="Revoke session"
                   >
                     {revoking === session.id ? (
                       <div className="h-4 w-4 animate-spin rounded-full border-2 border-content-disabled border-t-error" />

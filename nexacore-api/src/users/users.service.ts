@@ -28,13 +28,17 @@ import { SessionsService } from '../sessions/sessions.service';
 import { MailService } from '../mail/mail.service';
 import { PasswordBreachService } from '../auth/password-breach.service';
 import { TrustedDeviceService } from '../auth/trusted-device.service';
-import { TokenDenyListService, ACCESS_TOKEN_TTL_SECONDS } from '../auth/token-deny-list.service';
+import {
+  TokenDenyListService,
+  ACCESS_TOKEN_TTL_SECONDS,
+} from '../auth/token-deny-list.service';
 import { ChangeEmailDto } from './dto/change-email.dto';
 import { DeleteAccountDto } from './dto/delete-account.dto';
 import { UnlinkOAuthDto } from './dto/unlink-oauth.dto';
 import * as crypto from 'crypto';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { LinkedProvider } from '../auth/interfaces/oauth-account.interface';
+import { pseudonymizeEmail } from '../common/utils/pseudonymize-email';
 
 const BCRYPT_ROUNDS = 12;
 const EMAIL_CHANGE_TOKEN_EXPIRY_HOURS = 24;
@@ -68,10 +72,7 @@ export class UsersService {
     }) as Promise<User | null>;
   }
 
-  async create(data: {
-    email: string;
-    passwordHash: string;
-  }): Promise<User> {
+  async create(data: { email: string; passwordHash: string }): Promise<User> {
     try {
       return (await this.prisma.user.create({
         data: {
@@ -146,7 +147,9 @@ export class UsersService {
           providerId: profile.providerId,
         },
       },
-      include: { user: { include: { oauthAccounts: { select: { provider: true } } } } },
+      include: {
+        user: { include: { oauthAccounts: { select: { provider: true } } } },
+      },
     });
 
     if (existingAccount) {
@@ -167,15 +170,18 @@ export class UsersService {
           (!existingUser.avatarUrl && profileData.avatarUrl);
 
         if (needsUpdate) {
-          const user = await this.prisma.user.update({
+          const user = (await this.prisma.user.update({
             where: { id: existingUser.id },
             data: {
-              ...(!existingUser.firstName && profileData.firstName && { firstName: profileData.firstName }),
-              ...(!existingUser.lastName && profileData.lastName && { lastName: profileData.lastName }),
-              ...(!existingUser.avatarUrl && profileData.avatarUrl && { avatarUrl: profileData.avatarUrl }),
+              ...(!existingUser.firstName &&
+                profileData.firstName && { firstName: profileData.firstName }),
+              ...(!existingUser.lastName &&
+                profileData.lastName && { lastName: profileData.lastName }),
+              ...(!existingUser.avatarUrl &&
+                profileData.avatarUrl && { avatarUrl: profileData.avatarUrl }),
             },
             include: { oauthAccounts: { select: { provider: true } } },
-          }) as User;
+          })) as User;
           return { user, action: 'login' };
         }
         return { user: existingUser, action: 'login' };
@@ -216,7 +222,7 @@ export class UsersService {
     }
 
     // 3. New user: create User with nested OAuthAccount
-    const user = await this.prisma.user.create({
+    const user = (await this.prisma.user.create({
       data: {
         email: profile.email,
         emailVerified: true,
@@ -230,7 +236,7 @@ export class UsersService {
         },
       },
       include: { oauthAccounts: { select: { provider: true } } },
-    }) as User;
+    })) as User;
     return { user, action: 'created' };
   }
 
@@ -257,9 +263,7 @@ export class UsersService {
     // Verify OAuth email matches user's account email (CWE-287)
     const user = await this.findById(userId);
     if (!user) {
-      throw new UnauthorizedException(
-        ErrorMessages.auth.AUTHENTICATION_FAILED,
-      );
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
     if (user.email.toLowerCase() !== profile.email.toLowerCase()) {
       throw new BadRequestException(ErrorMessages.oauth.EMAIL_MISMATCH);
@@ -309,11 +313,7 @@ export class UsersService {
 
   // ── Security activity (SCRUM-135) ──
 
-  async getSecurityActivity(
-    userId: string,
-    page: number,
-    limit: number,
-  ) {
+  async getSecurityActivity(userId: string, page: number, limit: number) {
     const skip = (page - 1) * limit;
     const where = { userId };
 
@@ -348,9 +348,10 @@ export class UsersService {
 
   // ── New methods for SCRUM-21 ──
 
-  async findAll(
-    query: ListUsersQueryDto,
-  ): Promise<{ data: SafeUser[]; meta: { total: number; page: number; limit: number; totalPages: number } }> {
+  async findAll(query: ListUsersQueryDto): Promise<{
+    data: SafeUser[];
+    meta: { total: number; page: number; limit: number; totalPages: number };
+  }> {
     const page = query.page ?? 1;
     const limit = query.limit ?? 10;
     const skip = (page - 1) * limit;
@@ -369,8 +370,16 @@ export class UsersService {
       ];
     }
 
-    const validSortFields = ['createdAt', 'email', 'role', 'firstName', 'lastName'];
-    const sortBy = validSortFields.includes(query.sortBy ?? '') ? query.sortBy : 'createdAt';
+    const validSortFields = [
+      'createdAt',
+      'email',
+      'role',
+      'firstName',
+      'lastName',
+    ];
+    const sortBy = validSortFields.includes(query.sortBy ?? '')
+      ? query.sortBy
+      : 'createdAt';
     const sortOrder = query.sortOrder === 'asc' ? 'asc' : 'desc';
 
     const [users, total] = await Promise.all([
@@ -509,9 +518,7 @@ export class UsersService {
       (dto.role === Role.ADMIN || dto.role === Role.SUPERADMIN) &&
       actingUser.role !== Role.SUPERADMIN
     ) {
-      throw new ForbiddenException(
-        ErrorMessages.user.OPERATION_NOT_PERMITTED,
-      );
+      throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
     const updated = await this.prisma.user.update({
@@ -557,7 +564,9 @@ export class UsersService {
     }
 
     if (dto.isActive === false || dto.role !== undefined) {
-      this.tokenDenyListService.denyAllForUser(targetId, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
+      this.tokenDenyListService
+        .denyAllForUser(targetId, ACCESS_TOKEN_TTL_SECONDS)
+        .catch(() => {});
     }
 
     return toSafeUser(updated as User);
@@ -584,7 +593,9 @@ export class UsersService {
 
     // Revoke all sessions on soft delete (immediate lockout)
     await this.sessionsService.revokeAllUserSessions(targetId);
-    this.tokenDenyListService.denyAllForUser(targetId, ACCESS_TOKEN_TTL_SECONDS).catch(() => {});
+    this.tokenDenyListService
+      .denyAllForUser(targetId, ACCESS_TOKEN_TTL_SECONDS)
+      .catch(() => {});
 
     this.auditService
       .log({
@@ -593,7 +604,7 @@ export class UsersService {
         targetUserId: targetId,
         ipAddress: ctx?.ipAddress,
         userAgent: ctx?.userAgent,
-        metadata: { email: target.email },
+        metadata: { email: pseudonymizeEmail(target.email) },
       })
       .catch(() => {});
   }
@@ -727,7 +738,7 @@ export class UsersService {
         userId,
         ipAddress: ctx?.ipAddress,
         userAgent: ctx?.userAgent,
-        metadata: { newEmail: normalizedNewEmail },
+        metadata: { newEmail: pseudonymizeEmail(normalizedNewEmail) },
       })
       .catch(() => {});
 
@@ -848,7 +859,9 @@ export class UsersService {
     }
 
     if (!user.passwordHash) {
-      throw new BadRequestException(ErrorMessages.oauth.PASSWORD_REQUIRED_FOR_UNLINK);
+      throw new BadRequestException(
+        ErrorMessages.oauth.PASSWORD_REQUIRED_FOR_UNLINK,
+      );
     }
 
     const isPasswordValid = await bcrypt.compare(
@@ -870,7 +883,10 @@ export class UsersService {
         userId,
         ipAddress: ctx?.ipAddress,
         userAgent: ctx?.userAgent,
-        metadata: { provider: account.provider, providerId: account.providerId },
+        metadata: {
+          provider: account.provider,
+          providerId: account.providerId,
+        },
       })
       .catch(() => {});
 

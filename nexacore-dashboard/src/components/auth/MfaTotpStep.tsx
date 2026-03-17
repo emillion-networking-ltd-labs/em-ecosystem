@@ -248,7 +248,10 @@ export default function MfaTotpStep() {
       <div className="w-full md:w-[348px]">
         <form onSubmit={handleTotpSubmit} className="flex flex-col gap-2">
           <div className="flex min-h-[116px] flex-col gap-2">
-            <label className="text-[15px] font-semibold leading-[22px] text-content-primary">
+            <label
+              htmlFor="totp-digit-0"
+              className="text-[15px] font-semibold leading-[22px] text-content-primary"
+            >
               Verification Code
             </label>
 
@@ -262,6 +265,7 @@ export default function MfaTotpStep() {
               {code.map((digit, i) => (
                 <input
                   key={i}
+                  id={i === 0 ? "totp-digit-0" : undefined}
                   ref={(el) => {
                     inputRefs.current[i] = el;
                   }}

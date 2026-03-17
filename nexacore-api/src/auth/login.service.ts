@@ -23,6 +23,7 @@ import {
   MfaSetupRequiredResult,
 } from './interfaces/auth.interfaces';
 import { ErrorMessages } from '../common/constants/error-messages';
+import { pseudonymizeEmail } from '../common/utils/pseudonymize-email';
 import {
   BCRYPT_ROUNDS,
   MAX_FAILED_ATTEMPTS,
@@ -62,7 +63,7 @@ export class LoginService {
         AuditAction.REGISTER,
         ctx,
         existingUser.id,
-        { email: dto.email, outcome: 'existing_email' },
+        { email: pseudonymizeEmail(dto.email), outcome: 'existing_email' },
       );
 
       return { message: ErrorMessages.auth.CHECK_EMAIL };
@@ -88,7 +89,7 @@ export class LoginService {
       .catch(() => {});
 
     this.loginSecurityService.logAudit(AuditAction.REGISTER, ctx, user.id, {
-      email: dto.email,
+      email: pseudonymizeEmail(dto.email),
       outcome: 'new_account',
     });
 
@@ -109,7 +110,7 @@ export class LoginService {
         AuditAction.LOGIN_FAILURE,
         ctx,
         undefined,
-        { email: dto.email, reason: 'user_not_found' },
+        { email: pseudonymizeEmail(dto.email), reason: 'user_not_found' },
       );
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
     }
