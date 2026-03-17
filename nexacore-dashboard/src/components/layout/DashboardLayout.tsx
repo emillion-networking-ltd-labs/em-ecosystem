@@ -1,15 +1,18 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import Sidebar from './Sidebar';
-import NavBar from './NavBar';
+import { useState } from "react";
+import Sidebar from "./Sidebar";
+import NavBar from "./NavBar";
 
 type DashboardLayoutProps = {
   children: React.ReactNode;
   rightPanel?: React.ReactNode;
 };
 
-export default function DashboardLayout({ children, rightPanel }: DashboardLayoutProps) {
+export default function DashboardLayout({
+  children,
+  rightPanel,
+}: DashboardLayoutProps) {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(!!rightPanel);
@@ -47,12 +50,12 @@ export default function DashboardLayout({ children, rightPanel }: DashboardLayou
       {/* Main content */}
       <div
         className={`transition-[margin] duration-200 ${
-          sidebarCollapsed ? 'lg:ml-[68px]' : 'lg:ml-[212px]'
-        } ${showRightPanel ? 'lg:mr-[280px]' : ''}`}
+          sidebarCollapsed ? "lg:ml-[68px]" : "lg:ml-[212px]"
+        } ${showRightPanel ? "lg:mr-[280px]" : ""}`}
       >
         <NavBar
           onMenuClick={() => {
-            if (typeof window !== 'undefined' && window.innerWidth >= 1024) {
+            if (typeof window !== "undefined" && window.innerWidth >= 1024) {
               setSidebarCollapsed(!sidebarCollapsed);
             } else {
               setMobileOpen(!mobileOpen);
@@ -62,7 +65,7 @@ export default function DashboardLayout({ children, rightPanel }: DashboardLayou
             rightPanel ? () => setRightPanelOpen(!rightPanelOpen) : undefined
           }
         />
-        <main className="p-4 lg:p-6">{children}</main>
+        <main className="p-4 lg:px-7 lg:py-6">{children}</main>
       </div>
 
       {/* Right panel (optional, desktop only) */}

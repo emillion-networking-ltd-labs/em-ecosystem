@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import ThemeToggle from '@/components/ui/ThemeToggle';
-import Breadcrumbs from '@/components/ui/Breadcrumbs';
+import { useState, useRef, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import ThemeToggle from "@/components/ui/ThemeToggle";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import {
   PanelLeft,
   Star,
@@ -16,7 +16,7 @@ import {
   Shield,
   LogOut,
   ChevronDown,
-} from 'lucide-react';
+} from "lucide-react";
 
 type NavBarProps = {
   onMenuClick: () => void;
@@ -24,27 +24,33 @@ type NavBarProps = {
 };
 
 const routeLabels: Record<string, string> = {
-  '/dashboard': 'Overview',
-  '/profile': 'Profile',
-  '/admin': 'User Management',
+  "/dashboard": "Overview",
+  "/profile": "Profile",
+  "/admin": "User Management",
 };
 
-export default function NavBar({ onMenuClick, onRightPanelToggle }: NavBarProps) {
+export default function NavBar({
+  onMenuClick,
+  onRightPanelToggle,
+}: NavBarProps) {
   const pathname = usePathname();
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  const isAdmin = user?.role === 'ADMIN' || user?.role === 'SUPERADMIN';
+  const isAdmin = user?.role === "ADMIN" || user?.role === "SUPERADMIN";
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(e.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const handleLogout = async () => {
@@ -53,10 +59,13 @@ export default function NavBar({ onMenuClick, onRightPanelToggle }: NavBarProps)
   };
 
   // Build breadcrumbs from pathname
-  const parentLabel = pathname.startsWith('/admin') ? 'Admin' : 'Dashboards';
-  const currentLabel = routeLabels[pathname] || pathname.split('/').pop() || '';
+  const parentLabel = pathname.startsWith("/admin") ? "Admin" : "Dashboards";
+  const currentLabel = routeLabels[pathname] || pathname.split("/").pop() || "";
   const breadcrumbItems = [
-    { label: parentLabel, href: pathname.startsWith('/admin') ? '/admin' : '/dashboard' },
+    {
+      label: parentLabel,
+      href: pathname.startsWith("/admin") ? "/admin" : "/dashboard",
+    },
     { label: currentLabel },
   ];
 
@@ -95,10 +104,12 @@ export default function NavBar({ onMenuClick, onRightPanelToggle }: NavBarProps)
       {/* Right side */}
       <div className="flex items-center gap-5">
         {/* Compact search bar (desktop only) */}
-        <div className="hidden items-center gap-2 rounded-2xl bg-surface-subtle px-2 py-1 lg:flex">
-          <Search size={16} className="text-content-tertiary" />
-          <span className="text-caption text-content-tertiary">Search</span>
-          <kbd className="rounded-xs border border-border-default px-1 text-caption text-content-tertiary">
+        <div className="hidden w-[160px] items-center gap-2 rounded-2xl bg-black/[0.04] px-2 py-1 dark:bg-white/[0.04] lg:flex">
+          <Search size={16} className="text-content-primary/20" />
+          <span className="text-[14px] leading-[20px] text-content-primary/20">
+            Search
+          </span>
+          <kbd className="rounded-xs border border-black/10 px-1 text-caption text-content-primary/20 dark:border-white/10">
             /
           </kbd>
         </div>
@@ -107,18 +118,18 @@ export default function NavBar({ onMenuClick, onRightPanelToggle }: NavBarProps)
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <button
-            className="flex h-6 w-6 items-center justify-center rounded-xl p-1 text-content-primary hover:bg-surface-subtle"
+            className="flex h-7 w-7 items-center justify-center rounded-xl p-1 text-content-primary hover:bg-surface-subtle"
             aria-label="Notifications"
           >
-            <Bell size={16} />
+            <Bell size={20} />
           </button>
           {onRightPanelToggle && (
             <button
               onClick={onRightPanelToggle}
-              className="hidden h-6 w-6 items-center justify-center rounded-xl p-1 text-content-primary hover:bg-surface-subtle lg:flex"
+              className="hidden h-7 w-7 items-center justify-center rounded-xl p-1 text-content-primary hover:bg-surface-subtle lg:flex"
               aria-label="Toggle right panel"
             >
-              <PanelRight size={16} />
+              <PanelRight size={20} />
             </button>
           )}
         </div>
@@ -130,7 +141,7 @@ export default function NavBar({ onMenuClick, onRightPanelToggle }: NavBarProps)
             className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-body-sm text-content-primary hover:bg-surface-subtle"
           >
             <div className="flex h-7 w-7 items-center justify-center rounded-circle bg-surface-inverse text-caption font-semibold text-content-inverse">
-              {(user?.firstName?.[0] || user?.email[0] || '?').toUpperCase()}
+              {(user?.firstName?.[0] || user?.email[0] || "?").toUpperCase()}
             </div>
             <ChevronDown size={14} className="text-content-tertiary" />
           </button>
