@@ -14,6 +14,8 @@ export const ErrorMessages = {
       'New password must be different from current password',
     EMAIL_ALREADY_VERIFIED: 'Email already verified',
     RESEND_COOLDOWN: 'Please wait before requesting another email',
+    LOGIN_BLOCKED_SUSPICIOUS:
+      'Login blocked due to suspicious location activity. Please try again later or contact support.',
   },
   mfa: {
     OPERATION_NOT_AVAILABLE: 'MFA operation not available',
