@@ -120,7 +120,14 @@ export const componentRegistry: ComponentEntry[] = [
     fileName: "ConfirmModal.tsx",
   },
 
-  // ─── Organisms (3) ──────────────────────────────────────────
+  // ─── Organisms (4) ──────────────────────────────────────────
+  {
+    name: "DataTable",
+    category: "organism",
+    description:
+      "Generic data table with column config, loading and empty states",
+    fileName: "DataTable.tsx",
+  },
   {
     name: "LanguageSelector",
     category: "organism",

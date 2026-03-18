@@ -18,6 +18,7 @@ import Calendar from "@/components/ui/Calendar";
 import Pagination from "@/components/ui/Pagination";
 import ErrorAlert from "@/components/ui/ErrorAlert";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
 
 /* ===== Section Wrapper ===== */
 
@@ -462,6 +463,76 @@ export function MoleculeShowcase() {
       <PaginationShowcase />
       <ErrorAlertShowcase />
       <BreadcrumbsShowcase />
+      <DataTableShowcase />
     </div>
+  );
+}
+
+/* ===== Organism Showcases ===== */
+
+type SampleRow = { id: string; name: string; role: string; status: string };
+
+const sampleData: SampleRow[] = [
+  { id: "1", name: "Alice Brown", role: "Admin", status: "Active" },
+  { id: "2", name: "Bob Wilson", role: "User", status: "Active" },
+  { id: "3", name: "Carol Davis", role: "Admin", status: "Locked" },
+];
+
+const sampleColumns: ColumnDef<SampleRow>[] = [
+  { key: "name", label: "Name", render: (row) => row.name },
+  {
+    key: "role",
+    label: "Role",
+    render: (row) => (
+      <Badge variant={row.role === "Admin" ? "info" : "default"}>
+        {row.role}
+      </Badge>
+    ),
+  },
+  {
+    key: "status",
+    label: "Status",
+    render: (row) => (
+      <Badge variant={row.status === "Active" ? "success" : "error"}>
+        {row.status}
+      </Badge>
+    ),
+  },
+];
+
+function DataTableShowcase() {
+  return (
+    <ShowcaseSection title="DataTable">
+      <VariantRow label="with data">
+        <div className="w-full max-w-xl">
+          <DataTable
+            data={sampleData}
+            columns={sampleColumns}
+            keyExtractor={(row) => row.id}
+          />
+        </div>
+      </VariantRow>
+      <VariantRow label="loading">
+        <div className="w-full max-w-xl">
+          <DataTable
+            data={[]}
+            columns={sampleColumns}
+            keyExtractor={(row) => row.id}
+            loading
+            loadingRows={3}
+          />
+        </div>
+      </VariantRow>
+      <VariantRow label="empty">
+        <div className="w-full max-w-xl">
+          <DataTable
+            data={[]}
+            columns={sampleColumns}
+            keyExtractor={(row) => row.id}
+            emptyMessage="No users match your filters."
+          />
+        </div>
+      </VariantRow>
+    </ShowcaseSection>
   );
 }
