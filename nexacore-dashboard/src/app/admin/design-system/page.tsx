@@ -12,6 +12,7 @@ import {
   AtomShowcase,
   MoleculeShowcase,
 } from "@/components/admin/ComponentShowcase";
+import CodePlayground from "@/components/admin/CodePlayground";
 import {
   componentRegistry,
   categoryMeta,
@@ -26,6 +27,7 @@ const viewTabs = [
   { label: "Atoms", value: "atoms" },
   { label: "Molecules", value: "molecules" },
   { label: "Tokens", value: "tokens" },
+  { label: "Playground", value: "playground" },
 ];
 
 export default function DesignSystemPage() {
@@ -165,6 +167,9 @@ export default function DesignSystemPage() {
 
         {/* Tokens View */}
         {activeView === "tokens" && <TokenInspector />}
+
+        {/* Playground */}
+        {activeView === "playground" && <CodePlayground />}
       </DashboardLayout>
     </AdminRoute>
   );
