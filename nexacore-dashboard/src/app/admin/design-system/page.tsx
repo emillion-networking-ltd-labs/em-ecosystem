@@ -13,6 +13,7 @@ import {
   MoleculeShowcase,
 } from "@/components/admin/ComponentShowcase";
 import CodePlayground from "@/components/admin/CodePlayground";
+import LayoutTemplates from "@/components/admin/LayoutTemplates";
 import {
   componentRegistry,
   categoryMeta,
@@ -28,6 +29,7 @@ const viewTabs = [
   { label: "Molecules", value: "molecules" },
   { label: "Tokens", value: "tokens" },
   { label: "Playground", value: "playground" },
+  { label: "Templates", value: "templates" },
 ];
 
 export default function DesignSystemPage() {
@@ -170,6 +172,9 @@ export default function DesignSystemPage() {
 
         {/* Playground */}
         {activeView === "playground" && <CodePlayground />}
+
+        {/* Templates */}
+        {activeView === "templates" && <LayoutTemplates />}
       </DashboardLayout>
     </AdminRoute>
   );
