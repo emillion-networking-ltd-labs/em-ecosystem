@@ -28,6 +28,7 @@ import {
   BCRYPT_ROUNDS,
   MAX_FAILED_ATTEMPTS,
   DUMMY_PASSWORD_HASH,
+  MIN_LOGIN_DURATION_MS,
   getLockoutDurationMinutes,
 } from './constants/auth.constants';
 
@@ -96,7 +97,7 @@ export class LoginService {
     return { message: ErrorMessages.auth.CHECK_EMAIL };
   }
 
-  async login(
+  private async executeLogin(
     dto: LoginDto,
     requestMeta: { ipAddress: string; userAgent?: string | null },
     ctx?: RequestContext,
@@ -113,6 +114,12 @@ export class LoginService {
         { email: pseudonymizeEmail(dto.email), reason: 'user_not_found' },
       );
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
+    }
+
+    // Layer 1 timing defense (H-12): Equalize response time for locked-account path
+    // by running bcrypt before checkAccountLockout throws, matching user-not-found path timing.
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      await bcrypt.compare(dto.password, DUMMY_PASSWORD_HASH);
     }
 
     this.checkAccountLockout(user, ctx);
@@ -140,6 +147,47 @@ export class LoginService {
     }
 
     return this.handleLoginSuccess(user, requestMeta, ctx);
+  }
+
+  /**
+   * Public login method with timing attack mitigation.
+   * Wraps executeLogin() with a min-duration floor to ensure all code paths
+   * (success, MFA required, MFA setup, failures, lockout) take ≥ MIN_LOGIN_DURATION_MS.
+   *
+   * This addresses:
+   * - H-12 (account lockout timing leak): Ensures locked path doesn't return early
+   * - EM-04 (login path timing variance): Equalizes post-validation path execution times
+   */
+  async login(
+    dto: LoginDto,
+    requestMeta: { ipAddress: string; userAgent?: string | null },
+    ctx?: RequestContext,
+    fingerprint?: string,
+  ): Promise<AuthResult | MfaChallengeResult | MfaSetupRequiredResult> {
+    const start = Date.now();
+    let result:
+      | AuthResult
+      | MfaChallengeResult
+      | MfaSetupRequiredResult
+      | undefined;
+    let error: unknown;
+
+    try {
+      result = await this.executeLogin(dto, requestMeta, ctx, fingerprint);
+    } catch (err) {
+      error = err;
+    }
+
+    // Layer 2 timing defense (EM-04): Apply min-duration floor to all paths
+    const elapsed = Date.now() - start;
+    if (elapsed < MIN_LOGIN_DURATION_MS) {
+      await new Promise<void>((resolve) =>
+        setTimeout(resolve, MIN_LOGIN_DURATION_MS - elapsed),
+      );
+    }
+
+    if (error !== undefined) throw error as Error;
+    return result!;
   }
 
   private checkAccountLockout(user: User, ctx?: RequestContext): void {

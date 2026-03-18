@@ -1,3 +1,8 @@
+jest.mock('../constants/auth.constants', () => ({
+  ...jest.requireActual('../constants/auth.constants'),
+  MIN_LOGIN_DURATION_MS: 0,
+}));
+
 import {
   getLockoutDurationMs,
   getLockoutDurationMinutes,

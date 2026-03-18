@@ -1,3 +1,8 @@
+jest.mock('../constants/auth.constants', () => ({
+  ...jest.requireActual('../constants/auth.constants'),
+  MIN_LOGIN_DURATION_MS: 0,
+}));
+
 import { UnauthorizedException, ForbiddenException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { Role } from '../../users/enums/role.enum';

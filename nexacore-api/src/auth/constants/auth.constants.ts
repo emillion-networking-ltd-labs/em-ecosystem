@@ -20,6 +20,15 @@ export const DUMMY_PASSWORD_HASH = bcrypt.hashSync(
 );
 
 /**
+ * Minimum login response duration in milliseconds.
+ * Mitigates timing attacks by ensuring all login paths (success, MFA required, MFA setup, lockout, failures)
+ * take at least this long to respond. If execution completes faster, setTimeout pads the response.
+ * 350ms is conservative above typical bcrypt 12-round time (~200–300ms).
+ * Addresses audit findings H-12 (account lockout timing leak) and EM-04 (login path timing variance).
+ */
+export const MIN_LOGIN_DURATION_MS = 350;
+
+/**
  * Lockout duration escalation in minutes.
  * Index = lockoutCount (0-based), value = minutes locked.
  * After the last index, the final value is used for all subsequent lockouts.
