@@ -9,6 +9,10 @@ import Badge from "@/components/ui/Badge";
 import Tabs from "@/components/ui/Tabs";
 import TokenInspector from "@/components/admin/TokenInspector";
 import {
+  AtomShowcase,
+  MoleculeShowcase,
+} from "@/components/admin/ComponentShowcase";
+import {
   componentRegistry,
   categoryMeta,
   categoryColors,
@@ -18,12 +22,14 @@ import {
 type FilterCategory = ComponentCategory | "all";
 
 const viewTabs = [
-  { label: "Components", value: "components" },
+  { label: "Catalog", value: "catalog" },
+  { label: "Atoms", value: "atoms" },
+  { label: "Molecules", value: "molecules" },
   { label: "Tokens", value: "tokens" },
 ];
 
 export default function DesignSystemPage() {
-  const [activeView, setActiveView] = useState("components");
+  const [activeView, setActiveView] = useState("catalog");
   const [activeCategory, setActiveCategory] = useState<FilterCategory>("all");
 
   const filteredComponents = useMemo(() => {
@@ -57,7 +63,7 @@ export default function DesignSystemPage() {
             </p>
           </div>
           <div className="flex items-center gap-2 text-content-tertiary">
-            {activeView === "components" ? (
+            {activeView === "catalog" ? (
               <>
                 <Layers size={20} />
                 <span className="text-body-sm font-medium">
@@ -67,7 +73,11 @@ export default function DesignSystemPage() {
             ) : (
               <>
                 <Paintbrush size={20} />
-                <span className="text-body-sm font-medium">Design Tokens</span>
+                <span className="text-body-sm font-medium">
+                  {activeView === "tokens"
+                    ? "Design Tokens"
+                    : `${activeView.charAt(0).toUpperCase() + activeView.slice(1)} Preview`}
+                </span>
               </>
             )}
           </div>
@@ -82,8 +92,8 @@ export default function DesignSystemPage() {
           />
         </div>
 
-        {/* Components View */}
-        {activeView === "components" && (
+        {/* Catalog View */}
+        {activeView === "catalog" && (
           <>
             {/* Category Filter */}
             <div className="flex items-center gap-2 mb-6 flex-wrap">
@@ -146,6 +156,12 @@ export default function DesignSystemPage() {
             </div>
           </>
         )}
+
+        {/* Atom Showcase */}
+        {activeView === "atoms" && <AtomShowcase />}
+
+        {/* Molecule Showcase */}
+        {activeView === "molecules" && <MoleculeShowcase />}
 
         {/* Tokens View */}
         {activeView === "tokens" && <TokenInspector />}
