@@ -15,6 +15,7 @@ import {
   ScrollText,
   Key,
   Settings,
+  Palette,
 } from "lucide-react";
 
 type SidebarProps = {
@@ -42,6 +43,12 @@ const adminItems = [
     href: "/admin/permissions",
     label: "Permissions",
     icon: Key,
+    permission: "permissions:read",
+  },
+  {
+    href: "/admin/design-system",
+    label: "Design System",
+    icon: Palette,
     permission: "permissions:read",
   },
 ];
