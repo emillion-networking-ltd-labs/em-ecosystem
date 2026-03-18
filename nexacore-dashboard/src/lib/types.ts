@@ -31,9 +31,9 @@ export type AuthResponse = {
 };
 
 export type LoginResponse =
-  | AuthResponse
-  | { mfaRequired: true; mfaToken: string }
-  | { mfaSetupRequired: true; setupToken: string; message: string };
+  | (AuthResponse & { status: "success" })
+  | { status: "mfa_required"; mfaToken: string }
+  | { status: "mfa_setup_required"; setupToken: string; message: string };
 
 export type MfaSetupResponse = {
   secret: string;

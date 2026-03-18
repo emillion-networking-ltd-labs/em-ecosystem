@@ -71,6 +71,7 @@ export class OAuthAuthService {
     this.loginSecurityService.checkSuspiciousLoginSuccess(user, requestMeta);
 
     return {
+      status: 'success' as const,
       accessToken,
       user: toSafeUser(user),
       cookie: this.tokenService.buildRefreshCookie(refreshToken),
@@ -96,6 +97,7 @@ export class OAuthAuthService {
       await this.tokenService.generateTokens(user, ctx);
 
     return {
+      status: 'success' as const,
       accessToken,
       user: toSafeUser(user),
       cookie: this.tokenService.buildRefreshCookie(refreshToken),

@@ -170,7 +170,7 @@ describe('AuthService — Login Security', () => {
 
       const result = await ctx.authService.login(loginDto, requestMeta);
 
-      expect((result as any).mfaSetupRequired).toBe(true);
+      expect((result as any).status).toBe('mfa_setup_required');
       expect((result as any).message).toContain('MFA setup is required');
       expect((result as any).accessToken).toBeUndefined();
     });
@@ -185,7 +185,7 @@ describe('AuthService — Login Security', () => {
 
       const result = await ctx.authService.login(loginDto, requestMeta);
 
-      expect((result as any).mfaSetupRequired).toBe(true);
+      expect((result as any).status).toBe('mfa_setup_required');
       expect((result as any).accessToken).toBeUndefined();
     });
 
@@ -201,9 +201,9 @@ describe('AuthService — Login Security', () => {
 
       const result = await ctx.authService.login(loginDto, requestMeta);
 
-      expect((result as any).mfaRequired).toBe(true);
+      expect((result as any).status).toBe('mfa_required');
       expect((result as any).mfaToken).toBeDefined();
-      expect((result as any).mfaSetupRequired).toBeUndefined();
+      expect((result as any).status).not.toBe('mfa_setup_required');
     });
 
     it('should return tokens normally for USER without MFA', async () => {
@@ -212,7 +212,7 @@ describe('AuthService — Login Security', () => {
       const result = await ctx.authService.login(loginDto, requestMeta);
 
       expect((result as any).accessToken).toBe('access-token');
-      expect((result as any).mfaSetupRequired).toBeUndefined();
+      expect((result as any).status).not.toBe('mfa_setup_required');
     });
 
     it('should log audit event with mfaSetupRequired metadata', async () => {
@@ -238,7 +238,7 @@ describe('AuthService — Login Security', () => {
 
       const result = await ctx.authService.login(loginDto, requestMeta);
 
-      expect((result as any).mfaSetupRequired).toBe(true);
+      expect((result as any).status).toBe('mfa_setup_required');
     });
   });
 
@@ -400,7 +400,7 @@ describe('AuthService — Login Security', () => {
         requestMeta,
       );
 
-      expect((result as any).mfaSetupRequired).toBe(true);
+      expect((result as any).status).toBe('mfa_setup_required');
       await flushPromises();
     });
 
@@ -521,7 +521,7 @@ describe('AuthService — Login Security', () => {
 
       // Non-MFA user proceeds normally even when challenged
       expect(result).toHaveProperty('accessToken');
-      expect(result).not.toHaveProperty('mfaRequired');
+      expect((result as any).status).toBe('success');
     });
   });
 });

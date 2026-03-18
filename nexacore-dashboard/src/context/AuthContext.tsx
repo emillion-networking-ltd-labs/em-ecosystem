@@ -188,14 +188,16 @@ function detectRateLimitKind(errObj: ApiError): RateLimitKind {
 
 function isMfaResponse(
   data: LoginResponse,
-): data is { mfaRequired: true; mfaToken: string } {
-  return "mfaRequired" in data && data.mfaRequired === true;
+): data is { status: "mfa_required"; mfaToken: string } {
+  return data.status === "mfa_required";
 }
 
-function isMfaSetupResponse(
-  data: LoginResponse,
-): data is { mfaSetupRequired: true; setupToken: string; message: string } {
-  return "mfaSetupRequired" in data && data.mfaSetupRequired === true;
+function isMfaSetupResponse(data: LoginResponse): data is {
+  status: "mfa_setup_required";
+  setupToken: string;
+  message: string;
+} {
+  return data.status === "mfa_setup_required";
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

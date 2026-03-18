@@ -19,11 +19,7 @@ import {
 } from '@nestjs/swagger';
 import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
-import {
-  AuthService,
-  MfaChallengeResult,
-  MfaSetupRequiredResult,
-} from './auth.service';
+import { AuthService } from './auth.service';
 import { setCookieFromConfig } from '../common/utils/cookie.util';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
@@ -132,17 +128,21 @@ export class AuthController {
     );
 
     // MFA challenge — don't set cookie, return challenge token
-    if ('mfaRequired' in result) {
-      return result as MfaChallengeResult;
+    if (result.status === 'mfa_required') {
+      return result;
     }
 
     // Admin without MFA — don't issue tokens, require MFA setup first
-    if ('mfaSetupRequired' in result) {
-      return result as MfaSetupRequiredResult;
+    if (result.status === 'mfa_setup_required') {
+      return result;
     }
 
     setCookieFromConfig(res, result.cookie);
-    return { accessToken: result.accessToken, user: result.user };
+    return {
+      status: result.status,
+      accessToken: result.accessToken,
+      user: result.user,
+    };
   }
 
   @Post('refresh')

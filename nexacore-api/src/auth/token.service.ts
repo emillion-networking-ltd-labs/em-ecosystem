@@ -207,6 +207,7 @@ export class TokenService {
     this.loginSecurityService.checkSuspiciousLoginSuccess(user, requestMeta);
 
     return {
+      status: 'success' as const,
       accessToken,
       user: toSafeUser(user),
       cookie: this.buildRefreshCookie(refreshToken),

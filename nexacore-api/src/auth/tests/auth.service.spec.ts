@@ -422,7 +422,7 @@ describe('AuthService', () => {
         requestMeta,
       );
 
-      expect(result).toHaveProperty('mfaRequired', true);
+      expect(result).toHaveProperty('status', 'mfa_required');
     });
 
     it('logout should return clear cookie even when audit fails', async () => {

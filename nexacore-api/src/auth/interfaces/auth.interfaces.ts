@@ -12,7 +12,10 @@ export interface CookieConfig {
   };
 }
 
+export type LoginStatus = 'success' | 'mfa_required' | 'mfa_setup_required';
+
 export interface AuthResult {
+  status: 'success';
   accessToken: string;
   user: SafeUser;
   cookie: CookieConfig;
@@ -24,12 +27,12 @@ export interface RegisterResult {
 }
 
 export interface MfaChallengeResult {
-  mfaRequired: true;
+  status: 'mfa_required';
   mfaToken: string;
 }
 
 export interface MfaSetupRequiredResult {
-  mfaSetupRequired: true;
+  status: 'mfa_setup_required';
   setupToken: string;
   message: string;
 }

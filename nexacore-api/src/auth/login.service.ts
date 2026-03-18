@@ -305,7 +305,7 @@ export class LoginService {
         mfaChallengeIssued: true,
       },
     );
-    return { mfaRequired: true, mfaToken };
+    return { status: 'mfa_required' as const, mfaToken };
   }
 
   private async completeTrustedDeviceLogin(
@@ -344,6 +344,7 @@ export class LoginService {
     this.loginSecurityService.checkSuspiciousLoginSuccess(user, requestMeta);
 
     return {
+      status: 'success' as const,
       accessToken,
       user: toSafeUser(user),
       cookie: this.tokenService.buildRefreshCookie(refreshToken),
@@ -367,7 +368,7 @@ export class LoginService {
     const setupToken = this.tokenService.signMfaSetupToken(user.id);
 
     return {
-      mfaSetupRequired: true,
+      status: 'mfa_setup_required' as const,
       setupToken,
       message: ErrorMessages.mfa.SETUP_REQUIRED,
     };
@@ -397,7 +398,7 @@ export class LoginService {
         const mfaChallengeToken = this.tokenService.signMfaChallengeToken(
           user.id,
         );
-        return { mfaRequired: true, mfaToken: mfaChallengeToken };
+        return { status: 'mfa_required' as const, mfaToken: mfaChallengeToken };
       }
     }
 
@@ -409,6 +410,7 @@ export class LoginService {
     this.loginSecurityService.checkSuspiciousLoginSuccess(user, requestMeta);
 
     return {
+      status: 'success' as const,
       accessToken,
       user: toSafeUser(user),
       cookie: this.tokenService.buildRefreshCookie(refreshToken),

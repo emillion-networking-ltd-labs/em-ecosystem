@@ -37,6 +37,7 @@ describe('AuthController', () => {
   };
 
   const mockAuthResult = {
+    status: 'success' as const,
     accessToken: 'access-token-123',
     user: {
       id: 'uuid-123',
@@ -211,7 +212,10 @@ describe('AuthController', () => {
 
   describe('login - MFA challenge branch', () => {
     it('should return MFA challenge without setting cookie', async () => {
-      const mfaResult = { mfaRequired: true as const, mfaToken: 'mfa-jwt' };
+      const mfaResult = {
+        status: 'mfa_required' as const,
+        mfaToken: 'mfa-jwt',
+      };
       authService.login.mockResolvedValue(mfaResult);
 
       const result = await controller.login(
@@ -228,7 +232,8 @@ describe('AuthController', () => {
   describe('login - MFA setup required branch', () => {
     it('should return mfaSetupRequired without setting cookie', async () => {
       const mfaSetupResult = {
-        mfaSetupRequired: true as const,
+        status: 'mfa_setup_required' as const,
+        setupToken: 'setup-token-123',
         message: 'MFA setup is required. Please enable MFA to continue.',
       };
       authService.login.mockResolvedValue(mfaSetupResult);

@@ -39,7 +39,7 @@ describe('AuthService — Login Edge Cases', () => {
         requestMeta,
       );
 
-      expect((result as any).mfaRequired).toBe(true);
+      expect((result as any).status).toBe('mfa_required');
       expect((result as any).mfaToken).toBe('mfa-challenge-jwt');
     });
 
@@ -81,7 +81,7 @@ describe('AuthService — Login Edge Cases', () => {
       );
 
       expect(result.accessToken).toBe('access-token');
-      expect((result as any).mfaRequired).toBeUndefined();
+      expect((result as any).status).toBe('success');
     });
 
     it('should NOT skip MFA when fingerprint does not match any trusted device', async () => {
@@ -100,7 +100,7 @@ describe('AuthService — Login Edge Cases', () => {
         'untrusted-fingerprint',
       );
 
-      expect((result as any).mfaRequired).toBe(true);
+      expect((result as any).status).toBe('mfa_required');
     });
   });
 
