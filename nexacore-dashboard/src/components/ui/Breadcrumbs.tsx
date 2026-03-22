@@ -16,11 +16,12 @@ type BreadcrumbsProps = {
 export const breadcrumbsSpecs = {
   link: {
     active:
-      "text-sm font-medium leading-[21px] text-content-primary (last item)",
+      "text-sm font-normal tracking-wide leading-[21px] text-content-primary (last item)",
     inactive:
-      "text-sm font-medium leading-[21px] text-content-primary/75 hover:text-content-primary",
+      "text-sm font-normal tracking-wide leading-[21px] text-content-primary/75 hover:text-content-primary",
   },
-  separator: "text-sm font-medium leading-[21px] text-content-primary/20",
+  separator:
+    "en-dash (–) intermediate, em-dash (—) last level — text-sm font-normal tracking-wide leading-[21px] text-content-primary/75",
   home: "text-content-primary/75 hover:text-content-primary 16px Home icon shrink-0",
   collapse:
     "Auto-collapse via ResizeObserver — Home / … / Last when content overflows container",
@@ -56,11 +57,11 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
   }, [items]);
 
   const linkClass =
-    "rounded-lg px-2 py-1 text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary";
+    "rounded-lg px-1 py-0.5 text-sm font-normal tracking-wide leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary";
   const activeClass =
-    "rounded-lg px-2 py-1 text-sm font-medium leading-[21px] text-content-primary";
+    "rounded-lg px-1 py-0.5 text-sm font-normal tracking-wide leading-[21px] text-content-primary";
   const sepClass =
-    "shrink-0 text-sm font-medium leading-[21px] text-content-primary/20";
+    "shrink-0 text-sm font-normal tracking-wide leading-[21px] text-content-primary/75";
 
   return (
     <div ref={containerRef} className="min-w-0 overflow-hidden">
@@ -68,7 +69,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
       <nav
         data-breadcrumb-full
         aria-label="Breadcrumb"
-        className={`flex items-center gap-2 whitespace-nowrap ${collapsed ? "invisible absolute" : ""}`}
+        className={`flex items-center gap-0 whitespace-nowrap ${collapsed ? "invisible absolute" : ""}`}
       >
         <Link
           href="/dashboard"
@@ -79,8 +80,8 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           return (
-            <div key={item.label} className="flex items-center gap-2">
-              <span className={sepClass}>/</span>
+            <div key={item.label} className="flex items-center gap-0">
+              <span className={sepClass}>{isLast ? "—" : "–"}</span>
               {isLast || !item.href ? (
                 <span className={activeClass}>{item.label}</span>
               ) : (
@@ -97,7 +98,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
       {collapsed && (
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-2 whitespace-nowrap"
+          className="flex items-center gap-0 whitespace-nowrap"
         >
           <Link
             href="/dashboard"
@@ -106,15 +107,15 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
             <Home size={16} />
           </Link>
           {middleItems.length > 0 && (
-            <div className="flex items-center gap-2">
-              <span className={sepClass}>/</span>
-              <span className="px-2 py-1 text-sm font-medium leading-[21px] text-content-primary/50">
+            <div className="flex items-center gap-0">
+              <span className={sepClass}>–</span>
+              <span className="px-2 py-1 text-sm font-normal tracking-wide leading-[21px] text-content-primary/50">
                 …
               </span>
             </div>
           )}
-          <div className="flex items-center gap-2">
-            <span className={sepClass}>/</span>
+          <div className="flex items-center gap-0">
+            <span className={sepClass}>—</span>
             <span className={activeClass}>{lastItem.label}</span>
           </div>
         </nav>
