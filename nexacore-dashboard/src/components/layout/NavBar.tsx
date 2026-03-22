@@ -7,6 +7,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import Avatar from "@/components/ui/Avatar";
+import Divider from "@/components/ui/Divider";
 import {
   PanelLeft,
   Star,
@@ -74,10 +76,10 @@ export default function NavBar({
     <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-border-strong bg-surface-primary px-7">
       {/* Left side */}
       <div className="flex items-center gap-2">
-        {/* Mobile hamburger */}
+        {/* Mobile hamburger — 20px for touch target */}
         <button
           onClick={onMenuClick}
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-content-secondary hover:bg-surface-subtle lg:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-xl text-content-primary/50 transition-colors hover:text-content-primary lg:hidden"
           aria-label="Toggle sidebar"
         >
           <PanelLeft size={20} />
@@ -87,13 +89,13 @@ export default function NavBar({
         <div className="hidden items-center gap-2 lg:flex">
           <button
             onClick={onMenuClick}
-            className="flex h-6 w-6 items-center justify-center rounded-xl p-1 text-content-secondary hover:text-content-primary"
+            className="flex h-6 w-6 items-center justify-center rounded-xl p-1 text-content-primary/50 transition-colors hover:text-content-primary"
             aria-label="Toggle sidebar"
           >
             <PanelLeft size={16} />
           </button>
           <button
-            className="flex h-6 w-6 items-center justify-center rounded-xl p-1 text-content-secondary hover:text-content-primary"
+            className="flex h-6 w-6 items-center justify-center rounded-xl p-1 text-content-primary/50 transition-colors hover:text-content-primary"
             aria-label="Bookmark"
           >
             <Star size={16} />
@@ -105,12 +107,12 @@ export default function NavBar({
       {/* Right side */}
       <div className="flex items-center gap-5">
         {/* Compact search bar (desktop only) */}
-        <div className="hidden w-[160px] items-center gap-2 rounded-2xl bg-black/[0.04] px-2 py-1 dark:bg-white/[0.04] lg:flex">
-          <Search size={16} className="text-content-primary/20" />
-          <span className="text-[14px] leading-[20px] text-content-primary/20">
+        <div className="hidden w-[160px] items-center gap-2 rounded-2xl bg-surface-subtle px-2 py-1 lg:flex">
+          <Search size={16} className="text-content-primary/50" />
+          <span className="text-sm leading-[20px] text-content-primary/50">
             Search
           </span>
-          <kbd className="rounded-xs border border-black/10 px-1 text-caption text-content-primary/20 dark:border-white/10">
+          <kbd className="rounded-xs border border-border-strong px-1 text-caption text-content-primary/50">
             /
           </kbd>
         </div>
@@ -119,18 +121,18 @@ export default function NavBar({
         <div className="flex items-center gap-2">
           <ThemeToggle />
           <button
-            className="flex h-7 w-7 items-center justify-center rounded-xl p-1 text-content-primary hover:bg-surface-subtle"
+            className="flex h-7 w-7 items-center justify-center rounded-xl p-1 text-content-primary/50 transition-colors hover:text-content-primary"
             aria-label="Notifications"
           >
-            <Bell size={20} />
+            <Bell size={16} />
           </button>
           {onRightPanelToggle && (
             <button
               onClick={onRightPanelToggle}
-              className="hidden h-7 w-7 items-center justify-center rounded-xl p-1 text-content-primary hover:bg-surface-subtle lg:flex"
+              className="hidden h-7 w-7 items-center justify-center rounded-xl p-1 text-content-primary/50 transition-colors hover:text-content-primary lg:flex"
               aria-label="Toggle right panel"
             >
-              <PanelRight size={20} />
+              <PanelRight size={16} />
             </button>
           )}
         </div>
@@ -139,16 +141,14 @@ export default function NavBar({
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-body-sm text-content-primary hover:bg-surface-subtle"
+            className={`flex items-center gap-2 rounded-3xl px-2 py-1.5 text-body-sm text-content-primary transition-colors ${dropdownOpen ? "bg-surface-subtle" : "hover:bg-surface-subtle"}`}
           >
-            <div className="flex h-7 w-7 items-center justify-center rounded-circle bg-surface-inverse text-caption font-semibold text-content-inverse">
-              {(user?.firstName?.[0] || user?.email[0] || "?").toUpperCase()}
-            </div>
-            <ChevronDown size={14} className="text-content-tertiary" />
+            <Avatar size="sm" name={user?.firstName || user?.email || "?"} />
+            <ChevronDown size={16} className="text-content-primary/50" />
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 w-48 rounded-3xl border border-border-strong bg-surface-primary p-6 shadow-card animate-dropdown-down">
+            <div className="absolute right-0 top-full mt-1 w-48 rounded-3xl border border-border-strong bg-surface-primary p-6 animate-dropdown-down">
               <Link
                 href="/profile"
                 onClick={() => setDropdownOpen(false)}
@@ -167,7 +167,7 @@ export default function NavBar({
                   Admin
                 </Link>
               )}
-              <div className="my-2 h-px bg-border-strong" />
+              <Divider className="my-2" />
               <button
                 onClick={handleLogout}
                 className="flex w-full items-center gap-2 rounded-3xl p-2 text-caption text-error hover:bg-surface-subtle"
