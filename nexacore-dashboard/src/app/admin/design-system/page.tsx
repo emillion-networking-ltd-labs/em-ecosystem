@@ -1,19 +1,20 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { Layers, Paintbrush } from "lucide-react";
+import { LayoutGrid, Atom, Puzzle, Palette, Code2 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminRoute from "@/components/guards/AdminRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Badge from "@/components/ui/Badge";
 import Tabs from "@/components/ui/Tabs";
+import Button from "@/components/ui/Button";
+import { SingleAccordion } from "@/components/ui/Accordion";
 import TokenInspector from "@/components/admin/TokenInspector";
 import {
   AtomShowcase,
   MoleculeShowcase,
 } from "@/components/admin/ComponentShowcase";
 import CodePlayground from "@/components/admin/CodePlayground";
-import LayoutTemplates from "@/components/admin/LayoutTemplates";
 import {
   componentRegistry,
   categoryMeta,
@@ -23,13 +24,46 @@ import {
 
 type FilterCategory = ComponentCategory | "all";
 
+const componentToSection: Record<string, { tab: string; section: string }> = {
+  Button: { tab: "atoms", section: "showcase-button" },
+  Input: { tab: "atoms", section: "showcase-input" },
+  Badge: { tab: "atoms", section: "showcase-badge" },
+  Spinner: { tab: "atoms", section: "showcase-spinner" },
+  InfinitySpinner: { tab: "atoms", section: "showcase-spinner" },
+  RingSpinner: { tab: "atoms", section: "showcase-spinner" },
+  Avatar: { tab: "atoms", section: "showcase-avatar" },
+  Toggle: { tab: "atoms", section: "showcase-toggle" },
+  Checkbox: { tab: "atoms", section: "showcase-checkbox" },
+  Tooltip: { tab: "atoms", section: "showcase-tooltip" },
+  Divider: { tab: "atoms", section: "showcase-divider" },
+  Slider: { tab: "atoms", section: "showcase-slider" },
+  Accordion: { tab: "atoms", section: "showcase-accordion" },
+  Tabs: { tab: "molecules", section: "showcase-tabs" },
+  Select: { tab: "molecules", section: "showcase-select-dropdown" },
+  LanguageSelector: { tab: "molecules", section: "showcase-select-dropdown" },
+  Calendar: { tab: "molecules", section: "showcase-calendar" },
+  Pagination: { tab: "molecules", section: "showcase-navigation" },
+  Breadcrumbs: { tab: "molecules", section: "showcase-navigation" },
+  Toast: { tab: "molecules", section: "showcase-feedback-alerts" },
+  CountdownTimer: { tab: "molecules", section: "showcase-feedback-alerts" },
+  RateLimitBanner: { tab: "molecules", section: "showcase-feedback-alerts" },
+  DataTable: { tab: "molecules", section: "showcase-datatable" },
+  ChartCard: { tab: "molecules", section: "showcase-charts" },
+  TotalUsersChart: { tab: "molecules", section: "showcase-charts" },
+  UserRoleChart: { tab: "molecules", section: "showcase-charts" },
+  ConfirmModal: { tab: "molecules", section: "showcase-feedback-alerts" },
+  ThemeToggle: { tab: "atoms", section: "showcase-button" },
+  TurnstileWidget: { tab: "atoms", section: "showcase-input" },
+  ToastContainer: { tab: "molecules", section: "showcase-feedback-alerts" },
+  ErrorAlert: { tab: "molecules", section: "showcase-feedback-alerts" },
+};
+
 const viewTabs = [
-  { label: "Catalog", value: "catalog" },
-  { label: "Atoms", value: "atoms" },
-  { label: "Molecules", value: "molecules" },
-  { label: "Tokens", value: "tokens" },
-  { label: "Playground", value: "playground" },
-  { label: "Templates", value: "templates" },
+  { label: "Catalog", value: "catalog", icon: <LayoutGrid size={16} /> },
+  { label: "Atoms", value: "atoms", icon: <Atom size={16} /> },
+  { label: "Molecules", value: "molecules", icon: <Puzzle size={16} /> },
+  { label: "Tokens", value: "tokens", icon: <Palette size={16} /> },
+  { label: "Playground", value: "playground", icon: <Code2 size={16} /> },
 ];
 
 export default function DesignSystemPage() {
@@ -56,80 +90,104 @@ export default function DesignSystemPage() {
         </div>
 
         {/* Header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h1 className="text-heading-lg font-semibold text-content-primary">
-              Design System
-            </h1>
-            <p className="text-body-sm text-content-secondary mt-1">
-              Component library reference — {componentRegistry.length}{" "}
-              components
-            </p>
-          </div>
-          <div className="flex items-center gap-2 text-content-tertiary">
-            {activeView === "catalog" ? (
-              <>
-                <Layers size={20} />
-                <span className="text-body-sm font-medium">
-                  {filteredComponents.length} shown
-                </span>
-              </>
-            ) : (
-              <>
-                <Paintbrush size={20} />
-                <span className="text-body-sm font-medium">
-                  {activeView === "tokens"
-                    ? "Design Tokens"
-                    : `${activeView.charAt(0).toUpperCase() + activeView.slice(1)} Preview`}
-                </span>
-              </>
-            )}
-          </div>
+        <div className="mb-6">
+          <h1 className="text-heading-lg font-semibold text-content-primary">
+            Design System
+          </h1>
+          <p className="text-body-sm text-content-secondary mt-1">
+            Component library reference — {componentRegistry.length} components
+          </p>
         </div>
 
-        {/* View Toggle */}
+        {/* View Toggle — nav-horizontal with icons */}
         <div className="mb-6">
-          <Tabs
-            tabs={viewTabs}
-            activeTab={activeView}
-            onChange={setActiveView}
-          />
+          <div className="hidden sm:block">
+            <Tabs
+              tabs={viewTabs}
+              activeTab={activeView}
+              onChange={setActiveView}
+              variant="nav-horizontal"
+            />
+          </div>
+          <div className="sm:hidden overflow-hidden">
+            <div className="overflow-x-auto scrollbar-hide -mx-6 px-6 touch-pan-x">
+              <Tabs
+                tabs={viewTabs}
+                activeTab={activeView}
+                onChange={setActiveView}
+                variant="nav-horizontal"
+              />
+            </div>
+            <div className="flex justify-center gap-1.5 mt-2">
+              {viewTabs.map((tab) => (
+                <div
+                  key={tab.value}
+                  className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                    activeView === tab.value
+                      ? "bg-surface-inverse"
+                      : "bg-border-strong"
+                  }`}
+                />
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Catalog View */}
         {activeView === "catalog" && (
           <>
             {/* Category Filter */}
-            <div className="flex items-center gap-2 mb-6 flex-wrap">
-              <button
-                onClick={() => setActiveCategory("all")}
-                className={`px-3 py-1.5 text-body-sm font-medium rounded-md border transition-colors ${
-                  activeCategory === "all"
-                    ? "bg-surface-inverse text-content-inverse border-surface-inverse"
-                    : "bg-surface-primary text-content-secondary border-border-default hover:bg-hover"
-                }`}
+            <div className="mb-6">
+              <SingleAccordion
+                title={`Filter by category — ${activeCategory === "all" ? "All" : activeCategory} (${activeCategory === "all" ? componentRegistry.length : filteredComponents.length})`}
               >
-                All ({componentRegistry.length})
-              </button>
-              {categoryMeta.map((cat) => (
-                <button
-                  key={cat.key}
-                  onClick={() => setActiveCategory(cat.key)}
-                  className={`px-3 py-1.5 text-body-sm font-medium rounded-md border transition-colors ${
-                    activeCategory === cat.key
-                      ? "bg-surface-inverse text-content-inverse border-surface-inverse"
-                      : "bg-surface-primary text-content-secondary border-border-default hover:bg-hover"
-                  }`}
-                >
-                  {cat.label} ({cat.count})
-                </button>
-              ))}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Button
+                    variant={activeCategory === "all" ? "primary" : "outline"}
+                    size="sm"
+                    fullWidth={false}
+                    onClick={() => setActiveCategory("all")}
+                  >
+                    All ({componentRegistry.length})
+                  </Button>
+                  {categoryMeta.map((cat) => (
+                    <Button
+                      key={cat.key}
+                      variant={
+                        activeCategory === cat.key ? "primary" : "outline"
+                      }
+                      size="sm"
+                      fullWidth={false}
+                      onClick={() => setActiveCategory(cat.key)}
+                    >
+                      {cat.label} ({cat.count})
+                    </Button>
+                  ))}
+                </div>
+              </SingleAccordion>
             </div>
 
             {/* Component Grid */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {filteredComponents.map((entry) => (
-                <div key={entry.name} className="card flex flex-col gap-3">
+                <button
+                  key={entry.name}
+                  onClick={() => {
+                    const mapping = componentToSection[entry.name];
+                    if (!mapping) return;
+                    setActiveView(mapping.tab);
+                    if (mapping.section) {
+                      setTimeout(() => {
+                        const el = document.getElementById(mapping.section);
+                        el?.scrollIntoView({
+                          behavior: "smooth",
+                          block: "start",
+                        });
+                      }, 150);
+                    }
+                  }}
+                  className="card flex flex-col gap-3 text-left cursor-pointer"
+                >
                   <div className="flex items-center justify-between">
                     <h3 className="text-body-md font-semibold text-content-primary">
                       {entry.name}
@@ -150,12 +208,12 @@ export default function DesignSystemPage() {
                   <p className="text-caption text-content-secondary">
                     {entry.description}
                   </p>
-                  <div className="mt-auto pt-2 border-t border-border-subtle">
-                    <code className="text-xs text-content-tertiary font-mono">
+                  <div className="mt-auto pt-2 border-t border-border-strong">
+                    <code className="text-xs text-content-primary/50 font-mono">
                       ui/{entry.fileName}
                     </code>
                   </div>
-                </div>
+                </button>
               ))}
             </div>
           </>
@@ -174,7 +232,6 @@ export default function DesignSystemPage() {
         {activeView === "playground" && <CodePlayground />}
 
         {/* Templates */}
-        {activeView === "templates" && <LayoutTemplates />}
       </DashboardLayout>
     </AdminRoute>
   );

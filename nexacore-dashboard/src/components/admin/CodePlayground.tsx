@@ -107,14 +107,14 @@ export default function CodePlayground() {
     <div className="space-y-6">
       {/* Example Templates */}
       <div className="flex flex-wrap gap-2">
-        <span className="text-caption text-content-tertiary self-center mr-1">
+        <span className="text-caption text-content-primary/50 self-center mr-1">
           Examples:
         </span>
         {examples.map((ex) => (
           <button
             key={ex.label}
             onClick={() => setCode(ex.code)}
-            className="px-3 py-1 text-caption font-medium rounded-md border border-border-default bg-surface-primary text-content-secondary hover:bg-hover transition-colors"
+            className="px-3 py-1 text-caption font-medium rounded-md border border-border-strong bg-surface-primary text-content-secondary hover:bg-surface-subtle transition-colors"
           >
             {ex.label}
           </button>
@@ -129,8 +129,8 @@ export default function CodePlayground() {
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Editor */}
-          <div className="rounded-2xl border border-border-default overflow-hidden">
-            <div className="px-4 py-2 bg-surface-tertiary border-b border-border-default">
+          <div className="rounded-2xl border border-border-strong overflow-hidden">
+            <div className="px-4 py-2 bg-surface-tertiary border-b border-border-strong">
               <span className="text-caption font-medium text-content-secondary">
                 Editor
               </span>
@@ -142,8 +142,8 @@ export default function CodePlayground() {
           </div>
 
           {/* Preview */}
-          <div className="rounded-2xl border border-border-default overflow-hidden">
-            <div className="px-4 py-2 bg-surface-tertiary border-b border-border-default">
+          <div className="rounded-2xl border border-border-strong overflow-hidden">
+            <div className="px-4 py-2 bg-surface-tertiary border-b border-border-strong">
               <span className="text-caption font-medium text-content-secondary">
                 Preview
               </span>

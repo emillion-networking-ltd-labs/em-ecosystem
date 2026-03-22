@@ -8,7 +8,7 @@ export interface ComponentEntry {
 }
 
 export const componentRegistry: ComponentEntry[] = [
-  // ─── Atoms (10) ──────────────────────────────────────────────
+  // ─── Atoms (11) ──────────────────────────────────────────────
   {
     name: "Button",
     category: "atom",
@@ -30,7 +30,7 @@ export const componentRegistry: ComponentEntry[] = [
   {
     name: "Spinner",
     category: "atom",
-    description: "Loading spinner animation",
+    description: "Circular border loading spinner — sm/md/lg",
     fileName: "Spinner.tsx",
   },
   {
@@ -60,7 +60,7 @@ export const componentRegistry: ComponentEntry[] = [
   {
     name: "Divider",
     category: "atom",
-    description: "Horizontal separator line",
+    description: "Separator line — horizontal, vertical, with label (OR)",
     fileName: "Divider.tsx",
   },
   {
@@ -69,12 +69,19 @@ export const componentRegistry: ComponentEntry[] = [
     description: "Range slider with custom track and handle",
     fileName: "Slider.tsx",
   },
+  {
+    name: "Accordion",
+    category: "atom",
+    description: "Expandable content panel — single or multi (exclusive)",
+    fileName: "Accordion.tsx",
+  },
 
-  // ─── Molecules (8) ───────────────────────────────────────────
+  // ─── Molecules (10) ──────────────────────────────────────────
   {
     name: "Tabs",
     category: "molecule",
-    description: "Horizontal tab bar with keyboard navigation",
+    description:
+      "Tab bar — solid, subtle, nav, nav-horizontal variants with 3 sizes",
     fileName: "Tabs.tsx",
   },
   {
@@ -86,7 +93,7 @@ export const componentRegistry: ComponentEntry[] = [
   {
     name: "Calendar",
     category: "molecule",
-    description: "Month calendar with date selection",
+    description: "Calendar with day/month/year views and date selection",
     fileName: "Calendar.tsx",
   },
   {
@@ -104,13 +111,13 @@ export const componentRegistry: ComponentEntry[] = [
   {
     name: "ErrorAlert",
     category: "molecule",
-    description: "Error alert banner",
+    description: "Error alert banner (unused — pending removal)",
     fileName: "ErrorAlert.tsx",
   },
   {
     name: "Breadcrumbs",
     category: "molecule",
-    description: "Navigation breadcrumb trail",
+    description: "Navigation breadcrumb trail — auto-collapses on overflow",
     fileName: "Breadcrumbs.tsx",
   },
   {
@@ -118,6 +125,25 @@ export const componentRegistry: ComponentEntry[] = [
     category: "molecule",
     description: "Confirmation dialog with focus trap",
     fileName: "ConfirmModal.tsx",
+  },
+
+  {
+    name: "ChartCard",
+    category: "molecule",
+    description: "Chart container with title and legend",
+    fileName: "dashboard/ChartCard.tsx",
+  },
+  {
+    name: "TotalUsersChart",
+    category: "molecule",
+    description: "Line chart — dark mode adaptive, interactive tooltips",
+    fileName: "dashboard/TotalUsersChart.tsx",
+  },
+  {
+    name: "UserRoleChart",
+    category: "molecule",
+    description: "Doughnut chart — users by role with API data",
+    fileName: "dashboard/UserRoleChart.tsx",
   },
 
   // ─── Organisms (4) ──────────────────────────────────────────

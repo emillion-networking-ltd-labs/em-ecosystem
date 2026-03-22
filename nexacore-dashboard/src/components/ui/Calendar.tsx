@@ -12,7 +12,7 @@ interface CalendarProps {
   className?: string;
 }
 
-const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const WEEKDAYS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"];
 
 function isSameDay(a: Date, b: Date): boolean {
   return (
@@ -47,6 +47,50 @@ interface CalendarDay {
   isDisabled: boolean;
 }
 
+export const calendarSpecs = {
+  container: {
+    shared:
+      "w-[300px] bg-surface-primary border border-border-strong shadow-card rounded-3xl p-6 gap-5",
+  },
+  navigation: {
+    button: "w-6 h-6 rounded-full bg-surface-subtle hover:bg-surface-subtle",
+    icon: "ChevronLeft/Right 16px text-content-primary",
+    label:
+      "text-body-sm font-semibold — Link style (75% → 100%), disabled at years level",
+  },
+  views: {
+    days: "grid-cols-7 — circle button (min-w-9 h-9 rounded-full)",
+    months: "grid-cols-3 — circle button auto-width",
+    years: "grid-cols-3 — circle button auto-width",
+  },
+  day: {
+    selected:
+      "bg-surface-inverse text-content-inverse font-medium rounded-full",
+    today: "bg-surface-subtle text-content-primary font-medium rounded-full",
+    default: "text-content-primary hover:bg-surface-subtle rounded-full",
+    "other month": "text-content-primary/50",
+    disabled: "opacity-30 cursor-not-allowed",
+  },
+  weekday: "text-xs font-normal text-content-primary text-center",
+};
+
+type ViewMode = "days" | "months" | "years";
+
+const MONTH_LABELS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
+
 export default function Calendar({
   value,
   onChange,
@@ -62,13 +106,16 @@ export default function Calendar({
   const [viewMonth, setViewMonth] = useState(
     value?.getMonth() ?? today.getMonth(),
   );
+  const [viewMode, setViewMode] = useState<ViewMode>("days");
+  const [yearRangeStart, setYearRangeStart] = useState(
+    Math.floor((value?.getFullYear() ?? today.getFullYear()) / 12) * 12,
+  );
 
   const days = useMemo((): CalendarDay[] => {
     const result: CalendarDay[] = [];
     const daysInMonth = getDaysInMonth(viewYear, viewMonth);
     const firstDay = getFirstDayOfWeek(viewYear, viewMonth);
 
-    // Previous month overflow
     const prevMonth = viewMonth === 0 ? 11 : viewMonth - 1;
     const prevYear = viewMonth === 0 ? viewYear - 1 : viewYear;
     const daysInPrevMonth = getDaysInMonth(prevYear, prevMonth);
@@ -86,7 +133,6 @@ export default function Calendar({
       });
     }
 
-    // Current month
     for (let d = 1; d <= daysInMonth; d++) {
       const date = new Date(viewYear, viewMonth, d);
       result.push({
@@ -99,7 +145,6 @@ export default function Calendar({
       });
     }
 
-    // Next month overflow (fill to 42 cells = 6 rows)
     const remaining = 42 - result.length;
     const nextMonth = viewMonth === 11 ? 0 : viewMonth + 1;
     const nextYear = viewMonth === 11 ? viewYear + 1 : viewYear;
@@ -118,94 +163,182 @@ export default function Calendar({
     return result;
   }, [viewYear, viewMonth, value, today, disabled, minDate, maxDate]);
 
-  const goToPrevMonth = useCallback(() => {
-    if (viewMonth === 0) {
-      setViewMonth(11);
+  const goToPrev = useCallback(() => {
+    if (viewMode === "days") {
+      if (viewMonth === 0) {
+        setViewMonth(11);
+        setViewYear((y) => y - 1);
+      } else {
+        setViewMonth((m) => m - 1);
+      }
+    } else if (viewMode === "months") {
       setViewYear((y) => y - 1);
     } else {
-      setViewMonth((m) => m - 1);
+      setYearRangeStart((y) => y - 12);
     }
-  }, [viewMonth]);
+  }, [viewMonth, viewMode]);
 
-  const goToNextMonth = useCallback(() => {
-    if (viewMonth === 11) {
-      setViewMonth(0);
+  const goToNext = useCallback(() => {
+    if (viewMode === "days") {
+      if (viewMonth === 11) {
+        setViewMonth(0);
+        setViewYear((y) => y + 1);
+      } else {
+        setViewMonth((m) => m + 1);
+      }
+    } else if (viewMode === "months") {
       setViewYear((y) => y + 1);
     } else {
-      setViewMonth((m) => m + 1);
+      setYearRangeStart((y) => y + 12);
     }
-  }, [viewMonth]);
+  }, [viewMonth, viewMode]);
 
-  const monthLabel = new Date(viewYear, viewMonth).toLocaleDateString("en-US", {
-    month: "long",
-    year: "numeric",
-  });
+  const headerLabel =
+    viewMode === "days"
+      ? new Date(viewYear, viewMonth).toLocaleDateString("en-US", {
+          month: "long",
+          year: "numeric",
+        })
+      : viewMode === "months"
+        ? `${viewYear}`
+        : `${yearRangeStart} — ${yearRangeStart + 11}`;
+
+  const handleHeaderClick = () => {
+    if (viewMode === "days") setViewMode("months");
+    else if (viewMode === "months") {
+      setYearRangeStart(Math.floor(viewYear / 12) * 12);
+      setViewMode("years");
+    }
+  };
+
+  const selectMonth = (month: number) => {
+    setViewMonth(month);
+    setViewMode("days");
+  };
+
+  const selectYear = (year: number) => {
+    setViewYear(year);
+    setViewMode("months");
+  };
+
+  const cellClass = (isActive: boolean, isCurrent: boolean) =>
+    `min-w-9 h-9 px-2 mx-auto flex items-center justify-center text-body-sm font-normal rounded-full transition-colors cursor-pointer ${
+      isActive
+        ? "bg-surface-inverse text-content-inverse font-medium"
+        : isCurrent
+          ? "bg-surface-subtle text-content-primary font-medium"
+          : "text-content-primary hover:bg-surface-subtle"
+    }`;
 
   return (
     <div
-      className={`w-[300px] bg-surface-primary border border-border-default shadow-card rounded-3xl p-6 flex flex-col gap-5 ${className}`}
+      className={`w-[300px] bg-surface-primary border border-border-strong shadow-card rounded-3xl p-6 flex flex-col gap-5 ${className}`}
     >
       {/* Navigation */}
       <div className="flex items-center justify-between">
         <button
           type="button"
-          onClick={goToPrevMonth}
+          onClick={goToPrev}
           disabled={disabled}
-          aria-label="Previous month"
-          className="w-6 h-6 flex items-center justify-center rounded-full bg-surface-subtle hover:bg-hover transition-colors disabled:opacity-50"
+          aria-label="Previous"
+          className="w-6 h-6 flex items-center justify-center rounded-full bg-surface-subtle hover:bg-surface-subtle transition-colors disabled:opacity-50"
         >
           <ChevronLeft size={16} className="text-content-primary" />
         </button>
-        <span className="text-body-sm font-bold text-content-primary">
-          {monthLabel}
-        </span>
         <button
           type="button"
-          onClick={goToNextMonth}
+          onClick={handleHeaderClick}
+          disabled={viewMode === "years"}
+          className={`text-body-sm font-semibold transition-colors ${viewMode === "years" ? "text-content-primary cursor-default" : "text-content-primary/75 hover:text-content-primary cursor-pointer"}`}
+        >
+          {headerLabel}
+        </button>
+        <button
+          type="button"
+          onClick={goToNext}
           disabled={disabled}
-          aria-label="Next month"
-          className="w-6 h-6 flex items-center justify-center rounded-full bg-surface-subtle hover:bg-hover transition-colors disabled:opacity-50"
+          aria-label="Next"
+          className="w-6 h-6 flex items-center justify-center rounded-full bg-surface-subtle hover:bg-surface-subtle transition-colors disabled:opacity-50"
         >
           <ChevronRight size={16} className="text-content-primary" />
         </button>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-7 gap-y-1" role="grid">
-        {/* Weekday headers */}
-        {WEEKDAYS.map((day) => (
-          <div
-            key={day}
-            className="text-center text-xs font-normal text-content-primary py-1"
-            role="columnheader"
-          >
-            {day}
-          </div>
-        ))}
+      {/* Days view */}
+      {viewMode === "days" && (
+        <div className="grid grid-cols-7 gap-y-1" role="grid">
+          {WEEKDAYS.map((day) => (
+            <div
+              key={day}
+              className="text-center text-xs font-normal text-content-primary py-1"
+              role="columnheader"
+            >
+              {day}
+            </div>
+          ))}
+          {days.map((day, i) => (
+            <button
+              key={i}
+              type="button"
+              disabled={day.isDisabled}
+              onClick={() => !day.isDisabled && onChange(day.date)}
+              aria-label={day.date.toLocaleDateString()}
+              aria-selected={day.isSelected}
+              className={`min-w-9 h-9 px-2 mx-auto flex items-center justify-center text-[15px] font-normal rounded-full transition-colors ${
+                day.isSelected
+                  ? "bg-surface-inverse text-content-inverse font-medium"
+                  : day.isToday
+                    ? "bg-surface-subtle text-content-primary font-medium"
+                    : day.isCurrentMonth
+                      ? "text-content-primary hover:bg-surface-subtle"
+                      : "text-content-primary/50"
+              } ${day.isDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
+            >
+              {day.day}
+            </button>
+          ))}
+        </div>
+      )}
 
-        {/* Day cells */}
-        {days.map((day, i) => (
-          <button
-            key={i}
-            type="button"
-            disabled={day.isDisabled}
-            onClick={() => !day.isDisabled && onChange(day.date)}
-            aria-label={day.date.toLocaleDateString()}
-            aria-selected={day.isSelected}
-            className={`w-full aspect-square flex items-center justify-center text-[15px] font-normal rounded-full transition-colors ${
-              day.isSelected
-                ? "bg-surface-inverse text-content-inverse font-medium"
-                : day.isToday
-                  ? "bg-surface-subtle text-content-primary font-medium"
-                  : day.isCurrentMonth
-                    ? "text-content-primary hover:bg-hover"
-                    : "text-content-disabled"
-            } ${day.isDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
-          >
-            {day.day}
-          </button>
-        ))}
-      </div>
+      {/* Months view */}
+      {viewMode === "months" && (
+        <div className="grid grid-cols-3 gap-2">
+          {MONTH_LABELS.map((label, i) => (
+            <button
+              key={label}
+              type="button"
+              onClick={() => selectMonth(i)}
+              className={cellClass(
+                i === viewMonth && viewYear === (value?.getFullYear() ?? -1),
+                i === today.getMonth() && viewYear === today.getFullYear(),
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      {/* Years view */}
+      {viewMode === "years" && (
+        <div className="grid grid-cols-3 gap-2">
+          {Array.from({ length: 12 }, (_, i) => yearRangeStart + i).map(
+            (year) => (
+              <button
+                key={year}
+                type="button"
+                onClick={() => selectYear(year)}
+                className={cellClass(
+                  year === (value?.getFullYear() ?? -1),
+                  year === today.getFullYear(),
+                )}
+              >
+                {year}
+              </button>
+            ),
+          )}
+        </div>
+      )}
     </div>
   );
 }

@@ -16,12 +16,50 @@ const LANGUAGES: Language[] = [
 
 const STORAGE_KEY = "nexacore-language";
 
+export const languageSelectorSpecs = {
+  trigger: {
+    base: "flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium leading-[21px] transition-all",
+    closed:
+      "border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary",
+    open: "border border-border-strong bg-surface-primary text-content-primary",
+  },
+  popover: {
+    position: "absolute bottom-full left-0 right-0 sm:right-auto sm:w-[330px]",
+    container:
+      "rounded-3xl border border-border-strong bg-surface-primary p-4 shadow-card max-h-[240px] overflow-y-auto",
+    search:
+      "h-12 rounded-full border border-border-strong bg-surface-primary px-4 shadow-card",
+  },
+  option: {
+    selected: "bg-surface-tertiary text-content-primary",
+    default: "bg-transparent text-content-primary/75 hover:bg-surface-subtle",
+    avatar: "h-8 w-8 rounded-full bg-surface-subtle text-xs font-semibold",
+  },
+  icon: "ChevronDown 16px, rotate-180 on open",
+};
+
 export default function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Language>(LANGUAGES[0]);
+  const [popoverPos, setPopoverPos] = useState({
+    vertical: "up" as "up" | "down",
+    horizontal: "left" as "left" | "right",
+  });
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const openPopover = () => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const popoverH = 350;
+    const popoverW = 330;
+    setPopoverPos({
+      vertical: rect.top > popoverH ? "up" : "down",
+      horizontal: rect.left + popoverW > window.innerWidth ? "right" : "left",
+    });
+    setIsOpen(true);
+  };
 
   // Restore from localStorage on mount
   useEffect(() => {
@@ -87,7 +125,7 @@ export default function LanguageSelector() {
       {/* Trigger — arrow RIGHT, gap 8px */}
       <button
         type="button"
-        onClick={() => setIsOpen(!isOpen)}
+        onClick={() => (isOpen ? setIsOpen(false) : openPopover())}
         className={triggerClass}
       >
         <span className="whitespace-nowrap">{selected.name}</span>
@@ -99,8 +137,12 @@ export default function LanguageSelector() {
 
       {/* Popover — opens upward (footer context), search adjacent to trigger */}
       {isOpen && (
-        <div className="absolute bottom-full left-0 z-50 mb-1 w-[330px]">
-          <div className="flex flex-col gap-1">
+        <div
+          className={`absolute z-50 sm:w-[330px] ${popoverPos.vertical === "down" ? "top-full mt-1 animate-dropdown-down" : "bottom-full mb-1 animate-dropdown-up"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0 right-0 sm:right-auto"}`}
+        >
+          <div
+            className={`flex flex-col gap-1 ${popoverPos.vertical === "down" ? "flex-col-reverse" : ""}`}
+          >
             {/* Results — Figma: rounded card, border, shadow, scrollable */}
             <div className="max-h-[240px] overflow-y-auto rounded-3xl border border-border-strong bg-surface-primary p-4 shadow-card">
               {filtered.length === 0 ? (
@@ -119,7 +161,7 @@ export default function LanguageSelector() {
                         className={`flex h-10 items-center gap-2 rounded-md px-2 font-medium transition-colors ${
                           isSelected
                             ? "bg-surface-tertiary text-content-primary"
-                            : "bg-transparent text-content-primary/75 hover:bg-surface-tertiary hover:text-content-primary"
+                            : "bg-transparent text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary"
                         }`}
                       >
                         {/* Avatar — 32px circle, bg black/5, code 12px/600 */}

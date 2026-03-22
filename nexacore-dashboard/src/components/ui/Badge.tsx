@@ -2,12 +2,14 @@
 
 interface BadgeProps {
   variant?: "default" | "success" | "warning" | "error" | "info";
-  size?: "sm" | "md";
+  size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   className?: string;
 }
 
-const variantClasses = {
+export const baseClass = "inline-flex items-center font-medium rounded-md";
+
+export const variantClasses = {
   default: "bg-surface-subtle text-content-secondary",
   success: "bg-success-bg text-success",
   warning: "bg-warning-bg text-warning",
@@ -15,14 +17,15 @@ const variantClasses = {
   info: "bg-info-bg text-info",
 };
 
-const sizeClasses = {
+export const sizeClasses = {
   sm: "text-xs px-2 py-0.5",
-  md: "text-sm px-2.5 py-0.5",
+  md: "text-sm px-2.5 py-1",
+  lg: "text-base px-3 py-1.5",
 };
 
 export default function Badge({
   variant = "default",
-  size = "sm",
+  size = "md",
   children,
   className = "",
 }: BadgeProps) {

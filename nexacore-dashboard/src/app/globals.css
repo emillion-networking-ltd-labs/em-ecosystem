@@ -7,7 +7,7 @@
   /* Surface colors */
   --surface-primary: #ffffff;
   --surface-secondary: #fbfbfb;
-  --surface-tertiary: #f2f2f2;
+  --surface-tertiary: #e8e8e8;
   --surface-subtle: rgba(28, 28, 28, 0.05);
   --surface-inverse: #1c1c1c;
 
@@ -104,6 +104,45 @@
   --notification-blue: #1e2d3d;
 }
 
+/* Force light mode on elements inside dark page (Design System showcase) */
+.light {
+  --surface-primary: #ffffff;
+  --surface-secondary: #fbfbfb;
+  --surface-tertiary: #e8e8e8;
+  --surface-subtle: rgba(28, 28, 28, 0.05);
+  --surface-inverse: #1c1c1c;
+  --content-primary: 28 28 28;
+  --content-secondary: rgba(28, 28, 28, 0.5);
+  --content-tertiary: rgba(28, 28, 28, 0.4);
+  --content-disabled: #73787d;
+  --content-placeholder: rgba(28, 28, 28, 0.3);
+  --content-inverse: #ffffff;
+  --border-default: rgba(0, 0, 0, 0.05);
+  --border-strong: rgba(0, 0, 0, 0.08);
+  --border-subtle: rgba(0, 0, 0, 0.03);
+  --color-error: 138 17 17;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #f5c6c6;
+  --color-warning: #92400e;
+  --color-warning-bg: #fffbeb;
+  --color-warning-border: #fde68a;
+  --color-info: #1e40af;
+  --color-info-bg: #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-success: #166534;
+  --color-success-bg: #f0fdf4;
+  --color-success-border: #bbf7d0;
+  --hover-bg: rgba(251, 251, 251, 0.75);
+  --input-border-focus: #1c1c1c;
+  --input-bg-disabled: #f5f5f5;
+  color: rgb(var(--content-primary));
+}
+
+/* Ensure .dark class propagates color for currentColor inheritance (SVGs, borders) */
+.dark {
+  color: rgb(var(--content-primary));
+}
+
 /* ===== Base Styles ===== */
 @layer base {
   *,
@@ -134,9 +173,9 @@
   /* Card container pattern (from ui-design-system.md) */
   .card {
     background: var(--surface-primary);
-    border: 1px solid var(--border-default);
-    box-shadow: 6px 6px 50px rgba(0, 0, 0, 0.05);
-    border-radius: 16px;
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+    border-radius: 24px;
     padding: 24px;
   }
 
@@ -426,5 +465,43 @@ input:-webkit-autofill:focus {
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Dropdown/popover enter animations */
+  .animate-dropdown-down {
+    animation: dropdown-down 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .animate-dropdown-up {
+    animation: dropdown-up 150ms cubic-bezier(0.16, 1, 0.3, 1);
+  }
+}
+
+@keyframes dropdown-down {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes dropdown-up {
+  from {
+    opacity: 0;
+    transform: translateY(4px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }

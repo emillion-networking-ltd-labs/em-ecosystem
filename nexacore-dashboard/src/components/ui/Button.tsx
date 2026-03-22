@@ -1,48 +1,54 @@
-'use client';
+"use client";
 
-import Spinner from './Spinner';
+import InfinitySpinner from "./InfinitySpinner";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'outline' | 'danger';
-  size?: 'sm' | 'md' | 'lg';
+  variant?: "primary" | "secondary" | "outline" | "danger";
+  size?: "sm" | "md" | "lg";
   loading?: boolean;
   fullWidth?: boolean;
 }
 
-const variantClasses = {
+export const variantClasses = {
   primary:
-    'bg-surface-inverse text-content-inverse border border-border-default hover:opacity-90 disabled:bg-surface-primary disabled:text-content-disabled',
+    "bg-surface-inverse text-content-inverse border border-border-strong transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50",
   secondary:
-    'bg-surface-tertiary text-content-secondary border border-border-default hover:bg-hover disabled:bg-surface-primary disabled:text-content-disabled',
+    "bg-surface-tertiary text-content-secondary border border-border-strong transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   outline:
-    'bg-transparent text-content-primary border border-border-default hover:bg-hover disabled:text-content-disabled',
+    "bg-transparent text-content-primary border border-border-strong transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   danger:
-    'bg-transparent text-error border border-error-border hover:bg-error-bg disabled:opacity-50',
+    "bg-transparent text-error border border-error-border transition-colors hover:bg-error-bg disabled:pointer-events-none disabled:opacity-50",
 };
 
-const sizeClasses = {
-  sm: 'px-6 py-2.5 text-caption font-medium rounded-md',
-  md: 'px-6 py-2.5 text-body-sm font-medium rounded-md h-10',
-  lg: 'px-9 py-[21px] text-body-lg rounded-md h-14',
+export const baseClass = "inline-flex items-center justify-center gap-2";
+
+export const sizeClasses = {
+  sm: "px-4 py-1.5 text-caption font-medium rounded-md h-8",
+  md: "px-6 py-2.5 text-body-sm font-medium rounded-md h-10",
+  lg: "px-8 py-3 text-body-lg font-medium rounded-md h-12",
 };
 
 export default function Button({
-  variant = 'primary',
-  size = 'lg',
+  variant = "primary",
+  size = "md",
   loading = false,
   fullWidth = true,
   children,
-  className = '',
+  className = "",
   disabled,
   ...props
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 transition-colors ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? 'w-full' : ''} ${className}`}
+      className={`inline-flex items-center justify-center gap-2 ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? "w-full" : ""} ${className}`}
       disabled={loading || disabled}
       {...props}
     >
-      {loading ? <Spinner size={size === 'lg' ? 'md' : 'sm'} /> : children}
+      {loading ? (
+        <InfinitySpinner size={size === "sm" ? "sm" : "md"} />
+      ) : (
+        children
+      )}
     </button>
   );
 }

@@ -14,6 +14,20 @@ interface SliderProps {
   className?: string;
 }
 
+export const sliderSpecs = {
+  track: {
+    background:
+      "bg-surface-primary border border-border-strong — 5px height, rounded-full",
+    fill: "bg-surface-inverse border border-border-strong — dynamic width via percentage",
+  },
+  thumb: {
+    size: "16×16px rounded-full",
+    style: "bg-white border-2 border-solid border-[rgba(0,0,0,0.08)]",
+  },
+  label: "text-body-sm font-medium text-content-primary",
+  value: "text-caption text-content-secondary tabular-nums",
+};
+
 export default function Slider({
   value,
   onChange,
@@ -56,13 +70,13 @@ export default function Slider({
           )}
         </div>
       )}
-      <div className="relative flex items-center h-[18px]">
+      <div className="relative flex items-center h-[16px]">
         {/* Track background */}
-        <div className="absolute w-full h-[3px] rounded-md bg-border-default border border-border-default" />
+        <div className="absolute w-full h-[5px] rounded-full bg-surface-primary border border-border-strong" />
 
         {/* Progress fill */}
         <div
-          className="absolute h-[3px] rounded-md bg-surface-inverse border border-border-default"
+          className="absolute h-[5px] rounded-full bg-surface-inverse border border-border-strong"
           style={{ width: `${percentage}%` }}
         />
 
@@ -81,24 +95,22 @@ export default function Slider({
           aria-valuemax={max}
           aria-valuenow={value}
           aria-label={label}
-          className={`absolute w-full h-[18px] appearance-none bg-transparent cursor-pointer
+          className={`absolute w-full h-[16px] appearance-none bg-transparent cursor-pointer
             [&::-webkit-slider-thumb]:appearance-none
-            [&::-webkit-slider-thumb]:w-[18px]
-            [&::-webkit-slider-thumb]:h-[18px]
+            [&::-webkit-slider-thumb]:w-[16px]
+            [&::-webkit-slider-thumb]:h-[16px]
             [&::-webkit-slider-thumb]:rounded-full
             [&::-webkit-slider-thumb]:bg-white
-            [&::-webkit-slider-thumb]:border-[3px]
-            [&::-webkit-slider-thumb]:border-content-primary
-            [&::-webkit-slider-thumb]:shadow
-            [&::-webkit-slider-thumb]:transition-shadow
-            [&::-webkit-slider-thumb]:hover:shadow-md
-            [&::-moz-range-thumb]:w-[18px]
-            [&::-moz-range-thumb]:h-[18px]
+            [&::-webkit-slider-thumb]:border-2
+            [&::-webkit-slider-thumb]:border-solid
+            [&::-webkit-slider-thumb]:border-[rgba(0,0,0,0.08)]
+            [&::-moz-range-thumb]:w-[16px]
+            [&::-moz-range-thumb]:h-[16px]
             [&::-moz-range-thumb]:rounded-full
             [&::-moz-range-thumb]:bg-white
-            [&::-moz-range-thumb]:border-[3px]
-            [&::-moz-range-thumb]:border-content-primary
-            [&::-moz-range-thumb]:shadow
+            [&::-moz-range-thumb]:border-2
+            [&::-moz-range-thumb]:border-solid
+            [&::-moz-range-thumb]:border-[rgba(0,0,0,0.08)]
             ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         />
       </div>

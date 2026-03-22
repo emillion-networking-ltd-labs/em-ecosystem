@@ -29,7 +29,7 @@ const alignClasses = {
 
 function SkeletonRow({ cols }: { cols: number }) {
   return (
-    <tr className="border-b border-border-default last:border-b-0">
+    <tr className="border-b border-border-strong last:border-b-0">
       {Array.from({ length: cols }).map((_, i) => (
         <td key={i} className="px-4 py-3">
           <div className="h-4 rounded bg-surface-subtle animate-pulse" />
@@ -51,16 +51,16 @@ export default function DataTable<T>({
 }: DataTableProps<T>) {
   return (
     <div
-      className={`overflow-x-auto rounded-2xl border border-border-default bg-surface-primary shadow-card ${className}`}
+      className={`overflow-x-auto rounded-xl border border-border-strong bg-surface-primary ${className}`}
     >
       <table className="w-full">
         {/* Header */}
         <thead>
-          <tr className="border-b border-border-default">
+          <tr className="border-b border-border-strong bg-surface-secondary">
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`px-4 py-3 text-caption font-semibold uppercase tracking-wider text-content-tertiary ${
+                className={`px-4 py-3 text-caption font-semibold uppercase tracking-wider text-content-primary/50 ${
                   alignClasses[col.align ?? "left"]
                 } ${col.headerClassName ?? ""}`}
                 style={col.width ? { width: col.width } : undefined}
@@ -91,7 +91,7 @@ export default function DataTable<T>({
               <tr
                 key={keyExtractor(row)}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
-                className={`border-b border-border-default last:border-b-0 transition-colors hover:bg-surface-subtle ${
+                className={`border-b border-border-strong last:border-b-0 transition-colors hover:bg-surface-subtle ${
                   onRowClick ? "cursor-pointer" : ""
                 }`}
               >

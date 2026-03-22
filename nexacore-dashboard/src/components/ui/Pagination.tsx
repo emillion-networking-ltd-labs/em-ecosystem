@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 type PaginationProps = {
   currentPage: number;
@@ -8,72 +8,95 @@ type PaginationProps = {
   onPageChange: (page: number) => void;
 };
 
-export default function Pagination({ currentPage, totalPages, onPageChange }: PaginationProps) {
+const pageBase =
+  "flex h-8 w-8 items-center justify-center rounded-md text-caption font-medium border border-border-strong transition-colors";
+const pageActive =
+  "bg-surface-inverse text-content-inverse transition-opacity hover:opacity-90";
+const pageInactive =
+  "bg-transparent text-content-primary hover:bg-surface-subtle";
+const arrowBase =
+  "flex h-8 w-8 items-center justify-center rounded-md border border-border-strong text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50";
+
+export const paginationSpecs = {
+  page: {
+    base: pageBase,
+    active: pageActive,
+    inactive: pageInactive,
+    ellipsis: "text-content-primary/50 (no hover, no border)",
+  },
+  arrows: {
+    shared: arrowBase,
+    icon: "ChevronLeft/Right 16px",
+  },
+  dimensions: {
+    size: "h-8 w-8 (32px) — Button sm size",
+    gap: "gap-1 between pages",
+    radius: "rounded-md",
+  },
+};
+
+export default function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: PaginationProps) {
   if (totalPages <= 1) return null;
 
   const pages = getPageNumbers(currentPage, totalPages);
 
   return (
-    <nav aria-label="Pagination" className="flex items-center justify-center gap-[17px] pt-4">
+    <nav aria-label="Pagination" className="flex items-center gap-1">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
-        className="flex items-center gap-1 disabled:opacity-30"
+        className={arrowBase}
       >
-        <ChevronLeft size={12} strokeWidth={1.8} className="text-content-primary" />
-        <span className="text-body-sm font-medium text-content-secondary">Prev</span>
+        <ChevronLeft size={16} />
       </button>
 
-      <div className="flex items-center gap-2">
-        {pages.map((page, i) =>
-          page === '...' ? (
-            <span
-              key={`ellipsis-${i}`}
-              className="flex h-[38px] w-[38px] items-center justify-center rounded-sm bg-surface-secondary text-body-sm font-medium text-content-primary"
-            >
-              ...
-            </span>
-          ) : (
-            <button
-              key={page}
-              onClick={() => onPageChange(page as number)}
-              className={`flex h-[38px] w-[38px] items-center justify-center rounded-sm text-body-sm ${
-                page === currentPage
-                  ? 'border border-content-primary bg-surface-subtle font-bold text-content-primary'
-                  : 'bg-surface-secondary font-medium text-content-primary hover:bg-surface-subtle'
-              }`}
-            >
-              {page}
-            </button>
-          ),
-        )}
-      </div>
+      {pages.map((page, i) =>
+        page === "..." ? (
+          <span
+            key={`ellipsis-${i}`}
+            className="flex h-8 w-8 items-center justify-center text-caption font-medium text-content-primary/50"
+          >
+            ...
+          </span>
+        ) : (
+          <button
+            key={page}
+            onClick={() => onPageChange(page as number)}
+            className={`${pageBase} ${page === currentPage ? pageActive : pageInactive}`}
+          >
+            {page}
+          </button>
+        ),
+      )}
 
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
-        className="flex items-center gap-1 disabled:opacity-30"
+        className={arrowBase}
       >
-        <span className="text-body-sm font-medium text-content-primary">Next</span>
-        <ChevronRight size={12} strokeWidth={1.8} className="text-content-primary" />
+        <ChevronRight size={16} />
       </button>
     </nav>
   );
 }
 
-function getPageNumbers(current: number, total: number): (number | '...')[] {
+function getPageNumbers(current: number, total: number): (number | "...")[] {
   if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
 
-  const pages: (number | '...')[] = [1];
+  const pages: (number | "...")[] = [1];
 
-  if (current > 3) pages.push('...');
+  if (current > 3) pages.push("...");
 
   const start = Math.max(2, current - 1);
   const end = Math.min(total - 1, current + 1);
 
   for (let i = start; i <= end; i++) pages.push(i);
 
-  if (current < total - 2) pages.push('...');
+  if (current < total - 2) pages.push("...");
 
   pages.push(total);
   return pages;

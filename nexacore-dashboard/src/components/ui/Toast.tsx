@@ -48,7 +48,7 @@ export default function Toast({
     <div
       role="alert"
       aria-live="assertive"
-      className={`group flex max-w-[650px] items-start gap-2 rounded-full border border-border-default bg-surface-primary px-6 py-4 shadow-card ${
+      className={`group flex max-w-[650px] items-start gap-2 rounded-full border border-border-strong bg-surface-primary px-6 py-4 shadow-card ${
         isExiting ? "animate-toast-out" : "animate-toast-in"
       }`}
     >

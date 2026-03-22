@@ -15,7 +15,9 @@
 function DigitBox({ value }: { value: string }) {
   return (
     <span className="countdown-digit">
-      <span key={value} className="countdown-slide">{value}</span>
+      <span key={value} className="countdown-slide">
+        {value}
+      </span>
     </span>
   );
 }
@@ -23,8 +25,8 @@ function DigitBox({ value }: { value: string }) {
 export default function CountdownTimer({ seconds }: { seconds: number }) {
   const mins = Math.floor(seconds / 60);
   const secs = seconds % 60;
-  const minStr = String(mins).padStart(2, '0');
-  const secStr = String(secs).padStart(2, '0');
+  const minStr = String(mins).padStart(2, "0");
+  const secStr = String(secs).padStart(2, "0");
 
   return (
     <span className="inline-flex shrink-0 items-center gap-px">
@@ -32,7 +34,9 @@ export default function CountdownTimer({ seconds }: { seconds: number }) {
         <>
           <DigitBox value={minStr[0]} />
           <DigitBox value={minStr[1]} />
-          <span className="mx-px text-[10px] font-bold text-error/60">:</span>
+          <span className="mx-px text-[10px] font-semibold text-error/60">
+            :
+          </span>
         </>
       )}
       <DigitBox value={secStr[0]} />

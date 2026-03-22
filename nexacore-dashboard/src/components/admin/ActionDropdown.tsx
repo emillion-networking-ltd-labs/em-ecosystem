@@ -1,15 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect } from "react";
 import {
   MoreHorizontal,
   ShieldCheck,
   Lock,
   Unlock,
   Trash2,
-} from 'lucide-react';
-import type { SafeUser } from '@/lib/types';
-import Can from '@/components/guards/Can';
+} from "lucide-react";
+import type { SafeUser } from "@/lib/types";
+import Can from "@/components/guards/Can";
 
 type ActionDropdownProps = {
   user: SafeUser;
@@ -33,14 +33,14 @@ export default function ActionDropdown({
         setOpen(false);
       }
     }
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const isLocked = !user.isActive;
 
   return (
-    <Can anyPermission={['users:write', 'users:delete']}>
+    <Can anyPermission={["users:write", "users:delete"]}>
       <div className="relative" ref={ref}>
         <button
           onClick={() => setOpen(!open)}
@@ -50,7 +50,7 @@ export default function ActionDropdown({
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full z-30 mt-1 w-[241px] rounded-3xl border border-border-default bg-surface-primary p-6 shadow-card">
+          <div className="absolute right-0 top-full z-30 mt-1 w-[241px] rounded-3xl border border-border-strong bg-surface-primary p-6 shadow-card animate-dropdown-down">
             <Can permission="users:write">
               <button
                 onClick={() => {
@@ -70,7 +70,7 @@ export default function ActionDropdown({
                 className="flex w-full items-center gap-2 rounded-3xl p-2 text-caption text-content-primary hover:bg-surface-subtle"
               >
                 {isLocked ? <Unlock size={16} /> : <Lock size={16} />}
-                {isLocked ? 'Unlock Account' : 'Lock Account'}
+                {isLocked ? "Unlock Account" : "Lock Account"}
               </button>
             </Can>
             <Can permission="users:delete">

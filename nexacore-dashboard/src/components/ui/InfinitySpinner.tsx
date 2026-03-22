@@ -18,14 +18,12 @@
  * Usage: <InfinitySpinner /> or <InfinitySpinner size="lg" />
  */
 
-type SpinnerSize = "xs" | "sm" | "md" | "lg" | "xl";
+type SpinnerSize = "sm" | "md" | "lg";
 
 const SIZES: Record<SpinnerSize, number> = {
-  xs: 16,
-  sm: 20,
+  sm: 16,
   md: 24,
-  lg: 28,
-  xl: 32,
+  lg: 32,
 };
 
 export default function InfinitySpinner({

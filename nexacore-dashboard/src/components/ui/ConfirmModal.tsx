@@ -98,10 +98,10 @@ export default function ConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
-        className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary shadow-card"
+        className="w-[427px] overflow-hidden rounded-3xl border border-border-strong bg-surface-secondary shadow-card"
       >
         {/* Top section */}
-        <div className="flex gap-4 border-b border-border-default bg-surface-primary p-6">
+        <div className="flex gap-4 border-b border-border-strong bg-surface-primary p-6">
           <div className="flex-1">
             <h2
               id="confirm-modal-title"
@@ -130,7 +130,7 @@ export default function ConfirmModal({
             disabled={loading}
             className={`h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] transition-colors disabled:opacity-50 ${
               variant === "danger"
-                ? "bg-error text-white hover:opacity-90"
+                ? "bg-error text-content-inverse hover:opacity-90"
                 : "bg-surface-inverse text-content-inverse hover:opacity-90"
             }`}
           >

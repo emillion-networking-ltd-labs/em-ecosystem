@@ -15,6 +15,27 @@ interface InputProps extends Omit<
   leftIcon?: ReactNode;
 }
 
+export const inputSpecs = {
+  container:
+    "flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-transparent px-4 outline outline-2 outline-offset-2 transition-colors",
+  label: "text-[15px] font-semibold leading-[22px]",
+  input:
+    "min-w-0 flex-1 bg-transparent text-[15px] leading-6 text-content-primary outline-none placeholder:text-content-placeholder",
+  states: {
+    default: "outline-transparent",
+    hover: "hover:outline-content-primary/75",
+    focus: "focus-within:outline-content-primary/75",
+    error: "outline-error/75",
+    disabled: "cursor-not-allowed opacity-60",
+  },
+  icons: {
+    left: "shrink-0 text-content-secondary (16px)",
+    password:
+      "shrink-0 text-content-secondary hover:text-content-primary/75 (16px)",
+    error: "shrink-0 text-error (TriangleAlert 16px)",
+  },
+};
+
 export default function Input({
   label,
   error,
@@ -68,7 +89,7 @@ export default function Input({
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
           ref={inputRef}
-          className="flex-1 bg-transparent text-[15px] leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
+          className="min-w-0 flex-1 bg-transparent text-[15px] leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
           {...props}
         />
         {isPassword && !loading && (

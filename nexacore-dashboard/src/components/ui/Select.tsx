@@ -19,6 +19,31 @@ interface SelectProps {
   className?: string;
 }
 
+export const selectSpecs = {
+  trigger: {
+    shared:
+      "inline-flex items-center justify-between gap-2 w-full px-4 py-2.5 text-body-sm rounded-3xl bg-transparent",
+    hover: "hover:bg-surface-subtle",
+    open: "bg-surface-subtle",
+    disabled: "opacity-50 cursor-not-allowed",
+  },
+  dropdown: {
+    container:
+      "rounded-3xl border border-border-strong bg-surface-primary p-6 shadow-card max-h-64 overflow-auto",
+  },
+  option: {
+    selected: "bg-surface-inverse text-content-inverse rounded-3xl",
+    default: "text-content-primary rounded-3xl hover:bg-surface-subtle",
+    danger: "text-error hover:bg-error-bg rounded-3xl",
+    focused: "bg-surface-subtle text-content-primary",
+  },
+  icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open",
+  position: {
+    auto: "Detects viewport edges — flips vertical (up/down) and horizontal (left/right)",
+    animation: "animate-dropdown-down / animate-dropdown-up (150ms ease-out)",
+  },
+};
+
 export default function Select({
   options,
   value,
@@ -29,10 +54,29 @@ export default function Select({
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
+  const [popoverPos, setPopoverPos] = useState({
+    vertical: "down" as "up" | "down",
+    horizontal: "left" as "left" | "right",
+  });
   const containerRef = useRef<HTMLDivElement>(null);
   const listboxId = useId();
 
   const selectedOption = options.find((o) => o.value === value);
+
+  const openDropdown = () => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const dropdownH = 300;
+    const dropdownW = rect.width + 100;
+    setPopoverPos({
+      vertical:
+        window.innerHeight - rect.bottom < dropdownH && rect.top > dropdownH
+          ? "up"
+          : "down",
+      horizontal: rect.right + dropdownW > window.innerWidth ? "right" : "left",
+    });
+    setOpen(true);
+  };
 
   // Close on outside click
   useEffect(() => {
@@ -112,13 +156,13 @@ export default function Select({
         aria-haspopup="listbox"
         aria-controls={listboxId}
         disabled={disabled}
-        onClick={() => setOpen(!open)}
+        onClick={() => (open ? setOpen(false) : openDropdown())}
         onKeyDown={handleKeyDown}
-        className={`inline-flex items-center justify-between gap-2 w-full px-4 py-2.5 text-body-sm border border-border-default rounded-md bg-surface-primary transition-colors ${
+        className={`inline-flex items-center justify-between gap-2 w-full px-4 py-2.5 text-body-sm rounded-3xl transition-colors ${
           disabled
             ? "opacity-50 cursor-not-allowed"
-            : "hover:bg-hover cursor-pointer"
-        } ${open ? "border-content-primary" : ""}`}
+            : "hover:bg-surface-subtle cursor-pointer"
+        } ${open ? "bg-surface-subtle" : "bg-transparent"}`}
       >
         <span
           className={
@@ -129,7 +173,7 @@ export default function Select({
         </span>
         <ChevronDown
           size={16}
-          className={`text-content-tertiary transition-transform ${open ? "rotate-180" : ""}`}
+          className={`text-content-primary/50 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden="true"
         />
       </button>
@@ -141,7 +185,7 @@ export default function Select({
           aria-activedescendant={
             focusedIndex >= 0 ? `${listboxId}-opt-${focusedIndex}` : undefined
           }
-          className="absolute z-50 mt-1 w-full bg-surface-primary border border-border-default shadow-card rounded-3xl p-6 flex flex-col gap-0.5 max-h-64 overflow-auto"
+          className={`absolute z-50 min-w-full bg-surface-primary border border-border-strong shadow-card rounded-3xl p-6 flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;
@@ -165,8 +209,8 @@ export default function Select({
                     : isDanger
                       ? "text-error hover:bg-error-bg"
                       : isFocused
-                        ? "bg-hover text-content-primary"
-                        : "text-content-primary"
+                        ? "bg-surface-subtle text-content-primary"
+                        : "text-content-primary hover:bg-surface-subtle"
                 }`}
               >
                 {option.icon && (

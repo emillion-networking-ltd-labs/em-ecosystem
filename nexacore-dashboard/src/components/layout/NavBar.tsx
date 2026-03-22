@@ -71,7 +71,7 @@ export default function NavBar({
   ];
 
   return (
-    <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-border-default bg-surface-primary px-7">
+    <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-border-strong bg-surface-primary px-7">
       {/* Left side */}
       <div className="flex items-center gap-2">
         {/* Mobile hamburger */}
@@ -148,7 +148,7 @@ export default function NavBar({
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 w-48 rounded-3xl border border-border-default bg-surface-primary p-6 shadow-card">
+            <div className="absolute right-0 top-full mt-1 w-48 rounded-3xl border border-border-strong bg-surface-primary p-6 shadow-card animate-dropdown-down">
               <Link
                 href="/profile"
                 onClick={() => setDropdownOpen(false)}
@@ -167,7 +167,7 @@ export default function NavBar({
                   Admin
                 </Link>
               )}
-              <div className="my-2 h-px bg-border-default" />
+              <div className="my-2 h-px bg-border-strong" />
               <button
                 onClick={handleLogout}
                 className="flex w-full items-center gap-2 rounded-3xl p-2 text-caption text-error hover:bg-surface-subtle"
