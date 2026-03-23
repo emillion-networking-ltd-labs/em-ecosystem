@@ -148,7 +148,7 @@ export default function NavBar({
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border-strong bg-surface-primary p-6 animate-dropdown-down">
+            <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border-strong bg-surface-primary p-6 shadow-card animate-dropdown-down">
               <Link
                 href="/profile"
                 onClick={() => setDropdownOpen(false)}

@@ -539,6 +539,62 @@ input:-webkit-autofill:focus {
   animation: tab-content-in 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+/* Stagger fade-in for list items */
+@keyframes stagger-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-stagger > * {
+  opacity: 0;
+  animation: stagger-fade-in 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.animate-stagger > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.animate-stagger > *:nth-child(2) {
+  animation-delay: 40ms;
+}
+.animate-stagger > *:nth-child(3) {
+  animation-delay: 80ms;
+}
+.animate-stagger > *:nth-child(4) {
+  animation-delay: 120ms;
+}
+.animate-stagger > *:nth-child(5) {
+  animation-delay: 160ms;
+}
+.animate-stagger > *:nth-child(6) {
+  animation-delay: 200ms;
+}
+.animate-stagger > *:nth-child(7) {
+  animation-delay: 240ms;
+}
+.animate-stagger > *:nth-child(8) {
+  animation-delay: 280ms;
+}
+
+/* Corner radius grow animation */
+@keyframes corner-grow {
+  from {
+    border-bottom-left-radius: 6px;
+  }
+  to {
+    border-bottom-left-radius: 24px;
+  }
+}
+
+.animate-corner-bl {
+  animation: corner-grow 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
 /* Tab underline indicator animation */
 @keyframes tab-underline {
   from {

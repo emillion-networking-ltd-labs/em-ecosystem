@@ -12,7 +12,7 @@ export default function CheckEmailPage() {
         {/* Title Group — Figma: 330px, vertical, pAlign MIN (top) */}
         <div className="flex w-full flex-col md:w-[330px]">
           <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-            <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
+            <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
               Check Your Email
             </h1>
             <p className="text-justify text-body leading-[21px] text-content-primary/50">
@@ -44,7 +44,7 @@ export default function CheckEmailPage() {
           {/* Try Again — Figma: single full-width primary button */}
           <Link
             href="/forgot-password"
-            className="flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90"
+            className="flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-h3 font-normal text-content-inverse transition-opacity hover:opacity-90"
           >
             Try Again
           </Link>

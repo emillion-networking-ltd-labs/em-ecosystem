@@ -17,7 +17,7 @@ export const baseClass =
 export const sizeClasses = {
   sm: "w-8 h-8 text-caption",
   md: "w-10 h-10 text-body",
-  lg: "w-16 h-16 text-title",
+  lg: "w-16 h-16 text-h2",
 };
 
 const iconSizes = {

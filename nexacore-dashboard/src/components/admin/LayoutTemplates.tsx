@@ -21,7 +21,7 @@ function TemplateCard({
   return (
     <div className="card space-y-4">
       <div>
-        <h3 className="text-subtitle text-content-primary">{title}</h3>
+        <h3 className="text-h3 text-content-primary">{title}</h3>
         <p className="text-caption text-content-secondary mt-1">
           {description}
         </p>

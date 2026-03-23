@@ -34,7 +34,7 @@ export default function Error({
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
 
-        <h1 className="mb-2 text-title text-content-primary">
+        <h1 className="mb-2 text-h2 text-content-primary">
           Something went wrong
         </h1>
 

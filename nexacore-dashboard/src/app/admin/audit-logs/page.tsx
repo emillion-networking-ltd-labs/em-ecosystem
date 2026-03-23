@@ -75,7 +75,7 @@ export default function AuditLogsPage() {
 
         {/* Page header */}
         <div className="mb-6">
-          <h1 className="text-heading font-semibold text-content-primary">
+          <h1 className="text-h1 font-semibold text-content-primary">
             Audit Logs
           </h1>
           <p className="mt-1 text-caption text-content-tertiary">

@@ -26,9 +26,9 @@ export const languageSelectorSpecs = {
   popover: {
     position: "absolute w-fit min-w-[200px]",
     container:
-      "rounded-xl border border-border-strong bg-surface-primary p-4 max-h-[240px] overflow-y-auto",
+      "rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card max-h-[240px] overflow-y-auto",
     search:
-      "h-12 rounded-lg border border-border-strong bg-surface-primary px-4",
+      "h-12 rounded-lg border border-border-strong bg-surface-primary px-4 shadow-card",
   },
   option: {
     selected: "bg-surface-tertiary text-content-primary",
@@ -39,7 +39,9 @@ export const languageSelectorSpecs = {
   icon: "ChevronDown 16px, rotate-180 on open",
 };
 
-export default function LanguageSelector() {
+export default function LanguageSelector({
+  triggerClassName = "",
+}: { triggerClassName?: string } = {}) {
   const [isOpen, setIsOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Language>(LANGUAGES[0]);
@@ -127,12 +129,12 @@ export default function LanguageSelector() {
       <button
         type="button"
         onClick={() => (isOpen ? setIsOpen(false) : openPopover())}
-        className={triggerClass}
+        className={`${triggerClass} ${triggerClassName}`}
       >
         <span className="whitespace-nowrap">{selected.name}</span>
         <ChevronDown
           size={16}
-          className={`shrink-0 transition-transform ${isOpen ? "rotate-180" : ""}`}
+          className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
 
@@ -142,46 +144,10 @@ export default function LanguageSelector() {
           className={`absolute z-50 w-fit min-w-[200px] ${popoverPos.vertical === "down" ? "top-full mt-1 animate-dropdown-down" : "bottom-full mb-1 animate-dropdown-up"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
         >
           <div
-            className={`flex flex-col gap-1 ${popoverPos.vertical === "down" ? "flex-col-reverse" : ""}`}
+            className={`flex flex-col gap-1 animate-stagger ${popoverPos.vertical === "down" ? "" : "flex-col-reverse"}`}
           >
-            {/* Results — Figma: rounded card, border, shadow, scrollable */}
-            <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-strong bg-surface-primary p-4">
-              {filtered.length === 0 ? (
-                <p className="py-2 text-center text-body text-content-primary/50">
-                  No results
-                </p>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  {filtered.map((lang) => {
-                    const isSelected = selected.code === lang.code;
-                    return (
-                      <button
-                        key={lang.code}
-                        type="button"
-                        onClick={() => handleSelect(lang)}
-                        className={`flex h-10 items-center gap-2 rounded-md px-2 font-normal transition-colors ${
-                          isSelected
-                            ? "bg-surface-tertiary text-content-primary"
-                            : "bg-transparent text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary"
-                        }`}
-                      >
-                        {/* Avatar — 32px circle, bg black/5, code 12px/600 */}
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
-                          <span className="text-caption font-semibold">
-                            {lang.code}
-                          </span>
-                        </div>
-                        {/* Name — 15px */}
-                        <span className="truncate text-body">{lang.name}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* Search Bar — adjacent to trigger, pill, border, shadow */}
-            <div className="flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-surface-primary px-4">
+            {/* Search Bar — appears first (stagger child 1) */}
+            <div className="relative z-10 flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-surface-primary px-4 shadow-card">
               <Search
                 size={16}
                 className="shrink-0 text-content-primary"
@@ -203,6 +169,40 @@ export default function LanguageSelector() {
                 >
                   <X size={12} strokeWidth={2} />
                 </button>
+              )}
+            </div>
+
+            {/* Results — appears second (stagger child 2) */}
+            <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card">
+              {filtered.length === 0 ? (
+                <p className="py-2 text-center text-body text-content-primary/50">
+                  No results
+                </p>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  {filtered.map((lang) => {
+                    const isSelected = selected.code === lang.code;
+                    return (
+                      <button
+                        key={lang.code}
+                        type="button"
+                        onClick={() => handleSelect(lang)}
+                        className={`flex h-10 items-center gap-2 rounded-md px-2 font-normal transition-colors ${
+                          isSelected
+                            ? "bg-surface-tertiary text-content-primary"
+                            : "bg-transparent text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary"
+                        }`}
+                      >
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
+                          <span className="text-caption font-semibold">
+                            {lang.code}
+                          </span>
+                        </div>
+                        <span className="truncate text-body">{lang.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>

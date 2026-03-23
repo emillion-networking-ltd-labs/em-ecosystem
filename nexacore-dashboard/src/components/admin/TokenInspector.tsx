@@ -221,7 +221,7 @@ const unusedColorGroups: ColorGroup[] = [
 const typographyTokens = [
   {
     name: "heading",
-    desc: "text-heading font-semibold",
+    desc: "text-h1 font-semibold",
     size: "24px",
     lineHeight: "36px",
     weight: 600,
@@ -229,7 +229,7 @@ const typographyTokens = [
   },
   {
     name: "button",
-    desc: "text-subtitle font-normal",
+    desc: "text-h3 font-normal",
     size: "16px",
     lineHeight: "normal",
     weight: 500,
@@ -310,9 +310,7 @@ const shadowTokens = [
 /* ===== Section Components ===== */
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return (
-    <h3 className="text-subtitle text-content-primary mb-4">{children}</h3>
-  );
+  return <h3 className="text-h3 text-content-primary mb-4">{children}</h3>;
 }
 
 function ColorGrid({ groups }: { groups: ColorGroup[] }) {

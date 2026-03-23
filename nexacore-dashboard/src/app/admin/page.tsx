@@ -169,7 +169,7 @@ export default function AdminPage() {
 
         {/* Page header */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-heading font-semibold text-content-primary">
+          <h1 className="text-h1 font-semibold text-content-primary">
             User Management
           </h1>
           <div className="flex w-64 items-center gap-2 rounded-full border border-border-default bg-surface-secondary px-4">

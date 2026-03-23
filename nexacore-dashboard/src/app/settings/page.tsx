@@ -24,7 +24,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Page header */}
-        <h1 className="mb-6 text-heading font-semibold text-content-primary">
+        <h1 className="mb-6 text-h1 font-semibold text-content-primary">
           Settings
         </h1>
 

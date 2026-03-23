@@ -6,7 +6,7 @@ export default function AuthFooter() {
     <div className="flex w-full flex-wrap items-center gap-x-6 gap-y-2 p-2">
       {/* Left — Language Selector (Figma: layoutGrow=1, trigger fills parent) */}
       <div className="flex flex-1 items-center">
-        <LanguageSelector />
+        <LanguageSelector triggerClassName="animate-corner-bl" />
       </div>
 
       {/* Right — Nav Links (Figma: auto width, gap 24, px 16) */}

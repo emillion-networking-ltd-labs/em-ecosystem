@@ -47,7 +47,7 @@ function VerifyEmailChangeContent() {
         {isSuccess ? (
           <>
             <CheckCircle2 size={48} className="text-success" />
-            <h1 className="text-title text-content-primary">
+            <h1 className="text-h2 text-content-primary">
               Email Changed Successfully!
             </h1>
             <p className="text-body text-content-secondary">
@@ -63,7 +63,7 @@ function VerifyEmailChangeContent() {
         ) : (
           <>
             <AlertTriangle size={48} className="text-error" />
-            <h1 className="text-title text-content-primary">
+            <h1 className="text-h2 text-content-primary">
               Verification Failed
             </h1>
             <p className="text-body text-content-secondary">

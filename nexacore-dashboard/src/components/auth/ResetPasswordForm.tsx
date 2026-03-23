@@ -109,7 +109,7 @@ export default function ResetPasswordForm() {
       {/* Title Group — Figma: 330px, vertical, pAlign MIN (top) */}
       <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
             Reset Password
           </h1>
           <p className="text-justify text-body leading-[21px] text-content-primary/50">
@@ -190,7 +190,7 @@ export default function ResetPasswordForm() {
           <button
             type="submit"
             disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-h3 font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? "opacity-30" : ""}>
               Reset Password

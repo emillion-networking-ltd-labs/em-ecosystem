@@ -88,7 +88,7 @@ function ShowcaseSection({
         .replace(/-+/g, "-")
         .replace(/-$/, "")}`}
     >
-      <h3 className="text-subtitle text-content-primary">{title}</h3>
+      <h3 className="text-h3 text-content-primary">{title}</h3>
       {children}
     </div>
   );
@@ -1417,7 +1417,7 @@ function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
         <button
           type="button"
           onClick={() => (open ? setOpen(false) : openDropdown())}
-          className={`flex h-10 items-center gap-2 rounded-md px-4 text-subtitle font-normal border border-border-strong text-content-primary transition-all w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
+          className={`flex h-10 items-center gap-2 rounded-md px-4 text-h3 font-normal border border-border-strong text-content-primary transition-all w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
         >
           <span className="leading-none">user@example.com</span>
           <ChevronDown
@@ -1429,7 +1429,7 @@ function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
           <div
             className={`absolute z-50 w-fit min-w-[200px] left-0 ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"}`}
           >
-            <div className="rounded-xl border border-border-strong bg-surface-primary p-4 whitespace-nowrap">
+            <div className="rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card whitespace-nowrap">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
@@ -1485,9 +1485,9 @@ function SelectShowcase() {
           "Select Position": selectSpecs.position,
           "Email Selector (auth)": {
             trigger:
-              "h-10 rounded-md px-4 w-fit text-subtitle font-normal border border-border-strong bg-transparent hover:bg-surface-subtle",
+              "h-10 rounded-md px-4 w-fit text-h3 font-normal border border-border-strong bg-transparent hover:bg-surface-subtle",
             dropdown:
-              "rounded-xl border border-border-strong bg-surface-primary p-4 w-fit min-w-[200px] whitespace-nowrap",
+              "rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card w-fit min-w-[200px] whitespace-nowrap",
             avatar:
               "h-8 w-8 rounded-full bg-surface-subtle text-caption font-semibold",
           },
@@ -1750,7 +1750,7 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
               "Email verified!"
             )}
           </p>
-          <button className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle">
+          <button className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-h3 font-normal text-content-primary transition-colors hover:bg-surface-subtle">
             {isError ? "Go to Sign In" : "Go to Dashboard"}
           </button>
         </div>
@@ -1890,7 +1890,7 @@ function FeedbackShowcase() {
               "CircleCheck 48px text-[#166534] strokeWidth-1.5 icon-success animation",
             text: "text-body leading-[21px] text-content-primary/50 text-center",
             button:
-              "h-10 w-full rounded-md border border-border-strong bg-transparent text-subtitle font-normal — outline style",
+              "h-10 w-full rounded-md border border-border-strong bg-transparent text-h3 font-normal — outline style",
           },
         }}
       />
@@ -2009,7 +2009,7 @@ const speedoSizes = {
     hubInner: 3,
     fontSize: 10,
     labelOffset: 18,
-    textClass: "text-subtitle",
+    textClass: "text-h3",
   },
   lg: {
     w: 260,
@@ -2026,7 +2026,7 @@ const speedoSizes = {
     hubInner: 4,
     fontSize: 11,
     labelOffset: 22,
-    textClass: "text-heading",
+    textClass: "text-h1",
   },
 };
 

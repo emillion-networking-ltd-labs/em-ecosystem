@@ -67,14 +67,14 @@ const config: Config = {
         },
       },
       fontSize: {
-        heading: ["24px", { lineHeight: "36px" }],
-        title: ["20px", { lineHeight: "28px" }],
-        subtitle: ["16px", { lineHeight: "24px" }],
+        h1: ["24px", { lineHeight: "36px" }],
+        h2: ["20px", { lineHeight: "28px" }],
+        h3: ["16px", { lineHeight: "24px" }],
         body: ["14px", { lineHeight: "21px" }],
         caption: ["12px", { lineHeight: "18px" }],
       },
       boxShadow: {
-        card: "6px 6px 50px rgba(0, 0, 0, 0.05)",
+        card: "0 8px 32px rgba(0, 0, 0, 0.04)",
         avatar: "0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1)",
       },
       borderRadius: {

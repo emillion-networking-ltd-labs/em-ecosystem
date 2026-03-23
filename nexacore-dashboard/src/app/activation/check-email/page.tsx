@@ -11,7 +11,7 @@ export default function EmailSentPage() {
       <div className="flex flex-col gap-6 md:flex-row">
         <div className="flex w-full flex-col md:w-[330px]">
           <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-            <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
+            <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
               Check Your Email
             </h1>
             <p className="text-justify text-body leading-[21px] text-content-primary/50">

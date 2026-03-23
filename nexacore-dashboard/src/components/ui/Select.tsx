@@ -29,7 +29,7 @@ export const selectSpecs = {
   },
   dropdown: {
     container:
-      "rounded-xl border border-border-strong bg-surface-primary p-6 max-h-64 overflow-auto",
+      "rounded-xl border border-border-strong bg-surface-primary p-6 shadow-card max-h-64 overflow-auto",
   },
   option: {
     selected: "bg-surface-inverse text-content-inverse rounded-md",

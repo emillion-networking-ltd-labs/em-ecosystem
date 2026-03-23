@@ -23,7 +23,7 @@ interface TabsProps {
 const sizeClasses = {
   sm: "px-3 py-1.5 text-caption h-8",
   md: "px-4 py-2.5 text-body h-10",
-  lg: "px-6 py-3 text-subtitle h-12",
+  lg: "px-6 py-3 text-h3 h-12",
 };
 
 const variantStyles = {
@@ -80,7 +80,7 @@ export const tabsSpecs = {
   sizes: {
     sm: "h-8 px-3 py-1.5 text-caption (32px) — solid/subtle only",
     "md (default)": "h-10 px-4 py-2.5 text-body (40px) — solid/subtle only",
-    lg: "h-12 px-6 py-3 text-subtitle (48px) — solid/subtle only",
+    lg: "h-12 px-6 py-3 text-h3 (48px) — solid/subtle only",
   },
   mobile: {
     scroll: "overflow-x-auto scrollbar-hide touch-pan-x",

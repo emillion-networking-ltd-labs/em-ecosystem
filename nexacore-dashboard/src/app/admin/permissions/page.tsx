@@ -21,7 +21,7 @@ export default function PermissionsPage() {
         </div>
 
         <div className="mb-6">
-          <h1 className="text-heading font-semibold text-content-primary">
+          <h1 className="text-h1 font-semibold text-content-primary">
             Role Permissions
           </h1>
           <p className="mt-1 text-caption text-content-tertiary">

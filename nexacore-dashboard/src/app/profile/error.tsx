@@ -33,7 +33,7 @@ export default function ProfileError({
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
 
-        <h2 className="mb-2 text-title text-content-primary">
+        <h2 className="mb-2 text-h2 text-content-primary">
           Something went wrong
         </h2>
 

@@ -59,7 +59,7 @@ export default function ProfileForm() {
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="text-heading text-content-primary">
+            <span className="text-h1 text-content-primary">
               {(user?.firstName?.[0] || user?.email[0] || "?").toUpperCase()}
             </span>
           )}
