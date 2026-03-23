@@ -74,7 +74,7 @@ export default function ChangePasswordForm() {
 
   return (
     <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
-      <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
+      <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
         {hasPassword ? "Change Password" : "Set Password"}
       </h2>
 
@@ -101,7 +101,7 @@ export default function ChangePasswordForm() {
           />
           {newPassword && (
             <p
-              className={`mt-1 text-xs ${newPassword.length >= PASSWORD_MIN_LENGTH ? "text-success" : "text-error"}`}
+              className={`mt-1 text-caption ${newPassword.length >= PASSWORD_MIN_LENGTH ? "text-success" : "text-error"}`}
             >
               {newPassword.length >= PASSWORD_MIN_LENGTH
                 ? "Minimum length met"

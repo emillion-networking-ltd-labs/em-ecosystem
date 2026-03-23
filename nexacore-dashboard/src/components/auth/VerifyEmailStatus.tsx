@@ -26,7 +26,7 @@ export default function VerifyEmailStatus() {
     return (
       <div className="flex flex-col items-center gap-2">
         <Loader2 size={48} className="animate-spin text-content-secondary" />
-        <p className="text-sm leading-[21px] text-content-primary/50">
+        <p className="text-body leading-[21px] text-content-primary/50">
           Verifying your email...
         </p>
       </div>
@@ -52,11 +52,11 @@ export default function VerifyEmailStatus() {
       )}
 
       {isSuccess ? (
-        <p className="text-sm leading-[21px] text-content-primary/50">
+        <p className="text-body leading-[21px] text-content-primary/50">
           Email verified!
         </p>
       ) : (
-        <p className="text-center text-sm leading-[21px] text-content-primary/50">
+        <p className="text-center text-body leading-[21px] text-content-primary/50">
           Verification failed!
           <br />
           The verification link is invalid or has expired.
@@ -65,7 +65,7 @@ export default function VerifyEmailStatus() {
 
       <Link
         href={isSuccess ? "/dashboard" : "/login"}
-        className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+        className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle"
       >
         {isSuccess ? "Go to Dashboard" : "Go to Sign In"}
       </Link>

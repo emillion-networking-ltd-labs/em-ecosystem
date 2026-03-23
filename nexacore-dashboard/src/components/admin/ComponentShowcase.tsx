@@ -88,7 +88,7 @@ function ShowcaseSection({
         .replace(/-+/g, "-")
         .replace(/-$/, "")}`}
     >
-      <h3 className="text-heading-sm text-content-primary">{title}</h3>
+      <h3 className="text-subtitle text-content-primary">{title}</h3>
       {children}
     </div>
   );
@@ -140,7 +140,7 @@ function SpecsPanel({
                   <span className="text-caption font-normal text-content-secondary w-20 shrink-0">
                     {key}
                   </span>
-                  <code className="flex-1 text-xs bg-surface-secondary rounded px-2 py-1 text-content-primary font-mono overflow-x-auto">
+                  <code className="flex-1 text-caption bg-surface-secondary rounded px-2 py-1 text-content-primary font-mono overflow-x-auto">
                     {value}
                   </code>
                   <CopyButton text={value} />
@@ -167,7 +167,7 @@ const hoverClasses = {
 };
 
 const baseButtonClass =
-  "inline-flex items-center justify-center gap-2 font-normal rounded-md px-6 py-2.5 text-body-sm h-10";
+  "inline-flex items-center justify-center gap-2 font-normal rounded-md px-6 py-2.5 text-body h-10";
 
 function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
   const variants = ["primary", "secondary", "outline", "danger"] as const;
@@ -193,7 +193,7 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
         </thead>
         <tbody>
           <tr className="border-b border-border-strong">
-            <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
+            <td className="px-4 py-3 text-body font-normal text-content-primary">
               Normal
             </td>
             {variants.map((v) => (
@@ -205,14 +205,14 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
             ))}
             <td className={tdClass}>
               <div className="flex justify-center">
-                <button className="w-9 h-9 rounded-full flex items-center justify-center text-body-sm font-normal bg-surface-inverse text-content-inverse transition-colors hover:opacity-90">
+                <button className="w-9 h-9 rounded-full flex items-center justify-center text-body font-normal bg-surface-inverse text-content-inverse transition-colors hover:opacity-90">
                   15
                 </button>
               </div>
             </td>
           </tr>
           <tr className="border-b border-border-strong">
-            <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
+            <td className="px-4 py-3 text-body font-normal text-content-primary">
               Hover
             </td>
             {variants.map((v) => (
@@ -224,14 +224,14 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
             ))}
             <td className={tdClass}>
               <div className="flex justify-center">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-body-sm font-normal bg-surface-inverse text-content-inverse opacity-90">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-body font-normal bg-surface-inverse text-content-inverse opacity-90">
                   15
                 </div>
               </div>
             </td>
           </tr>
           <tr className="border-b border-border-strong">
-            <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
+            <td className="px-4 py-3 text-body font-normal text-content-primary">
               Disabled
             </td>
             {variants.map((v) => (
@@ -243,14 +243,14 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
             ))}
             <td className={tdClass}>
               <div className="flex justify-center">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-body-sm font-normal bg-surface-inverse text-content-inverse opacity-50 pointer-events-none">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-body font-normal bg-surface-inverse text-content-inverse opacity-50 pointer-events-none">
                   15
                 </div>
               </div>
             </td>
           </tr>
           <tr>
-            <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
+            <td className="px-4 py-3 text-body font-normal text-content-primary">
               Loading
             </td>
             {variants.map((v) => (
@@ -279,9 +279,7 @@ function ButtonShowcase() {
 
       {/* Sizes — largest to smallest */}
       <div className="mt-6">
-        <p className="text-body-sm font-normal text-content-primary mb-2">
-          Sizes
-        </p>
+        <p className="text-body font-normal text-content-primary mb-2">Sizes</p>
         <div className="flex flex-wrap items-end justify-center sm:justify-start gap-4">
           <div className="flex flex-col items-center gap-1.5">
             <Button variant="primary" size="lg" fullWidth={false}>
@@ -311,7 +309,7 @@ function ButtonShowcase() {
       </div>
 
       {/* Link Buttons */}
-      <p className="text-body-sm font-normal text-content-primary mb-2">
+      <p className="text-body font-normal text-content-primary mb-2">
         Link Buttons
       </p>
       {(["light", "dark"] as const).map((mode) => (
@@ -341,7 +339,7 @@ function ButtonShowcase() {
             </thead>
             <tbody>
               <tr className="border-b border-border-strong">
-                <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
+                <td className="px-4 py-3 text-body font-normal text-content-primary">
                   Normal
                 </td>
                 <td className="px-4 py-3 text-center">
@@ -368,21 +366,21 @@ function ButtonShowcase() {
                 </td>
               </tr>
               <tr>
-                <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
+                <td className="px-4 py-3 text-body font-normal text-content-primary">
                   Hover
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <span className="text-sm font-normal leading-[21px] text-content-primary">
+                  <span className="text-body font-normal leading-[21px] text-content-primary">
                     Link
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <span className="text-sm font-normal leading-[21px] text-content-primary underline">
+                  <span className="text-body font-normal leading-[21px] text-content-primary underline">
                     Link
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <span className="inline-flex items-center justify-center gap-1 w-full text-sm font-normal leading-[21px] text-content-primary underline">
+                  <span className="inline-flex items-center justify-center gap-1 w-full text-body font-normal leading-[21px] text-content-primary underline">
                     <ArrowLeft size={14} />
                     Link
                   </span>
@@ -394,7 +392,7 @@ function ButtonShowcase() {
       ))}
 
       {/* Icon Buttons */}
-      <p className="text-body-sm font-normal text-content-primary mb-2">
+      <p className="text-body font-normal text-content-primary mb-2">
         Icon Buttons
       </p>
       {(["light", "dark"] as const).map((mode) => (
@@ -422,7 +420,7 @@ function ButtonShowcase() {
             </thead>
             <tbody>
               <tr className="border-b border-border-strong">
-                <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
+                <td className="px-4 py-3 text-body font-normal text-content-primary">
                   Normal
                 </td>
                 <td className="px-4 py-3">
@@ -457,7 +455,7 @@ function ButtonShowcase() {
                 </td>
               </tr>
               <tr>
-                <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
+                <td className="px-4 py-3 text-body font-normal text-content-primary">
                   Hover
                 </td>
                 <td className="px-4 py-3">
@@ -509,7 +507,7 @@ function ButtonShowcase() {
 }
 
 const linkSpecs = {
-  base: "text-sm font-normal leading-[21px] transition-colors",
+  base: "text-body font-normal leading-[21px] transition-colors",
   variants: {
     simple: "text-content-primary/75 hover:text-content-primary",
     underline:
@@ -574,9 +572,7 @@ function InputShowcase() {
 
       {/* Sizes */}
       <div>
-        <p className="text-body-sm font-normal text-content-primary mb-2">
-          Sizes
-        </p>
+        <p className="text-body font-normal text-content-primary mb-2">Sizes</p>
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1.5 w-[240px]">
             <Input placeholder="md · 48px (default)" />
@@ -1072,33 +1068,25 @@ function DividerShowcase() {
           </p>
           <div className="space-y-3">
             <div className="space-y-4">
-              <p className="text-body-sm text-content-secondary">
-                Content above
-              </p>
+              <p className="text-body text-content-secondary">Content above</p>
               <Divider />
-              <p className="text-body-sm text-content-secondary">
-                Content below
-              </p>
+              <p className="text-body text-content-secondary">Content below</p>
             </div>
             <div className="space-y-4">
-              <p className="text-body-sm text-content-secondary">
-                Content above
-              </p>
+              <p className="text-body text-content-secondary">Content above</p>
               <Divider label="OR" />
-              <p className="text-body-sm text-content-secondary">
-                Content below
-              </p>
+              <p className="text-body text-content-secondary">Content below</p>
             </div>
             <div className="flex items-center gap-6 h-16">
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body-sm text-content-secondary">Left</p>
+                <p className="text-body text-content-secondary">Left</p>
                 <Divider orientation="vertical" />
-                <p className="text-body-sm text-content-secondary">Right</p>
+                <p className="text-body text-content-secondary">Right</p>
               </div>
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body-sm text-content-secondary">Left</p>
+                <p className="text-body text-content-secondary">Left</p>
                 <Divider orientation="vertical" label="OR" />
-                <p className="text-body-sm text-content-secondary">Right</p>
+                <p className="text-body text-content-secondary">Right</p>
               </div>
             </div>
           </div>
@@ -1109,33 +1097,25 @@ function DividerShowcase() {
           </p>
           <div className="space-y-3">
             <div className="space-y-4">
-              <p className="text-body-sm text-content-secondary">
-                Content above
-              </p>
+              <p className="text-body text-content-secondary">Content above</p>
               <Divider />
-              <p className="text-body-sm text-content-secondary">
-                Content below
-              </p>
+              <p className="text-body text-content-secondary">Content below</p>
             </div>
             <div className="space-y-4">
-              <p className="text-body-sm text-content-secondary">
-                Content above
-              </p>
+              <p className="text-body text-content-secondary">Content above</p>
               <Divider label="OR" />
-              <p className="text-body-sm text-content-secondary">
-                Content below
-              </p>
+              <p className="text-body text-content-secondary">Content below</p>
             </div>
             <div className="flex items-center gap-6 h-16">
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body-sm text-content-secondary">Left</p>
+                <p className="text-body text-content-secondary">Left</p>
                 <Divider orientation="vertical" />
-                <p className="text-body-sm text-content-secondary">Right</p>
+                <p className="text-body text-content-secondary">Right</p>
               </div>
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body-sm text-content-secondary">Left</p>
+                <p className="text-body text-content-secondary">Left</p>
                 <Divider orientation="vertical" label="OR" />
-                <p className="text-body-sm text-content-secondary">Right</p>
+                <p className="text-body text-content-secondary">Right</p>
               </div>
             </div>
           </div>
@@ -1437,7 +1417,7 @@ function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
         <button
           type="button"
           onClick={() => (open ? setOpen(false) : openDropdown())}
-          className={`flex h-10 items-center gap-2 rounded-md px-4 text-base font-normal border border-border-strong text-content-primary transition-all w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
+          className={`flex h-10 items-center gap-2 rounded-md px-4 text-subtitle font-normal border border-border-strong text-content-primary transition-all w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
         >
           <span className="leading-none">user@example.com</span>
           <ChevronDown
@@ -1456,14 +1436,14 @@ function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
                 className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-tertiary px-2 font-normal text-content-primary transition-colors"
               >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
-                  <span className="text-xs font-semibold">U</span>
+                  <span className="text-caption font-semibold">U</span>
                 </div>
-                <span className="truncate text-[15px]">user@example.com</span>
+                <span className="truncate text-body">user@example.com</span>
               </button>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="mt-4 w-full px-2 text-left text-sm font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
+                className="mt-4 w-full px-2 text-left text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
               >
                 Try a different email address
               </button>
@@ -1505,11 +1485,11 @@ function SelectShowcase() {
           "Select Position": selectSpecs.position,
           "Email Selector (auth)": {
             trigger:
-              "h-10 rounded-md px-4 w-fit text-base font-normal border border-border-strong bg-transparent hover:bg-surface-subtle",
+              "h-10 rounded-md px-4 w-fit text-subtitle font-normal border border-border-strong bg-transparent hover:bg-surface-subtle",
             dropdown:
               "rounded-xl border border-border-strong bg-surface-primary p-4 w-fit min-w-[200px] whitespace-nowrap",
             avatar:
-              "h-8 w-8 rounded-full bg-surface-subtle text-xs font-semibold",
+              "h-8 w-8 rounded-full bg-surface-subtle text-caption font-semibold",
           },
           "LanguageSelector Trigger": languageSelectorSpecs.trigger,
           "LanguageSelector Popover": languageSelectorSpecs.popover,
@@ -1558,7 +1538,7 @@ function NavigationShowcase() {
   const [pageDark, setPageDark] = useState(3);
   return (
     <ShowcaseSection title="Navigation">
-      <p className="text-body-sm font-normal text-content-primary mb-2">
+      <p className="text-body font-normal text-content-primary mb-2">
         Breadcrumbs
       </p>
       <div className="flex flex-wrap gap-4">
@@ -1588,7 +1568,7 @@ function NavigationShowcase() {
         </div>
       </div>
 
-      <p className="text-body-sm font-normal text-content-primary mb-2 mt-4">
+      <p className="text-body font-normal text-content-primary mb-2 mt-4">
         Pagination
       </p>
       <div className="flex flex-wrap gap-4">
@@ -1710,10 +1690,10 @@ function ToastDemo() {
                 >
                   <Icon size={16} className={`mt-px shrink-0 ${color}`} />
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <p className="whitespace-nowrap text-xs font-semibold leading-tight text-content-primary">
+                    <p className="whitespace-nowrap text-caption font-semibold leading-tight text-content-primary">
                       {title}
                     </p>
-                    <p className="whitespace-nowrap text-xs leading-tight text-content-primary/50">
+                    <p className="whitespace-nowrap text-caption leading-tight text-content-primary/50">
                       {desc}
                     </p>
                   </div>
@@ -1759,7 +1739,7 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
               strokeWidth={1.5}
             />
           )}
-          <p className="text-center text-sm leading-[21px] text-content-primary/50">
+          <p className="text-center text-body leading-[21px] text-content-primary/50">
             {isError ? (
               <>
                 Something went wrong!
@@ -1770,7 +1750,7 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
               "Email verified!"
             )}
           </p>
-          <button className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle">
+          <button className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle">
             {isError ? "Go to Sign In" : "Go to Dashboard"}
           </button>
         </div>
@@ -1812,7 +1792,7 @@ function RateLimitDemo() {
       <div role="alert" className="flex items-start gap-2">
         <AlertTriangle size={16} className="mt-1 shrink-0 text-error" />
         <div className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-          <span className="text-xs leading-6 text-error">
+          <span className="text-caption leading-6 text-error">
             Too many attempts.
           </span>
           <CountdownTimer seconds={seconds} />
@@ -1841,7 +1821,7 @@ function FeedbackShowcase() {
                 </p>
                 <div role="alert" className="flex items-center gap-2">
                   <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="flex-1 text-xs leading-6 text-error">
+                  <span className="flex-1 text-caption leading-6 text-error">
                     Enter a valid email address
                   </span>
                 </div>
@@ -1853,7 +1833,7 @@ function FeedbackShowcase() {
                 </p>
                 <div className="flex items-center gap-2 rounded-lg border border-error/20 bg-error/5 px-3 py-2">
                   <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="text-xs text-error">
+                  <span className="text-caption text-error">
                     Invalid verification code. Please try again.
                   </span>
                 </div>
@@ -1875,12 +1855,12 @@ function FeedbackShowcase() {
             container:
               "flex items-center gap-2 (also used below Input component)",
             icon: "AlertTriangle 16px text-error",
-            text: "text-xs leading-6 text-error",
+            text: "text-caption leading-6 text-error",
           },
           "Boxed Error": {
             container: "rounded-lg border border-error/20 bg-error/5 px-3 py-2",
             icon: "AlertTriangle 16px text-error",
-            text: "text-xs text-error",
+            text: "text-caption text-error",
           },
           "Rate Limit": {
             container: "flex items-start gap-2",
@@ -1893,8 +1873,9 @@ function FeedbackShowcase() {
               "rounded-full border border-border-strong bg-surface-primary px-6 py-4",
             icons:
               "error: AlertTriangle, success: CircleCheck, warning: CircleAlert, info: Info — 16px",
-            title: "text-xs font-semibold leading-tight text-content-primary",
-            description: "text-xs leading-tight text-content-primary/50",
+            title:
+              "text-caption font-semibold leading-tight text-content-primary",
+            description: "text-caption leading-tight text-content-primary/50",
             close: "X 16px — opacity-0 group-hover:opacity-100",
             animation:
               "animate-toast-in / animate-toast-out (300ms), auto-dismiss 5s",
@@ -1907,9 +1888,9 @@ function FeedbackShowcase() {
               "CircleX 48px text-[#8a1111] strokeWidth-1.5 icon-error animation",
             "success icon":
               "CircleCheck 48px text-[#166534] strokeWidth-1.5 icon-success animation",
-            text: "text-sm leading-[21px] text-content-primary/50 text-center",
+            text: "text-body leading-[21px] text-content-primary/50 text-center",
             button:
-              "h-10 w-full rounded-md border border-border-strong bg-transparent text-base font-normal — outline style",
+              "h-10 w-full rounded-md border border-border-strong bg-transparent text-subtitle font-normal — outline style",
           },
         }}
       />
@@ -1931,7 +1912,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
             Single
           </p>
           <SingleAccordion title="Click to expand">
-            <p className="text-body-sm text-content-secondary">
+            <p className="text-body text-content-secondary">
               Expandable content panel. Used for specs, FAQs, and collapsible
               sections.
             </p>
@@ -1946,7 +1927,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
               {
                 title: "Section 1",
                 children: (
-                  <p className="text-body-sm text-content-secondary">
+                  <p className="text-body text-content-secondary">
                     Content for section 1. Only one open at a time.
                   </p>
                 ),
@@ -1954,7 +1935,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
               {
                 title: "Section 2",
                 children: (
-                  <p className="text-body-sm text-content-secondary">
+                  <p className="text-body text-content-secondary">
                     Content for section 2. Opening this closes section 1.
                   </p>
                 ),
@@ -1962,7 +1943,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
               {
                 title: "Section 3",
                 children: (
-                  <p className="text-body-sm text-content-secondary">
+                  <p className="text-body text-content-secondary">
                     Content for section 3. Exclusive accordion behavior.
                   </p>
                 ),
@@ -2011,7 +1992,7 @@ const speedoSizes = {
     hubInner: 2,
     fontSize: 8,
     labelOffset: 14,
-    textClass: "text-sm",
+    textClass: "text-body",
   },
   md: {
     w: 210,
@@ -2028,7 +2009,7 @@ const speedoSizes = {
     hubInner: 3,
     fontSize: 10,
     labelOffset: 18,
-    textClass: "text-lg",
+    textClass: "text-subtitle",
   },
   lg: {
     w: 260,
@@ -2045,7 +2026,7 @@ const speedoSizes = {
     hubInner: 4,
     fontSize: 11,
     labelOffset: 22,
-    textClass: "text-2xl",
+    textClass: "text-heading",
   },
 };
 
@@ -2232,7 +2213,7 @@ function DoughnutChartMock() {
   return (
     <div className="rounded-3xl border border-border-strong bg-surface-primary p-6">
       <div className="mb-4">
-        <h3 className="text-body-sm font-semibold text-content-primary">
+        <h3 className="text-body font-semibold text-content-primary">
           Users by Role
         </h3>
       </div>
@@ -2290,7 +2271,7 @@ function ChartsShowcase() {
                 </p>
                 <div className="rounded-3xl border border-border-strong bg-surface-primary p-6">
                   <div className="mb-2">
-                    <h3 className="text-body-sm font-semibold text-content-primary">
+                    <h3 className="text-body font-semibold text-content-primary">
                       Performance
                     </h3>
                   </div>
@@ -2332,7 +2313,7 @@ function ChartsShowcase() {
           "ChartCard Container": {
             shared:
               "rounded-3xl border border-border-strong bg-surface-secondary p-6",
-            title: "text-body-sm font-semibold text-content-primary",
+            title: "text-body font-semibold text-content-primary",
           },
           Legend: {
             dot: "h-2 w-2 rounded-full",
@@ -2402,7 +2383,7 @@ function CardShowcase() {
               container
             </p>
             <div className="card-container">
-              <h3 className="text-body-sm font-semibold text-content-primary">
+              <h3 className="text-body font-semibold text-content-primary">
                 Card Container
               </h3>
             </div>
@@ -2412,7 +2393,7 @@ function CardShowcase() {
             style={{ color: "rgb(var(--content-primary))" }}
           >
             <div className="card-container">
-              <h3 className="text-body-sm font-semibold text-content-primary">
+              <h3 className="text-body font-semibold text-content-primary">
                 Card Container
               </h3>
             </div>
@@ -2424,7 +2405,7 @@ function CardShowcase() {
               container-flat
             </p>
             <div className="card-container-flat">
-              <h3 className="text-body-sm font-semibold text-content-primary">
+              <h3 className="text-body font-semibold text-content-primary">
                 Card Container Flat
               </h3>
             </div>
@@ -2434,7 +2415,7 @@ function CardShowcase() {
             style={{ color: "rgb(var(--content-primary))" }}
           >
             <div className="card-container-flat">
-              <h3 className="text-body-sm font-semibold text-content-primary">
+              <h3 className="text-body font-semibold text-content-primary">
                 Card Container Flat
               </h3>
             </div>
@@ -2446,7 +2427,7 @@ function CardShowcase() {
               inner
             </p>
             <div className="card">
-              <h3 className="text-body-sm font-semibold text-content-primary">
+              <h3 className="text-body font-semibold text-content-primary">
                 Card Inner
               </h3>
             </div>
@@ -2456,7 +2437,7 @@ function CardShowcase() {
             style={{ color: "rgb(var(--content-primary))" }}
           >
             <div className="card">
-              <h3 className="text-body-sm font-semibold text-content-primary">
+              <h3 className="text-body font-semibold text-content-primary">
                 Card Inner
               </h3>
             </div>
@@ -2468,7 +2449,7 @@ function CardShowcase() {
               flat
             </p>
             <div className="card-flat">
-              <h3 className="text-body-sm font-semibold text-content-primary">
+              <h3 className="text-body font-semibold text-content-primary">
                 Card Flat
               </h3>
             </div>
@@ -2478,7 +2459,7 @@ function CardShowcase() {
             style={{ color: "rgb(var(--content-primary))" }}
           >
             <div className="card-flat">
-              <h3 className="text-body-sm font-semibold text-content-primary">
+              <h3 className="text-body font-semibold text-content-primary">
                 Card Flat
               </h3>
             </div>

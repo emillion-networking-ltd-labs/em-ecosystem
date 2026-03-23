@@ -169,7 +169,7 @@ export default function AdminPage() {
 
         {/* Page header */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-heading-lg font-semibold text-content-primary">
+          <h1 className="text-heading font-semibold text-content-primary">
             User Management
           </h1>
           <div className="flex w-64 items-center gap-2 rounded-full border border-border-default bg-surface-secondary px-4">
@@ -179,7 +179,7 @@ export default function AdminPage() {
               placeholder="Search users..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-10 flex-1 bg-transparent text-body-sm text-content-primary outline-none placeholder:text-content-placeholder"
+              className="h-10 flex-1 bg-transparent text-body text-content-primary outline-none placeholder:text-content-placeholder"
             />
           </div>
         </div>
@@ -187,15 +187,11 @@ export default function AdminPage() {
         {/* Table */}
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <p className="text-body-sm text-content-tertiary">
-              Loading users...
-            </p>
+            <p className="text-body text-content-tertiary">Loading users...</p>
           </div>
         ) : users.length === 0 ? (
           <div className="flex h-64 items-center justify-center rounded-2xl border border-border-default bg-surface-primary">
-            <p className="text-body-sm text-content-tertiary">
-              No users found.
-            </p>
+            <p className="text-body text-content-tertiary">No users found.</p>
           </div>
         ) : (
           <>
@@ -232,7 +228,7 @@ export default function AdminPage() {
             <select
               value={selectedRole}
               onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-              className="mt-3 h-10 w-full rounded-lg border border-border-default bg-transparent px-4 text-body-sm text-content-primary outline-none"
+              className="mt-3 h-10 w-full rounded-lg border border-border-default bg-transparent px-4 text-body text-content-primary outline-none"
             >
               <option value="USER">USER</option>
               <option value="ADMIN">ADMIN</option>

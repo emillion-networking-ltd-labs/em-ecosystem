@@ -49,9 +49,7 @@ function SettingRow({
           <Icon size={20} className="text-content-secondary" />
         </div>
         <div>
-          <p className="text-body-sm font-normal text-content-primary">
-            {label}
-          </p>
+          <p className="text-body font-normal text-content-primary">{label}</p>
           <p className="text-caption text-content-tertiary">{description}</p>
         </div>
       </div>
@@ -76,7 +74,7 @@ export default function UserPreferences() {
 
   return (
     <section className="rounded-2xl border border-border-default bg-surface-primary p-6">
-      <h2 className="mb-4 text-body-sm font-semibold text-content-primary">
+      <h2 className="mb-4 text-body font-semibold text-content-primary">
         Preferences
       </h2>
       <div className="divide-y divide-border-default">

@@ -43,7 +43,7 @@ export default function ProfileForm() {
 
   return (
     <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
-      <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
+      <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
         Profile Information
       </h2>
 
@@ -59,7 +59,7 @@ export default function ProfileForm() {
               className="h-full w-full object-cover"
             />
           ) : (
-            <span className="text-heading-lg text-content-primary">
+            <span className="text-heading text-content-primary">
               {(user?.firstName?.[0] || user?.email[0] || "?").toUpperCase()}
             </span>
           )}
@@ -67,13 +67,13 @@ export default function ProfileForm() {
         <div className="flex flex-col gap-1">
           <button
             type="button"
-            className="text-body-sm font-normal text-content-primary hover:underline"
+            className="text-body font-normal text-content-primary hover:underline"
           >
             Upload photo
           </button>
           <button
             type="button"
-            className="text-body-sm text-content-tertiary hover:text-error"
+            className="text-body text-content-tertiary hover:text-error"
           >
             Remove
           </button>

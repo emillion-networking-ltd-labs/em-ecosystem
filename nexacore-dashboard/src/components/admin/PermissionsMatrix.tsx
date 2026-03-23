@@ -132,9 +132,7 @@ export default function PermissionsMatrix() {
   if (loadError && permissions.length === 0) {
     return (
       <div className="flex h-64 items-center justify-center rounded-2xl border border-border-default bg-surface-primary">
-        <p className="text-body-sm text-error">
-          Failed to load permissions data.
-        </p>
+        <p className="text-body text-error">Failed to load permissions data.</p>
       </div>
     );
   }
@@ -174,7 +172,7 @@ export default function PermissionsMatrix() {
                   >
                     <td className="px-6 py-3">
                       <div>
-                        <span className="text-body-sm font-normal text-content-primary">
+                        <span className="text-body font-normal text-content-primary">
                           {perm.key}
                         </span>
                         <p className="text-caption text-content-tertiary">
@@ -229,7 +227,7 @@ export default function PermissionsMatrix() {
               key={role}
               className="flex items-center gap-2 rounded-xl border border-border-default bg-surface-primary px-4 py-3"
             >
-              <span className="text-body-sm font-normal text-content-primary">
+              <span className="text-body font-normal text-content-primary">
                 {role}
               </span>
               <button

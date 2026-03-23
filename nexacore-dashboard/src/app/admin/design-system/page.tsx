@@ -80,7 +80,7 @@ export default function DesignSystemPage() {
       <DashboardLayout>
         {/* Breadcrumbs + Title */}
         <div className="mb-6 flex items-center gap-2">
-          <h1 className="text-lg font-semibold text-content-primary">
+          <h1 className="text-subtitle font-semibold text-content-primary">
             Design System
           </h1>
           <span className="inline-block h-6 w-px bg-border-strong" />
@@ -185,7 +185,7 @@ export default function DesignSystemPage() {
                     className="card-flat flex flex-col gap-3 text-left cursor-pointer"
                   >
                     <div className="flex items-center justify-between">
-                      <h3 className="text-body-md font-semibold text-content-primary">
+                      <h3 className="text-body font-semibold text-content-primary">
                         {entry.name}
                       </h3>
                       <Badge
@@ -205,7 +205,7 @@ export default function DesignSystemPage() {
                       {entry.description}
                     </p>
                     <div className="mt-auto pt-2 border-t border-border-strong">
-                      <code className="text-xs text-content-primary/50 font-mono">
+                      <code className="text-caption text-content-primary/50 font-mono">
                         ui/{entry.fileName}
                       </code>
                     </div>

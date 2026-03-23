@@ -34,7 +34,7 @@ export default function CountdownTimer({ seconds }: { seconds: number }) {
         <>
           <DigitBox value={minStr[0]} />
           <DigitBox value={minStr[1]} />
-          <span className="mx-px text-[10px] font-semibold text-error/60">
+          <span className="mx-px text-caption font-semibold text-error/60">
             :
           </span>
         </>

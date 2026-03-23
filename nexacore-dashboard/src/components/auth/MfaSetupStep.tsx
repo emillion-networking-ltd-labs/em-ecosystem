@@ -113,7 +113,7 @@ export default function MfaSetupStep() {
     return (
       <div className="flex flex-col items-center gap-4 py-8">
         <InfinitySpinner />
-        <p className="text-sm text-content-primary/50">
+        <p className="text-body text-content-primary/50">
           Preparing MFA setup...
         </p>
       </div>
@@ -132,7 +132,7 @@ export default function MfaSetupStep() {
               strokeWidth={1.5}
             />
 
-            <p className="text-center text-sm leading-[21px] text-content-primary/50">
+            <p className="text-center text-body leading-[21px] text-content-primary/50">
               MFA setup failed!
               <br />
               An unexpected error occurred. Please try again.
@@ -143,7 +143,7 @@ export default function MfaSetupStep() {
               onClick={() => {
                 window.location.href = "/login";
               }}
-              className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Go to Sign In
             </button>
@@ -160,10 +160,10 @@ export default function MfaSetupStep() {
       <div className="flex flex-col gap-6 md:flex-row">
         <div className="flex w-full flex-col gap-2 md:w-[330px]">
           <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-            <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
+            <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
               Set Up MFA
             </h1>
-            <p className="text-justify text-sm leading-[21px] text-content-primary/50">
+            <p className="text-justify text-body leading-[21px] text-content-primary/50">
               Your account requires two-factor authentication. Scan the QR code
               with your authenticator app (Google Authenticator, Authy, etc.).
             </p>
@@ -174,7 +174,7 @@ export default function MfaSetupStep() {
           {error && (
             <div className="flex items-center gap-2 rounded-lg border border-error/20 bg-error/5 px-3 py-2">
               <AlertTriangle size={16} className="shrink-0 text-error" />
-              <span className="text-xs text-error">{error}</span>
+              <span className="text-caption text-error">{error}</span>
             </div>
           )}
 
@@ -190,11 +190,11 @@ export default function MfaSetupStep() {
 
           {/* Manual entry fallback */}
           <div className="flex flex-col gap-2">
-            <span className="text-sm leading-[21px] text-content-primary/50">
+            <span className="text-body leading-[21px] text-content-primary/50">
               Or enter this key manually:
             </span>
             <div className="flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-surface-subtle px-4">
-              <code className="flex-1 break-all font-mono text-[15px] leading-6 text-content-primary">
+              <code className="flex-1 break-all font-mono text-body leading-6 text-content-primary">
                 {secret}
               </code>
               <button
@@ -216,14 +216,14 @@ export default function MfaSetupStep() {
             <button
               type="button"
               onClick={cancelMfa}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={() => setPhase("recovery")}
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90"
+              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90"
             >
               Next
             </button>
@@ -239,10 +239,10 @@ export default function MfaSetupStep() {
       <div className="flex flex-col gap-6 md:flex-row">
         <div className="flex w-full flex-col gap-2 md:w-[330px]">
           <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-            <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
+            <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
               Recovery Codes
             </h1>
-            <p className="text-justify text-sm leading-[21px] text-content-primary/50">
+            <p className="text-justify text-body leading-[21px] text-content-primary/50">
               Save these recovery codes in a safe place. Each code can only be
               used once if you lose access to your authenticator app.
             </p>
@@ -255,7 +255,7 @@ export default function MfaSetupStep() {
               {recoveryCodes.map((c, i) => (
                 <code
                   key={i}
-                  className="rounded bg-white px-2 py-1 text-center font-mono text-sm text-content-primary dark:bg-surface-inverse/10"
+                  className="rounded bg-white px-2 py-1 text-center font-mono text-body text-content-primary dark:bg-surface-inverse/10"
                 >
                   {c}
                 </code>
@@ -266,7 +266,7 @@ export default function MfaSetupStep() {
           <button
             type="button"
             onClick={copyRecoveryCodes}
-            className="flex items-center justify-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-sm font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+            className="flex items-center justify-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
           >
             {copied ? (
               <>
@@ -283,7 +283,7 @@ export default function MfaSetupStep() {
             <button
               type="button"
               onClick={() => setPhase("qr")}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Back
             </button>
@@ -293,7 +293,7 @@ export default function MfaSetupStep() {
                 setPhase("verify");
                 setTimeout(() => inputRefs.current[0]?.focus(), 100);
               }}
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90"
+              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90"
             >
               I saved them
             </button>
@@ -308,10 +308,10 @@ export default function MfaSetupStep() {
     <div className="flex flex-col gap-6 md:flex-row">
       <div className="flex w-full flex-col gap-2 md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
             Verify Setup
           </h1>
-          <p className="text-justify text-sm leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body leading-[21px] text-content-primary/50">
             Enter the 6-digit code from your authenticator app to confirm setup.
           </p>
         </div>
@@ -322,7 +322,7 @@ export default function MfaSetupStep() {
           <div className="flex min-h-[116px] flex-col gap-2">
             <label
               htmlFor="setup-digit-0"
-              className="text-[15px] font-semibold leading-[22px] text-content-primary"
+              className="text-body font-semibold leading-[22px] text-content-primary"
             >
               Verification Code
             </label>
@@ -346,7 +346,7 @@ export default function MfaSetupStep() {
                   value={digit}
                   onChange={(e) => handleDigitChange(i, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(i, e)}
-                  className="h-12 w-12 rounded-lg border border-border-strong bg-transparent text-center font-mono text-lg text-content-primary outline outline-2 outline-offset-2 outline-transparent transition-colors focus:outline-content-primary/75"
+                  className="h-12 w-12 rounded-lg border border-border-strong bg-transparent text-center font-mono text-subtitle text-content-primary outline outline-2 outline-offset-2 outline-transparent transition-colors focus:outline-content-primary/75"
                   aria-label={`Digit ${i + 1}`}
                 />
               ))}
@@ -360,7 +360,7 @@ export default function MfaSetupStep() {
               {error && (
                 <>
                   <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="flex-1 text-xs leading-6 text-error">
+                  <span className="flex-1 text-caption leading-6 text-error">
                     {error}
                   </span>
                 </>
@@ -372,14 +372,14 @@ export default function MfaSetupStep() {
             <button
               type="button"
               onClick={() => setPhase("recovery")}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Back
             </button>
             <button
               type="submit"
               disabled={isLoading || code.join("").length !== 6}
-              className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+              className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
             >
               <span className={isLoading ? "opacity-30" : ""}>Enable MFA</span>
               {isLoading && (

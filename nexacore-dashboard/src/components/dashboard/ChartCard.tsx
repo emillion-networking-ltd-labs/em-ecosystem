@@ -20,7 +20,7 @@ export default function ChartCard({
       className={`rounded-xl border border-border-strong bg-surface-primary p-6 ${className}`}
     >
       <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-body-sm font-semibold text-content-primary">
+        <h3 className="text-body font-semibold text-content-primary">
           {title}
         </h3>
         {action}

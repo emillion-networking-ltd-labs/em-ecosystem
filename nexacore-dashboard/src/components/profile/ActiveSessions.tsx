@@ -112,7 +112,7 @@ export default function ActiveSessions() {
   return (
     <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-body-sm font-semibold uppercase tracking-wider text-content-primary">
+        <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
           Active Sessions
         </h2>
         {otherSessions.length > 0 && (
@@ -134,14 +134,14 @@ export default function ActiveSessions() {
         </div>
       ) : loadError ? (
         <p
-          className="py-4 text-center text-body-sm text-error"
+          className="py-4 text-center text-body text-error"
           role="alert"
           aria-live="polite"
         >
           Failed to load sessions.
         </p>
       ) : sessions.length === 0 ? (
-        <p className="py-4 text-center text-body-sm text-content-tertiary">
+        <p className="py-4 text-center text-body text-content-tertiary">
           No active sessions found.
         </p>
       ) : (
@@ -166,7 +166,7 @@ export default function ActiveSessions() {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="truncate text-body-sm font-normal text-content-primary">
+                    <span className="truncate text-body font-normal text-content-primary">
                       {label}
                     </span>
                     {session.isCurrent && (

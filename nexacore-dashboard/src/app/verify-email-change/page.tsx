@@ -31,7 +31,7 @@ function VerifyEmailChangeContent() {
       <AuthLayout>
         <div className="flex flex-col items-center gap-4 py-4 text-center">
           <Loader2 size={48} className="animate-spin text-content-secondary" />
-          <p className="text-body-sm text-content-secondary">
+          <p className="text-body text-content-secondary">
             Verifying your email change...
           </p>
         </div>
@@ -47,10 +47,10 @@ function VerifyEmailChangeContent() {
         {isSuccess ? (
           <>
             <CheckCircle2 size={48} className="text-success" />
-            <h1 className="text-heading-md text-content-primary">
+            <h1 className="text-title text-content-primary">
               Email Changed Successfully!
             </h1>
-            <p className="text-body-sm text-content-secondary">
+            <p className="text-body text-content-secondary">
               Your email has been updated. All sessions have been revoked for
               security. Please log in with your new email.
             </p>
@@ -63,10 +63,10 @@ function VerifyEmailChangeContent() {
         ) : (
           <>
             <AlertTriangle size={48} className="text-error" />
-            <h1 className="text-heading-md text-content-primary">
+            <h1 className="text-title text-content-primary">
               Verification Failed
             </h1>
-            <p className="text-body-sm text-content-secondary">
+            <p className="text-body text-content-secondary">
               The verification link is invalid or has expired. Please request a
               new email change from your profile.
             </p>
@@ -87,7 +87,7 @@ export default function VerifyEmailChangePage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center">
-          <p className="text-sm text-content-primary/50">Loading...</p>
+          <p className="text-body text-content-primary/50">Loading...</p>
         </div>
       }
     >

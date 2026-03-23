@@ -38,7 +38,7 @@ export const checkboxSpecs = {
     "md (default)": "box: 20×20px · icon: 14px · radius: 5px",
     lg: "box: 24×24px · icon: 16px · radius: 6px",
   },
-  label: "text-[15px] font-normal text-content-primary",
+  label: "text-body font-normal text-content-primary",
 };
 
 export default function Checkbox({
@@ -103,7 +103,7 @@ export default function Checkbox({
       {label && (
         <label
           htmlFor={id}
-          className={`text-[15px] font-normal text-content-primary select-none ${
+          className={`text-body font-normal text-content-primary select-none ${
             disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           }`}
         >

@@ -55,11 +55,11 @@ export default function Toast({
       <Icon size={16} className={`mt-px shrink-0 ${variantClass}`} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <p className="whitespace-nowrap text-xs font-semibold leading-tight text-content-primary">
+        <p className="whitespace-nowrap text-caption font-semibold leading-tight text-content-primary">
           {title}
         </p>
         {description && (
-          <p className="whitespace-nowrap text-xs leading-tight text-content-primary/50">
+          <p className="whitespace-nowrap text-caption leading-tight text-content-primary/50">
             {description}
           </p>
         )}

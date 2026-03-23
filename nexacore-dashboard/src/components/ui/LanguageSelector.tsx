@@ -18,7 +18,7 @@ const STORAGE_KEY = "nexacore-language";
 
 export const languageSelectorSpecs = {
   trigger: {
-    base: "flex h-10 items-center gap-2 rounded-md px-4 text-sm font-normal leading-[21px] transition-all",
+    base: "flex h-10 items-center gap-2 rounded-md px-4 text-body font-normal leading-[21px] transition-all",
     closed:
       "border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary",
     open: "border border-border-strong bg-surface-primary text-content-primary",
@@ -33,8 +33,8 @@ export const languageSelectorSpecs = {
   option: {
     selected: "bg-surface-tertiary text-content-primary",
     default:
-      "bg-transparent text-sm text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary",
-    avatar: "h-8 w-8 rounded-full bg-surface-subtle text-xs font-semibold",
+      "bg-transparent text-body text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary",
+    avatar: "h-8 w-8 rounded-full bg-surface-subtle text-caption font-semibold",
   },
   icon: "ChevronDown 16px, rotate-180 on open",
 };
@@ -116,7 +116,7 @@ export default function LanguageSelector() {
      Closed → invisible pill (transparent border/bg), Nav Link color (75% → 100%)
      Open   → visible pill (border black/5, bg-white), full opacity text, no shadow */
   const triggerBase =
-    "flex h-10 items-center gap-2 rounded-md px-4 text-sm font-normal leading-[21px] transition-all";
+    "flex h-10 items-center gap-2 rounded-md px-4 text-body font-normal leading-[21px] transition-all";
   const triggerClass = isOpen
     ? `${triggerBase} border border-border-strong bg-surface-primary text-content-primary`
     : `${triggerBase} border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary`;
@@ -147,7 +147,7 @@ export default function LanguageSelector() {
             {/* Results — Figma: rounded card, border, shadow, scrollable */}
             <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-strong bg-surface-primary p-4">
               {filtered.length === 0 ? (
-                <p className="py-2 text-center text-sm text-content-primary/50">
+                <p className="py-2 text-center text-body text-content-primary/50">
                   No results
                 </p>
               ) : (
@@ -167,14 +167,12 @@ export default function LanguageSelector() {
                       >
                         {/* Avatar — 32px circle, bg black/5, code 12px/600 */}
                         <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
-                          <span className="text-xs font-semibold">
+                          <span className="text-caption font-semibold">
                             {lang.code}
                           </span>
                         </div>
                         {/* Name — 15px */}
-                        <span className="truncate text-[15px]">
-                          {lang.name}
-                        </span>
+                        <span className="truncate text-body">{lang.name}</span>
                       </button>
                     );
                   })}
@@ -195,7 +193,7 @@ export default function LanguageSelector() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search language..."
-                className="flex-1 bg-transparent text-[15px] leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
+                className="flex-1 bg-transparent text-body leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
               />
               {search && (
                 <button

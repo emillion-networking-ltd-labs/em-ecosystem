@@ -109,7 +109,7 @@ export default function NavBar({
         {/* Compact search bar (desktop only) */}
         <div className="hidden w-[160px] items-center gap-2 rounded-2xl bg-surface-subtle px-2 py-1 lg:flex">
           <Search size={16} className="text-content-primary/50" />
-          <span className="text-sm leading-[20px] text-content-primary/50">
+          <span className="text-body leading-[20px] text-content-primary/50">
             Search
           </span>
           <kbd className="rounded-xs border border-border-strong px-1 text-caption text-content-primary/50">
@@ -141,7 +141,7 @@ export default function NavBar({
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-body-sm text-content-primary transition-colors ${dropdownOpen ? "bg-surface-subtle" : "hover:bg-surface-subtle"}`}
+            className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-body text-content-primary transition-colors ${dropdownOpen ? "bg-surface-subtle" : "hover:bg-surface-subtle"}`}
           >
             <Avatar size="sm" name={user?.firstName || user?.email || "?"} />
             <ChevronDown size={16} className="text-content-primary/50" />

@@ -53,7 +53,7 @@ export default function RightPanel() {
     <div className="space-y-6 p-4">
       {/* Notifications */}
       <section>
-        <h3 className="px-2 py-1 text-body-sm font-semibold text-content-primary">
+        <h3 className="px-2 py-1 text-body font-semibold text-content-primary">
           Notifications
         </h3>
         <div className="mt-2 space-y-1">
@@ -69,7 +69,7 @@ export default function RightPanel() {
                 <item.icon size={16} className="text-content-primary" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-body-sm text-content-primary">
+                <p className="truncate text-body text-content-primary">
                   {item.message}
                 </p>
                 <p className="text-caption text-content-tertiary">
@@ -83,7 +83,7 @@ export default function RightPanel() {
 
       {/* Activities */}
       <section>
-        <h3 className="px-2 py-1 text-body-sm font-semibold text-content-primary">
+        <h3 className="px-2 py-1 text-body font-semibold text-content-primary">
           Activities
         </h3>
         <div className="relative mt-2 space-y-1">
@@ -93,7 +93,7 @@ export default function RightPanel() {
           {activities.map((item, i) => (
             <div key={i} className="relative flex items-center gap-2 p-2">
               <div className="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-surface-subtle">
-                <span className="text-[10px] font-semibold text-content-primary">
+                <span className="text-caption font-semibold text-content-primary">
                   {item.name
                     .split(" ")
                     .map((n) => n[0])
@@ -101,7 +101,7 @@ export default function RightPanel() {
                 </span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-body-sm text-content-primary">
+                <p className="truncate text-body text-content-primary">
                   <span className="font-normal">{item.name}</span>{" "}
                   <span className="text-content-tertiary">{item.action}</span>
                 </p>
@@ -116,7 +116,7 @@ export default function RightPanel() {
 
       {/* Contacts */}
       <section>
-        <h3 className="px-2 py-1 text-body-sm font-semibold text-content-primary">
+        <h3 className="px-2 py-1 text-body font-semibold text-content-primary">
           Contacts
         </h3>
         <div className="mt-2 space-y-1">
@@ -126,11 +126,11 @@ export default function RightPanel() {
               className="flex items-center gap-2 rounded-xl p-2"
             >
               <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-surface-subtle">
-                <span className="text-[10px] font-semibold text-content-primary">
+                <span className="text-caption font-semibold text-content-primary">
                   {contact.initials}
                 </span>
               </div>
-              <span className="truncate text-body-sm text-content-primary">
+              <span className="truncate text-body text-content-primary">
                 {contact.name}
               </span>
             </div>

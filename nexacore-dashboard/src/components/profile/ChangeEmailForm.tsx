@@ -70,14 +70,14 @@ export default function ChangeEmailForm() {
       id="change-email"
       className="rounded-2xl border border-border-default bg-surface-primary p-6"
     >
-      <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
+      <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
         Change Email
       </h2>
 
       {isOAuthOnly ? (
         <div className="flex items-start gap-3 rounded-xl bg-surface-subtle p-4">
           <Info size={18} className="mt-0.5 shrink-0 text-content-secondary" />
-          <p className="text-body-sm text-content-secondary">
+          <p className="text-body text-content-secondary">
             Your email is managed by {providerNames}. Set a password in{" "}
             <a
               href="#connected-accounts"

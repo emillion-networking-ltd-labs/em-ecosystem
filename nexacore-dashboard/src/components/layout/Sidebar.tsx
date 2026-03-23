@@ -95,12 +95,12 @@ export default function Sidebar({
       <div className="flex items-center justify-between rounded-lg p-2">
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/[0.04]">
-            <span className="text-[10px] font-semibold text-content-primary">
+            <span className="text-caption font-semibold text-content-primary">
               N
             </span>
           </div>
           {!collapsed && (
-            <span className="text-[14px] leading-[20px] font-normal text-content-primary">
+            <span className="text-body leading-[20px] font-normal text-content-primary">
               NexaCore
             </span>
           )}
@@ -175,12 +175,12 @@ export default function Sidebar({
         {user && (
           <div className="border-t border-border-default pt-3">
             <div className="flex items-center gap-2 rounded-lg p-2">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-circle bg-surface-inverse text-[10px] font-semibold text-content-inverse">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-circle bg-surface-inverse text-caption font-semibold text-content-inverse">
                 {(user.firstName?.[0] || user.email[0]).toUpperCase()}
               </div>
               {!collapsed && (
                 <div className="min-w-0">
-                  <p className="truncate text-body-sm font-normal text-content-primary">
+                  <p className="truncate text-body font-normal text-content-primary">
                     {user.firstName && user.lastName
                       ? `${user.firstName} ${user.lastName}`
                       : user.email.split("@")[0]}
@@ -212,7 +212,7 @@ function NavSection({
   return (
     <div className={className}>
       {label && (
-        <p className="mb-2 px-3 text-[14px] leading-[20px] font-normal text-content-primary/40">
+        <p className="mb-2 px-3 text-body leading-[20px] font-normal text-content-primary/40">
           {label}
         </p>
       )}
@@ -241,7 +241,7 @@ function NavItem({
     <Link
       href={href}
       onClick={onNavigate}
-      className={`flex h-9 items-center gap-1 rounded-xl p-2 text-[14px] leading-[20px] transition-colors ${
+      className={`flex h-9 items-center gap-1 rounded-xl p-2 text-body leading-[20px] transition-colors ${
         active
           ? "bg-black/[0.04] text-content-primary dark:bg-white/[0.04]"
           : "text-content-primary hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"

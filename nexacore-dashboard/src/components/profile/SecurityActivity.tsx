@@ -92,18 +92,18 @@ export default function SecurityActivity() {
 
   return (
     <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
-      <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
+      <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
         Security Activity
       </h2>
 
       {/* Recent Security Events */}
       <div>
         {eventsLoading ? (
-          <p className="py-4 text-center text-body-sm text-content-tertiary">
+          <p className="py-4 text-center text-body text-content-tertiary">
             Loading events...
           </p>
         ) : events.length === 0 ? (
-          <p className="py-4 text-center text-body-sm text-content-tertiary">
+          <p className="py-4 text-center text-body text-content-tertiary">
             No security events.
           </p>
         ) : (
@@ -122,7 +122,7 @@ export default function SecurityActivity() {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
                         <span
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-normal ${CATEGORY_STYLES[config.category]}`}
+                          className={`rounded px-1.5 py-0.5 text-caption font-normal ${CATEGORY_STYLES[config.category]}`}
                         >
                           {config.label}
                         </span>

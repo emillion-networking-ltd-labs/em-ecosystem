@@ -75,7 +75,7 @@ const examples = [
     code: `<div className="flex items-center gap-3">
   <Avatar name="Alice B" size="lg" />
   <div>
-    <p className="text-body-md font-normal text-content-primary">Alice Brown</p>
+    <p className="text-body font-normal text-content-primary">Alice Brown</p>
     <div className="flex gap-2 mt-1">
       <Badge variant="success">Admin</Badge>
       <Badge variant="info">MFA</Badge>
@@ -137,7 +137,7 @@ export default function CodePlayground() {
             </div>
             <LiveEditor
               onChange={setCode}
-              className="!font-mono !text-sm !bg-surface-secondary !p-4 !min-h-[200px]"
+              className="!font-mono !text-body !bg-surface-secondary !p-4 !min-h-[200px]"
             />
           </div>
 

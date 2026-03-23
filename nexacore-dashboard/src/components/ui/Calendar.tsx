@@ -56,7 +56,7 @@ export const calendarSpecs = {
     button: "w-6 h-6 rounded-full bg-surface-subtle hover:bg-surface-subtle",
     icon: "ChevronLeft/Right 16px text-content-primary",
     label:
-      "text-body-sm font-semibold — Link style (75% → 100%), disabled at years level",
+      "text-body font-semibold — Link style (75% → 100%), disabled at years level",
   },
   views: {
     days: "grid-cols-7 — circle button (min-w-9 h-9 rounded-full)",
@@ -71,7 +71,7 @@ export const calendarSpecs = {
     "other month": "text-content-primary/50",
     disabled: "opacity-30 cursor-not-allowed",
   },
-  weekday: "text-xs font-normal text-content-primary text-center",
+  weekday: "text-caption font-normal text-content-primary text-center",
 };
 
 type ViewMode = "days" | "months" | "years";
@@ -222,7 +222,7 @@ export default function Calendar({
   };
 
   const cellClass = (isActive: boolean, isCurrent: boolean) =>
-    `min-w-9 h-9 px-2 mx-auto flex items-center justify-center text-body-sm font-normal rounded-full transition-colors cursor-pointer ${
+    `min-w-9 h-9 px-2 mx-auto flex items-center justify-center text-body font-normal rounded-full transition-colors cursor-pointer ${
       isActive
         ? "bg-surface-inverse text-content-inverse font-normal"
         : isCurrent
@@ -249,7 +249,7 @@ export default function Calendar({
           type="button"
           onClick={handleHeaderClick}
           disabled={viewMode === "years"}
-          className={`text-body-sm font-semibold transition-colors ${viewMode === "years" ? "text-content-primary cursor-default" : "text-content-primary/75 hover:text-content-primary cursor-pointer"}`}
+          className={`text-body font-semibold transition-colors ${viewMode === "years" ? "text-content-primary cursor-default" : "text-content-primary/75 hover:text-content-primary cursor-pointer"}`}
         >
           {headerLabel}
         </button>
@@ -270,7 +270,7 @@ export default function Calendar({
           {WEEKDAYS.map((day) => (
             <div
               key={day}
-              className="text-center text-xs font-normal text-content-primary py-1"
+              className="text-center text-caption font-normal text-content-primary py-1"
               role="columnheader"
             >
               {day}
@@ -284,7 +284,7 @@ export default function Calendar({
               onClick={() => !day.isDisabled && onChange(day.date)}
               aria-label={day.date.toLocaleDateString()}
               aria-selected={day.isSelected}
-              className={`min-w-9 h-9 px-2 mx-auto flex items-center justify-center text-[15px] font-normal rounded-full transition-colors ${
+              className={`min-w-9 h-9 px-2 mx-auto flex items-center justify-center text-body font-normal rounded-full transition-colors ${
                 day.isSelected
                   ? "bg-surface-inverse text-content-inverse font-normal"
                   : day.isToday

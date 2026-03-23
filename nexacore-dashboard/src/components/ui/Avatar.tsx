@@ -15,9 +15,9 @@ export const baseClass =
   "inline-flex items-center justify-center rounded-full border border-border-strong bg-surface-tertiary overflow-hidden shrink-0";
 
 export const sizeClasses = {
-  sm: "w-8 h-8 text-xs",
-  md: "w-10 h-10 text-sm",
-  lg: "w-16 h-16 text-xl",
+  sm: "w-8 h-8 text-caption",
+  md: "w-10 h-10 text-body",
+  lg: "w-16 h-16 text-title",
 };
 
 const iconSizes = {

@@ -75,7 +75,7 @@ export default function UsersTable({
                         ).toUpperCase()}
                       </span>
                     </div>
-                    <span className="text-body-sm font-normal text-content-primary">
+                    <span className="text-body font-normal text-content-primary">
                       {user.firstName && user.lastName
                         ? `${user.firstName} ${user.lastName}`
                         : user.email.split("@")[0]}
@@ -84,7 +84,7 @@ export default function UsersTable({
                 </td>
 
                 {/* Email */}
-                <td className="px-4 py-3 text-body-sm text-content-primary">
+                <td className="px-4 py-3 text-body text-content-primary">
                   {user.email}
                 </td>
 
@@ -104,7 +104,7 @@ export default function UsersTable({
                       className={`h-2 w-2 rounded-full ${statusDotClass}`}
                     />
                     <span
-                      className={`text-body-sm ${
+                      className={`text-body ${
                         isLocked
                           ? "text-error"
                           : user.isActive

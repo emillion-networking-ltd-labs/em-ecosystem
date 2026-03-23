@@ -50,7 +50,7 @@ export default function RateLimitBanner({
     <div role="alert" className="flex items-start gap-2">
       <Icon size={16} className="mt-1 shrink-0 text-error" />
       <div className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1">
-        <span className="text-xs leading-6 text-error">{message}</span>
+        <span className="text-caption leading-6 text-error">{message}</span>
         {secondsLeft > 0 && <CountdownTimer seconds={secondsLeft} />}
       </div>
     </div>

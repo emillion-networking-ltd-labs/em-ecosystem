@@ -58,7 +58,7 @@ function PasskeyItem({
         </div>
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span className="text-body-sm font-normal text-content-primary">
+            <span className="text-body font-normal text-content-primary">
               {passkey.name || "Passkey"}
             </span>
             {passkey.backedUp && (
@@ -204,7 +204,7 @@ export default function PasskeyManager() {
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Key size={18} className="text-content-secondary" />
-          <h2 className="text-body-sm font-semibold uppercase tracking-wider text-content-primary">
+          <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
             Passkeys
           </h2>
         </div>
@@ -221,7 +221,7 @@ export default function PasskeyManager() {
         <div className="flex items-start gap-3 rounded-lg border border-warning-border bg-warning-bg p-4">
           <AlertTriangle size={18} className="mt-0.5 shrink-0 text-warning" />
           <div>
-            <p className="text-body-sm font-normal text-content-primary">
+            <p className="text-body font-normal text-content-primary">
               Passkeys not supported
             </p>
             <p className="mt-1 text-caption text-content-secondary">
@@ -243,7 +243,7 @@ export default function PasskeyManager() {
       {isSupported && view === "list" && (
         <>
           {!isLoadingList && passkeys.length === 0 && (
-            <p className="mb-4 text-body-sm text-content-secondary">
+            <p className="mb-4 text-body text-content-secondary">
               No passkeys registered. Add a passkey for faster, more secure
               sign-in using biometrics or your device.
             </p>
@@ -297,7 +297,7 @@ export default function PasskeyManager() {
       {/* Registering View */}
       {isSupported && view === "registering" && (
         <div className="flex flex-col gap-4">
-          <p className="text-body-sm text-content-secondary">
+          <p className="text-body text-content-secondary">
             Give your passkey a name to identify it later, then follow the
             biometric prompt.
           </p>

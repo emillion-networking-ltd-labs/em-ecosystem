@@ -22,7 +22,7 @@ interface SelectProps {
 export const selectSpecs = {
   trigger: {
     shared:
-      "inline-flex items-center justify-between gap-2 w-fit px-4 py-2.5 text-body-sm rounded-md bg-transparent",
+      "inline-flex items-center justify-between gap-2 w-fit px-4 py-2.5 text-body rounded-md bg-transparent",
     hover: "hover:bg-surface-subtle",
     open: "bg-surface-subtle",
     disabled: "opacity-50 cursor-not-allowed",
@@ -158,7 +158,7 @@ export default function Select({
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openDropdown())}
         onKeyDown={handleKeyDown}
-        className={`inline-flex items-center justify-between gap-2 w-fit px-4 py-2.5 text-body-sm rounded-md transition-colors ${
+        className={`inline-flex items-center justify-between gap-2 w-fit px-4 py-2.5 text-body rounded-md transition-colors ${
           disabled
             ? "opacity-50 cursor-not-allowed"
             : "hover:bg-surface-subtle cursor-pointer"
@@ -203,7 +203,7 @@ export default function Select({
                   setOpen(false);
                 }}
                 onMouseEnter={() => setFocusedIndex(index)}
-                className={`flex items-center gap-2 px-2 py-2 rounded-md text-xs cursor-pointer transition-colors ${
+                className={`flex items-center gap-2 px-2 py-2 rounded-md text-caption cursor-pointer transition-colors ${
                   isSelected
                     ? "bg-surface-inverse text-content-inverse"
                     : isDanger

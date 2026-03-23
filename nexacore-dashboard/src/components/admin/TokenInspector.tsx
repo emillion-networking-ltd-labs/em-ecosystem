@@ -221,7 +221,7 @@ const unusedColorGroups: ColorGroup[] = [
 const typographyTokens = [
   {
     name: "heading",
-    desc: "text-2xl font-semibold",
+    desc: "text-heading font-semibold",
     size: "24px",
     lineHeight: "36px",
     weight: 600,
@@ -229,7 +229,7 @@ const typographyTokens = [
   },
   {
     name: "button",
-    desc: "text-base font-normal",
+    desc: "text-subtitle font-normal",
     size: "16px",
     lineHeight: "normal",
     weight: 500,
@@ -237,7 +237,7 @@ const typographyTokens = [
   },
   {
     name: "label",
-    desc: "text-[15px] font-semibold",
+    desc: "text-body font-semibold",
     size: "15px",
     lineHeight: "22px",
     weight: 600,
@@ -245,7 +245,7 @@ const typographyTokens = [
   },
   {
     name: "input",
-    desc: "text-[15px] font-normal",
+    desc: "text-body font-normal",
     size: "15px",
     lineHeight: "24px",
     weight: 400,
@@ -253,7 +253,7 @@ const typographyTokens = [
   },
   {
     name: "link",
-    desc: "text-sm font-normal",
+    desc: "text-body font-normal",
     size: "14px",
     lineHeight: "21px",
     weight: 500,
@@ -261,7 +261,7 @@ const typographyTokens = [
   },
   {
     name: "error / desc",
-    desc: "text-xs",
+    desc: "text-caption",
     size: "12px",
     lineHeight: "24px",
     weight: 400,
@@ -269,7 +269,7 @@ const typographyTokens = [
   },
   {
     name: "toast title",
-    desc: "text-xs font-semibold",
+    desc: "text-caption font-semibold",
     size: "12px",
     lineHeight: "1.25",
     weight: 600,
@@ -277,7 +277,7 @@ const typographyTokens = [
   },
   {
     name: "technical",
-    desc: "font-mono text-xs",
+    desc: "font-mono text-caption",
     size: "12px",
     lineHeight: "normal",
     weight: 400,
@@ -311,7 +311,7 @@ const shadowTokens = [
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h3 className="text-heading-sm text-content-primary mb-4">{children}</h3>
+    <h3 className="text-subtitle text-content-primary mb-4">{children}</h3>
   );
 }
 
@@ -320,7 +320,7 @@ function ColorGrid({ groups }: { groups: ColorGroup[] }) {
     <>
       {groups.map((group) => (
         <div key={group.label}>
-          <h4 className="text-body-sm font-normal text-content-secondary mb-3">
+          <h4 className="text-body font-normal text-content-secondary mb-3">
             {group.label}
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -337,7 +337,7 @@ function ColorGrid({ groups }: { groups: ColorGroup[] }) {
                   <p className="text-caption font-normal text-content-primary truncate">
                     {token.name}
                   </p>
-                  <p className="text-[10px] text-content-primary/50 font-mono truncate">
+                  <p className="text-caption text-content-primary/50 font-mono truncate">
                     {token.value}
                   </p>
                 </div>
@@ -380,7 +380,7 @@ function TypographySection() {
               <p className="text-caption font-normal text-content-primary">
                 {token.name}
               </p>
-              <p className="text-[10px] text-content-primary/50 font-mono">
+              <p className="text-caption text-content-primary/50 font-mono">
                 {token.desc}
               </p>
             </div>
@@ -448,7 +448,7 @@ function RadiusSection() {
               <p className="text-caption font-normal text-content-primary">
                 {token.name}
               </p>
-              <p className="text-[10px] text-content-primary/50 font-mono">
+              <p className="text-caption text-content-primary/50 font-mono">
                 {token.value}
               </p>
             </div>
@@ -474,7 +474,7 @@ function ShadowSection() {
               <p className="text-caption font-normal text-content-primary">
                 {token.name}
               </p>
-              <p className="text-[10px] text-content-primary/50 font-mono max-w-[200px]">
+              <p className="text-caption text-content-primary/50 font-mono max-w-[200px]">
                 {token.value}
               </p>
             </div>

@@ -66,10 +66,10 @@ export default function ForgotPasswordForm() {
       {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top), inner 300px */}
       <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
             Password Recovery
           </h1>
-          <p className="text-justify text-sm leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body leading-[21px] text-content-primary/50">
             Start the NexaCore password reset process. A secure identity check
             will be required to restore account access.
           </p>
@@ -112,7 +112,7 @@ export default function ForgotPasswordForm() {
                 {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-xs leading-6 text-error">
+                    <span className="flex-1 text-caption leading-6 text-error">
                       {activeError}
                     </span>
                   </>
@@ -124,7 +124,7 @@ export default function ForgotPasswordForm() {
             <div className="flex items-center justify-end">
               <Link
                 href="/login"
-                className="whitespace-nowrap text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Back to Sign In
               </Link>
@@ -142,7 +142,7 @@ export default function ForgotPasswordForm() {
           <button
             type="submit"
             disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? "opacity-30" : ""}>
               Send Recovery Email

@@ -95,10 +95,10 @@ export default function RegisterForm() {
       {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top), inner 300px */}
       <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
             Create Account
           </h1>
-          <p className="text-justify text-sm leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body leading-[21px] text-content-primary/50">
             Create your NexaCore user profile. This session will be available to
             other EM Ecosystem modules in the browser.
           </p>
@@ -147,7 +147,7 @@ export default function RegisterForm() {
                 {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="text-xs leading-6 text-error">
+                    <span className="text-caption leading-6 text-error">
                       {activeError}
                     </span>
                   </>
@@ -167,14 +167,14 @@ export default function RegisterForm() {
           <div className="flex gap-2">
             <Link
               href="/login"
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Back to Sign In
             </Link>
             <button
               type="submit"
               disabled={isDisabled}
-              className="relative flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+              className="relative flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
             >
               <span className={isLoading ? "opacity-30" : ""}>
                 Create Account

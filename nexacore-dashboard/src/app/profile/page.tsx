@@ -18,7 +18,7 @@ export default function ProfilePage() {
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        <h1 className="mb-6 text-body-sm font-semibold text-content-primary">
+        <h1 className="mb-6 text-body font-semibold text-content-primary">
           Profile
         </h1>
         <div className="max-w-2xl space-y-6">

@@ -122,7 +122,7 @@ export default function TrustedDevices() {
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Shield size={18} className="text-content-secondary" />
-          <h2 className="text-body-sm font-semibold uppercase tracking-wider text-content-primary">
+          <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
             Trusted Devices
           </h2>
           {devices.length > 0 && (
@@ -154,7 +154,7 @@ export default function TrustedDevices() {
 
       {/* Empty state */}
       {!isLoading && devices.length === 0 && (
-        <p className="py-4 text-center text-body-sm text-content-secondary">
+        <p className="py-4 text-center text-body text-content-secondary">
           No trusted devices. When you log in with MFA and trust a device, it
           will appear here.
         </p>
@@ -181,7 +181,7 @@ export default function TrustedDevices() {
                   />
                 )}
                 <div className="min-w-0">
-                  <p className="text-body-sm font-normal text-content-primary">
+                  <p className="text-body font-normal text-content-primary">
                     {device.deviceName}
                   </p>
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-caption text-content-secondary">

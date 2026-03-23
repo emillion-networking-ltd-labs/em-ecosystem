@@ -116,7 +116,7 @@ export default function RecentActivityFeed() {
                   <Icon size={16} className="text-content-secondary" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-body-sm text-content-primary">
+                  <p className="truncate text-body text-content-primary">
                     <span className="font-normal">{userLabel}</span>{" "}
                     <span className="text-content-tertiary">{meta.label}</span>
                   </p>

@@ -51,7 +51,7 @@ export default function AuditLogFilters({
       <select
         value={action}
         onChange={(e) => onActionChange(e.target.value as AuditAction | "")}
-        className="h-10 rounded-lg border border-border-default bg-surface-secondary px-3 text-body-sm text-content-primary outline-none"
+        className="h-10 rounded-lg border border-border-default bg-surface-secondary px-3 text-body text-content-primary outline-none"
       >
         <option value="">All actions</option>
         {AUDIT_ACTIONS.map((a) => (
@@ -69,7 +69,7 @@ export default function AuditLogFilters({
           placeholder="Filter by user ID..."
           value={userId}
           onChange={(e) => onUserIdChange(e.target.value)}
-          className="flex-1 bg-transparent text-body-sm text-content-primary outline-none placeholder:text-content-placeholder"
+          className="flex-1 bg-transparent text-body text-content-primary outline-none placeholder:text-content-placeholder"
         />
       </div>
 
@@ -78,14 +78,14 @@ export default function AuditLogFilters({
         type="date"
         value={startDate}
         onChange={(e) => onStartDateChange(e.target.value)}
-        className="h-10 rounded-lg border border-border-default bg-surface-secondary px-3 text-body-sm text-content-primary outline-none"
+        className="h-10 rounded-lg border border-border-default bg-surface-secondary px-3 text-body text-content-primary outline-none"
       />
-      <span className="text-body-sm text-content-tertiary">to</span>
+      <span className="text-body text-content-tertiary">to</span>
       <input
         type="date"
         value={endDate}
         onChange={(e) => onEndDateChange(e.target.value)}
-        className="h-10 rounded-lg border border-border-default bg-surface-secondary px-3 text-body-sm text-content-primary outline-none"
+        className="h-10 rounded-lg border border-border-default bg-surface-secondary px-3 text-body text-content-primary outline-none"
       />
     </div>
   );

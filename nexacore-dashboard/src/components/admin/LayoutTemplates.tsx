@@ -21,11 +21,11 @@ function TemplateCard({
   return (
     <div className="card space-y-4">
       <div>
-        <h3 className="text-heading-sm text-content-primary">{title}</h3>
+        <h3 className="text-subtitle text-content-primary">{title}</h3>
         <p className="text-caption text-content-secondary mt-1">
           {description}
         </p>
-        <p className="text-[10px] text-content-primary/50 font-mono mt-1">
+        <p className="text-caption text-content-primary/50 font-mono mt-1">
           Used by: {usage}
         </p>
       </div>
@@ -49,7 +49,7 @@ function ListPageTemplate() {
       <div className="space-y-3 max-w-[600px]">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h4 className="text-body-md font-semibold text-content-primary">
+          <h4 className="text-body font-semibold text-content-primary">
             Items
           </h4>
           <Button variant="primary" size="sm" fullWidth={false}>
@@ -76,13 +76,13 @@ function ListPageTemplate() {
           <table className="w-full">
             <thead>
               <tr className="bg-surface-tertiary">
-                <th className="text-left text-[10px] font-normal text-content-primary/50 uppercase px-3 py-2">
+                <th className="text-left text-caption font-normal text-content-primary/50 uppercase px-3 py-2">
                   Name
                 </th>
-                <th className="text-left text-[10px] font-normal text-content-primary/50 uppercase px-3 py-2">
+                <th className="text-left text-caption font-normal text-content-primary/50 uppercase px-3 py-2">
                   Status
                 </th>
-                <th className="text-left text-[10px] font-normal text-content-primary/50 uppercase px-3 py-2">
+                <th className="text-left text-caption font-normal text-content-primary/50 uppercase px-3 py-2">
                   Role
                 </th>
                 <th className="w-8 px-3 py-2" />
@@ -116,14 +116,14 @@ function ListPageTemplate() {
 
         {/* Pagination */}
         <div className="flex items-center justify-between">
-          <span className="text-[10px] text-content-primary/50">
+          <span className="text-caption text-content-primary/50">
             Showing 1-3 of 24
           </span>
           <div className="flex gap-1">
             {[1, 2, 3, "...", 8].map((p, i) => (
               <span
                 key={i}
-                className={`w-6 h-6 flex items-center justify-center rounded text-[10px] ${
+                className={`w-6 h-6 flex items-center justify-center rounded text-caption ${
                   p === 1
                     ? "bg-surface-tertiary font-semibold text-content-primary border border-border-strong"
                     : "text-content-secondary"
@@ -151,7 +151,7 @@ function DetailPageTemplate() {
       <div className="space-y-3 max-w-[600px]">
         {/* Back + Title */}
         <div>
-          <button className="flex items-center gap-1 text-[10px] text-content-primary/50 mb-1">
+          <button className="flex items-center gap-1 text-caption text-content-primary/50 mb-1">
             <ChevronRight size={10} className="rotate-180" />
             Back to list
           </button>
@@ -160,10 +160,10 @@ function DetailPageTemplate() {
               AB
             </div>
             <div>
-              <h4 className="text-body-md font-semibold text-content-primary">
+              <h4 className="text-body font-semibold text-content-primary">
                 Project Alpha
               </h4>
-              <p className="text-[10px] text-content-primary/50">
+              <p className="text-caption text-content-primary/50">
                 Created Dec 15, 2025
               </p>
             </div>
@@ -188,18 +188,16 @@ function DetailPageTemplate() {
         {/* Content sections */}
         <div className="grid grid-cols-2 gap-3">
           <div className="p-3 border border-border-strong rounded-lg">
-            <p className="text-[10px] text-content-primary/50 uppercase mb-1">
+            <p className="text-caption text-content-primary/50 uppercase mb-1">
               Members
             </p>
-            <p className="text-body-sm font-semibold text-content-primary">
-              12
-            </p>
+            <p className="text-body font-semibold text-content-primary">12</p>
           </div>
           <div className="p-3 border border-border-strong rounded-lg">
-            <p className="text-[10px] text-content-primary/50 uppercase mb-1">
+            <p className="text-caption text-content-primary/50 uppercase mb-1">
               Teams
             </p>
-            <p className="text-body-sm font-semibold text-content-primary">3</p>
+            <p className="text-body font-semibold text-content-primary">3</p>
           </div>
         </div>
       </div>
@@ -226,7 +224,7 @@ function SettingsPageTemplate() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-caption text-content-primary">Dark mode</p>
-                <p className="text-[10px] text-content-primary/50">
+                <p className="text-caption text-content-primary/50">
                   Toggle dark theme
                 </p>
               </div>
@@ -239,7 +237,7 @@ function SettingsPageTemplate() {
                 <p className="text-caption text-content-primary">
                   Notifications
                 </p>
-                <p className="text-[10px] text-content-primary/50">
+                <p className="text-caption text-content-primary/50">
                   Email alerts
                 </p>
               </div>

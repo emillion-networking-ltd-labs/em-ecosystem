@@ -24,7 +24,7 @@ export const sliderSpecs = {
     size: "16×16px rounded-full",
     style: "bg-white border-2 border-solid border-[rgba(0,0,0,0.08)]",
   },
-  label: "text-body-sm font-normal text-content-primary",
+  label: "text-body font-normal text-content-primary",
   value: "text-caption text-content-secondary tabular-nums",
 };
 
@@ -56,7 +56,7 @@ export default function Slider({
           {label && (
             <label
               htmlFor={id}
-              className={`text-body-sm font-normal text-content-primary ${
+              className={`text-body font-normal text-content-primary ${
                 disabled ? "opacity-50" : ""
               }`}
             >

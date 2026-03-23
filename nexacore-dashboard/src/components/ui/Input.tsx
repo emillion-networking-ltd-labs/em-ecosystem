@@ -17,20 +17,20 @@ interface InputProps extends Omit<
 }
 
 const sizeClasses = {
-  sm: "h-10 px-3 text-sm",
-  md: "h-12 px-4 text-[15px]",
+  sm: "h-10 px-3 text-body",
+  md: "h-12 px-4 text-body",
 };
 
 export const inputSpecs = {
   container:
     "flex items-center gap-2 rounded-lg border border-border-strong bg-transparent outline outline-2 outline-offset-2 transition-colors",
   sizes: {
-    sm: "h-10 px-3 text-sm (40px — compact contexts)",
-    "md (default)": "h-12 px-4 text-[15px] (48px — forms, auth)",
+    sm: "h-10 px-3 text-body (40px — compact contexts)",
+    "md (default)": "h-12 px-4 text-body (48px — forms, auth)",
   },
-  label: "text-[15px] font-semibold leading-[22px]",
+  label: "text-body font-semibold leading-[22px]",
   input:
-    "min-w-0 flex-1 bg-transparent text-[15px] leading-6 text-content-primary outline-none placeholder:text-content-placeholder",
+    "min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary outline-none placeholder:text-content-placeholder",
   states: {
     default: "outline-transparent",
     hover: "hover:outline-content-primary/75",
@@ -76,7 +76,7 @@ export default function Input({
       {label && (
         <label
           htmlFor={inputId}
-          className={`text-[15px] font-semibold leading-[22px] ${isErrorState ? "text-error/75" : "text-content-primary"}`}
+          className={`text-body font-semibold leading-[22px] ${isErrorState ? "text-error/75" : "text-content-primary"}`}
         >
           {label}
         </label>
@@ -101,7 +101,7 @@ export default function Input({
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
           ref={inputRef}
-          className={`min-w-0 flex-1 bg-transparent ${size === "sm" ? "text-sm" : "text-[15px]"} leading-6 text-content-primary outline-none placeholder:text-content-placeholder`}
+          className={`min-w-0 flex-1 bg-transparent ${size === "sm" ? "text-body" : "text-body"} leading-6 text-content-primary outline-none placeholder:text-content-placeholder`}
           {...props}
         />
         {isPassword && !loading && (
@@ -127,7 +127,7 @@ export default function Input({
           role="alert"
         >
           <TriangleAlert size={16} className="shrink-0 text-error" />
-          <p className="flex-1 text-xs leading-6 text-error">{error}</p>
+          <p className="flex-1 text-caption leading-6 text-error">{error}</p>
         </div>
       )}
     </div>

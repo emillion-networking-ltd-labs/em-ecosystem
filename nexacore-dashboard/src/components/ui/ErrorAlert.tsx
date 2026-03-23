@@ -31,7 +31,7 @@ export default function ErrorAlert({
         <line x1="12" y1="8" x2="12" y2="12" />
         <line x1="12" y1="16" x2="12.01" y2="16" />
       </svg>
-      <p className="flex-1 text-body-sm text-error">{message}</p>
+      <p className="flex-1 text-body text-error">{message}</p>
       {onDismiss && (
         <button
           onClick={onDismiss}

@@ -22,8 +22,8 @@ interface TabsProps {
 
 const sizeClasses = {
   sm: "px-3 py-1.5 text-caption h-8",
-  md: "px-4 py-2.5 text-body-sm h-10",
-  lg: "px-6 py-3 text-body-lg h-12",
+  md: "px-4 py-2.5 text-body h-10",
+  lg: "px-6 py-3 text-subtitle h-12",
 };
 
 const variantStyles = {
@@ -44,16 +44,16 @@ const variantStyles = {
   nav: {
     container: "flex-col gap-1",
     active:
-      "bg-surface-subtle rounded-md text-sm font-normal text-content-primary",
+      "bg-surface-subtle rounded-md text-body font-normal text-content-primary",
     inactive:
-      "text-sm font-normal text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
+      "text-body font-normal text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
   },
   "nav-horizontal": {
     container: "gap-1",
     active:
-      "bg-surface-subtle rounded-md text-sm font-normal text-content-primary",
+      "bg-surface-subtle rounded-md text-body font-normal text-content-primary",
     inactive:
-      "text-sm font-normal text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
+      "text-body font-normal text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
   },
 };
 
@@ -63,7 +63,7 @@ export const tabsSpecs = {
       "Active: Button primary colors (hover:opacity-90) | Inactive: Button outline colors (hover:bg-surface-subtle) | Separator: border-r border-border-strong",
     subtle:
       "Active: bg-surface-secondary border font-semibold | Inactive: font-semibold text-content-primary (Figma)",
-    nav: "Active: bg-surface-subtle rounded-md text-sm text-content-primary | Inactive: text-sm text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
+    nav: "Active: bg-surface-subtle rounded-md text-body text-content-primary | Inactive: text-body text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
     "nav-horizontal": "Same as nav but horizontal layout (top nav bar)",
   },
   container: {
@@ -79,8 +79,8 @@ export const tabsSpecs = {
   },
   sizes: {
     sm: "h-8 px-3 py-1.5 text-caption (32px) — solid/subtle only",
-    "md (default)": "h-10 px-4 py-2.5 text-body-sm (40px) — solid/subtle only",
-    lg: "h-12 px-6 py-3 text-body-lg (48px) — solid/subtle only",
+    "md (default)": "h-10 px-4 py-2.5 text-body (40px) — solid/subtle only",
+    lg: "h-12 px-6 py-3 text-subtitle (48px) — solid/subtle only",
   },
   mobile: {
     scroll: "overflow-x-auto scrollbar-hide touch-pan-x",
@@ -150,7 +150,7 @@ export default function Tabs({
             onKeyDown={(e) => handleKeyDown(e, index)}
             className={`whitespace-nowrap shrink-0 ${
               isNav
-                ? `flex items-center gap-1 px-2 py-2 text-body-sm h-9 text-left ${variant === "nav" ? "w-full" : ""} ${isActive ? styles.active : styles.inactive}`
+                ? `flex items-center gap-1 px-2 py-2 text-body h-9 text-left ${variant === "nav" ? "w-full" : ""} ${isActive ? styles.active : styles.inactive}`
                 : `text-center ${sizeClasses[size]} ${fullWidth ? "flex-1" : ""} ${index < tabs.length - 1 ? "border-r border-border-strong" : ""} ${isActive ? styles.active : styles.inactive}`
             }`}
           >

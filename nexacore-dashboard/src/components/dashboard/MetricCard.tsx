@@ -31,9 +31,7 @@ export default function MetricCard({
           <div className="h-8 w-20 animate-pulse rounded-lg bg-black/[0.08] dark:bg-white/[0.08]" />
         ) : (
           <>
-            <span className="text-heading-lg text-content-primary">
-              {value}
-            </span>
+            <span className="text-heading text-content-primary">{value}</span>
             {trend !== undefined && (
               <span
                 className={`flex items-center gap-1 text-caption ${

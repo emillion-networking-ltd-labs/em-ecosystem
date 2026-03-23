@@ -109,10 +109,10 @@ export default function MfaTotpStep() {
       <div className="flex flex-col gap-6 md:flex-row">
         <div className="flex w-full flex-col gap-2 md:w-[330px]">
           <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-            <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
+            <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
               Recovery Code
             </h1>
-            <p className="text-justify text-sm leading-[21px] text-content-primary/50">
+            <p className="text-justify text-body leading-[21px] text-content-primary/50">
               Enter one of your recovery codes. Each code can only be used once.
             </p>
           </div>
@@ -123,7 +123,7 @@ export default function MfaTotpStep() {
             <div className="flex min-h-[116px] flex-col gap-2">
               <label
                 htmlFor="recovery-code"
-                className="text-[15px] font-semibold leading-[22px] text-content-primary"
+                className="text-body font-semibold leading-[22px] text-content-primary"
               >
                 Recovery Code
               </label>
@@ -137,7 +137,7 @@ export default function MfaTotpStep() {
                     setRecoveryCode(e.target.value);
                   }}
                   placeholder="xxxx-xxxx-xxxx"
-                  className="flex-1 bg-transparent font-mono text-[15px] leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
+                  className="flex-1 bg-transparent font-mono text-body leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
                   autoFocus
                 />
               </div>
@@ -160,7 +160,7 @@ export default function MfaTotpStep() {
                         size={16}
                         className="shrink-0 text-error"
                       />
-                      <span className="flex-1 text-xs leading-6 text-error">
+                      <span className="flex-1 text-caption leading-6 text-error">
                         {error}
                       </span>
                     </>
@@ -180,7 +180,7 @@ export default function MfaTotpStep() {
                   onChange={(e) => setTrustDevice(e.target.checked)}
                   className="h-4 w-4 rounded border-border-strong accent-surface-inverse"
                 />
-                <span className="text-sm leading-[21px] text-content-primary/75">
+                <span className="text-body leading-[21px] text-content-primary/75">
                   Trust this device for 30 days
                 </span>
               </label>
@@ -195,7 +195,7 @@ export default function MfaTotpStep() {
                     setUseRecovery(false);
                     setRecoveryCode("");
                   }}
-                  className="flex items-center gap-1 whitespace-nowrap text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                  className="flex items-center gap-1 whitespace-nowrap text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
                 >
                   <ArrowLeft size={14} />
                   Use authenticator app
@@ -208,14 +208,14 @@ export default function MfaTotpStep() {
               <button
                 type="button"
                 onClick={cancelMfa}
-                className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+                className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isDisabled || !recoveryCode.trim()}
-                className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+                className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
               >
                 <span className={isLoading ? "opacity-30" : ""}>Verify</span>
                 {isLoading && (
@@ -235,10 +235,10 @@ export default function MfaTotpStep() {
     <div className="flex flex-col gap-6 md:flex-row">
       <div className="flex w-full flex-col gap-2 md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
             Two-Factor Authentication
           </h1>
-          <p className="text-justify text-sm leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body leading-[21px] text-content-primary/50">
             Enter the 6-digit code from your authenticator app to complete sign
             in.
           </p>
@@ -250,7 +250,7 @@ export default function MfaTotpStep() {
           <div className="flex min-h-[116px] flex-col gap-2">
             <label
               htmlFor="totp-digit-0"
-              className="text-[15px] font-semibold leading-[22px] text-content-primary"
+              className="text-body font-semibold leading-[22px] text-content-primary"
             >
               Verification Code
             </label>
@@ -275,7 +275,7 @@ export default function MfaTotpStep() {
                   value={digit}
                   onChange={(e) => handleDigitChange(i, e.target.value)}
                   onKeyDown={(e) => handleKeyDown(i, e)}
-                  className="h-12 w-12 rounded-lg border border-border-strong bg-transparent text-center font-mono text-lg text-content-primary outline outline-2 outline-offset-2 outline-transparent transition-colors focus:outline-content-primary/75"
+                  className="h-12 w-12 rounded-lg border border-border-strong bg-transparent text-center font-mono text-subtitle text-content-primary outline outline-2 outline-offset-2 outline-transparent transition-colors focus:outline-content-primary/75"
                   aria-label={`Digit ${i + 1}`}
                 />
               ))}
@@ -296,7 +296,7 @@ export default function MfaTotpStep() {
                 {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-xs leading-6 text-error">
+                    <span className="flex-1 text-caption leading-6 text-error">
                       {error}
                     </span>
                   </>
@@ -316,7 +316,7 @@ export default function MfaTotpStep() {
                 onChange={(e) => setTrustDevice(e.target.checked)}
                 className="h-4 w-4 rounded border-border-strong accent-surface-inverse"
               />
-              <span className="text-sm leading-[21px] text-content-primary/75">
+              <span className="text-body leading-[21px] text-content-primary/75">
                 Trust this device for 30 days
               </span>
             </label>
@@ -331,7 +331,7 @@ export default function MfaTotpStep() {
                   setUseRecovery(true);
                   setCode(Array(6).fill(""));
                 }}
-                className="whitespace-nowrap text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Use recovery code
               </button>
@@ -343,14 +343,14 @@ export default function MfaTotpStep() {
             <button
               type="button"
               onClick={cancelMfa}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isDisabled || code.join("").length !== 6}
-              className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+              className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
             >
               <span className={isLoading ? "opacity-30" : ""}>Verify</span>
               {isLoading && (

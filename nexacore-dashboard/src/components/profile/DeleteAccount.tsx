@@ -114,10 +114,10 @@ export default function DeleteAccount() {
     <>
       {/* Danger zone card */}
       <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
-        <h2 className="mb-4 text-body-sm font-semibold uppercase tracking-wider text-error">
+        <h2 className="mb-4 text-body font-semibold uppercase tracking-wider text-error">
           Danger Zone
         </h2>
-        <p className="mb-6 text-body-sm text-content-secondary">
+        <p className="mb-6 text-body text-content-secondary">
           Permanently delete your account and all associated data. This action
           cannot be undone.
         </p>
@@ -151,17 +151,17 @@ export default function DeleteAccount() {
             <div className="border-b border-border-default bg-surface-primary p-6">
               <h2
                 id="delete-account-modal-title"
-                className="text-heading-md text-content-primary"
+                className="text-title text-content-primary"
               >
                 Delete Account
               </h2>
-              <p className="mt-2 text-body-sm text-content-secondary">
+              <p className="mt-2 text-body text-content-secondary">
                 This action is permanent and cannot be undone. All your data
                 will be anonymized and your sessions will be revoked.
               </p>
 
               <div className="mt-4">
-                <p className="mb-2 text-body-sm text-content-secondary">
+                <p className="mb-2 text-body text-content-secondary">
                   Type{" "}
                   <span className="font-semibold text-content-primary">
                     DELETE
@@ -195,14 +195,14 @@ export default function DeleteAccount() {
               <button
                 onClick={handleClose}
                 disabled={loading}
-                className="h-10 rounded-md px-6 text-body-sm font-normal tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
+                className="h-10 rounded-md px-6 text-body font-normal tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={!canConfirm}
-                className="h-10 rounded-md px-6 text-body-sm font-normal tracking-[-0.28px] bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                className="h-10 rounded-md px-6 text-body font-normal tracking-[-0.28px] bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
               >
                 {loading ? "Deleting..." : "Delete My Account"}
               </button>

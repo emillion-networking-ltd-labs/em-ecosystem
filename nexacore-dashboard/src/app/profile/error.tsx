@@ -33,11 +33,11 @@ export default function ProfileError({
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
 
-        <h2 className="mb-2 text-heading-md text-content-primary">
+        <h2 className="mb-2 text-title text-content-primary">
           Something went wrong
         </h2>
 
-        <p className="mb-6 text-body-sm text-content-secondary">
+        <p className="mb-6 text-body text-content-secondary">
           {process.env.NODE_ENV === "development"
             ? error.message
             : "An error occurred while loading your profile. Please try again."}

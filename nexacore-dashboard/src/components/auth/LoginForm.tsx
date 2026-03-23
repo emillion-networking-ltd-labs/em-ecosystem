@@ -196,10 +196,10 @@ export default function LoginForm() {
       {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top) */}
       <div className="flex w-full flex-col gap-2 md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
             Sign In
           </h1>
-          <p className="text-justify text-sm leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body leading-[21px] text-content-primary/50">
             Connect using your NexaCore Account. This session will be available
             to other EM Ecosystem modules in the browser.
           </p>
@@ -238,7 +238,7 @@ export default function LoginForm() {
                         size={16}
                         className="shrink-0 text-error"
                       />
-                      <span className="flex-1 text-xs leading-6 text-error">
+                      <span className="flex-1 text-caption leading-6 text-error">
                         {activeError}
                       </span>
                     </>
@@ -252,13 +252,13 @@ export default function LoginForm() {
           <div className="flex gap-2">
             <Link
               href="/register"
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Create Account
             </Link>
             <button
               type="submit"
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90"
+              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90"
             >
               Next
             </button>
@@ -274,7 +274,7 @@ export default function LoginForm() {
               onClick={handlePasskeyLogin}
               disabled={passkeyLoading}
               aria-label="Sign in with passkey"
-              className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
+              className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-subtitle font-normal text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
             >
               <Key
                 size={16}
@@ -292,7 +292,7 @@ export default function LoginForm() {
             {passkeyError && (
               <div role="alert" className="mt-2 flex items-center gap-2">
                 <AlertTriangle size={14} className="shrink-0 text-error" />
-                <span className="text-xs text-error">{passkeyError}</span>
+                <span className="text-caption text-error">{passkeyError}</span>
               </div>
             )}
           </div>
@@ -372,16 +372,16 @@ function PasswordStep({
       {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top), inner 300px */}
       <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-2xl font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-heading font-semibold leading-[36px] text-content-primary">
             Sign In
           </h1>
 
-          {/* Select Email Button — Figma: cornerRadius 100 (pill), px-16, text-base, Bordered variant */}
+          {/* Select Email Button — Figma: cornerRadius 100 (pill), px-16, text-subtitle, Bordered variant */}
           <div ref={dropdownRef} className="relative self-start">
             <button
               type="button"
               onClick={() => setIsEmailOpen(!isEmailOpen)}
-              className={`flex h-10 items-center justify-center gap-2 rounded-full px-4 text-base font-normal transition-all ${
+              className={`flex h-10 items-center justify-center gap-2 rounded-full px-4 text-subtitle font-normal transition-all ${
                 isEmailOpen
                   ? "border border-border-strong bg-surface-primary text-content-primary"
                   : "border border-border-strong bg-transparent text-content-primary"
@@ -404,18 +404,18 @@ function PasswordStep({
                     className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-tertiary px-2 font-normal text-content-primary transition-colors"
                   >
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
-                      <span className="text-xs font-semibold">
+                      <span className="text-caption font-semibold">
                         {emailInitial}
                       </span>
                     </div>
-                    <span className="truncate text-[15px]">{email}</span>
+                    <span className="truncate text-body">{email}</span>
                   </button>
 
                   {/* Change email — Link/Simple pattern (75% → 100%, hover:underline) */}
                   <button
                     type="button"
                     onClick={onChangeEmail}
-                    className="mt-4 w-full px-2 text-left text-sm font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
+                    className="mt-4 w-full px-2 text-left text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
                   >
                     Try a different email address
                   </button>
@@ -459,7 +459,7 @@ function PasswordStep({
                 {showError && (
                   <>
                     <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-xs leading-6 text-error">
+                    <span className="flex-1 text-caption leading-6 text-error">
                       {activeError}
                     </span>
                   </>
@@ -471,7 +471,7 @@ function PasswordStep({
             <div className="flex items-center justify-end">
               <Link
                 href={`/forgot-password?email=${encodeURIComponent(email)}`}
-                className="whitespace-nowrap text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Forgot password?
               </Link>
@@ -489,7 +489,7 @@ function PasswordStep({
           <button
             type="submit"
             disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-subtitle font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? "opacity-30" : ""}>Sign In</span>
             {isLoading && (

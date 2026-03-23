@@ -88,7 +88,7 @@ export default function DashboardPage() {
       <DashboardLayout rightPanel={<RightPanel />}>
         {/* Page header */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="rounded-xl bg-transparent px-2 py-1 text-body-sm font-semibold text-content-primary">
+          <h1 className="rounded-xl bg-transparent px-2 py-1 text-body font-semibold text-content-primary">
             Overview
           </h1>
           <button className="flex items-center gap-1 rounded-lg px-2 py-1 text-caption text-content-primary hover:bg-surface-subtle">

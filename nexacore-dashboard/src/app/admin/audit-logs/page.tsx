@@ -75,7 +75,7 @@ export default function AuditLogsPage() {
 
         {/* Page header */}
         <div className="mb-6">
-          <h1 className="text-heading-lg font-semibold text-content-primary">
+          <h1 className="text-heading font-semibold text-content-primary">
             Audit Logs
           </h1>
           <p className="mt-1 text-caption text-content-tertiary">
@@ -100,13 +100,13 @@ export default function AuditLogsPage() {
         {/* Table */}
         {loading ? (
           <div className="flex h-64 items-center justify-center">
-            <p className="text-body-sm text-content-tertiary">
+            <p className="text-body text-content-tertiary">
               Loading audit logs...
             </p>
           </div>
         ) : logs.length === 0 ? (
           <div className="flex h-64 items-center justify-center rounded-2xl border border-border-default bg-surface-primary">
-            <p className="text-body-sm text-content-tertiary">
+            <p className="text-body text-content-tertiary">
               No audit logs found.
             </p>
           </div>

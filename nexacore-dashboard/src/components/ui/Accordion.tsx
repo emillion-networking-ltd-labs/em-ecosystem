@@ -16,7 +16,7 @@ interface AccordionProps {
 
 export const accordionSpecs = {
   trigger: {
-    shared: "w-full px-4 py-3 text-body-sm font-normal text-content-primary",
+    shared: "w-full px-4 py-3 text-body font-normal text-content-primary",
     hover: "hover:bg-surface-subtle transition-colors",
   },
   container: {
@@ -49,7 +49,7 @@ export default function Accordion({
         <div key={i}>
           <button
             onClick={() => toggle(i)}
-            className="flex w-full items-center justify-between px-4 py-3 text-body-sm font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+            className="flex w-full items-center justify-between px-4 py-3 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
           >
             {item.title}
             <ChevronDown
@@ -87,7 +87,7 @@ export function SingleAccordion({
     >
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-4 py-3 text-body-sm font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+        className="flex w-full items-center justify-between px-4 py-3 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
       >
         {title}
         <ChevronDown
