@@ -7,7 +7,7 @@ interface BadgeProps {
   className?: string;
 }
 
-export const baseClass = "inline-flex items-center font-medium rounded-md";
+export const baseClass = "inline-flex items-center font-normal rounded-md";
 
 export const variantClasses = {
   default: "bg-surface-subtle text-content-secondary",
@@ -31,7 +31,7 @@ export default function Badge({
 }: BadgeProps) {
   return (
     <span
-      className={`inline-flex items-center font-medium rounded-md ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+      className={`inline-flex items-center font-normal rounded-md ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
     >
       {children}
     </span>

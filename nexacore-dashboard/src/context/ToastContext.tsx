@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   createContext,
@@ -6,11 +6,11 @@ import {
   useReducer,
   useCallback,
   type ReactNode,
-} from 'react';
+} from "react";
 
 /* ===== Types ===== */
 
-export type ToastVariant = 'error' | 'success' | 'warning' | 'info';
+export type ToastVariant = "error" | "success" | "warning" | "info";
 
 export type Toast = {
   id: number;
@@ -20,21 +20,21 @@ export type Toast = {
   duration?: number;
 };
 
-export type AddToastInput = Omit<Toast, 'id'>;
+export type AddToastInput = Omit<Toast, "id">;
 
 /* ===== Reducer ===== */
 
 type ToastAction =
-  | { type: 'ADD_TOAST'; payload: Toast }
-  | { type: 'REMOVE_TOAST'; payload: number };
+  | { type: "ADD_TOAST"; payload: Toast }
+  | { type: "REMOVE_TOAST"; payload: number };
 
 let nextId = 0;
 
 function toastReducer(state: Toast[], action: ToastAction): Toast[] {
   switch (action.type) {
-    case 'ADD_TOAST':
+    case "ADD_TOAST":
       return [...state, action.payload];
-    case 'REMOVE_TOAST':
+    case "REMOVE_TOAST":
       return state.filter((t) => t.id !== action.payload);
     default:
       return state;
@@ -58,11 +58,11 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
   const addToast = useCallback((input: AddToastInput) => {
     const id = nextId++;
-    dispatch({ type: 'ADD_TOAST', payload: { ...input, id } });
+    dispatch({ type: "ADD_TOAST", payload: { ...input, id } });
   }, []);
 
   const removeToast = useCallback((id: number) => {
-    dispatch({ type: 'REMOVE_TOAST', payload: id });
+    dispatch({ type: "REMOVE_TOAST", payload: id });
   }, []);
 
   return (
@@ -76,6 +76,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
 
 export function useToast(): ToastContextType {
   const context = useContext(ToastContext);
-  if (!context) throw new Error('useToast must be used within ToastProvider');
+  if (!context) throw new Error("useToast must be used within ToastProvider");
   return context;
 }

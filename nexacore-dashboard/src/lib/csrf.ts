@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
 let cachedCsrfToken: string | null = null;
 let tokenFetchPromise: Promise<string | null> | null = null;
@@ -11,12 +11,12 @@ export async function getCsrfToken(): Promise<string | null> {
   tokenFetchPromise = (async () => {
     try {
       const res = await fetch(`${API_BASE_URL}/auth/csrf-token`, {
-        method: 'GET',
-        credentials: 'include',
+        method: "GET",
+        credentials: "include",
       });
 
       if (!res.ok) {
-        console.error('Failed to fetch CSRF token:', res.status);
+        console.error("Failed to fetch CSRF token:", res.status);
         return null;
       }
 
@@ -24,7 +24,7 @@ export async function getCsrfToken(): Promise<string | null> {
       cachedCsrfToken = data.csrfToken;
       return cachedCsrfToken;
     } catch (err) {
-      console.error('Error fetching CSRF token:', err);
+      console.error("Error fetching CSRF token:", err);
       return null;
     } finally {
       tokenFetchPromise = null;

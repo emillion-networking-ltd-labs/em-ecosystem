@@ -179,7 +179,7 @@ export default function ResetPasswordForm() {
             <div className="flex items-center justify-end">
               <Link
                 href="/login"
-                className="whitespace-nowrap text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Back to Sign In
               </Link>
@@ -190,7 +190,7 @@ export default function ResetPasswordForm() {
           <button
             type="submit"
             disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? "opacity-30" : ""}>
               Reset Password

@@ -1,9 +1,9 @@
-import { getCsrfToken, clearCsrfToken } from './csrf';
-import { DETECTION_CSRF_ERROR } from './error-constants';
+import { getCsrfToken, clearCsrfToken } from "./csrf";
+import { DETECTION_CSRF_ERROR } from "./error-constants";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
-const CSRF_METHODS = new Set(['POST', 'PUT', 'PATCH', 'DELETE']);
+const CSRF_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 class ApiClient {
   private accessToken: string | null = null;
@@ -27,18 +27,20 @@ class ApiClient {
   }
 
   async request<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
-    const method = (options.method || 'GET').toUpperCase();
+    const method = (options.method || "GET").toUpperCase();
 
     const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(this.accessToken && { Authorization: `Bearer ${this.accessToken}` }),
-      ...(this.deviceFingerprint && { 'X-Device-Fingerprint': this.deviceFingerprint }),
+      ...(this.deviceFingerprint && {
+        "X-Device-Fingerprint": this.deviceFingerprint,
+      }),
     };
 
     if (CSRF_METHODS.has(method)) {
       const csrfToken = await getCsrfToken();
       if (csrfToken) {
-        headers['X-CSRF-Token'] = csrfToken;
+        headers["X-CSRF-Token"] = csrfToken;
       }
     }
 
@@ -46,29 +48,43 @@ class ApiClient {
     try {
       response = await fetch(`${API_BASE_URL}${endpoint}`, {
         ...options,
-        credentials: 'include',
+        credentials: "include",
         headers: { ...headers, ...(options.headers as Record<string, string>) },
       });
     } catch {
       throw {
-        error: { message: 'Network error. Please check your connection.', code: 'NETWORK_ERROR', statusCode: 0 },
+        error: {
+          message: "Network error. Please check your connection.",
+          code: "NETWORK_ERROR",
+          statusCode: 0,
+        },
       };
     }
 
     // Handle 403 CSRF token errors — clear and retry once
     if (response.status === 403) {
-      const body = await response.clone().json().catch(() => null);
-      const csrfMsg = (body?.message || body?.error?.message || '').toLowerCase();
+      const body = await response
+        .clone()
+        .json()
+        .catch(() => null);
+      const csrfMsg = (
+        body?.message ||
+        body?.error?.message ||
+        ""
+      ).toLowerCase();
       if (csrfMsg.includes(DETECTION_CSRF_ERROR)) {
         clearCsrfToken();
         const newCsrfToken = await getCsrfToken();
         if (newCsrfToken) {
-          headers['X-CSRF-Token'] = newCsrfToken;
+          headers["X-CSRF-Token"] = newCsrfToken;
           try {
             const retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
               ...options,
-              credentials: 'include',
-              headers: { ...headers, ...(options.headers as Record<string, string>) },
+              credentials: "include",
+              headers: {
+                ...headers,
+                ...(options.headers as Record<string, string>),
+              },
             });
             if (!retryResponse.ok) {
               throw await this.parseErrorResponse(retryResponse);
@@ -77,7 +93,11 @@ class ApiClient {
           } catch (retryErr) {
             if ((retryErr as { error?: unknown })?.error) throw retryErr;
             throw {
-              error: { message: 'Network error. Please check your connection.', code: 'NETWORK_ERROR', statusCode: 0 },
+              error: {
+                message: "Network error. Please check your connection.",
+                code: "NETWORK_ERROR",
+                statusCode: 0,
+              },
             };
           }
         }
@@ -92,19 +112,26 @@ class ApiClient {
         if (CSRF_METHODS.has(method)) {
           const csrfToken = await getCsrfToken();
           if (csrfToken) {
-            headers['X-CSRF-Token'] = csrfToken;
+            headers["X-CSRF-Token"] = csrfToken;
           }
         }
         let retryResponse: Response;
         try {
           retryResponse = await fetch(`${API_BASE_URL}${endpoint}`, {
             ...options,
-            credentials: 'include',
-            headers: { ...headers, ...(options.headers as Record<string, string>) },
+            credentials: "include",
+            headers: {
+              ...headers,
+              ...(options.headers as Record<string, string>),
+            },
           });
         } catch {
           throw {
-            error: { message: 'Network error. Please check your connection.', code: 'NETWORK_ERROR', statusCode: 0 },
+            error: {
+              message: "Network error. Please check your connection.",
+              code: "NETWORK_ERROR",
+              statusCode: 0,
+            },
           };
         }
         if (!retryResponse.ok) {
@@ -122,27 +149,47 @@ class ApiClient {
   }
 
   get<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: 'GET' });
+    return this.request<T>(endpoint, { ...options, method: "GET" });
   }
 
   post<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: 'POST', body: JSON.stringify(body) });
+    return this.request<T>(endpoint, {
+      ...options,
+      method: "POST",
+      body: JSON.stringify(body),
+    });
   }
 
   put<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: 'PUT', body: JSON.stringify(body) });
+    return this.request<T>(endpoint, {
+      ...options,
+      method: "PUT",
+      body: JSON.stringify(body),
+    });
   }
 
   patch<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: 'PATCH', body: JSON.stringify(body) });
+    return this.request<T>(endpoint, {
+      ...options,
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
   }
 
   delete<T>(endpoint: string, options?: RequestInit): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: 'DELETE' });
+    return this.request<T>(endpoint, { ...options, method: "DELETE" });
   }
 
-  deleteWithBody<T>(endpoint: string, body: unknown, options?: RequestInit): Promise<T> {
-    return this.request<T>(endpoint, { ...options, method: 'DELETE', body: JSON.stringify(body) });
+  deleteWithBody<T>(
+    endpoint: string,
+    body: unknown,
+    options?: RequestInit,
+  ): Promise<T> {
+    return this.request<T>(endpoint, {
+      ...options,
+      method: "DELETE",
+      body: JSON.stringify(body),
+    });
   }
 
   private async parseErrorResponse(response: Response): Promise<unknown> {
@@ -150,7 +197,7 @@ class ApiClient {
       const body = await response.json();
 
       if (body?.error && (response.status === 429 || response.status === 401)) {
-        const retryAfter = response.headers.get('Retry-After');
+        const retryAfter = response.headers.get("Retry-After");
         if (retryAfter && !body.error.retryAfter) {
           body.error.retryAfter = parseInt(retryAfter, 10);
         }
@@ -161,7 +208,7 @@ class ApiClient {
       return {
         error: {
           message: `Server error (${response.status})`,
-          code: 'SERVER_ERROR',
+          code: "SERVER_ERROR",
           statusCode: response.status,
         },
       };
@@ -175,9 +222,9 @@ class ApiClient {
       try {
         const csrfToken = await getCsrfToken();
         const res = await fetch(`${API_BASE_URL}/auth/refresh`, {
-          method: 'POST',
-          credentials: 'include',
-          headers: csrfToken ? { 'X-CSRF-Token': csrfToken } : {},
+          method: "POST",
+          credentials: "include",
+          headers: csrfToken ? { "X-CSRF-Token": csrfToken } : {},
         });
         if (!res.ok) return null;
         const data = await res.json();

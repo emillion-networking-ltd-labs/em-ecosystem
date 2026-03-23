@@ -81,7 +81,7 @@ export default function Toggle({
       {label && (
         <label
           htmlFor={id}
-          className={`text-body-sm font-medium text-content-primary select-none ${
+          className={`text-body-sm font-normal text-content-primary select-none ${
             disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           }`}
         >

@@ -117,7 +117,7 @@ export default function RecentActivityFeed() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-body-sm text-content-primary">
-                    <span className="font-medium">{userLabel}</span>{" "}
+                    <span className="font-normal">{userLabel}</span>{" "}
                     <span className="text-content-tertiary">{meta.label}</span>
                   </p>
                   <p className="text-caption text-content-tertiary">

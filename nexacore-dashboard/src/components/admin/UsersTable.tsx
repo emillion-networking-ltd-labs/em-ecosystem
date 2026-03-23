@@ -23,7 +23,7 @@ export default function UsersTable({
   onDelete,
 }: UsersTableProps) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary shadow-card">
+    <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary">
       <table className="w-full">
         <thead>
           <tr className="border-b border-border-default">
@@ -75,7 +75,7 @@ export default function UsersTable({
                         ).toUpperCase()}
                       </span>
                     </div>
-                    <span className="text-body-sm font-medium text-content-primary">
+                    <span className="text-body-sm font-normal text-content-primary">
                       {user.firstName && user.lastName
                         ? `${user.firstName} ${user.lastName}`
                         : user.email.split("@")[0]}
@@ -91,7 +91,7 @@ export default function UsersTable({
                 {/* Role */}
                 <td className="px-4 py-3">
                   <span
-                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-caption font-medium ${roleBadgeClasses[user.role]}`}
+                    className={`inline-flex items-center rounded-md px-2 py-0.5 text-caption font-normal ${roleBadgeClasses[user.role]}`}
                   >
                     {user.role}
                   </span>

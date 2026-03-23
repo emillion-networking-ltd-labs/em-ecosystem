@@ -252,13 +252,13 @@ export default function LoginForm() {
           <div className="flex gap-2">
             <Link
               href="/register"
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Create Account
             </Link>
             <button
               type="submit"
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90"
+              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90"
             >
               Next
             </button>
@@ -274,7 +274,7 @@ export default function LoginForm() {
               onClick={handlePasskeyLogin}
               disabled={passkeyLoading}
               aria-label="Sign in with passkey"
-              className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
+              className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
             >
               <Key
                 size={16}
@@ -381,7 +381,7 @@ function PasswordStep({
             <button
               type="button"
               onClick={() => setIsEmailOpen(!isEmailOpen)}
-              className={`flex h-10 items-center justify-center gap-2 rounded-full px-4 text-base font-medium transition-all ${
+              className={`flex h-10 items-center justify-center gap-2 rounded-full px-4 text-base font-normal transition-all ${
                 isEmailOpen
                   ? "border border-border-strong bg-surface-primary text-content-primary"
                   : "border border-border-strong bg-transparent text-content-primary"
@@ -397,11 +397,11 @@ function PasswordStep({
             {/* Email Dropdown — same visual pattern as LanguageSelector */}
             {isEmailOpen && (
               <div className="absolute left-0 top-full z-50 mt-1 w-[300px]">
-                <div className="rounded-3xl border border-border-strong bg-surface-primary p-4 shadow-card">
+                <div className="rounded-3xl border border-border-strong bg-surface-primary p-4">
                   <button
                     type="button"
                     onClick={() => setIsEmailOpen(false)}
-                    className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-tertiary px-2 font-medium text-content-primary transition-colors"
+                    className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-tertiary px-2 font-normal text-content-primary transition-colors"
                   >
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
                       <span className="text-xs font-semibold">
@@ -415,7 +415,7 @@ function PasswordStep({
                   <button
                     type="button"
                     onClick={onChangeEmail}
-                    className="mt-4 w-full px-2 text-left text-sm font-medium text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
+                    className="mt-4 w-full px-2 text-left text-sm font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
                   >
                     Try a different email address
                   </button>
@@ -471,7 +471,7 @@ function PasswordStep({
             <div className="flex items-center justify-end">
               <Link
                 href={`/forgot-password?email=${encodeURIComponent(email)}`}
-                className="whitespace-nowrap text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Forgot password?
               </Link>
@@ -489,7 +489,7 @@ function PasswordStep({
           <button
             type="submit"
             disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? "opacity-30" : ""}>Sign In</span>
             {isLoading && (

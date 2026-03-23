@@ -70,7 +70,7 @@ export default function QuickActionsCard() {
               <action.icon size={16} className="text-content-secondary" />
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-body-sm font-medium text-content-primary">
+              <p className="text-body-sm font-normal text-content-primary">
                 {action.label}
               </p>
               <p className="text-caption text-content-tertiary">

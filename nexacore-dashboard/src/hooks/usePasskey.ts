@@ -1,8 +1,11 @@
-'use client';
+"use client";
 
-import { useState, useCallback, useRef, useEffect } from 'react';
-import { startRegistration, startAuthentication } from '@simplewebauthn/browser';
-import { useAuth } from '@/hooks/useAuth';
+import { useState, useCallback, useRef, useEffect } from "react";
+import {
+  startRegistration,
+  startAuthentication,
+} from "@simplewebauthn/browser";
+import { useAuth } from "@/hooks/useAuth";
 import {
   passkeyRegisterOptions,
   passkeyRegisterVerify,
@@ -10,14 +13,14 @@ import {
   listPasskeys as apiListPasskeys,
   renamePasskey as apiRenamePasskey,
   deletePasskey as apiDeletePasskey,
-} from '@/lib/passkey-api';
-import type { PasskeyResponse, PasskeyRegisterResult } from '@/lib/types';
+} from "@/lib/passkey-api";
+import type { PasskeyResponse, PasskeyRegisterResult } from "@/lib/types";
 
 type ApiError = { error?: { message?: string } };
 
 function extractMessage(err: unknown, fallback: string): string {
   const msg = (err as ApiError)?.error?.message ?? fallback;
-  return msg.endsWith('.') ? msg : `${msg}.`;
+  return msg.endsWith(".") ? msg : `${msg}.`;
 }
 
 export function usePasskey() {
@@ -32,7 +35,7 @@ export function usePasskey() {
   const conditionalAbortRef = useRef<AbortController | null>(null);
 
   const isSupported =
-    typeof window !== 'undefined' && !!window.PublicKeyCredential;
+    typeof window !== "undefined" && !!window.PublicKeyCredential;
 
   const clearError = useCallback(() => setError(null), []);
 
@@ -42,7 +45,7 @@ export function usePasskey() {
       const data = await apiListPasskeys();
       setPasskeys(data);
     } catch (err) {
-      setError(extractMessage(err, 'Failed to load passkeys.'));
+      setError(extractMessage(err, "Failed to load passkeys."));
     } finally {
       setIsLoadingList(false);
     }
@@ -54,13 +57,18 @@ export function usePasskey() {
       setError(null);
       try {
         const options = await passkeyRegisterOptions();
-        const credential = await startRegistration({ optionsJSON: options as never });
-        const result = await passkeyRegisterVerify(credential as unknown as Record<string, unknown>, name);
+        const credential = await startRegistration({
+          optionsJSON: options as never,
+        });
+        const result = await passkeyRegisterVerify(
+          credential as unknown as Record<string, unknown>,
+          name,
+        );
         await fetchPasskeys();
         return result;
       } catch (err: unknown) {
-        if ((err as Error)?.name === 'NotAllowedError') return null;
-        setError(extractMessage(err, 'Passkey registration failed.'));
+        if ((err as Error)?.name === "NotAllowedError") return null;
+        setError(extractMessage(err, "Passkey registration failed."));
         return null;
       } finally {
         setIsRegistering(false);
@@ -77,11 +85,16 @@ export function usePasskey() {
       try {
         const { options, challengeId } = await passkeyLoginOptions(email);
         if (abortRef.current) return;
-        const credential = await startAuthentication({ optionsJSON: options as never });
+        const credential = await startAuthentication({
+          optionsJSON: options as never,
+        });
         if (abortRef.current) return;
-        await passkeyLogin(challengeId, credential as unknown as Record<string, unknown>);
+        await passkeyLogin(
+          challengeId,
+          credential as unknown as Record<string, unknown>,
+        );
       } catch (err: unknown) {
-        if ((err as Error)?.name === 'NotAllowedError') return;
+        if ((err as Error)?.name === "NotAllowedError") return;
         // AuthContext.passkeyLogin already shows a toast — avoid duplicate inline error
       } finally {
         setIsLoggingIn(false);
@@ -98,7 +111,7 @@ export function usePasskey() {
         await fetchPasskeys();
         return true;
       } catch (err) {
-        setError(extractMessage(err, 'Failed to rename passkey.'));
+        setError(extractMessage(err, "Failed to rename passkey."));
         return false;
       }
     },
@@ -113,7 +126,7 @@ export function usePasskey() {
         await fetchPasskeys();
         return null;
       } catch (err) {
-        const msg = extractMessage(err, 'Failed to delete passkey.');
+        const msg = extractMessage(err, "Failed to delete passkey.");
         setError(msg);
         return msg;
       }
@@ -157,7 +170,7 @@ export function usePasskey() {
       );
     } catch (err: unknown) {
       const name = (err as Error)?.name;
-      if (name === 'AbortError' || name === 'NotAllowedError') return;
+      if (name === "AbortError" || name === "NotAllowedError") return;
       // Silently ignore — conditional UI is a progressive enhancement
     } finally {
       if (conditionalAbortRef.current === controller) {

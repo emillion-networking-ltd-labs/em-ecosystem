@@ -50,7 +50,7 @@ interface CalendarDay {
 export const calendarSpecs = {
   container: {
     shared:
-      "w-[300px] bg-surface-primary border border-border-strong shadow-card rounded-3xl p-6 gap-5",
+      "w-[300px] bg-surface-primary border border-border-strong rounded-3xl p-6 gap-5",
   },
   navigation: {
     button: "w-6 h-6 rounded-full bg-surface-subtle hover:bg-surface-subtle",
@@ -65,8 +65,8 @@ export const calendarSpecs = {
   },
   day: {
     selected:
-      "bg-surface-inverse text-content-inverse font-medium rounded-full",
-    today: "bg-surface-subtle text-content-primary font-medium rounded-full",
+      "bg-surface-inverse text-content-inverse font-normal rounded-full",
+    today: "bg-surface-subtle text-content-primary font-normal rounded-full",
     default: "text-content-primary hover:bg-surface-subtle rounded-full",
     "other month": "text-content-primary/50",
     disabled: "opacity-30 cursor-not-allowed",
@@ -224,15 +224,15 @@ export default function Calendar({
   const cellClass = (isActive: boolean, isCurrent: boolean) =>
     `min-w-9 h-9 px-2 mx-auto flex items-center justify-center text-body-sm font-normal rounded-full transition-colors cursor-pointer ${
       isActive
-        ? "bg-surface-inverse text-content-inverse font-medium"
+        ? "bg-surface-inverse text-content-inverse font-normal"
         : isCurrent
-          ? "bg-surface-subtle text-content-primary font-medium"
+          ? "bg-surface-subtle text-content-primary font-normal"
           : "text-content-primary hover:bg-surface-subtle"
     }`;
 
   return (
     <div
-      className={`w-[300px] bg-surface-primary border border-border-strong shadow-card rounded-3xl p-6 flex flex-col gap-5 ${className}`}
+      className={`w-[300px] bg-surface-primary border border-border-strong rounded-3xl p-6 flex flex-col gap-5 ${className}`}
     >
       {/* Navigation */}
       <div className="flex items-center justify-between">
@@ -286,9 +286,9 @@ export default function Calendar({
               aria-selected={day.isSelected}
               className={`min-w-9 h-9 px-2 mx-auto flex items-center justify-center text-[15px] font-normal rounded-full transition-colors ${
                 day.isSelected
-                  ? "bg-surface-inverse text-content-inverse font-medium"
+                  ? "bg-surface-inverse text-content-inverse font-normal"
                   : day.isToday
-                    ? "bg-surface-subtle text-content-primary font-medium"
+                    ? "bg-surface-subtle text-content-primary font-normal"
                     : day.isCurrentMonth
                       ? "text-content-primary hover:bg-surface-subtle"
                       : "text-content-primary/50"

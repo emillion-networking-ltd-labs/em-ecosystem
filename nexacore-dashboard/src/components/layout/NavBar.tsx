@@ -141,18 +141,18 @@ export default function NavBar({
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setDropdownOpen(!dropdownOpen)}
-            className={`flex items-center gap-2 rounded-3xl px-2 py-1.5 text-body-sm text-content-primary transition-colors ${dropdownOpen ? "bg-surface-subtle" : "hover:bg-surface-subtle"}`}
+            className={`flex items-center gap-2 rounded-md px-2 py-1.5 text-body-sm text-content-primary transition-colors ${dropdownOpen ? "bg-surface-subtle" : "hover:bg-surface-subtle"}`}
           >
             <Avatar size="sm" name={user?.firstName || user?.email || "?"} />
             <ChevronDown size={16} className="text-content-primary/50" />
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 w-48 rounded-3xl border border-border-strong bg-surface-primary p-6 animate-dropdown-down">
+            <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border-strong bg-surface-primary p-6 animate-dropdown-down">
               <Link
                 href="/profile"
                 onClick={() => setDropdownOpen(false)}
-                className="flex items-center gap-2 rounded-3xl p-2 text-caption text-content-primary hover:bg-surface-subtle"
+                className="flex items-center gap-2 rounded-md p-2 text-caption text-content-primary hover:bg-surface-subtle"
               >
                 <User size={16} />
                 Profile
@@ -161,7 +161,7 @@ export default function NavBar({
                 <Link
                   href="/admin"
                   onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2 rounded-3xl p-2 text-caption text-content-primary hover:bg-surface-subtle"
+                  className="flex items-center gap-2 rounded-md p-2 text-caption text-content-primary hover:bg-surface-subtle"
                 >
                   <Shield size={16} />
                   Admin
@@ -170,7 +170,7 @@ export default function NavBar({
               <Divider className="my-2" />
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2 rounded-3xl p-2 text-caption text-error hover:bg-surface-subtle"
+                className="flex w-full items-center gap-2 rounded-md p-2 text-caption text-error hover:bg-surface-subtle"
               >
                 <LogOut size={16} />
                 Sign out

@@ -1,8 +1,8 @@
-import AuthLayout from '@/components/layout/AuthLayout';
-import Link from 'next/link';
+import AuthLayout from "@/components/layout/AuthLayout";
+import Link from "next/link";
 
 export const metadata = {
-  title: 'Verification Email Sent — EM NexaCore',
+  title: "Verification Email Sent — EM NexaCore",
 };
 
 export default function EmailSentPage() {
@@ -29,7 +29,7 @@ export default function EmailSentPage() {
             <div className="flex items-center justify-end">
               <Link
                 href="/login"
-                className="whitespace-nowrap text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Back to Sign In
               </Link>

@@ -23,9 +23,9 @@ export const variantClasses = {
 export const baseClass = "inline-flex items-center justify-center gap-2";
 
 export const sizeClasses = {
-  sm: "px-4 py-1.5 text-caption font-medium rounded-md h-8",
-  md: "px-6 py-2.5 text-body-sm font-medium rounded-md h-10",
-  lg: "px-8 py-3 text-body-lg font-medium rounded-md h-12",
+  sm: "px-4 py-1.5 text-caption font-normal rounded-md h-8",
+  md: "px-6 py-2.5 text-body-sm font-normal rounded-md h-10",
+  lg: "px-8 py-3 text-body-lg font-normal rounded-md h-12",
 };
 
 export default function Button({

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Home } from "lucide-react";
 
@@ -73,7 +73,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
       >
         <Link
           href="/dashboard"
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-xl p-1 text-content-primary/75 transition-colors hover:text-content-primary"
+          className="flex shrink-0 items-center justify-center pr-1 text-content-primary/75 transition-colors hover:text-content-primary"
         >
           <Home size={16} />
         </Link>
@@ -102,7 +102,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
         >
           <Link
             href="/dashboard"
-            className="flex h-6 w-6 shrink-0 items-center justify-center rounded-xl p-1 text-content-primary/75 transition-colors hover:text-content-primary"
+            className="flex shrink-0 items-center justify-center pr-1 text-content-primary/75 transition-colors hover:text-content-primary"
           >
             <Home size={16} />
           </Link>

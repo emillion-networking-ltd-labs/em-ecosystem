@@ -1,5 +1,5 @@
-import { Suspense } from 'react';
-import OAuthCallbackHandler from '@/components/auth/OAuthCallbackHandler';
+import { Suspense } from "react";
+import OAuthCallbackHandler from "@/components/auth/OAuthCallbackHandler";
 
 export default function OAuthCallbackPage() {
   return (

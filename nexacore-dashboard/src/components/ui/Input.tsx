@@ -13,11 +13,21 @@ interface InputProps extends Omit<
   hasError?: boolean;
   loading?: boolean;
   leftIcon?: ReactNode;
+  size?: "sm" | "md";
 }
+
+const sizeClasses = {
+  sm: "h-10 px-3 text-sm",
+  md: "h-12 px-4 text-[15px]",
+};
 
 export const inputSpecs = {
   container:
-    "flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-transparent px-4 outline outline-2 outline-offset-2 transition-colors",
+    "flex items-center gap-2 rounded-lg border border-border-strong bg-transparent outline outline-2 outline-offset-2 transition-colors",
+  sizes: {
+    sm: "h-10 px-3 text-sm (40px — compact contexts)",
+    "md (default)": "h-12 px-4 text-[15px] (48px — forms, auth)",
+  },
   label: "text-[15px] font-semibold leading-[22px]",
   input:
     "min-w-0 flex-1 bg-transparent text-[15px] leading-6 text-content-primary outline-none placeholder:text-content-placeholder",
@@ -42,6 +52,7 @@ export default function Input({
   hasError = false,
   loading = false,
   leftIcon,
+  size = "md",
   type = "text",
   className = "",
   disabled,
@@ -72,8 +83,9 @@ export default function Input({
       )}
       <div
         className={`
-          flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-transparent px-4
+          flex items-center gap-2 rounded-lg border border-border-strong bg-transparent
           outline outline-2 outline-offset-2 transition-colors
+          ${sizeClasses[size]}
           ${outlineClass}
           ${disabled ? "cursor-not-allowed opacity-60" : "cursor-text"}
         `}
@@ -89,7 +101,7 @@ export default function Input({
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
           ref={inputRef}
-          className="min-w-0 flex-1 bg-transparent text-[15px] leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
+          className={`min-w-0 flex-1 bg-transparent ${size === "sm" ? "text-sm" : "text-[15px]"} leading-6 text-content-primary outline-none placeholder:text-content-placeholder`}
           {...props}
         />
         {isPassword && !loading && (

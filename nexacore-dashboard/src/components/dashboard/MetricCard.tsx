@@ -21,7 +21,7 @@ export default function MetricCard({
 
   return (
     <div
-      className={`rounded-2xl border border-border-default p-6 shadow-card ${
+      className={`rounded-2xl border border-border-default p-6 ${
         colorVariant === "purple" ? "bg-metric-purple" : "bg-metric-blue"
       }`}
     >

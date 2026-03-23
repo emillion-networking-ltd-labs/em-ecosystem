@@ -98,7 +98,7 @@ export default function ConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
-        className="w-[427px] overflow-hidden rounded-3xl border border-border-strong bg-surface-secondary shadow-card"
+        className="w-[427px] overflow-hidden rounded-3xl border border-border-strong bg-surface-secondary"
       >
         {/* Top section */}
         <div className="flex gap-4 border-b border-border-strong bg-surface-primary p-6">
@@ -121,14 +121,14 @@ export default function ConfirmModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle"
+            className="h-10 rounded-md px-6 text-body-sm font-normal tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] transition-colors disabled:opacity-50 ${
+            className={`h-10 rounded-md px-6 text-body-sm font-normal tracking-[-0.28px] transition-colors disabled:opacity-50 ${
               variant === "danger"
                 ? "bg-error text-content-inverse hover:opacity-90"
                 : "bg-surface-inverse text-content-inverse hover:opacity-90"

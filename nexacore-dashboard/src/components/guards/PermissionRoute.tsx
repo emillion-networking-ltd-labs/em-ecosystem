@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, type ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { usePermissions } from '@/hooks/usePermissions';
+import { useEffect, type ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
+import { usePermissions } from "@/hooks/usePermissions";
 
 type PermissionRouteProps = {
   permission?: string;
@@ -18,7 +18,7 @@ export default function PermissionRoute({
   allPermissions,
   anyPermission,
   children,
-  redirectTo = '/dashboard',
+  redirectTo = "/dashboard",
 }: PermissionRouteProps) {
   const router = useRouter();
   const { isAuthenticated, isInitialized } = useAuth();

@@ -81,7 +81,7 @@ function ShowcaseSection({
 }) {
   return (
     <div
-      className="card space-y-4 scroll-mt-20"
+      className="card-flat space-y-4 scroll-mt-20"
       id={`showcase-${title
         .toLowerCase()
         .replace(/[^a-z0-9]/g, "-")
@@ -137,7 +137,7 @@ function SpecsPanel({
             <div className="space-y-1.5">
               {Object.entries(entries).map(([key, value]) => (
                 <div key={key} className="flex items-center gap-2">
-                  <span className="text-caption font-medium text-content-secondary w-20 shrink-0">
+                  <span className="text-caption font-normal text-content-secondary w-20 shrink-0">
                     {key}
                   </span>
                   <code className="flex-1 text-xs bg-surface-secondary rounded px-2 py-1 text-content-primary font-mono overflow-x-auto">
@@ -167,7 +167,7 @@ const hoverClasses = {
 };
 
 const baseButtonClass =
-  "inline-flex items-center justify-center gap-2 font-medium rounded-md px-6 py-2.5 text-body-sm h-10";
+  "inline-flex items-center justify-center gap-2 font-normal rounded-md px-6 py-2.5 text-body-sm h-10";
 
 function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
   const variants = ["primary", "secondary", "outline", "danger"] as const;
@@ -193,7 +193,7 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
         </thead>
         <tbody>
           <tr className="border-b border-border-strong">
-            <td className="px-4 py-3 text-body-sm font-medium text-content-primary">
+            <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
               Normal
             </td>
             {variants.map((v) => (
@@ -205,14 +205,14 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
             ))}
             <td className={tdClass}>
               <div className="flex justify-center">
-                <button className="w-9 h-9 rounded-full flex items-center justify-center text-body-sm font-medium bg-surface-inverse text-content-inverse transition-colors hover:opacity-90">
+                <button className="w-9 h-9 rounded-full flex items-center justify-center text-body-sm font-normal bg-surface-inverse text-content-inverse transition-colors hover:opacity-90">
                   15
                 </button>
               </div>
             </td>
           </tr>
           <tr className="border-b border-border-strong">
-            <td className="px-4 py-3 text-body-sm font-medium text-content-primary">
+            <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
               Hover
             </td>
             {variants.map((v) => (
@@ -224,14 +224,14 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
             ))}
             <td className={tdClass}>
               <div className="flex justify-center">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-body-sm font-medium bg-surface-inverse text-content-inverse opacity-90">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-body-sm font-normal bg-surface-inverse text-content-inverse opacity-90">
                   15
                 </div>
               </div>
             </td>
           </tr>
           <tr className="border-b border-border-strong">
-            <td className="px-4 py-3 text-body-sm font-medium text-content-primary">
+            <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
               Disabled
             </td>
             {variants.map((v) => (
@@ -243,14 +243,14 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
             ))}
             <td className={tdClass}>
               <div className="flex justify-center">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-body-sm font-medium bg-surface-inverse text-content-inverse opacity-50 pointer-events-none">
+                <div className="w-9 h-9 rounded-full flex items-center justify-center text-body-sm font-normal bg-surface-inverse text-content-inverse opacity-50 pointer-events-none">
                   15
                 </div>
               </div>
             </td>
           </tr>
           <tr>
-            <td className="px-4 py-3 text-body-sm font-medium text-content-primary">
+            <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
               Loading
             </td>
             {variants.map((v) => (
@@ -279,7 +279,7 @@ function ButtonShowcase() {
 
       {/* Sizes — largest to smallest */}
       <div className="mt-6">
-        <p className="text-body-sm font-medium text-content-primary mb-2">
+        <p className="text-body-sm font-normal text-content-primary mb-2">
           Sizes
         </p>
         <div className="flex flex-wrap items-end justify-center sm:justify-start gap-4">
@@ -311,7 +311,7 @@ function ButtonShowcase() {
       </div>
 
       {/* Link Buttons */}
-      <p className="text-body-sm font-medium text-content-primary mb-2">
+      <p className="text-body-sm font-normal text-content-primary mb-2">
         Link Buttons
       </p>
       {(["light", "dark"] as const).map((mode) => (
@@ -341,7 +341,7 @@ function ButtonShowcase() {
             </thead>
             <tbody>
               <tr className="border-b border-border-strong">
-                <td className="px-4 py-3 text-body-sm font-medium text-content-primary">
+                <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
                   Normal
                 </td>
                 <td className="px-4 py-3 text-center">
@@ -368,21 +368,21 @@ function ButtonShowcase() {
                 </td>
               </tr>
               <tr>
-                <td className="px-4 py-3 text-body-sm font-medium text-content-primary">
+                <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
                   Hover
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <span className="text-sm font-medium leading-[21px] text-content-primary">
+                  <span className="text-sm font-normal leading-[21px] text-content-primary">
                     Link
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <span className="text-sm font-medium leading-[21px] text-content-primary underline">
+                  <span className="text-sm font-normal leading-[21px] text-content-primary underline">
                     Link
                   </span>
                 </td>
                 <td className="px-4 py-3 text-center">
-                  <span className="inline-flex items-center justify-center gap-1 w-full text-sm font-medium leading-[21px] text-content-primary underline">
+                  <span className="inline-flex items-center justify-center gap-1 w-full text-sm font-normal leading-[21px] text-content-primary underline">
                     <ArrowLeft size={14} />
                     Link
                   </span>
@@ -394,7 +394,7 @@ function ButtonShowcase() {
       ))}
 
       {/* Icon Buttons */}
-      <p className="text-body-sm font-medium text-content-primary mb-2">
+      <p className="text-body-sm font-normal text-content-primary mb-2">
         Icon Buttons
       </p>
       {(["light", "dark"] as const).map((mode) => (
@@ -422,7 +422,7 @@ function ButtonShowcase() {
             </thead>
             <tbody>
               <tr className="border-b border-border-strong">
-                <td className="px-4 py-3 text-body-sm font-medium text-content-primary">
+                <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
                   Normal
                 </td>
                 <td className="px-4 py-3">
@@ -457,7 +457,7 @@ function ButtonShowcase() {
                 </td>
               </tr>
               <tr>
-                <td className="px-4 py-3 text-body-sm font-medium text-content-primary">
+                <td className="px-4 py-3 text-body-sm font-normal text-content-primary">
                   Hover
                 </td>
                 <td className="px-4 py-3">
@@ -509,7 +509,7 @@ function ButtonShowcase() {
 }
 
 const linkSpecs = {
-  base: "text-sm font-medium leading-[21px] transition-colors",
+  base: "text-sm font-normal leading-[21px] transition-colors",
   variants: {
     simple: "text-content-primary/75 hover:text-content-primary",
     underline:
@@ -541,12 +541,12 @@ const iconButtonSpecs = {
 function InputGrid({ mode }: { mode: "light" | "dark" }) {
   return (
     <div
-      className={`rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode}
       </p>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <Input label="Default" placeholder="Type here..." />
         <Input
           label="With icon"
@@ -572,18 +572,37 @@ function InputShowcase() {
 
       <InputGrid mode="dark" />
 
+      {/* Sizes */}
+      <div>
+        <p className="text-body-sm font-normal text-content-primary mb-2">
+          Sizes
+        </p>
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex flex-col gap-1.5 w-[240px]">
+            <Input placeholder="md · 48px (default)" />
+            <span className="text-caption text-content-primary/50">
+              md · 48px (default)
+            </span>
+          </div>
+          <div className="flex flex-col gap-1.5 w-[240px]">
+            <Input size="sm" placeholder="sm · 40px" />
+            <span className="text-caption text-content-primary/50">
+              sm · 40px
+            </span>
+          </div>
+        </div>
+      </div>
+
       <SpecsPanel
         specs={{
           Container: { shared: inputSpecs.container },
+          Sizes: inputSpecs.sizes,
           Label: { shared: inputSpecs.label },
           Input: { shared: inputSpecs.input },
           States: inputSpecs.states,
           Icons: inputSpecs.icons,
           Dimensions: {
-            height: "48px (h-12)",
-            padding: "16px horizontal (px-4)",
             "border-radius": "8px (rounded-lg)",
-            font: "15px / 24px line-height",
             "label font": "15px / 22px line-height, semibold",
             outline: "2px, offset-2",
           },
@@ -598,17 +617,14 @@ function BadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
   const sizes = ["lg", "md", "sm"] as const;
   return (
     <div
-      className={`rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {sizes.map((size) => (
-          <div
-            key={size}
-            className="rounded-xl border border-border-strong p-4"
-          >
+          <div key={size} className="card-flat !p-4">
             <p className="text-caption text-content-primary/50 font-mono mb-3">
               {size} · {size === "sm" ? "12" : size === "md" ? "14" : "16"}px
               {size === "md" ? " (default)" : ""}
@@ -659,17 +675,14 @@ const spinnerTypes = [
 function SpinnerGrid({ mode }: { mode: "light" | "dark" }) {
   return (
     <div
-      className={`rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {spinnerTypes.map(({ label, Component }) => (
-          <div
-            key={label}
-            className="rounded-xl border border-border-strong p-4"
-          >
+          <div key={label} className="card-flat !p-4">
             <p className="text-caption text-content-primary/50 font-mono mb-3">
               {label}
             </p>
@@ -730,17 +743,14 @@ function AvatarGrid({ mode }: { mode: "light" | "dark" }) {
   const names = ["Jane Doe", "Alice Brown", "Bob Wilson"];
   return (
     <div
-      className={`rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {(["image", "initials", "icon fallback"] as const).map((type) => (
-          <div
-            key={type}
-            className="rounded-xl border border-border-strong p-4"
-          >
+          <div key={type} className="card-flat !p-4">
             <p className="text-caption text-content-primary/50 font-mono mb-3">
               {type}
             </p>
@@ -809,7 +819,7 @@ function ToggleCard({ mode }: { mode: "light" | "dark" }) {
   });
   return (
     <div
-      className={`flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode}
@@ -910,7 +920,7 @@ function CheckboxCard({ mode }: { mode: "light" | "dark" }) {
   });
   return (
     <div
-      className={`flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode}
@@ -1014,7 +1024,7 @@ function TooltipCard({ mode }: { mode: "light" | "dark" }) {
   const positions = ["top", "bottom", "left", "right"] as const;
   return (
     <div
-      className={`flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode}
@@ -1056,12 +1066,12 @@ function DividerShowcase() {
   return (
     <ShowcaseSection title="Divider">
       <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 light bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             light
           </p>
           <div className="space-y-3">
-            <div className="space-y-2">
+            <div className="space-y-4">
               <p className="text-body-sm text-content-secondary">
                 Content above
               </p>
@@ -1070,7 +1080,7 @@ function DividerShowcase() {
                 Content below
               </p>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-4">
               <p className="text-body-sm text-content-secondary">
                 Content above
               </p>
@@ -1093,12 +1103,12 @@ function DividerShowcase() {
             </div>
           </div>
         </div>
-        <div className="flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 dark bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             dark
           </p>
           <div className="space-y-3">
-            <div className="space-y-2">
+            <div className="space-y-4">
               <p className="text-body-sm text-content-secondary">
                 Content above
               </p>
@@ -1107,7 +1117,7 @@ function DividerShowcase() {
                 Content below
               </p>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-4">
               <p className="text-body-sm text-content-secondary">
                 Content above
               </p>
@@ -1147,7 +1157,7 @@ function SliderCard({ mode }: { mode: "light" | "dark" }) {
   const [v2, setV2] = useState(70);
   return (
     <div
-      className={`flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode}
@@ -1206,7 +1216,7 @@ function TabsCard({
   ];
   return (
     <div
-      className={`flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 overflow-hidden ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat !p-4 overflow-hidden ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode} · {variant}
@@ -1253,7 +1263,7 @@ function TabsNavCard({ mode }: { mode: "light" | "dark" }) {
   ];
   return (
     <div
-      className={`flex-1 rounded-xl border border-border-strong p-4 overflow-hidden ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 card-flat !p-4 overflow-hidden ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode} · nav
@@ -1278,7 +1288,7 @@ function NavHorizontalColumn() {
   ];
   return (
     <div className="flex-1 min-w-[280px] flex flex-col gap-4">
-      <div className="rounded-xl border border-border-strong p-4 overflow-hidden light bg-surface-primary">
+      <div className="card-flat !p-4 overflow-hidden light bg-surface-primary">
         <p className="text-caption text-content-primary/50 font-mono mb-3">
           light · nav-horizontal
         </p>
@@ -1299,7 +1309,7 @@ function NavHorizontalColumn() {
           ))}
         </div>
       </div>
-      <div className="rounded-xl border border-border-strong p-4 overflow-hidden dark bg-surface-primary">
+      <div className="card-flat !p-4 overflow-hidden dark bg-surface-primary">
         <p className="text-caption text-content-primary/50 font-mono mb-3">
           dark · nav-horizontal
         </p>
@@ -1367,7 +1377,7 @@ function SelectCard({ mode }: { mode: "light" | "dark" }) {
   ];
   return (
     <div
-      className={`rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode} · select
@@ -1418,18 +1428,18 @@ function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
 
   return (
     <div
-      className={`rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode} · email
       </p>
-      <div ref={ref} className="relative w-full">
+      <div ref={ref} className="relative w-fit">
         <button
           type="button"
           onClick={() => (open ? setOpen(false) : openDropdown())}
-          className={`flex h-10 items-center gap-2 rounded-full px-4 text-base font-medium border border-border-strong text-content-primary transition-all max-w-full ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
+          className={`flex h-10 items-center gap-2 rounded-md px-4 text-base font-normal border border-border-strong text-content-primary transition-all w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
         >
-          <span className="truncate leading-none">user@example.com</span>
+          <span className="leading-none">user@example.com</span>
           <ChevronDown
             size={16}
             className={`shrink-0 text-content-primary/50 transition-transform ${open ? "rotate-180" : ""}`}
@@ -1437,13 +1447,13 @@ function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
         </button>
         {open && (
           <div
-            className={`absolute z-50 left-0 right-0 ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"}`}
+            className={`absolute z-50 w-fit min-w-[200px] left-0 ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"}`}
           >
-            <div className="rounded-3xl border border-border-strong bg-surface-primary p-4 shadow-card">
+            <div className="rounded-xl border border-border-strong bg-surface-primary p-4 whitespace-nowrap">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-tertiary px-2 font-medium text-content-primary transition-colors"
+                className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-tertiary px-2 font-normal text-content-primary transition-colors"
               >
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
                   <span className="text-xs font-semibold">U</span>
@@ -1453,7 +1463,7 @@ function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="mt-4 w-full px-2 text-left text-sm font-medium text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
+                className="mt-4 w-full px-2 text-left text-sm font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
               >
                 Try a different email address
               </button>
@@ -1473,13 +1483,13 @@ function SelectShowcase() {
         <SelectCard mode="dark" />
         <EmailSelectorCard mode="light" />
         <EmailSelectorCard mode="dark" />
-        <div className="rounded-xl border border-border-strong p-4 light bg-surface-primary">
+        <div className="card-flat !p-4 light bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             light · language
           </p>
           <LanguageSelector />
         </div>
-        <div className="rounded-xl border border-border-strong p-4 dark bg-surface-primary">
+        <div className="card-flat !p-4 dark bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             dark · language
           </p>
@@ -1495,9 +1505,9 @@ function SelectShowcase() {
           "Select Position": selectSpecs.position,
           "Email Selector (auth)": {
             trigger:
-              "h-10 rounded-full px-4 text-base font-medium border border-border-strong bg-transparent hover:bg-surface-subtle",
+              "h-10 rounded-md px-4 w-fit text-base font-normal border border-border-strong bg-transparent hover:bg-surface-subtle",
             dropdown:
-              "rounded-3xl border border-border-strong bg-surface-primary p-4 shadow-card w-[300px]",
+              "rounded-xl border border-border-strong bg-surface-primary p-4 w-fit min-w-[200px] whitespace-nowrap",
             avatar:
               "h-8 w-8 rounded-full bg-surface-subtle text-xs font-semibold",
           },
@@ -1516,13 +1526,13 @@ function CalendarShowcase() {
   return (
     <ShowcaseSection title="Calendar">
       <div className="flex flex-wrap gap-4">
-        <div className="rounded-xl border border-border-strong p-4 light bg-surface-primary">
+        <div className="card-flat !p-4 light bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             light
           </p>
           <Calendar value={dateLight} onChange={setDateLight} />
         </div>
-        <div className="rounded-xl border border-border-strong p-4 dark bg-surface-primary">
+        <div className="card-flat !p-4 dark bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             dark
           </p>
@@ -1548,11 +1558,11 @@ function NavigationShowcase() {
   const [pageDark, setPageDark] = useState(3);
   return (
     <ShowcaseSection title="Navigation">
-      <p className="text-body-sm font-medium text-content-primary mb-2">
+      <p className="text-body-sm font-normal text-content-primary mb-2">
         Breadcrumbs
       </p>
       <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 light bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             light
           </p>
@@ -1564,7 +1574,7 @@ function NavigationShowcase() {
             ]}
           />
         </div>
-        <div className="flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 dark bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             dark
           </p>
@@ -1578,11 +1588,11 @@ function NavigationShowcase() {
         </div>
       </div>
 
-      <p className="text-body-sm font-medium text-content-primary mb-2 mt-4">
+      <p className="text-body-sm font-normal text-content-primary mb-2 mt-4">
         Pagination
       </p>
       <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 light bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             light
           </p>
@@ -1592,7 +1602,7 @@ function NavigationShowcase() {
             onPageChange={setPageLight}
           />
         </div>
-        <div className="flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 dark bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             dark
           </p>
@@ -1696,7 +1706,7 @@ function ToastDemo() {
               visible[variant] && (
                 <div
                   key={variant}
-                  className={`group flex items-start gap-2 rounded-full border border-border-strong bg-surface-primary px-6 py-4 shadow-card ${exiting[variant] ? "animate-toast-out" : "animate-toast-in"}`}
+                  className={`group flex items-start gap-2 rounded-full border border-border-strong bg-surface-primary px-6 py-4 ${exiting[variant] ? "animate-toast-out" : "animate-toast-in"}`}
                 >
                   <Icon size={16} className={`mt-px shrink-0 ${color}`} />
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -1760,7 +1770,7 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
               "Email verified!"
             )}
           </p>
-          <button className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle">
+          <button className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle">
             {isError ? "Go to Sign In" : "Go to Dashboard"}
           </button>
         </div>
@@ -1819,7 +1829,7 @@ function FeedbackShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`flex-1 min-w-[300px] rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-primary/50 font-mono mb-4">
               {mode}
@@ -1880,7 +1890,7 @@ function FeedbackShowcase() {
           },
           Toast: {
             container:
-              "rounded-full border border-border-strong bg-surface-primary px-6 py-4 shadow-card",
+              "rounded-full border border-border-strong bg-surface-primary px-6 py-4",
             icons:
               "error: AlertTriangle, success: CircleCheck, warning: CircleAlert, info: Info — 16px",
             title: "text-xs font-semibold leading-tight text-content-primary",
@@ -1899,7 +1909,7 @@ function FeedbackShowcase() {
               "CircleCheck 48px text-[#166534] strokeWidth-1.5 icon-success animation",
             text: "text-sm leading-[21px] text-content-primary/50 text-center",
             button:
-              "h-10 w-full rounded-md border border-border-strong bg-transparent text-base font-medium — outline style",
+              "h-10 w-full rounded-md border border-border-strong bg-transparent text-base font-normal — outline style",
           },
         }}
       />
@@ -1910,7 +1920,7 @@ function FeedbackShowcase() {
 function AccordionCard({ mode }: { mode: "light" | "dark" }) {
   return (
     <div
-      className={`flex-1 min-w-[280px] rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode}
@@ -2262,7 +2272,7 @@ function ChartsShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`flex-1 min-w-[400px] rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`flex-1 min-w-[400px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-primary/50 font-mono mb-3">
               {mode}
@@ -2377,7 +2387,142 @@ export function AtomShowcase() {
       <DividerShowcase />
       <SliderShowcase />
       <AccordionShowcase />
+      <CardShowcase />
     </div>
+  );
+}
+
+function CardShowcase() {
+  return (
+    <ShowcaseSection title="Card">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="space-y-4">
+          <div>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              container
+            </p>
+            <div className="card-container">
+              <h3 className="text-body-sm font-semibold text-content-primary">
+                Card Container
+              </h3>
+            </div>
+          </div>
+          <div
+            className="dark"
+            style={{ color: "rgb(var(--content-primary))" }}
+          >
+            <div className="card-container">
+              <h3 className="text-body-sm font-semibold text-content-primary">
+                Card Container
+              </h3>
+            </div>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              container-flat
+            </p>
+            <div className="card-container-flat">
+              <h3 className="text-body-sm font-semibold text-content-primary">
+                Card Container Flat
+              </h3>
+            </div>
+          </div>
+          <div
+            className="dark"
+            style={{ color: "rgb(var(--content-primary))" }}
+          >
+            <div className="card-container-flat">
+              <h3 className="text-body-sm font-semibold text-content-primary">
+                Card Container Flat
+              </h3>
+            </div>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              inner
+            </p>
+            <div className="card">
+              <h3 className="text-body-sm font-semibold text-content-primary">
+                Card Inner
+              </h3>
+            </div>
+          </div>
+          <div
+            className="dark"
+            style={{ color: "rgb(var(--content-primary))" }}
+          >
+            <div className="card">
+              <h3 className="text-body-sm font-semibold text-content-primary">
+                Card Inner
+              </h3>
+            </div>
+          </div>
+        </div>
+        <div className="space-y-4">
+          <div>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              flat
+            </p>
+            <div className="card-flat">
+              <h3 className="text-body-sm font-semibold text-content-primary">
+                Card Flat
+              </h3>
+            </div>
+          </div>
+          <div
+            className="dark"
+            style={{ color: "rgb(var(--content-primary))" }}
+          >
+            <div className="card-flat">
+              <h3 className="text-body-sm font-semibold text-content-primary">
+                Card Flat
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
+      <SpecsPanel
+        specs={{
+          "Container (card-container)": {
+            background: "bg-surface-primary (#ffffff light / #1a1a1a dark)",
+            border: "1px border-border-strong rgba(0,0,0,0.08)",
+            shadow: "0 8px 32px rgba(0,0,0,0.04)",
+            radius: "24px (rounded-3xl)",
+            padding: "24px",
+            usage: "Auth cards, modals, main panels, dropdowns",
+          },
+          "Inner (card)": {
+            background: "bg-surface-primary (#ffffff light / #1a1a1a dark)",
+            border: "1px border-border-strong rgba(0,0,0,0.08)",
+            shadow: "0 8px 32px rgba(0,0,0,0.04)",
+            radius: "12px (rounded-xl)",
+            padding: "24px",
+            usage:
+              "Content sections, chart cards, showcase items, settings panels",
+          },
+          "Container Flat (card-container-flat)": {
+            background: "bg-surface-primary",
+            border: "1px border-border-strong",
+            shadow: "none",
+            radius: "24px (rounded-3xl)",
+            padding: "24px",
+            usage: "Lightweight main panels, page sections",
+          },
+          "Flat (card-flat)": {
+            background: "bg-surface-primary",
+            border: "1px border-border-strong",
+            shadow: "none",
+            radius: "12px (rounded-xl)",
+            padding: "24px",
+            usage: "Nav tabs, filters, catalog, lightweight sections",
+          },
+        }}
+      />
+    </ShowcaseSection>
   );
 }
 
@@ -2434,7 +2579,7 @@ function DataTableShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`flex-1 min-w-[300px] rounded-xl border border-border-strong p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-primary/50 font-mono mb-3">
               {mode}

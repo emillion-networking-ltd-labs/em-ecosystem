@@ -110,7 +110,7 @@ export default function ActiveSessions() {
   const otherSessions = sessions.filter((s) => !s.isCurrent);
 
   return (
-    <div className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card">
+    <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-body-sm font-semibold uppercase tracking-wider text-content-primary">
           Active Sessions
@@ -166,11 +166,11 @@ export default function ActiveSessions() {
 
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
-                    <span className="truncate text-body-sm font-medium text-content-primary">
+                    <span className="truncate text-body-sm font-normal text-content-primary">
                       {label}
                     </span>
                     {session.isCurrent && (
-                      <span className="shrink-0 rounded-full bg-status-success/10 px-2 py-0.5 text-caption font-medium text-status-success">
+                      <span className="shrink-0 rounded-full bg-status-success/10 px-2 py-0.5 text-caption font-normal text-status-success">
                         Current
                       </span>
                     )}

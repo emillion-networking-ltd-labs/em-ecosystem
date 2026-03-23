@@ -144,7 +144,7 @@ export default function PermissionsMatrix() {
   return (
     <div className="space-y-6">
       {/* Matrix table */}
-      <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary shadow-card">
+      <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border-default">
@@ -174,7 +174,7 @@ export default function PermissionsMatrix() {
                   >
                     <td className="px-6 py-3">
                       <div>
-                        <span className="text-body-sm font-medium text-content-primary">
+                        <span className="text-body-sm font-normal text-content-primary">
                           {perm.key}
                         </span>
                         <p className="text-caption text-content-tertiary">
@@ -229,13 +229,13 @@ export default function PermissionsMatrix() {
               key={role}
               className="flex items-center gap-2 rounded-xl border border-border-default bg-surface-primary px-4 py-3"
             >
-              <span className="text-body-sm font-medium text-content-primary">
+              <span className="text-body-sm font-normal text-content-primary">
                 {role}
               </span>
               <button
                 onClick={() => saveRole(role)}
                 disabled={!isDirty(role) || saving === role}
-                className="flex items-center gap-1 rounded-lg bg-brand-primary px-3 py-1.5 text-caption font-medium text-white transition-colors hover:bg-brand-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg bg-brand-primary px-3 py-1.5 text-caption font-normal text-white transition-colors hover:bg-brand-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
               >
                 {saving === role ? (
                   <Loader2 size={14} className="animate-spin" />
@@ -247,7 +247,7 @@ export default function PermissionsMatrix() {
               <button
                 onClick={() => resetRole(role)}
                 disabled={!isDirty(role)}
-                className="flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-caption font-medium text-content-secondary transition-colors hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-caption font-normal text-content-secondary transition-colors hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RotateCcw size={14} />
                 Reset

@@ -1,29 +1,33 @@
-'use client';
+"use client";
 
-import { Check, AlertTriangle } from 'lucide-react';
-import { useAuth } from '@/hooks/useAuth';
+import { Check, AlertTriangle } from "lucide-react";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function AccountInfo() {
   const { user } = useAuth();
 
   if (!user) return null;
 
-  const memberSince = new Date(user.createdAt).toLocaleDateString('en-US', {
-    month: 'short',
-    day: 'numeric',
-    year: 'numeric',
+  const memberSince = new Date(user.createdAt).toLocaleDateString("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
   });
 
   const isLocked = !user.isActive;
-  const statusLabel = isLocked ? 'Locked' : user.isActive ? 'Active' : 'Inactive';
-  const statusDotClass = isLocked
-    ? 'bg-error'
+  const statusLabel = isLocked
+    ? "Locked"
     : user.isActive
-      ? 'bg-success'
-      : 'bg-content-disabled';
+      ? "Active"
+      : "Inactive";
+  const statusDotClass = isLocked
+    ? "bg-error"
+    : user.isActive
+      ? "bg-success"
+      : "bg-content-disabled";
 
   return (
-    <div className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card">
+    <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
       <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
         Account Information
       </h2>
@@ -34,7 +38,7 @@ export default function AccountInfo() {
 
         <dt className="text-body-sm text-content-tertiary">Role</dt>
         <dd>
-          <span className="inline-flex items-center rounded-md bg-surface-subtle px-2 py-0.5 text-caption font-medium text-content-secondary">
+          <span className="inline-flex items-center rounded-md bg-surface-subtle px-2 py-0.5 text-caption font-normal text-content-secondary">
             {user.role}
           </span>
         </dd>

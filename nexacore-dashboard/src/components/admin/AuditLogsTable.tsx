@@ -72,7 +72,7 @@ function getMetadataSummary(metadata: Record<string, unknown> | null): string {
 
 export default function AuditLogsTable({ logs }: AuditLogsTableProps) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary shadow-card">
+    <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary">
       <table className="w-full text-left text-body-sm">
         <thead>
           <tr className="border-b border-border-default">
@@ -107,7 +107,7 @@ export default function AuditLogsTable({ logs }: AuditLogsTableProps) {
               </td>
               <td className="px-4 py-3">
                 <span
-                  className={`inline-block rounded-full px-2 py-0.5 text-caption font-medium ${
+                  className={`inline-block rounded-full px-2 py-0.5 text-caption font-normal ${
                     ACTION_COLORS[log.action] ||
                     "bg-surface-subtle text-content-secondary"
                   }`}

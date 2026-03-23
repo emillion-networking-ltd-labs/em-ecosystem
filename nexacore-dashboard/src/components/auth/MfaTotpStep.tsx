@@ -195,7 +195,7 @@ export default function MfaTotpStep() {
                     setUseRecovery(false);
                     setRecoveryCode("");
                   }}
-                  className="flex items-center gap-1 whitespace-nowrap text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                  className="flex items-center gap-1 whitespace-nowrap text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
                 >
                   <ArrowLeft size={14} />
                   Use authenticator app
@@ -208,14 +208,14 @@ export default function MfaTotpStep() {
               <button
                 type="button"
                 onClick={cancelMfa}
-                className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+                className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isDisabled || !recoveryCode.trim()}
-                className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+                className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
               >
                 <span className={isLoading ? "opacity-30" : ""}>Verify</span>
                 {isLoading && (
@@ -331,7 +331,7 @@ export default function MfaTotpStep() {
                   setUseRecovery(true);
                   setCode(Array(6).fill(""));
                 }}
-                className="whitespace-nowrap text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Use recovery code
               </button>
@@ -343,14 +343,14 @@ export default function MfaTotpStep() {
             <button
               type="button"
               onClick={cancelMfa}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Cancel
             </button>
             <button
               type="submit"
               disabled={isDisabled || code.join("").length !== 6}
-              className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+              className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
             >
               <span className={isLoading ? "opacity-30" : ""}>Verify</span>
               {isLoading && (

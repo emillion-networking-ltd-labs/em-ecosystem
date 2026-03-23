@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useCallback } from 'react';
-import { getFingerprint } from '@/lib/fingerprint';
+import { useState, useCallback } from "react";
+import { getFingerprint } from "@/lib/fingerprint";
 import {
   trustDevice,
   listTrustedDevices,
   revokeDevice as revokeDeviceApi,
   revokeAllDevices as revokeAllDevicesApi,
-} from '@/lib/trusted-device-api';
-import type { TrustedDeviceResponse } from '@/lib/types';
-import { extractMessageByStatus } from '@/lib/error-utils';
-import { HTTP_STATUS } from '@/lib/error-constants';
+} from "@/lib/trusted-device-api";
+import type { TrustedDeviceResponse } from "@/lib/types";
+import { extractMessageByStatus } from "@/lib/error-utils";
+import { HTTP_STATUS } from "@/lib/error-constants";
 
 export function useTrustedDevices() {
   const [devices, setDevices] = useState<TrustedDeviceResponse[]>([]);
@@ -26,7 +26,16 @@ export function useTrustedDevices() {
       const data = await listTrustedDevices();
       setDevices(data);
     } catch (err) {
-      setError(extractMessageByStatus(err, { [HTTP_STATUS.TOO_MANY_REQUESTS]: 'Too many requests. Try again later.' }, 'Failed to load trusted devices.'));
+      setError(
+        extractMessageByStatus(
+          err,
+          {
+            [HTTP_STATUS.TOO_MANY_REQUESTS]:
+              "Too many requests. Try again later.",
+          },
+          "Failed to load trusted devices.",
+        ),
+      );
     } finally {
       setIsLoading(false);
     }
@@ -37,14 +46,23 @@ export function useTrustedDevices() {
     try {
       const fp = await getFingerprint();
       if (!fp) {
-        setError('Device fingerprinting not available.');
+        setError("Device fingerprinting not available.");
         return false;
       }
       await trustDevice(fp);
       await fetchDevices();
       return true;
     } catch (err) {
-      setError(extractMessageByStatus(err, { [HTTP_STATUS.TOO_MANY_REQUESTS]: 'Too many requests. Try again later.' }, 'Failed to trust device.'));
+      setError(
+        extractMessageByStatus(
+          err,
+          {
+            [HTTP_STATUS.TOO_MANY_REQUESTS]:
+              "Too many requests. Try again later.",
+          },
+          "Failed to trust device.",
+        ),
+      );
       return false;
     }
   }, [fetchDevices]);
@@ -57,7 +75,16 @@ export function useTrustedDevices() {
         await fetchDevices();
         return true;
       } catch (err) {
-        setError(extractMessageByStatus(err, { [HTTP_STATUS.TOO_MANY_REQUESTS]: 'Too many requests. Try again later.' }, 'Failed to revoke device.'));
+        setError(
+          extractMessageByStatus(
+            err,
+            {
+              [HTTP_STATUS.TOO_MANY_REQUESTS]:
+                "Too many requests. Try again later.",
+            },
+            "Failed to revoke device.",
+          ),
+        );
         return false;
       }
     },
@@ -71,7 +98,16 @@ export function useTrustedDevices() {
       await fetchDevices();
       return true;
     } catch (err) {
-      setError(extractMessageByStatus(err, { [HTTP_STATUS.TOO_MANY_REQUESTS]: 'Too many requests. Try again later.' }, 'Failed to revoke all devices.'));
+      setError(
+        extractMessageByStatus(
+          err,
+          {
+            [HTTP_STATUS.TOO_MANY_REQUESTS]:
+              "Too many requests. Try again later.",
+          },
+          "Failed to revoke all devices.",
+        ),
+      );
       return false;
     }
   }, [fetchDevices]);

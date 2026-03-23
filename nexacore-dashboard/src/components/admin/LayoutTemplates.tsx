@@ -76,13 +76,13 @@ function ListPageTemplate() {
           <table className="w-full">
             <thead>
               <tr className="bg-surface-tertiary">
-                <th className="text-left text-[10px] font-medium text-content-primary/50 uppercase px-3 py-2">
+                <th className="text-left text-[10px] font-normal text-content-primary/50 uppercase px-3 py-2">
                   Name
                 </th>
-                <th className="text-left text-[10px] font-medium text-content-primary/50 uppercase px-3 py-2">
+                <th className="text-left text-[10px] font-normal text-content-primary/50 uppercase px-3 py-2">
                   Status
                 </th>
-                <th className="text-left text-[10px] font-medium text-content-primary/50 uppercase px-3 py-2">
+                <th className="text-left text-[10px] font-normal text-content-primary/50 uppercase px-3 py-2">
                   Role
                 </th>
                 <th className="w-8 px-3 py-2" />

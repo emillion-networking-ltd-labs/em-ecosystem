@@ -9,7 +9,7 @@ type PaginationProps = {
 };
 
 const pageBase =
-  "flex h-8 w-8 items-center justify-center rounded-md text-caption font-medium border border-border-strong transition-colors";
+  "flex h-8 w-8 items-center justify-center rounded-md text-caption font-normal border border-border-strong transition-colors";
 const pageActive =
   "bg-surface-inverse text-content-inverse transition-opacity hover:opacity-90";
 const pageInactive =
@@ -58,7 +58,7 @@ export default function Pagination({
         page === "..." ? (
           <span
             key={`ellipsis-${i}`}
-            className="flex h-8 w-8 items-center justify-center text-caption font-medium text-content-primary/50"
+            className="flex h-8 w-8 items-center justify-center text-caption font-normal text-content-primary/50"
           >
             ...
           </span>

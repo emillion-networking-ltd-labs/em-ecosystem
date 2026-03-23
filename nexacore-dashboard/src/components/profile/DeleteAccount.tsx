@@ -113,7 +113,7 @@ export default function DeleteAccount() {
   return (
     <>
       {/* Danger zone card */}
-      <div className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card">
+      <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
         <h2 className="mb-4 text-body-sm font-semibold uppercase tracking-wider text-error">
           Danger Zone
         </h2>
@@ -145,7 +145,7 @@ export default function DeleteAccount() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="delete-account-modal-title"
-            className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary shadow-card"
+            className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary"
           >
             {/* Top section */}
             <div className="border-b border-border-default bg-surface-primary p-6">
@@ -195,14 +195,14 @@ export default function DeleteAccount() {
               <button
                 onClick={handleClose}
                 disabled={loading}
-                className="h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
+                className="h-10 rounded-md px-6 text-body-sm font-normal tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
                 disabled={!canConfirm}
-                className="h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                className="h-10 rounded-md px-6 text-body-sm font-normal tracking-[-0.28px] bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
               >
                 {loading ? "Deleting..." : "Delete My Account"}
               </button>

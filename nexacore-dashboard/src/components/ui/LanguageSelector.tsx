@@ -18,21 +18,22 @@ const STORAGE_KEY = "nexacore-language";
 
 export const languageSelectorSpecs = {
   trigger: {
-    base: "flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium leading-[21px] transition-all",
+    base: "flex h-10 items-center gap-2 rounded-md px-4 text-sm font-normal leading-[21px] transition-all",
     closed:
       "border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary",
     open: "border border-border-strong bg-surface-primary text-content-primary",
   },
   popover: {
-    position: "absolute bottom-full left-0 right-0 sm:right-auto sm:w-[330px]",
+    position: "absolute w-fit min-w-[200px]",
     container:
-      "rounded-3xl border border-border-strong bg-surface-primary p-4 shadow-card max-h-[240px] overflow-y-auto",
+      "rounded-xl border border-border-strong bg-surface-primary p-4 max-h-[240px] overflow-y-auto",
     search:
-      "h-12 rounded-full border border-border-strong bg-surface-primary px-4 shadow-card",
+      "h-12 rounded-lg border border-border-strong bg-surface-primary px-4",
   },
   option: {
     selected: "bg-surface-tertiary text-content-primary",
-    default: "bg-transparent text-content-primary/75 hover:bg-surface-subtle",
+    default:
+      "bg-transparent text-sm text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary",
     avatar: "h-8 w-8 rounded-full bg-surface-subtle text-xs font-semibold",
   },
   icon: "ChevronDown 16px, rotate-180 on open",
@@ -111,17 +112,17 @@ export default function LanguageSelector() {
   };
 
   /* Trigger styles:
-     Both states share the same box model (h-10, px-4, rounded-full) to prevent layout shift.
+     Both states share the same box model (h-10, px-4, rounded-md) to prevent layout shift.
      Closed → invisible pill (transparent border/bg), Nav Link color (75% → 100%)
      Open   → visible pill (border black/5, bg-white), full opacity text, no shadow */
   const triggerBase =
-    "flex h-10 items-center gap-2 rounded-full px-4 text-sm font-medium leading-[21px] transition-all";
+    "flex h-10 items-center gap-2 rounded-md px-4 text-sm font-normal leading-[21px] transition-all";
   const triggerClass = isOpen
     ? `${triggerBase} border border-border-strong bg-surface-primary text-content-primary`
     : `${triggerBase} border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary`;
 
   return (
-    <div ref={containerRef} className="relative w-full">
+    <div ref={containerRef} className="relative w-fit">
       {/* Trigger — arrow RIGHT, gap 8px */}
       <button
         type="button"
@@ -138,13 +139,13 @@ export default function LanguageSelector() {
       {/* Popover — opens upward (footer context), search adjacent to trigger */}
       {isOpen && (
         <div
-          className={`absolute z-50 sm:w-[330px] ${popoverPos.vertical === "down" ? "top-full mt-1 animate-dropdown-down" : "bottom-full mb-1 animate-dropdown-up"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0 right-0 sm:right-auto"}`}
+          className={`absolute z-50 w-fit min-w-[200px] ${popoverPos.vertical === "down" ? "top-full mt-1 animate-dropdown-down" : "bottom-full mb-1 animate-dropdown-up"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
         >
           <div
             className={`flex flex-col gap-1 ${popoverPos.vertical === "down" ? "flex-col-reverse" : ""}`}
           >
             {/* Results — Figma: rounded card, border, shadow, scrollable */}
-            <div className="max-h-[240px] overflow-y-auto rounded-3xl border border-border-strong bg-surface-primary p-4 shadow-card">
+            <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-strong bg-surface-primary p-4">
               {filtered.length === 0 ? (
                 <p className="py-2 text-center text-sm text-content-primary/50">
                   No results
@@ -158,7 +159,7 @@ export default function LanguageSelector() {
                         key={lang.code}
                         type="button"
                         onClick={() => handleSelect(lang)}
-                        className={`flex h-10 items-center gap-2 rounded-md px-2 font-medium transition-colors ${
+                        className={`flex h-10 items-center gap-2 rounded-md px-2 font-normal transition-colors ${
                           isSelected
                             ? "bg-surface-tertiary text-content-primary"
                             : "bg-transparent text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary"
@@ -182,7 +183,7 @@ export default function LanguageSelector() {
             </div>
 
             {/* Search Bar — adjacent to trigger, pill, border, shadow */}
-            <div className="flex h-12 items-center gap-2 rounded-full border border-border-strong bg-surface-primary px-4 shadow-card">
+            <div className="flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-surface-primary px-4">
               <Search
                 size={16}
                 className="shrink-0 text-content-primary"

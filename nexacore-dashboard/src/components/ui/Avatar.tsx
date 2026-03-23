@@ -58,7 +58,7 @@ export default function Avatar({
           onError={() => setImgError(true)}
         />
       ) : initials ? (
-        <span className="font-medium text-content-secondary select-none">
+        <span className="font-normal text-content-secondary select-none">
           {initials}
         </span>
       ) : (

@@ -1,4 +1,4 @@
-import { SVGProps } from 'react';
+import { SVGProps } from "react";
 
 /**
  * Monochrome Google "G" icon — uses currentColor to match lucide-react pattern.

@@ -65,7 +65,9 @@ export default function DashboardLayout({
             rightPanel ? () => setRightPanelOpen(!rightPanelOpen) : undefined
           }
         />
-        <main className="p-4 lg:px-7 lg:py-6">{children}</main>
+        <main className="p-4 lg:px-7 lg:py-6 max-w-[1200px] mx-auto">
+          {children}
+        </main>
       </div>
 
       {/* Right panel (optional, desktop only) */}

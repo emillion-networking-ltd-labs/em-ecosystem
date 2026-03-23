@@ -10,8 +10,8 @@ interface TooltipProps {
 
 export const tooltipSpecs = {
   container:
-    "max-w-[241px] rounded-xs border border-border-strong bg-surface-primary px-4 py-3 shadow-card",
-  text: "text-caption font-medium text-content-primary",
+    "max-w-[241px] rounded-lg border border-border-strong bg-surface-primary px-4 py-3",
+  text: "text-caption font-normal text-content-primary",
   arrow:
     "h-[8px] w-[8px] rotate-45 border border-border-strong bg-surface-primary",
   positions: {
@@ -58,9 +58,9 @@ export default function Tooltip({
         <div
           id={tooltipId}
           role="tooltip"
-          className={`absolute z-50 max-w-[241px] rounded-xs border border-border-strong bg-surface-primary px-4 py-3 shadow-card ${positionClasses[position]}`}
+          className={`absolute z-50 max-w-[241px] rounded-lg border border-border-strong bg-surface-primary px-4 py-3 ${positionClasses[position]}`}
         >
-          <p className="text-caption font-medium text-content-primary">
+          <p className="text-caption font-normal text-content-primary">
             {content}
           </p>
           <div

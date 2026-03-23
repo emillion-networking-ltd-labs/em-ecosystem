@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import FingerprintJS from '@fingerprintjs/fingerprintjs';
+import FingerprintJS from "@fingerprintjs/fingerprintjs";
 
 let cachedFingerprint: string | null = null;
 let loadPromise: Promise<string> | null = null;
@@ -17,7 +17,7 @@ export function getFingerprint(): Promise<string> {
     })
     .catch(() => {
       // Fail-open: login still works, just can't skip MFA
-      return '';
+      return "";
     })
     .finally(() => {
       loadPromise = null;

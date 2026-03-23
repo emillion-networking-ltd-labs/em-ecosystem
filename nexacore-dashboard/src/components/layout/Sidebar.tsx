@@ -89,7 +89,7 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-30 flex h-screen flex-col border-r border-border-default bg-surface-primary transition-[width,transform] duration-200 ${widthClass} ${translateClass}`}
+      className={`fixed left-0 top-0 z-30 flex h-screen flex-col border-r border-border-strong bg-surface-primary transition-[width,transform] duration-200 ${widthClass} ${translateClass}`}
     >
       {/* Logo area */}
       <div className="flex items-center justify-between rounded-lg p-2">
@@ -180,7 +180,7 @@ export default function Sidebar({
               </div>
               {!collapsed && (
                 <div className="min-w-0">
-                  <p className="truncate text-body-sm font-medium text-content-primary">
+                  <p className="truncate text-body-sm font-normal text-content-primary">
                     {user.firstName && user.lastName
                       ? `${user.firstName} ${user.lastName}`
                       : user.email.split("@")[0]}

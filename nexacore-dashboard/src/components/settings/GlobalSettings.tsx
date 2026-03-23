@@ -48,7 +48,7 @@ function SettingRow({
           <Icon size={20} className="text-content-secondary" />
         </div>
         <div>
-          <p className="text-body-sm font-medium text-content-primary">
+          <p className="text-body-sm font-normal text-content-primary">
             {label}
           </p>
           <p className="text-caption text-content-tertiary">{description}</p>

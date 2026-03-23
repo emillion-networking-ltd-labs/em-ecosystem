@@ -75,7 +75,7 @@ const examples = [
     code: `<div className="flex items-center gap-3">
   <Avatar name="Alice B" size="lg" />
   <div>
-    <p className="text-body-md font-medium text-content-primary">Alice Brown</p>
+    <p className="text-body-md font-normal text-content-primary">Alice Brown</p>
     <div className="flex gap-2 mt-1">
       <Badge variant="success">Admin</Badge>
       <Badge variant="info">MFA</Badge>
@@ -114,7 +114,7 @@ export default function CodePlayground() {
           <button
             key={ex.label}
             onClick={() => setCode(ex.code)}
-            className="px-3 py-1 text-caption font-medium rounded-md border border-border-strong bg-surface-primary text-content-secondary hover:bg-surface-subtle transition-colors"
+            className="px-3 py-1 text-caption font-normal rounded-md border border-border-strong bg-surface-primary text-content-secondary hover:bg-surface-subtle transition-colors"
           >
             {ex.label}
           </button>
@@ -131,7 +131,7 @@ export default function CodePlayground() {
           {/* Editor */}
           <div className="rounded-2xl border border-border-strong overflow-hidden">
             <div className="px-4 py-2 bg-surface-tertiary border-b border-border-strong">
-              <span className="text-caption font-medium text-content-secondary">
+              <span className="text-caption font-normal text-content-secondary">
                 Editor
               </span>
             </div>
@@ -144,7 +144,7 @@ export default function CodePlayground() {
           {/* Preview */}
           <div className="rounded-2xl border border-border-strong overflow-hidden">
             <div className="px-4 py-2 bg-surface-tertiary border-b border-border-strong">
-              <span className="text-caption font-medium text-content-secondary">
+              <span className="text-caption font-normal text-content-secondary">
                 Preview
               </span>
             </div>

@@ -1,8 +1,8 @@
-import AuthLayout from '@/components/layout/AuthLayout';
-import Link from 'next/link';
+import AuthLayout from "@/components/layout/AuthLayout";
+import Link from "next/link";
 
 export const metadata = {
-  title: 'Check Your Email — EM NexaCore',
+  title: "Check Your Email — EM NexaCore",
 };
 
 export default function CheckEmailPage() {
@@ -34,7 +34,7 @@ export default function CheckEmailPage() {
             <div className="flex items-center justify-end">
               <Link
                 href="/login"
-                className="whitespace-nowrap text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Back to Sign In
               </Link>
@@ -44,7 +44,7 @@ export default function CheckEmailPage() {
           {/* Try Again — Figma: single full-width primary button */}
           <Link
             href="/forgot-password"
-            className="flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90"
+            className="flex h-10 w-full items-center justify-center rounded-md border border-border-default bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90"
           >
             Try Again
           </Link>

@@ -229,7 +229,7 @@ const typographyTokens = [
   },
   {
     name: "button",
-    desc: "text-base font-medium",
+    desc: "text-base font-normal",
     size: "16px",
     lineHeight: "normal",
     weight: 500,
@@ -253,7 +253,7 @@ const typographyTokens = [
   },
   {
     name: "link",
-    desc: "text-sm font-medium",
+    desc: "text-sm font-normal",
     size: "14px",
     lineHeight: "21px",
     weight: 500,
@@ -320,7 +320,7 @@ function ColorGrid({ groups }: { groups: ColorGroup[] }) {
     <>
       {groups.map((group) => (
         <div key={group.label}>
-          <h4 className="text-body-sm font-medium text-content-secondary mb-3">
+          <h4 className="text-body-sm font-normal text-content-secondary mb-3">
             {group.label}
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -334,7 +334,7 @@ function ColorGrid({ groups }: { groups: ColorGroup[] }) {
                   style={{ backgroundColor: token.value }}
                 />
                 <div className="min-w-0">
-                  <p className="text-caption font-medium text-content-primary truncate">
+                  <p className="text-caption font-normal text-content-primary truncate">
                     {token.name}
                   </p>
                   <p className="text-[10px] text-content-primary/50 font-mono truncate">
@@ -377,7 +377,7 @@ function TypographySection() {
             className="flex items-baseline gap-4 p-3 rounded-lg border border-border-strong"
           >
             <div className="w-32 shrink-0">
-              <p className="text-caption font-medium text-content-primary">
+              <p className="text-caption font-normal text-content-primary">
                 {token.name}
               </p>
               <p className="text-[10px] text-content-primary/50 font-mono">
@@ -445,7 +445,7 @@ function RadiusSection() {
               style={{ borderRadius: token.value }}
             />
             <div className="text-center">
-              <p className="text-caption font-medium text-content-primary">
+              <p className="text-caption font-normal text-content-primary">
                 {token.name}
               </p>
               <p className="text-[10px] text-content-primary/50 font-mono">
@@ -471,7 +471,7 @@ function ShadowSection() {
               style={{ boxShadow: token.value }}
             />
             <div className="text-center">
-              <p className="text-caption font-medium text-content-primary">
+              <p className="text-caption font-normal text-content-primary">
                 {token.name}
               </p>
               <p className="text-[10px] text-content-primary/50 font-mono max-w-[200px]">

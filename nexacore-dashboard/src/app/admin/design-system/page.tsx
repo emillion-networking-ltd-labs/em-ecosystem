@@ -78,8 +78,12 @@ export default function DesignSystemPage() {
   return (
     <AdminRoute>
       <DashboardLayout>
-        {/* Breadcrumbs */}
-        <div className="mb-6">
+        {/* Breadcrumbs + Title */}
+        <div className="mb-6 flex items-center gap-2">
+          <h1 className="text-lg font-semibold text-content-primary">
+            Design System
+          </h1>
+          <span className="inline-block h-6 w-px bg-border-strong" />
           <Breadcrumbs
             items={[
               { label: "Dashboards", href: "/dashboard" },
@@ -89,18 +93,8 @@ export default function DesignSystemPage() {
           />
         </div>
 
-        {/* Header */}
-        <div className="mb-6">
-          <h1 className="text-heading-lg font-semibold text-content-primary">
-            Design System
-          </h1>
-          <p className="text-body-sm text-content-secondary mt-1">
-            Component library reference — {componentRegistry.length} components
-          </p>
-        </div>
-
         {/* View Toggle — nav-horizontal with icons */}
-        <div className="mb-6">
+        <div className="card mb-6">
           <div className="hidden sm:block">
             <Tabs
               tabs={viewTabs}
@@ -133,105 +127,108 @@ export default function DesignSystemPage() {
           </div>
         </div>
 
-        {/* Catalog View */}
-        {activeView === "catalog" && (
-          <>
-            {/* Category Filter */}
-            <div className="mb-6">
-              <SingleAccordion
-                title={`Filter by category — ${activeCategory === "all" ? "All" : activeCategory} (${activeCategory === "all" ? componentRegistry.length : filteredComponents.length})`}
-              >
-                <div className="flex items-center gap-2 flex-wrap">
-                  <Button
-                    variant={activeCategory === "all" ? "primary" : "outline"}
-                    size="sm"
-                    fullWidth={false}
-                    onClick={() => setActiveCategory("all")}
-                  >
-                    All ({componentRegistry.length})
-                  </Button>
-                  {categoryMeta.map((cat) => (
+        {/* Content area */}
+        <div key={activeView} className="animate-tab-content">
+          {/* Catalog View */}
+          {activeView === "catalog" && (
+            <div className="card">
+              {/* Category Filter */}
+              <div className="mb-6">
+                <SingleAccordion
+                  title={`Filter by category — ${activeCategory === "all" ? "All" : activeCategory} (${activeCategory === "all" ? componentRegistry.length : filteredComponents.length})`}
+                >
+                  <div className="flex items-center gap-2 flex-wrap">
                     <Button
-                      key={cat.key}
-                      variant={
-                        activeCategory === cat.key ? "primary" : "outline"
-                      }
+                      variant={activeCategory === "all" ? "primary" : "outline"}
                       size="sm"
                       fullWidth={false}
-                      onClick={() => setActiveCategory(cat.key)}
+                      onClick={() => setActiveCategory("all")}
                     >
-                      {cat.label} ({cat.count})
+                      All ({componentRegistry.length})
                     </Button>
-                  ))}
-                </div>
-              </SingleAccordion>
-            </div>
+                    {categoryMeta.map((cat) => (
+                      <Button
+                        key={cat.key}
+                        variant={
+                          activeCategory === cat.key ? "primary" : "outline"
+                        }
+                        size="sm"
+                        fullWidth={false}
+                        onClick={() => setActiveCategory(cat.key)}
+                      >
+                        {cat.label} ({cat.count})
+                      </Button>
+                    ))}
+                  </div>
+                </SingleAccordion>
+              </div>
 
-            {/* Component Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredComponents.map((entry) => (
-                <button
-                  key={entry.name}
-                  onClick={() => {
-                    const mapping = componentToSection[entry.name];
-                    if (!mapping) return;
-                    setActiveView(mapping.tab);
-                    if (mapping.section) {
-                      setTimeout(() => {
-                        const el = document.getElementById(mapping.section);
-                        el?.scrollIntoView({
-                          behavior: "smooth",
-                          block: "start",
-                        });
-                      }, 150);
-                    }
-                  }}
-                  className="card flex flex-col gap-3 text-left cursor-pointer"
-                >
-                  <div className="flex items-center justify-between">
-                    <h3 className="text-body-md font-semibold text-content-primary">
-                      {entry.name}
-                    </h3>
-                    <Badge
-                      variant={
-                        categoryColors[entry.category] as
-                          | "default"
-                          | "info"
-                          | "success"
-                          | "warning"
+              {/* Component Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filteredComponents.map((entry) => (
+                  <button
+                    key={entry.name}
+                    onClick={() => {
+                      const mapping = componentToSection[entry.name];
+                      if (!mapping) return;
+                      setActiveView(mapping.tab);
+                      if (mapping.section) {
+                        setTimeout(() => {
+                          const el = document.getElementById(mapping.section);
+                          el?.scrollIntoView({
+                            behavior: "smooth",
+                            block: "start",
+                          });
+                        }, 150);
                       }
-                      size="sm"
-                    >
-                      {entry.category}
-                    </Badge>
-                  </div>
-                  <p className="text-caption text-content-secondary">
-                    {entry.description}
-                  </p>
-                  <div className="mt-auto pt-2 border-t border-border-strong">
-                    <code className="text-xs text-content-primary/50 font-mono">
-                      ui/{entry.fileName}
-                    </code>
-                  </div>
-                </button>
-              ))}
+                    }}
+                    className="card-flat flex flex-col gap-3 text-left cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-body-md font-semibold text-content-primary">
+                        {entry.name}
+                      </h3>
+                      <Badge
+                        variant={
+                          categoryColors[entry.category] as
+                            | "default"
+                            | "info"
+                            | "success"
+                            | "warning"
+                        }
+                        size="sm"
+                      >
+                        {entry.category}
+                      </Badge>
+                    </div>
+                    <p className="text-caption text-content-secondary">
+                      {entry.description}
+                    </p>
+                    <div className="mt-auto pt-2 border-t border-border-strong">
+                      <code className="text-xs text-content-primary/50 font-mono">
+                        ui/{entry.fileName}
+                      </code>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
-          </>
-        )}
+          )}
 
-        {/* Atom Showcase */}
-        {activeView === "atoms" && <AtomShowcase />}
+          {/* Atom Showcase */}
+          {activeView === "atoms" && <AtomShowcase />}
 
-        {/* Molecule Showcase */}
-        {activeView === "molecules" && <MoleculeShowcase />}
+          {/* Molecule Showcase */}
+          {activeView === "molecules" && <MoleculeShowcase />}
 
-        {/* Tokens View */}
-        {activeView === "tokens" && <TokenInspector />}
+          {/* Tokens View */}
+          {activeView === "tokens" && <TokenInspector />}
 
-        {/* Playground */}
-        {activeView === "playground" && <CodePlayground />}
+          {/* Playground */}
+          {activeView === "playground" && <CodePlayground />}
 
-        {/* Templates */}
+          {/* Templates */}
+        </div>
       </DashboardLayout>
     </AdminRoute>
   );

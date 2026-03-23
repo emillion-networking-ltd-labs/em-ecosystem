@@ -9,7 +9,7 @@ export default function GoBackSection() {
     >
       <Link
         href="/"
-        className="flex items-center gap-2 text-sm font-medium leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary"
+        className="flex items-center gap-2 text-sm font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary"
       >
         <House size={16} strokeWidth={2} />
         Go back to the Home Page

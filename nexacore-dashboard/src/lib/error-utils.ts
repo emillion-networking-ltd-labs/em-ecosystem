@@ -10,7 +10,7 @@ type ApiErrorShape = {
 
 /** Ensure string ends with a period. */
 export function ensurePeriod(s: string): string {
-  return s.endsWith('.') ? s : `${s}.`;
+  return s.endsWith(".") ? s : `${s}.`;
 }
 
 /**
@@ -20,8 +20,11 @@ export function ensurePeriod(s: string): string {
 export function extractErrorMessage(err: unknown): string {
   const errObj = err as ApiErrorShape;
   const details = errObj?.error?.details;
-  if (Array.isArray(details) && details.length > 0) return ensurePeriod(details[0]);
-  return ensurePeriod(errObj?.error?.message ?? 'An unexpected error occurred.');
+  if (Array.isArray(details) && details.length > 0)
+    return ensurePeriod(details[0]);
+  return ensurePeriod(
+    errObj?.error?.message ?? "An unexpected error occurred.",
+  );
 }
 
 /**

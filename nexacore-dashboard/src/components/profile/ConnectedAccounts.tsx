@@ -177,7 +177,7 @@ export default function ConnectedAccounts() {
     <>
       <div
         id="connected-accounts"
-        className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card"
+        className="rounded-2xl border border-border-default bg-surface-primary p-6"
       >
         <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
           Connected Accounts
@@ -196,7 +196,7 @@ export default function ConnectedAccounts() {
               >
                 <div className="flex items-center gap-3">
                   {provider.icon}
-                  <span className="text-body-sm font-medium text-content-primary">
+                  <span className="text-body-sm font-normal text-content-primary">
                     {provider.name}
                   </span>
                 </div>
@@ -256,7 +256,7 @@ export default function ConnectedAccounts() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="disconnect-title"
-            className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary shadow-card"
+            className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary"
           >
             {/* Top section */}
             <div className="border-b border-border-default bg-surface-primary p-6">
@@ -288,14 +288,14 @@ export default function ConnectedAccounts() {
               <button
                 onClick={handleClose}
                 disabled={loading}
-                className="h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
+                className="h-10 rounded-md px-6 text-body-sm font-normal tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUnlink}
                 disabled={!canConfirm}
-                className="h-10 rounded-md px-6 text-body-sm font-medium tracking-[-0.28px] bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                className="h-10 rounded-md px-6 text-body-sm font-normal tracking-[-0.28px] bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
               >
                 {loading ? "Disconnecting..." : "Disconnect"}
               </button>

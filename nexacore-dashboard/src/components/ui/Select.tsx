@@ -22,19 +22,19 @@ interface SelectProps {
 export const selectSpecs = {
   trigger: {
     shared:
-      "inline-flex items-center justify-between gap-2 w-full px-4 py-2.5 text-body-sm rounded-3xl bg-transparent",
+      "inline-flex items-center justify-between gap-2 w-fit px-4 py-2.5 text-body-sm rounded-md bg-transparent",
     hover: "hover:bg-surface-subtle",
     open: "bg-surface-subtle",
     disabled: "opacity-50 cursor-not-allowed",
   },
   dropdown: {
     container:
-      "rounded-3xl border border-border-strong bg-surface-primary p-6 shadow-card max-h-64 overflow-auto",
+      "rounded-xl border border-border-strong bg-surface-primary p-6 max-h-64 overflow-auto",
   },
   option: {
-    selected: "bg-surface-inverse text-content-inverse rounded-3xl",
-    default: "text-content-primary rounded-3xl hover:bg-surface-subtle",
-    danger: "text-error hover:bg-error-bg rounded-3xl",
+    selected: "bg-surface-inverse text-content-inverse rounded-md",
+    default: "text-content-primary rounded-md hover:bg-surface-subtle",
+    danger: "text-error hover:bg-error-bg rounded-md",
     focused: "bg-surface-subtle text-content-primary",
   },
   icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open",
@@ -158,7 +158,7 @@ export default function Select({
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openDropdown())}
         onKeyDown={handleKeyDown}
-        className={`inline-flex items-center justify-between gap-2 w-full px-4 py-2.5 text-body-sm rounded-3xl transition-colors ${
+        className={`inline-flex items-center justify-between gap-2 w-fit px-4 py-2.5 text-body-sm rounded-md transition-colors ${
           disabled
             ? "opacity-50 cursor-not-allowed"
             : "hover:bg-surface-subtle cursor-pointer"
@@ -185,7 +185,7 @@ export default function Select({
           aria-activedescendant={
             focusedIndex >= 0 ? `${listboxId}-opt-${focusedIndex}` : undefined
           }
-          className={`absolute z-50 min-w-full bg-surface-primary border border-border-strong shadow-card rounded-3xl p-6 flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
+          className={`absolute z-50 w-fit min-w-[160px] bg-surface-primary border border-border-strong rounded-xl p-6 flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;
@@ -203,7 +203,7 @@ export default function Select({
                   setOpen(false);
                 }}
                 onMouseEnter={() => setFocusedIndex(index)}
-                className={`flex items-center gap-2 px-2 py-2 rounded-3xl text-xs cursor-pointer transition-colors ${
+                className={`flex items-center gap-2 px-2 py-2 rounded-md text-xs cursor-pointer transition-colors ${
                   isSelected
                     ? "bg-surface-inverse text-content-inverse"
                     : isDanger

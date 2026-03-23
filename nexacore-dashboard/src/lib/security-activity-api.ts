@@ -1,10 +1,10 @@
-import { apiClient } from './api';
+import { apiClient } from "./api";
 import type {
   PaginatedResponse,
   SecurityEvent,
   SessionResponse,
   MessageResponse,
-} from './types';
+} from "./types";
 
 export function getSecurityActivity(
   page = 1,
@@ -20,7 +20,7 @@ export function getSecurityActivity(
 }
 
 export function getActiveSessions(): Promise<SessionResponse[]> {
-  return apiClient.get<SessionResponse[]>('/auth/sessions');
+  return apiClient.get<SessionResponse[]>("/auth/sessions");
 }
 
 export function revokeSession(sessionId: string): Promise<MessageResponse> {
@@ -28,5 +28,5 @@ export function revokeSession(sessionId: string): Promise<MessageResponse> {
 }
 
 export function revokeAllSessions(): Promise<MessageResponse> {
-  return apiClient.post<MessageResponse>('/auth/logout-all', {});
+  return apiClient.post<MessageResponse>("/auth/logout-all", {});
 }

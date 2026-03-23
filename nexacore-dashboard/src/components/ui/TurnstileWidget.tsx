@@ -1,12 +1,12 @@
-'use client';
+"use client";
 
-import { useRef, useCallback } from 'react';
-import { Turnstile } from '@marsidev/react-turnstile';
-import type { TurnstileInstance } from '@marsidev/react-turnstile';
-import { useTheme } from '@/hooks/useTheme';
+import { useRef, useCallback } from "react";
+import { Turnstile } from "@marsidev/react-turnstile";
+import type { TurnstileInstance } from "@marsidev/react-turnstile";
+import { useTheme } from "@/hooks/useTheme";
 
 const SITE_KEY =
-  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '1x00000000000000000000AA';
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? "1x00000000000000000000AA";
 
 type TurnstileWidgetProps = {
   onToken: (token: string) => void;
@@ -38,8 +38,8 @@ export default function TurnstileWidget({
         onError={() => ref.current?.reset()}
         options={{
           theme,
-          size: 'flexible',
-          action: 'auth',
+          size: "flexible",
+          action: "auth",
         }}
       />
     </div>

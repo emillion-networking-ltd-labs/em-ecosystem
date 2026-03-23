@@ -1,11 +1,11 @@
-'use client';
+"use client";
 
-import { Search } from 'lucide-react';
-import type { AuditAction } from '@/lib/types';
+import { Search } from "lucide-react";
+import type { AuditAction } from "@/lib/types";
 
 type AuditLogFiltersProps = {
-  action: AuditAction | '';
-  onActionChange: (action: AuditAction | '') => void;
+  action: AuditAction | "";
+  onActionChange: (action: AuditAction | "") => void;
   userId: string;
   onUserIdChange: (userId: string) => void;
   startDate: string;
@@ -15,24 +15,24 @@ type AuditLogFiltersProps = {
 };
 
 const AUDIT_ACTIONS: AuditAction[] = [
-  'LOGIN_SUCCESS',
-  'LOGIN_FAILURE',
-  'LOGOUT',
-  'REGISTER',
-  'TOKEN_REFRESH',
-  'OAUTH_LOGIN',
-  'OAUTH_LINKED',
-  'OAUTH_REGISTER',
-  'OAUTH_UNLINKED',
-  'ACCOUNT_LOCKED',
-  'ACCOUNT_UNLOCKED',
-  'PASSWORD_CHANGE',
-  'PROFILE_UPDATE',
-  'USER_ROLE_CHANGE',
-  'USER_DEACTIVATED',
-  'USER_ACTIVATED',
-  'USER_DELETED',
-  'SUPERADMIN_BYPASS',
+  "LOGIN_SUCCESS",
+  "LOGIN_FAILURE",
+  "LOGOUT",
+  "REGISTER",
+  "TOKEN_REFRESH",
+  "OAUTH_LOGIN",
+  "OAUTH_LINKED",
+  "OAUTH_REGISTER",
+  "OAUTH_UNLINKED",
+  "ACCOUNT_LOCKED",
+  "ACCOUNT_UNLOCKED",
+  "PASSWORD_CHANGE",
+  "PROFILE_UPDATE",
+  "USER_ROLE_CHANGE",
+  "USER_DEACTIVATED",
+  "USER_ACTIVATED",
+  "USER_DELETED",
+  "SUPERADMIN_BYPASS",
 ];
 
 export default function AuditLogFilters({
@@ -50,13 +50,13 @@ export default function AuditLogFilters({
       {/* Action filter */}
       <select
         value={action}
-        onChange={(e) => onActionChange(e.target.value as AuditAction | '')}
+        onChange={(e) => onActionChange(e.target.value as AuditAction | "")}
         className="h-10 rounded-lg border border-border-default bg-surface-secondary px-3 text-body-sm text-content-primary outline-none"
       >
         <option value="">All actions</option>
         {AUDIT_ACTIONS.map((a) => (
           <option key={a} value={a}>
-            {a.replace(/_/g, ' ')}
+            {a.replace(/_/g, " ")}
           </option>
         ))}
       </select>

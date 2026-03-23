@@ -1,21 +1,30 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Key, Smartphone, Monitor, Pencil, Trash2, Plus, AlertTriangle, ShieldCheck } from 'lucide-react';
-import { usePasskey } from '@/hooks/usePasskey';
-import { useToast } from '@/context/ToastContext';
-import Button from '@/components/ui/Button';
-import Input from '@/components/ui/Input';
-import ConfirmModal from '@/components/ui/ConfirmModal';
-import type { PasskeyResponse } from '@/lib/types';
+import { useState, useEffect } from "react";
+import {
+  Key,
+  Smartphone,
+  Monitor,
+  Pencil,
+  Trash2,
+  Plus,
+  AlertTriangle,
+  ShieldCheck,
+} from "lucide-react";
+import { usePasskey } from "@/hooks/usePasskey";
+import { useToast } from "@/context/ToastContext";
+import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import ConfirmModal from "@/components/ui/ConfirmModal";
+import type { PasskeyResponse } from "@/lib/types";
 
-type View = 'list' | 'registering';
+type View = "list" | "registering";
 
 function formatRelativeTime(dateStr: string | null): string {
-  if (!dateStr) return 'Never';
+  if (!dateStr) return "Never";
   const diff = Date.now() - new Date(dateStr).getTime();
   const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return 'Just now';
+  if (minutes < 1) return "Just now";
   if (minutes < 60) return `${minutes}m ago`;
   const hours = Math.floor(minutes / 60);
   if (hours < 24) return `${hours}h ago`;
@@ -25,7 +34,7 @@ function formatRelativeTime(dateStr: string | null): string {
 }
 
 function DeviceIcon({ deviceType }: { deviceType: string }) {
-  return deviceType === 'multiDevice' ? (
+  return deviceType === "multiDevice" ? (
     <Smartphone size={18} className="text-content-secondary" />
   ) : (
     <Monitor size={18} className="text-content-secondary" />
@@ -49,11 +58,11 @@ function PasskeyItem({
         </div>
         <div className="flex flex-col">
           <div className="flex items-center gap-2">
-            <span className="text-body-sm font-medium text-content-primary">
-              {passkey.name || 'Passkey'}
+            <span className="text-body-sm font-normal text-content-primary">
+              {passkey.name || "Passkey"}
             </span>
             {passkey.backedUp && (
-              <span className="rounded-full bg-surface-tertiary px-2 py-0.5 text-[11px] font-medium text-content-secondary">
+              <span className="rounded-full bg-surface-tertiary px-2 py-0.5 text-[11px] font-normal text-content-secondary">
                 Synced
               </span>
             )}
@@ -68,7 +77,7 @@ function PasskeyItem({
           type="button"
           onClick={() => onRename(passkey)}
           className="rounded-md p-2 text-content-secondary transition-colors hover:bg-surface-subtle hover:text-content-primary"
-          aria-label={`Rename ${passkey.name || 'passkey'}`}
+          aria-label={`Rename ${passkey.name || "passkey"}`}
         >
           <Pencil size={16} />
         </button>
@@ -76,7 +85,7 @@ function PasskeyItem({
           type="button"
           onClick={() => onDelete(passkey)}
           className="rounded-md p-2 text-content-secondary transition-colors hover:bg-error-bg hover:text-error"
-          aria-label={`Delete ${passkey.name || 'passkey'}`}
+          aria-label={`Delete ${passkey.name || "passkey"}`}
         >
           <Trash2 size={16} />
         </button>
@@ -100,18 +109,20 @@ export default function PasskeyManager() {
 
   const { addToast } = useToast();
 
-  const [view, setView] = useState<View>('list');
-  const [regName, setRegName] = useState('');
+  const [view, setView] = useState<View>("list");
+  const [regName, setRegName] = useState("");
 
   // Rename state
-  const [renamingPasskey, setRenamingPasskey] = useState<PasskeyResponse | null>(null);
-  const [renameValue, setRenameValue] = useState('');
+  const [renamingPasskey, setRenamingPasskey] =
+    useState<PasskeyResponse | null>(null);
+  const [renameValue, setRenameValue] = useState("");
   const [isRenaming, setIsRenaming] = useState(false);
 
   // Delete state
-  const [deletingPasskey, setDeletingPasskey] = useState<PasskeyResponse | null>(null);
-  const [deletePassword, setDeletePassword] = useState('');
-  const [deleteFieldError, setDeleteFieldError] = useState('');
+  const [deletingPasskey, setDeletingPasskey] =
+    useState<PasskeyResponse | null>(null);
+  const [deletePassword, setDeletePassword] = useState("");
+  const [deleteFieldError, setDeleteFieldError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
@@ -122,11 +133,19 @@ export default function PasskeyManager() {
     clearError();
     const result = await registerPasskey(regName.trim() || undefined);
     if (result) {
-      addToast({ variant: 'success', title: 'Passkey registered', description: `"${result.name}" added successfully.` });
-      setRegName('');
-      setView('list');
+      addToast({
+        variant: "success",
+        title: "Passkey registered",
+        description: `"${result.name}" added successfully.`,
+      });
+      setRegName("");
+      setView("list");
     } else {
-      addToast({ variant: 'error', title: 'Registration failed', description: 'Passkey registration failed. Please try again.' });
+      addToast({
+        variant: "error",
+        title: "Registration failed",
+        description: "Passkey registration failed. Please try again.",
+      });
     }
   };
 
@@ -136,34 +155,51 @@ export default function PasskeyManager() {
     const ok = await renamePasskey(renamingPasskey.id, renameValue.trim());
     setIsRenaming(false);
     if (ok) {
-      addToast({ variant: 'success', title: 'Passkey renamed', description: `Renamed to "${renameValue.trim()}".` });
+      addToast({
+        variant: "success",
+        title: "Passkey renamed",
+        description: `Renamed to "${renameValue.trim()}".`,
+      });
       setRenamingPasskey(null);
     } else {
-      addToast({ variant: 'error', title: 'Rename failed', description: 'Failed to rename passkey.' });
+      addToast({
+        variant: "error",
+        title: "Rename failed",
+        description: "Failed to rename passkey.",
+      });
     }
   };
 
   const handleDeleteSubmit = async () => {
     if (!deletingPasskey) return;
     if (!deletePassword.trim()) {
-      setDeleteFieldError('Enter your password');
+      setDeleteFieldError("Enter your password");
       return;
     }
-    setDeleteFieldError('');
+    setDeleteFieldError("");
     setIsDeleting(true);
     const errMsg = await deletePasskey(deletingPasskey.id, deletePassword);
     setIsDeleting(false);
     if (!errMsg) {
-      addToast({ variant: 'success', title: 'Passkey deleted', description: 'Passkey removed. You can also delete it from your browser or device settings.' });
+      addToast({
+        variant: "success",
+        title: "Passkey deleted",
+        description:
+          "Passkey removed. You can also delete it from your browser or device settings.",
+      });
       setDeletingPasskey(null);
-      setDeletePassword('');
+      setDeletePassword("");
     } else {
-      addToast({ variant: 'error', title: 'Delete failed', description: errMsg });
+      addToast({
+        variant: "error",
+        title: "Delete failed",
+        description: errMsg,
+      });
     }
   };
 
   return (
-    <div className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card">
+    <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -185,11 +221,12 @@ export default function PasskeyManager() {
         <div className="flex items-start gap-3 rounded-lg border border-warning-border bg-warning-bg p-4">
           <AlertTriangle size={18} className="mt-0.5 shrink-0 text-warning" />
           <div>
-            <p className="text-body-sm font-medium text-content-primary">
+            <p className="text-body-sm font-normal text-content-primary">
               Passkeys not supported
             </p>
             <p className="mt-1 text-caption text-content-secondary">
-              Your browser does not support WebAuthn. Use a modern browser like Chrome, Edge, Safari, or Firefox.
+              Your browser does not support WebAuthn. Use a modern browser like
+              Chrome, Edge, Safari, or Firefox.
             </p>
           </div>
         </div>
@@ -203,11 +240,12 @@ export default function PasskeyManager() {
       )}
 
       {/* List View */}
-      {isSupported && view === 'list' && (
+      {isSupported && view === "list" && (
         <>
           {!isLoadingList && passkeys.length === 0 && (
             <p className="mb-4 text-body-sm text-content-secondary">
-              No passkeys registered. Add a passkey for faster, more secure sign-in using biometrics or your device.
+              No passkeys registered. Add a passkey for faster, more secure
+              sign-in using biometrics or your device.
             </p>
           )}
 
@@ -219,12 +257,12 @@ export default function PasskeyManager() {
                   passkey={pk}
                   onRename={(p) => {
                     clearError();
-                    setRenameValue(p.name || '');
+                    setRenameValue(p.name || "");
                     setRenamingPasskey(p);
                   }}
                   onDelete={(p) => {
                     clearError();
-                    setDeletePassword('');
+                    setDeletePassword("");
                     setDeletingPasskey(p);
                   }}
                 />
@@ -238,8 +276,8 @@ export default function PasskeyManager() {
             fullWidth={false}
             onClick={() => {
               clearError();
-              setRegName('');
-              setView('registering');
+              setRegName("");
+              setView("registering");
             }}
             disabled={passkeys.length >= 10}
             className="gap-2"
@@ -257,10 +295,11 @@ export default function PasskeyManager() {
       )}
 
       {/* Registering View */}
-      {isSupported && view === 'registering' && (
+      {isSupported && view === "registering" && (
         <div className="flex flex-col gap-4">
           <p className="text-body-sm text-content-secondary">
-            Give your passkey a name to identify it later, then follow the biometric prompt.
+            Give your passkey a name to identify it later, then follow the
+            biometric prompt.
           </p>
           <Input
             label="Passkey name (optional)"
@@ -276,7 +315,10 @@ export default function PasskeyManager() {
               variant="outline"
               size="md"
               fullWidth
-              onClick={() => { clearError(); setView('list'); }}
+              onClick={() => {
+                clearError();
+                setView("list");
+              }}
               disabled={isRegistering}
             >
               Cancel
@@ -300,7 +342,7 @@ export default function PasskeyManager() {
         onClose={() => setRenamingPasskey(null)}
         onConfirm={handleRenameSubmit}
         title="Rename Passkey"
-        description={`Enter a new name for "${renamingPasskey?.name || 'Passkey'}".`}
+        description={`Enter a new name for "${renamingPasskey?.name || "Passkey"}".`}
         confirmLabel="Save"
         loading={isRenaming}
       >
@@ -319,10 +361,14 @@ export default function PasskeyManager() {
       {/* Delete Modal */}
       <ConfirmModal
         open={!!deletingPasskey}
-        onClose={() => { setDeletingPasskey(null); setDeleteFieldError(''); clearError(); }}
+        onClose={() => {
+          setDeletingPasskey(null);
+          setDeleteFieldError("");
+          clearError();
+        }}
         onConfirm={handleDeleteSubmit}
         title="Delete Passkey"
-        description={`Are you sure you want to delete "${deletingPasskey?.name || 'Passkey'}"? This action cannot be undone.`}
+        description={`Are you sure you want to delete "${deletingPasskey?.name || "Passkey"}"? This action cannot be undone.`}
         confirmLabel="Delete"
         variant="danger"
         loading={isDeleting}
@@ -333,7 +379,10 @@ export default function PasskeyManager() {
             type="password"
             name="delete-passkey-password"
             value={deletePassword}
-            onChange={(e) => { setDeletePassword(e.target.value); setDeleteFieldError(''); }}
+            onChange={(e) => {
+              setDeletePassword(e.target.value);
+              setDeleteFieldError("");
+            }}
             placeholder="Enter your password"
             error={deleteFieldError || undefined}
           />

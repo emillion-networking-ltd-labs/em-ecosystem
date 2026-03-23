@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 type ErrorAlertProps = {
   message: string;
@@ -6,7 +6,11 @@ type ErrorAlertProps = {
   className?: string;
 };
 
-export default function ErrorAlert({ message, onDismiss, className = '' }: ErrorAlertProps) {
+export default function ErrorAlert({
+  message,
+  onDismiss,
+  className = "",
+}: ErrorAlertProps) {
   if (!message) return null;
 
   return (
@@ -34,7 +38,14 @@ export default function ErrorAlert({ message, onDismiss, className = '' }: Error
           className="shrink-0 text-error/60 hover:text-error"
           aria-label="Dismiss error"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+          >
             <line x1="18" y1="6" x2="6" y2="18" />
             <line x1="6" y1="6" x2="18" y2="18" />
           </svg>

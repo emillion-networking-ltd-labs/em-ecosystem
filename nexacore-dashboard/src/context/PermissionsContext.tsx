@@ -1,12 +1,7 @@
-'use client';
+"use client";
 
-import {
-  createContext,
-  useContext,
-  useMemo,
-  type ReactNode,
-} from 'react';
-import { useAuth } from '@/context/AuthContext';
+import { createContext, useContext, useMemo, type ReactNode } from "react";
+import { useAuth } from "@/context/AuthContext";
 
 type PermissionsContextType = {
   permissions: string[];
@@ -21,8 +16,11 @@ const PermissionsContext = createContext<PermissionsContextType | null>(null);
 export function PermissionsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
 
-  const permissions = useMemo(() => user?.permissions ?? [], [user?.permissions]);
-  const isSuperAdmin = permissions.includes('*');
+  const permissions = useMemo(
+    () => user?.permissions ?? [],
+    [user?.permissions],
+  );
+  const isSuperAdmin = permissions.includes("*");
 
   const permissionSet = useMemo(() => new Set(permissions), [permissions]);
 
@@ -49,7 +47,7 @@ export function PermissionsProvider({ children }: { children: ReactNode }) {
 export function usePermissions(): PermissionsContextType {
   const context = useContext(PermissionsContext);
   if (!context) {
-    throw new Error('usePermissions must be used within PermissionsProvider');
+    throw new Error("usePermissions must be used within PermissionsProvider");
   }
   return context;
 }

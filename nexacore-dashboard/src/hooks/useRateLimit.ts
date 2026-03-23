@@ -1,5 +1,5 @@
-import { useState, useCallback } from 'react';
-import type { RateLimitInfo, RateLimitKind } from '@/lib/types';
+import { useState, useCallback } from "react";
+import type { RateLimitInfo, RateLimitKind } from "@/lib/types";
 
 const DEFAULT_RATE_LIMIT: RateLimitInfo = {
   isRateLimited: false,
@@ -9,11 +9,15 @@ const DEFAULT_RATE_LIMIT: RateLimitInfo = {
 };
 
 export function useRateLimit() {
-  const [rateLimitInfo, setRateLimitInfo] = useState<RateLimitInfo>(DEFAULT_RATE_LIMIT);
+  const [rateLimitInfo, setRateLimitInfo] =
+    useState<RateLimitInfo>(DEFAULT_RATE_LIMIT);
 
-  const setRateLimit = useCallback((retryAfter: number, message: string, kind: RateLimitKind = 'throttle') => {
-    setRateLimitInfo({ isRateLimited: true, retryAfter, message, kind });
-  }, []);
+  const setRateLimit = useCallback(
+    (retryAfter: number, message: string, kind: RateLimitKind = "throttle") => {
+      setRateLimitInfo({ isRateLimited: true, retryAfter, message, kind });
+    },
+    [],
+  );
 
   const clearRateLimit = useCallback(() => {
     setRateLimitInfo(DEFAULT_RATE_LIMIT);

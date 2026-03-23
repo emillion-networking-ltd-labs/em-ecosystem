@@ -1,35 +1,36 @@
-'use client';
+"use client";
 
-import { useState } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { useToast } from '@/context/ToastContext';
-import { requestEmailChange } from '@/lib/email-change-api';
-import Input from '@/components/ui/Input';
-import Button from '@/components/ui/Button';
-import { Info } from 'lucide-react';
-import { extractMessageByStatus } from '@/lib/error-utils';
-import { HTTP_STATUS } from '@/lib/error-constants';
+import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/context/ToastContext";
+import { requestEmailChange } from "@/lib/email-change-api";
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+import { Info } from "lucide-react";
+import { extractMessageByStatus } from "@/lib/error-utils";
+import { HTTP_STATUS } from "@/lib/error-constants";
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ChangeEmailForm() {
   const { user } = useAuth();
   const { addToast } = useToast();
-  const [newEmail, setNewEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [newEmail, setNewEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (!user) return null;
 
   const isOAuthOnly = user.oauthProviders.length > 0 && !user.hasPassword;
   const providerNames = user.oauthProviders
-    .map((p) => p === 'GOOGLE' ? 'Google' : p === 'GITHUB' ? 'GitHub' : p)
-    .join(' and ');
+    .map((p) => (p === "GOOGLE" ? "Google" : p === "GITHUB" ? "GitHub" : p))
+    .join(" and ");
 
   const isValidEmail = EMAIL_REGEX.test(newEmail);
   const isSameEmail = newEmail.toLowerCase() === user.email.toLowerCase();
   const isValidPassword = password.length >= 8;
-  const canSubmit = !isOAuthOnly && isValidEmail && !isSameEmail && isValidPassword && !loading;
+  const canSubmit =
+    !isOAuthOnly && isValidEmail && !isSameEmail && isValidPassword && !loading;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,21 +38,38 @@ export default function ChangeEmailForm() {
     setLoading(true);
     try {
       await requestEmailChange(newEmail, password);
-      addToast({ variant: 'success', title: 'Verification email sent', description: 'Check the inbox of your new email address to confirm the change.' });
-      setNewEmail('');
-      setPassword('');
+      addToast({
+        variant: "success",
+        title: "Verification email sent",
+        description:
+          "Check the inbox of your new email address to confirm the change.",
+      });
+      setNewEmail("");
+      setPassword("");
     } catch (err: unknown) {
-      const msg = extractMessageByStatus(err, {
-        [HTTP_STATUS.TOO_MANY_REQUESTS]: 'Too many requests. Try again later.',
-      }, 'Failed to request email change.');
-      addToast({ variant: 'error', title: 'Email change failed', description: msg });
+      const msg = extractMessageByStatus(
+        err,
+        {
+          [HTTP_STATUS.TOO_MANY_REQUESTS]:
+            "Too many requests. Try again later.",
+        },
+        "Failed to request email change.",
+      );
+      addToast({
+        variant: "error",
+        title: "Email change failed",
+        description: msg,
+      });
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div id="change-email" className="rounded-2xl border border-border-default bg-surface-primary p-6 shadow-card">
+    <div
+      id="change-email"
+      className="rounded-2xl border border-border-default bg-surface-primary p-6"
+    >
       <h2 className="mb-6 text-body-sm font-semibold uppercase tracking-wider text-content-primary">
         Change Email
       </h2>
@@ -60,10 +78,13 @@ export default function ChangeEmailForm() {
         <div className="flex items-start gap-3 rounded-xl bg-surface-subtle p-4">
           <Info size={18} className="mt-0.5 shrink-0 text-content-secondary" />
           <p className="text-body-sm text-content-secondary">
-            Your email is managed by {providerNames}. Set a password in{' '}
-            <a href="#connected-accounts" className="font-medium text-content-primary underline underline-offset-2 hover:text-brand">
+            Your email is managed by {providerNames}. Set a password in{" "}
+            <a
+              href="#connected-accounts"
+              className="font-normal text-content-primary underline underline-offset-2 hover:text-brand"
+            >
               Connected Accounts
-            </a>{' '}
+            </a>{" "}
             to change your email.
           </p>
         </div>
@@ -78,9 +99,9 @@ export default function ChangeEmailForm() {
             placeholder="Enter new email address"
             error={
               newEmail && !isValidEmail
-                ? 'Enter a valid email address'
+                ? "Enter a valid email address"
                 : newEmail && isSameEmail
-                  ? 'New email must be different from current email'
+                  ? "New email must be different from current email"
                   : undefined
             }
           />
@@ -95,7 +116,13 @@ export default function ChangeEmailForm() {
           />
 
           <div className="flex justify-end">
-            <Button type="submit" size="md" fullWidth={false} loading={loading} disabled={!canSubmit}>
+            <Button
+              type="submit"
+              size="md"
+              fullWidth={false}
+              loading={loading}
+              disabled={!canSubmit}
+            >
               Change Email
             </Button>
           </div>

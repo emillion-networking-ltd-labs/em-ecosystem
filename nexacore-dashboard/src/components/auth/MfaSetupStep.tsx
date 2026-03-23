@@ -143,7 +143,7 @@ export default function MfaSetupStep() {
               onClick={() => {
                 window.location.href = "/login";
               }}
-              className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Go to Sign In
             </button>
@@ -216,14 +216,14 @@ export default function MfaSetupStep() {
             <button
               type="button"
               onClick={cancelMfa}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Cancel
             </button>
             <button
               type="button"
               onClick={() => setPhase("recovery")}
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90"
+              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90"
             >
               Next
             </button>
@@ -266,7 +266,7 @@ export default function MfaSetupStep() {
           <button
             type="button"
             onClick={copyRecoveryCodes}
-            className="flex items-center justify-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-sm font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+            className="flex items-center justify-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-sm font-normal text-content-primary transition-colors hover:bg-surface-subtle"
           >
             {copied ? (
               <>
@@ -283,7 +283,7 @@ export default function MfaSetupStep() {
             <button
               type="button"
               onClick={() => setPhase("qr")}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Back
             </button>
@@ -293,7 +293,7 @@ export default function MfaSetupStep() {
                 setPhase("verify");
                 setTimeout(() => inputRefs.current[0]?.focus(), 100);
               }}
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90"
+              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90"
             >
               I saved them
             </button>
@@ -372,14 +372,14 @@ export default function MfaSetupStep() {
             <button
               type="button"
               onClick={() => setPhase("recovery")}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-base font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Back
             </button>
             <button
               type="submit"
               disabled={isLoading || code.join("").length !== 6}
-              className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-medium text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+              className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-base font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
             >
               <span className={isLoading ? "opacity-30" : ""}>Enable MFA</span>
               {isLoading && (

@@ -50,14 +50,14 @@ export default function ActionDropdown({
         </button>
 
         {open && (
-          <div className="absolute right-0 top-full z-30 mt-1 w-[241px] rounded-3xl border border-border-strong bg-surface-primary p-6 shadow-card animate-dropdown-down">
+          <div className="absolute right-0 top-full z-30 mt-1 w-[241px] rounded-xl border border-border-strong bg-surface-primary p-6 animate-dropdown-down">
             <Can permission="users:write">
               <button
                 onClick={() => {
                   setOpen(false);
                   onChangeRole(user);
                 }}
-                className="flex w-full items-center gap-2 rounded-3xl p-2 text-caption text-content-primary hover:bg-surface-subtle"
+                className="flex w-full items-center gap-2 rounded-md p-2 text-caption text-content-primary hover:bg-surface-subtle"
               >
                 <ShieldCheck size={16} />
                 Change Role
@@ -67,20 +67,20 @@ export default function ActionDropdown({
                   setOpen(false);
                   onToggleLock(user);
                 }}
-                className="flex w-full items-center gap-2 rounded-3xl p-2 text-caption text-content-primary hover:bg-surface-subtle"
+                className="flex w-full items-center gap-2 rounded-md p-2 text-caption text-content-primary hover:bg-surface-subtle"
               >
                 {isLocked ? <Unlock size={16} /> : <Lock size={16} />}
                 {isLocked ? "Unlock Account" : "Lock Account"}
               </button>
             </Can>
             <Can permission="users:delete">
-              <div className="my-2 h-px bg-border-default" />
+              <div className="my-2 h-px bg-border-strong" />
               <button
                 onClick={() => {
                   setOpen(false);
                   onDelete(user);
                 }}
-                className="flex w-full items-center gap-2 rounded-3xl p-2 text-caption text-error hover:bg-surface-subtle"
+                className="flex w-full items-center gap-2 rounded-md p-2 text-caption text-error hover:bg-surface-subtle"
               >
                 <Trash2 size={16} />
                 Delete User

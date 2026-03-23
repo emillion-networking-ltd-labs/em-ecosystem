@@ -16,11 +16,12 @@ interface AccordionProps {
 
 export const accordionSpecs = {
   trigger: {
-    shared: "w-full px-4 py-3 text-body-sm font-medium text-content-primary",
+    shared: "w-full px-4 py-3 text-body-sm font-normal text-content-primary",
     hover: "hover:bg-surface-subtle transition-colors",
   },
   container: {
-    shared: "rounded-xl border border-border-strong overflow-hidden",
+    shared:
+      "rounded-xl border border-border-strong overflow-hidden bg-surface-primary",
     divider: "divide-y divide-border-strong",
   },
   icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open",
@@ -42,13 +43,13 @@ export default function Accordion({
 
   return (
     <div
-      className={`rounded-xl border border-border-strong overflow-hidden divide-y divide-border-strong ${className}`}
+      className={`rounded-xl border border-border-strong overflow-hidden bg-surface-primary divide-y divide-border-strong ${className}`}
     >
       {items.map((item, i) => (
         <div key={i}>
           <button
             onClick={() => toggle(i)}
-            className="flex w-full items-center justify-between px-4 py-3 text-body-sm font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+            className="flex w-full items-center justify-between px-4 py-3 text-body-sm font-normal text-content-primary transition-colors hover:bg-surface-subtle"
           >
             {item.title}
             <ChevronDown
@@ -82,11 +83,11 @@ export function SingleAccordion({
 
   return (
     <div
-      className={`rounded-xl border border-border-strong overflow-hidden ${className}`}
+      className={`rounded-xl border border-border-strong overflow-hidden bg-surface-primary ${className}`}
     >
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center justify-between px-4 py-3 text-body-sm font-medium text-content-primary transition-colors hover:bg-surface-subtle"
+        className="flex w-full items-center justify-between px-4 py-3 text-body-sm font-normal text-content-primary transition-colors hover:bg-surface-subtle"
       >
         {title}
         <ChevronDown
