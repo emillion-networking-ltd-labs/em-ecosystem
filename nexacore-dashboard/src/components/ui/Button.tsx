@@ -21,7 +21,7 @@ export const variantClasses = {
 };
 
 export const baseClass =
-  "items-center justify-center gap-2 whitespace-nowrap (flex when fullWidth, inline-flex otherwise)";
+  "flex|inline-flex items-center justify-center gap-2 whitespace-nowrap";
 
 export const sizeClasses = {
   sm: "px-4 py-1.5 text-caption font-normal rounded-md h-8",

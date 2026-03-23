@@ -20,6 +20,12 @@
 
 type SpinnerSize = "sm" | "md" | "lg";
 
+export const infinitySpinnerSpecs = {
+  type: "Figure-8 lemniscate — used inside buttons",
+  sizes: { sm: "16px", md: "24px", lg: "32px" },
+  base: "SVG dashoffset animation 2s linear, stroke=currentColor",
+};
+
 const SIZES: Record<SpinnerSize, number> = {
   sm: 16,
   md: 24,

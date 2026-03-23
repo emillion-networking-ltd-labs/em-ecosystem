@@ -21,6 +21,12 @@
 
 type SpinnerSize = "sm" | "md" | "lg";
 
+export const ringSpinnerSpecs = {
+  type: "Ripple/sonar rings — used for page loading",
+  sizes: { sm: "16px", md: "24px", lg: "32px" },
+  base: "SVG SMIL animate, stroke=currentColor, 1.8s staggered ripple",
+};
+
 const SIZES: Record<SpinnerSize, number> = {
   sm: 16,
   md: 24,

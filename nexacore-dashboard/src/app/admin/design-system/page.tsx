@@ -80,7 +80,7 @@ export default function DesignSystemPage() {
       <DashboardLayout>
         {/* Breadcrumbs + Title */}
         <div className="mb-6 flex items-center gap-2">
-          <h1 className="text-h3 font-semibold text-content-primary">
+          <h1 className="text-h2 font-semibold text-content-primary">
             Design System
           </h1>
           <span className="inline-block h-6 w-px bg-border-strong" />

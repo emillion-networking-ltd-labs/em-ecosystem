@@ -25,7 +25,7 @@ export const sliderSpecs = {
     style: "bg-white border-2 border-solid border-[rgba(0,0,0,0.08)]",
   },
   label: "text-body font-normal text-content-primary",
-  value: "text-caption text-content-secondary tabular-nums",
+  value: "text-caption text-content-primary/50 tabular-nums",
 };
 
 export default function Slider({
@@ -64,7 +64,7 @@ export default function Slider({
             </label>
           )}
           {showValue && (
-            <span className="text-caption text-content-secondary tabular-nums">
+            <span className="text-caption text-content-primary/50 tabular-nums">
               {value}
             </span>
           )}

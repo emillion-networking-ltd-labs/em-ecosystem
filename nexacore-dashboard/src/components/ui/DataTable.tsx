@@ -18,6 +18,8 @@ interface DataTableProps<T> {
   loadingRows?: number;
   emptyMessage?: string;
   onRowClick?: (row: T) => void;
+  hoverRows?: boolean;
+  headerRowClassName?: string;
   className?: string;
 }
 
@@ -47,6 +49,8 @@ export default function DataTable<T>({
   loadingRows = 5,
   emptyMessage = "No data found.",
   onRowClick,
+  hoverRows = true,
+  headerRowClassName = "",
   className = "",
 }: DataTableProps<T>) {
   return (
@@ -56,7 +60,9 @@ export default function DataTable<T>({
       <table className="w-full">
         {/* Header */}
         <thead>
-          <tr className="border-b border-border-strong bg-surface-secondary">
+          <tr
+            className={`border-b border-border-strong bg-surface-secondary ${headerRowClassName}`}
+          >
             {columns.map((col) => (
               <th
                 key={col.key}
@@ -91,9 +97,9 @@ export default function DataTable<T>({
               <tr
                 key={keyExtractor(row)}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
-                className={`border-b border-border-strong last:border-b-0 transition-colors hover:bg-surface-subtle ${
-                  onRowClick ? "cursor-pointer" : ""
-                }`}
+                className={`border-b border-border-strong last:border-b-0 ${
+                  hoverRows ? "transition-colors hover:bg-surface-subtle" : ""
+                } ${onRowClick ? "cursor-pointer" : ""}`}
               >
                 {columns.map((col) => (
                   <td

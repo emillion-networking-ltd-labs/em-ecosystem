@@ -43,9 +43,11 @@ import Badge, {
   sizeClasses as badgeSizes,
   baseClass as badgeBase,
 } from "@/components/ui/Badge";
-import Spinner from "@/components/ui/Spinner";
-import InfinitySpinner from "@/components/ui/InfinitySpinner";
-import RingSpinner from "@/components/ui/RingSpinner";
+import Spinner, { spinnerSpecs } from "@/components/ui/Spinner";
+import InfinitySpinner, {
+  infinitySpinnerSpecs,
+} from "@/components/ui/InfinitySpinner";
+import RingSpinner, { ringSpinnerSpecs } from "@/components/ui/RingSpinner";
 import Avatar, {
   sizeClasses as avatarSizes,
   baseClass as avatarBase,
@@ -88,14 +90,11 @@ function ShowcaseSection({
         .replace(/-+/g, "-")
         .replace(/-$/, "")}`}
     >
-      <h3 className="text-h3 text-content-primary">{title}</h3>
+      <h3 className="text-h3 font-semibold text-content-primary">{title}</h3>
       {children}
     </div>
   );
 }
-
-const thClass =
-  "px-4 py-3 text-center text-caption font-semibold uppercase tracking-wider";
 
 /* ===== Specs Panel (uses Accordion) ===== */
 
@@ -169,101 +168,83 @@ const hoverClasses = {
 const baseButtonClass =
   "inline-flex items-center justify-center gap-2 font-normal rounded-md px-6 py-2.5 text-body h-10";
 
+type ButtonRow = {
+  state: string;
+  disabled?: boolean;
+  loading?: boolean;
+  hover?: boolean;
+};
+
+const buttonRows: ButtonRow[] = [
+  { state: "Normal" },
+  { state: "Hover", hover: true },
+  { state: "Disabled", disabled: true },
+  { state: "Loading", loading: true },
+];
+
 function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
   const variants = ["primary", "secondary", "outline", "danger"] as const;
-  const tdClass = "px-4 py-3 text-center";
+
+  const columns: ColumnDef<ButtonRow>[] = [
+    {
+      key: "state",
+      label: mode,
+      align: "left",
+      width: "100px",
+      headerClassName: "font-mono font-normal lowercase",
+      render: (row) => row.state,
+    },
+    ...variants.map((v) => ({
+      key: v,
+      label: v.toUpperCase(),
+      align: "center" as const,
+      render: (row: ButtonRow) =>
+        row.hover ? (
+          <button className={`${baseButtonClass} ${hoverClasses[v]}`}>
+            Button
+          </button>
+        ) : (
+          <Button
+            variant={v}
+            fullWidth={false}
+            disabled={row.disabled}
+            loading={row.loading}
+          >
+            Button
+          </Button>
+        ),
+    })),
+    {
+      key: "circle",
+      label: "CIRCLE",
+      align: "center" as const,
+      render: (row: ButtonRow) =>
+        row.loading ? null : (
+          <div className="flex justify-center">
+            <div
+              className={`w-9 h-9 rounded-full flex items-center justify-center text-body font-normal bg-surface-inverse text-content-inverse ${
+                row.hover
+                  ? "opacity-90"
+                  : row.disabled
+                    ? "opacity-50 pointer-events-none"
+                    : "transition-colors hover:opacity-90"
+              }`}
+            >
+              15
+            </div>
+          </div>
+        ),
+    },
+  ];
 
   return (
-    <div
-      className={`overflow-x-auto rounded-xl border border-border-strong ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
-    >
-      <table className="w-full">
-        <thead>
-          <tr className="border-b border-border-strong bg-surface-secondary">
-            <th className={`${thClass} text-left text-content-primary/50 w-24`}>
-              <span className="font-mono font-normal lowercase">{mode}</span>
-            </th>
-            {variants.map((v) => (
-              <th key={v} className={`${thClass} text-content-primary/50`}>
-                {v}
-              </th>
-            ))}
-            <th className={`${thClass} text-content-primary/50`}>CIRCLE</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className="border-b border-border-strong">
-            <td className="px-4 py-3 text-body font-normal text-content-primary">
-              Normal
-            </td>
-            {variants.map((v) => (
-              <td key={v} className={tdClass}>
-                <Button variant={v} fullWidth={false}>
-                  Button
-                </Button>
-              </td>
-            ))}
-            <td className={tdClass}>
-              <div className="flex justify-center">
-                <button className="w-9 h-9 rounded-full flex items-center justify-center text-body font-normal bg-surface-inverse text-content-inverse transition-colors hover:opacity-90">
-                  15
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr className="border-b border-border-strong">
-            <td className="px-4 py-3 text-body font-normal text-content-primary">
-              Hover
-            </td>
-            {variants.map((v) => (
-              <td key={v} className={tdClass}>
-                <button className={`${baseButtonClass} ${hoverClasses[v]}`}>
-                  Button
-                </button>
-              </td>
-            ))}
-            <td className={tdClass}>
-              <div className="flex justify-center">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-body font-normal bg-surface-inverse text-content-inverse opacity-90">
-                  15
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr className="border-b border-border-strong">
-            <td className="px-4 py-3 text-body font-normal text-content-primary">
-              Disabled
-            </td>
-            {variants.map((v) => (
-              <td key={v} className={tdClass}>
-                <Button variant={v} fullWidth={false} disabled>
-                  Button
-                </Button>
-              </td>
-            ))}
-            <td className={tdClass}>
-              <div className="flex justify-center">
-                <div className="w-9 h-9 rounded-full flex items-center justify-center text-body font-normal bg-surface-inverse text-content-inverse opacity-50 pointer-events-none">
-                  15
-                </div>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td className="px-4 py-3 text-body font-normal text-content-primary">
-              Loading
-            </td>
-            {variants.map((v) => (
-              <td key={v} className={tdClass}>
-                <Button variant={v} fullWidth={false} loading>
-                  Button
-                </Button>
-              </td>
-            ))}
-            <td className={tdClass}></td>
-          </tr>
-        </tbody>
-      </table>
+    <div className={mode === "dark" ? "dark" : "light"}>
+      <DataTable
+        columns={columns}
+        data={buttonRows}
+        keyExtractor={(row) => row.state}
+        hoverRows={false}
+      />
     </div>
   );
 }
@@ -279,7 +260,9 @@ function ButtonShowcase() {
 
       {/* Sizes — largest to smallest */}
       <div className="mt-6">
-        <p className="text-body font-normal text-content-primary mb-2">Sizes</p>
+        <p className="text-body font-semibold text-content-primary mb-2">
+          Sizes
+        </p>
         <div className="flex flex-wrap items-end justify-center sm:justify-start gap-4">
           <div className="flex flex-col items-center gap-1.5">
             <Button variant="primary" size="lg" fullWidth={false}>
@@ -309,180 +292,177 @@ function ButtonShowcase() {
       </div>
 
       {/* Link Buttons */}
-      <p className="text-body font-normal text-content-primary mb-2">
+      <p className="text-body font-semibold text-content-primary mb-2">
         Link Buttons
       </p>
-      {(["light", "dark"] as const).map((mode) => (
-        <div
-          key={`link-${mode}`}
-          className={`overflow-x-auto rounded-xl border border-border-strong ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
-        >
-          <table className="w-full table-fixed">
-            <thead>
-              <tr className="border-b border-border-strong bg-surface-secondary">
-                <th
-                  className={`${thClass} text-left text-content-primary/50`}
-                  style={{ width: "15%" }}
+      {(["light", "dark"] as const).map((mode) => {
+        const linkColumns: ColumnDef<{ state: string; hover?: boolean }>[] = [
+          {
+            key: "state",
+            label: mode,
+            align: "left",
+            width: "15%",
+            headerClassName: "font-mono font-normal lowercase",
+            render: (row) => row.state,
+          },
+          {
+            key: "simple",
+            label: "SIMPLE",
+            align: "center",
+            render: (row) =>
+              row.hover ? (
+                <span className="text-body font-normal leading-[21px] text-content-primary">
+                  Link
+                </span>
+              ) : (
+                <button
+                  className={`${linkSpecs.base} ${linkSpecs.variants.simple}`}
                 >
-                  <span className="font-mono font-normal lowercase">
-                    {mode}
-                  </span>
-                </th>
-                <th className={`${thClass} text-content-primary/50`}>SIMPLE</th>
-                <th className={`${thClass} text-content-primary/50`}>
-                  UNDERLINE
-                </th>
-                <th className={`${thClass} text-content-primary/50`}>
-                  UNDERLINE + ICON
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-border-strong">
-                <td className="px-4 py-3 text-body font-normal text-content-primary">
-                  Normal
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <button
-                    className={`${linkSpecs.base} ${linkSpecs.variants.simple}`}
-                  >
-                    Link
-                  </button>
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <button
-                    className={`${linkSpecs.base} ${linkSpecs.variants.underline}`}
-                  >
-                    Link
-                  </button>
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <button
-                    className={`inline-flex items-center justify-center gap-1 w-full ${linkSpecs.base} ${linkSpecs.variants.underline}`}
-                  >
-                    <ArrowLeft size={14} />
-                    Link
-                  </button>
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-3 text-body font-normal text-content-primary">
-                  Hover
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <span className="text-body font-normal leading-[21px] text-content-primary">
-                    Link
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <span className="text-body font-normal leading-[21px] text-content-primary underline">
-                    Link
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-center">
-                  <span className="inline-flex items-center justify-center gap-1 w-full text-body font-normal leading-[21px] text-content-primary underline">
-                    <ArrowLeft size={14} />
-                    Link
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      ))}
+                  Link
+                </button>
+              ),
+          },
+          {
+            key: "underline",
+            label: "UNDERLINE",
+            align: "center",
+            render: (row) =>
+              row.hover ? (
+                <span className="text-body font-normal leading-[21px] text-content-primary underline">
+                  Link
+                </span>
+              ) : (
+                <button
+                  className={`${linkSpecs.base} ${linkSpecs.variants.underline}`}
+                >
+                  Link
+                </button>
+              ),
+          },
+          {
+            key: "underline-icon",
+            label: "UNDERLINE + ICON",
+            align: "center",
+            render: (row) =>
+              row.hover ? (
+                <span className="inline-flex items-center justify-center gap-1 w-full text-body font-normal leading-[21px] text-content-primary underline">
+                  <ArrowLeft size={14} />
+                  Link
+                </span>
+              ) : (
+                <button
+                  className={`inline-flex items-center justify-center gap-1 w-full ${linkSpecs.base} ${linkSpecs.variants.underline}`}
+                >
+                  <ArrowLeft size={14} />
+                  Link
+                </button>
+              ),
+          },
+        ];
+        return (
+          <div
+            key={`link-${mode}`}
+            className={mode === "dark" ? "dark" : "light"}
+          >
+            <DataTable
+              columns={linkColumns}
+              data={[{ state: "Normal" }, { state: "Hover", hover: true }]}
+              keyExtractor={(r) => r.state}
+              hoverRows={false}
+            />
+          </div>
+        );
+      })}
 
       {/* Icon Buttons */}
-      <p className="text-body font-normal text-content-primary mb-2">
+      <p className="text-body font-semibold text-content-primary mb-2">
         Icon Buttons
       </p>
-      {(["light", "dark"] as const).map((mode) => (
-        <div
-          key={`icon-${mode}`}
-          className={`overflow-x-auto rounded-xl border border-border-strong ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
-        >
-          <table className="w-full table-fixed">
-            <thead>
-              <tr className="border-b border-border-strong bg-surface-secondary">
-                <th
-                  className={`${thClass} text-left text-content-primary/50`}
-                  style={{ width: "15%" }}
-                >
-                  <span className="font-mono font-normal lowercase">
-                    {mode}
-                  </span>
-                </th>
-                <th className={`${thClass} text-content-primary/50`}>
-                  DEFAULT
-                </th>
-                <th className={`${thClass} text-content-primary/50`}>INPUT</th>
-                <th className={`${thClass} text-content-primary/50`}>BOXED</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr className="border-b border-border-strong">
-                <td className="px-4 py-3 text-body font-normal text-content-primary">
-                  Normal
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-center">
-                    <button
-                      className={`${iconButtonSpecs.base} ${iconButtonSpecs.variants.default}`}
-                    >
-                      <Copy size={16} />
-                    </button>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-center">
-                    <button
-                      className={`${iconButtonSpecs.base} text-content-secondary hover:text-content-primary/75`}
-                    >
-                      <Eye size={16} />
-                    </button>
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-center">
-                    <button
-                      className={`${iconButtonSpecs.base} ${iconButtonSpecs.variants.boxed}`}
-                    >
-                      <ChevronRight
-                        size={16}
-                        className="text-content-primary"
-                      />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-              <tr>
-                <td className="px-4 py-3 text-body font-normal text-content-primary">
-                  Hover
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-center text-content-primary">
+      {(["light", "dark"] as const).map((mode) => {
+        const iconColumns: ColumnDef<{ state: string; hover?: boolean }>[] = [
+          {
+            key: "state",
+            label: mode,
+            align: "left",
+            width: "15%",
+            headerClassName: "font-mono font-normal lowercase",
+            render: (row) => row.state,
+          },
+          {
+            key: "default",
+            label: "DEFAULT",
+            align: "center",
+            render: (row) => (
+              <div className="flex justify-center">
+                {row.hover ? (
+                  <span className="text-content-primary">
                     <Copy size={16} />
-                  </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-center text-content-primary/75">
+                  </span>
+                ) : (
+                  <button
+                    className={`${iconButtonSpecs.base} ${iconButtonSpecs.variants.default}`}
+                  >
+                    <Copy size={16} />
+                  </button>
+                )}
+              </div>
+            ),
+          },
+          {
+            key: "input",
+            label: "INPUT",
+            align: "center",
+            render: (row) => (
+              <div className="flex justify-center">
+                {row.hover ? (
+                  <span className="text-content-primary/75">
                     <Eye size={16} />
+                  </span>
+                ) : (
+                  <button
+                    className={`${iconButtonSpecs.base} text-content-secondary hover:text-content-primary/75`}
+                  >
+                    <Eye size={16} />
+                  </button>
+                )}
+              </div>
+            ),
+          },
+          {
+            key: "boxed",
+            label: "BOXED",
+            align: "center",
+            render: (row) => (
+              <div className="flex justify-center">
+                {row.hover ? (
+                  <div className={iconButtonSpecs.variants.boxed}>
+                    <ChevronRight size={16} className="text-content-primary" />
                   </div>
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex justify-center">
-                    <div className={`${iconButtonSpecs.variants.boxed}`}>
-                      <ChevronRight
-                        size={16}
-                        className="text-content-primary"
-                      />
-                    </div>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      ))}
+                ) : (
+                  <button
+                    className={`${iconButtonSpecs.base} ${iconButtonSpecs.variants.boxed}`}
+                  >
+                    <ChevronRight size={16} className="text-content-primary" />
+                  </button>
+                )}
+              </div>
+            ),
+          },
+        ];
+        return (
+          <div
+            key={`icon-${mode}`}
+            className={mode === "dark" ? "dark" : "light"}
+          >
+            <DataTable
+              columns={iconColumns}
+              data={[{ state: "Normal" }, { state: "Hover", hover: true }]}
+              keyExtractor={(r) => r.state}
+              hoverRows={false}
+            />
+          </div>
+        );
+      })}
 
       <SpecsPanel
         specs={{
@@ -572,7 +552,9 @@ function InputShowcase() {
 
       {/* Sizes */}
       <div>
-        <p className="text-body font-normal text-content-primary mb-2">Sizes</p>
+        <p className="text-body font-semibold text-content-primary mb-2">
+          Sizes
+        </p>
         <div className="flex flex-wrap items-end gap-4">
           <div className="flex flex-col gap-1.5 w-[240px]">
             <Input placeholder="md · 48px (default)" />
@@ -599,7 +581,7 @@ function InputShowcase() {
           Icons: inputSpecs.icons,
           Dimensions: {
             "border-radius": "8px (rounded-lg)",
-            "label font": "15px / 22px line-height, semibold",
+            "label font": "14px (text-body) / 22px line-height, semibold",
             outline: "2px, offset-2",
           },
         }}
@@ -711,20 +693,20 @@ function SpinnerShowcase() {
 
       <SpecsPanel
         specs={{
-          Types: {
-            Spinner: "Circular border animation — general purpose",
-            InfinitySpinner: "Figure-8 lemniscate — used inside buttons",
-            RingSpinner: "Ripple/sonar rings — used for page loading",
+          "Spinner (circular)": {
+            type: spinnerSpecs.type,
+            base: spinnerSpecs.base,
+            ...spinnerSpecs.sizes,
           },
-          Sizes: {
-            sm: "16px — buttons, inputs",
-            md: "24px — standalone, cards",
-            lg: "32px — page loading, OAuth callback",
+          "InfinitySpinner (buttons)": {
+            type: infinitySpinnerSpecs.type,
+            base: infinitySpinnerSpecs.base,
+            ...infinitySpinnerSpecs.sizes,
           },
-          Base: {
-            color: "currentColor (inherits text color from parent)",
-            animation:
-              "Spinner: CSS spin, Infinity: SVG dashoffset, Ring: SMIL animate",
+          "RingSpinner (pages)": {
+            type: ringSpinnerSpecs.type,
+            base: ringSpinnerSpecs.base,
+            ...ringSpinnerSpecs.sizes,
           },
         }}
       />
@@ -1538,7 +1520,7 @@ function NavigationShowcase() {
   const [pageDark, setPageDark] = useState(3);
   return (
     <ShowcaseSection title="Navigation">
-      <p className="text-body font-normal text-content-primary mb-2">
+      <p className="text-body font-semibold text-content-primary mb-2">
         Breadcrumbs
       </p>
       <div className="flex flex-wrap gap-4">
@@ -1568,7 +1550,7 @@ function NavigationShowcase() {
         </div>
       </div>
 
-      <p className="text-body font-normal text-content-primary mb-2 mt-4">
+      <p className="text-body font-semibold text-content-primary mb-2 mt-4">
         Pagination
       </p>
       <div className="flex flex-wrap gap-4">
@@ -2376,92 +2358,104 @@ export function AtomShowcase() {
 function CardShowcase() {
   return (
     <ShowcaseSection title="Card">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="space-y-4">
-          <div>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
-              container
-            </p>
-            <div className="card-container">
-              <h3 className="text-body font-semibold text-content-primary">
-                Card Container
-              </h3>
+      <div className="flex flex-wrap gap-4">
+        {/* Light */}
+        <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            light
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-caption text-content-primary/50 font-mono mb-2">
+                container
+              </p>
+              <div className="card-container">
+                <h3 className="text-body font-semibold text-content-primary">
+                  Card Container
+                </h3>
+              </div>
             </div>
-          </div>
-          <div
-            className="dark"
-            style={{ color: "rgb(var(--content-primary))" }}
-          >
-            <div className="card-container">
-              <h3 className="text-body font-semibold text-content-primary">
-                Card Container
-              </h3>
+            <div>
+              <p className="text-caption text-content-primary/50 font-mono mb-2">
+                container-flat
+              </p>
+              <div className="card-container-flat">
+                <h3 className="text-body font-semibold text-content-primary">
+                  Card Container Flat
+                </h3>
+              </div>
             </div>
-          </div>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
-              container-flat
-            </p>
-            <div className="card-container-flat">
-              <h3 className="text-body font-semibold text-content-primary">
-                Card Container Flat
-              </h3>
+            <div>
+              <p className="text-caption text-content-primary/50 font-mono mb-2">
+                inner
+              </p>
+              <div className="card">
+                <h3 className="text-body font-semibold text-content-primary">
+                  Card Inner
+                </h3>
+              </div>
             </div>
-          </div>
-          <div
-            className="dark"
-            style={{ color: "rgb(var(--content-primary))" }}
-          >
-            <div className="card-container-flat">
-              <h3 className="text-body font-semibold text-content-primary">
-                Card Container Flat
-              </h3>
-            </div>
-          </div>
-        </div>
-        <div className="space-y-4">
-          <div>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
-              inner
-            </p>
-            <div className="card">
-              <h3 className="text-body font-semibold text-content-primary">
-                Card Inner
-              </h3>
-            </div>
-          </div>
-          <div
-            className="dark"
-            style={{ color: "rgb(var(--content-primary))" }}
-          >
-            <div className="card">
-              <h3 className="text-body font-semibold text-content-primary">
-                Card Inner
-              </h3>
+            <div>
+              <p className="text-caption text-content-primary/50 font-mono mb-2">
+                inner-flat
+              </p>
+              <div className="card-flat">
+                <h3 className="text-body font-semibold text-content-primary">
+                  Card Flat
+                </h3>
+              </div>
             </div>
           </div>
         </div>
-        <div className="space-y-4">
-          <div>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
-              flat
-            </p>
-            <div className="card-flat">
-              <h3 className="text-body font-semibold text-content-primary">
-                Card Flat
-              </h3>
+
+        {/* Dark */}
+        <div
+          className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary"
+          style={{ color: "rgb(var(--content-primary))" }}
+        >
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            dark
+          </p>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <p className="text-caption text-content-primary/50 font-mono mb-2">
+                container
+              </p>
+              <div className="card-container">
+                <h3 className="text-body font-semibold text-content-primary">
+                  Card Container
+                </h3>
+              </div>
             </div>
-          </div>
-          <div
-            className="dark"
-            style={{ color: "rgb(var(--content-primary))" }}
-          >
-            <div className="card-flat">
-              <h3 className="text-body font-semibold text-content-primary">
-                Card Flat
-              </h3>
+            <div>
+              <p className="text-caption text-content-primary/50 font-mono mb-2">
+                container-flat
+              </p>
+              <div className="card-container-flat">
+                <h3 className="text-body font-semibold text-content-primary">
+                  Card Container Flat
+                </h3>
+              </div>
+            </div>
+            <div>
+              <p className="text-caption text-content-primary/50 font-mono mb-2">
+                inner
+              </p>
+              <div className="card">
+                <h3 className="text-body font-semibold text-content-primary">
+                  Card Inner
+                </h3>
+              </div>
+            </div>
+            <div>
+              <p className="text-caption text-content-primary/50 font-mono mb-2">
+                inner-flat
+              </p>
+              <div className="card-flat">
+                <h3 className="text-body font-semibold text-content-primary">
+                  Card Flat
+                </h3>
+              </div>
             </div>
           </div>
         </div>
@@ -2493,7 +2487,7 @@ function CardShowcase() {
             padding: "24px",
             usage: "Lightweight main panels, page sections",
           },
-          "Flat (card-flat)": {
+          "Inner Flat (card-flat)": {
             background: "bg-surface-primary",
             border: "1px border-border-strong",
             shadow: "none",
