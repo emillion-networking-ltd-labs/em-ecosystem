@@ -20,7 +20,8 @@ export const variantClasses = {
     "bg-transparent text-error border border-error-border transition-colors hover:bg-error-bg disabled:pointer-events-none disabled:opacity-50",
 };
 
-export const baseClass = "inline-flex items-center justify-center gap-2";
+export const baseClass =
+  "items-center justify-center gap-2 whitespace-nowrap (flex when fullWidth, inline-flex otherwise)";
 
 export const sizeClasses = {
   sm: "px-4 py-1.5 text-caption font-normal rounded-md h-8",
@@ -40,7 +41,7 @@ export default function Button({
 }: ButtonProps) {
   return (
     <button
-      className={`inline-flex items-center justify-center gap-2 ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? "w-full" : ""} ${className}`}
+      className={`${fullWidth ? "flex" : "inline-flex"} items-center justify-center gap-2 whitespace-nowrap ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? "w-full" : ""} ${className}`}
       disabled={loading || disabled}
       {...props}
     >

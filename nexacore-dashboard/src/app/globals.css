@@ -160,6 +160,7 @@
     margin: 0;
     background-color: var(--surface-secondary);
     color: rgb(var(--content-primary));
+    letter-spacing: 0.01em;
   }
 }
 

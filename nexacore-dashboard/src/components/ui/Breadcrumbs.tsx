@@ -16,12 +16,12 @@ type BreadcrumbsProps = {
 export const breadcrumbsSpecs = {
   link: {
     active:
-      "text-body font-normal tracking-wide leading-[21px] text-content-primary (last item)",
+      "text-body font-normal leading-[21px] text-content-primary (last item)",
     inactive:
-      "text-body font-normal tracking-wide leading-[21px] text-content-primary/75 hover:text-content-primary",
+      "text-body font-normal leading-[21px] text-content-primary/75 hover:text-content-primary",
   },
   separator:
-    "en-dash (–) intermediate, em-dash (—) last level — text-body font-normal tracking-wide leading-[21px] text-content-primary/75",
+    "en-dash (–) intermediate, em-dash (—) last level — text-body font-normal leading-[21px] text-content-primary/75",
   home: "text-content-primary/75 hover:text-content-primary 16px Home icon shrink-0",
   collapse:
     "Auto-collapse via ResizeObserver — Home / … / Last when content overflows container",
@@ -57,11 +57,11 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
   }, [items]);
 
   const linkClass =
-    "rounded-lg px-1 py-0.5 text-body font-normal tracking-wide leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary";
+    "rounded-lg px-1 py-0.5 text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary";
   const activeClass =
-    "rounded-lg px-1 py-0.5 text-body font-normal tracking-wide leading-[21px] text-content-primary";
+    "rounded-lg px-1 py-0.5 text-body font-normal leading-[21px] text-content-primary";
   const sepClass =
-    "shrink-0 text-body font-normal tracking-wide leading-[21px] text-content-primary/75";
+    "shrink-0 text-body font-normal leading-[21px] text-content-primary/75";
 
   return (
     <div ref={containerRef} className="min-w-0 overflow-hidden">
@@ -109,7 +109,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
           {middleItems.length > 0 && (
             <div className="flex items-center gap-0">
               <span className={sepClass}>–</span>
-              <span className="px-2 py-1 text-body font-normal tracking-wide leading-[21px] text-content-primary/50">
+              <span className="px-2 py-1 text-body font-normal leading-[21px] text-content-primary/50">
                 …
               </span>
             </div>

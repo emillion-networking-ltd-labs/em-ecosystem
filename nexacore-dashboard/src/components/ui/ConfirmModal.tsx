@@ -121,14 +121,14 @@ export default function ConfirmModal({
           <button
             onClick={onClose}
             disabled={loading}
-            className="h-10 rounded-md px-6 text-body font-normal tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle"
+            className="h-10 rounded-md px-6 text-body font-normal text-content-secondary transition-colors hover:bg-surface-subtle"
           >
             {cancelLabel}
           </button>
           <button
             onClick={onConfirm}
             disabled={loading}
-            className={`h-10 rounded-md px-6 text-body font-normal tracking-[-0.28px] transition-colors disabled:opacity-50 ${
+            className={`h-10 rounded-md px-6 text-body font-normal transition-colors disabled:opacity-50 ${
               variant === "danger"
                 ? "bg-error text-content-inverse hover:opacity-90"
                 : "bg-surface-inverse text-content-inverse hover:opacity-90"

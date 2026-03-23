@@ -288,14 +288,14 @@ export default function ConnectedAccounts() {
               <button
                 onClick={handleClose}
                 disabled={loading}
-                className="h-10 rounded-md px-6 text-body font-normal tracking-[-0.28px] text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
+                className="h-10 rounded-md px-6 text-body font-normal text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
               >
                 Cancel
               </button>
               <button
                 onClick={handleUnlink}
                 disabled={!canConfirm}
-                className="h-10 rounded-md px-6 text-body font-normal tracking-[-0.28px] bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                className="h-10 rounded-md px-6 text-body font-normal bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
               >
                 {loading ? "Disconnecting..." : "Disconnect"}
               </button>

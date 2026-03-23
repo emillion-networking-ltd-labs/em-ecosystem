@@ -67,11 +67,11 @@ const config: Config = {
         },
       },
       fontSize: {
-        h1: ["24px", { lineHeight: "36px" }],
-        h2: ["20px", { lineHeight: "28px" }],
-        h3: ["16px", { lineHeight: "24px" }],
-        body: ["14px", { lineHeight: "21px" }],
-        caption: ["12px", { lineHeight: "18px" }],
+        h1: ["24px", { lineHeight: "36px", letterSpacing: "-0.01em" }],
+        h2: ["20px", { lineHeight: "28px", letterSpacing: "-0.01em" }],
+        h3: ["16px", { lineHeight: "24px", letterSpacing: "0" }],
+        body: ["14px", { lineHeight: "21px", letterSpacing: "0.01em" }],
+        caption: ["12px", { lineHeight: "18px", letterSpacing: "0.02em" }],
       },
       boxShadow: {
         card: "0 8px 32px rgba(0, 0, 0, 0.04)",
