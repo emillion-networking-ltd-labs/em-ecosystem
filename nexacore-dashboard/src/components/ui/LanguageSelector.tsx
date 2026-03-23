@@ -141,7 +141,7 @@ export default function LanguageSelector({
       {/* Popover — opens upward (footer context), search adjacent to trigger */}
       {isOpen && (
         <div
-          className={`absolute z-50 w-fit min-w-[200px] ${popoverPos.vertical === "down" ? "top-full mt-1 animate-dropdown-down" : "bottom-full mb-1 animate-dropdown-up"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
+          className={`absolute z-50 w-fit min-w-[200px] ${popoverPos.vertical === "down" ? "top-full mt-1" : "bottom-full mb-1"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
         >
           <div
             className={`flex flex-col gap-1 animate-stagger ${popoverPos.vertical === "down" ? "" : "flex-col-reverse"}`}

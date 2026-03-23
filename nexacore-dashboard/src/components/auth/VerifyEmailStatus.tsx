@@ -65,7 +65,7 @@ export default function VerifyEmailStatus() {
 
       <Link
         href={isSuccess ? "/dashboard" : "/login"}
-        className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-h3 font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+        className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
       >
         {isSuccess ? "Go to Dashboard" : "Go to Sign In"}
       </Link>

@@ -252,13 +252,13 @@ export default function LoginForm() {
           <div className="flex gap-2">
             <Link
               href="/register"
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-h3 font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Create Account
             </Link>
             <button
               type="submit"
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-h3 font-normal text-content-inverse transition-opacity hover:opacity-90"
+              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-body font-normal text-content-inverse transition-opacity hover:opacity-90"
             >
               Next
             </button>
@@ -274,7 +274,7 @@ export default function LoginForm() {
               onClick={handlePasskeyLogin}
               disabled={passkeyLoading}
               aria-label="Sign in with passkey"
-              className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-h3 font-normal text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
+              className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
             >
               <Key
                 size={16}
@@ -376,12 +376,12 @@ function PasswordStep({
             Sign In
           </h1>
 
-          {/* Select Email Button — Figma: cornerRadius 100 (pill), px-16, text-h3, Bordered variant */}
+          {/* Select Email Button — Figma: cornerRadius 100 (pill), px-16, text-body, Bordered variant */}
           <div ref={dropdownRef} className="relative self-start">
             <button
               type="button"
               onClick={() => setIsEmailOpen(!isEmailOpen)}
-              className={`flex h-10 items-center justify-center gap-2 rounded-md px-4 text-h3 font-normal transition-all ${
+              className={`flex h-10 items-center justify-center gap-2 rounded-md px-4 text-body font-normal transition-all ${
                 isEmailOpen
                   ? "border border-border-strong bg-surface-subtle text-content-primary"
                   : "border border-border-strong bg-transparent text-content-primary hover:bg-surface-subtle"
@@ -489,7 +489,7 @@ function PasswordStep({
           <button
             type="submit"
             disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-h3 font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-body font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
           >
             <span className={isLoading ? "opacity-30" : ""}>Sign In</span>
             {isLoading && (
