@@ -109,10 +109,10 @@ export default function ResetPasswordForm() {
       {/* Title Group — Figma: 330px, vertical, pAlign MIN (top) */}
       <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-h1 font-semibold text-content-primary">
             Reset Password
           </h1>
-          <p className="text-justify text-body leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body text-content-primary/50">
             Enter your new password. It must be at least 8 characters and
             different from your current one.
           </p>
@@ -179,7 +179,7 @@ export default function ResetPasswordForm() {
             <div className="flex items-center justify-end">
               <Link
                 href="/login"
-                className="whitespace-nowrap text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Back to Sign In
               </Link>

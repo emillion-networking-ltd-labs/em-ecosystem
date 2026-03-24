@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
+import Avatar from "./Avatar";
+import Input from "./Input";
 
 interface Language {
   code: string;
@@ -18,7 +20,7 @@ const STORAGE_KEY = "nexacore-language";
 
 export const languageSelectorSpecs = {
   trigger: {
-    base: "flex h-10 items-center gap-2 rounded-md px-4 text-body font-normal leading-[21px] transition-all",
+    base: "flex h-10 items-center gap-2 rounded-md px-4 text-body font-normal transition-colors",
     closed:
       "border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary",
     open: "border border-border-strong bg-surface-primary text-content-primary",
@@ -33,8 +35,8 @@ export const languageSelectorSpecs = {
   option: {
     selected: "bg-surface-tertiary text-content-primary",
     default:
-      "bg-transparent text-body text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary",
-    avatar: "h-8 w-8 rounded-full bg-surface-subtle text-caption font-semibold",
+      "bg-transparent text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle",
+    avatar: "Avatar size=sm (h-8 w-8 rounded-full bg-surface-tertiary)",
   },
   icon: "ChevronDown 16px, rotate-180 on open",
 };
@@ -118,7 +120,7 @@ export default function LanguageSelector({
      Closed → invisible pill (transparent border/bg), Nav Link color (75% → 100%)
      Open   → visible pill (border black/5, bg-white), full opacity text, no shadow */
   const triggerBase =
-    "flex h-10 items-center gap-2 rounded-md px-4 text-body font-normal leading-[21px] transition-all";
+    "flex h-10 items-center gap-2 rounded-md px-4 text-body font-normal transition-colors";
   const triggerClass = isOpen
     ? `${triggerBase} border border-border-strong bg-surface-primary text-content-primary`
     : `${triggerBase} border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary`;
@@ -146,30 +148,28 @@ export default function LanguageSelector({
           <div
             className={`flex flex-col gap-1 animate-stagger ${popoverPos.vertical === "down" ? "" : "flex-col-reverse"}`}
           >
-            {/* Search Bar — appears first (stagger child 1) */}
-            <div className="relative z-10 flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-surface-primary px-4 shadow-card">
-              <Search
-                size={16}
-                className="shrink-0 text-content-primary"
-                strokeWidth={2}
-              />
-              <input
+            {/* Search Bar — uses Input component */}
+            <div className="relative z-10">
+              <Input
                 ref={searchInputRef}
-                type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search language..."
-                className="flex-1 bg-transparent text-body leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
+                leftIcon={<Search size={16} strokeWidth={2} />}
+                rightIcon={
+                  search ? (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="text-content-primary/50 hover:text-content-primary"
+                    >
+                      <X size={12} strokeWidth={2} />
+                    </button>
+                  ) : undefined
+                }
+                variant="filled"
+                className="shadow-card"
               />
-              {search && (
-                <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="shrink-0 text-content-primary/50 hover:text-content-primary"
-                >
-                  <X size={12} strokeWidth={2} />
-                </button>
-              )}
             </div>
 
             {/* Results — appears second (stagger child 2) */}
@@ -187,17 +187,13 @@ export default function LanguageSelector({
                         key={lang.code}
                         type="button"
                         onClick={() => handleSelect(lang)}
-                        className={`flex h-10 items-center gap-2 rounded-md px-2 font-normal transition-colors ${
+                        className={`flex h-10 items-center gap-2 rounded-md px-2 text-body font-normal transition-colors ${
                           isSelected
-                            ? "bg-surface-tertiary text-content-primary"
-                            : "bg-transparent text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary"
+                            ? "bg-surface-subtle text-content-primary"
+                            : "bg-transparent text-content-primary hover:bg-surface-subtle"
                         }`}
                       >
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
-                          <span className="text-caption font-semibold">
-                            {lang.code}
-                          </span>
-                        </div>
+                        <Avatar size="sm" name={lang.code} />
                         <span className="truncate text-body">{lang.name}</span>
                       </button>
                     );

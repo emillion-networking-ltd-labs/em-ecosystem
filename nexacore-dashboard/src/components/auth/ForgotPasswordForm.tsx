@@ -66,10 +66,10 @@ export default function ForgotPasswordForm() {
       {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top), inner 300px */}
       <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-h1 font-semibold text-content-primary">
             Password Recovery
           </h1>
-          <p className="text-justify text-body leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body text-content-primary/50">
             Start the NexaCore password reset process. A secure identity check
             will be required to restore account access.
           </p>
@@ -124,7 +124,7 @@ export default function ForgotPasswordForm() {
             <div className="flex items-center justify-end">
               <Link
                 href="/login"
-                className="whitespace-nowrap text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Back to Sign In
               </Link>

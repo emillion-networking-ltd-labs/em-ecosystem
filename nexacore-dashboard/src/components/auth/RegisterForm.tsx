@@ -95,10 +95,10 @@ export default function RegisterForm() {
       {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top), inner 300px */}
       <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-h1 font-semibold text-content-primary">
             Create Account
           </h1>
-          <p className="text-justify text-body leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body text-content-primary/50">
             Create your NexaCore user profile. This session will be available to
             other EM Ecosystem modules in the browser.
           </p>

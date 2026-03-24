@@ -12,10 +12,10 @@ export default function CheckEmailPage() {
         {/* Title Group — Figma: 330px, vertical, pAlign MIN (top) */}
         <div className="flex w-full flex-col md:w-[330px]">
           <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-            <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+            <h1 className="text-h1 font-semibold text-content-primary">
               Check Your Email
             </h1>
-            <p className="text-justify text-body leading-[21px] text-content-primary/50">
+            <p className="text-justify text-body text-content-primary/50">
               If an account exists for the email you entered, we&apos;ve sent a
               password reset link. The link expires in 1 hour.
             </p>
@@ -25,7 +25,7 @@ export default function CheckEmailPage() {
         <div className="flex w-full flex-col gap-2 md:w-[348px]">
           {/* Field — Figma: 348x110, VERTICAL, itemSpacing 40 */}
           <div className="flex min-h-[110px] flex-col gap-10">
-            <p className="text-justify text-body leading-[21px] text-content-primary/50">
+            <p className="text-justify text-body text-content-primary/50">
               Didn&apos;t receive the email? Check your spam folder or try again
               with a different email address.
             </p>
@@ -34,7 +34,7 @@ export default function CheckEmailPage() {
             <div className="flex items-center justify-end">
               <Link
                 href="/login"
-                className="whitespace-nowrap text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Back to Sign In
               </Link>

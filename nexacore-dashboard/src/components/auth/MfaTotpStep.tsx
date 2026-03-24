@@ -109,10 +109,10 @@ export default function MfaTotpStep() {
       <div className="flex flex-col gap-6 md:flex-row">
         <div className="flex w-full flex-col gap-2 md:w-[330px]">
           <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-            <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+            <h1 className="text-h1 font-semibold text-content-primary">
               Recovery Code
             </h1>
-            <p className="text-justify text-body leading-[21px] text-content-primary/50">
+            <p className="text-justify text-body text-content-primary/50">
               Enter one of your recovery codes. Each code can only be used once.
             </p>
           </div>
@@ -180,7 +180,7 @@ export default function MfaTotpStep() {
                   onChange={(e) => setTrustDevice(e.target.checked)}
                   className="h-4 w-4 rounded border-border-strong accent-surface-inverse"
                 />
-                <span className="text-body leading-[21px] text-content-primary/75">
+                <span className="text-body text-content-primary/75">
                   Trust this device for 30 days
                 </span>
               </label>
@@ -195,7 +195,7 @@ export default function MfaTotpStep() {
                     setUseRecovery(false);
                     setRecoveryCode("");
                   }}
-                  className="flex items-center gap-1 whitespace-nowrap text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                  className="flex items-center gap-1 whitespace-nowrap text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
                 >
                   <ArrowLeft size={14} />
                   Use authenticator app
@@ -235,10 +235,10 @@ export default function MfaTotpStep() {
     <div className="flex flex-col gap-6 md:flex-row">
       <div className="flex w-full flex-col gap-2 md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-h1 font-semibold text-content-primary">
             Two-Factor Authentication
           </h1>
-          <p className="text-justify text-body leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body text-content-primary/50">
             Enter the 6-digit code from your authenticator app to complete sign
             in.
           </p>
@@ -316,7 +316,7 @@ export default function MfaTotpStep() {
                 onChange={(e) => setTrustDevice(e.target.checked)}
                 className="h-4 w-4 rounded border-border-strong accent-surface-inverse"
               />
-              <span className="text-body leading-[21px] text-content-primary/75">
+              <span className="text-body text-content-primary/75">
                 Trust this device for 30 days
               </span>
             </label>
@@ -331,7 +331,7 @@ export default function MfaTotpStep() {
                   setUseRecovery(true);
                   setCode(Array(6).fill(""));
                 }}
-                className="whitespace-nowrap text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Use recovery code
               </button>

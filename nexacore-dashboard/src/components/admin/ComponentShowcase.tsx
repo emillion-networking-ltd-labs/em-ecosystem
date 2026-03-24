@@ -311,7 +311,7 @@ function ButtonShowcase() {
             align: "center",
             render: (row) =>
               row.hover ? (
-                <span className="text-body font-normal leading-[21px] text-content-primary">
+                <span className="text-body font-normal text-content-primary">
                   Link
                 </span>
               ) : (
@@ -328,7 +328,7 @@ function ButtonShowcase() {
             align: "center",
             render: (row) =>
               row.hover ? (
-                <span className="text-body font-normal leading-[21px] text-content-primary underline">
+                <span className="text-body font-normal text-content-primary underline">
                   Link
                 </span>
               ) : (
@@ -345,7 +345,7 @@ function ButtonShowcase() {
             align: "center",
             render: (row) =>
               row.hover ? (
-                <span className="inline-flex items-center justify-center gap-1 w-full text-body font-normal leading-[21px] text-content-primary underline">
+                <span className="inline-flex items-center justify-center gap-1 w-full text-body font-normal text-content-primary underline">
                   <ArrowLeft size={14} />
                   Link
                 </span>
@@ -487,7 +487,7 @@ function ButtonShowcase() {
 }
 
 const linkSpecs = {
-  base: "text-body font-normal leading-[21px] transition-colors",
+  base: "text-body font-normal transition-colors",
   variants: {
     simple: "text-content-primary/75 hover:text-content-primary",
     underline:
@@ -550,23 +550,53 @@ function InputShowcase() {
 
       <InputGrid mode="dark" />
 
-      {/* Sizes */}
-      <div>
-        <p className="text-body font-semibold text-content-primary mb-2">
-          Sizes
-        </p>
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex flex-col gap-1.5 w-[240px]">
-            <Input placeholder="md · 48px (default)" />
-            <span className="text-caption text-content-primary/50">
-              md · 48px (default)
-            </span>
+      {/* Sizes & Search */}
+      <div className="flex flex-wrap gap-8">
+        <div>
+          <p className="text-body font-semibold text-content-primary mb-2">
+            Sizes
+          </p>
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex flex-col gap-1.5 w-[240px]">
+              <Input placeholder="md · 48px (default)" />
+              <span className="text-caption text-content-primary/50">
+                md · 48px (default)
+              </span>
+            </div>
+            <div className="flex flex-col gap-1.5 w-[240px]">
+              <Input size="sm" placeholder="sm · 40px" />
+              <span className="text-caption text-content-primary/50">
+                sm · 40px
+              </span>
+            </div>
           </div>
-          <div className="flex flex-col gap-1.5 w-[240px]">
-            <Input size="sm" placeholder="sm · 40px" />
-            <span className="text-caption text-content-primary/50">
-              sm · 40px
-            </span>
+        </div>
+        <div>
+          <p className="text-body font-semibold text-content-primary mb-2">
+            Filled variant
+          </p>
+          <div className="flex flex-wrap items-end gap-4">
+            <div className="flex flex-col gap-1.5 w-[240px]">
+              <Input
+                placeholder="Search..."
+                leftIcon={<Search size={16} />}
+                variant="filled"
+              />
+              <span className="text-caption text-content-primary/50">
+                md · 48px · filled
+              </span>
+            </div>
+            <div className="flex flex-col gap-1.5 w-[240px]">
+              <Input
+                size="sm"
+                placeholder="Search..."
+                leftIcon={<Search size={16} />}
+                variant="filled"
+              />
+              <span className="text-caption text-content-primary/50">
+                sm · 40px · filled
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -1324,7 +1354,13 @@ function TabsShowcase() {
   );
 }
 
-function SelectCard({ mode }: { mode: "light" | "dark" }) {
+function SelectCard({
+  mode,
+  bare,
+}: {
+  mode: "light" | "dark";
+  bare?: boolean;
+}) {
   const [val, setVal] = useState("");
   const options = [
     { label: "Edit", value: "edit", icon: <Edit size={16} /> },
@@ -1337,6 +1373,15 @@ function SelectCard({ mode }: { mode: "light" | "dark" }) {
       variant: "danger" as const,
     },
   ];
+  const content = (
+    <Select
+      options={options}
+      value={val}
+      onChange={setVal}
+      placeholder="Choose action..."
+    />
+  );
+  if (bare) return content;
   return (
     <div
       className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
@@ -1344,19 +1389,18 @@ function SelectCard({ mode }: { mode: "light" | "dark" }) {
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode} · select
       </p>
-      <div>
-        <Select
-          options={options}
-          value={val}
-          onChange={setVal}
-          placeholder="Choose action..."
-        />
-      </div>
+      {content}
     </div>
   );
 }
 
-function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
+function EmailSelectorCard({
+  mode,
+  bare,
+}: {
+  mode: "light" | "dark";
+  bare?: boolean;
+}) {
   const [open, setOpen] = useState(false);
   const [popoverPos, setPopoverPos] = useState({
     vertical: "down" as "up" | "down",
@@ -1388,6 +1432,44 @@ function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
     setOpen(true);
   };
 
+  const content = (
+    <div ref={ref} className="relative w-fit">
+      <button
+        type="button"
+        onClick={() => (open ? setOpen(false) : openDropdown())}
+        className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap border border-border-strong text-content-primary transition-colors w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
+      >
+        <span className="leading-none">user@example.com</span>
+        <ChevronDown
+          size={16}
+          className={`shrink-0 text-content-primary/50 transition-transform ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      {open && (
+        <div
+          className={`absolute z-50 w-fit min-w-[200px] left-0 ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"}`}
+        >
+          <div className="rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card whitespace-nowrap">
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-subtle px-2 text-body font-normal text-content-primary transition-colors"
+            >
+              <Avatar size="sm" name="U" />
+              <span className="truncate text-body">user@example.com</span>
+            </button>
+            <span
+              onClick={() => setOpen(false)}
+              className="mt-4 inline-block cursor-pointer text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+            >
+              Try a different email address
+            </span>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+  if (bare) return content;
   return (
     <div
       className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
@@ -1395,44 +1477,7 @@ function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
       <p className="text-caption text-content-primary/50 font-mono mb-3">
         {mode} · email
       </p>
-      <div ref={ref} className="relative w-fit">
-        <button
-          type="button"
-          onClick={() => (open ? setOpen(false) : openDropdown())}
-          className={`flex h-10 items-center gap-2 rounded-md px-4 text-h3 font-normal border border-border-strong text-content-primary transition-all w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
-        >
-          <span className="leading-none">user@example.com</span>
-          <ChevronDown
-            size={16}
-            className={`shrink-0 text-content-primary/50 transition-transform ${open ? "rotate-180" : ""}`}
-          />
-        </button>
-        {open && (
-          <div
-            className={`absolute z-50 w-fit min-w-[200px] left-0 ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"}`}
-          >
-            <div className="rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card whitespace-nowrap">
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-tertiary px-2 font-normal text-content-primary transition-colors"
-              >
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
-                  <span className="text-caption font-semibold">U</span>
-                </div>
-                <span className="truncate text-body">user@example.com</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setOpen(false)}
-                className="mt-4 w-full px-2 text-left text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
-              >
-                Try a different email address
-              </button>
-            </div>
-          </div>
-        )}
-      </div>
+      {content}
     </div>
   );
 }
@@ -1440,22 +1485,50 @@ function EmailSelectorCard({ mode }: { mode: "light" | "dark" }) {
 function SelectShowcase() {
   return (
     <ShowcaseSection title="Select / Dropdown">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <SelectCard mode="light" />
-        <SelectCard mode="dark" />
-        <EmailSelectorCard mode="light" />
-        <EmailSelectorCard mode="dark" />
-        <div className="card-flat !p-4 light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
-            light · language
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="card-flat !p-4 light bg-surface-primary space-y-6">
+          <p className="text-caption text-content-primary/50 font-mono">
+            light
           </p>
-          <LanguageSelector />
+          <div>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              select
+            </p>
+            <SelectCard mode="light" bare />
+          </div>
+          <div>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              language
+            </p>
+            <LanguageSelector />
+          </div>
+          <div>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              email
+            </p>
+            <EmailSelectorCard mode="light" bare />
+          </div>
         </div>
-        <div className="card-flat !p-4 dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
-            dark · language
-          </p>
-          <LanguageSelector />
+        <div className="card-flat !p-4 dark bg-surface-primary space-y-6">
+          <p className="text-caption text-content-primary/50 font-mono">dark</p>
+          <div>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              select
+            </p>
+            <SelectCard mode="dark" bare />
+          </div>
+          <div>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              language
+            </p>
+            <LanguageSelector />
+          </div>
+          <div>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              email
+            </p>
+            <EmailSelectorCard mode="dark" bare />
+          </div>
         </div>
       </div>
 
@@ -1467,7 +1540,7 @@ function SelectShowcase() {
           "Select Position": selectSpecs.position,
           "Email Selector (auth)": {
             trigger:
-              "h-10 rounded-md px-4 w-fit text-h3 font-normal border border-border-strong bg-transparent hover:bg-surface-subtle",
+              "h-10 rounded-md px-6 py-2.5 w-fit text-body font-normal whitespace-nowrap border border-border-strong bg-transparent hover:bg-surface-subtle transition-colors",
             dropdown:
               "rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card w-fit min-w-[200px] whitespace-nowrap",
             avatar:
@@ -1721,7 +1794,7 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
               strokeWidth={1.5}
             />
           )}
-          <p className="text-center text-body leading-[21px] text-content-primary/50">
+          <p className="text-center text-body text-content-primary/50">
             {isError ? (
               <>
                 Something went wrong!
@@ -1870,7 +1943,7 @@ function FeedbackShowcase() {
               "CircleX 48px text-[#8a1111] strokeWidth-1.5 icon-error animation",
             "success icon":
               "CircleCheck 48px text-[#166534] strokeWidth-1.5 icon-success animation",
-            text: "text-body leading-[21px] text-content-primary/50 text-center",
+            text: "text-body text-content-primary/50 text-center",
             button:
               "h-10 w-full rounded-md border border-border-strong bg-transparent text-h3 font-normal — outline style",
           },

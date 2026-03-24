@@ -132,7 +132,7 @@ export default function MfaSetupStep() {
               strokeWidth={1.5}
             />
 
-            <p className="text-center text-body leading-[21px] text-content-primary/50">
+            <p className="text-center text-body text-content-primary/50">
               MFA setup failed!
               <br />
               An unexpected error occurred. Please try again.
@@ -160,10 +160,10 @@ export default function MfaSetupStep() {
       <div className="flex flex-col gap-6 md:flex-row">
         <div className="flex w-full flex-col gap-2 md:w-[330px]">
           <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-            <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+            <h1 className="text-h1 font-semibold text-content-primary">
               Set Up MFA
             </h1>
-            <p className="text-justify text-body leading-[21px] text-content-primary/50">
+            <p className="text-justify text-body text-content-primary/50">
               Your account requires two-factor authentication. Scan the QR code
               with your authenticator app (Google Authenticator, Authy, etc.).
             </p>
@@ -190,7 +190,7 @@ export default function MfaSetupStep() {
 
           {/* Manual entry fallback */}
           <div className="flex flex-col gap-2">
-            <span className="text-body leading-[21px] text-content-primary/50">
+            <span className="text-body text-content-primary/50">
               Or enter this key manually:
             </span>
             <div className="flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-surface-subtle px-4">
@@ -239,10 +239,10 @@ export default function MfaSetupStep() {
       <div className="flex flex-col gap-6 md:flex-row">
         <div className="flex w-full flex-col gap-2 md:w-[330px]">
           <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-            <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+            <h1 className="text-h1 font-semibold text-content-primary">
               Recovery Codes
             </h1>
-            <p className="text-justify text-body leading-[21px] text-content-primary/50">
+            <p className="text-justify text-body text-content-primary/50">
               Save these recovery codes in a safe place. Each code can only be
               used once if you lose access to your authenticator app.
             </p>
@@ -308,10 +308,10 @@ export default function MfaSetupStep() {
     <div className="flex flex-col gap-6 md:flex-row">
       <div className="flex w-full flex-col gap-2 md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-h1 font-semibold text-content-primary">
             Verify Setup
           </h1>
-          <p className="text-justify text-body leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body text-content-primary/50">
             Enter the 6-digit code from your authenticator app to confirm setup.
           </p>
         </div>

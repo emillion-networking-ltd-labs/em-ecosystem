@@ -13,19 +13,19 @@ export default function AuthFooter() {
       <div className="flex items-center gap-6 px-4">
         <Link
           href="#"
-          className="text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary"
+          className="text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary"
         >
           Help
         </Link>
         <Link
           href="#"
-          className="text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary"
+          className="text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary"
         >
           Privacy
         </Link>
         <Link
           href="#"
-          className="text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary"
+          className="text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary"
         >
           Terms
         </Link>

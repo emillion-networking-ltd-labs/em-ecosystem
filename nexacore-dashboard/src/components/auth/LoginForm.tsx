@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { ChevronDown, AlertTriangle, Key } from "lucide-react";
 import Input from "@/components/ui/Input";
+import Avatar from "@/components/ui/Avatar";
 import InfinitySpinner from "@/components/ui/InfinitySpinner";
 import RateLimitBanner from "@/components/ui/RateLimitBanner";
 import OAuthButtons from "./OAuthButtons";
@@ -196,10 +197,10 @@ export default function LoginForm() {
       {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top) */}
       <div className="flex w-full flex-col gap-2 md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-h1 font-semibold text-content-primary">
             Sign In
           </h1>
-          <p className="text-justify text-body leading-[21px] text-content-primary/50">
+          <p className="text-justify text-body text-content-primary/50">
             Connect using your NexaCore Account. This session will be available
             to other EM Ecosystem modules in the browser.
           </p>
@@ -372,7 +373,7 @@ function PasswordStep({
       {/* Title Group — Figma: 330px fixed, vertical, pAlign MIN (top), inner 300px */}
       <div className="flex w-full flex-col md:w-[330px]">
         <div className="flex w-full flex-col gap-2 md:max-w-[300px]">
-          <h1 className="text-h1 font-semibold leading-[36px] text-content-primary">
+          <h1 className="text-h1 font-semibold text-content-primary">
             Sign In
           </h1>
 
@@ -381,7 +382,7 @@ function PasswordStep({
             <button
               type="button"
               onClick={() => setIsEmailOpen(!isEmailOpen)}
-              className={`flex h-10 items-center justify-center gap-2 rounded-md px-4 text-body font-normal transition-all ${
+              className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap transition-colors ${
                 isEmailOpen
                   ? "border border-border-strong bg-surface-subtle text-content-primary"
                   : "border border-border-strong bg-transparent text-content-primary hover:bg-surface-subtle"
@@ -401,13 +402,9 @@ function PasswordStep({
                   <button
                     type="button"
                     onClick={() => setIsEmailOpen(false)}
-                    className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-tertiary px-2 font-normal text-content-primary transition-colors"
+                    className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-subtle px-2 text-body font-normal text-content-primary transition-colors"
                   >
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
-                      <span className="text-caption font-semibold">
-                        {emailInitial}
-                      </span>
-                    </div>
+                    <Avatar size="sm" name={emailInitial} />
                     <span className="truncate text-body">{email}</span>
                   </button>
 
@@ -471,7 +468,7 @@ function PasswordStep({
             <div className="flex items-center justify-end">
               <Link
                 href={`/forgot-password?email=${encodeURIComponent(email)}`}
-                className="whitespace-nowrap text-body font-normal leading-[21px] text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                className="whitespace-nowrap text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
               >
                 Forgot password?
               </Link>

@@ -152,7 +152,7 @@ export default function NavBar({
               <Link
                 href="/profile"
                 onClick={() => setDropdownOpen(false)}
-                className="flex items-center gap-2 rounded-md p-2 text-caption text-content-primary hover:bg-surface-subtle"
+                className="flex items-center gap-2 rounded-md p-2 text-body font-normal text-content-primary hover:bg-surface-subtle"
               >
                 <User size={16} />
                 Profile
@@ -161,7 +161,7 @@ export default function NavBar({
                 <Link
                   href="/admin"
                   onClick={() => setDropdownOpen(false)}
-                  className="flex items-center gap-2 rounded-md p-2 text-caption text-content-primary hover:bg-surface-subtle"
+                  className="flex items-center gap-2 rounded-md p-2 text-body font-normal text-content-primary hover:bg-surface-subtle"
                 >
                   <Shield size={16} />
                   Admin
@@ -170,7 +170,7 @@ export default function NavBar({
               <Divider className="my-2" />
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-2 rounded-md p-2 text-caption text-error hover:bg-surface-subtle"
+                className="flex w-full items-center gap-2 rounded-md p-2 text-body font-normal text-error hover:bg-surface-subtle"
               >
                 <LogOut size={16} />
                 Sign out

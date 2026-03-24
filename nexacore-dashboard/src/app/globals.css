@@ -151,6 +151,13 @@
     box-sizing: border-box;
   }
 
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
+  }
+
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -495,10 +502,12 @@ input:-webkit-autofill:focus {
 
   /* Dropdown/popover enter animations */
   .animate-dropdown-down {
-    animation: dropdown-down 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    animation: dropdown-down 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: auto;
   }
   .animate-dropdown-up {
-    animation: dropdown-up 150ms cubic-bezier(0.16, 1, 0.3, 1);
+    animation: dropdown-up 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: auto;
   }
 }
 

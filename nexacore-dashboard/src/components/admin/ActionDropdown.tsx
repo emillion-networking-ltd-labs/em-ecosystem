@@ -57,7 +57,7 @@ export default function ActionDropdown({
                   setOpen(false);
                   onChangeRole(user);
                 }}
-                className="flex w-full items-center gap-2 rounded-md p-2 text-caption text-content-primary hover:bg-surface-subtle"
+                className="flex w-full items-center gap-2 rounded-md p-2 text-body font-normal text-content-primary hover:bg-surface-subtle"
               >
                 <ShieldCheck size={16} />
                 Change Role
@@ -67,7 +67,7 @@ export default function ActionDropdown({
                   setOpen(false);
                   onToggleLock(user);
                 }}
-                className="flex w-full items-center gap-2 rounded-md p-2 text-caption text-content-primary hover:bg-surface-subtle"
+                className="flex w-full items-center gap-2 rounded-md p-2 text-body font-normal text-content-primary hover:bg-surface-subtle"
               >
                 {isLocked ? <Unlock size={16} /> : <Lock size={16} />}
                 {isLocked ? "Unlock Account" : "Lock Account"}
@@ -80,7 +80,7 @@ export default function ActionDropdown({
                   setOpen(false);
                   onDelete(user);
                 }}
-                className="flex w-full items-center gap-2 rounded-md p-2 text-caption text-error hover:bg-surface-subtle"
+                className="flex w-full items-center gap-2 rounded-md p-2 text-body font-normal text-error hover:bg-surface-subtle"
               >
                 <Trash2 size={16} />
                 Delete User

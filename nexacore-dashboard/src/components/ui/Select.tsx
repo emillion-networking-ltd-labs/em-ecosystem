@@ -21,10 +21,10 @@ interface SelectProps {
 
 export const selectSpecs = {
   trigger: {
-    shared:
-      "inline-flex items-center justify-between gap-2 w-fit px-4 py-2.5 text-body rounded-md bg-transparent",
-    hover: "hover:bg-surface-subtle",
-    open: "bg-surface-subtle",
+    base: "flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-2.5 text-body font-normal transition-colors",
+    closed:
+      "text-content-primary/75 hover:text-content-primary hover:bg-surface-subtle",
+    open: "bg-surface-subtle text-content-primary",
     disabled: "opacity-50 cursor-not-allowed",
   },
   dropdown: {
@@ -32,9 +32,10 @@ export const selectSpecs = {
       "rounded-xl border border-border-strong bg-surface-primary p-6 shadow-card max-h-64 overflow-auto",
   },
   option: {
-    selected: "bg-surface-inverse text-content-inverse rounded-md",
-    default: "text-content-primary rounded-md hover:bg-surface-subtle",
-    danger: "text-error hover:bg-error-bg rounded-md",
+    base: "flex h-10 items-center gap-2 whitespace-nowrap px-6 py-2.5 rounded-md text-body font-normal transition-colors",
+    selected: "bg-surface-inverse text-content-inverse",
+    default: "text-content-primary hover:bg-surface-subtle",
+    danger: "text-error hover:bg-error-bg",
     focused: "bg-surface-subtle text-content-primary",
   },
   icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open",
@@ -158,19 +159,13 @@ export default function Select({
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openDropdown())}
         onKeyDown={handleKeyDown}
-        className={`inline-flex items-center justify-between gap-2 w-fit px-4 py-2.5 text-body rounded-md transition-colors ${
+        className={`flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-2.5 text-body font-normal transition-colors ${
           disabled
             ? "opacity-50 cursor-not-allowed"
-            : "hover:bg-surface-subtle cursor-pointer"
-        } ${open ? "bg-surface-subtle" : "bg-transparent"}`}
+            : "hover:text-content-primary hover:bg-surface-subtle cursor-pointer"
+        } ${open ? "bg-surface-subtle text-content-primary" : "bg-transparent text-content-primary/75"}`}
       >
-        <span
-          className={
-            selectedOption ? "text-content-primary" : "text-content-placeholder"
-          }
-        >
-          {selectedOption?.label ?? placeholder}
-        </span>
+        <span>{selectedOption?.label ?? placeholder}</span>
         <ChevronDown
           size={16}
           className={`text-content-primary/50 transition-transform ${open ? "rotate-180" : ""}`}
@@ -185,7 +180,7 @@ export default function Select({
           aria-activedescendant={
             focusedIndex >= 0 ? `${listboxId}-opt-${focusedIndex}` : undefined
           }
-          className={`absolute z-50 w-fit min-w-[160px] bg-surface-primary border border-border-strong rounded-xl p-6 flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
+          className={`absolute z-50 w-fit min-w-[160px] bg-surface-primary border border-border-strong rounded-xl p-6 shadow-card flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;
@@ -203,7 +198,7 @@ export default function Select({
                   setOpen(false);
                 }}
                 onMouseEnter={() => setFocusedIndex(index)}
-                className={`flex items-center gap-2 px-2 py-2 rounded-md text-caption cursor-pointer transition-colors ${
+                className={`flex h-10 items-center gap-2 whitespace-nowrap px-6 py-2.5 rounded-md text-body font-normal cursor-pointer transition-colors ${
                   isSelected
                     ? "bg-surface-inverse text-content-inverse"
                     : isDanger

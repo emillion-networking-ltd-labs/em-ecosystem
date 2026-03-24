@@ -1,5 +1,7 @@
 "use client";
 
+import { designTokens } from "../../../tailwind.config";
+
 /* ===== Token Data (from globals.css + tailwind.config.ts) ===== */
 
 interface ColorToken {
@@ -222,63 +224,47 @@ const typographyTokens = [
   {
     name: "heading",
     desc: "text-h1 font-semibold",
-    size: "24px",
-    lineHeight: "36px",
+    size: designTokens.fontSize.h1.size,
+    lineHeight: designTokens.fontSize.h1.lineHeight,
     weight: 600,
     mono: false,
   },
   {
-    name: "button",
+    name: "title",
+    desc: "text-h2 font-semibold",
+    size: designTokens.fontSize.h2.size,
+    lineHeight: designTokens.fontSize.h2.lineHeight,
+    weight: 600,
+    mono: false,
+  },
+  {
+    name: "button / subtitle",
     desc: "text-h3 font-normal",
-    size: "16px",
-    lineHeight: "normal",
-    weight: 500,
-    mono: false,
-  },
-  {
-    name: "label",
-    desc: "text-body font-semibold",
-    size: "15px",
-    lineHeight: "22px",
-    weight: 600,
-    mono: false,
-  },
-  {
-    name: "input",
-    desc: "text-body font-normal",
-    size: "15px",
-    lineHeight: "24px",
+    size: designTokens.fontSize.h3.size,
+    lineHeight: designTokens.fontSize.h3.lineHeight,
     weight: 400,
     mono: false,
   },
   {
-    name: "link",
-    desc: "text-body font-normal",
-    size: "14px",
-    lineHeight: "21px",
-    weight: 500,
-    mono: false,
-  },
-  {
-    name: "error / desc",
-    desc: "text-caption",
-    size: "12px",
-    lineHeight: "24px",
+    name: "body / label / link",
+    desc: "text-body font-normal (semibold for labels)",
+    size: designTokens.fontSize.body.size,
+    lineHeight: designTokens.fontSize.body.lineHeight,
     weight: 400,
     mono: false,
   },
   {
-    name: "toast title",
-    desc: "text-caption font-semibold",
-    size: "12px",
-    lineHeight: "1.25",
-    weight: 600,
+    name: "caption / error",
+    desc: "text-caption font-normal (semibold for toast title)",
+    size: designTokens.fontSize.caption.size,
+    lineHeight: designTokens.fontSize.caption.lineHeight,
+    weight: 400,
     mono: false,
   },
   {
     name: "technical",
     desc: "font-mono text-caption",
-    size: "12px",
+    size: designTokens.fontSize.caption.size,
     lineHeight: "normal",
     weight: 400,
     mono: true,
@@ -297,14 +283,18 @@ const spacingTokens = [
 ];
 
 const radiusTokens = [
-  { name: "md (buttons, inputs)", value: "6px" },
-  { name: "lg (input container)", value: "8px" },
-  { name: "3xl (cards, dropdowns)", value: "24px" },
-  { name: "full (pills, avatars)", value: "9999px" },
+  { name: "md (buttons, inputs)", value: designTokens.borderRadius.md },
+  { name: "lg (input container)", value: designTokens.borderRadius.lg },
+  { name: "xl (inner cards)", value: designTokens.borderRadius.xl },
+  {
+    name: "3xl (container cards, dropdowns)",
+    value: designTokens.borderRadius["3xl"],
+  },
+  { name: "full (pills, avatars)", value: designTokens.borderRadius.full },
 ];
 
 const shadowTokens = [
-  { name: "card / dropdown", value: "0 8px 32px rgba(0, 0, 0, 0.04)" },
+  { name: "card / dropdown", value: designTokens.boxShadow.card },
 ];
 
 /* ===== Section Components ===== */

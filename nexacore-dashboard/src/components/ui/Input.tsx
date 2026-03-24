@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, type ReactNode } from "react";
+import { useState, useRef, forwardRef, type ReactNode } from "react";
 import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 import Spinner from "./Spinner";
 
@@ -13,7 +13,9 @@ interface InputProps extends Omit<
   hasError?: boolean;
   loading?: boolean;
   leftIcon?: ReactNode;
+  rightIcon?: ReactNode;
   size?: "sm" | "md";
+  variant?: "default" | "filled";
 }
 
 const sizeClasses = {
@@ -37,39 +39,49 @@ export const inputSpecs = {
     focus: "focus-within:outline-content-primary/75",
     error: "outline-error/75",
     disabled: "cursor-not-allowed opacity-60",
+    "filled variant": "bg-surface-primary, no outline (search bars, dropdowns)",
   },
   icons: {
     left: "shrink-0 text-content-secondary (16px)",
+    right: "shrink-0 (custom ReactNode)",
     password:
       "shrink-0 text-content-secondary hover:text-content-primary/75 (16px)",
     error: "shrink-0 text-error (TriangleAlert 16px)",
   },
 };
 
-export default function Input({
-  label,
-  error,
-  hasError = false,
-  loading = false,
-  leftIcon,
-  size = "md",
-  type = "text",
-  className = "",
-  disabled,
-  id,
-  ...props
-}: InputProps) {
+const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
+  {
+    label,
+    error,
+    hasError = false,
+    loading = false,
+    leftIcon,
+    rightIcon,
+    size = "md",
+    variant = "default",
+    type = "text",
+    className = "",
+    disabled,
+    id,
+    ...props
+  },
+  ref,
+) {
   const [showPassword, setShowPassword] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const internalRef = useRef<HTMLInputElement>(null);
+  const inputRef = (ref as React.RefObject<HTMLInputElement>) || internalRef;
   const inputId = id || props.name;
   const isPassword = type === "password";
 
-  /* Outline states (ui-design-system: border always 1px black/5, outline on top)
-     default: no outline | hover: 2px black/75 | focus: 2px black/75 | error: 2px error/75 */
+  /* Outline states */
   const isErrorState = !!(error || hasError);
-  const outlineClass = isErrorState
-    ? "outline-error/75"
-    : "outline-transparent hover:outline-content-primary/75 focus-within:outline-content-primary/75";
+  const isFilled = variant === "filled";
+  const outlineClass = isFilled
+    ? "outline-none"
+    : isErrorState
+      ? "outline-error/75"
+      : "outline-transparent hover:outline-content-primary/75 focus-within:outline-content-primary/75";
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
@@ -83,8 +95,9 @@ export default function Input({
       )}
       <div
         className={`
-          flex items-center gap-2 rounded-lg border border-border-strong bg-transparent
-          outline outline-2 outline-offset-2 transition-colors
+          flex items-center gap-2 rounded-lg border border-border-strong
+          ${isFilled ? "bg-surface-primary" : "bg-transparent outline outline-2 outline-offset-2"}
+          transition-colors
           ${sizeClasses[size]}
           ${outlineClass}
           ${disabled ? "cursor-not-allowed opacity-60" : "cursor-text"}
@@ -101,7 +114,7 @@ export default function Input({
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
           ref={inputRef}
-          className={`min-w-0 flex-1 bg-transparent ${size === "sm" ? "text-body" : "text-body"} leading-6 text-content-primary outline-none placeholder:text-content-placeholder`}
+          className="min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
           {...props}
         />
         {isPassword && !loading && (
@@ -113,6 +126,9 @@ export default function Input({
           >
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
+        )}
+        {rightIcon && !isPassword && !loading && (
+          <span className="shrink-0">{rightIcon}</span>
         )}
         {loading && (
           <span className="shrink-0">
@@ -132,4 +148,6 @@ export default function Input({
       )}
     </div>
   );
-}
+});
+
+export default Input;
