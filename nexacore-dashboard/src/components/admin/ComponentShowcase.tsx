@@ -1,9 +1,13 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { createPortal } from "react-dom";
-import { computePlacement } from "@/hooks/useAutoPlacement";
-import type { Placement } from "@/hooks/useAutoPlacement";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+} from "recharts";
 import {
   Search,
   Trash2,
@@ -27,14 +31,6 @@ import {
 } from "lucide-react";
 import CountdownTimer from "@/components/ui/CountdownTimer";
 import TotalUsersChart from "@/components/dashboard/TotalUsersChart";
-import {
-  Chart as ChartJS,
-  ArcElement,
-  Tooltip as ChartTooltip,
-} from "chart.js";
-import { Doughnut } from "react-chartjs-2";
-
-ChartJS.register(ArcElement, ChartTooltip);
 import Button, {
   variantClasses as buttonVariants,
   sizeClasses as buttonSizes,
@@ -1760,7 +1756,7 @@ function ToastDemo() {
           <Button
             key={variant}
             variant="outline"
-            size="sm"
+            size="md"
             fullWidth={false}
             onClick={() => show(variant)}
           >
@@ -1840,9 +1836,9 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
               "Email verified!"
             )}
           </p>
-          <button className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-h3 font-normal text-content-primary transition-colors hover:bg-surface-subtle">
+          <Button variant="outline" size="md" fullWidth>
             {isError ? "Go to Sign In" : "Go to Dashboard"}
-          </button>
+          </Button>
         </div>
       </div>
       <div className="h-14 w-full p-2" />
@@ -1856,7 +1852,7 @@ function FullPageIconsDemo() {
       <p className="text-caption text-content-primary/50 font-mono mb-2">
         full page — hover to preview
       </p>
-      <div className="flex flex-wrap gap-4 items-start justify-center sm:justify-start">
+      <div className="flex flex-wrap gap-4 items-start justify-center">
         <FullPageCard type="error" />
         <FullPageCard type="success" />
       </div>
@@ -2068,37 +2064,37 @@ function AccordionShowcase() {
 
 const speedoSizes = {
   sm: {
-    w: 150,
-    h: 120,
-    cx: 75,
-    cy: 75,
-    R: 45,
-    progressW: 10,
-    trackW: 8,
-    dashR: 30,
-    needleLen: 28,
-    needleBase: 3,
-    hub: 5,
+    w: 180,
+    h: 145,
+    cx: 90,
+    cy: 90,
+    R: 55,
+    progressW: 12,
+    trackW: 10,
+    dashR: 38,
+    needleLen: 34,
+    needleBase: 4,
+    hub: 6,
     hubInner: 2,
-    fontSize: 8,
-    labelOffset: 14,
+    fontSize: 12,
+    labelOffset: 16,
     textClass: "text-body",
   },
   md: {
-    w: 210,
-    h: 170,
-    cx: 105,
-    cy: 110,
-    R: 65,
-    progressW: 14,
-    trackW: 12,
-    dashR: 45,
-    needleLen: 42,
+    w: 230,
+    h: 185,
+    cx: 115,
+    cy: 120,
+    R: 72,
+    progressW: 16,
+    trackW: 14,
+    dashR: 50,
+    needleLen: 48,
     needleBase: 5,
     hub: 8,
     hubInner: 3,
-    fontSize: 10,
-    labelOffset: 18,
+    fontSize: 12,
+    labelOffset: 20,
     textClass: "text-h3",
   },
   lg: {
@@ -2114,7 +2110,7 @@ const speedoSizes = {
     needleBase: 6,
     hub: 10,
     hubInner: 4,
-    fontSize: 11,
+    fontSize: 12,
     labelOffset: 22,
     textClass: "text-h1",
   },
@@ -2264,169 +2260,81 @@ function SpeedometerChart({
   );
 }
 
-const doughnutArrowClasses: Record<string, string> = {
-  top: "top-full left-1/2 -translate-x-1/2 -mt-[3px]",
-  bottom: "bottom-full left-1/2 -translate-x-1/2 -mb-[3px]",
-  left: "left-full top-1/2 -translate-y-1/2 -ml-[3px]",
-  right: "right-full top-1/2 -translate-y-1/2 -mr-[3px]",
-};
-
-function getDoughnutPlacement(
-  xAlign: string,
-  yAlign: string,
-): "top" | "bottom" | "left" | "right" {
-  if (yAlign === "bottom") return "top";
-  if (yAlign === "top") return "bottom";
-  if (xAlign === "right") return "left";
-  if (xAlign === "left") return "right";
-  return "top";
+function getDoughnutMockData(isDark: boolean) {
+  return [
+    { name: "USER", value: 150, fill: "#a0bce8" },
+    { name: "ADMIN", value: 75, fill: "#6be6d3" },
+    { name: "SUPERADMIN", value: 25, fill: isDark ? "#f5f5f5" : "#1c1c1c" },
+  ];
 }
 
-function DoughnutChartMock() {
-  const [tooltipData, setTooltipData] = useState<{
-    caretX: number;
-    caretY: number;
-    label: string;
-    value: number;
-    color: string;
-    placement: "top" | "bottom" | "left" | "right";
-  } | null>(null);
-
-  const doughnutData = {
-    labels: ["USER", "ADMIN", "SUPERADMIN"],
-    datasets: [
-      {
-        data: [150, 75, 25],
-        backgroundColor: ["#a0bce8", "#6be6d3", "#1c1c1c"],
-        borderWidth: 0,
-        spacing: 2,
-      },
-    ],
-  };
-
-  const doughnutOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    cutout: "60%",
-    plugins: {
-      tooltip: {
-        enabled: false,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        external: (ctx: any) => {
-          const { tooltip: t } = ctx;
-          if (t.opacity === 0) {
-            setTooltipData(null);
-            return;
-          }
-          const label = t.title?.[0] || "";
-          const body = t.body?.[0]?.lines?.[0] || "";
-          const value = parseInt(body.replace(/\D/g, "")) || 0;
-          const color = t.labelColors?.[0]?.backgroundColor || "#1c1c1c";
-          setTooltipData({
-            caretX: t.caretX,
-            caretY: t.caretY,
-            label,
-            value,
-            color,
-            placement: getDoughnutPlacement(
-              t.xAlign || "center",
-              t.yAlign || "bottom",
-            ),
-          });
-        },
-      },
-    },
-  };
-
-  const chartContainerRef = useRef<HTMLDivElement>(null);
-  const chartAreaRef = useRef<HTMLDivElement>(null);
-
+function DoughnutChartMock({ isDark = false }: { isDark?: boolean }) {
+  const doughnutMockData = getDoughnutMockData(isDark);
   return (
-    <div
-      ref={chartContainerRef}
-      className="rounded-3xl border border-border-strong bg-surface-primary p-6"
-    >
+    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
       <div className="mb-4">
         <h3 className="text-body font-semibold text-content-primary">
           Users by Role
         </h3>
       </div>
       <div className="flex items-center gap-6">
-        <div ref={chartAreaRef} className="h-[120px] w-[120px] shrink-0">
-          <Doughnut data={doughnutData} options={doughnutOptions} />
+        <div className="h-[120px] w-[120px] shrink-0">
+          <ResponsiveContainer width="100%" height="100%">
+            <PieChart>
+              <Pie
+                data={doughnutMockData}
+                dataKey="value"
+                nameKey="name"
+                cx="50%"
+                cy="50%"
+                innerRadius="60%"
+                outerRadius="100%"
+                paddingAngle={2}
+                strokeWidth={0}
+              >
+                {doughnutMockData.map((e) => (
+                  <Cell key={e.name} fill={e.fill} />
+                ))}
+              </Pie>
+              <RechartsTooltip
+                content={({ active, payload }) => {
+                  if (!active || !payload?.length) return null;
+                  const item = payload[0];
+                  return (
+                    <div className="rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-sm"
+                          style={{
+                            background: item.payload?.fill || item.color,
+                          }}
+                        />
+                        <span className="text-caption font-normal text-content-primary">
+                          {item.name}: {item.value}
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }}
+              />
+            </PieChart>
+          </ResponsiveContainer>
         </div>
         <div className="space-y-3">
-          {[
-            { role: "USER", color: "bg-[#a0bce8]", count: 150, pct: "60.0" },
-            { role: "ADMIN", color: "bg-[#6be6d3]", count: 75, pct: "30.0" },
-            {
-              role: "SUPERADMIN",
-              color: "bg-surface-inverse",
-              count: 25,
-              pct: "10.0",
-            },
-          ].map(({ role, color, count, pct }) => (
-            <div key={role} className="flex items-center gap-2">
-              <span className={`h-2 w-2 shrink-0 rounded-full ${color}`} />
-              <span className="text-caption text-content-primary">{role}</span>
+          {doughnutMockData.map(({ name, value, fill }) => (
+            <div key={name} className="flex items-center gap-2">
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ background: fill }}
+              />
+              <span className="text-caption text-content-primary">{name}</span>
               <span className="text-caption text-content-primary/50">
-                {count} ({pct}%)
+                {value} ({((value / 250) * 100).toFixed(1)}%)
               </span>
             </div>
           ))}
         </div>
       </div>
-      {tooltipData &&
-        chartAreaRef.current &&
-        createPortal(
-          (() => {
-            const chartRect = chartAreaRef.current!.getBoundingClientRect();
-            const refX = chartRect.left + tooltipData.caretX;
-            const refY = chartRect.top + tooltipData.caretY;
-            const { placement, x, y } = computePlacement(
-              refX,
-              refY,
-              180,
-              40,
-              tooltipData.placement,
-            );
-            return (
-              <div
-                className="fixed pointer-events-none z-[9999]"
-                style={{ left: x, top: y }}
-              >
-                <div className="relative inline-flex">
-                  <div
-                    role="tooltip"
-                    className={`absolute z-50 whitespace-nowrap rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card ${
-                      placement === "top"
-                        ? "bottom-full left-1/2 -translate-x-1/2 mb-0"
-                        : placement === "bottom"
-                          ? "top-full left-1/2 -translate-x-1/2 mt-0"
-                          : placement === "left"
-                            ? "right-full top-1/2 -translate-y-1/2 mr-0"
-                            : "left-full top-1/2 -translate-y-1/2 ml-0"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1.5">
-                      <span
-                        className="h-2 w-2 shrink-0 rounded-sm"
-                        style={{ background: tooltipData.color }}
-                      />
-                      <span className="text-caption font-normal text-content-primary">
-                        {tooltipData.label}: {tooltipData.value}
-                      </span>
-                    </div>
-                    <div
-                      className={`absolute h-[8px] w-[8px] rotate-45 border border-border-strong bg-surface-primary ${doughnutArrowClasses[placement]}`}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
-          })(),
-          document.body,
-        )}
     </div>
   );
 }
@@ -2454,7 +2362,7 @@ function ChartsShowcase() {
                 <p className="text-caption text-content-primary/50 font-mono mb-2">
                   Speedometer
                 </p>
-                <div className="rounded-3xl border border-border-strong bg-surface-primary p-6">
+                <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
                   <div className="mb-2">
                     <h3 className="text-body font-semibold text-content-primary">
                       Performance
@@ -2486,7 +2394,7 @@ function ChartsShowcase() {
                 <p className="text-caption text-content-primary/50 font-mono mb-2">
                   Doughnut Chart
                 </p>
-                <DoughnutChartMock />
+                <DoughnutChartMock isDark={mode === "dark"} />
               </div>
             </div>
           </div>
@@ -2510,22 +2418,20 @@ function ChartsShowcase() {
             secondary: "#a0bce8 — comparison line, USER role",
             tertiary: "#6be6d3 — ADMIN role",
           },
-          "Chart.js Config": {
+          "Recharts Config": {
+            rendering: "SVG/HTML — same engine as all UI components, no canvas",
             tooltip:
-              "Custom React tooltip via createPortal(document.body) + computePlacement() auto-positioning",
+              "Custom HTML content via <Tooltip content={...} /> — native DOM positioning",
             "tooltip style":
-              "rounded-lg border-border-strong bg-surface-primary px-4 py-3 shadow-card + diamond arrow (Tooltip.tsx pattern)",
-            "tooltip placement":
-              "computePlacement() from hooks/useAutoPlacement.ts — flip+shift algorithm, detects all 4 viewport edges",
-            "tooltip labels":
-              "solid color squares (no border) via labelColor callback",
-            interaction:
-              "mode: index, intersect: false — tooltip on any x position",
-            grid: "border-strong color, no x-grid",
-            ticks: "font 12px (Geist Sans), content-primary/50",
-            "dark mode": "auto via useTheme() + forceDark prop",
-            animation:
-              "default chartjs enter + pointHoverRadius 4 (instant, no grow animation)",
+              "rounded-lg border-border-strong bg-surface-primary px-4 py-3 shadow-card (no diamond — Recharts controls position)",
+            "color dots": "h-2 w-2 rounded-sm with item.color",
+            grid: "border-strong color, no x-grid, strokeDasharray 3 3",
+            ticks: "text-caption (12px) via SVG, system font inherited",
+            "dark mode":
+              "auto via useTheme() — colors.line, colors.ticks, colors.grid adapt",
+            "SUPERADMIN color":
+              "isDark ? #f5f5f5 : #1c1c1c (surface-inverse adaptive)",
+            activeDot: "r: 4, strokeWidth: 0, instant (no grow animation)",
           },
           Speedometer: {
             arc: "270° sweep (135° to 45°), strokeLinecap round",
@@ -2533,7 +2439,10 @@ function ChartsShowcase() {
             track: "stroke-surface-tertiary",
             needle: "polygon triangle fill-surface-inverse",
             hub: "fill-surface-inverse + fill-surface-primary center",
-            sizes: "sm (140px), md (210px), lg (260px)",
+            labels: "text-caption (12px) — 00 / 100 inside dashed circle",
+            percentage:
+              "sm: text-body (14px), md: text-h3 (16px), lg: text-h1 (24px)",
+            sizes: "sm (180px), md (230px), lg (260px)",
           },
         }}
       />

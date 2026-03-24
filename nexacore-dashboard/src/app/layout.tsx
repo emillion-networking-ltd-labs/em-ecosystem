@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
-import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import Providers from "./providers";
 
@@ -26,7 +25,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
         />
       </head>
-      <body className={GeistSans.className}>
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>

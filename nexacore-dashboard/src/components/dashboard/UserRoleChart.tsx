@@ -1,13 +1,17 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Chart as ChartJS, ArcElement, Tooltip } from "chart.js";
-import { Doughnut } from "react-chartjs-2";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip as RechartsTooltip,
+  ResponsiveContainer,
+} from "recharts";
 import ChartCard from "./ChartCard";
 import { apiClient } from "@/lib/api";
+import { useTheme } from "@/hooks/useTheme";
 import type { SafeUser, PaginatedResponse } from "@/lib/types";
-
-ChartJS.register(ArcElement, Tooltip);
 
 type RoleCounts = {
   USER: number;
@@ -15,42 +19,25 @@ type RoleCounts = {
   SUPERADMIN: number;
 };
 
-const ROLE_COLORS: Record<string, string> = {
-  USER: "#a0bce8",
-  ADMIN: "#6be6d3",
-  SUPERADMIN: "#1c1c1c",
-};
+function getRoleColors(isDark: boolean) {
+  return {
+    USER: "#a0bce8",
+    ADMIN: "#6be6d3",
+    SUPERADMIN: isDark ? "#f5f5f5" : "#1c1c1c",
+  } as Record<string, string>;
+}
 
-const ROLE_BG_CLASSES: Record<string, string> = {
-  USER: "bg-[#a0bce8]",
-  ADMIN: "bg-[#6be6d3]",
-  SUPERADMIN: "bg-[#1c1c1c]",
-};
-
-const options = {
-  responsive: true,
-  maintainAspectRatio: false,
-  cutout: "60%",
-  plugins: {
-    tooltip: {
-      backgroundColor: "#ffffff",
-      titleColor: "#1c1c1c",
-      bodyColor: "#1c1c1c",
-      borderColor: "rgba(28, 28, 28, 0.08)",
-      borderWidth: 1,
-      cornerRadius: 8,
-      bodyFont: { size: 12 },
-      titleFont: { size: 12 },
-      padding: 10,
-      callbacks: {
-        label: (ctx: { parsed: number; label: string }) =>
-          ` ${ctx.label}: ${ctx.parsed}`,
-      },
-    },
-  },
-};
+function getRoleBgClasses(isDark: boolean) {
+  return {
+    USER: "bg-[#a0bce8]",
+    ADMIN: "bg-[#6be6d3]",
+    SUPERADMIN: isDark ? "bg-[#f5f5f5]" : "bg-[#1c1c1c]",
+  } as Record<string, string>;
+}
 
 export default function UserRoleChart() {
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [counts, setCounts] = useState<RoleCounts | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -85,20 +72,12 @@ export default function UserRoleChart() {
 
   const roles = ["USER", "ADMIN", "SUPERADMIN"] as const;
   const total = counts ? counts.USER + counts.ADMIN + counts.SUPERADMIN : 0;
+  const roleColors = getRoleColors(isDark);
+  const roleBgClasses = getRoleBgClasses(isDark);
 
-  const data = counts
-    ? {
-        labels: roles.map((r) => r),
-        datasets: [
-          {
-            data: roles.map((r) => counts[r]),
-            backgroundColor: roles.map((r) => ROLE_COLORS[r]),
-            borderWidth: 0,
-            spacing: 2,
-          },
-        ],
-      }
-    : null;
+  const pieData = counts
+    ? roles.map((r) => ({ name: r, value: counts[r], fill: roleColors[r] }))
+    : [];
 
   return (
     <ChartCard title="Users by Role">
@@ -122,10 +101,49 @@ export default function UserRoleChart() {
         </p>
       )}
 
-      {!loading && !error && data && (
+      {!loading && !error && pieData.length > 0 && (
         <div className="flex items-center gap-6">
           <div className="h-[120px] w-[120px] flex-shrink-0">
-            <Doughnut data={data} options={options} />
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius="60%"
+                  outerRadius="100%"
+                  paddingAngle={2}
+                  strokeWidth={0}
+                >
+                  {pieData.map((entry) => (
+                    <Cell key={entry.name} fill={entry.fill} />
+                  ))}
+                </Pie>
+                <RechartsTooltip
+                  content={({ active, payload }) => {
+                    if (!active || !payload?.length) return null;
+                    const item = payload[0];
+                    return (
+                      <div className="rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <span
+                            className="h-2 w-2 shrink-0 rounded-sm"
+                            style={{
+                              background: item.payload?.fill || item.color,
+                            }}
+                          />
+                          <span className="text-caption font-normal text-content-primary">
+                            {item.name}: {item.value}
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  }}
+                />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
           <div className="space-y-3">
             {roles.map((role) => {
@@ -134,7 +152,7 @@ export default function UserRoleChart() {
               return (
                 <div key={role} className="flex items-center gap-2">
                   <span
-                    className={`h-2 w-2 flex-shrink-0 rounded-full ${ROLE_BG_CLASSES[role]}`}
+                    className={`h-2 w-2 flex-shrink-0 rounded-full ${roleBgClasses[role]}`}
                   />
                   <span className="text-caption text-content-primary">
                     {role}

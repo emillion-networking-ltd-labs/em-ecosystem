@@ -27,7 +27,15 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
+        sans: [
+          "-apple-system",
+          "BlinkMacSystemFont",
+          "Segoe UI",
+          "Noto Sans",
+          "Helvetica",
+          "Arial",
+          "sans-serif",
+        ],
       },
       colors: {
         accent: {
