@@ -1,6 +1,8 @@
 "use client";
 
-import { useMemo, useState, useCallback } from "react";
+import { useMemo, useState, useCallback, useRef } from "react";
+import { createPortal } from "react-dom";
+import { computePlacement } from "@/hooks/useAutoPlacement";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -51,32 +53,21 @@ const arrowClasses: Record<string, string> = {
 };
 
 type TooltipInfo = {
-  /* Position of the tooltip box (px, relative to canvas) */
-  x: number;
-  y: number;
-  /* Where the caret/arrow should point (px, relative to canvas) */
   caretX: number;
   caretY: number;
-  /* Chart.js computed alignment */
-  placement: "top" | "bottom" | "left" | "right";
+  preferred: "top" | "bottom" | "left" | "right";
   title: string;
   items: { label: string; value: string; color: string }[];
 } | null;
 
-/**
- * Map Chart.js xAlign/yAlign to our Tooltip placement.
- * Chart.js: yAlign=top means tooltip is ABOVE the point → our "top"
- *           yAlign=bottom means tooltip is BELOW → our "bottom"
- *           xAlign=left/right with yAlign=center → our "left"/"right"
- */
-function getPlacement(
+function chartJsToPreferred(
   xAlign: string,
   yAlign: string,
 ): "top" | "bottom" | "left" | "right" {
-  if (yAlign === "bottom") return "top"; // tooltip above point
-  if (yAlign === "top") return "bottom"; // tooltip below point
-  if (xAlign === "right") return "left"; // tooltip left of point
-  if (xAlign === "left") return "right"; // tooltip right of point
+  if (yAlign === "bottom") return "top";
+  if (yAlign === "top") return "bottom";
+  if (xAlign === "right") return "left";
+  if (xAlign === "left") return "right";
   return "top";
 }
 
@@ -87,6 +78,7 @@ export default function TotalUsersChart({
   const isDark = forceDark ?? theme === "dark";
   const colors = useMemo(() => getChartColors(isDark), [isDark]);
   const [tooltipInfo, setTooltipInfo] = useState<TooltipInfo>(null);
+  const chartAreaRef = useRef<HTMLDivElement>(null);
 
   const data = {
     labels,
@@ -136,13 +128,13 @@ export default function TotalUsersChart({
       x: {
         grid: { display: false },
         border: { display: false },
-        ticks: { font: { size: 12 }, color: colors.ticks },
+        ticks: { font: { size: 14 }, color: colors.ticks },
       },
       y: {
         grid: { color: colors.grid, drawTicks: false },
         border: { display: false, dash: [3, 3] as number[] },
         ticks: {
-          font: { size: 12 },
+          font: { size: 14 },
           color: colors.ticks,
           callback: formatYAxis,
           padding: 8,
@@ -168,11 +160,12 @@ export default function TotalUsersChart({
             })) || [];
 
           setTooltipInfo({
-            x: t.x,
-            y: t.y,
             caretX: t.caretX,
             caretY: t.caretY,
-            placement: getPlacement(t.xAlign || "center", t.yAlign || "bottom"),
+            preferred: chartJsToPreferred(
+              t.xAlign || "center",
+              t.yAlign || "bottom",
+            ),
             title,
             items,
           });
@@ -192,7 +185,7 @@ export default function TotalUsersChart({
               This year
             </span>
           </div>
-          <span className="text-body text-content-primary/20">|</span>
+          <span className="text-caption text-content-primary/20">|</span>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-[#a0bce8]" />
             <span className="text-caption text-content-primary/50">
@@ -202,53 +195,65 @@ export default function TotalUsersChart({
         </div>
       }
     >
-      <div className="relative h-[250px] overflow-visible">
+      <div ref={chartAreaRef} className="h-[250px] overflow-visible">
         <Line data={data} options={options} />
-
-        {/* Custom tooltip — positioned by Chart.js coordinates, arrow from Tooltip.tsx */}
-        {tooltipInfo && (
-          <div
-            className="absolute pointer-events-none"
-            style={{ left: tooltipInfo.caretX, top: tooltipInfo.caretY }}
-          >
-            {/* Wrapper — same as Tooltip.tsx: relative inline-flex */}
-            <div className="relative inline-flex">
-              {/* Card — same classes as Tooltip.tsx */}
-              <div
-                role="tooltip"
-                className={`absolute z-50 whitespace-nowrap rounded-lg border border-border-strong bg-surface-primary px-4 py-3 ${
-                  tooltipInfo.placement === "top"
-                    ? "bottom-full left-1/2 -translate-x-1/2 mb-2"
-                    : tooltipInfo.placement === "bottom"
-                      ? "top-full left-1/2 -translate-x-1/2 mt-2"
-                      : tooltipInfo.placement === "left"
-                        ? "right-full top-1/2 -translate-y-1/2 mr-2"
-                        : "left-full top-1/2 -translate-y-1/2 ml-2"
-                }`}
-              >
-                <p className="text-caption font-semibold text-content-primary mb-1 capitalize">
-                  {tooltipInfo.title.toLowerCase()}
-                </p>
-                {tooltipInfo.items.map((item, i) => (
-                  <div key={i} className="flex items-center gap-1.5">
-                    <span
-                      className="h-2 w-2 shrink-0 rounded-sm"
-                      style={{ background: item.color }}
-                    />
-                    <span className="text-caption font-normal text-content-primary">
-                      {item.label}: {item.value}
-                    </span>
-                  </div>
-                ))}
-                {/* Arrow — identical to Tooltip.tsx */}
-                <div
-                  className={`absolute h-[8px] w-[8px] rotate-45 border border-border-strong bg-surface-primary ${arrowClasses[tooltipInfo.placement]}`}
-                />
-              </div>
-            </div>
-          </div>
-        )}
       </div>
+      {tooltipInfo &&
+        chartAreaRef.current &&
+        createPortal(
+          (() => {
+            const chartRect = chartAreaRef.current!.getBoundingClientRect();
+            const refX = chartRect.left + tooltipInfo.caretX;
+            const refY = chartRect.top + tooltipInfo.caretY;
+            const { placement, x, y } = computePlacement(
+              refX,
+              refY,
+              200,
+              60,
+              tooltipInfo.preferred,
+            );
+            return (
+              <div
+                className="fixed pointer-events-none z-[9999]"
+                style={{ left: x, top: y }}
+              >
+                <div className="relative inline-flex">
+                  <div
+                    role="tooltip"
+                    className={`absolute z-50 whitespace-nowrap rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card ${
+                      placement === "top"
+                        ? "bottom-full left-1/2 -translate-x-1/2 mb-0"
+                        : placement === "bottom"
+                          ? "top-full left-1/2 -translate-x-1/2 mt-0"
+                          : placement === "left"
+                            ? "right-full top-1/2 -translate-y-1/2 mr-0"
+                            : "left-full top-1/2 -translate-y-1/2 ml-0"
+                    }`}
+                  >
+                    <p className="text-caption font-semibold text-content-primary mb-1 capitalize">
+                      {tooltipInfo.title.toLowerCase()}
+                    </p>
+                    {tooltipInfo.items.map((item, i) => (
+                      <div key={i} className="flex items-center gap-1.5">
+                        <span
+                          className="h-2 w-2 shrink-0 rounded-sm"
+                          style={{ background: item.color }}
+                        />
+                        <span className="text-caption font-normal text-content-primary">
+                          {item.label}: {item.value}
+                        </span>
+                      </div>
+                    ))}
+                    <div
+                      className={`absolute h-[8px] w-[8px] rotate-45 border border-border-strong bg-surface-primary ${arrowClasses[placement]}`}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })(),
+          document.body,
+        )}
     </ChartCard>
   );
 }

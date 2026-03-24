@@ -1,6 +1,9 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
+import { computePlacement } from "@/hooks/useAutoPlacement";
+import type { Placement } from "@/hooks/useAutoPlacement";
 import {
   Search,
   Trash2,
@@ -136,7 +139,7 @@ function SpecsPanel({
             <div className="space-y-1.5">
               {Object.entries(entries).map(([key, value]) => (
                 <div key={key} className="flex items-center gap-2">
-                  <span className="text-caption font-normal text-content-secondary w-20 shrink-0">
+                  <span className="text-caption font-normal text-content-primary/50 w-20 shrink-0">
                     {key}
                   </span>
                   <code className="flex-1 text-caption bg-surface-secondary rounded px-2 py-1 text-content-primary font-mono overflow-x-auto">
@@ -1080,25 +1083,25 @@ function DividerShowcase() {
           </p>
           <div className="space-y-3">
             <div className="space-y-4">
-              <p className="text-body text-content-secondary">Content above</p>
+              <p className="text-body text-content-primary/50">Content above</p>
               <Divider />
-              <p className="text-body text-content-secondary">Content below</p>
+              <p className="text-body text-content-primary/50">Content below</p>
             </div>
             <div className="space-y-4">
-              <p className="text-body text-content-secondary">Content above</p>
+              <p className="text-body text-content-primary/50">Content above</p>
               <Divider label="OR" />
-              <p className="text-body text-content-secondary">Content below</p>
+              <p className="text-body text-content-primary/50">Content below</p>
             </div>
             <div className="flex items-center gap-6 h-16">
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body text-content-secondary">Left</p>
+                <p className="text-body text-content-primary/50">Left</p>
                 <Divider orientation="vertical" />
-                <p className="text-body text-content-secondary">Right</p>
+                <p className="text-body text-content-primary/50">Right</p>
               </div>
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body text-content-secondary">Left</p>
+                <p className="text-body text-content-primary/50">Left</p>
                 <Divider orientation="vertical" label="OR" />
-                <p className="text-body text-content-secondary">Right</p>
+                <p className="text-body text-content-primary/50">Right</p>
               </div>
             </div>
           </div>
@@ -1109,25 +1112,25 @@ function DividerShowcase() {
           </p>
           <div className="space-y-3">
             <div className="space-y-4">
-              <p className="text-body text-content-secondary">Content above</p>
+              <p className="text-body text-content-primary/50">Content above</p>
               <Divider />
-              <p className="text-body text-content-secondary">Content below</p>
+              <p className="text-body text-content-primary/50">Content below</p>
             </div>
             <div className="space-y-4">
-              <p className="text-body text-content-secondary">Content above</p>
+              <p className="text-body text-content-primary/50">Content above</p>
               <Divider label="OR" />
-              <p className="text-body text-content-secondary">Content below</p>
+              <p className="text-body text-content-primary/50">Content below</p>
             </div>
             <div className="flex items-center gap-6 h-16">
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body text-content-secondary">Left</p>
+                <p className="text-body text-content-primary/50">Left</p>
                 <Divider orientation="vertical" />
-                <p className="text-body text-content-secondary">Right</p>
+                <p className="text-body text-content-primary/50">Right</p>
               </div>
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body text-content-secondary">Left</p>
+                <p className="text-body text-content-primary/50">Left</p>
                 <Divider orientation="vertical" label="OR" />
-                <p className="text-body text-content-secondary">Right</p>
+                <p className="text-body text-content-primary/50">Right</p>
               </div>
             </div>
           </div>
@@ -1193,59 +1196,6 @@ function SliderShowcase() {
 
 /* ===== Molecule Showcases ===== */
 
-function TabsCard({
-  mode,
-  variant,
-}: {
-  mode: "light" | "dark";
-  variant: "solid" | "subtle";
-}) {
-  const [active, setActive] = useState("tab1");
-  const tabItems = [
-    { label: "Overview", value: "tab1" },
-    { label: "Members", value: "tab2" },
-    { label: "Settings", value: "tab3" },
-  ];
-  return (
-    <div
-      className={`flex-1 min-w-[280px] card-flat !p-4 overflow-hidden ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
-    >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
-        {mode} · {variant}
-      </p>
-      <div className="space-y-4">
-        {(["sm", "md", "lg"] as const).map((s) => (
-          <div key={s}>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
-              {s} · {s === "sm" ? "32" : s === "md" ? "40" : "48"}px
-              {s === "md" ? " (default)" : ""}
-            </p>
-            <div className="overflow-hidden">
-              <div className="overflow-x-auto scrollbar-hide touch-pan-x">
-                <Tabs
-                  tabs={tabItems}
-                  activeTab={active}
-                  onChange={setActive}
-                  size={s}
-                  variant={variant}
-                />
-              </div>
-              <div className="flex justify-center gap-1.5 mt-2 sm:hidden">
-                {tabItems.map((tab) => (
-                  <div
-                    key={tab.value}
-                    className={`h-1.5 w-1.5 rounded-full transition-colors ${active === tab.value ? "bg-surface-inverse" : "bg-border-strong"}`}
-                  />
-                ))}
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
 function TabsNavCard({ mode }: { mode: "light" | "dark" }) {
   const [active, setActive] = useState("dashboard");
   const navItems = [
@@ -1270,6 +1220,103 @@ function TabsNavCard({ mode }: { mode: "light" | "dark" }) {
   );
 }
 
+function ScrollDotsWrapper({
+  tabs,
+  activeTab,
+  onChange,
+  children,
+}: {
+  tabs: { value: string }[];
+  activeTab: string;
+  onChange: (value: string) => void;
+  children: React.ReactNode;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [overflows, setOverflows] = useState(false);
+  const [dragging, setDragging] = useState(false);
+  const startX = useRef(0);
+  const scrollLeftRef = useRef(0);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const check = () => setOverflows(el.scrollWidth > el.clientWidth + 1);
+    check();
+    const ro = new ResizeObserver(check);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  useEffect(() => {
+    if (!dragging) return;
+    const onMove = (e: MouseEvent) => {
+      const el = scrollRef.current;
+      if (!el) return;
+      e.preventDefault();
+      el.scrollLeft = scrollLeftRef.current - (e.clientX - startX.current);
+    };
+    const onUp = () => setDragging(false);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [dragging]);
+
+  const onMouseDown = (e: React.MouseEvent) => {
+    const el = scrollRef.current;
+    if (!el || !overflows) return;
+    setDragging(true);
+    startX.current = e.clientX;
+    scrollLeftRef.current = el.scrollLeft;
+  };
+
+  return (
+    <>
+      <div
+        ref={scrollRef}
+        style={{
+          cursor: overflows ? (dragging ? "grabbing" : "grab") : undefined,
+        }}
+        className={`overflow-x-auto scrollbar-hide touch-pan-x select-none ${dragging ? "[&_*]:pointer-events-none" : ""}`}
+        onMouseDown={onMouseDown}
+      >
+        {children}
+      </div>
+      {overflows && (
+        <div className="flex justify-center gap-1 mt-2">
+          {tabs.map((tab, i) => (
+            <button
+              key={tab.value}
+              type="button"
+              onClick={() => {
+                onChange(tab.value);
+                const el = scrollRef.current;
+                if (!el) return;
+                const tabEl = el.querySelectorAll("[role='tab']")[
+                  i
+                ] as HTMLElement;
+                if (tabEl)
+                  tabEl.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "center",
+                  });
+              }}
+              className="p-1 cursor-pointer"
+            >
+              <div
+                className={`h-[9px] w-[9px] rounded-full transition-colors ${activeTab === tab.value ? "bg-surface-inverse" : "bg-border-strong hover:bg-content-primary/30"}`}
+              />
+            </button>
+          ))}
+        </div>
+      )}
+    </>
+  );
+}
+
 function NavHorizontalColumn() {
   const [activeLight, setActiveLight] = useState("dashboard");
   const [activeDark, setActiveDark] = useState("dashboard");
@@ -1284,43 +1331,35 @@ function NavHorizontalColumn() {
         <p className="text-caption text-content-primary/50 font-mono mb-3">
           light · nav-horizontal
         </p>
-        <div className="overflow-x-auto scrollbar-hide touch-pan-x">
+        <ScrollDotsWrapper
+          tabs={navItems}
+          activeTab={activeLight}
+          onChange={setActiveLight}
+        >
           <Tabs
             tabs={navItems}
             activeTab={activeLight}
             onChange={setActiveLight}
             variant="nav-horizontal"
           />
-        </div>
-        <div className="flex justify-center gap-1.5 mt-2 sm:hidden">
-          {navItems.map((tab) => (
-            <div
-              key={tab.value}
-              className={`h-1.5 w-1.5 rounded-full transition-colors ${activeLight === tab.value ? "bg-surface-inverse" : "bg-border-strong"}`}
-            />
-          ))}
-        </div>
+        </ScrollDotsWrapper>
       </div>
       <div className="card-flat !p-4 overflow-hidden dark bg-surface-primary">
         <p className="text-caption text-content-primary/50 font-mono mb-3">
           dark · nav-horizontal
         </p>
-        <div className="overflow-x-auto scrollbar-hide touch-pan-x">
+        <ScrollDotsWrapper
+          tabs={navItems}
+          activeTab={activeDark}
+          onChange={setActiveDark}
+        >
           <Tabs
             tabs={navItems}
             activeTab={activeDark}
             onChange={setActiveDark}
             variant="nav-horizontal"
           />
-        </div>
-        <div className="flex justify-center gap-1.5 mt-2 sm:hidden">
-          {navItems.map((tab) => (
-            <div
-              key={tab.value}
-              className={`h-1.5 w-1.5 rounded-full transition-colors ${activeDark === tab.value ? "bg-surface-inverse" : "bg-border-strong"}`}
-            />
-          ))}
-        </div>
+        </ScrollDotsWrapper>
       </div>
     </div>
   );
@@ -1329,10 +1368,6 @@ function NavHorizontalColumn() {
 function TabsShowcase() {
   return (
     <ShowcaseSection title="Tabs">
-      <div className="flex flex-wrap gap-4">
-        <TabsCard mode="light" variant="solid" />
-        <TabsCard mode="dark" variant="solid" />
-      </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <TabsNavCard mode="light" />
@@ -1347,7 +1382,7 @@ function TabsShowcase() {
           Container: tabsSpecs.container,
           Nav: tabsSpecs.nav,
           Sizes: tabsSpecs.sizes,
-          Mobile: tabsSpecs.mobile,
+          Overflow: tabsSpecs.overflow,
         }}
       />
     </ShowcaseSection>
@@ -1668,29 +1703,29 @@ const toastVariants = [
   {
     icon: AlertTriangle,
     color: "text-error",
-    title: "Error title",
-    desc: "Something went wrong",
+    title: "Sign in failed",
+    desc: "Invalid credentials. Please try again.",
     variant: "error",
   },
   {
     icon: CircleCheck,
     color: "text-success",
-    title: "Success title",
-    desc: "Action completed successfully",
+    title: "Account created",
+    desc: "Please check your email to verify your account.",
     variant: "success",
   },
   {
     icon: CircleAlert,
     color: "text-warning",
-    title: "Warning title",
-    desc: "Please review before continuing",
+    title: "Too many attempts",
+    desc: "Please wait before trying again.",
     variant: "warning",
   },
   {
     icon: Info,
     color: "text-info",
-    title: "Info title",
-    desc: "Here is some useful information",
+    title: "Session refreshed",
+    desc: "Your session has been renewed.",
     variant: "info",
   },
 ] as const;
@@ -1754,7 +1789,7 @@ function ToastDemo() {
                   </div>
                   <button
                     onClick={() => dismiss(variant)}
-                    className="mt-px shrink-0 text-content-secondary opacity-0 transition-all group-hover:opacity-100 hover:text-content-primary"
+                    className="mt-px shrink-0 text-content-primary/50 opacity-0 transition-all group-hover:opacity-100 hover:text-content-primary"
                     aria-label="Close"
                   >
                     <X size={16} />
@@ -1886,9 +1921,9 @@ function FeedbackShowcase() {
                 <p className="text-caption text-content-primary/50 font-mono mb-2">
                   boxed error
                 </p>
-                <div className="flex items-center gap-2 rounded-lg border border-error/20 bg-error/5 px-3 py-2">
+                <div className="inline-flex items-center gap-2 rounded-lg border border-error/20 bg-error/5 px-3 py-2">
                   <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="text-caption text-error">
+                  <span className="text-caption text-error whitespace-nowrap">
                     Invalid verification code. Please try again.
                   </span>
                 </div>
@@ -1967,7 +2002,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
             Single
           </p>
           <SingleAccordion title="Click to expand">
-            <p className="text-body text-content-secondary">
+            <p className="text-body text-content-primary/50">
               Expandable content panel. Used for specs, FAQs, and collapsible
               sections.
             </p>
@@ -1982,7 +2017,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
               {
                 title: "Section 1",
                 children: (
-                  <p className="text-body text-content-secondary">
+                  <p className="text-body text-content-primary/50">
                     Content for section 1. Only one open at a time.
                   </p>
                 ),
@@ -1990,7 +2025,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
               {
                 title: "Section 2",
                 children: (
-                  <p className="text-body text-content-secondary">
+                  <p className="text-body text-content-primary/50">
                     Content for section 2. Opening this closes section 1.
                   </p>
                 ),
@@ -1998,7 +2033,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
               {
                 title: "Section 3",
                 children: (
-                  <p className="text-body text-content-secondary">
+                  <p className="text-body text-content-primary/50">
                     Content for section 3. Exclusive accordion behavior.
                   </p>
                 ),
@@ -2229,7 +2264,34 @@ function SpeedometerChart({
   );
 }
 
+const doughnutArrowClasses: Record<string, string> = {
+  top: "top-full left-1/2 -translate-x-1/2 -mt-[3px]",
+  bottom: "bottom-full left-1/2 -translate-x-1/2 -mb-[3px]",
+  left: "left-full top-1/2 -translate-y-1/2 -ml-[3px]",
+  right: "right-full top-1/2 -translate-y-1/2 -mr-[3px]",
+};
+
+function getDoughnutPlacement(
+  xAlign: string,
+  yAlign: string,
+): "top" | "bottom" | "left" | "right" {
+  if (yAlign === "bottom") return "top";
+  if (yAlign === "top") return "bottom";
+  if (xAlign === "right") return "left";
+  if (xAlign === "left") return "right";
+  return "top";
+}
+
 function DoughnutChartMock() {
+  const [tooltipData, setTooltipData] = useState<{
+    caretX: number;
+    caretY: number;
+    label: string;
+    value: number;
+    color: string;
+    placement: "top" | "bottom" | "left" | "right";
+  } | null>(null);
+
   const doughnutData = {
     labels: ["USER", "ADMIN", "SUPERADMIN"],
     datasets: [
@@ -2248,32 +2310,49 @@ function DoughnutChartMock() {
     cutout: "60%",
     plugins: {
       tooltip: {
-        backgroundColor: "#ffffff",
-        titleColor: "#1c1c1c",
-        bodyColor: "#1c1c1c",
-        borderColor: "rgba(28, 28, 28, 0.08)",
-        borderWidth: 1,
-        cornerRadius: 8,
-        bodyFont: { size: 12 },
-        titleFont: { size: 12 },
-        padding: 10,
-        callbacks: {
-          label: (ctx: { parsed: number; label: string }) =>
-            ` ${ctx.label}: ${ctx.parsed}`,
+        enabled: false,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        external: (ctx: any) => {
+          const { tooltip: t } = ctx;
+          if (t.opacity === 0) {
+            setTooltipData(null);
+            return;
+          }
+          const label = t.title?.[0] || "";
+          const body = t.body?.[0]?.lines?.[0] || "";
+          const value = parseInt(body.replace(/\D/g, "")) || 0;
+          const color = t.labelColors?.[0]?.backgroundColor || "#1c1c1c";
+          setTooltipData({
+            caretX: t.caretX,
+            caretY: t.caretY,
+            label,
+            value,
+            color,
+            placement: getDoughnutPlacement(
+              t.xAlign || "center",
+              t.yAlign || "bottom",
+            ),
+          });
         },
       },
     },
   };
 
+  const chartContainerRef = useRef<HTMLDivElement>(null);
+  const chartAreaRef = useRef<HTMLDivElement>(null);
+
   return (
-    <div className="rounded-3xl border border-border-strong bg-surface-primary p-6">
+    <div
+      ref={chartContainerRef}
+      className="rounded-3xl border border-border-strong bg-surface-primary p-6"
+    >
       <div className="mb-4">
         <h3 className="text-body font-semibold text-content-primary">
           Users by Role
         </h3>
       </div>
       <div className="flex items-center gap-6">
-        <div className="h-[120px] w-[120px] shrink-0">
+        <div ref={chartAreaRef} className="h-[120px] w-[120px] shrink-0">
           <Doughnut data={doughnutData} options={doughnutOptions} />
         </div>
         <div className="space-y-3">
@@ -2297,6 +2376,57 @@ function DoughnutChartMock() {
           ))}
         </div>
       </div>
+      {tooltipData &&
+        chartAreaRef.current &&
+        createPortal(
+          (() => {
+            const chartRect = chartAreaRef.current!.getBoundingClientRect();
+            const refX = chartRect.left + tooltipData.caretX;
+            const refY = chartRect.top + tooltipData.caretY;
+            const { placement, x, y } = computePlacement(
+              refX,
+              refY,
+              180,
+              40,
+              tooltipData.placement,
+            );
+            return (
+              <div
+                className="fixed pointer-events-none z-[9999]"
+                style={{ left: x, top: y }}
+              >
+                <div className="relative inline-flex">
+                  <div
+                    role="tooltip"
+                    className={`absolute z-50 whitespace-nowrap rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card ${
+                      placement === "top"
+                        ? "bottom-full left-1/2 -translate-x-1/2 mb-0"
+                        : placement === "bottom"
+                          ? "top-full left-1/2 -translate-x-1/2 mt-0"
+                          : placement === "left"
+                            ? "right-full top-1/2 -translate-y-1/2 mr-0"
+                            : "left-full top-1/2 -translate-y-1/2 ml-0"
+                    }`}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-sm"
+                        style={{ background: tooltipData.color }}
+                      />
+                      <span className="text-caption font-normal text-content-primary">
+                        {tooltipData.label}: {tooltipData.value}
+                      </span>
+                    </div>
+                    <div
+                      className={`absolute h-[8px] w-[8px] rotate-45 border border-border-strong bg-surface-primary ${doughnutArrowClasses[placement]}`}
+                    />
+                  </div>
+                </div>
+              </div>
+            );
+          })(),
+          document.body,
+        )}
     </div>
   );
 }
@@ -2382,16 +2512,20 @@ function ChartsShowcase() {
           },
           "Chart.js Config": {
             tooltip:
-              "bg surface-primary, text content-primary, border border-strong, radius 8px, font 12px",
+              "Custom React tooltip via createPortal(document.body) + computePlacement() auto-positioning",
+            "tooltip style":
+              "rounded-lg border-border-strong bg-surface-primary px-4 py-3 shadow-card + diamond arrow (Tooltip.tsx pattern)",
+            "tooltip placement":
+              "computePlacement() from hooks/useAutoPlacement.ts — flip+shift algorithm, detects all 4 viewport edges",
             "tooltip labels":
               "solid color squares (no border) via labelColor callback",
             interaction:
               "mode: index, intersect: false — tooltip on any x position",
             grid: "border-strong color, no x-grid",
-            ticks: "font 12px, content-primary/50",
+            ticks: "font 12px (Geist Sans), content-primary/50",
             "dark mode": "auto via useTheme() + forceDark prop",
             animation:
-              "default chartjs enter animation + hover tooltips + pointHoverRadius 4",
+              "default chartjs enter + pointHoverRadius 4 (instant, no grow animation)",
           },
           Speedometer: {
             arc: "270° sweep (135° to 45°), strokeLinecap round",

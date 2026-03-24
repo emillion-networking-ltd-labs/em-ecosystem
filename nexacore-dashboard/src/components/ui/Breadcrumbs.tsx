@@ -20,7 +20,7 @@ export const breadcrumbsSpecs = {
       "text-body font-normal text-content-primary/75 hover:text-content-primary",
   },
   separator:
-    "en-dash (–) intermediate, em-dash (—) last level — text-body font-normal text-content-primary/75",
+    "en-dash (–) intermediate, em-dash (—) last level — text-caption font-normal text-content-primary/75",
   home: "text-content-primary/75 hover:text-content-primary 16px Home icon shrink-0",
   collapse:
     "Auto-collapse via ResizeObserver — Home / … / Last when content overflows container",
@@ -59,7 +59,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
     "rounded-lg px-1 py-0.5 text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary";
   const activeClass =
     "rounded-lg px-1 py-0.5 text-body font-normal text-content-primary";
-  const sepClass = "shrink-0 text-body font-normal text-content-primary/75";
+  const sepClass = "shrink-0 text-caption font-normal text-content-primary/75";
 
   return (
     <div ref={containerRef} className="min-w-0 overflow-hidden">

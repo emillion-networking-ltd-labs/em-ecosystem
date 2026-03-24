@@ -116,7 +116,7 @@ export default function DesignSystemPage() {
               {viewTabs.map((tab) => (
                 <div
                   key={tab.value}
-                  className={`h-1.5 w-1.5 rounded-full transition-colors ${
+                  className={`h-[9px] w-[9px] rounded-full transition-colors ${
                     activeView === tab.value
                       ? "bg-surface-inverse"
                       : "bg-border-strong"

@@ -13,7 +13,7 @@ interface TabsProps {
   tabs: Tab[];
   activeTab: string;
   onChange: (value: string) => void;
-  variant?: "solid" | "subtle" | "nav" | "nav-horizontal";
+  variant?: "subtle" | "nav" | "nav-horizontal";
   size?: "sm" | "md" | "lg";
   fullWidth?: boolean;
   wrap?: boolean;
@@ -27,13 +27,6 @@ const sizeClasses = {
 };
 
 const variantStyles = {
-  solid: {
-    container: "border border-border-strong rounded-[5px]",
-    active:
-      "bg-surface-inverse text-content-inverse font-normal transition-opacity hover:opacity-90",
-    inactive:
-      "bg-transparent text-content-primary font-normal transition-colors hover:bg-surface-subtle",
-  },
   subtle: {
     container:
       "bg-surface-primary border border-border-strong rounded-[5px] shadow-[6px_6px_50px_rgba(0,0,0,0.05)]",
@@ -59,15 +52,13 @@ const variantStyles = {
 
 export const tabsSpecs = {
   variants: {
-    "solid (default)":
-      "Active: Button primary colors (hover:opacity-90) | Inactive: Button outline colors (hover:bg-surface-subtle) | Separator: border-r border-border-strong",
     subtle:
       "Active: bg-surface-secondary border font-semibold | Inactive: font-semibold text-content-primary (Figma)",
     nav: "Active: bg-surface-subtle rounded-md text-body text-content-primary | Inactive: text-body text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
     "nav-horizontal": "Same as nav but horizontal layout (top nav bar)",
   },
   container: {
-    "solid/subtle": "border border-border-strong rounded-[5px]",
+    subtle: "border border-border-strong rounded-[5px]",
     nav: "flex-col gap-1 (vertical)",
     "nav-horizontal": "gap-1 (horizontal)",
   },
@@ -78,14 +69,17 @@ export const tabsSpecs = {
     padding: "px-2 py-2, gap-1 between elements",
   },
   sizes: {
-    sm: "h-8 px-3 py-1.5 text-caption (32px) — solid/subtle only",
-    "md (default)": "h-10 px-4 py-2.5 text-body (40px) — solid/subtle only",
-    lg: "h-12 px-6 py-3 text-h3 (48px) — solid/subtle only",
+    sm: "h-8 px-3 py-1.5 text-caption (32px) — subtle only",
+    "md (default)": "h-10 px-4 py-2.5 text-body (40px) — subtle only",
+    lg: "h-12 px-6 py-3 text-h3 (48px) — subtle only",
   },
-  mobile: {
-    scroll: "overflow-x-auto scrollbar-hide touch-pan-x",
+  overflow: {
+    scroll:
+      "overflow-x-auto scrollbar-hide touch-pan-x, drag-to-scroll (mouse + touch)",
     indicators:
-      "h-1.5 w-1.5 rounded-full dots — active: bg-surface-inverse, inactive: bg-border-strong",
+      "h-[9px] w-[9px] rounded-full — active: bg-surface-inverse, inactive: bg-border-strong, clickable (scrolls to tab)",
+    detection:
+      "ResizeObserver — dots appear only when content overflows container",
   },
 };
 
@@ -93,7 +87,7 @@ export default function Tabs({
   tabs,
   activeTab,
   onChange,
-  variant = "solid",
+  variant = "nav",
   size = "md",
   fullWidth = false,
   wrap = false,

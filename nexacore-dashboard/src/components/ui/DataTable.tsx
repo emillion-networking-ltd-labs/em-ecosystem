@@ -87,7 +87,7 @@ export default function DataTable<T>({
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-4 py-12 text-center text-body text-content-secondary"
+                className="px-4 py-12 text-center text-body text-content-primary/50"
               >
                 {emptyMessage}
               </td>
