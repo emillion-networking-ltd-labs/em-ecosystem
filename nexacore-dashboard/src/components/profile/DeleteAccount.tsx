@@ -151,7 +151,7 @@ export default function DeleteAccount() {
             <div className="border-b border-border-default bg-surface-primary p-6">
               <h2
                 id="delete-account-modal-title"
-                className="text-h2 text-content-primary"
+                className="text-h2 font-semibold text-content-primary"
               >
                 Delete Account
               </h2>

@@ -105,7 +105,7 @@ export default function ConfirmModal({
           <div className="flex-1">
             <h2
               id="confirm-modal-title"
-              className="text-h2 text-content-primary"
+              className="text-h2 font-semibold text-content-primary"
             >
               {title}
             </h2>

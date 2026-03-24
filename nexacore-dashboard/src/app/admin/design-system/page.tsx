@@ -29,8 +29,6 @@ const componentToSection: Record<string, { tab: string; section: string }> = {
   Input: { tab: "atoms", section: "showcase-input" },
   Badge: { tab: "atoms", section: "showcase-badge" },
   Spinner: { tab: "atoms", section: "showcase-spinner" },
-  InfinitySpinner: { tab: "atoms", section: "showcase-spinner" },
-  RingSpinner: { tab: "atoms", section: "showcase-spinner" },
   Avatar: { tab: "atoms", section: "showcase-avatar" },
   Toggle: { tab: "atoms", section: "showcase-toggle" },
   Checkbox: { tab: "atoms", section: "showcase-checkbox" },
@@ -38,24 +36,20 @@ const componentToSection: Record<string, { tab: string; section: string }> = {
   Divider: { tab: "atoms", section: "showcase-divider" },
   Slider: { tab: "atoms", section: "showcase-slider" },
   Accordion: { tab: "atoms", section: "showcase-accordion" },
+  Card: { tab: "atoms", section: "showcase-card" },
   Tabs: { tab: "molecules", section: "showcase-tabs" },
-  Select: { tab: "molecules", section: "showcase-select-dropdown" },
-  LanguageSelector: { tab: "molecules", section: "showcase-select-dropdown" },
-  Calendar: { tab: "molecules", section: "showcase-calendar" },
-  Pagination: { tab: "molecules", section: "showcase-navigation" },
-  Breadcrumbs: { tab: "molecules", section: "showcase-navigation" },
-  Toast: { tab: "molecules", section: "showcase-feedback-alerts" },
-  CountdownTimer: { tab: "molecules", section: "showcase-feedback-alerts" },
-  RateLimitBanner: { tab: "molecules", section: "showcase-feedback-alerts" },
+  "Select / Dropdown": {
+    tab: "molecules",
+    section: "showcase-select---dropdown",
+  },
+  Navigation: { tab: "molecules", section: "showcase-navigation" },
   DataTable: { tab: "molecules", section: "showcase-datatable" },
-  ChartCard: { tab: "molecules", section: "showcase-charts" },
-  TotalUsersChart: { tab: "molecules", section: "showcase-charts" },
-  UserRoleChart: { tab: "molecules", section: "showcase-charts" },
-  ConfirmModal: { tab: "molecules", section: "showcase-feedback-alerts" },
-  ThemeToggle: { tab: "atoms", section: "showcase-button" },
-  TurnstileWidget: { tab: "atoms", section: "showcase-input" },
-  ToastContainer: { tab: "molecules", section: "showcase-feedback-alerts" },
-  ErrorAlert: { tab: "molecules", section: "showcase-feedback-alerts" },
+  "Feedback / Alerts": {
+    tab: "molecules",
+    section: "showcase-feedback---alerts",
+  },
+  Calendar: { tab: "molecules", section: "showcase-calendar" },
+  Charts: { tab: "molecules", section: "showcase-charts" },
 };
 
 const viewTabs = [
@@ -196,18 +190,23 @@ export default function DesignSystemPage() {
                             | "success"
                             | "warning"
                         }
-                        size="sm"
+                        size="md"
                       >
                         {entry.category}
                       </Badge>
                     </div>
-                    <p className="text-caption text-content-secondary">
+                    <p className="text-caption text-content-primary/50">
                       {entry.description}
                     </p>
-                    <div className="mt-auto pt-2 border-t border-border-strong">
-                      <code className="text-caption text-content-primary/50 font-mono">
-                        ui/{entry.fileName}
-                      </code>
+                    <div className="pt-2 border-t border-border-strong flex flex-col gap-0.5">
+                      {entry.files.map((file) => (
+                        <code
+                          key={file}
+                          className="text-caption text-content-primary/50 font-mono"
+                        >
+                          {file}
+                        </code>
+                      ))}
                     </div>
                   </button>
                 ))}

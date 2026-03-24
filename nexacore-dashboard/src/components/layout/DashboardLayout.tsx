@@ -20,7 +20,7 @@ export default function DashboardLayout({
   const showRightPanel = rightPanel && rightPanelOpen;
 
   return (
-    <div className="min-h-screen bg-surface-secondary">
+    <div className="min-h-screen bg-surface-tertiary">
       {/* Mobile overlay */}
       {mobileOpen && (
         <div

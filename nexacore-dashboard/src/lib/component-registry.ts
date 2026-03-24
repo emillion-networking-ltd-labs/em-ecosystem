@@ -1,208 +1,150 @@
-export type ComponentCategory = "atom" | "molecule" | "organism" | "utility";
+export type ComponentCategory = "atom" | "molecule";
 
 export interface ComponentEntry {
   name: string;
   category: ComponentCategory;
   description: string;
-  fileName: string;
+  files: string[];
+  count?: number;
 }
 
 export const componentRegistry: ComponentEntry[] = [
-  // ─── Atoms (11) ──────────────────────────────────────────────
+  // ─── Atoms ──────────────────────────────────────────────
   {
     name: "Button",
     category: "atom",
-    description: "Primary action trigger with variants and sizes",
-    fileName: "Button.tsx",
+    description:
+      "Primary, secondary, outline, danger + link buttons + icon buttons + circle",
+    files: ["Button.tsx"],
   },
   {
     name: "Input",
     category: "atom",
-    description: "Text input with label, error, and password toggle",
-    fileName: "Input.tsx",
+    description:
+      "Text input with label, error, password toggle — default and filled variants",
+    files: ["Input.tsx"],
   },
   {
     name: "Badge",
     category: "atom",
-    description: "Status indicator with semantic color variants",
-    fileName: "Badge.tsx",
+    description: "Status indicator — 5 color variants, 3 sizes",
+    files: ["Badge.tsx"],
   },
   {
     name: "Spinner",
     category: "atom",
-    description: "Circular border loading spinner — sm/md/lg",
-    fileName: "Spinner.tsx",
+    description: "Loading spinner — circular, infinity, ring — 3 sizes",
+    files: ["Spinner.tsx", "InfinitySpinner.tsx", "RingSpinner.tsx"],
+    count: 3,
   },
   {
     name: "Avatar",
     category: "atom",
-    description: "User avatar with image, initials, and fallback",
-    fileName: "Avatar.tsx",
+    description: "User avatar — image, initials, fallback icon — 3 sizes",
+    files: ["Avatar.tsx"],
   },
   {
     name: "Toggle",
     category: "atom",
-    description: "On/off switch with label",
-    fileName: "Toggle.tsx",
+    description: "On/off switch with label — 3 sizes",
+    files: ["Toggle.tsx"],
   },
   {
     name: "Checkbox",
     category: "atom",
-    description: "Checkbox with checked, unchecked, and indeterminate states",
-    fileName: "Checkbox.tsx",
+    description: "Checked, unchecked, indeterminate — 3 sizes",
+    files: ["Checkbox.tsx"],
   },
   {
     name: "Tooltip",
     category: "atom",
-    description: "Floating tooltip with 4 position options",
-    fileName: "Tooltip.tsx",
+    description:
+      "Floating tooltip with diamond arrow — auto position detection",
+    files: ["Tooltip.tsx"],
   },
   {
     name: "Divider",
     category: "atom",
-    description: "Separator line — horizontal, vertical, with label (OR)",
-    fileName: "Divider.tsx",
+    description: "Separator — horizontal, vertical, with label (OR)",
+    files: ["Divider.tsx"],
   },
   {
     name: "Slider",
     category: "atom",
-    description: "Range slider with custom track and handle",
-    fileName: "Slider.tsx",
+    description: "Range slider with custom track, handle, label",
+    files: ["Slider.tsx"],
   },
   {
     name: "Accordion",
     category: "atom",
-    description: "Expandable content panel — single or multi (exclusive)",
-    fileName: "Accordion.tsx",
+    description: "Expandable content panel — single or multi",
+    files: ["Accordion.tsx"],
+  },
+  {
+    name: "Card",
+    category: "atom",
+    description:
+      "Container card — container, container-flat, inner, inner-flat",
+    files: ["globals.css"],
+    count: 4,
   },
 
-  // ─── Molecules (10) ──────────────────────────────────────────
+  // ─── Molecules ──────────────────────────────────────────
   {
     name: "Tabs",
     category: "molecule",
-    description:
-      "Tab bar — solid, subtle, nav, nav-horizontal variants with 3 sizes",
-    fileName: "Tabs.tsx",
+    description: "Tab bar — subtle, nav, nav-horizontal with overflow dots",
+    files: ["Tabs.tsx"],
   },
   {
-    name: "Select",
+    name: "Select / Dropdown",
     category: "molecule",
-    description: "Dropdown select with keyboard navigation",
-    fileName: "Select.tsx",
+    description:
+      "Select, LanguageSelector, EmailSelector — auto edge detection",
+    files: ["Select.tsx", "LanguageSelector.tsx"],
+    count: 3,
+  },
+  {
+    name: "Navigation",
+    category: "molecule",
+    description:
+      "Breadcrumbs (auto-collapse) + Pagination (primary/outline buttons)",
+    files: ["Breadcrumbs.tsx", "Pagination.tsx"],
+    count: 2,
+  },
+  {
+    name: "DataTable",
+    category: "molecule",
+    description:
+      "Data table with column config, sorting, loading and empty states",
+    files: ["DataTable.tsx"],
+  },
+  {
+    name: "Feedback / Alerts",
+    category: "molecule",
+    description:
+      "Toast, inline error, boxed error, rate limit, countdown, full page",
+    files: [
+      "Toast.tsx",
+      "ToastContainer.tsx",
+      "RateLimitBanner.tsx",
+      "CountdownTimer.tsx",
+      "ErrorAlert.tsx",
+    ],
+    count: 6,
   },
   {
     name: "Calendar",
     category: "molecule",
-    description: "Calendar with day/month/year views and date selection",
-    fileName: "Calendar.tsx",
+    description: "Date picker — day/month/year navigation with circle buttons",
+    files: ["Calendar.tsx"],
   },
   {
-    name: "Pagination",
+    name: "Charts",
     category: "molecule",
-    description: "Page navigation with ellipsis support",
-    fileName: "Pagination.tsx",
-  },
-  {
-    name: "Toast",
-    category: "molecule",
-    description: "Auto-dismiss notification with 4 variants",
-    fileName: "Toast.tsx",
-  },
-  {
-    name: "ErrorAlert",
-    category: "molecule",
-    description: "Error alert banner (unused — pending removal)",
-    fileName: "ErrorAlert.tsx",
-  },
-  {
-    name: "Breadcrumbs",
-    category: "molecule",
-    description: "Navigation breadcrumb trail — auto-collapses on overflow",
-    fileName: "Breadcrumbs.tsx",
-  },
-  {
-    name: "ConfirmModal",
-    category: "molecule",
-    description: "Confirmation dialog with focus trap",
-    fileName: "ConfirmModal.tsx",
-  },
-
-  {
-    name: "ChartCard",
-    category: "molecule",
-    description: "Chart container with title and legend",
-    fileName: "dashboard/ChartCard.tsx",
-  },
-  {
-    name: "TotalUsersChart",
-    category: "molecule",
-    description: "Line chart — dark mode adaptive, interactive tooltips",
-    fileName: "dashboard/TotalUsersChart.tsx",
-  },
-  {
-    name: "UserRoleChart",
-    category: "molecule",
-    description: "Doughnut chart — users by role with API data",
-    fileName: "dashboard/UserRoleChart.tsx",
-  },
-
-  // ─── Organisms (4) ──────────────────────────────────────────
-  {
-    name: "DataTable",
-    category: "organism",
-    description:
-      "Generic data table with column config, loading and empty states",
-    fileName: "DataTable.tsx",
-  },
-  {
-    name: "LanguageSelector",
-    category: "organism",
-    description: "Language picker with search dropdown",
-    fileName: "LanguageSelector.tsx",
-  },
-  {
-    name: "ThemeToggle",
-    category: "organism",
-    description: "Light/dark mode toggle",
-    fileName: "ThemeToggle.tsx",
-  },
-  {
-    name: "TurnstileWidget",
-    category: "organism",
-    description: "Cloudflare Turnstile CAPTCHA",
-    fileName: "TurnstileWidget.tsx",
-  },
-
-  // ─── Utility (5) ─────────────────────────────────────────────
-  {
-    name: "InfinitySpinner",
-    category: "utility",
-    description: "Infinity loop loading animation",
-    fileName: "InfinitySpinner.tsx",
-  },
-  {
-    name: "RingSpinner",
-    category: "utility",
-    description: "Ring-shaped spinner variant",
-    fileName: "RingSpinner.tsx",
-  },
-  {
-    name: "CountdownTimer",
-    category: "utility",
-    description: "Rate limit countdown digits",
-    fileName: "CountdownTimer.tsx",
-  },
-  {
-    name: "RateLimitBanner",
-    category: "utility",
-    description: "Rate limit/lockout notification banner",
-    fileName: "RateLimitBanner.tsx",
-  },
-  {
-    name: "ToastContainer",
-    category: "utility",
-    description: "Toast queue manager",
-    fileName: "ToastContainer.tsx",
+    description: "Line chart, doughnut chart, speedometer — Recharts SVG",
+    files: ["TotalUsersChart.tsx", "UserRoleChart.tsx", "ChartCard.tsx"],
+    count: 3,
   },
 ];
 
@@ -221,21 +163,9 @@ export const categoryMeta: {
     label: "Molecules",
     count: componentRegistry.filter((c) => c.category === "molecule").length,
   },
-  {
-    key: "organism",
-    label: "Organisms",
-    count: componentRegistry.filter((c) => c.category === "organism").length,
-  },
-  {
-    key: "utility",
-    label: "Utility",
-    count: componentRegistry.filter((c) => c.category === "utility").length,
-  },
 ];
 
 export const categoryColors: Record<ComponentCategory, string> = {
   atom: "info",
   molecule: "success",
-  organism: "warning",
-  utility: "default",
 } as const;

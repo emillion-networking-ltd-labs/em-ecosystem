@@ -104,20 +104,22 @@ export default function CodePlayground() {
   const [code, setCode] = useState(defaultCode);
 
   return (
-    <div className="space-y-6">
+    <div className="card-flat space-y-6">
       {/* Example Templates */}
       <div className="flex flex-wrap gap-2">
         <span className="text-caption text-content-primary/50 self-center mr-1">
           Examples:
         </span>
         {examples.map((ex) => (
-          <button
+          <Button
             key={ex.label}
+            variant="outline"
+            size="sm"
+            fullWidth={false}
             onClick={() => setCode(ex.code)}
-            className="px-3 py-1 text-caption font-normal rounded-md border border-border-strong bg-surface-primary text-content-secondary hover:bg-surface-subtle transition-colors"
           >
             {ex.label}
-          </button>
+          </Button>
         ))}
       </div>
 
@@ -129,22 +131,22 @@ export default function CodePlayground() {
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Editor */}
-          <div className="rounded-2xl border border-border-strong overflow-hidden">
-            <div className="px-4 py-2 bg-surface-tertiary border-b border-border-strong">
-              <span className="text-caption font-normal text-content-secondary">
+          <div className="rounded-xl border border-border-strong overflow-hidden">
+            <div className="px-4 py-2 bg-surface-secondary border-b border-border-strong">
+              <span className="text-caption font-semibold text-content-primary">
                 Editor
               </span>
             </div>
             <LiveEditor
               onChange={setCode}
-              className="!font-mono !text-body !bg-surface-secondary !p-4 !min-h-[200px]"
+              className="!font-mono !text-body !bg-surface-primary !p-4 !min-h-[200px]"
             />
           </div>
 
           {/* Preview */}
-          <div className="rounded-2xl border border-border-strong overflow-hidden">
-            <div className="px-4 py-2 bg-surface-tertiary border-b border-border-strong">
-              <span className="text-caption font-normal text-content-secondary">
+          <div className="rounded-xl border border-border-strong overflow-hidden">
+            <div className="px-4 py-2 bg-surface-secondary border-b border-border-strong">
+              <span className="text-caption font-semibold text-content-primary">
                 Preview
               </span>
             </div>

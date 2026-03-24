@@ -262,7 +262,7 @@ export default function ConnectedAccounts() {
             <div className="border-b border-border-default bg-surface-primary p-6">
               <h2
                 id="disconnect-title"
-                className="text-h2 text-content-primary"
+                className="text-h2 font-semibold text-content-primary"
               >
                 Disconnect {activeProvider?.name}
               </h2>

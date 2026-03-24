@@ -17,7 +17,7 @@ interface ColorGroup {
 
 const colorGroups: ColorGroup[] = [
   {
-    label: "Surface (auth verified)",
+    label: "Surface",
     tokens: [
       { name: "primary", value: "#ffffff", cssVar: "--surface-primary" },
       { name: "secondary", value: "#fbfbfb", cssVar: "--surface-secondary" },
@@ -36,7 +36,7 @@ const colorGroups: ColorGroup[] = [
     ],
   },
   {
-    label: "Content (auth verified)",
+    label: "Content",
     tokens: [
       { name: "primary", value: "#1c1c1c", cssVar: "--content-primary" },
       {
@@ -63,7 +63,7 @@ const colorGroups: ColorGroup[] = [
     ],
   },
   {
-    label: "Border & Outline (auth verified)",
+    label: "Border & Outline",
     tokens: [
       {
         name: "strong (8%)",
@@ -83,7 +83,7 @@ const colorGroups: ColorGroup[] = [
     ],
   },
   {
-    label: "Error (auth verified)",
+    label: "Error",
     tokens: [
       { name: "error", value: "rgb(138,17,17)", cssVar: "--color-error" },
       {
@@ -110,7 +110,7 @@ const colorGroups: ColorGroup[] = [
     ],
   },
   {
-    label: "Success (auth verified)",
+    label: "Success",
     tokens: [
       { name: "success", value: "#166534", cssVar: "--color-success" },
       { name: "success icon", value: "#166534", cssVar: "--color-success" },
@@ -133,7 +133,7 @@ const colorGroups: ColorGroup[] = [
 
 const unusedColorGroups: ColorGroup[] = [
   {
-    label: "Content (not in auth)",
+    label: "Content",
     tokens: [
       {
         name: "tertiary",
@@ -144,7 +144,7 @@ const unusedColorGroups: ColorGroup[] = [
     ],
   },
   {
-    label: "Border (not in auth)",
+    label: "Border",
     tokens: [
       {
         name: "default (5%)",
@@ -159,7 +159,7 @@ const unusedColorGroups: ColorGroup[] = [
     ],
   },
   {
-    label: "Semantic borders (not in auth)",
+    label: "Semantic borders",
     tokens: [
       {
         name: "error-border",
@@ -180,7 +180,7 @@ const unusedColorGroups: ColorGroup[] = [
     ],
   },
   {
-    label: "Interactive & Accent (not in auth)",
+    label: "Interactive & Accent",
     tokens: [
       {
         name: "hover-bg",
@@ -202,7 +202,7 @@ const unusedColorGroups: ColorGroup[] = [
     ],
   },
   {
-    label: "Dashboard (not in auth)",
+    label: "Dashboard",
     tokens: [
       { name: "metric-purple", value: "#edeefc", cssVar: "--metric-purple" },
       { name: "metric-blue", value: "#e6f1fd", cssVar: "--metric-blue" },
@@ -226,48 +226,65 @@ const typographyTokens = [
     desc: "text-h1 font-semibold",
     size: designTokens.fontSize.h1.size,
     lineHeight: designTokens.fontSize.h1.lineHeight,
+    spacing: designTokens.fontSize.h1.letterSpacing,
     weight: 600,
     mono: false,
+    usage:
+      "Main headings (Sign In, Create Account), metric cards, profile form title",
   },
   {
     name: "title",
     desc: "text-h2 font-semibold",
     size: designTokens.fontSize.h2.size,
     lineHeight: designTokens.fontSize.h2.lineHeight,
+    spacing: designTokens.fontSize.h2.letterSpacing,
     weight: 600,
     mono: false,
+    usage:
+      "Design System page title, Avatar lg, ConfirmModal title, profile section headings, error pages",
   },
   {
     name: "button / subtitle",
     desc: "text-h3 font-normal",
     size: designTokens.fontSize.h3.size,
     lineHeight: designTokens.fontSize.h3.lineHeight,
+    spacing: designTokens.fontSize.h3.letterSpacing,
     weight: 400,
     mono: false,
+    usage:
+      "ShowcaseSection titles, Button lg, Badge lg, Tabs subtle, chart card titles",
   },
   {
     name: "body / label / link",
     desc: "text-body font-normal (semibold for labels)",
     size: designTokens.fontSize.body.size,
     lineHeight: designTokens.fontSize.body.lineHeight,
+    spacing: designTokens.fontSize.body.letterSpacing,
     weight: 400,
     mono: false,
+    usage:
+      "Buttons md, links, inputs, descriptions, nav tabs, select triggers, breadcrumbs, calendar days",
   },
   {
     name: "caption / error",
     desc: "text-caption font-normal (semibold for toast title)",
     size: designTokens.fontSize.caption.size,
     lineHeight: designTokens.fontSize.caption.lineHeight,
+    spacing: designTokens.fontSize.caption.letterSpacing,
     weight: 400,
     mono: false,
+    usage:
+      "Error messages, toast items, legend dots, chart ticks, table headers, badge sm, button sm, breadcrumb separators, speedometer labels",
   },
   {
     name: "technical",
     desc: "font-mono text-caption",
     size: designTokens.fontSize.caption.size,
     lineHeight: "normal",
+    spacing: designTokens.fontSize.caption.letterSpacing,
     weight: 400,
     mono: true,
+    usage: "Showcase light/dark labels, spec code values, countdown digits",
   },
 ];
 
@@ -300,7 +317,11 @@ const shadowTokens = [
 /* ===== Section Components ===== */
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
-  return <h3 className="text-h3 text-content-primary mb-4">{children}</h3>;
+  return (
+    <h3 className="text-h3 font-semibold text-content-primary mb-4">
+      {children}
+    </h3>
+  );
 }
 
 function ColorGrid({ groups }: { groups: ColorGroup[] }) {
@@ -308,7 +329,7 @@ function ColorGrid({ groups }: { groups: ColorGroup[] }) {
     <>
       {groups.map((group) => (
         <div key={group.label}>
-          <h4 className="text-body font-normal text-content-secondary mb-3">
+          <h4 className="text-body font-semibold text-content-primary mb-3">
             {group.label}
           </h4>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
@@ -341,11 +362,11 @@ function ColorGrid({ groups }: { groups: ColorGroup[] }) {
 function ColorSection() {
   return (
     <div className="space-y-6">
-      <SectionTitle>Colors — Auth Verified</SectionTitle>
+      <SectionTitle>Colors — Verified</SectionTitle>
       <ColorGrid groups={colorGroups} />
 
       <div className="border-t border-border-strong pt-6">
-        <SectionTitle>Colors — Available (not in auth)</SectionTitle>
+        <SectionTitle>Colors — Available</SectionTitle>
         <div className="opacity-60">
           <ColorGrid groups={unusedColorGroups} />
         </div>
@@ -356,34 +377,141 @@ function ColorSection() {
 
 function TypographySection() {
   return (
-    <div>
+    <div className="space-y-6">
       <SectionTitle>Typography</SectionTitle>
-      <div className="space-y-4">
-        {typographyTokens.map((token) => (
-          <div
-            key={token.name}
-            className="flex items-baseline gap-4 p-3 rounded-lg border border-border-strong"
-          >
-            <div className="w-32 shrink-0">
-              <p className="text-caption font-normal text-content-primary">
-                {token.name}
-              </p>
-              <p className="text-caption text-content-primary/50 font-mono">
-                {token.desc}
-              </p>
-            </div>
-            <p
-              style={{
-                fontSize: token.size,
-                lineHeight: token.lineHeight,
-                fontWeight: token.weight,
-              }}
-              className={`text-content-primary ${token.mono ? "font-mono" : ""}`}
-            >
-              The quick brown fox jumps
+
+      {/* Font Family */}
+      <div className="space-y-2">
+        <p className="text-body font-semibold text-content-primary">
+          Font Family
+        </p>
+        <div className="p-3 rounded-md border border-border-strong">
+          <p className="text-caption font-mono text-content-primary/50">
+            -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Noto
+            Sans&quot;, Helvetica, Arial, sans-serif
+          </p>
+          <p className="text-caption text-content-primary/50 mt-1">
+            System font stack (GitHub pattern) — Windows: Segoe UI, Mac: SF Pro,
+            Linux: Noto Sans
+          </p>
+        </div>
+      </div>
+
+      {/* Weights */}
+      <div className="space-y-2">
+        <p className="text-body font-semibold text-content-primary">Weights</p>
+        <div className="flex gap-4">
+          <div className="flex-1 p-3 rounded-md border border-border-strong">
+            <p className="text-body font-normal text-content-primary">
+              font-normal (400)
+            </p>
+            <p className="text-caption text-content-primary/50">
+              Body, buttons, links, inputs, descriptions
             </p>
           </div>
-        ))}
+          <div className="flex-1 p-3 rounded-md border border-border-strong">
+            <p className="text-body font-semibold text-content-primary">
+              font-semibold (600)
+            </p>
+            <p className="text-caption text-content-primary/50">
+              Headings, labels, section titles, toast titles
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Heading Hierarchy */}
+      <div className="space-y-2">
+        <p className="text-body font-semibold text-content-primary">
+          Heading Hierarchy
+        </p>
+        <div className="space-y-2">
+          {[
+            {
+              level: "Page",
+              cls: "text-h2 font-semibold",
+              size: "20px / 600",
+              example: "Design System",
+            },
+            {
+              level: "Section",
+              cls: "text-h3 font-semibold",
+              size: "16px / 600",
+              example: "Button",
+            },
+            {
+              level: "Subsection",
+              cls: "text-body font-semibold",
+              size: "14px / 600",
+              example: "Sizes",
+            },
+            {
+              level: "Spec label",
+              cls: "text-caption font-semibold uppercase",
+              size: "12px / 600",
+              example: "VARIANTS",
+            },
+          ].map((h) => (
+            <div
+              key={h.level}
+              className="flex items-center gap-4 p-3 rounded-md border border-border-strong"
+            >
+              <span className="text-caption text-content-primary/50 w-20 shrink-0">
+                {h.level}
+              </span>
+              <span className="text-caption font-mono text-content-primary/50 w-48 shrink-0">
+                {h.cls}
+              </span>
+              <span className="text-caption text-content-primary/50 w-20 shrink-0">
+                {h.size}
+              </span>
+              <span className={h.cls + " text-content-primary"}>
+                {h.example}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Scale */}
+      <div className="space-y-2">
+        <p className="text-body font-semibold text-content-primary">Scale</p>
+        <div className="space-y-3">
+          {typographyTokens.map((token) => (
+            <div
+              key={token.name}
+              className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 p-3 rounded-md border border-border-strong"
+            >
+              <div className="sm:w-40 shrink-0">
+                <p className="text-caption font-normal text-content-primary">
+                  {token.name}
+                </p>
+                <p className="text-caption text-content-primary/50 font-mono">
+                  {token.desc}
+                </p>
+                <p className="text-caption text-content-primary/50">
+                  {token.size} / {token.lineHeight} / {token.weight} /{" "}
+                  {token.spacing}
+                </p>
+              </div>
+              <div className="flex-1">
+                <p
+                  style={{
+                    fontSize: token.size,
+                    lineHeight: token.lineHeight,
+                    fontWeight: token.weight,
+                  }}
+                  className={`text-content-primary ${token.mono ? "font-mono" : ""}`}
+                >
+                  The quick brown fox jumps
+                </p>
+                <p className="text-caption text-content-primary/50 mt-1">
+                  {token.usage}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
@@ -424,7 +552,7 @@ function SpacingSection() {
 function RadiusSection() {
   return (
     <div>
-      <SectionTitle>Border Radii</SectionTitle>
+      <SectionTitle>Border Radius</SectionTitle>
       <div className="flex flex-wrap gap-4">
         {radiusTokens.map((token) => (
           <div key={token.name} className="flex flex-col items-center gap-2">
@@ -477,12 +605,22 @@ function ShadowSection() {
 
 export default function TokenInspector() {
   return (
-    <div className="space-y-10">
-      <ColorSection />
-      <TypographySection />
-      <SpacingSection />
-      <RadiusSection />
-      <ShadowSection />
+    <div className="space-y-4">
+      <div className="card-flat">
+        <ColorSection />
+      </div>
+      <div className="card-flat">
+        <TypographySection />
+      </div>
+      <div className="card-flat">
+        <SpacingSection />
+      </div>
+      <div className="card-flat">
+        <RadiusSection />
+      </div>
+      <div className="card-flat">
+        <ShadowSection />
+      </div>
     </div>
   );
 }
