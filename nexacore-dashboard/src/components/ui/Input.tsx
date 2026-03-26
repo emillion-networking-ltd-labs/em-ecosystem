@@ -3,6 +3,7 @@
 import { useState, useRef, forwardRef, type ReactNode } from "react";
 import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 import Spinner from "./Spinner";
+import IconButton from "./IconButton";
 
 interface InputProps extends Omit<
   React.InputHTMLAttributes<HTMLInputElement>,
@@ -44,8 +45,7 @@ export const inputSpecs = {
   icons: {
     left: "shrink-0 text-content-secondary (16px)",
     right: "shrink-0 (custom ReactNode)",
-    password:
-      "shrink-0 text-content-secondary hover:text-content-primary/75 (16px)",
+    password: "IconButton size=sm default variant (32px hit area, 16px icon)",
     error: "shrink-0 text-error (TriangleAlert 16px)",
   },
 };
@@ -118,14 +118,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           {...props}
         />
         {isPassword && !loading && (
-          <button
-            type="button"
+          <IconButton
+            size="sm"
             onClick={() => setShowPassword(!showPassword)}
-            className="shrink-0 text-content-secondary hover:text-content-primary/75"
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-          </button>
+          </IconButton>
         )}
         {rightIcon && !isPassword && !loading && (
           <span className="shrink-0">{rightIcon}</span>

@@ -43,8 +43,10 @@ export const languageSelectorSpecs = {
 
 export default function LanguageSelector({
   triggerClassName = "",
-}: { triggerClassName?: string } = {}) {
+  triggerStyle,
+}: { triggerClassName?: string; triggerStyle?: React.CSSProperties } = {}) {
   const [isOpen, setIsOpen] = useState(false);
+
   const [search, setSearch] = useState("");
   const [selected, setSelected] = useState<Language>(LANGUAGES[0]);
   const [popoverPos, setPopoverPos] = useState({
@@ -120,9 +122,9 @@ export default function LanguageSelector({
      Closed → invisible pill (transparent border/bg), Nav Link color (75% → 100%)
      Open   → visible pill (border black/5, bg-white), full opacity text, no shadow */
   const triggerBase =
-    "flex h-10 items-center gap-2 rounded-md px-4 text-body font-normal transition-colors";
+    "flex h-10 items-center gap-2 px-4 text-body font-normal transition-colors";
   const triggerClass = isOpen
-    ? `${triggerBase} border border-border-strong bg-surface-primary text-content-primary`
+    ? `${triggerBase} border border-border-strong bg-surface-subtle text-content-primary`
     : `${triggerBase} border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary`;
 
   return (
@@ -131,7 +133,8 @@ export default function LanguageSelector({
       <button
         type="button"
         onClick={() => (isOpen ? setIsOpen(false) : openPopover())}
-        className={`${triggerClass} ${triggerClassName}`}
+        className={`${triggerClass} rounded-md ${triggerClassName}`}
+        style={triggerStyle}
       >
         <span className="whitespace-nowrap">{selected.name}</span>
         <ChevronDown

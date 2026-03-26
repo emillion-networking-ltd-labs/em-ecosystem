@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/context/ToastContext";
+import { PROFILE_TOAST } from "@/lib/toast-messages";
 import { deleteAccount } from "@/lib/delete-account-api";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -52,7 +53,7 @@ export default function DeleteAccount() {
         },
         "Failed to delete account.",
       );
-      addToast({ variant: "error", title: "Delete failed", description: msg });
+      addToast(PROFILE_TOAST.PROFILE_UPDATE_FAILED(msg));
     } finally {
       setLoading(false);
     }
@@ -192,20 +193,23 @@ export default function DeleteAccount() {
 
             {/* Bottom section — buttons */}
             <div className="flex justify-end gap-3 p-3">
-              <button
+              <Button
+                variant="outline"
                 onClick={handleClose}
                 disabled={loading}
-                className="h-10 rounded-md px-6 text-body font-normal text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
+                fullWidth={false}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
                 onClick={handleDelete}
                 disabled={!canConfirm}
-                className="h-10 rounded-md px-6 text-body font-normal bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                loading={loading}
+                fullWidth={false}
               >
-                {loading ? "Deleting..." : "Delete My Account"}
-              </button>
+                Delete My Account
+              </Button>
             </div>
           </div>
         </div>

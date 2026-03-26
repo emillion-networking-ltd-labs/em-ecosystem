@@ -4,8 +4,10 @@ import { useState, useEffect, useRef } from "react";
 import { Info } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/context/ToastContext";
+import { PROFILE_TOAST } from "@/lib/toast-messages";
 import { unlinkOAuth, generateLinkCode } from "@/lib/oauth-api";
 import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
 import Tooltip from "@/components/ui/Tooltip";
 import { extractMessageByStatus } from "@/lib/error-utils";
 import { HTTP_STATUS } from "@/lib/error-constants";
@@ -78,11 +80,7 @@ export default function ConnectedAccounts() {
         disconnectingProvider;
       setDisconnectingProvider(null);
       setPassword("");
-      addToast({
-        variant: "success",
-        title: "Account disconnected",
-        description: `${providerName} has been disconnected.`,
-      });
+      addToast(PROFILE_TOAST.OAUTH_DISCONNECTED(providerName));
       await refreshSession();
     } catch (err: unknown) {
       const msg = extractMessageByStatus(
@@ -94,11 +92,7 @@ export default function ConnectedAccounts() {
         },
         "Failed to unlink OAuth provider.",
       );
-      addToast({
-        variant: "error",
-        title: "Disconnect failed",
-        description: msg,
-      });
+      addToast(PROFILE_TOAST.OAUTH_FAILED(msg));
     } finally {
       setLoading(false);
     }
@@ -162,11 +156,11 @@ export default function ConnectedAccounts() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
       window.location.href = `${apiUrl}/auth/link/${providerId.toLowerCase()}?code=${encodeURIComponent(code)}`;
     } catch {
-      addToast({
-        variant: "error",
-        title: "Connection failed",
-        description: "Could not initiate account linking. Please try again.",
-      });
+      addToast(
+        PROFILE_TOAST.OAUTH_FAILED(
+          "Could not initiate account linking. Please try again.",
+        ),
+      );
       setConnecting(false);
     }
   };
@@ -207,22 +201,27 @@ export default function ConnectedAccounts() {
                       Set a password first
                     </span>
                   ) : (
-                    <button
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      fullWidth={false}
                       onClick={() => setDisconnectingProvider(provider.id)}
-                      className="rounded-md border border-error-border px-4 py-1.5 text-caption text-error hover:bg-error-bg"
                     >
                       Disconnect
-                    </button>
+                    </Button>
                   )
                 ) : (
                   <div className="flex items-center gap-2">
-                    <button
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      fullWidth={false}
                       onClick={() => handleConnect(provider.id)}
                       disabled={connecting}
-                      className="rounded-md border border-border-default px-4 py-1.5 text-caption text-content-primary hover:bg-surface-subtle disabled:opacity-50"
+                      loading={connecting}
                     >
-                      {connecting ? "Connecting..." : "Connect"}
-                    </button>
+                      Connect
+                    </Button>
                     {provider.id === "GITHUB" && (
                       <Tooltip
                         content="Your active GitHub session will be used. To link a different account, log out of github.com first."
@@ -285,20 +284,23 @@ export default function ConnectedAccounts() {
 
             {/* Bottom section — buttons */}
             <div className="flex justify-end gap-3 p-3">
-              <button
+              <Button
+                variant="outline"
                 onClick={handleClose}
                 disabled={loading}
-                className="h-10 rounded-md px-6 text-body font-normal text-content-secondary transition-colors hover:bg-surface-subtle disabled:opacity-50"
+                fullWidth={false}
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
+                variant="danger"
                 onClick={handleUnlink}
                 disabled={!canConfirm}
-                className="h-10 rounded-md px-6 text-body font-normal bg-error text-white transition-colors hover:opacity-90 disabled:opacity-50"
+                loading={loading}
+                fullWidth={false}
               >
-                {loading ? "Disconnecting..." : "Disconnect"}
-              </button>
+                Disconnect
+              </Button>
             </div>
           </div>
         </div>

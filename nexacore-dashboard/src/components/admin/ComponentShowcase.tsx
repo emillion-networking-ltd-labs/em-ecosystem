@@ -61,7 +61,28 @@ import Select, { selectSpecs } from "@/components/ui/Select";
 import Calendar, { calendarSpecs } from "@/components/ui/Calendar";
 import Pagination, { paginationSpecs } from "@/components/ui/Pagination";
 
+import InlineError, { inlineErrorSpecs } from "@/components/ui/InlineError";
 import Breadcrumbs, { breadcrumbsSpecs } from "@/components/ui/Breadcrumbs";
+import MfaDigitInput, {
+  mfaDigitInputSpecs,
+} from "@/components/ui/MfaDigitInput";
+import CopyField, { copyFieldSpecs } from "@/components/ui/CopyField";
+import QrCodeCard, { qrCodeCardSpecs } from "@/components/ui/QrCodeCard";
+import RecoveryCodesGrid, {
+  recoveryCodesGridSpecs,
+} from "@/components/ui/RecoveryCodesGrid";
+import IconButton, {
+  variantClasses as iconBtnVariants,
+  sizeClasses as iconBtnSizes,
+  baseClass as iconBtnBase,
+  usage as iconBtnUsage,
+} from "@/components/ui/IconButton";
+import SegmentedControl, {
+  segmentedControlSpecs,
+} from "@/components/ui/SegmentedControl";
+import EmailSelector, {
+  emailSelectorSpecs,
+} from "@/components/ui/EmailSelector";
 import LanguageSelector, {
   languageSelectorSpecs,
 } from "@/components/ui/LanguageSelector";
@@ -179,6 +200,8 @@ const buttonRows: ButtonRow[] = [
   { state: "Hover", hover: true },
   { state: "Disabled", disabled: true },
   { state: "Loading", loading: true },
+  { state: "With icon" },
+  { state: "Circle" },
 ];
 
 function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
@@ -202,6 +225,16 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
           <button className={`${baseButtonClass} ${hoverClasses[v]}`}>
             Button
           </button>
+        ) : row.state === "Circle" ? (
+          <div className="flex justify-center">
+            <Button
+              variant={v}
+              fullWidth={false}
+              className="!rounded-full !px-0 w-9 h-9 !min-w-0"
+            >
+              15
+            </Button>
+          </div>
         ) : (
           <Button
             variant={v}
@@ -209,31 +242,11 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
             disabled={row.disabled}
             loading={row.loading}
           >
+            {row.state === "With icon" && <Settings size={16} />}
             Button
           </Button>
         ),
     })),
-    {
-      key: "circle",
-      label: "CIRCLE",
-      align: "center" as const,
-      render: (row: ButtonRow) =>
-        row.loading ? null : (
-          <div className="flex justify-center">
-            <div
-              className={`w-9 h-9 rounded-full flex items-center justify-center text-body font-normal bg-surface-inverse text-content-inverse ${
-                row.hover
-                  ? "opacity-90"
-                  : row.disabled
-                    ? "opacity-50 pointer-events-none"
-                    : "transition-colors hover:opacity-90"
-              }`}
-            >
-              15
-            </div>
-          </div>
-        ),
-    },
   ];
 
   return (
@@ -399,7 +412,7 @@ function ButtonShowcase() {
                   </span>
                 ) : (
                   <button
-                    className={`${iconButtonSpecs.base} ${iconButtonSpecs.variants.default}`}
+                    className={`${iconBtnBase} ${iconBtnVariants.default}`}
                   >
                     <Copy size={16} />
                   </button>
@@ -419,7 +432,7 @@ function ButtonShowcase() {
                   </span>
                 ) : (
                   <button
-                    className={`${iconButtonSpecs.base} text-content-secondary hover:text-content-primary/75`}
+                    className={`${iconBtnBase} text-content-secondary hover:text-content-primary/75`}
                   >
                     <Eye size={16} />
                   </button>
@@ -434,13 +447,11 @@ function ButtonShowcase() {
             render: (row) => (
               <div className="flex justify-center">
                 {row.hover ? (
-                  <div className={iconButtonSpecs.variants.boxed}>
+                  <div className={iconBtnVariants.boxed}>
                     <ChevronRight size={16} className="text-content-primary" />
                   </div>
                 ) : (
-                  <button
-                    className={`${iconButtonSpecs.base} ${iconButtonSpecs.variants.boxed}`}
-                  >
+                  <button className={`${iconBtnBase} ${iconBtnVariants.boxed}`}>
                     <ChevronRight size={16} className="text-content-primary" />
                   </button>
                 )}
@@ -477,8 +488,10 @@ function ButtonShowcase() {
           },
           "Link Variants": linkSpecs.variants,
           "Link Base": { shared: linkSpecs.base },
-          "Icon Button Variants": iconButtonSpecs.variants,
-          "Icon Button Usage": iconButtonSpecs.usage,
+          "Icon Button Base": { shared: iconBtnBase },
+          "Icon Button Variants": iconBtnVariants,
+          "Icon Button Sizes": iconBtnSizes,
+          "Icon Button Usage": iconBtnUsage,
         }}
       />
     </ShowcaseSection>
@@ -493,25 +506,6 @@ const linkSpecs = {
       "text-content-primary/75 hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted",
     "underline + icon":
       "Same as underline with flex items-center gap-1 + lucide icon 16px",
-  },
-};
-
-const iconButtonSpecs = {
-  base: "transition-colors cursor-pointer",
-  variants: {
-    default: "text-content-primary/50 hover:text-content-primary",
-    "inside input":
-      "text-content-secondary hover:text-content-primary/75 (shrink-0)",
-    boxed:
-      "w-6 h-6 rounded-full bg-surface-subtle hover:bg-surface-subtle flex items-center justify-center",
-  },
-  icon: "16px lucide icons",
-  usage: {
-    "theme toggle": "AuthLayout — Moon/SunDim 16px (default)",
-    "copy secret": "MfaSetupStep — Copy/Check 16px (default)",
-    "password eye": "Input — Eye/EyeOff 16px (inside input)",
-    "calendar nav": "Calendar — ChevronLeft/Right 16px (boxed)",
-    "calendar day": "Calendar — day number text (circle)",
   },
 };
 
@@ -568,32 +562,16 @@ function InputShowcase() {
                 sm · 40px
               </span>
             </div>
-          </div>
-        </div>
-        <div>
-          <p className="text-body font-semibold text-content-primary mb-2">
-            Filled variant
-          </p>
-          <div className="flex flex-wrap items-end gap-4">
             <div className="flex flex-col gap-1.5 w-[240px]">
-              <Input
-                placeholder="Search..."
-                leftIcon={<Search size={16} />}
-                variant="filled"
-              />
+              <Input placeholder="md · no outline" variant="filled" />
               <span className="text-caption text-content-primary/50">
-                md · 48px · filled
+                md · 48px (no outline)
               </span>
             </div>
             <div className="flex flex-col gap-1.5 w-[240px]">
-              <Input
-                size="sm"
-                placeholder="Search..."
-                leftIcon={<Search size={16} />}
-                variant="filled"
-              />
+              <Input size="sm" placeholder="sm · no outline" variant="filled" />
               <span className="text-caption text-content-primary/50">
-                sm · 40px · filled
+                sm · 40px (no outline)
               </span>
             </div>
           </div>
@@ -1592,17 +1570,21 @@ function CalendarShowcase() {
   return (
     <ShowcaseSection title="Calendar">
       <div className="flex flex-wrap gap-4">
-        <div className="card-flat !p-4 light bg-surface-primary">
+        <div className="card-flat !p-4 flex-1 light bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             light
           </p>
-          <Calendar value={dateLight} onChange={setDateLight} />
+          <div className="flex justify-center">
+            <Calendar value={dateLight} onChange={setDateLight} />
+          </div>
         </div>
-        <div className="card-flat !p-4 dark bg-surface-primary">
+        <div className="card-flat !p-4 flex-1 dark bg-surface-primary">
           <p className="text-caption text-content-primary/50 font-mono mb-3">
             dark
           </p>
-          <Calendar value={dateDark} onChange={setDateDark} />
+          <div className="flex justify-center">
+            <Calendar value={dateDark} onChange={setDateDark} />
+          </div>
         </div>
       </div>
 
@@ -1905,12 +1887,7 @@ function FeedbackShowcase() {
                 <p className="text-caption text-content-primary/50 font-mono mb-2">
                   inline validation
                 </p>
-                <div role="alert" className="flex items-center gap-2">
-                  <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="flex-1 text-caption leading-6 text-error">
-                    Enter a valid email address
-                  </span>
-                </div>
+                <InlineError message="Enter a valid email address" />
               </div>
 
               <div>
@@ -1937,12 +1914,7 @@ function FeedbackShowcase() {
 
       <SpecsPanel
         specs={{
-          "Inline Validation": {
-            container:
-              "flex items-center gap-2 (also used below Input component)",
-            icon: "AlertTriangle 16px text-error",
-            text: "text-caption leading-6 text-error",
-          },
+          "Inline Validation (InlineError)": inlineErrorSpecs,
           "Boxed Error": {
             container: "rounded-lg border border-error/20 bg-error/5 px-3 py-2",
             icon: "AlertTriangle 16px text-error",
@@ -2039,6 +2011,298 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
         </div>
       </div>
     </div>
+  );
+}
+
+function CopyFieldShowcase() {
+  return (
+    <ShowcaseSection title="CopyField">
+      <div className="flex flex-wrap gap-4">
+        <div className="card-flat !p-4 flex-1 min-w-[280px] light bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            light
+          </p>
+          <CopyField value="JBSWY3DPEHPK3PXP" />
+        </div>
+        <div className="card-flat !p-4 flex-1 min-w-[280px] dark bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            dark
+          </p>
+          <CopyField value="JBSWY3DPEHPK3PXP" />
+        </div>
+      </div>
+
+      {/* Sizes */}
+      <div>
+        <p className="text-body font-semibold text-content-primary mb-2">
+          Sizes
+        </p>
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex flex-col gap-1.5 w-[240px]">
+            <CopyField value="JBSWY3DPEHPK3PXP" />
+            <span className="text-caption text-content-primary/50">
+              md · 48px (default)
+            </span>
+          </div>
+          <div className="flex flex-col gap-1.5 w-[240px]">
+            <CopyField value="JBSWY3DPEHPK3PXP" size="sm" />
+            <span className="text-caption text-content-primary/50">
+              sm · 40px
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <SpecsPanel
+        specs={{
+          Container: { shared: copyFieldSpecs.container },
+          Code: { shared: copyFieldSpecs.code },
+          Sizes: copyFieldSpecs.sizes,
+          "Copy Button": { shared: copyFieldSpecs.copyButton },
+          Icon: { shared: copyFieldSpecs.icon },
+        }}
+      />
+    </ShowcaseSection>
+  );
+}
+
+function DigitInputShowcase() {
+  const [code, setCode] = useState(Array(6).fill(""));
+  return (
+    <ShowcaseSection title="Digit Input">
+      <div className="flex flex-wrap gap-4">
+        <div className="card-flat !p-4 flex-1 min-w-[300px] light bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            light
+          </p>
+          <MfaDigitInput
+            value={code}
+            onChange={setCode}
+            idPrefix="demo-digit"
+          />
+        </div>
+        <div className="card-flat !p-4 flex-1 min-w-[300px] dark bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            dark
+          </p>
+          <MfaDigitInput
+            value={Array(6).fill("")}
+            onChange={() => {}}
+            idPrefix="demo-digit-dark"
+          />
+        </div>
+      </div>
+      {/* Sizes — auto-switches based on container width */}
+      <div>
+        <p className="text-body font-semibold text-content-primary mb-2">
+          Sizes
+        </p>
+        <div className="flex flex-wrap items-end gap-4">
+          <div className="flex flex-col gap-1.5" style={{ width: 340 }}>
+            <MfaDigitInput
+              value={Array(6).fill("")}
+              onChange={() => {}}
+              idPrefix="size-md"
+            />
+            <span className="text-caption text-content-primary/50">
+              md · 48×48px (default — container ≥ 328px)
+            </span>
+          </div>
+          <div className="flex flex-col gap-1.5" style={{ width: 260 }}>
+            <MfaDigitInput
+              value={Array(6).fill("")}
+              onChange={() => {}}
+              idPrefix="size-sm"
+            />
+            <span className="text-caption text-content-primary/50">
+              sm · 40×40px (auto — container &lt; 328px)
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <SpecsPanel
+        specs={{
+          Container: mfaDigitInputSpecs.container,
+          Digit: mfaDigitInputSpecs.digit,
+          Behavior: mfaDigitInputSpecs.behavior,
+        }}
+      />
+    </ShowcaseSection>
+  );
+}
+
+function QrCodeCardShowcase() {
+  return (
+    <ShowcaseSection title="QR Code Card">
+      <div className="flex flex-wrap gap-4">
+        <div className="card-flat !p-4 flex-1 min-w-[300px] light bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            light
+          </p>
+          <QrCodeCard />
+        </div>
+        <div className="card-flat !p-4 flex-1 min-w-[300px] dark bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            dark
+          </p>
+          <QrCodeCard />
+        </div>
+      </div>
+      <SpecsPanel
+        specs={{
+          Container: qrCodeCardSpecs,
+        }}
+      />
+    </ShowcaseSection>
+  );
+}
+
+function IconButtonShowcase() {
+  return (
+    <ShowcaseSection title="IconButton">
+      <div className="flex flex-wrap gap-4">
+        <div className="card-flat !p-4 flex-1 min-w-[280px] light bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            light
+          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center gap-1.5">
+              <IconButton variant="default" aria-label="Default">
+                <Copy size={16} />
+              </IconButton>
+              <span className="text-caption text-content-primary/50">
+                default
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-1.5">
+              <IconButton variant="danger" aria-label="Danger">
+                <Trash2 size={16} />
+              </IconButton>
+              <span className="text-caption text-content-primary/50">
+                danger
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-1.5">
+              <IconButton variant="boxed" aria-label="Boxed">
+                <Settings size={16} />
+              </IconButton>
+              <span className="text-caption text-content-primary/50">
+                boxed
+              </span>
+            </div>
+          </div>
+        </div>
+        <div className="card-flat !p-4 flex-1 min-w-[280px] dark bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            dark
+          </p>
+          <div className="flex items-center gap-4">
+            <div className="flex flex-col items-center gap-1.5">
+              <IconButton variant="default" aria-label="Default">
+                <Copy size={16} />
+              </IconButton>
+              <span className="text-caption text-content-primary/50">
+                default
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-1.5">
+              <IconButton variant="danger" aria-label="Danger">
+                <Trash2 size={16} />
+              </IconButton>
+              <span className="text-caption text-content-primary/50">
+                danger
+              </span>
+            </div>
+            <div className="flex flex-col items-center gap-1.5">
+              <IconButton variant="boxed" aria-label="Boxed">
+                <Settings size={16} />
+              </IconButton>
+              <span className="text-caption text-content-primary/50">
+                boxed
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <SpecsPanel
+        specs={{
+          Variants: iconBtnVariants,
+          Sizes: iconBtnSizes,
+          Base: { shared: iconBtnBase },
+        }}
+      />
+    </ShowcaseSection>
+  );
+}
+
+function SegmentedControlShowcase() {
+  const [val, setVal] = useState("light");
+  return (
+    <ShowcaseSection title="SegmentedControl">
+      <div className="flex flex-wrap gap-4">
+        <div className="card-flat !p-4 flex-1 min-w-[280px] light bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            light
+          </p>
+          <SegmentedControl
+            value={val}
+            onChange={setVal}
+            options={[
+              { value: "light", label: "Light" },
+              { value: "dark", label: "Dark" },
+            ]}
+          />
+        </div>
+        <div className="card-flat !p-4 flex-1 min-w-[280px] dark bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            dark
+          </p>
+          <SegmentedControl
+            value="dark"
+            onChange={() => {}}
+            options={[
+              { value: "light", label: "Light" },
+              { value: "dark", label: "Dark" },
+            ]}
+          />
+        </div>
+      </div>
+      <SpecsPanel
+        specs={{
+          Container: { shared: segmentedControlSpecs.container },
+          Option: segmentedControlSpecs.option,
+        }}
+      />
+    </ShowcaseSection>
+  );
+}
+
+function EmailSelectorShowcase() {
+  return (
+    <ShowcaseSection title="EmailSelector">
+      <div className="flex flex-wrap gap-4">
+        <div className="card-flat !p-4 flex-1 min-w-[280px] light bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            light
+          </p>
+          <EmailSelector email="user@example.com" onChangeEmail={() => {}} />
+        </div>
+        <div className="card-flat !p-4 flex-1 min-w-[280px] dark bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            dark
+          </p>
+          <EmailSelector email="user@example.com" onChangeEmail={() => {}} />
+        </div>
+      </div>
+      <SpecsPanel
+        specs={{
+          Trigger: { shared: emailSelectorSpecs.trigger },
+          Dropdown: { shared: emailSelectorSpecs.dropdown },
+          Option: { shared: emailSelectorSpecs.option },
+        }}
+      />
+    </ShowcaseSection>
   );
 }
 
@@ -2457,6 +2721,10 @@ export function AtomShowcase() {
     <div className="space-y-6">
       <ButtonShowcase />
       <InputShowcase />
+      <CopyFieldShowcase />
+      <DigitInputShowcase />
+      <QrCodeCardShowcase />
+      <RecoveryCodesGridShowcase />
       <BadgeShowcase />
       <SpinnerShowcase />
       <AvatarShowcase />
@@ -2465,6 +2733,9 @@ export function AtomShowcase() {
       <TooltipShowcase />
       <DividerShowcase />
       <SliderShowcase />
+      <IconButtonShowcase />
+      <SegmentedControlShowcase />
+      <EmailSelectorShowcase />
       <AccordionShowcase />
       <CardShowcase />
     </div>
@@ -2611,6 +2882,48 @@ function CardShowcase() {
             padding: "24px",
             usage: "Nav tabs, filters, catalog, lightweight sections",
           },
+        }}
+      />
+    </ShowcaseSection>
+  );
+}
+
+function RecoveryCodesGridShowcase() {
+  const demoCodes = [
+    "a1b2-c3d4-e5f6",
+    "g7h8-i9j0-k1l2",
+    "m3n4-o5p6-q7r8",
+    "s9t0-u1v2-w3x4",
+    "y5z6-a7b8-c9d0",
+    "e1f2-g3h4-i5j6",
+    "k7l8-m9n0-o1p2",
+    "q3r4-s5t6-u7v8",
+    "w9x0-y1z2-a3b4",
+    "c5d6-e7f8-g9h0",
+  ];
+
+  return (
+    <ShowcaseSection title="Recovery Codes Grid">
+      <div className="flex flex-wrap gap-4">
+        <div className="card-flat !p-4 flex-1 min-w-[300px] light bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            light
+          </p>
+          <RecoveryCodesGrid codes={demoCodes} />
+        </div>
+        <div className="card-flat !p-4 flex-1 min-w-[300px] dark bg-surface-primary">
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            dark
+          </p>
+          <RecoveryCodesGrid codes={demoCodes} />
+        </div>
+      </div>
+
+      <SpecsPanel
+        specs={{
+          Container: { shared: recoveryCodesGridSpecs.container },
+          Grid: { shared: recoveryCodesGridSpecs.grid },
+          Code: { shared: recoveryCodesGridSpecs.code },
         }}
       />
     </ShowcaseSection>

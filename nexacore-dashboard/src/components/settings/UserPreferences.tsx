@@ -4,32 +4,8 @@ import { useState, useEffect } from "react";
 import { Sun, Moon, Bell, Globe } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
-
-function Toggle({
-  checked,
-  onChange,
-}: {
-  checked: boolean;
-  onChange: (val: boolean) => void;
-}) {
-  return (
-    <button
-      type="button"
-      role="switch"
-      aria-checked={checked}
-      onClick={() => onChange(!checked)}
-      className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors ${
-        checked ? "bg-content-primary" : "bg-black/[0.08] dark:bg-white/[0.08]"
-      }`}
-    >
-      <span
-        className={`pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-          checked ? "translate-x-5" : "translate-x-0"
-        }`}
-      />
-    </button>
-  );
-}
+import Toggle from "@/components/ui/Toggle";
+import SegmentedControl from "@/components/ui/SegmentedControl";
 
 function SettingRow({
   icon: Icon,
@@ -83,30 +59,14 @@ export default function UserPreferences() {
           label="Theme"
           description="Choose your preferred appearance"
         >
-          <div className="flex items-center gap-1 rounded-xl bg-black/[0.04] p-1 dark:bg-white/[0.04]">
-            <button
-              onClick={() => setTheme("light")}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-caption transition-colors ${
-                theme === "light"
-                  ? "bg-surface-primary text-content-primary shadow-sm"
-                  : "text-content-tertiary hover:text-content-primary"
-              }`}
-            >
-              <Sun size={14} />
-              Light
-            </button>
-            <button
-              onClick={() => setTheme("dark")}
-              className={`flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-caption transition-colors ${
-                theme === "dark"
-                  ? "bg-surface-primary text-content-primary shadow-sm"
-                  : "text-content-tertiary hover:text-content-primary"
-              }`}
-            >
-              <Moon size={14} />
-              Dark
-            </button>
-          </div>
+          <SegmentedControl
+            value={theme}
+            onChange={setTheme}
+            options={[
+              { value: "light", label: "Light", icon: <Sun size={14} /> },
+              { value: "dark", label: "Dark", icon: <Moon size={14} /> },
+            ]}
+          />
         </SettingRow>
 
         <SettingRow

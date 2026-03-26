@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/context/ToastContext";
+import { PROFILE_TOAST } from "@/lib/toast-messages";
 import { requestEmailChange } from "@/lib/email-change-api";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -38,12 +39,7 @@ export default function ChangeEmailForm() {
     setLoading(true);
     try {
       await requestEmailChange(newEmail, password);
-      addToast({
-        variant: "success",
-        title: "Verification email sent",
-        description:
-          "Check the inbox of your new email address to confirm the change.",
-      });
+      addToast(PROFILE_TOAST.VERIFICATION_EMAIL_SENT(newEmail));
       setNewEmail("");
       setPassword("");
     } catch (err: unknown) {
@@ -55,11 +51,7 @@ export default function ChangeEmailForm() {
         },
         "Failed to request email change.",
       );
-      addToast({
-        variant: "error",
-        title: "Email change failed",
-        description: msg,
-      });
+      addToast(PROFILE_TOAST.EMAIL_CHANGE_FAILED(msg));
     } finally {
       setLoading(false);
     }

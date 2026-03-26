@@ -8,6 +8,7 @@ import {
   Unlock,
   Trash2,
 } from "lucide-react";
+import IconButton from "@/components/ui/IconButton";
 import type { SafeUser } from "@/lib/types";
 import Can from "@/components/guards/Can";
 
@@ -42,12 +43,9 @@ export default function ActionDropdown({
   return (
     <Can anyPermission={["users:write", "users:delete"]}>
       <div className="relative" ref={ref}>
-        <button
-          onClick={() => setOpen(!open)}
-          className="flex h-8 w-8 items-center justify-center rounded-lg hover:bg-surface-subtle"
-        >
-          <MoreHorizontal size={16} className="text-content-primary" />
-        </button>
+        <IconButton onClick={() => setOpen(!open)} aria-label="Actions">
+          <MoreHorizontal size={16} />
+        </IconButton>
 
         {open && (
           <div className="absolute right-0 top-full z-30 mt-1 w-[241px] rounded-xl border border-border-strong bg-surface-primary p-6 shadow-card animate-dropdown-down">

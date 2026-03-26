@@ -48,18 +48,18 @@ export default function Toast({
     <div
       role="alert"
       aria-live="assertive"
-      className={`group flex max-w-[650px] items-start gap-2 rounded-full border border-border-strong bg-surface-primary px-6 py-4 ${
+      className={`pointer-events-auto group flex max-w-[550px] items-start gap-2 rounded-full border border-border-strong bg-surface-primary px-6 py-4 ${
         isExiting ? "animate-toast-out" : "animate-toast-in"
       }`}
     >
       <Icon size={16} className={`mt-px shrink-0 ${variantClass}`} />
 
       <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <p className="whitespace-nowrap text-caption font-semibold leading-tight text-content-primary">
+        <p className="text-caption font-semibold leading-tight text-content-primary">
           {title}
         </p>
         {description && (
-          <p className="whitespace-nowrap text-caption leading-tight text-content-primary/50">
+          <p className="text-caption leading-tight text-content-primary/50">
             {description}
           </p>
         )}

@@ -1,34 +1,26 @@
 import Link from "next/link";
 import LanguageSelector from "@/components/ui/LanguageSelector";
+import Button from "@/components/ui/Button";
 
 export default function AuthFooter() {
   return (
     <div className="flex w-full flex-wrap items-center gap-x-6 gap-y-2 p-2">
-      {/* Left — Language Selector (Figma: layoutGrow=1, trigger fills parent) */}
+      {/* Left — Language Selector */}
       <div className="flex flex-1 items-center">
-        <LanguageSelector triggerClassName="animate-corner-bl" />
+        <LanguageSelector triggerClassName="!rounded-bl-3xl" />
       </div>
 
-      {/* Right — Nav Links (Figma: auto width, gap 24, px 16) */}
+      {/* Right — Nav Links */}
       <div className="flex items-center gap-6 px-4">
-        <Link
-          href="#"
-          className="text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary"
-        >
+        <Button as={Link} href="#" variant="link" size="md" fullWidth={false}>
           Help
-        </Link>
-        <Link
-          href="#"
-          className="text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary"
-        >
+        </Button>
+        <Button as={Link} href="#" variant="link" size="md" fullWidth={false}>
           Privacy
-        </Link>
-        <Link
-          href="#"
-          className="text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary"
-        >
+        </Button>
+        <Button as={Link} href="#" variant="link" size="md" fullWidth={false}>
           Terms
-        </Link>
+        </Button>
       </div>
     </div>
   );
