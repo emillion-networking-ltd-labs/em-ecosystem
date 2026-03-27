@@ -236,6 +236,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Register auth failure callback — when ApiClient's silentRefresh fails, trigger logout
+  const handleAuthFailure = useCallback(() => {
+    dispatch({ type: "LOGOUT" });
+  }, []);
+
   // Generate fingerprint then attempt silent refresh on mount (ref guard prevents StrictMode double-fire)
   // Skip refresh on /auth/callback — the OAuth exchange handler will authenticate;
   // running both causes a race condition where refresh's LOGOUT overwrites exchange's AUTH_SUCCESS.
@@ -243,6 +248,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (mountedRef.current) return;
     mountedRef.current = true;
+    apiClient.setOnAuthFailure(handleAuthFailure);
     (async () => {
       const fp = await getFingerprint();
       if (fp) apiClient.setDeviceFingerprint(fp);
@@ -252,7 +258,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       await refreshSession();
     })();
-  }, [refreshSession]);
+    return () => {
+      apiClient.setOnAuthFailure(null);
+    };
+  }, [refreshSession, handleAuthFailure]);
 
   const login = useCallback(
     async (email: string, password: string, turnstileToken?: string) => {

@@ -9,6 +9,11 @@ class ApiClient {
   private accessToken: string | null = null;
   private refreshPromise: Promise<string | null> | null = null;
   private deviceFingerprint: string | null = null;
+  private onAuthFailure: (() => void) | null = null;
+
+  setOnAuthFailure(callback: (() => void) | null) {
+    this.onAuthFailure = callback;
+  }
 
   setAccessToken(token: string | null) {
     this.accessToken = token;
@@ -139,6 +144,9 @@ class ApiClient {
         }
         return retryResponse.json();
       }
+      // Refresh failed — session unrecoverable, notify auth context
+      this.accessToken = null;
+      this.onAuthFailure?.();
     }
 
     if (!response.ok) {
