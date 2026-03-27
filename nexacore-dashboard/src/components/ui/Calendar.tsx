@@ -50,7 +50,7 @@ interface CalendarDay {
 export const calendarSpecs = {
   container: {
     shared:
-      "w-[300px] bg-surface-primary border border-border-strong rounded-3xl p-6 gap-5",
+      "w-[300px] bg-surface-primary border border-border-strong rounded-xl p-6 gap-5",
   },
   navigation: {
     button: "w-6 h-6 rounded-full bg-surface-subtle hover:bg-surface-subtle",
@@ -232,7 +232,7 @@ export default function Calendar({
 
   return (
     <div
-      className={`w-[300px] bg-surface-primary border border-border-strong rounded-3xl p-6 flex flex-col gap-5 ${className}`}
+      className={`w-[300px] bg-surface-primary border border-border-strong rounded-xl p-6 flex flex-col gap-5 ${className}`}
     >
       {/* Navigation */}
       <div className="flex items-center justify-between">

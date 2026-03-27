@@ -605,20 +605,6 @@ input:-webkit-autofill:focus {
   animation-delay: 280ms;
 }
 
-/* Corner radius grow animation */
-@keyframes corner-grow {
-  from {
-    border-bottom-left-radius: 6px;
-  }
-  to {
-    border-bottom-left-radius: 24px;
-  }
-}
-
-.animate-corner-bl {
-  animation: corner-grow 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
 /* Tab underline indicator animation */
 @keyframes tab-underline {
   from {

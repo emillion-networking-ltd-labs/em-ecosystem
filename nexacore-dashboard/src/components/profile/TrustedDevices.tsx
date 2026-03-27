@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Shield, Laptop, Smartphone, Trash2, Plus } from "lucide-react";
 import { useTrustedDevices } from "@/hooks/useTrustedDevices";
 import { useToast } from "@/context/ToastContext";
+import { PROFILE_TOAST } from "@/lib/toast-messages";
 import Button from "@/components/ui/Button";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import Spinner from "@/components/ui/Spinner";
@@ -61,17 +62,9 @@ export default function TrustedDevices() {
     const ok = await trustCurrentDevice();
     setIsTrusting(false);
     if (ok) {
-      addToast({
-        variant: "success",
-        title: "Device trusted",
-        description: "This device is now trusted for future logins.",
-      });
+      addToast(PROFILE_TOAST.DEVICE_TRUSTED);
     } else {
-      addToast({
-        variant: "error",
-        title: "Trust failed",
-        description: "Could not trust this device. Try again later.",
-      });
+      addToast(PROFILE_TOAST.DEVICE_REVOKE_FAILED);
     }
   };
 
@@ -82,17 +75,9 @@ export default function TrustedDevices() {
     setIsRevoking(false);
     setRevokeTarget(null);
     if (ok) {
-      addToast({
-        variant: "success",
-        title: "Device revoked",
-        description: "This device will require MFA on next login.",
-      });
+      addToast(PROFILE_TOAST.DEVICE_REVOKED);
     } else {
-      addToast({
-        variant: "error",
-        title: "Revoke failed",
-        description: "Could not revoke device trust. Try again later.",
-      });
+      addToast(PROFILE_TOAST.DEVICE_REVOKE_FAILED);
     }
   };
 
@@ -102,17 +87,9 @@ export default function TrustedDevices() {
     setIsRevokingAll(false);
     setShowRevokeAll(false);
     if (ok) {
-      addToast({
-        variant: "success",
-        title: "All devices revoked",
-        description: `${devices.length} device${devices.length !== 1 ? "s" : ""} will require MFA on next login.`,
-      });
+      addToast(PROFILE_TOAST.DEVICE_REVOKED);
     } else {
-      addToast({
-        variant: "error",
-        title: "Revoke failed",
-        description: "Could not revoke all devices. Try again later.",
-      });
+      addToast(PROFILE_TOAST.DEVICE_REVOKE_FAILED);
     }
   };
 

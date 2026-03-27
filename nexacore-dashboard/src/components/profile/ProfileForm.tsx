@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Lock } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
+import { PROFILE_TOAST } from "@/lib/toast-messages";
 import { apiClient } from "@/lib/api";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
@@ -23,19 +24,15 @@ export default function ProfileForm() {
     try {
       await apiClient.patch<SafeUser>("/users/me", { firstName, lastName });
       await refreshSession();
-      addToast({
-        variant: "success",
-        title: "Profile updated",
-        description: "Your profile information has been saved.",
-      });
+      addToast(PROFILE_TOAST.PROFILE_UPDATED);
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
       const msg = apiErr?.error?.message || "Could not update profile.";
-      addToast({
-        variant: "error",
-        title: "Update failed",
-        description: msg.endsWith(".") ? msg : `${msg}.`,
-      });
+      addToast(
+        PROFILE_TOAST.PROFILE_UPDATE_FAILED(
+          msg.endsWith(".") ? msg : `${msg}.`,
+        ),
+      );
     } finally {
       setLoading(false);
     }
@@ -65,18 +62,23 @@ export default function ProfileForm() {
           )}
         </div>
         <div className="flex flex-col gap-1">
-          <button
+          <Button
             type="button"
-            className="text-body font-normal text-content-primary hover:underline"
+            variant="link-underline"
+            size="md"
+            fullWidth={false}
           >
             Upload photo
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
-            className="text-body text-content-tertiary hover:text-error"
+            variant="link"
+            size="md"
+            fullWidth={false}
+            className="text-content-primary/50 hover:text-error"
           >
             Remove
-          </button>
+          </Button>
         </div>
       </div>
 

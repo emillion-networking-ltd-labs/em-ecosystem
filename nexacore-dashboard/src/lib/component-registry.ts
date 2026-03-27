@@ -81,6 +81,42 @@ export const componentRegistry: ComponentEntry[] = [
     files: ["Accordion.tsx"],
   },
   {
+    name: "CopyField",
+    category: "atom",
+    description: "Read-only copyable text — API keys, secrets, tokens",
+    files: ["CopyField.tsx"],
+  },
+  {
+    name: "Digit Input",
+    category: "atom",
+    description: "Multi-cell numeric input — MFA codes, OTP, verification",
+    files: ["MfaDigitInput.tsx"],
+  },
+  {
+    name: "QR Code Card",
+    category: "atom",
+    description: "QR code display with copyable secret key",
+    files: ["QrCodeCard.tsx", "CopyField.tsx"],
+  },
+  {
+    name: "IconButton",
+    category: "atom",
+    description: "Icon-only button — default, danger, boxed variants",
+    files: ["IconButton.tsx"],
+  },
+  {
+    name: "SegmentedControl",
+    category: "atom",
+    description: "Multi-option selector — theme picker, view toggle",
+    files: ["SegmentedControl.tsx"],
+  },
+  {
+    name: "EmailSelector",
+    category: "atom",
+    description: "Email dropdown with avatar and change link",
+    files: ["EmailSelector.tsx"],
+  },
+  {
     name: "Card",
     category: "atom",
     description:
@@ -127,11 +163,12 @@ export const componentRegistry: ComponentEntry[] = [
     files: [
       "Toast.tsx",
       "ToastContainer.tsx",
+      "InlineError.tsx",
       "RateLimitBanner.tsx",
       "CountdownTimer.tsx",
       "ErrorAlert.tsx",
     ],
-    count: 6,
+    count: 7,
   },
   {
     name: "Calendar",
@@ -145,6 +182,12 @@ export const componentRegistry: ComponentEntry[] = [
     description: "Line chart, doughnut chart, speedometer — Recharts SVG",
     files: ["TotalUsersChart.tsx", "UserRoleChart.tsx", "ChartCard.tsx"],
     count: 3,
+  },
+  {
+    name: "Recovery Codes Grid",
+    category: "atom",
+    description: "2×5 grid of monospace recovery codes",
+    files: ["RecoveryCodesGrid.tsx"],
   },
 ];
 

@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import Link from "next/link";
 import { CircleX } from "lucide-react";
 import AuthLayout from "@/components/layout/AuthLayout";
+import Button from "@/components/ui/Button";
 
 interface AuthErrorFallbackProps {
   error: Error & { digest?: string };
@@ -34,12 +35,9 @@ export default function AuthErrorFallback({
           An unexpected error occurred. Please try again.
         </p>
 
-        <Link
-          href="/login"
-          className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
-        >
+        <Button as={Link} href="/login" variant="outline">
           Go to Sign In
-        </Link>
+        </Button>
       </div>
     </AuthLayout>
   );

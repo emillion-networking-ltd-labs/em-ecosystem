@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { House } from "lucide-react";
+import Button from "@/components/ui/Button";
 
 export default function GoBackSection() {
   return (
@@ -7,13 +8,10 @@ export default function GoBackSection() {
       className="auth-card-enter relative z-[1] flex w-full items-center justify-center py-6"
       style={{ animationDelay: "120ms" }}
     >
-      <Link
-        href="/"
-        className="flex items-center gap-2 text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary"
-      >
+      <Button as={Link} href="/" variant="link" size="md" fullWidth={false}>
         <House size={16} strokeWidth={2} />
         Go back to the Home Page
-      </Link>
+      </Button>
     </div>
   );
 }

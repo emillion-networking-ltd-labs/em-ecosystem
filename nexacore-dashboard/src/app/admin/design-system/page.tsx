@@ -35,6 +35,12 @@ const componentToSection: Record<string, { tab: string; section: string }> = {
   Tooltip: { tab: "atoms", section: "showcase-tooltip" },
   Divider: { tab: "atoms", section: "showcase-divider" },
   Slider: { tab: "atoms", section: "showcase-slider" },
+  CopyField: { tab: "atoms", section: "showcase-copyfield" },
+  "Digit Input": { tab: "atoms", section: "showcase-digit-input" },
+  "QR Code Card": { tab: "atoms", section: "showcase-qr-code-card" },
+  IconButton: { tab: "atoms", section: "showcase-iconbutton" },
+  SegmentedControl: { tab: "atoms", section: "showcase-segmentedcontrol" },
+  EmailSelector: { tab: "atoms", section: "showcase-emailselector" },
   Accordion: { tab: "atoms", section: "showcase-accordion" },
   Card: { tab: "atoms", section: "showcase-card" },
   Tabs: { tab: "molecules", section: "showcase-tabs" },
@@ -50,6 +56,10 @@ const componentToSection: Record<string, { tab: string; section: string }> = {
   },
   Calendar: { tab: "molecules", section: "showcase-calendar" },
   Charts: { tab: "molecules", section: "showcase-charts" },
+  "Recovery Codes Grid": {
+    tab: "atoms",
+    section: "showcase-recovery-codes-grid",
+  },
 };
 
 const viewTabs = [

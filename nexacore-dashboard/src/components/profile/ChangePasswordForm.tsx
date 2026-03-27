@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
+import { PROFILE_TOAST } from "@/lib/toast-messages";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { validatePassword, PASSWORD_MIN_LENGTH } from "@/lib/validation";
@@ -41,20 +42,12 @@ export default function ChangePasswordForm() {
       if (hasPassword) body.currentPassword = currentPassword;
       await apiClient.patch("/users/me/password", body);
       if (hasPassword) {
-        addToast({
-          variant: "success",
-          title: "Password changed",
-          description: "Please log in again with your new password.",
-        });
+        addToast(PROFILE_TOAST.PASSWORD_CHANGED);
         await logout();
         router.push("/login");
         return;
       }
-      addToast({
-        variant: "success",
-        title: "Password set",
-        description: "Your password has been updated.",
-      });
+      addToast(PROFILE_TOAST.PASSWORD_SET);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
@@ -62,11 +55,11 @@ export default function ChangePasswordForm() {
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
       const msg = apiErr?.error?.message || "Could not change password.";
-      addToast({
-        variant: "error",
-        title: "Password change failed",
-        description: msg.endsWith(".") ? msg : `${msg}.`,
-      });
+      addToast(
+        PROFILE_TOAST.PASSWORD_CHANGE_FAILED(
+          msg.endsWith(".") ? msg : `${msg}.`,
+        ),
+      );
     } finally {
       setLoading(false);
     }

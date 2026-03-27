@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { CircleCheck, CircleX, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
+import Button from "@/components/ui/Button";
 
 export default function VerifyEmailStatus() {
   const searchParams = useSearchParams();
@@ -61,12 +62,13 @@ export default function VerifyEmailStatus() {
         </p>
       )}
 
-      <Link
+      <Button
+        as={Link}
         href={isSuccess ? "/dashboard" : "/login"}
-        className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+        variant="outline"
       >
         {isSuccess ? "Go to Dashboard" : "Go to Sign In"}
-      </Link>
+      </Button>
     </div>
   );
 }

@@ -1,12 +1,23 @@
 "use client";
 
+import React from "react";
 import InfinitySpinner from "./InfinitySpinner";
 
+export type ButtonVariant =
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "danger"
+  | "link"
+  | "link-underline";
+
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: "primary" | "secondary" | "outline" | "danger";
+  variant?: ButtonVariant;
   size?: "sm" | "md" | "lg";
   loading?: boolean;
   fullWidth?: boolean;
+  as?: React.ElementType;
+  href?: string;
 }
 
 export const variantClasses = {
@@ -18,10 +29,13 @@ export const variantClasses = {
     "bg-transparent text-content-primary border border-border-strong transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   danger:
     "bg-transparent text-error border border-error-border transition-colors hover:bg-error-bg disabled:pointer-events-none disabled:opacity-50",
+  link: "bg-transparent text-content-primary/75 border-0 transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-50",
+  "link-underline":
+    "bg-transparent text-content-primary/75 border-0 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted disabled:pointer-events-none disabled:opacity-50",
 };
 
 export const baseClass =
-  "flex|inline-flex items-center justify-center gap-2 whitespace-nowrap";
+  "relative items-center justify-center gap-2 whitespace-nowrap";
 
 export const sizeClasses = {
   sm: "px-4 py-1.5 text-caption font-normal rounded-md h-8",
@@ -29,7 +43,14 @@ export const sizeClasses = {
   lg: "px-8 py-3 text-h3 font-normal rounded-md h-12",
 };
 
+export const linkSizeClasses = {
+  sm: "text-caption font-normal",
+  md: "text-body font-normal",
+  lg: "text-h3 font-normal",
+};
+
 export default function Button({
+  as: Component = "button",
   variant = "primary",
   size = "md",
   loading = false,
@@ -37,19 +58,36 @@ export default function Button({
   children,
   className = "",
   disabled,
+  href,
   ...props
 }: ButtonProps) {
-  return (
-    <button
-      className={`${fullWidth ? "flex" : "inline-flex"} items-center justify-center gap-2 whitespace-nowrap ${variantClasses[variant]} ${sizeClasses[size]} ${fullWidth ? "w-full" : ""} ${className}`}
-      disabled={loading || disabled}
-      {...props}
+  const isLink = variant === "link" || variant === "link-underline";
+  const sizes = isLink ? linkSizeClasses[size] : sizeClasses[size];
+  const display = isLink ? "inline-flex" : fullWidth ? "flex" : "inline-flex";
+
+  const componentProps: Record<string, unknown> = {
+    className: `${display} ${baseClass} ${variantClasses[variant]} ${sizes} ${!isLink && fullWidth ? "w-full" : ""} ${className}`,
+    ...props,
+  };
+
+  if (href) componentProps.href = href;
+  if (Component === "button") componentProps.disabled = loading || disabled;
+
+  return React.createElement(
+    Component,
+    componentProps,
+    <span
+      className={`inline-flex items-center gap-2 ${loading ? "opacity-30" : ""}`}
     >
-      {loading ? (
+      {children}
+    </span>,
+    loading && (
+      <span
+        key="spinner"
+        className="absolute inset-0 flex items-center justify-center"
+      >
         <InfinitySpinner size={size === "sm" ? "sm" : "md"} />
-      ) : (
-        children
-      )}
-    </button>
+      </span>
+    ),
   );
 }

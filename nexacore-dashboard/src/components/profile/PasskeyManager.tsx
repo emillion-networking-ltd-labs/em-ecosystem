@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { usePasskey } from "@/hooks/usePasskey";
 import { useToast } from "@/context/ToastContext";
+import { PROFILE_TOAST } from "@/lib/toast-messages";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import ConfirmModal from "@/components/ui/ConfirmModal";
@@ -133,19 +134,15 @@ export default function PasskeyManager() {
     clearError();
     const result = await registerPasskey(regName.trim() || undefined);
     if (result) {
-      addToast({
-        variant: "success",
-        title: "Passkey registered",
-        description: `"${result.name}" added successfully.`,
-      });
+      addToast(PROFILE_TOAST.PASSKEY_REGISTERED);
       setRegName("");
       setView("list");
     } else {
-      addToast({
-        variant: "error",
-        title: "Registration failed",
-        description: "Passkey registration failed. Please try again.",
-      });
+      addToast(
+        PROFILE_TOAST.PASSKEY_FAILED(
+          "Passkey registration failed. Please try again.",
+        ),
+      );
     }
   };
 
@@ -155,18 +152,10 @@ export default function PasskeyManager() {
     const ok = await renamePasskey(renamingPasskey.id, renameValue.trim());
     setIsRenaming(false);
     if (ok) {
-      addToast({
-        variant: "success",
-        title: "Passkey renamed",
-        description: `Renamed to "${renameValue.trim()}".`,
-      });
+      addToast(PROFILE_TOAST.PASSKEY_RENAMED);
       setRenamingPasskey(null);
     } else {
-      addToast({
-        variant: "error",
-        title: "Rename failed",
-        description: "Failed to rename passkey.",
-      });
+      addToast(PROFILE_TOAST.PASSKEY_FAILED("Failed to rename passkey."));
     }
   };
 
@@ -181,20 +170,11 @@ export default function PasskeyManager() {
     const errMsg = await deletePasskey(deletingPasskey.id, deletePassword);
     setIsDeleting(false);
     if (!errMsg) {
-      addToast({
-        variant: "success",
-        title: "Passkey deleted",
-        description:
-          "Passkey removed. You can also delete it from your browser or device settings.",
-      });
+      addToast(PROFILE_TOAST.PASSKEY_DELETED);
       setDeletingPasskey(null);
       setDeletePassword("");
     } else {
-      addToast({
-        variant: "error",
-        title: "Delete failed",
-        description: errMsg,
-      });
+      addToast(PROFILE_TOAST.PASSKEY_FAILED(errMsg));
     }
   };
 

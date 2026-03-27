@@ -7,6 +7,7 @@ import { useTheme } from "@/hooks/useTheme";
 import AuthFooter from "@/components/auth/AuthFooter";
 import AuthGridLines from "@/components/auth/AuthGridLines";
 import GoBackSection from "@/components/auth/GoBackSection";
+import IconButton from "@/components/ui/IconButton";
 
 type AuthLayoutProps = {
   children: React.ReactNode;
@@ -68,17 +69,13 @@ export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
 
               {/* Figma: "Ligth / Dark" — flex-1, justify-end, p=10 */}
               <div className="flex flex-1 items-center justify-end p-2.5">
-                <button
-                  type="button"
-                  onClick={toggleTheme}
-                  className="text-content-primary/50 transition-colors hover:text-content-primary"
-                >
+                <IconButton onClick={toggleTheme} aria-label="Toggle theme">
                   {isDark ? (
                     <SunDim size={16} strokeWidth={2} />
                   ) : (
                     <Moon size={16} strokeWidth={2} />
                   )}
-                </button>
+                </IconButton>
               </div>
             </div>
 

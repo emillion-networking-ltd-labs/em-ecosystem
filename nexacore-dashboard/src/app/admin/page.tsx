@@ -10,6 +10,7 @@ import Pagination from "@/components/ui/Pagination";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import { apiClient } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
+import { ADMIN_TOAST } from "@/lib/toast-messages";
 import type {
   SafeUser,
   PaginatedResponse,
@@ -54,11 +55,7 @@ export default function AdminPage() {
         setUsers(res.data);
         setMeta(res.meta);
       } catch {
-        addToast({
-          variant: "error",
-          title: "Load users failed",
-          description: "Could not retrieve the user list.",
-        });
+        addToast(ADMIN_TOAST.LOAD_USERS_FAILED);
       } finally {
         setLoading(false);
       }

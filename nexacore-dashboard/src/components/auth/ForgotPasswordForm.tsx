@@ -3,10 +3,11 @@
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
 import Input from "@/components/ui/Input";
-import InfinitySpinner from "@/components/ui/InfinitySpinner";
+import Button from "@/components/ui/Button";
+import InlineError from "@/components/ui/InlineError";
 import RateLimitBanner from "@/components/ui/RateLimitBanner";
+import { AUTH_TOAST } from "@/lib/toast-messages";
 import { useAuth } from "@/hooks/useAuth";
 import { useRateLimit } from "@/hooks/useRateLimit";
 import { useToast } from "@/context/ToastContext";
@@ -38,11 +39,7 @@ export default function ForgotPasswordForm() {
     try {
       const success = await forgotPassword(email, turnstileToken ?? undefined);
       if (success) {
-        addToast({
-          variant: "success",
-          title: "Recovery email sent",
-          description: "Check your inbox for the password reset link.",
-        });
+        addToast(AUTH_TOAST.RECOVERY_SENT);
         router.push("/password-reset/check-email");
       }
     } catch (err) {
@@ -104,30 +101,22 @@ export default function ForgotPasswordForm() {
                 onExpired={clearRateLimit}
               />
             ) : (
-              <div
-                role="alert"
-                aria-live="polite"
-                className={`flex items-center gap-2 ${showError ? "min-h-6" : "h-6"}`}
-              >
-                {showError && (
-                  <>
-                    <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-caption leading-6 text-error">
-                      {activeError}
-                    </span>
-                  </>
-                )}
+              <div aria-live="polite" className={showError ? "min-h-6" : "h-6"}>
+                {showError && <InlineError message={activeError} />}
               </div>
             )}
 
             {/* Password Recovery Button — Figma: 348x21, always visible, right-aligned */}
             <div className="flex items-center justify-end">
-              <Link
+              <Button
+                as={Link}
                 href="/login"
-                className="whitespace-nowrap text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                variant="link-underline"
+                size="md"
+                fullWidth={false}
               >
                 Back to Sign In
-              </Link>
+              </Button>
             </div>
           </div>
 
@@ -139,20 +128,9 @@ export default function ForgotPasswordForm() {
           />
 
           {/* Recovery Button — Figma: 348x40, primary, single button */}
-          <button
-            type="submit"
-            disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-body font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
-          >
-            <span className={isLoading ? "opacity-30" : ""}>
-              Send Recovery Email
-            </span>
-            {isLoading && (
-              <span className="absolute inset-0 flex items-center justify-center">
-                <InfinitySpinner />
-              </span>
-            )}
-          </button>
+          <Button type="submit" disabled={isDisabled} loading={isLoading}>
+            Send Recovery Email
+          </Button>
         </form>
       </div>
     </div>

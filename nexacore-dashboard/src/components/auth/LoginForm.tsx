@@ -3,11 +3,14 @@
 import { useState, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, AlertTriangle, Key } from "lucide-react";
+import { Key } from "lucide-react";
+import EmailSelector from "@/components/ui/EmailSelector";
 import Input from "@/components/ui/Input";
 import Avatar from "@/components/ui/Avatar";
-import InfinitySpinner from "@/components/ui/InfinitySpinner";
+import Button from "@/components/ui/Button";
+import InlineError from "@/components/ui/InlineError";
 import RateLimitBanner from "@/components/ui/RateLimitBanner";
+import { AUTH_TOAST } from "@/lib/toast-messages";
 import OAuthButtons from "./OAuthButtons";
 import Divider from "@/components/ui/Divider";
 import MfaTotpStep from "./MfaTotpStep";
@@ -66,11 +69,7 @@ export default function LoginForm() {
     const oauthError = searchParams.get("oauth_error");
     if (oauthError && !oauthErrorShown.current) {
       oauthErrorShown.current = true;
-      addToast({
-        variant: "error",
-        title: "Sign in failed",
-        description: decodeURIComponent(oauthError),
-      });
+      addToast(AUTH_TOAST.LOGIN_FAILED(decodeURIComponent(oauthError)));
     }
   }, [clearError, searchParams, addToast]);
 
@@ -141,12 +140,11 @@ export default function LoginForm() {
     } catch (err) {
       if (err instanceof RateLimitError) {
         setRateLimit(err.retryAfter, err.message, "throttle");
-        addToast({
-          variant: "warning",
-          title: "Too many attempts",
-          description:
+        addToast(
+          AUTH_TOAST.TOO_MANY_ATTEMPTS(
             "If you are a registered user, please check your email for further instructions.",
-        });
+          ),
+        );
       }
     } finally {
       setTurnstileToken(null);
@@ -229,21 +227,10 @@ export default function LoginForm() {
               const activeError = emailError;
               return (
                 <div
-                  role="alert"
                   aria-live="polite"
-                  className={`flex items-center gap-2 ${activeError ? "min-h-6" : "h-6"}`}
+                  className={activeError ? "min-h-6" : "h-6"}
                 >
-                  {activeError && (
-                    <>
-                      <AlertTriangle
-                        size={16}
-                        className="shrink-0 text-error"
-                      />
-                      <span className="flex-1 text-caption leading-6 text-error">
-                        {activeError}
-                      </span>
-                    </>
-                  )}
+                  {activeError && <InlineError message={activeError} />}
                 </div>
               );
             })()}
@@ -251,18 +238,17 @@ export default function LoginForm() {
 
           {/* Buttons Field — Figma: horizontal, itemSpacing 8 */}
           <div className="flex gap-2">
-            <Link
+            <Button
+              as={Link}
               href="/register"
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              variant="outline"
+              className="flex-1"
             >
               Create Account
-            </Link>
-            <button
-              type="submit"
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-body font-normal text-content-inverse transition-opacity hover:opacity-90"
-            >
+            </Button>
+            <Button type="submit" className="flex-1">
               Next
-            </button>
+            </Button>
           </div>
         </form>
 
@@ -270,31 +256,19 @@ export default function LoginForm() {
         {passkeySupported && (
           <div>
             <Divider label="OR" className="py-2" />
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={handlePasskeyLogin}
               disabled={passkeyLoading}
+              loading={passkeyLoading}
               aria-label="Sign in with passkey"
-              className="relative flex h-10 w-full items-center justify-center gap-2 rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50"
             >
-              <Key
-                size={16}
-                className={`text-content-primary/50 ${passkeyLoading ? "opacity-30" : ""}`}
-              />
-              <span className={passkeyLoading ? "opacity-30" : ""}>
-                Sign in with passkey
-              </span>
-              {passkeyLoading && (
-                <span className="absolute inset-0 flex items-center justify-center">
-                  <InfinitySpinner />
-                </span>
-              )}
-            </button>
+              <Key size={16} className="text-content-primary/50" />
+              Sign in with passkey
+            </Button>
             {passkeyError && (
-              <div role="alert" className="mt-2 flex items-center gap-2">
-                <AlertTriangle size={14} className="shrink-0 text-error" />
-                <span className="text-caption text-error">{passkeyError}</span>
-              </div>
+              <InlineError message={passkeyError} className="mt-2" />
             )}
           </div>
         )}
@@ -377,49 +351,7 @@ function PasswordStep({
             Sign In
           </h1>
 
-          {/* Select Email Button — Figma: cornerRadius 100 (pill), px-16, text-body, Bordered variant */}
-          <div ref={dropdownRef} className="relative self-start">
-            <button
-              type="button"
-              onClick={() => setIsEmailOpen(!isEmailOpen)}
-              className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap transition-colors ${
-                isEmailOpen
-                  ? "border border-border-strong bg-surface-subtle text-content-primary"
-                  : "border border-border-strong bg-transparent text-content-primary hover:bg-surface-subtle"
-              }`}
-            >
-              <span className="whitespace-nowrap leading-none">{email}</span>
-              <ChevronDown
-                size={16}
-                className={`shrink-0 transition-transform ${isEmailOpen ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            {/* Email Dropdown — same visual pattern as LanguageSelector */}
-            {isEmailOpen && (
-              <div className="absolute left-0 top-full z-50 mt-1 w-[300px]">
-                <div className="rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card">
-                  <button
-                    type="button"
-                    onClick={() => setIsEmailOpen(false)}
-                    className="flex h-10 w-full items-center gap-2 rounded-md bg-surface-subtle px-2 text-body font-normal text-content-primary transition-colors"
-                  >
-                    <Avatar size="sm" name={emailInitial} />
-                    <span className="truncate text-body">{email}</span>
-                  </button>
-
-                  {/* Change email — Link/Simple pattern (75% → 100%, hover:underline) */}
-                  <button
-                    type="button"
-                    onClick={onChangeEmail}
-                    className="mt-4 w-full px-2 text-left text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline"
-                  >
-                    Try a different email address
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+          <EmailSelector email={email} onChangeEmail={onChangeEmail} />
         </div>
       </div>
 
@@ -448,30 +380,22 @@ function PasswordStep({
                 onExpired={onRateLimitExpired}
               />
             ) : (
-              <div
-                role="alert"
-                aria-live="polite"
-                className={`flex items-center gap-2 ${showError ? "min-h-6" : "h-6"}`}
-              >
-                {showError && (
-                  <>
-                    <AlertTriangle size={16} className="shrink-0 text-error" />
-                    <span className="flex-1 text-caption leading-6 text-error">
-                      {activeError}
-                    </span>
-                  </>
-                )}
+              <div aria-live="polite" className={showError ? "min-h-6" : "h-6"}>
+                {showError && <InlineError message={activeError} />}
               </div>
             )}
 
             {/* Password Recovery Button — Figma: 348x21, always visible, right-aligned */}
             <div className="flex items-center justify-end">
-              <Link
+              <Button
+                as={Link}
                 href={`/forgot-password?email=${encodeURIComponent(email)}`}
-                className="whitespace-nowrap text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted"
+                variant="link-underline"
+                size="md"
+                fullWidth={false}
               >
                 Forgot password?
-              </Link>
+              </Button>
             </div>
           </div>
 
@@ -483,18 +407,9 @@ function PasswordStep({
           />
 
           {/* Sign In button — Figma: full width 348px, primary button */}
-          <button
-            type="submit"
-            disabled={isDisabled}
-            className="relative flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-body font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
-          >
-            <span className={isLoading ? "opacity-30" : ""}>Sign In</span>
-            {isLoading && (
-              <span className="absolute inset-0 flex items-center justify-center">
-                <InfinitySpinner />
-              </span>
-            )}
-          </button>
+          <Button type="submit" disabled={isDisabled} loading={isLoading}>
+            Sign In
+          </Button>
         </form>
       </div>
     </div>

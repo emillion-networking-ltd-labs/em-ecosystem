@@ -2,9 +2,13 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { AlertTriangle, CircleX, Copy, Check } from "lucide-react";
+import { CircleX, Copy, Check } from "lucide-react";
 import InfinitySpinner from "@/components/ui/InfinitySpinner";
 import AuthLayout from "@/components/layout/AuthLayout";
+import Button from "@/components/ui/Button";
+import InlineError from "@/components/ui/InlineError";
+import IconButton from "@/components/ui/IconButton";
+import MfaDigitInput from "@/components/ui/MfaDigitInput";
 import { useAuth } from "@/hooks/useAuth";
 
 type SetupPhase = "loading" | "error" | "qr" | "recovery" | "verify";
@@ -138,15 +142,15 @@ export default function MfaSetupStep() {
               An unexpected error occurred. Please try again.
             </p>
 
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => {
                 window.location.href = "/login";
               }}
-              className="flex h-10 w-full items-center justify-center rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
             >
               Go to Sign In
-            </button>
+            </Button>
           </div>
         </AuthLayout>
       </div>,
@@ -172,10 +176,10 @@ export default function MfaSetupStep() {
 
         <div className="flex w-full flex-col gap-4 md:w-[348px]">
           {error && (
-            <div className="flex items-center gap-2 rounded-lg border border-error/20 bg-error/5 px-3 py-2">
-              <AlertTriangle size={16} className="shrink-0 text-error" />
-              <span className="text-caption text-error">{error}</span>
-            </div>
+            <InlineError
+              message={error}
+              className="rounded-lg border border-error/20 bg-error/5 px-3 py-2"
+            />
           )}
 
           {qrCodeDataUrl && (
@@ -197,36 +201,32 @@ export default function MfaSetupStep() {
               <code className="flex-1 break-all font-mono text-body leading-6 text-content-primary">
                 {secret}
               </code>
-              <button
-                type="button"
-                onClick={copySecret}
-                className="shrink-0 text-content-primary/50 transition-colors hover:text-content-primary"
-                aria-label="Copy secret key"
-              >
+              <IconButton onClick={copySecret} aria-label="Copy secret key">
                 {copiedSecret ? (
                   <Check size={14} className="text-green-600" />
                 ) : (
                   <Copy size={14} />
                 )}
-              </button>
+              </IconButton>
             </div>
           </div>
 
           <div className="flex gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={cancelMfa}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex-1"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setPhase("recovery")}
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-body font-normal text-content-inverse transition-opacity hover:opacity-90"
+              className="flex-1"
             >
               Next
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -263,10 +263,12 @@ export default function MfaSetupStep() {
             </div>
           </div>
 
-          <button
+          <Button
             type="button"
+            variant="outline"
             onClick={copyRecoveryCodes}
-            className="flex items-center justify-center gap-2 rounded-lg border border-border-strong px-4 py-2 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+            fullWidth={false}
+            className="mx-auto"
           >
             {copied ? (
               <>
@@ -277,26 +279,27 @@ export default function MfaSetupStep() {
                 <Copy size={16} /> Copy all codes
               </>
             )}
-          </button>
+          </Button>
 
           <div className="flex gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setPhase("qr")}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex-1"
             >
               Back
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => {
                 setPhase("verify");
                 setTimeout(() => inputRefs.current[0]?.focus(), 100);
               }}
-              className="flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-body font-normal text-content-inverse transition-opacity hover:opacity-90"
+              className="flex-1"
             >
               I saved them
-            </button>
+            </Button>
           </div>
         </div>
       </div>
@@ -327,67 +330,34 @@ export default function MfaSetupStep() {
               Verification Code
             </label>
 
-            <div
-              className="flex gap-2"
-              role="group"
-              aria-label="Verification code digits"
-              onPaste={handlePaste}
-            >
-              {code.map((digit, i) => (
-                <input
-                  key={i}
-                  id={i === 0 ? "setup-digit-0" : undefined}
-                  ref={(el) => {
-                    inputRefs.current[i] = el;
-                  }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) => handleDigitChange(i, e.target.value)}
-                  onKeyDown={(e) => handleKeyDown(i, e)}
-                  className="h-12 w-12 rounded-lg border border-border-strong bg-transparent text-center font-mono text-body text-content-primary outline outline-2 outline-offset-2 outline-transparent transition-colors focus:outline-content-primary/75"
-                  aria-label={`Digit ${i + 1}`}
-                />
-              ))}
-            </div>
+            <MfaDigitInput
+              value={code}
+              onChange={setCode}
+              idPrefix="setup-digit"
+            />
 
-            <div
-              role="alert"
-              aria-live="polite"
-              className={`flex items-center gap-2 ${error ? "min-h-6" : "h-6"}`}
-            >
-              {error && (
-                <>
-                  <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="flex-1 text-caption leading-6 text-error">
-                    {error}
-                  </span>
-                </>
-              )}
+            <div aria-live="polite" className={error ? "min-h-6" : "h-6"}>
+              {error && <InlineError message={error} />}
             </div>
           </div>
 
           <div className="flex gap-2">
-            <button
+            <Button
               type="button"
+              variant="outline"
               onClick={() => setPhase("recovery")}
-              className="flex h-10 flex-1 items-center justify-center whitespace-nowrap rounded-md border border-border-strong bg-transparent px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+              className="flex-1"
             >
               Back
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
               disabled={isLoading || code.join("").length !== 6}
-              className="relative flex h-10 flex-1 items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-6 py-2.5 text-body font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50"
+              loading={isLoading}
+              className="flex-1"
             >
-              <span className={isLoading ? "opacity-30" : ""}>Enable MFA</span>
-              {isLoading && (
-                <span className="absolute inset-0 flex items-center justify-center">
-                  <InfinitySpinner />
-                </span>
-              )}
-            </button>
+              Enable MFA
+            </Button>
           </div>
         </form>
       </div>

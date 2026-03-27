@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Monitor, Smartphone, Globe, Trash2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
+import { PROFILE_TOAST } from "@/lib/toast-messages";
 import type { SessionResponse } from "@/lib/types";
 import Button from "@/components/ui/Button";
 
@@ -81,11 +82,7 @@ export default function ActiveSessions() {
       await apiClient.delete(`/auth/sessions/${sessionId}`);
       setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     } catch {
-      addToast({
-        variant: "error",
-        title: "Revoke failed",
-        description: "Could not revoke the session.",
-      });
+      addToast(PROFILE_TOAST.SESSION_REVOKE_FAILED);
     } finally {
       setRevoking(null);
     }
@@ -97,11 +94,7 @@ export default function ActiveSessions() {
       await apiClient.post("/auth/logout-all", {});
       setSessions((prev) => prev.filter((s) => s.isCurrent));
     } catch {
-      addToast({
-        variant: "error",
-        title: "Revoke failed",
-        description: "Could not revoke other sessions.",
-      });
+      addToast(PROFILE_TOAST.SESSIONS_REVOKE_FAILED);
     } finally {
       setRevokingAll(false);
     }
