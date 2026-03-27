@@ -1,6 +1,7 @@
 "use client";
 
 import { designTokens } from "../../../tailwind.config";
+import { Inbox, AlertTriangle } from "lucide-react";
 
 /* ===== Token Data (from globals.css + tailwind.config.ts) ===== */
 
@@ -601,6 +602,48 @@ function ShadowSection() {
   );
 }
 
+function IconSizeSection() {
+  return (
+    <div>
+      <SectionTitle>Icon Sizes</SectionTitle>
+      <div className="flex flex-wrap items-end gap-8">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center justify-center w-16 h-16 rounded-xl border border-border-strong bg-surface-primary">
+            <AlertTriangle size={16} className="text-content-primary/50" />
+          </div>
+          <div className="text-center">
+            <p className="text-caption font-normal text-content-primary">
+              16px
+            </p>
+            <p className="text-caption text-content-primary/50">inline</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center justify-center w-16 h-16 rounded-xl border border-border-strong bg-surface-primary">
+            <Inbox size={48} className="text-content-primary/50" />
+          </div>
+          <div className="text-center">
+            <p className="text-caption font-normal text-content-primary">
+              48px
+            </p>
+            <p className="text-caption text-content-primary/50">page-level</p>
+          </div>
+        </div>
+      </div>
+      <div className="mt-4 flex flex-col gap-1">
+        <p className="text-caption text-content-primary/50">
+          <span className="font-semibold text-content-primary">16px</span> —
+          buttons, inputs, errors, navigation, toasts
+        </p>
+        <p className="text-caption text-content-primary/50">
+          <span className="font-semibold text-content-primary">48px</span> —
+          empty states, full page status (success/error), loading spinners
+        </p>
+      </div>
+    </div>
+  );
+}
+
 /* ===== Main Component ===== */
 
 export default function TokenInspector() {
@@ -620,6 +663,9 @@ export default function TokenInspector() {
       </div>
       <div className="card-flat">
         <ShadowSection />
+      </div>
+      <div className="card-flat">
+        <IconSizeSection />
       </div>
     </div>
   );
