@@ -19,9 +19,7 @@ import {
   ShoppingCart,
   Settings,
   ChevronDown,
-  ChevronRight,
   ArrowLeft,
-  Eye,
   AlertTriangle,
   CircleX,
   CircleCheck,
@@ -62,6 +60,8 @@ import Calendar, { calendarSpecs } from "@/components/ui/Calendar";
 import Pagination, { paginationSpecs } from "@/components/ui/Pagination";
 
 import InlineError, { inlineErrorSpecs } from "@/components/ui/InlineError";
+import FormField, { formFieldSpecs } from "@/components/ui/FormField";
+import EmptyState, { emptyStateSpecs } from "@/components/ui/EmptyState";
 import Breadcrumbs, { breadcrumbsSpecs } from "@/components/ui/Breadcrumbs";
 import MfaDigitInput, {
   mfaDigitInputSpecs,
@@ -80,9 +80,7 @@ import IconButton, {
 import SegmentedControl, {
   segmentedControlSpecs,
 } from "@/components/ui/SegmentedControl";
-import EmailSelector, {
-  emailSelectorSpecs,
-} from "@/components/ui/EmailSelector";
+import EmailSelector from "@/components/ui/EmailSelector";
 import LanguageSelector, {
   languageSelectorSpecs,
 } from "@/components/ui/LanguageSelector";
@@ -386,7 +384,7 @@ function ButtonShowcase() {
         );
       })}
 
-      {/* Icon Buttons */}
+      {/* Icon Buttons — uses <IconButton> component for propagation */}
       <p className="text-body font-semibold text-content-primary mb-2">
         Icon Buttons
       </p>
@@ -396,7 +394,7 @@ function ButtonShowcase() {
             key: "state",
             label: mode,
             align: "left",
-            width: "15%",
+            width: "100px",
             headerClassName: "font-mono font-normal lowercase",
             render: (row) => row.state,
           },
@@ -407,35 +405,34 @@ function ButtonShowcase() {
             render: (row) => (
               <div className="flex justify-center">
                 {row.hover ? (
-                  <span className="text-content-primary">
+                  <IconButton className="pointer-events-none hover:bg-surface-tertiary text-content-primary">
                     <Copy size={16} />
-                  </span>
+                  </IconButton>
                 ) : (
-                  <button
-                    className={`${iconBtnBase} ${iconBtnVariants.default}`}
-                  >
+                  <IconButton variant="default" aria-label="Default">
                     <Copy size={16} />
-                  </button>
+                  </IconButton>
                 )}
               </div>
             ),
           },
           {
-            key: "input",
-            label: "INPUT",
+            key: "danger",
+            label: "DANGER",
             align: "center",
             render: (row) => (
               <div className="flex justify-center">
                 {row.hover ? (
-                  <span className="text-content-primary/75">
-                    <Eye size={16} />
-                  </span>
-                ) : (
-                  <button
-                    className={`${iconBtnBase} text-content-secondary hover:text-content-primary/75`}
+                  <IconButton
+                    variant="danger"
+                    className="pointer-events-none bg-error-bg"
                   >
-                    <Eye size={16} />
-                  </button>
+                    <Trash2 size={16} />
+                  </IconButton>
+                ) : (
+                  <IconButton variant="danger" aria-label="Danger">
+                    <Trash2 size={16} />
+                  </IconButton>
                 )}
               </div>
             ),
@@ -447,13 +444,13 @@ function ButtonShowcase() {
             render: (row) => (
               <div className="flex justify-center">
                 {row.hover ? (
-                  <div className={iconBtnVariants.boxed}>
-                    <ChevronRight size={16} className="text-content-primary" />
-                  </div>
+                  <IconButton variant="boxed" className="pointer-events-none">
+                    <Settings size={16} />
+                  </IconButton>
                 ) : (
-                  <button className={`${iconBtnBase} ${iconBtnVariants.boxed}`}>
-                    <ChevronRight size={16} className="text-content-primary" />
-                  </button>
+                  <IconButton variant="boxed" aria-label="Boxed">
+                    <Settings size={16} />
+                  </IconButton>
                 )}
               </div>
             ),
@@ -1340,6 +1337,12 @@ function NavHorizontalColumn() {
 }
 
 function TabsShowcase() {
+  const [segPrimary, setSegPrimary] = useState("a");
+  const [segSecondary, setSegSecondary] = useState("a");
+  const [segOutline, setSegOutline] = useState("a");
+  const [segSm, setSegSm] = useState("a");
+  const [segMd, setSegMd] = useState("a");
+  const [segLg, setSegLg] = useState("a");
   return (
     <ShowcaseSection title="Tabs">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1350,6 +1353,123 @@ function TabsShowcase() {
         <NavHorizontalColumn />
       </div>
 
+      {/* Segmented Control — binary selector variant */}
+      <p className="text-body font-semibold text-content-primary mb-2">
+        Segmented Control
+      </p>
+      <div className="flex flex-wrap gap-4">
+        {(["light", "dark"] as const).map((mode) => (
+          <div
+            key={`seg-${mode}`}
+            className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+          >
+            <p className="text-caption text-content-primary/50 font-mono mb-3">
+              {mode}
+            </p>
+            <div className="flex flex-col gap-4">
+              <div>
+                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                  variants
+                </p>
+                <div className="flex flex-wrap items-end gap-3">
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-caption text-content-primary/50">
+                      primary
+                    </span>
+                    <SegmentedControl
+                      value={segPrimary}
+                      onChange={setSegPrimary}
+                      options={[
+                        { value: "a", label: "Option A" },
+                        { value: "b", label: "Option B" },
+                      ]}
+                      variant="primary"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-caption text-content-primary/50">
+                      secondary
+                    </span>
+                    <SegmentedControl
+                      value={segSecondary}
+                      onChange={setSegSecondary}
+                      options={[
+                        { value: "a", label: "Option A" },
+                        { value: "b", label: "Option B" },
+                      ]}
+                      variant="secondary"
+                    />
+                  </div>
+                  <div className="flex flex-col gap-1.5">
+                    <span className="text-caption text-content-primary/50">
+                      outline
+                    </span>
+                    <SegmentedControl
+                      value={segOutline}
+                      onChange={setSegOutline}
+                      options={[
+                        { value: "a", label: "Option A" },
+                        { value: "b", label: "Option B" },
+                      ]}
+                      variant="outline"
+                    />
+                  </div>
+                </div>
+              </div>
+              <div>
+                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                  sizes
+                </p>
+                <div className="flex flex-col items-start gap-2">
+                  <div className="flex items-center gap-3">
+                    <SegmentedControl
+                      value={segSm}
+                      onChange={setSegSm}
+                      options={[
+                        { value: "a", label: "Option A" },
+                        { value: "b", label: "Option B" },
+                      ]}
+                      size="sm"
+                    />
+                    <span className="text-caption text-content-primary/50">
+                      sm · 32px
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <SegmentedControl
+                      value={segMd}
+                      onChange={setSegMd}
+                      options={[
+                        { value: "a", label: "Option A" },
+                        { value: "b", label: "Option B" },
+                      ]}
+                      size="md"
+                    />
+                    <span className="text-caption text-content-primary/50">
+                      md · 40px
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <SegmentedControl
+                      value={segLg}
+                      onChange={setSegLg}
+                      options={[
+                        { value: "a", label: "Option A" },
+                        { value: "b", label: "Option B" },
+                      ]}
+                      size="lg"
+                    />
+                    <span className="text-caption text-content-primary/50">
+                      lg · 48px
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       <SpecsPanel
         specs={{
           Variants: tabsSpecs.variants,
@@ -1357,6 +1477,8 @@ function TabsShowcase() {
           Nav: tabsSpecs.nav,
           Sizes: tabsSpecs.sizes,
           Overflow: tabsSpecs.overflow,
+          "Segmented Variants": segmentedControlSpecs.variants,
+          "Segmented Sizes": segmentedControlSpecs.sizes,
         }}
       />
     </ShowcaseSection>
@@ -2158,154 +2280,6 @@ function QrCodeCardShowcase() {
   );
 }
 
-function IconButtonShowcase() {
-  return (
-    <ShowcaseSection title="IconButton">
-      <div className="flex flex-wrap gap-4">
-        <div className="card-flat !p-4 flex-1 min-w-[280px] light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
-            light
-          </p>
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-center gap-1.5">
-              <IconButton variant="default" aria-label="Default">
-                <Copy size={16} />
-              </IconButton>
-              <span className="text-caption text-content-primary/50">
-                default
-              </span>
-            </div>
-            <div className="flex flex-col items-center gap-1.5">
-              <IconButton variant="danger" aria-label="Danger">
-                <Trash2 size={16} />
-              </IconButton>
-              <span className="text-caption text-content-primary/50">
-                danger
-              </span>
-            </div>
-            <div className="flex flex-col items-center gap-1.5">
-              <IconButton variant="boxed" aria-label="Boxed">
-                <Settings size={16} />
-              </IconButton>
-              <span className="text-caption text-content-primary/50">
-                boxed
-              </span>
-            </div>
-          </div>
-        </div>
-        <div className="card-flat !p-4 flex-1 min-w-[280px] dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
-            dark
-          </p>
-          <div className="flex items-center gap-4">
-            <div className="flex flex-col items-center gap-1.5">
-              <IconButton variant="default" aria-label="Default">
-                <Copy size={16} />
-              </IconButton>
-              <span className="text-caption text-content-primary/50">
-                default
-              </span>
-            </div>
-            <div className="flex flex-col items-center gap-1.5">
-              <IconButton variant="danger" aria-label="Danger">
-                <Trash2 size={16} />
-              </IconButton>
-              <span className="text-caption text-content-primary/50">
-                danger
-              </span>
-            </div>
-            <div className="flex flex-col items-center gap-1.5">
-              <IconButton variant="boxed" aria-label="Boxed">
-                <Settings size={16} />
-              </IconButton>
-              <span className="text-caption text-content-primary/50">
-                boxed
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <SpecsPanel
-        specs={{
-          Variants: iconBtnVariants,
-          Sizes: iconBtnSizes,
-          Base: { shared: iconBtnBase },
-        }}
-      />
-    </ShowcaseSection>
-  );
-}
-
-function SegmentedControlShowcase() {
-  const [val, setVal] = useState("light");
-  return (
-    <ShowcaseSection title="SegmentedControl">
-      <div className="flex flex-wrap gap-4">
-        <div className="card-flat !p-4 flex-1 min-w-[280px] light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
-            light
-          </p>
-          <SegmentedControl
-            value={val}
-            onChange={setVal}
-            options={[
-              { value: "light", label: "Light" },
-              { value: "dark", label: "Dark" },
-            ]}
-          />
-        </div>
-        <div className="card-flat !p-4 flex-1 min-w-[280px] dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
-            dark
-          </p>
-          <SegmentedControl
-            value="dark"
-            onChange={() => {}}
-            options={[
-              { value: "light", label: "Light" },
-              { value: "dark", label: "Dark" },
-            ]}
-          />
-        </div>
-      </div>
-      <SpecsPanel
-        specs={{
-          Container: { shared: segmentedControlSpecs.container },
-          Option: segmentedControlSpecs.option,
-        }}
-      />
-    </ShowcaseSection>
-  );
-}
-
-function EmailSelectorShowcase() {
-  return (
-    <ShowcaseSection title="EmailSelector">
-      <div className="flex flex-wrap gap-4">
-        <div className="card-flat !p-4 flex-1 min-w-[280px] light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
-            light
-          </p>
-          <EmailSelector email="user@example.com" onChangeEmail={() => {}} />
-        </div>
-        <div className="card-flat !p-4 flex-1 min-w-[280px] dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
-            dark
-          </p>
-          <EmailSelector email="user@example.com" onChangeEmail={() => {}} />
-        </div>
-      </div>
-      <SpecsPanel
-        specs={{
-          Trigger: { shared: emailSelectorSpecs.trigger },
-          Dropdown: { shared: emailSelectorSpecs.dropdown },
-          Option: { shared: emailSelectorSpecs.option },
-        }}
-      />
-    </ShowcaseSection>
-  );
-}
-
 function AccordionShowcase() {
   return (
     <ShowcaseSection title="Accordion">
@@ -2733,9 +2707,8 @@ export function AtomShowcase() {
       <TooltipShowcase />
       <DividerShowcase />
       <SliderShowcase />
-      <IconButtonShowcase />
-      <SegmentedControlShowcase />
-      <EmailSelectorShowcase />
+      <FormFieldShowcase />
+      <EmptyStateShowcase />
       <AccordionShowcase />
       <CardShowcase />
     </div>
@@ -2940,7 +2913,226 @@ export function MoleculeShowcase() {
       <FeedbackShowcase />
       <ChartsShowcase />
       <CalendarShowcase />
+      <SidebarShowcase />
     </div>
+  );
+}
+
+/* ===== New Showcase Sections ===== */
+
+function FormFieldShowcase() {
+  return (
+    <ShowcaseSection title="FormField">
+      <div className="flex flex-wrap gap-4">
+        {(["light", "dark"] as const).map((mode) => (
+          <div
+            key={mode}
+            className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+          >
+            <p className="text-caption text-content-primary/50 font-mono mb-3">
+              {mode}
+            </p>
+            <div className="flex flex-col gap-4">
+              <FormField label="With Input" htmlFor="demo-input">
+                <Input id="demo-input" placeholder="Type here..." />
+              </FormField>
+              <FormField label="With EmailSelector">
+                <EmailSelector
+                  email="user@example.com"
+                  onChangeEmail={() => {}}
+                />
+              </FormField>
+              <FormField
+                label="Required field"
+                htmlFor="demo-required"
+                required
+              >
+                <Input id="demo-required" placeholder="Required..." />
+              </FormField>
+              <FormField
+                label="With error"
+                htmlFor="demo-error"
+                error="This field is required"
+              >
+                <Input id="demo-error" placeholder="..." hasError />
+              </FormField>
+            </div>
+          </div>
+        ))}
+      </div>
+      <SpecsPanel specs={{ FormField: formFieldSpecs }} />
+    </ShowcaseSection>
+  );
+}
+
+function EmptyStateShowcase() {
+  return (
+    <ShowcaseSection title="EmptyState">
+      <div className="flex flex-wrap gap-4">
+        {(["light", "dark"] as const).map((mode) => (
+          <div
+            key={mode}
+            className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+          >
+            <p className="text-caption text-content-primary/50 font-mono mb-3">
+              {mode}
+            </p>
+            <div className="flex flex-col gap-6">
+              <div>
+                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                  default
+                </p>
+                <div className="rounded-lg border border-border-strong">
+                  <EmptyState
+                    title="No users found"
+                    description="Try adjusting your search or filters."
+                  />
+                </div>
+              </div>
+              <div>
+                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                  with action
+                </p>
+                <div className="rounded-lg border border-border-strong">
+                  <EmptyState
+                    title="No projects yet"
+                    description="Create your first project to get started."
+                    action={
+                      <Button variant="primary" size="sm" fullWidth={false}>
+                        Create project
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
+              <div>
+                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                  custom icon
+                </p>
+                <div className="rounded-lg border border-border-strong">
+                  <EmptyState
+                    icon={<Search size={48} />}
+                    title="No results"
+                    description="No items match your search query."
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <SpecsPanel specs={{ EmptyState: emptyStateSpecs }} />
+    </ShowcaseSection>
+  );
+}
+
+function SidebarShowcase() {
+  return (
+    <ShowcaseSection title="Sidebar">
+      <div className="flex flex-wrap gap-4">
+        {(["light", "dark"] as const).map((mode) => (
+          <div
+            key={mode}
+            className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+          >
+            <p className="text-caption text-content-primary/50 font-mono mb-3">
+              {mode}
+            </p>
+            <div className="flex gap-4">
+              {/* Collapsed */}
+              <div>
+                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                  collapsed (68px)
+                </p>
+                <div className="w-[68px] rounded-xl border border-border-strong bg-surface-secondary p-2 flex flex-col gap-3">
+                  <div className="flex h-10 w-full items-center justify-center">
+                    <div className="h-6 w-10 rounded bg-content-primary/10" />
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    {[1, 2, 3, 4].map((i) => (
+                      <div
+                        key={i}
+                        className={`flex h-9 items-center justify-center rounded-md ${i === 1 ? "bg-surface-subtle" : ""}`}
+                      >
+                        <div className="h-5 w-5 rounded bg-content-primary/20" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+              {/* Expanded */}
+              <div className="flex-1">
+                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                  expanded (212px)
+                </p>
+                <div className="w-[212px] rounded-xl border border-border-strong bg-surface-secondary p-2 flex flex-col gap-3">
+                  <div className="flex h-10 items-center gap-2 px-2">
+                    <div className="h-6 w-10 rounded bg-content-primary/10" />
+                    <span className="text-caption font-semibold text-content-primary">
+                      NexaCore
+                    </span>
+                  </div>
+                  <p className="px-2 text-caption text-content-primary/50">
+                    Dashboards
+                  </p>
+                  <div className="flex flex-col gap-1">
+                    {["Dashboard", "Profile", "Admin", "Design System"].map(
+                      (label, i) => (
+                        <div
+                          key={label}
+                          className={`flex h-9 items-center gap-2 rounded-md px-2 ${i === 0 ? "bg-surface-subtle" : ""}`}
+                        >
+                          <div className="h-5 w-5 shrink-0 rounded bg-content-primary/20" />
+                          <span className="text-body text-content-primary">
+                            {label}
+                          </span>
+                        </div>
+                      ),
+                    )}
+                  </div>
+                  <p className="px-2 text-caption text-content-primary/50">
+                    Account
+                  </p>
+                  <div className="flex flex-col gap-1">
+                    {["Settings", "Documentation"].map((label) => (
+                      <div
+                        key={label}
+                        className="flex h-9 items-center gap-2 rounded-md px-2"
+                      >
+                        <div className="h-5 w-5 shrink-0 rounded bg-content-primary/20" />
+                        <span className="text-body text-content-primary">
+                          {label}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      <SpecsPanel
+        specs={{
+          Widths: {
+            collapsed: "68px",
+            expanded: "212px",
+            mobile: "212px slide-in",
+          },
+          NavItem: {
+            layout: "h-9 rounded-md px-2, icon 20px shrink-0 + label text-body",
+            active: "bg-surface-subtle text-content-primary",
+            inactive:
+              "text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary",
+          },
+          Sections: {
+            header:
+              "text-caption text-content-primary/50 (Dashboards, Account)",
+            transition: "width 200ms ease, mobile: translate-x with 300ms",
+          },
+        }}
+      />
+    </ShowcaseSection>
   );
 }
 

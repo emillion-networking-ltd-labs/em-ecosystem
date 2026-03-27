@@ -11,7 +11,7 @@ export const variantClasses: Record<string, string> = {
   default: "text-content-primary/50 hover:text-content-primary",
   "inside input":
     "text-content-secondary hover:text-content-primary/75 hover:bg-surface-tertiary",
-  danger: "text-content-primary/50 hover:text-error hover:bg-error/10",
+  danger: "text-error hover:bg-error-bg",
   boxed: "bg-surface-tertiary hover:bg-surface-tertiary text-content-primary",
 };
 

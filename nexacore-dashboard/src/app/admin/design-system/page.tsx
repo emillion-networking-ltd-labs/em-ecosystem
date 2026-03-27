@@ -38,9 +38,6 @@ const componentToSection: Record<string, { tab: string; section: string }> = {
   CopyField: { tab: "atoms", section: "showcase-copyfield" },
   "Digit Input": { tab: "atoms", section: "showcase-digit-input" },
   "QR Code Card": { tab: "atoms", section: "showcase-qr-code-card" },
-  IconButton: { tab: "atoms", section: "showcase-iconbutton" },
-  SegmentedControl: { tab: "atoms", section: "showcase-segmentedcontrol" },
-  EmailSelector: { tab: "atoms", section: "showcase-emailselector" },
   Accordion: { tab: "atoms", section: "showcase-accordion" },
   Card: { tab: "atoms", section: "showcase-card" },
   Tabs: { tab: "molecules", section: "showcase-tabs" },
@@ -60,6 +57,9 @@ const componentToSection: Record<string, { tab: string; section: string }> = {
     tab: "atoms",
     section: "showcase-recovery-codes-grid",
   },
+  FormField: { tab: "atoms", section: "showcase-formfield" },
+  EmptyState: { tab: "atoms", section: "showcase-emptystate" },
+  Sidebar: { tab: "molecules", section: "showcase-sidebar" },
 };
 
 const viewTabs = [

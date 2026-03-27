@@ -17,8 +17,8 @@ interface SliderProps {
 export const sliderSpecs = {
   track: {
     background:
-      "bg-surface-primary border border-border-strong — 5px height, rounded-full",
-    fill: "bg-surface-inverse border border-border-strong — dynamic width via percentage",
+      "bg-surface-primary border-2 border-border-strong — 8px height, rounded-full",
+    fill: "bg-surface-inverse border-2 border-border-strong — dynamic width via percentage",
   },
   thumb: {
     size: "16×16px rounded-full",
@@ -72,11 +72,11 @@ export default function Slider({
       )}
       <div className="relative flex items-center h-[16px]">
         {/* Track background */}
-        <div className="absolute w-full h-[5px] rounded-full bg-surface-primary border border-border-strong" />
+        <div className="absolute w-full h-[8px] rounded-full bg-surface-primary border-2 border-border-strong" />
 
         {/* Progress fill */}
         <div
-          className="absolute h-[5px] rounded-full bg-surface-inverse border border-border-strong"
+          className="absolute h-[8px] rounded-full bg-surface-inverse border-2 border-border-strong"
           style={{ width: `${percentage}%` }}
         />
 

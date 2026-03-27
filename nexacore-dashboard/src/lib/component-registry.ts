@@ -99,22 +99,17 @@ export const componentRegistry: ComponentEntry[] = [
     files: ["QrCodeCard.tsx", "CopyField.tsx"],
   },
   {
-    name: "IconButton",
+    name: "FormField",
     category: "atom",
-    description: "Icon-only button — default, danger, boxed variants",
-    files: ["IconButton.tsx"],
+    description: "Label + any control + error — consistent form field wrapper",
+    files: ["FormField.tsx"],
   },
   {
-    name: "SegmentedControl",
+    name: "EmptyState",
     category: "atom",
-    description: "Multi-option selector — theme picker, view toggle",
-    files: ["SegmentedControl.tsx"],
-  },
-  {
-    name: "EmailSelector",
-    category: "atom",
-    description: "Email dropdown with avatar and change link",
-    files: ["EmailSelector.tsx"],
+    description:
+      "Icon + title + description + action — tables, lists, search results",
+    files: ["EmptyState.tsx"],
   },
   {
     name: "Card",
@@ -188,6 +183,13 @@ export const componentRegistry: ComponentEntry[] = [
     category: "atom",
     description: "2×5 grid of monospace recovery codes",
     files: ["RecoveryCodesGrid.tsx"],
+  },
+  {
+    name: "Sidebar",
+    category: "molecule",
+    description:
+      "Collapsible navigation — 68px collapsed, 212px expanded, mobile slide-in",
+    files: ["Sidebar.tsx"],
   },
 ];
 
