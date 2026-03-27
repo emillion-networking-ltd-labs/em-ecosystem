@@ -41,7 +41,7 @@ export default function AdminPage() {
   const [modalLoading, setModalLoading] = useState(false);
 
   const fetchUsers = useCallback(
-    async (page: number) => {
+    async (page: number, signal?: AbortSignal) => {
       setLoading(true);
       try {
         const params = new URLSearchParams({
@@ -51,20 +51,25 @@ export default function AdminPage() {
         if (search) params.set("search", search);
         const res = await apiClient.get<PaginatedResponse<SafeUser>>(
           `/users?${params}`,
+          { signal },
         );
+        if (signal?.aborted) return;
         setUsers(res.data);
         setMeta(res.meta);
       } catch {
+        if (signal?.aborted) return;
         addToast(ADMIN_TOAST.LOAD_USERS_FAILED);
       } finally {
-        setLoading(false);
+        if (!signal?.aborted) setLoading(false);
       }
     },
     [search, addToast],
   );
 
   useEffect(() => {
-    fetchUsers(1);
+    const controller = new AbortController();
+    fetchUsers(1, controller.signal);
+    return () => controller.abort();
   }, [fetchUsers]);
 
   const handleChangeRole = (user: SafeUser) => {
