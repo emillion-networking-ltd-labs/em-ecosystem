@@ -140,11 +140,12 @@ describe('GoogleStrategy', () => {
 
       expect(oauthStateStore.validate).toHaveBeenCalledWith('valid-state');
       expect(authService.validateOAuthUser).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           email: 'google@example.com',
           provider: Provider.GOOGLE,
           providerId: 'google-id-123',
-        },
+          emailVerified: true,
+        }),
         expect.objectContaining({ ipAddress: '127.0.0.1' }),
         expect.objectContaining({ ipAddress: '127.0.0.1' }),
       );

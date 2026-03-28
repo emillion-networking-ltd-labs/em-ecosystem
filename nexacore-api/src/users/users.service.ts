@@ -194,6 +194,36 @@ export class UsersService {
     if (existingUser) {
       // Auto-link: only if the account has a verified email (prevents pre-account takeover)
       if (!existingUser.emailVerified) {
+        if (profile.emailVerified) {
+          // OAuth provider confirms email ownership → auto-verify + anti pre-hijack
+          const [user] = await this.prisma.$transaction([
+            this.prisma.user.update({
+              where: { id: existingUser.id },
+              data: {
+                emailVerified: true,
+                passwordHash: null, // Invalidate attacker's password (OWASP pre-hijack mitigation)
+                ...profileData,
+              },
+              include: { oauthAccounts: { select: { provider: true } } },
+            }),
+            this.prisma.oAuthAccount.create({
+              data: {
+                userId: existingUser.id,
+                provider: profile.provider,
+                providerId: profile.providerId,
+                email: profile.email,
+              },
+            }),
+          ]);
+          this.auditService
+            .log({
+              action: AuditAction.OAUTH_AUTO_VERIFIED,
+              userId: existingUser.id,
+              metadata: { provider: profile.provider },
+            })
+            .catch(() => {});
+          return { user: user as User, action: 'linked' };
+        }
         throw new ConflictException(
           'An account with this email already exists but is not verified. Please verify your email first.',
         );
