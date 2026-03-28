@@ -140,11 +140,12 @@ describe('GitHubStrategy', () => {
 
       expect(oauthStateStore.validate).toHaveBeenCalledWith('valid-state');
       expect(authService.validateOAuthUser).toHaveBeenCalledWith(
-        {
+        expect.objectContaining({
           email: 'github@example.com',
           provider: Provider.GITHUB,
           providerId: 'github-id-456',
-        },
+          emailVerified: false,
+        }),
         expect.objectContaining({ ipAddress: '127.0.0.1' }),
         expect.objectContaining({ ipAddress: '127.0.0.1' }),
       );
