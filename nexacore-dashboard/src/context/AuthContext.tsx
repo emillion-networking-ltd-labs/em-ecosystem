@@ -313,7 +313,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           title: "Sign in failed",
           description: message,
         });
-        dispatch({ type: "AUTH_STOP" });
+        dispatch({ type: "AUTH_ERROR", payload: message });
       }
     },
     [addToast],
