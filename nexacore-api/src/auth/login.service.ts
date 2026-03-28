@@ -210,9 +210,6 @@ export class LoginService {
         user.id,
         { reason: 'email_not_verified' },
       );
-      this.emailVerificationService
-        .createAndSendVerificationEmail(user)
-        .catch(() => {});
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
     }
   }
