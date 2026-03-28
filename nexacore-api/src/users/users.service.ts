@@ -163,16 +163,24 @@ export class UsersService {
         });
         // Fall through to email lookup / new user creation below
       } else {
+        // Auto-verify if OAuth account exists but email is still unverified
+        const needsVerify =
+          !existingUser.emailVerified && profile.emailVerified;
+
         // Update profile fields if they were empty and OAuth provides them
-        const needsUpdate =
+        const needsProfileUpdate =
           (!existingUser.firstName && profileData.firstName) ||
           (!existingUser.lastName && profileData.lastName) ||
           (!existingUser.avatarUrl && profileData.avatarUrl);
 
-        if (needsUpdate) {
+        if (needsVerify || needsProfileUpdate) {
           const user = (await this.prisma.user.update({
             where: { id: existingUser.id },
             data: {
+              ...(needsVerify && {
+                emailVerified: true,
+                passwordHash: null,
+              }),
               ...(!existingUser.firstName &&
                 profileData.firstName && { firstName: profileData.firstName }),
               ...(!existingUser.lastName &&
@@ -182,6 +190,15 @@ export class UsersService {
             },
             include: { oauthAccounts: { select: { provider: true } } },
           })) as User;
+          if (needsVerify) {
+            this.auditService
+              .log({
+                action: AuditAction.OAUTH_AUTO_VERIFIED,
+                userId: existingUser.id,
+                metadata: { provider: profile.provider },
+              })
+              .catch(() => {});
+          }
           return { user, action: 'login' };
         }
         return { user: existingUser, action: 'login' };

@@ -346,6 +346,7 @@ describe('UsersService', () => {
       const existingOAuthUser = {
         ...mockUser,
         email: 'oauth@example.com',
+        emailVerified: true,
         oauthAccounts: [{ provider: Provider.GOOGLE }],
       };
       prisma.oAuthAccount.findUnique.mockResolvedValue({
@@ -474,6 +475,7 @@ describe('UsersService', () => {
       const existingOAuthUser = {
         ...mockUser,
         email: 'oauth@example.com',
+        emailVerified: true,
         firstName: null,
         lastName: null,
         avatarUrl: null,
