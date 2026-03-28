@@ -58,14 +58,15 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
     _accessToken: string,
     _refreshToken: string,
     profile: {
-      emails?: { value: string }[];
+      emails?: { value: string; verified?: boolean }[];
       id: string;
       displayName?: string;
       photos?: { value: string }[];
     },
     done: (error: Error | null, user?: unknown) => void,
   ): Promise<void> {
-    const email = profile.emails?.[0]?.value;
+    const primaryEmail = profile.emails?.[0];
+    const email = primaryEmail?.value;
     if (!email) {
       done(new Error('No email provided by GitHub'));
       return;
@@ -91,6 +92,7 @@ export class GitHubStrategy extends PassportStrategy(Strategy, 'github') {
         firstName,
         lastName,
         avatarUrl: profile.photos?.[0]?.value,
+        emailVerified: primaryEmail?.verified === true,
       },
       done,
     );

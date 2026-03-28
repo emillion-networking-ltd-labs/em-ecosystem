@@ -56,6 +56,7 @@ enum AuditAction {
   OAUTH_UNLINKED
   OAUTH_LINKED
   OAUTH_REGISTER
+  OAUTH_AUTO_VERIFIED
 }
 
 enum EmailVerificationTokenType {

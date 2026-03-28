@@ -339,6 +339,7 @@ describe('UsersService', () => {
       email: 'oauth@example.com',
       provider: Provider.GOOGLE,
       providerId: 'google-id-123',
+      emailVerified: true,
     };
 
     it('should return existing user when provider and providerId match', async () => {
@@ -396,21 +397,44 @@ describe('UsersService', () => {
       expect(prisma.$transaction).toHaveBeenCalled();
     });
 
-    it('should throw ConflictException when email matches but is not verified', async () => {
+    it('should throw ConflictException when email matches but is not verified and provider does not verify email', async () => {
       const unverifiedUser = {
         ...mockUser,
         email: 'oauth@example.com',
         emailVerified: false,
         oauthAccounts: [],
       };
-      // No existing OAuthAccount
+      const unverifiedProfile = { ...googleProfile, emailVerified: false };
       prisma.oAuthAccount.findUnique.mockResolvedValue(null);
-      // findByEmail returns unverified user
       prisma.user.findUnique.mockResolvedValue(unverifiedUser);
 
       await expect(
-        usersService.findOrCreateByOAuth(googleProfile),
+        usersService.findOrCreateByOAuth(unverifiedProfile),
       ).rejects.toThrow(ConflictException);
+    });
+
+    it('should auto-verify and link when unverified local account + provider confirms email', async () => {
+      const unverifiedUser = {
+        ...mockUser,
+        email: 'oauth@example.com',
+        emailVerified: false,
+        passwordHash: 'old-hash',
+        oauthAccounts: [],
+      };
+      const autoVerifiedUser = {
+        ...unverifiedUser,
+        emailVerified: true,
+        passwordHash: null,
+        oauthAccounts: [{ provider: Provider.GOOGLE }],
+      };
+      prisma.oAuthAccount.findUnique.mockResolvedValue(null);
+      prisma.user.findUnique.mockResolvedValue(unverifiedUser);
+      prisma.$transaction.mockResolvedValue([autoVerifiedUser, {}]);
+
+      const result = await usersService.findOrCreateByOAuth(googleProfile);
+
+      expect(result).toEqual({ user: autoVerifiedUser, action: 'linked' });
+      expect(prisma.$transaction).toHaveBeenCalled();
     });
 
     it('should create new user when no existing user with that email', async () => {

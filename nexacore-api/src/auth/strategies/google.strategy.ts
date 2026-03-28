@@ -82,6 +82,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         firstName: profile.name?.givenName,
         lastName: profile.name?.familyName,
         avatarUrl: profile.photos?.[0]?.value,
+        emailVerified: true, // Google always verifies email ownership
       },
       done as (error: Error | null, user?: unknown) => void,
     );
