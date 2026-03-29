@@ -34,6 +34,7 @@ describe('UsersService', () => {
     sendEmailChangeRequestNotification: jest.Mock;
     sendEmailChangedConfirmation: jest.Mock;
     sendAccountDeletionConfirmation: jest.Mock;
+    sendWelcomeEmail: jest.Mock;
   };
   let prisma: {
     user: {
@@ -167,6 +168,7 @@ describe('UsersService', () => {
             sendAccountDeletionConfirmation: jest
               .fn()
               .mockResolvedValue(undefined),
+            sendWelcomeEmail: jest.fn().mockResolvedValue(undefined),
           },
         },
         {

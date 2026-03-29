@@ -39,6 +39,30 @@ export class MailService {
     }
   }
 
+  async sendWelcomeEmail(
+    email: string,
+    firstName?: string | null,
+  ): Promise<void> {
+    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3001';
+    try {
+      await this.mailerService.sendMail({
+        to: email,
+        subject: 'Welcome to EM NexaCore',
+        template: 'welcome',
+        context: {
+          name: firstName || 'there',
+          dashboardUrl: `${frontendUrl}/dashboard`,
+          currentYear: new Date().getFullYear(),
+        },
+      });
+    } catch (error) {
+      this.logger.error(
+        `Failed to send welcome email to ${pseudonymizeEmail(email)}`,
+        error,
+      );
+    }
+  }
+
   async sendRegistrationAttemptNotification(
     email: string,
     firstName?: string | null,
