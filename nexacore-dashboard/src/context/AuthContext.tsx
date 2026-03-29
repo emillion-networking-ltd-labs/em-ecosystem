@@ -313,7 +313,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           title: "Sign in failed",
           description: message,
         });
-        dispatch({ type: "AUTH_ERROR", payload: message });
+        dispatch({ type: "AUTH_STOP" });
+        throw err;
       }
     },
     [addToast],
@@ -375,6 +376,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           variant: "success",
           title: "Account created",
           description: "Your account has been created successfully.",
+        });
+      } else if (data.oauthAction === "auto-verified") {
+        const lastProvider =
+          user.oauthProviders[user.oauthProviders.length - 1];
+        const providerName =
+          lastProvider === "GOOGLE"
+            ? "Google"
+            : lastProvider === "GITHUB"
+              ? "GitHub"
+              : lastProvider;
+        addToast({
+          variant: "warning",
+          title: "Account verified",
+          description: `Verified via ${providerName}. Set a password in your profile for alternative access.`,
+          duration: 10000,
         });
       } else if (data.oauthAction === "linked") {
         const lastProvider =

@@ -19,7 +19,7 @@ export interface AuthResult {
   accessToken: string;
   user: SafeUser;
   cookie: CookieConfig;
-  oauthAction?: 'login' | 'created' | 'linked';
+  oauthAction?: 'login' | 'created' | 'linked' | 'auto-verified';
 }
 
 export interface RegisterResult {

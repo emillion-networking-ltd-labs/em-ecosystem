@@ -27,7 +27,7 @@ export type LinkedProvider = {
 export type AuthResponse = {
   user: SafeUser;
   accessToken: string;
-  oauthAction?: "created" | "linked";
+  oauthAction?: "created" | "linked" | "auto-verified";
 };
 
 export type LoginResponse =

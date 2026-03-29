@@ -129,9 +129,10 @@ export class UsersService {
     });
   }
 
-  async findOrCreateByOAuth(
-    profile: OAuthProfile,
-  ): Promise<{ user: User; action: 'login' | 'created' | 'linked' }> {
+  async findOrCreateByOAuth(profile: OAuthProfile): Promise<{
+    user: User;
+    action: 'login' | 'created' | 'linked' | 'auto-verified';
+  }> {
     // Profile fields to populate from OAuth provider
     const profileData = {
       ...(profile.firstName && { firstName: profile.firstName }),
@@ -199,7 +200,7 @@ export class UsersService {
               })
               .catch(() => {});
           }
-          return { user, action: 'login' };
+          return { user, action: 'auto-verified' };
         }
         return { user: existingUser, action: 'login' };
       }
@@ -239,7 +240,7 @@ export class UsersService {
               metadata: { provider: profile.provider },
             })
             .catch(() => {});
-          return { user: user as User, action: 'linked' };
+          return { user: user as User, action: 'auto-verified' };
         }
         throw new ConflictException(
           'An account with this email already exists but is not verified. Please verify your email first.',

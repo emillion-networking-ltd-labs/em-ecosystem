@@ -71,6 +71,14 @@ export default function ChangePasswordForm() {
         {hasPassword ? "Change Password" : "Set Password"}
       </h2>
 
+      {!hasPassword && (
+        <div className="mb-4 rounded-lg border border-warning/30 bg-warning/5 px-4 py-3">
+          <p className="text-caption text-warning">
+            Set a password for an alternative login method.
+          </p>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-6">
         {hasPassword && (
           <Input

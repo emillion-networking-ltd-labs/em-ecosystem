@@ -11,6 +11,7 @@ export interface OAuthTokenPayload {
   accessToken: string;
   user: SafeUser;
   cookie: CookieConfig;
+  oauthAction?: 'login' | 'created' | 'linked' | 'auto-verified';
 }
 
 @Injectable()

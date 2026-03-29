@@ -104,7 +104,7 @@ export class AuthService {
     accessToken: string;
     user: SafeUser;
     cookie: CookieConfig;
-    oauthAction?: 'login' | 'created' | 'linked';
+    oauthAction?: 'login' | 'created' | 'linked' | 'auto-verified';
   }): Promise<string> {
     return this.oauthAuthService.generateOAuthCode(payload);
   }
@@ -113,7 +113,7 @@ export class AuthService {
     accessToken: string;
     user: SafeUser;
     cookie: CookieConfig;
-    oauthAction?: 'login' | 'created' | 'linked';
+    oauthAction?: 'login' | 'created' | 'linked' | 'auto-verified';
   }> {
     return this.oauthAuthService.exchangeOAuthCode(code);
   }

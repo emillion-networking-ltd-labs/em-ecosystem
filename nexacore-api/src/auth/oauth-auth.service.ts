@@ -53,6 +53,7 @@ export class OAuthAuthService {
       login: AuditAction.OAUTH_LOGIN,
       linked: AuditAction.OAUTH_LINKED,
       created: AuditAction.OAUTH_REGISTER,
+      'auto-verified': AuditAction.OAUTH_AUTO_VERIFIED,
     };
 
     this.auditService
@@ -109,7 +110,7 @@ export class OAuthAuthService {
     accessToken: string;
     user: SafeUser;
     cookie: CookieConfig;
-    oauthAction?: 'login' | 'created' | 'linked';
+    oauthAction?: 'login' | 'created' | 'linked' | 'auto-verified';
   }): Promise<string> {
     return this.oauthCodeStore.store(payload);
   }
@@ -118,7 +119,7 @@ export class OAuthAuthService {
     accessToken: string;
     user: SafeUser;
     cookie: CookieConfig;
-    oauthAction?: 'login' | 'created' | 'linked';
+    oauthAction?: 'login' | 'created' | 'linked' | 'auto-verified';
   }> {
     const payload = await this.oauthCodeStore.exchange(code);
     if (!payload) {
