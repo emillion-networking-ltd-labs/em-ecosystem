@@ -385,19 +385,6 @@ function PasswordStep({
               </div>
             )}
 
-            {/* Verification hint — shown for ALL errors (CWE-203: no account state leak) */}
-            {showError && (
-              <p className="text-caption text-content-primary/50">
-                If you recently registered, check your inbox or{" "}
-                <Link
-                  href="/resend-verification"
-                  className="text-content-primary/75 underline hover:text-content-primary"
-                >
-                  resend verification email
-                </Link>
-              </p>
-            )}
-
             {/* Password Recovery Button — Figma: 348x21, always visible, right-aligned */}
             <div className="flex items-center justify-end">
               <Button

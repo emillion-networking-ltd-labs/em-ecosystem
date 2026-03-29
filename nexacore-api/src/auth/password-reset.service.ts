@@ -42,11 +42,8 @@ export class PasswordResetService {
       return;
     }
 
-    if (!user.passwordHash) {
-      // CWE-203: timing protection — match CPU cost of LOCAL-email path
-      await bcrypt.compare(dto.email, DUMMY_PASSWORD_HASH);
-      return;
-    }
+    // Allow password reset for OAuth-only accounts (creates password)
+    // Firebase/Notion model: forgot-password works for all accounts
 
     // Invalidate all existing unused reset tokens for this user
     await this.prisma.passwordResetToken.updateMany({
@@ -122,7 +119,8 @@ export class PasswordResetService {
 
     const newPasswordHash = await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS);
 
-    // Mark token as used and update password
+    // Mark token as used, update password, and verify email
+    // Password reset via email link proves inbox ownership (Firebase/Auth0 model)
     await this.prisma.$transaction([
       this.prisma.passwordResetToken.update({
         where: { id: resetToken.id },
@@ -130,7 +128,7 @@ export class PasswordResetService {
       }),
       this.prisma.user.update({
         where: { id: resetToken.userId },
-        data: { passwordHash: newPasswordHash },
+        data: { passwordHash: newPasswordHash, emailVerified: true },
       }),
     ]);
 
