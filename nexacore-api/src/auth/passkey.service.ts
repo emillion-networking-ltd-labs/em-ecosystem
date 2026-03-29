@@ -12,14 +12,12 @@ import {
   verifyRegistrationResponse,
   generateAuthenticationOptions,
   verifyAuthenticationResponse,
+  type RegistrationResponseJSON,
+  type AuthenticationResponseJSON,
+  type AuthenticatorTransportFuture,
+  type PublicKeyCredentialCreationOptionsJSON,
+  type PublicKeyCredentialRequestOptionsJSON,
 } from '@simplewebauthn/server';
-import type {
-  RegistrationResponseJSON,
-  AuthenticationResponseJSON,
-  AuthenticatorTransportFuture,
-  PublicKeyCredentialCreationOptionsJSON,
-  PublicKeyCredentialRequestOptionsJSON,
-} from '@simplewebauthn/types';
 import * as bcrypt from 'bcrypt';
 import Redis from 'ioredis';
 import { PrismaService } from '../prisma/prisma.service';
