@@ -3,6 +3,13 @@ import { DETECTION_CSRF_ERROR } from "./error-constants";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
+export class SessionExpiredError extends Error {
+  constructor() {
+    super("Session expired");
+    this.name = "SessionExpiredError";
+  }
+}
+
 const CSRF_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
 class ApiClient {
@@ -147,6 +154,7 @@ class ApiClient {
       // Refresh failed — session unrecoverable, notify auth context
       this.accessToken = null;
       this.onAuthFailure?.();
+      throw new SessionExpiredError();
     }
 
     if (!response.ok) {

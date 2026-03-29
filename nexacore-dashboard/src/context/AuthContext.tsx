@@ -13,6 +13,8 @@ import { apiClient, API_BASE_URL } from "@/lib/api";
 import { getCsrfToken, clearCsrfToken } from "@/lib/csrf";
 import { passkeyLoginVerify } from "@/lib/passkey-api";
 import { getFingerprint } from "@/lib/fingerprint";
+import { useIdleTimeout } from "@/hooks/useIdleTimeout";
+import IdleWarningModal from "@/components/ui/IdleWarningModal";
 import { useToast } from "@/context/ToastContext";
 import { RateLimitError } from "@/lib/types";
 import type {
@@ -238,8 +240,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Register auth failure callback — when ApiClient's silentRefresh fails, trigger logout
   const handleAuthFailure = useCallback(() => {
+    addToast({
+      variant: "warning",
+      title: "Session expired",
+      description: "Please sign in again.",
+    });
     dispatch({ type: "LOGOUT" });
-  }, []);
+  }, [addToast]);
 
   // Generate fingerprint then attempt silent refresh on mount (ref guard prevents StrictMode double-fire)
   // Skip refresh on /auth/callback — the OAuth exchange handler will authenticate;
@@ -672,6 +679,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "CLEAR_ERROR" });
   }, []);
 
+  // Idle timeout: logout after 30 min of user inactivity (OWASP ASVS V3.3.2)
+  // Warning modal appears 2 min before logout
+  const isAuthenticated = !!state.user && !!state.accessToken;
+  const { showWarning, secondsLeft, keepAlive } = useIdleTimeout(
+    30 * 60 * 1000, // 30 min (OWASP ASVS V3.3.2)
+    () => {
+      addToast({
+        variant: "warning",
+        title: "Session expired",
+        description: "You were signed out due to inactivity.",
+      });
+      dispatch({ type: "LOGOUT" });
+    },
+    isAuthenticated,
+    2 * 60 * 1000, // 2 min warning before logout
+  );
+
   return (
     <AuthContext.Provider
       value={{
@@ -696,6 +720,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }}
     >
       {children}
+      {showWarning && (
+        <IdleWarningModal secondsLeft={secondsLeft} onKeepAlive={keepAlive} />
+      )}
     </AuthContext.Provider>
   );
 }

@@ -8,7 +8,7 @@ import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import UsersTable from "@/components/admin/UsersTable";
 import Pagination from "@/components/ui/Pagination";
 import ConfirmModal from "@/components/ui/ConfirmModal";
-import { apiClient } from "@/lib/api";
+import { apiClient, SessionExpiredError } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
 import { ADMIN_TOAST } from "@/lib/toast-messages";
 import type {
@@ -56,8 +56,9 @@ export default function AdminPage() {
         if (signal?.aborted) return;
         setUsers(res.data);
         setMeta(res.meta);
-      } catch {
+      } catch (err) {
         if (signal?.aborted) return;
+        if (err instanceof SessionExpiredError) return;
         addToast(ADMIN_TOAST.LOAD_USERS_FAILED);
       } finally {
         if (!signal?.aborted) setLoading(false);
