@@ -199,6 +199,9 @@ export class UsersService {
                 metadata: { provider: profile.provider },
               })
               .catch(() => {});
+            this.mailService
+              .sendWelcomeEmail(existingUser.email, existingUser.firstName)
+              .catch(() => {});
           }
           return { user, action: needsVerify ? 'auto-verified' : 'login' };
         }
@@ -239,6 +242,9 @@ export class UsersService {
               userId: existingUser.id,
               metadata: { provider: profile.provider },
             })
+            .catch(() => {});
+          this.mailService
+            .sendWelcomeEmail(existingUser.email, existingUser.firstName)
             .catch(() => {});
           return { user: user as User, action: 'auto-verified' };
         }
@@ -285,6 +291,9 @@ export class UsersService {
       },
       include: { oauthAccounts: { select: { provider: true } } },
     })) as User;
+    this.mailService
+      .sendWelcomeEmail(user.email, user.firstName)
+      .catch(() => {});
     return { user, action: 'created' };
   }
 

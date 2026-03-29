@@ -118,6 +118,7 @@ export class PasswordResetService {
     }
 
     const newPasswordHash = await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS);
+    const wasUnverified = !resetToken.user.emailVerified;
 
     // Mark token as used, update password, and verify email
     // Password reset via email link proves inbox ownership (Firebase/Auth0 model)
@@ -131,6 +132,13 @@ export class PasswordResetService {
         data: { passwordHash: newPasswordHash, emailVerified: true },
       }),
     ]);
+
+    // Welcome email on first activation via password reset
+    if (wasUnverified) {
+      this.mailService
+        .sendWelcomeEmail(resetToken.user.email, resetToken.user.firstName)
+        .catch(() => {});
+    }
 
     // Revoke all sessions (forces re-authentication)
     await this.sessionsService.revokeAllUserSessions(resetToken.userId);

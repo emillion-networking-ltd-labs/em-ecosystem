@@ -194,6 +194,7 @@ export async function createAuthTestModule(): Promise<AuthTestContext> {
             .mockResolvedValue(undefined),
           sendEmailChangedConfirmation: jest.fn().mockResolvedValue(undefined),
           sendAccountLockedEmail: jest.fn().mockResolvedValue(undefined),
+          sendWelcomeEmail: jest.fn().mockResolvedValue(undefined),
         },
       },
       {

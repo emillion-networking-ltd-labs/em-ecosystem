@@ -76,6 +76,14 @@ export class EmailVerificationService {
       }),
     ]);
 
+    // Welcome email on first activation
+    this.mailService
+      .sendWelcomeEmail(
+        verificationToken.user.email,
+        verificationToken.user.firstName,
+      )
+      .catch(() => {});
+
     return { status: 'success' };
   }
 
