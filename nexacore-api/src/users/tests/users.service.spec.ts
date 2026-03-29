@@ -434,7 +434,10 @@ describe('UsersService', () => {
 
       const result = await usersService.findOrCreateByOAuth(googleProfile);
 
-      expect(result).toEqual({ user: autoVerifiedUser, action: 'linked' });
+      expect(result).toEqual({
+        user: autoVerifiedUser,
+        action: 'auto-verified',
+      });
       expect(prisma.$transaction).toHaveBeenCalled();
     });
 

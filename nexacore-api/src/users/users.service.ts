@@ -200,7 +200,7 @@ export class UsersService {
               })
               .catch(() => {});
           }
-          return { user, action: 'auto-verified' };
+          return { user, action: needsVerify ? 'auto-verified' : 'login' };
         }
         return { user: existingUser, action: 'login' };
       }

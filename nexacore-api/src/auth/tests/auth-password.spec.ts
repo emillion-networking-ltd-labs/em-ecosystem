@@ -35,24 +35,21 @@ describe('AuthService — Password Reset', () => {
       );
     });
 
-    it('should return silently for OAuth-only accounts (no passwordHash)', async () => {
+    it('should send reset email for OAuth-only accounts (no passwordHash) — allows password creation', async () => {
       ctx.usersService.findByEmail.mockResolvedValue({
         ...mockUser,
         passwordHash: null,
       });
-      (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+      ctx.prismaService.passwordResetToken.updateMany.mockResolvedValue({
+        count: 0,
+      });
+      ctx.prismaService.passwordResetToken.create.mockResolvedValue({});
 
       await expect(
         ctx.authService.forgotPassword({ email: 'test@example.com' }),
       ).resolves.toBeUndefined();
 
-      expect(
-        ctx.prismaService.passwordResetToken.create,
-      ).not.toHaveBeenCalled();
-      expect(bcrypt.compare).toHaveBeenCalled();
-      expect((bcrypt.compare as jest.Mock).mock.calls[0][0]).toBe(
-        'test@example.com',
-      );
+      expect(ctx.prismaService.passwordResetToken.create).toHaveBeenCalled();
     });
 
     it('should invalidate existing tokens and create new reset token', async () => {
@@ -79,19 +76,10 @@ describe('AuthService — Password Reset', () => {
       );
     });
 
-    it('non-existing and OAuth-only paths should both call bcrypt.compare for timing protection', async () => {
+    it('non-existing path should call bcrypt.compare for timing protection', async () => {
       ctx.usersService.findByEmail.mockResolvedValue(null);
       (bcrypt.compare as jest.Mock).mockResolvedValue(false);
       await ctx.authService.forgotPassword({ email: 'nobody@example.com' });
-      expect(bcrypt.compare).toHaveBeenCalled();
-
-      (bcrypt.compare as jest.Mock).mockClear();
-
-      ctx.usersService.findByEmail.mockResolvedValue({
-        ...mockUser,
-        passwordHash: null,
-      });
-      await ctx.authService.forgotPassword({ email: 'oauth@example.com' });
       expect(bcrypt.compare).toHaveBeenCalled();
     });
 
