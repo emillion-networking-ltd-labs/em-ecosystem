@@ -183,7 +183,7 @@ model TrustedDevice {
   id              String   @id @default(uuid())
   userId          String
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fingerprintHash String
+  fingerprintHash String /// @sensitive
   deviceName      String
   ipAddress       String
   lastVerifiedAt  DateTime @default(now())
@@ -201,7 +201,7 @@ model WebAuthnCredential {
   id           String    @id @default(uuid())
   userId       String
   credentialId String    @unique
-  publicKey    Bytes
+  publicKey    Bytes  /// @sensitive
   signCount    Int       @default(0)
   transports   String[]  @default([])
   backedUp     Boolean   @default(false)

@@ -123,16 +123,48 @@ npm run lint              # Lint code
 
 | Method | Endpoint | Description | Auth |
 |--------|----------|-------------|------|
+| GET | `/auth/csrf-token` | Get CSRF token | No |
 | POST | `/auth/register` | Register new user | No |
 | POST | `/auth/login` | Login with email/password | No |
 | POST | `/auth/refresh` | Refresh token pair | No |
 | POST | `/auth/logout` | Invalidate session | Yes |
+| POST | `/auth/logout-all` | Revoke all sessions | Yes |
 | GET | `/auth/me` | Get current user profile | Yes |
 | GET | `/auth/admin` | Admin-only endpoint | Yes (Admin) |
 | GET | `/auth/google` | Initiate Google OAuth | No |
 | GET | `/auth/google/callback` | Google OAuth callback | No |
 | GET | `/auth/github` | Initiate GitHub OAuth | No |
 | GET | `/auth/github/callback` | GitHub OAuth callback | No |
+| POST | `/auth/oauth/exchange` | Exchange OAuth code for tokens | No |
+| POST | `/auth/link/code` | Generate OAuth link code | Yes |
+| GET | `/auth/link/google` | Link Google to account | Yes |
+| GET | `/auth/link/github` | Link GitHub to account | Yes |
+| POST | `/auth/verify-email` | Verify email with token | No |
+| POST | `/auth/verify-email-change` | Verify email change | No |
+| POST | `/auth/resend-verification` | Resend verification (auth) | Yes |
+| POST | `/auth/resend-verification-public` | Resend verification (public) | No |
+| POST | `/auth/forgot-password` | Request password reset | No |
+| POST | `/auth/reset-password` | Reset password with token | No |
+| POST | `/auth/validate-reset-token` | Validate reset token | No |
+| GET | `/auth/sessions` | List active sessions | Yes |
+| DELETE | `/auth/sessions/:id` | Revoke session | Yes |
+| POST | `/auth/trusted-devices` | Trust current device | Yes |
+| GET | `/auth/trusted-devices` | List trusted devices | Yes |
+| DELETE | `/auth/trusted-devices` | Revoke all devices | Yes |
+| DELETE | `/auth/trusted-devices/:id` | Revoke device | Yes |
+| POST | `/auth/mfa/setup` | Initialize MFA setup | Yes |
+| POST | `/auth/mfa/verify-setup` | Verify and activate MFA | Yes |
+| POST | `/auth/mfa/verify-login` | Verify MFA on login | No |
+| DELETE | `/auth/mfa` | Disable MFA | Yes |
+| POST | `/auth/mfa/recovery-codes` | Regenerate recovery codes | Yes |
+| GET | `/auth/mfa/status` | Get MFA status | Yes |
+| POST | `/auth/passkeys/register/options` | Get passkey registration options | Yes |
+| POST | `/auth/passkeys/register/verify` | Complete passkey registration | Yes |
+| POST | `/auth/passkeys/login/options` | Get passkey login options | No |
+| POST | `/auth/passkeys/login/verify` | Complete passkey login | No |
+| GET | `/auth/passkeys` | List passkeys | Yes |
+| PATCH | `/auth/passkeys/:id` | Update passkey name | Yes |
+| DELETE | `/auth/passkeys/:id` | Delete passkey | Yes |
 
 ## Development Standards
 
