@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Server, UserPlus, Clock, ShieldCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import IconBadge from "@/components/ui/IconBadge";
 import Toggle from "@/components/ui/Toggle";
 
 function SettingRow({
@@ -19,9 +20,9 @@ function SettingRow({
   return (
     <div className="flex items-center justify-between gap-4 rounded-xl p-4">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.04]">
-          <Icon size={20} className="text-content-secondary" />
-        </div>
+        <IconBadge size="md">
+          <Icon size={24} />
+        </IconBadge>
         <div>
           <p className="text-body font-normal text-content-primary">{label}</p>
           <p className="text-caption text-content-tertiary">{description}</p>
@@ -85,6 +86,7 @@ export default function GlobalSettings() {
           <Toggle
             checked={publicRegistration}
             onChange={handleRegistrationToggle}
+            size="md"
           />
         </SettingRow>
 
@@ -101,7 +103,7 @@ export default function GlobalSettings() {
           label="Enforce MFA"
           description="Require multi-factor authentication for all users"
         >
-          <Toggle checked={mfaEnforced} onChange={handleMfaToggle} />
+          <Toggle checked={mfaEnforced} onChange={handleMfaToggle} size="md" />
         </SettingRow>
       </div>
     </section>

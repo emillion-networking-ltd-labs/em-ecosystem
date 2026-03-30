@@ -6,6 +6,7 @@ import { useTrustedDevices } from "@/hooks/useTrustedDevices";
 import { useToast } from "@/context/ToastContext";
 import { PROFILE_TOAST } from "@/lib/toast-messages";
 import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import Spinner from "@/components/ui/Spinner";
 import type { TrustedDeviceResponse } from "@/lib/types";
@@ -170,13 +171,14 @@ export default function TrustedDevices() {
                   </div>
                 </div>
               </div>
-              <button
+              <IconButton
+                variant="danger"
+                size="sm"
                 onClick={() => setRevokeTarget(device)}
-                className="ml-2 shrink-0 rounded-md p-2 text-content-secondary transition-colors hover:bg-error-bg hover:text-error"
                 aria-label={`Revoke trust for ${device.deviceName}`}
               >
                 <Trash2 size={16} />
-              </button>
+              </IconButton>
             </div>
           ))}
         </div>

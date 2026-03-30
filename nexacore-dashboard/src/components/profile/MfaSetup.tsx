@@ -14,6 +14,7 @@ import {
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
 import type { MfaSetupResponse, MfaStatusResponse } from "@/lib/types";
 
@@ -246,14 +247,14 @@ export default function MfaSetup() {
               <code className="flex-1 select-all rounded-lg border border-border-default bg-surface-subtle px-3 py-2 font-mono text-body text-content-primary">
                 {setupData.secret}
               </code>
-              <button
-                type="button"
+              <IconButton
+                variant="boxed"
+                size="sm"
                 onClick={() => copyToClipboard(setupData.secret, "secret")}
-                className="shrink-0 rounded-md border border-border-default p-2 text-content-secondary transition-colors hover:bg-hover hover:text-content-primary"
-                title="Copy secret"
+                aria-label="Copy secret"
               >
                 {copiedSecret ? <Check size={16} /> : <Copy size={16} />}
-              </button>
+              </IconButton>
             </div>
           </div>
 

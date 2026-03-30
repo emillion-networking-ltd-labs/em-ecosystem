@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Search } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminRoute from "@/components/guards/AdminRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import UsersTable from "@/components/admin/UsersTable";
 import Pagination from "@/components/ui/Pagination";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
 import { apiClient, SessionExpiredError } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
 import { ADMIN_TOAST } from "@/lib/toast-messages";
@@ -175,14 +176,13 @@ export default function AdminPage() {
           <h1 className="text-h1 font-semibold text-content-primary">
             User Management
           </h1>
-          <div className="flex w-64 items-center gap-2 rounded-full border border-border-default bg-surface-secondary px-4">
-            <Search size={16} className="text-content-tertiary" />
-            <input
-              type="text"
-              placeholder="Search users..."
+          <div className="w-64">
+            <Input
+              name="search"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="h-10 flex-1 bg-transparent text-body text-content-primary outline-none placeholder:text-content-placeholder"
+              placeholder="Search users..."
+              size="md"
             />
           </div>
         </div>
@@ -228,15 +228,18 @@ export default function AdminPage() {
           loading={modalLoading}
         >
           {modalType === "role" && (
-            <select
-              value={selectedRole}
-              onChange={(e) => setSelectedRole(e.target.value as UserRole)}
-              className="mt-3 h-10 w-full rounded-lg border border-border-default bg-transparent px-4 text-body text-content-primary outline-none"
-            >
-              <option value="USER">USER</option>
-              <option value="ADMIN">ADMIN</option>
-              <option value="SUPERADMIN">SUPERADMIN</option>
-            </select>
+            <div className="mt-3">
+              <Select
+                options={[
+                  { value: "USER", label: "USER" },
+                  { value: "ADMIN", label: "ADMIN" },
+                  { value: "SUPERADMIN", label: "SUPERADMIN" },
+                ]}
+                value={selectedRole}
+                onChange={(v) => setSelectedRole(v as UserRole)}
+                placeholder="Select role"
+              />
+            </div>
           )}
         </ConfirmModal>
       </DashboardLayout>

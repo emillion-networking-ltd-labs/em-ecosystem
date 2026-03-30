@@ -4,8 +4,10 @@ import { useState, useEffect } from "react";
 import { Sun, Moon, Bell, Globe } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
+import IconBadge from "@/components/ui/IconBadge";
 import Toggle from "@/components/ui/Toggle";
 import SegmentedControl from "@/components/ui/SegmentedControl";
+import Select from "@/components/ui/Select";
 
 function SettingRow({
   icon: Icon,
@@ -21,9 +23,9 @@ function SettingRow({
   return (
     <div className="flex items-center justify-between gap-4 rounded-xl p-4">
       <div className="flex items-center gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-black/[0.04] dark:bg-white/[0.04]">
-          <Icon size={20} className="text-content-secondary" />
-        </div>
+        <IconBadge size="md">
+          <Icon size={24} />
+        </IconBadge>
         <div>
           <p className="text-body font-normal text-content-primary">{label}</p>
           <p className="text-caption text-content-tertiary">{description}</p>
@@ -74,7 +76,11 @@ export default function UserPreferences() {
           label="Email Notifications"
           description="Receive email alerts for important events"
         >
-          <Toggle checked={emailNotifications} onChange={handleEmailToggle} />
+          <Toggle
+            checked={emailNotifications}
+            onChange={handleEmailToggle}
+            size="md"
+          />
         </SettingRow>
 
         <SettingRow
@@ -82,13 +88,12 @@ export default function UserPreferences() {
           label="Language"
           description="Display language for the interface"
         >
-          <select
-            className="rounded-lg border border-border-default bg-surface-primary px-3 py-1.5 text-caption text-content-primary"
-            defaultValue="en"
-            disabled
-          >
-            <option value="en">English</option>
-          </select>
+          <Select
+            options={[{ value: "en", label: "English" }]}
+            value="en"
+            onChange={() => {}}
+            placeholder="Language"
+          />
         </SettingRow>
       </div>
     </section>

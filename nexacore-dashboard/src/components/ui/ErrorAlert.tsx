@@ -1,5 +1,8 @@
 "use client";
 
+import { X } from "lucide-react";
+import IconButton from "./IconButton";
+
 type ErrorAlertProps = {
   message: string;
   onDismiss?: () => void;
@@ -33,23 +36,14 @@ export default function ErrorAlert({
       </svg>
       <p className="flex-1 text-body text-error">{message}</p>
       {onDismiss && (
-        <button
+        <IconButton
+          variant="danger"
+          size="sm"
           onClick={onDismiss}
-          className="shrink-0 text-error/60 hover:text-error"
           aria-label="Dismiss error"
         >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-          >
-            <line x1="18" y1="6" x2="6" y2="18" />
-            <line x1="6" y1="6" x2="18" y2="18" />
-          </svg>
-        </button>
+          <X size={16} />
+        </IconButton>
       )}
     </div>
   );

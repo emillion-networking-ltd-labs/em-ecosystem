@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/useToast";
 import { PROFILE_TOAST } from "@/lib/toast-messages";
 import type { SessionResponse } from "@/lib/types";
 import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
 
 function parseUserAgent(ua: string | null): {
   label: string;
@@ -179,18 +180,16 @@ export default function ActiveSessions() {
                 </div>
 
                 {!session.isCurrent && (
-                  <button
+                  <IconButton
+                    variant="danger"
+                    size="sm"
                     onClick={() => revokeSession(session.id)}
                     disabled={revoking === session.id}
-                    className="shrink-0 rounded-lg p-2 text-content-tertiary transition-colors hover:bg-error/10 hover:text-error disabled:opacity-50"
+                    loading={revoking === session.id}
                     aria-label="Revoke session"
                   >
-                    {revoking === session.id ? (
-                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-content-disabled border-t-error" />
-                    ) : (
-                      <Trash2 size={16} />
-                    )}
-                  </button>
+                    <Trash2 size={16} />
+                  </IconButton>
                 )}
               </div>
             );

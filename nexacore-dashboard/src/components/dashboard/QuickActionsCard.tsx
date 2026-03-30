@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Users, ScrollText, Key, User, Settings } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
+import IconBadge from "@/components/ui/IconBadge";
 import ChartCard from "./ChartCard";
 
 type QuickAction = {
@@ -66,9 +67,9 @@ export default function QuickActionsCard() {
             href={action.href}
             className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
           >
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-black/[0.04] dark:bg-white/[0.04]">
-              <action.icon size={16} className="text-content-secondary" />
-            </div>
+            <IconBadge size="md">
+              <action.icon size={24} />
+            </IconBadge>
             <div className="min-w-0 flex-1">
               <p className="text-body font-normal text-content-primary">
                 {action.label}

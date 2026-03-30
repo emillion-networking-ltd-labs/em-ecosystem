@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { TriangleAlert, CircleCheck, CircleAlert, Info, X } from "lucide-react";
+import IconButton from "./IconButton";
 
 type ToastVariant = "error" | "success" | "warning" | "info";
 
@@ -65,13 +66,14 @@ export default function Toast({
         )}
       </div>
 
-      <button
+      <IconButton
+        size="sm"
         onClick={dismiss}
-        className="mt-px shrink-0 text-content-primary/50 opacity-0 transition-all group-hover:opacity-100 hover:text-content-primary"
+        className="mt-px opacity-0 transition-all group-hover:opacity-100"
         aria-label="Close notification"
       >
         <X size={16} />
-      </button>
+      </IconButton>
     </div>
   );
 }

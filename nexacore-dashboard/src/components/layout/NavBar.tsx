@@ -9,6 +9,7 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Avatar from "@/components/ui/Avatar";
 import Divider from "@/components/ui/Divider";
+import IconButton from "@/components/ui/IconButton";
 import {
   PanelLeft,
   Star,
@@ -76,30 +77,30 @@ export default function NavBar({
     <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-border-strong bg-surface-primary px-7">
       {/* Left side */}
       <div className="flex items-center gap-2">
-        {/* Mobile hamburger — 20px for touch target */}
-        <button
+        {/* Mobile hamburger */}
+        <IconButton
+          variant="boxed"
+          size="md"
           onClick={onMenuClick}
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-content-primary/50 transition-colors hover:text-content-primary lg:hidden"
+          className="lg:hidden"
           aria-label="Toggle sidebar"
         >
-          <PanelLeft size={20} />
-        </button>
+          <PanelLeft size={16} />
+        </IconButton>
 
         {/* Desktop: sidebar toggle + star + breadcrumbs */}
         <div className="hidden items-center gap-2 lg:flex">
-          <button
+          <IconButton
+            variant="boxed"
+            size="sm"
             onClick={onMenuClick}
-            className="flex h-6 w-6 items-center justify-center rounded-xl p-1 text-content-primary/50 transition-colors hover:text-content-primary"
             aria-label="Toggle sidebar"
           >
             <PanelLeft size={16} />
-          </button>
-          <button
-            className="flex h-6 w-6 items-center justify-center rounded-xl p-1 text-content-primary/50 transition-colors hover:text-content-primary"
-            aria-label="Bookmark"
-          >
+          </IconButton>
+          <IconButton variant="boxed" size="sm" aria-label="Bookmark">
             <Star size={16} />
-          </button>
+          </IconButton>
           <Breadcrumbs items={breadcrumbItems} />
         </div>
       </div>
@@ -120,20 +121,19 @@ export default function NavBar({
         {/* Action icons */}
         <div className="flex items-center gap-2">
           <ThemeToggle />
-          <button
-            className="flex h-7 w-7 items-center justify-center rounded-xl p-1 text-content-primary/50 transition-colors hover:text-content-primary"
-            aria-label="Notifications"
-          >
+          <IconButton variant="boxed" size="sm" aria-label="Notifications">
             <Bell size={16} />
-          </button>
+          </IconButton>
           {onRightPanelToggle && (
-            <button
+            <IconButton
+              variant="boxed"
+              size="sm"
               onClick={onRightPanelToggle}
-              className="hidden h-7 w-7 items-center justify-center rounded-xl p-1 text-content-primary/50 transition-colors hover:text-content-primary lg:flex"
+              className="hidden lg:inline-flex"
               aria-label="Toggle right panel"
             >
               <PanelRight size={16} />
-            </button>
+            </IconButton>
           )}
         </div>
 

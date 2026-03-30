@@ -26,6 +26,7 @@ import {
   CircleAlert,
   Info,
   X,
+  Bell,
 } from "lucide-react";
 import CountdownTimer from "@/components/ui/CountdownTimer";
 import TotalUsersChart from "@/components/dashboard/TotalUsersChart";
@@ -86,6 +87,7 @@ import LanguageSelector, {
 } from "@/components/ui/LanguageSelector";
 import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
 import ConfirmModal, { confirmModalSpecs } from "@/components/ui/ConfirmModal";
+import IconBadge, { iconBadgeSpecs } from "@/components/ui/IconBadge";
 import Accordion, {
   SingleAccordion,
   accordionSpecs,
@@ -456,6 +458,27 @@ function ButtonShowcase() {
               </div>
             ),
           },
+          {
+            key: "boxed-hover",
+            label: "BOXED-HOVER",
+            align: "center",
+            render: (row) => (
+              <div className="flex justify-center">
+                {row.hover ? (
+                  <IconButton
+                    variant="boxed-hover"
+                    className="pointer-events-none bg-surface-tertiary text-content-primary"
+                  >
+                    <Bell size={16} />
+                  </IconButton>
+                ) : (
+                  <IconButton variant="boxed-hover" aria-label="Boxed Hover">
+                    <Bell size={16} />
+                  </IconButton>
+                )}
+              </div>
+            ),
+          },
         ];
         return (
           <div
@@ -626,12 +649,81 @@ function BadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
   );
 }
 
+function IconBadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
+  const variants = ["default", "success", "warning", "error", "info"] as const;
+  const sizes = ["lg", "md", "sm"] as const;
+  const icons: Record<string, Record<number, React.ReactNode>> = {
+    default: {
+      16: <Settings size={16} />,
+      24: <Settings size={24} />,
+      32: <Settings size={32} />,
+    },
+    success: {
+      16: <Check size={16} />,
+      24: <Check size={24} />,
+      32: <Check size={32} />,
+    },
+    warning: {
+      16: <AlertTriangle size={16} />,
+      24: <AlertTriangle size={24} />,
+      32: <AlertTriangle size={32} />,
+    },
+    error: { 16: <X size={16} />, 24: <X size={24} />, 32: <X size={32} /> },
+    info: {
+      16: <Info size={16} />,
+      24: <Info size={24} />,
+      32: <Info size={32} />,
+    },
+  };
+  return (
+    <div
+      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+    >
+      <p className="text-caption text-content-primary/50 font-mono mb-3">
+        {mode}
+      </p>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {sizes.map((size) => {
+          const iconSize = size === "sm" ? 16 : size === "md" ? 24 : 32;
+          return (
+            <div key={size} className="card-flat !p-4">
+              <p className="text-caption text-content-primary/50 font-mono mb-3">
+                {size} · {size === "sm" ? "32" : size === "md" ? "40" : "56"}px
+                {size === "sm" ? " (default)" : ""}
+              </p>
+              <div className="flex flex-wrap items-center gap-3">
+                {variants.map((v) => (
+                  <div key={v} className="flex flex-col items-center gap-1">
+                    <IconBadge variant={v} size={size}>
+                      {icons[v][iconSize]}
+                    </IconBadge>
+                    <span className="text-caption text-content-primary/50 font-mono">
+                      {v}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function BadgeShowcase() {
   return (
     <ShowcaseSection title="Badge">
       <BadgeSizeGrid mode="light" />
 
       <BadgeSizeGrid mode="dark" />
+
+      {/* Icon Badge */}
+      <p className="text-body font-semibold text-content-primary mb-2">
+        Icon Badge
+      </p>
+      <IconBadgeSizeGrid mode="light" />
+      <IconBadgeSizeGrid mode="dark" />
 
       <SpecsPanel
         specs={{
@@ -643,6 +735,7 @@ function BadgeShowcase() {
             "md (default)": "14px font · 10/4px padding",
             lg: "16px font · 12/6px padding",
           },
+          "Icon Badge": iconBadgeSpecs.sizes,
         }}
       />
     </ShowcaseSection>

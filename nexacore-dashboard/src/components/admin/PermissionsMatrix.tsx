@@ -5,6 +5,7 @@ import { Save, RotateCcw, Loader2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
 import Can from "@/components/guards/Can";
+import Checkbox from "@/components/ui/Checkbox";
 import type {
   Permission,
   RolePermissionsResponse,
@@ -185,31 +186,24 @@ export default function PermissionsMatrix() {
                         <Can
                           permission="permissions:write"
                           fallback={
-                            <input
-                              type="checkbox"
+                            <Checkbox
                               checked={current[role]?.has(perm.key) ?? false}
                               disabled
-                              className="h-4 w-4 cursor-not-allowed accent-brand-primary opacity-50"
+                              size="md"
                             />
                           }
                         >
-                          <input
-                            type="checkbox"
+                          <Checkbox
                             checked={current[role]?.has(perm.key) ?? false}
                             onChange={() => toggle(role, perm.key)}
-                            className="h-4 w-4 cursor-pointer accent-brand-primary"
+                            size="md"
                           />
                         </Can>
                       </td>
                     ))}
                     {/* SUPERADMIN: always checked, disabled */}
                     <td className="px-6 py-3 text-center">
-                      <input
-                        type="checkbox"
-                        checked
-                        disabled
-                        className="h-4 w-4 cursor-not-allowed accent-brand-primary"
-                      />
+                      <Checkbox checked disabled size="md" />
                     </td>
                   </tr>
                 ))}

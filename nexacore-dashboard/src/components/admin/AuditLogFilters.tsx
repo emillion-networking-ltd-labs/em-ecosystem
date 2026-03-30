@@ -1,7 +1,8 @@
 "use client";
 
-import { Search } from "lucide-react";
 import type { AuditAction } from "@/lib/types";
+import Select from "@/components/ui/Select";
+import Input from "@/components/ui/Input";
 
 type AuditLogFiltersProps = {
   action: AuditAction | "";
@@ -48,28 +49,27 @@ export default function AuditLogFilters({
   return (
     <div className="flex flex-wrap items-center gap-3">
       {/* Action filter */}
-      <select
+      <Select
+        options={[
+          { value: "", label: "All actions" },
+          ...AUDIT_ACTIONS.map((a) => ({
+            value: a,
+            label: a.replace(/_/g, " "),
+          })),
+        ]}
         value={action}
-        onChange={(e) => onActionChange(e.target.value as AuditAction | "")}
-        className="h-10 rounded-lg border border-border-default bg-surface-secondary px-3 text-body text-content-primary outline-none"
-      >
-        <option value="">All actions</option>
-        {AUDIT_ACTIONS.map((a) => (
-          <option key={a} value={a}>
-            {a.replace(/_/g, " ")}
-          </option>
-        ))}
-      </select>
+        onChange={(v) => onActionChange(v as AuditAction | "")}
+        placeholder="All actions"
+      />
 
       {/* User ID filter */}
-      <div className="flex h-10 w-56 items-center gap-2 rounded-lg border border-border-default bg-surface-secondary px-3">
-        <Search size={14} className="text-content-tertiary" />
-        <input
-          type="text"
-          placeholder="Filter by user ID..."
+      <div className="w-56">
+        <Input
+          name="userId"
           value={userId}
           onChange={(e) => onUserIdChange(e.target.value)}
-          className="flex-1 bg-transparent text-body text-content-primary outline-none placeholder:text-content-placeholder"
+          placeholder="Filter by user ID..."
+          size="md"
         />
       </div>
 
@@ -78,14 +78,14 @@ export default function AuditLogFilters({
         type="date"
         value={startDate}
         onChange={(e) => onStartDateChange(e.target.value)}
-        className="h-10 rounded-lg border border-border-default bg-surface-secondary px-3 text-body text-content-primary outline-none"
+        className="h-10 rounded-md border border-border-strong bg-transparent px-3 text-body text-content-primary outline-none"
       />
       <span className="text-body text-content-tertiary">to</span>
       <input
         type="date"
         value={endDate}
         onChange={(e) => onEndDateChange(e.target.value)}
-        className="h-10 rounded-lg border border-border-default bg-surface-secondary px-3 text-body text-content-primary outline-none"
+        className="h-10 rounded-md border border-border-strong bg-transparent px-3 text-body text-content-primary outline-none"
       />
     </div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { designTokens } from "../../../tailwind.config";
-import { Inbox, AlertTriangle } from "lucide-react";
+import { Inbox, AlertTriangle, Settings } from "lucide-react";
 
 /* ===== Token Data (from globals.css + tailwind.config.ts) ===== */
 
@@ -620,11 +620,22 @@ function IconSizeSection() {
         </div>
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center justify-center w-16 h-16 rounded-xl border border-border-strong bg-surface-primary">
-            <Inbox size={48} className="text-content-primary/50" />
+            <Settings size={24} className="text-content-primary/50" />
           </div>
           <div className="text-center">
             <p className="text-caption font-normal text-content-primary">
-              48px
+              24px
+            </p>
+            <p className="text-caption text-content-primary/50">medium</p>
+          </div>
+        </div>
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center justify-center w-16 h-16 rounded-xl border border-border-strong bg-surface-primary">
+            <Inbox size={32} className="text-content-primary/50" />
+          </div>
+          <div className="text-center">
+            <p className="text-caption font-normal text-content-primary">
+              32px
             </p>
             <p className="text-caption text-content-primary/50">page-level</p>
           </div>
@@ -636,7 +647,11 @@ function IconSizeSection() {
           buttons, inputs, errors, navigation, toasts
         </p>
         <p className="text-caption text-content-primary/50">
-          <span className="font-semibold text-content-primary">48px</span> —
+          <span className="font-semibold text-content-primary">24px</span> —
+          icon badges, cards, medium emphasis
+        </p>
+        <p className="text-caption text-content-primary/50">
+          <span className="font-semibold text-content-primary">32px</span> —
           empty states, full page status (success/error), loading spinners
         </p>
       </div>

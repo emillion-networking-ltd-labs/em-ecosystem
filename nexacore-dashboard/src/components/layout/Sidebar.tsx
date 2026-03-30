@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
+import IconButton from "@/components/ui/IconButton";
 import type { LucideIcon } from "lucide-react";
 import {
   PieChart,
@@ -105,13 +106,13 @@ export default function Sidebar({
             </span>
           )}
         </div>
-        <button
+        <IconButton
+          size="sm"
           onClick={onToggle}
-          className="flex h-6 w-6 shrink-0 items-center justify-center rounded-xl p-1 text-content-secondary hover:text-content-primary"
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-        </button>
+        </IconButton>
       </div>
 
       {/* Navigation sections */}

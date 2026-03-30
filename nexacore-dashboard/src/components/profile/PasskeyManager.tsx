@@ -15,6 +15,7 @@ import { usePasskey } from "@/hooks/usePasskey";
 import { useToast } from "@/context/ToastContext";
 import { PROFILE_TOAST } from "@/lib/toast-messages";
 import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import type { PasskeyResponse } from "@/lib/types";
@@ -74,22 +75,21 @@ function PasskeyItem({
         </div>
       </div>
       <div className="flex items-center gap-1">
-        <button
-          type="button"
+        <IconButton
+          size="sm"
           onClick={() => onRename(passkey)}
-          className="rounded-md p-2 text-content-secondary transition-colors hover:bg-surface-subtle hover:text-content-primary"
           aria-label={`Rename ${passkey.name || "passkey"}`}
         >
           <Pencil size={16} />
-        </button>
-        <button
-          type="button"
+        </IconButton>
+        <IconButton
+          variant="danger"
+          size="sm"
           onClick={() => onDelete(passkey)}
-          className="rounded-md p-2 text-content-secondary transition-colors hover:bg-error-bg hover:text-error"
           aria-label={`Delete ${passkey.name || "passkey"}`}
         >
           <Trash2 size={16} />
-        </button>
+        </IconButton>
       </div>
     </div>
   );

@@ -27,8 +27,10 @@ export const componentRegistry: ComponentEntry[] = [
   {
     name: "Badge",
     category: "atom",
-    description: "Status indicator — 5 color variants, 3 sizes",
-    files: ["Badge.tsx"],
+    description:
+      "Status indicator — 5 color variants, 3 sizes + Icon Badge (sm/md/lg)",
+    files: ["Badge.tsx", "IconBadge.tsx"],
+    count: 2,
   },
   {
     name: "Spinner",

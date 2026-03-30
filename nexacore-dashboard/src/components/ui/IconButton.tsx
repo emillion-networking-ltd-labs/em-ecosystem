@@ -2,17 +2,20 @@
 
 import React from "react";
 
-export type IconButtonVariant = "default" | "danger" | "boxed";
+export type IconButtonVariant = "default" | "danger" | "boxed" | "boxed-hover";
 
 export const baseClass =
-  "inline-flex items-center justify-center shrink-0 p-2 rounded-md transition-colors cursor-pointer";
+  "inline-flex items-center justify-center shrink-0 p-2 rounded-md cursor-pointer";
 
 export const variantClasses: Record<string, string> = {
-  default: "text-content-primary/50 hover:text-content-primary",
+  default:
+    "text-content-primary/50 transition-colors hover:text-content-primary",
   "inside input":
-    "text-content-secondary hover:text-content-primary/75 hover:bg-surface-tertiary",
-  danger: "text-error hover:bg-error-bg",
-  boxed: "bg-surface-tertiary hover:bg-surface-tertiary text-content-primary",
+    "text-content-secondary transition-colors hover:text-content-primary/75 hover:bg-surface-tertiary",
+  danger: "text-error transition-colors hover:bg-error-bg",
+  boxed: "bg-surface-tertiary text-content-primary hover:bg-surface-subtle",
+  "boxed-hover":
+    "text-content-primary/50 transition-colors hover:bg-surface-tertiary hover:text-content-primary",
 };
 
 export const sizeClasses = {
