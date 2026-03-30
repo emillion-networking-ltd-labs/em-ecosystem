@@ -1,31 +1,36 @@
 "use client";
 
+import { useState, useRef } from "react";
 import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
+import Badge from "@/components/ui/Badge";
 import type { AuditLog } from "@/lib/types";
 
 type AuditLogsTableProps = {
   logs: AuditLog[];
 };
 
-const ACTION_COLORS: Record<string, string> = {
-  LOGIN_SUCCESS: "bg-success-bg text-success",
-  LOGIN_FAILURE: "bg-error-bg text-error",
-  LOGOUT: "bg-surface-subtle text-content-secondary",
-  REGISTER: "bg-success-bg text-success",
-  TOKEN_REFRESH: "bg-surface-subtle text-content-secondary",
-  OAUTH_LOGIN: "bg-info-bg text-info",
-  OAUTH_LINKED: "bg-success-bg text-success",
-  OAUTH_REGISTER: "bg-success-bg text-success",
-  OAUTH_UNLINKED: "bg-warning-bg text-warning",
-  ACCOUNT_LOCKED: "bg-error-bg text-error",
-  ACCOUNT_UNLOCKED: "bg-success-bg text-success",
-  PASSWORD_CHANGE: "bg-warning-bg text-warning",
-  PROFILE_UPDATE: "bg-surface-subtle text-content-secondary",
-  USER_ROLE_CHANGE: "bg-warning-bg text-warning",
-  USER_DEACTIVATED: "bg-error-bg text-error",
-  USER_ACTIVATED: "bg-success-bg text-success",
-  USER_DELETED: "bg-error-bg text-error",
-  SUPERADMIN_BYPASS: "bg-warning-bg text-warning",
+const ACTION_BADGE_VARIANT: Record<
+  string,
+  "default" | "success" | "warning" | "error" | "info"
+> = {
+  LOGIN_SUCCESS: "success",
+  LOGIN_FAILURE: "error",
+  LOGOUT: "default",
+  REGISTER: "success",
+  TOKEN_REFRESH: "default",
+  OAUTH_LOGIN: "info",
+  OAUTH_LINKED: "success",
+  OAUTH_REGISTER: "success",
+  OAUTH_UNLINKED: "warning",
+  ACCOUNT_LOCKED: "error",
+  ACCOUNT_UNLOCKED: "success",
+  PASSWORD_CHANGE: "warning",
+  PROFILE_UPDATE: "default",
+  USER_ROLE_CHANGE: "warning",
+  USER_DEACTIVATED: "error",
+  USER_ACTIVATED: "success",
+  USER_DELETED: "error",
+  SUPERADMIN_BYPASS: "warning",
 };
 
 function formatDate(dateStr: string): string {
@@ -67,6 +72,77 @@ function getMetadataSummary(metadata: Record<string, unknown> | null): string {
     .join(", ");
 }
 
+function CopyCell({
+  value,
+  maxWidth,
+  className = "",
+}: {
+  value: string;
+  maxWidth: string;
+  className?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  const [hover, setHover] = useState(false);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const tableRef = useRef<HTMLElement | null>(null);
+
+  if (value === "—") {
+    return <span className={`text-content-tertiary ${className}`}>—</span>;
+  }
+
+  const handleClick = () => {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!tableRef.current) {
+      tableRef.current = (e.target as HTMLElement).closest(".card-flat");
+    }
+    const table = tableRef.current?.getBoundingClientRect();
+    if (table) {
+      setPos({
+        x: Math.min(e.clientX + 12, table.right - 320),
+        y: Math.min(e.clientY + 12, table.bottom - 40),
+      });
+    } else {
+      setPos({ x: e.clientX + 12, y: e.clientY + 12 });
+    }
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={handleClick}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => {
+          setHover(false);
+          setCopied(false);
+          tableRef.current = null;
+        }}
+        onMouseMove={handleMouseMove}
+        className={`block truncate text-left transition-colors hover:text-content-primary ${maxWidth} ${className}`}
+      >
+        {value}
+      </button>
+      {hover && (
+        <div
+          className={`pointer-events-none fixed z-50 max-w-xs rounded-lg border px-3 py-2 text-caption shadow-card ${
+            copied
+              ? "border-success/30 bg-success-bg text-success"
+              : "border-border-strong bg-surface-primary text-content-primary"
+          }`}
+          style={{ left: pos.x, top: pos.y }}
+        >
+          {copied ? "Copied!" : value}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const columns: ColumnDef<AuditLog>[] = [
   {
     key: "time",
@@ -79,33 +155,42 @@ const columns: ColumnDef<AuditLog>[] = [
     key: "action",
     label: "Action",
     render: (log) => (
-      <span
-        className={`inline-block rounded-full px-2 py-0.5 text-caption font-normal ${
-          ACTION_COLORS[log.action] ||
-          "bg-surface-subtle text-content-secondary"
-        }`}
+      <Badge
+        variant={ACTION_BADGE_VARIANT[log.action] || "default"}
+        size="sm"
+        className="whitespace-nowrap"
       >
         {log.action.replace(/_/g, " ")}
-      </span>
+      </Badge>
     ),
   },
   {
     key: "user",
     label: "User",
-    render: (log) => getUserLabel(log),
+    render: (log) => (
+      <CopyCell
+        value={getUserLabel(log)}
+        maxWidth="max-w-[160px]"
+        className="text-content-primary"
+      />
+    ),
   },
   {
     key: "target",
     label: "Target",
     render: (log) => (
-      <span className="text-content-secondary">{getTargetLabel(log)}</span>
+      <CopyCell
+        value={getTargetLabel(log)}
+        maxWidth="max-w-[180px]"
+        className="text-content-secondary"
+      />
     ),
   },
   {
     key: "ip",
     label: "IP",
     render: (log) => (
-      <span className="font-mono text-caption text-content-tertiary">
+      <span className="whitespace-nowrap font-mono text-caption text-content-tertiary">
         {log.ipAddress || "—"}
       </span>
     ),
@@ -114,12 +199,11 @@ const columns: ColumnDef<AuditLog>[] = [
     key: "details",
     label: "Details",
     render: (log) => (
-      <span
-        className="block max-w-[240px] truncate text-caption text-content-tertiary"
-        title={getMetadataSummary(log.metadata)}
-      >
-        {getMetadataSummary(log.metadata)}
-      </span>
+      <CopyCell
+        value={getMetadataSummary(log.metadata)}
+        maxWidth="max-w-[240px]"
+        className="font-mono text-caption text-content-tertiary"
+      />
     ),
   },
 ];

@@ -148,14 +148,24 @@ const unusedColorGroups: ColorGroup[] = [
     label: "Border",
     tokens: [
       {
-        name: "default (5%)",
+        name: "subtle (3%)",
+        value: "rgba(0,0,0,0.03)",
+        cssVar: "--border-subtle",
+      },
+      {
+        name: "default (5%) — dividers, separators",
         value: "rgba(0,0,0,0.05)",
         cssVar: "--border-default",
       },
       {
-        name: "subtle (3%)",
-        value: "rgba(0,0,0,0.03)",
-        cssVar: "--border-subtle",
+        name: "strong (8%) — cards, containers",
+        value: "rgba(0,0,0,0.08)",
+        cssVar: "--border-strong",
+      },
+      {
+        name: "components (15%) — inputs, selects, buttons, checkboxes",
+        value: "rgba(0,0,0,0.15)",
+        cssVar: "--border-components",
       },
     ],
   },

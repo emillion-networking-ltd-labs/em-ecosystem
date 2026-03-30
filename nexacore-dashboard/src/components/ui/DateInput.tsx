@@ -149,7 +149,11 @@ export default function DateInput({
         </div>
       )}
 
-      {error && <p className="text-caption text-error">{error}</p>}
+      {error && (
+        <p className="absolute left-0 top-full mt-1 text-caption text-error">
+          {error}
+        </p>
+      )}
     </div>
   );
 }

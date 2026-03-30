@@ -22,6 +22,7 @@
   /* Border colors */
   --border-default: rgba(0, 0, 0, 0.05);
   --border-strong: rgba(0, 0, 0, 0.08);
+  --border-components: rgba(0, 0, 0, 0.15);
   --border-subtle: rgba(0, 0, 0, 0.03);
 
   /* Semantic feedback colors */
@@ -73,6 +74,7 @@
 
   --border-default: rgba(255, 255, 255, 0.08);
   --border-strong: rgba(255, 255, 255, 0.12);
+  --border-components: rgba(255, 255, 255, 0.2);
   --border-subtle: rgba(255, 255, 255, 0.04);
 
   /* Semantic feedback colors */
@@ -119,6 +121,7 @@
   --content-inverse: #ffffff;
   --border-default: rgba(0, 0, 0, 0.05);
   --border-strong: rgba(0, 0, 0, 0.08);
+  --border-components: rgba(0, 0, 0, 0.15);
   --border-subtle: rgba(0, 0, 0, 0.03);
   --color-error: 138 17 17;
   --color-error-bg: #fef2f2;

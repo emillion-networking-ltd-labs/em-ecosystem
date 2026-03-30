@@ -61,6 +61,7 @@ const config: Config = {
         border: {
           default: "var(--border-default)",
           strong: "var(--border-strong)",
+          components: "var(--border-components)",
           subtle: "var(--border-subtle)",
         },
         hover: {

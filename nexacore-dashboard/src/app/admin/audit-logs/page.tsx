@@ -7,12 +7,14 @@ import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import AuditLogsTable from "@/components/admin/AuditLogsTable";
 import AuditLogFilters from "@/components/admin/AuditLogFilters";
 import Pagination from "@/components/ui/Pagination";
-import { apiClient } from "@/lib/api";
+import { apiClient, SessionExpiredError } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 import type { AuditLog, AuditAction, PaginatedResponse } from "@/lib/types";
 
 const LIMIT = 20;
 
 export default function AuditLogsPage() {
+  const { isAuthenticated } = useAuth();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [meta, setMeta] = useState({
     total: 0,
@@ -28,8 +30,10 @@ export default function AuditLogsPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
+  const dateRangePartial = (startDate && !endDate) || (!startDate && endDate);
+
   const fetchLogs = useCallback(
-    async (page: number) => {
+    async (page: number, signal?: AbortSignal) => {
       setLoading(true);
       try {
         const params = new URLSearchParams({
@@ -38,26 +42,34 @@ export default function AuditLogsPage() {
         });
         if (action) params.set("action", action);
         if (userId.trim()) params.set("userId", userId.trim());
-        if (startDate) params.set("startDate", startDate);
-        if (endDate) params.set("endDate", endDate);
+        if (startDate && endDate) {
+          params.set("startDate", startDate);
+          params.set("endDate", endDate);
+        }
 
         const res = await apiClient.get<PaginatedResponse<AuditLog>>(
           `/audit-logs?${params}`,
+          { signal },
         );
+        if (signal?.aborted) return;
         setLogs(res.data);
         setMeta(res.meta);
-      } catch {
-        // silently fail — user sees empty table
+      } catch (err) {
+        if (signal?.aborted) return;
+        if (err instanceof SessionExpiredError) return;
       } finally {
-        setLoading(false);
+        if (!signal?.aborted) setLoading(false);
       }
     },
     [action, userId, startDate, endDate],
   );
 
   useEffect(() => {
-    fetchLogs(1);
-  }, [fetchLogs]);
+    if (!isAuthenticated) return;
+    const controller = new AbortController();
+    fetchLogs(1, controller.signal);
+    return () => controller.abort();
+  }, [fetchLogs, isAuthenticated]);
 
   return (
     <AdminRoute>
@@ -78,7 +90,7 @@ export default function AuditLogsPage() {
         </div>
 
         {/* Filters */}
-        <div className="mb-4">
+        <div className="card-flat mb-6">
           <AuditLogFilters
             action={action}
             onActionChange={setAction}
@@ -88,39 +100,42 @@ export default function AuditLogsPage() {
             onStartDateChange={setStartDate}
             endDate={endDate}
             onEndDateChange={setEndDate}
+            dateRangePartial={dateRangePartial}
           />
         </div>
 
         {/* Table */}
-        {loading ? (
-          <div className="flex h-64 items-center justify-center">
-            <p className="text-body text-content-tertiary">
-              Loading audit logs...
-            </p>
-          </div>
-        ) : logs.length === 0 ? (
-          <div className="flex h-64 items-center justify-center rounded-xl border border-border-default bg-surface-primary">
-            <p className="text-body text-content-tertiary">
-              No audit logs found.
-            </p>
-          </div>
-        ) : (
-          <>
-            <AuditLogsTable logs={logs} />
-            {meta.totalPages > 1 && (
-              <div className="mt-4">
-                <Pagination
-                  currentPage={meta.page}
-                  totalPages={meta.totalPages}
-                  onPageChange={(page) => fetchLogs(page)}
-                />
-              </div>
-            )}
-            <p className="mt-2 text-caption text-content-tertiary">
-              {meta.total} total entries
-            </p>
-          </>
-        )}
+        <div className="card-flat">
+          {loading ? (
+            <div className="flex h-64 items-center justify-center">
+              <p className="text-body text-content-tertiary">
+                Loading audit logs...
+              </p>
+            </div>
+          ) : logs.length === 0 ? (
+            <div className="flex h-64 items-center justify-center">
+              <p className="text-body text-content-tertiary">
+                No audit logs found.
+              </p>
+            </div>
+          ) : (
+            <>
+              <AuditLogsTable logs={logs} />
+              {meta.totalPages > 1 && (
+                <div className="mt-4">
+                  <Pagination
+                    currentPage={meta.page}
+                    totalPages={meta.totalPages}
+                    onPageChange={(page) => fetchLogs(page)}
+                  />
+                </div>
+              )}
+              <p className="mt-2 text-caption text-content-tertiary">
+                {meta.total} total entries
+              </p>
+            </>
+          )}
+        </div>
       </DashboardLayout>
     </AdminRoute>
   );
