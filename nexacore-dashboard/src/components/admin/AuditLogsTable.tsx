@@ -1,5 +1,6 @@
 "use client";
 
+import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
 import type { AuditLog } from "@/lib/types";
 
 type AuditLogsTableProps = {
@@ -41,21 +42,17 @@ function formatDate(dateStr: string): string {
 
 function getUserLabel(log: AuditLog): string {
   if (!log.user) return log.userId || "—";
-  const name =
-    log.user.firstName && log.user.lastName
-      ? `${log.user.firstName} ${log.user.lastName}`
-      : log.user.email;
-  return name;
+  return log.user.firstName && log.user.lastName
+    ? `${log.user.firstName} ${log.user.lastName}`
+    : log.user.email;
 }
 
 function getTargetLabel(log: AuditLog): string {
   if (!log.targetUserId) return "—";
   if (!log.targetUser) return log.targetUserId;
-  const name =
-    log.targetUser.firstName && log.targetUser.lastName
-      ? `${log.targetUser.firstName} ${log.targetUser.lastName}`
-      : log.targetUser.email;
-  return name;
+  return log.targetUser.firstName && log.targetUser.lastName
+    ? `${log.targetUser.firstName} ${log.targetUser.lastName}`
+    : log.targetUser.email;
 }
 
 function getMetadataSummary(metadata: Record<string, unknown> | null): string {
@@ -70,70 +67,70 @@ function getMetadataSummary(metadata: Record<string, unknown> | null): string {
     .join(", ");
 }
 
+const columns: ColumnDef<AuditLog>[] = [
+  {
+    key: "time",
+    label: "Time",
+    render: (log) => (
+      <span className="whitespace-nowrap">{formatDate(log.createdAt)}</span>
+    ),
+  },
+  {
+    key: "action",
+    label: "Action",
+    render: (log) => (
+      <span
+        className={`inline-block rounded-full px-2 py-0.5 text-caption font-normal ${
+          ACTION_COLORS[log.action] ||
+          "bg-surface-subtle text-content-secondary"
+        }`}
+      >
+        {log.action.replace(/_/g, " ")}
+      </span>
+    ),
+  },
+  {
+    key: "user",
+    label: "User",
+    render: (log) => getUserLabel(log),
+  },
+  {
+    key: "target",
+    label: "Target",
+    render: (log) => (
+      <span className="text-content-secondary">{getTargetLabel(log)}</span>
+    ),
+  },
+  {
+    key: "ip",
+    label: "IP",
+    render: (log) => (
+      <span className="font-mono text-caption text-content-tertiary">
+        {log.ipAddress || "—"}
+      </span>
+    ),
+  },
+  {
+    key: "details",
+    label: "Details",
+    render: (log) => (
+      <span
+        className="block max-w-[240px] truncate text-caption text-content-tertiary"
+        title={getMetadataSummary(log.metadata)}
+      >
+        {getMetadataSummary(log.metadata)}
+      </span>
+    ),
+  },
+];
+
 export default function AuditLogsTable({ logs }: AuditLogsTableProps) {
   return (
-    <div className="overflow-x-auto rounded-xl border border-border-default bg-surface-primary">
-      <table className="w-full text-left text-body">
-        <thead>
-          <tr className="border-b border-border-default">
-            <th className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wider text-content-tertiary">
-              Time
-            </th>
-            <th className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wider text-content-tertiary">
-              Action
-            </th>
-            <th className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wider text-content-tertiary">
-              User
-            </th>
-            <th className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wider text-content-tertiary">
-              Target
-            </th>
-            <th className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wider text-content-tertiary">
-              IP
-            </th>
-            <th className="px-4 py-3 text-left text-caption font-semibold uppercase tracking-wider text-content-tertiary">
-              Details
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.map((log) => (
-            <tr
-              key={log.id}
-              className="border-b border-border-default last:border-b-0 hover:bg-surface-subtle/50"
-            >
-              <td className="whitespace-nowrap px-4 py-3 text-content-primary">
-                {formatDate(log.createdAt)}
-              </td>
-              <td className="px-4 py-3">
-                <span
-                  className={`inline-block rounded-full px-2 py-0.5 text-caption font-normal ${
-                    ACTION_COLORS[log.action] ||
-                    "bg-surface-subtle text-content-secondary"
-                  }`}
-                >
-                  {log.action.replace(/_/g, " ")}
-                </span>
-              </td>
-              <td className="px-4 py-3 text-content-primary">
-                {getUserLabel(log)}
-              </td>
-              <td className="px-4 py-3 text-content-secondary">
-                {getTargetLabel(log)}
-              </td>
-              <td className="px-4 py-3 font-mono text-caption text-content-tertiary">
-                {log.ipAddress || "—"}
-              </td>
-              <td
-                className="max-w-[240px] truncate px-4 py-3 text-caption text-content-tertiary"
-                title={getMetadataSummary(log.metadata)}
-              >
-                {getMetadataSummary(log.metadata)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <DataTable
+      data={logs}
+      columns={columns}
+      keyExtractor={(log) => log.id}
+      emptyMessage="No audit logs found."
+    />
   );
 }

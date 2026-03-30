@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { ChevronDown } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { usePermissions } from "@/hooks/usePermissions";
 import { apiClient } from "@/lib/api";
 import type { SafeUser, PaginatedResponse } from "@/lib/types";
@@ -88,9 +89,18 @@ export default function DashboardPage() {
       <DashboardLayout rightPanel={<RightPanel />}>
         {/* Page header */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="rounded-xl bg-transparent px-2 py-1 text-body font-semibold text-content-primary">
-            Overview
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-h2 font-semibold text-content-primary">
+              Overview
+            </h1>
+            <span className="inline-block h-6 w-px bg-border-strong" />
+            <Breadcrumbs
+              items={[
+                { label: "Dashboards", href: "/dashboard" },
+                { label: "Overview" },
+              ]}
+            />
+          </div>
           <button className="flex items-center gap-1 rounded-lg px-2 py-1 text-caption text-content-primary hover:bg-surface-subtle">
             Today
             <ChevronDown size={16} className="text-content-tertiary" />

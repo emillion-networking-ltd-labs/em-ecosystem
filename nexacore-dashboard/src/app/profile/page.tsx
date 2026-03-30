@@ -13,14 +13,24 @@ import ConnectedAccounts from "@/components/profile/ConnectedAccounts";
 import ActiveSessions from "@/components/profile/ActiveSessions";
 import DeleteAccount from "@/components/profile/DeleteAccount";
 import SecurityActivity from "@/components/profile/SecurityActivity";
+import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
 export default function ProfilePage() {
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        <h1 className="mb-6 text-body font-semibold text-content-primary">
-          Profile
-        </h1>
+        <div className="mb-6 flex items-center gap-2">
+          <h1 className="text-h2 font-semibold text-content-primary">
+            Profile
+          </h1>
+          <span className="inline-block h-6 w-px bg-border-strong" />
+          <Breadcrumbs
+            items={[
+              { label: "Dashboards", href: "/dashboard" },
+              { label: "Profile" },
+            ]}
+          />
+        </div>
         <div className="max-w-2xl space-y-6">
           <ProfileForm />
           <ChangeEmailForm />

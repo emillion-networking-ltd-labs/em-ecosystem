@@ -6,6 +6,7 @@ import { apiClient } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
 import Can from "@/components/guards/Can";
 import Checkbox from "@/components/ui/Checkbox";
+import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
 import type {
   Permission,
   RolePermissionsResponse,
@@ -142,76 +143,68 @@ export default function PermissionsMatrix() {
 
   return (
     <div className="space-y-6">
-      {/* Matrix table */}
-      <div className="overflow-x-auto rounded-xl border border-border-default bg-surface-primary">
-        <table className="w-full">
-          <thead>
-            <tr className="border-b border-border-default">
-              <th className="px-6 py-4 text-left text-caption font-semibold uppercase tracking-wider text-content-tertiary">
-                Permission
-              </th>
-              {EDITABLE_ROLES.map((role) => (
-                <th
-                  key={role}
-                  className="px-6 py-4 text-center text-caption font-semibold uppercase tracking-wider text-content-tertiary"
-                >
-                  {role}
-                </th>
-              ))}
-              <th className="px-6 py-4 text-center text-caption font-semibold uppercase tracking-wider text-brand-primary">
-                SUPERADMIN
-              </th>
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from(grouped.entries()).map(([resource, perms]) => (
-              <ResourceGroup key={resource} resource={resource}>
-                {perms.map((perm) => (
-                  <tr
-                    key={perm.id}
-                    className="border-b border-border-default last:border-b-0 hover:bg-surface-subtle/50"
-                  >
-                    <td className="px-6 py-3">
-                      <div>
-                        <span className="text-body font-normal text-content-primary">
-                          {perm.key}
-                        </span>
-                        <p className="text-caption text-content-tertiary">
-                          {perm.description}
-                        </p>
-                      </div>
-                    </td>
-                    {EDITABLE_ROLES.map((role) => (
-                      <td key={role} className="px-6 py-3 text-center">
-                        <Can
-                          permission="permissions:write"
-                          fallback={
-                            <Checkbox
-                              checked={current[role]?.has(perm.key) ?? false}
-                              disabled
-                              size="md"
-                            />
-                          }
-                        >
-                          <Checkbox
-                            checked={current[role]?.has(perm.key) ?? false}
-                            onChange={() => toggle(role, perm.key)}
-                            size="md"
-                          />
-                        </Can>
-                      </td>
-                    ))}
-                    {/* SUPERADMIN: always checked, disabled */}
-                    <td className="px-6 py-3 text-center">
-                      <Checkbox checked disabled size="md" />
-                    </td>
-                  </tr>
-                ))}
-              </ResourceGroup>
-            ))}
-          </tbody>
-        </table>
-      </div>
+      {/* Matrix tables — one DataTable per resource group */}
+      {Array.from(grouped.entries()).map(([resource, perms]) => {
+        const columns: ColumnDef<Permission>[] = [
+          {
+            key: "permission",
+            label: "Permission",
+            render: (perm) => (
+              <div>
+                <span className="text-body font-normal text-content-primary">
+                  {perm.key}
+                </span>
+                <p className="text-caption text-content-tertiary">
+                  {perm.description}
+                </p>
+              </div>
+            ),
+          },
+          ...EDITABLE_ROLES.map((role) => ({
+            key: role,
+            label: role,
+            align: "center" as const,
+            render: (perm: Permission) => (
+              <Can
+                permission="permissions:write"
+                fallback={
+                  <Checkbox
+                    checked={current[role]?.has(perm.key) ?? false}
+                    disabled
+                    size="md"
+                  />
+                }
+              >
+                <Checkbox
+                  checked={current[role]?.has(perm.key) ?? false}
+                  onChange={() => toggle(role, perm.key)}
+                  size="md"
+                />
+              </Can>
+            ),
+          })),
+          {
+            key: "superadmin",
+            label: "SUPERADMIN",
+            align: "center" as const,
+            headerClassName: "!text-brand-primary",
+            render: () => <Checkbox checked disabled size="md" />,
+          },
+        ];
+
+        return (
+          <div key={resource}>
+            <p className="mb-2 text-caption font-semibold uppercase tracking-wider text-content-tertiary">
+              {resource}
+            </p>
+            <DataTable
+              data={perms}
+              columns={columns}
+              keyExtractor={(perm) => perm.id}
+            />
+          </div>
+        );
+      })}
 
       {/* Save/Reset buttons per role */}
       <Can permission="permissions:write">
@@ -249,29 +242,5 @@ export default function PermissionsMatrix() {
         </div>
       </Can>
     </div>
-  );
-}
-
-/* ---- Sub-component: resource group header ---- */
-
-function ResourceGroup({
-  resource,
-  children,
-}: {
-  resource: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <>
-      <tr className="bg-surface-secondary">
-        <td
-          colSpan={4}
-          className="px-6 py-2 text-caption font-semibold uppercase tracking-wider text-content-tertiary"
-        >
-          {resource}
-        </td>
-      </tr>
-      {children}
-    </>
   );
 }

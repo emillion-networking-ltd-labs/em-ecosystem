@@ -160,22 +160,21 @@ export default function AdminPage() {
   return (
     <AdminRoute>
       <DashboardLayout>
-        {/* Breadcrumbs */}
-        <div className="mb-6">
-          <Breadcrumbs
-            items={[
-              { label: "Dashboards", href: "/dashboard" },
-              { label: "Admin", href: "/admin" },
-              { label: "User Management" },
-            ]}
-          />
-        </div>
-
         {/* Page header */}
         <div className="mb-6 flex items-center justify-between">
-          <h1 className="text-h1 font-semibold text-content-primary">
-            User Management
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-h2 font-semibold text-content-primary">
+              User Management
+            </h1>
+            <span className="inline-block h-6 w-px bg-border-strong" />
+            <Breadcrumbs
+              items={[
+                { label: "Dashboards", href: "/dashboard" },
+                { label: "Admin", href: "/admin" },
+                { label: "User Management" },
+              ]}
+            />
+          </div>
           <div className="w-64">
             <Input
               name="search"

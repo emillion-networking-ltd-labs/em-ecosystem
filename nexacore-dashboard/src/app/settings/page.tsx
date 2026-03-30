@@ -13,8 +13,12 @@ export default function SettingsPage() {
   return (
     <ProtectedRoute>
       <DashboardLayout>
-        {/* Breadcrumbs */}
-        <div className="mb-6">
+        {/* Page header */}
+        <div className="mb-6 flex items-center gap-2">
+          <h1 className="text-h2 font-semibold text-content-primary">
+            Settings
+          </h1>
+          <span className="inline-block h-6 w-px bg-border-strong" />
           <Breadcrumbs
             items={[
               { label: "Dashboards", href: "/dashboard" },
@@ -22,11 +26,6 @@ export default function SettingsPage() {
             ]}
           />
         </div>
-
-        {/* Page header */}
-        <h1 className="mb-6 text-h1 font-semibold text-content-primary">
-          Settings
-        </h1>
 
         {/* Settings sections */}
         <div className="space-y-6">
