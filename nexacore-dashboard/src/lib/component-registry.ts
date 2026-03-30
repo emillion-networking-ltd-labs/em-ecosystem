@@ -185,6 +185,14 @@ export const componentRegistry: ComponentEntry[] = [
     files: ["RecoveryCodesGrid.tsx"],
   },
   {
+    name: "Modal",
+    category: "molecule",
+    description:
+      "Confirm modal — primary/danger variants, focus trap, Escape close, overlay click",
+    files: ["ConfirmModal.tsx", "IdleWarningModal.tsx"],
+    count: 2,
+  },
+  {
     name: "Sidebar",
     category: "molecule",
     description:

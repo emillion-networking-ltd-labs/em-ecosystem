@@ -85,6 +85,7 @@ import LanguageSelector, {
   languageSelectorSpecs,
 } from "@/components/ui/LanguageSelector";
 import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
+import ConfirmModal, { confirmModalSpecs } from "@/components/ui/ConfirmModal";
 import Accordion, {
   SingleAccordion,
   accordionSpecs,
@@ -2913,6 +2914,7 @@ export function MoleculeShowcase() {
       <FeedbackShowcase />
       <ChartsShowcase />
       <CalendarShowcase />
+      <ModalShowcase />
       <SidebarShowcase />
     </div>
   );
@@ -3022,6 +3024,67 @@ function EmptyStateShowcase() {
         ))}
       </div>
       <SpecsPanel specs={{ EmptyState: emptyStateSpecs }} />
+    </ShowcaseSection>
+  );
+}
+
+function ModalShowcase() {
+  const [primaryOpen, setPrimaryOpen] = useState(false);
+  const [dangerOpen, setDangerOpen] = useState(false);
+
+  return (
+    <ShowcaseSection title="Modal">
+      <div className="flex flex-wrap gap-4">
+        {(["light", "dark"] as const).map((mode) => (
+          <div
+            key={mode}
+            className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+          >
+            <p className="text-caption text-content-primary/50 font-mono mb-4">
+              {mode}
+            </p>
+            <p className="text-caption text-content-primary/50 font-mono mb-2">
+              variants — click to preview
+            </p>
+            <div className="flex gap-2">
+              <Button
+                size="md"
+                variant="outline"
+                onClick={() => setPrimaryOpen(true)}
+              >
+                Primary
+              </Button>
+              <Button
+                size="md"
+                variant="outline"
+                onClick={() => setDangerOpen(true)}
+              >
+                Danger
+              </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <ConfirmModal
+        open={primaryOpen}
+        onClose={() => setPrimaryOpen(false)}
+        onConfirm={() => setPrimaryOpen(false)}
+        title="Confirm action"
+        description="Are you sure you want to proceed? This action can be undone."
+        variant="primary"
+      />
+      <ConfirmModal
+        open={dangerOpen}
+        onClose={() => setDangerOpen(false)}
+        onConfirm={() => setDangerOpen(false)}
+        title="Delete item"
+        description="This action cannot be undone. All associated data will be permanently removed."
+        confirmLabel="Delete"
+        variant="danger"
+      />
+
+      <SpecsPanel specs={confirmModalSpecs} />
     </ShowcaseSection>
   );
 }

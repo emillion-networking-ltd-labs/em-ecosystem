@@ -1,6 +1,35 @@
 "use client";
 
 import { useEffect, useRef, useCallback } from "react";
+import { X } from "lucide-react";
+import Button from "./Button";
+import IconButton from "./IconButton";
+
+export const confirmModalSpecs = {
+  variants: {
+    primary: "Button primary (bg-surface-inverse)",
+    danger: "Button danger (bg-error)",
+  },
+  layout: {
+    width: "max-w-[390px]",
+    radius: "rounded-xl (card inner)",
+    overlay: "bg-black/40",
+    topSection: "bg-surface-primary p-6 border-b border-border-default",
+    bottomSection: "bg-surface-secondary px-6 py-3",
+  },
+  accessibility: {
+    role: "dialog, aria-modal=true",
+    focusTrap: "Tab/Shift+Tab cycles within modal",
+    escape: "Closes modal",
+    overlayClick: "Closes modal",
+    focusRestore: "Previous focus restored on close",
+  },
+  close: {
+    position: "absolute right-4 top-4",
+    visibility: "opacity-0 group-hover:opacity-100",
+    component: "IconButton default sm + X 16px",
+  },
+};
 
 type ConfirmModalProps = {
   open: boolean;
@@ -35,7 +64,6 @@ export default function ConfirmModal({
   useEffect(() => {
     if (!open) return;
     previousFocusRef.current = document.activeElement as HTMLElement;
-    // Focus the first focusable element in the panel
     const panel = panelRef.current;
     if (panel) {
       const focusable = panel.querySelectorAll<HTMLElement>(
@@ -44,7 +72,6 @@ export default function ConfirmModal({
       if (focusable.length > 0) focusable[0].focus();
     }
     return () => {
-      // Restore focus on close
       previousFocusRef.current?.focus();
     };
   }, [open]);
@@ -98,44 +125,52 @@ export default function ConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
-        className="w-[427px] overflow-hidden rounded-3xl border border-border-strong bg-surface-secondary"
+        className="group max-w-[390px] overflow-hidden rounded-xl border border-border-default bg-surface-secondary shadow-card"
       >
         {/* Top section */}
-        <div className="flex gap-4 border-b border-border-strong bg-surface-primary p-6">
-          <div className="flex-1">
-            <h2
-              id="confirm-modal-title"
-              className="text-h2 font-semibold text-content-primary"
-            >
-              {title}
-            </h2>
-            <p className="mt-2 text-body text-content-secondary">
-              {description}
-            </p>
-            {children}
-          </div>
+        <div className="relative border-b border-border-default bg-surface-primary p-6">
+          <IconButton
+            variant="default"
+            size="sm"
+            className="absolute right-6 top-6 opacity-0 transition-opacity group-hover:opacity-100"
+            aria-label="Close"
+            onClick={onClose}
+          >
+            <X size={16} />
+          </IconButton>
+          <h2
+            id="confirm-modal-title"
+            className="text-h2 font-semibold text-content-primary"
+          >
+            {title}
+          </h2>
+          <p className="mt-2 pr-4 text-body text-content-secondary">
+            {description}
+          </p>
+          {children}
         </div>
 
         {/* Bottom section — buttons */}
-        <div className="flex justify-end gap-3 p-3">
-          <button
+        <div className="flex justify-end gap-3 px-6 py-3">
+          <Button
+            variant="outline"
+            size="md"
+            fullWidth={false}
             onClick={onClose}
             disabled={loading}
-            className="h-10 rounded-md px-6 text-body font-normal text-content-secondary transition-colors hover:bg-surface-subtle"
           >
             {cancelLabel}
-          </button>
-          <button
+          </Button>
+          <Button
+            variant={variant === "danger" ? "danger" : "primary"}
+            size="md"
+            fullWidth={false}
             onClick={onConfirm}
             disabled={loading}
-            className={`h-10 rounded-md px-6 text-body font-normal transition-colors disabled:opacity-50 ${
-              variant === "danger"
-                ? "bg-error text-content-inverse hover:opacity-90"
-                : "bg-surface-inverse text-content-inverse hover:opacity-90"
-            }`}
+            loading={loading}
           >
-            {loading ? "Loading..." : confirmLabel}
-          </button>
+            {confirmLabel}
+          </Button>
         </div>
       </div>
     </div>

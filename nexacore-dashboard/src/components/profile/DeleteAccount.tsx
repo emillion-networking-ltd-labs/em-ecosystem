@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/context/ToastContext";
@@ -8,6 +8,7 @@ import { PROFILE_TOAST } from "@/lib/toast-messages";
 import { deleteAccount } from "@/lib/delete-account-api";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { extractMessageByStatus } from "@/lib/error-utils";
 import { HTTP_STATUS } from "@/lib/error-constants";
 
@@ -15,9 +16,6 @@ export default function DeleteAccount() {
   const { user, logout } = useAuth();
   const { addToast } = useToast();
   const router = useRouter();
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const panelRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const [showModal, setShowModal] = useState(false);
   const [confirmText, setConfirmText] = useState("");
@@ -29,14 +27,15 @@ export default function DeleteAccount() {
   const isPasswordValid = !requiresPassword || password.length >= 8;
   const canConfirm = isConfirmValid && isPasswordValid && !loading;
 
-  const handleClose = useCallback(() => {
+  const handleClose = () => {
     if (loading) return;
     setShowModal(false);
     setConfirmText("");
     setPassword("");
-  }, [loading]);
+  };
 
   const handleDelete = async () => {
+    if (!canConfirm) return;
     setLoading(true);
     try {
       await deleteAccount(requiresPassword ? password : undefined);
@@ -58,56 +57,6 @@ export default function DeleteAccount() {
       setLoading(false);
     }
   };
-
-  // Save previous focus and focus first element on open
-  useEffect(() => {
-    if (!showModal) return;
-    previousFocusRef.current = document.activeElement as HTMLElement;
-    const panel = panelRef.current;
-    if (panel) {
-      const focusable = panel.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
-      );
-      if (focusable.length > 0) focusable[0].focus();
-    }
-    return () => {
-      previousFocusRef.current?.focus();
-    };
-  }, [showModal]);
-
-  // Keyboard handler: Escape + focus trap
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        handleClose();
-        return;
-      }
-      if (e.key === "Tab") {
-        const panel = panelRef.current;
-        if (!panel) return;
-        const focusable = panel.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
-        );
-        if (focusable.length === 0) return;
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    },
-    [handleClose],
-  );
-
-  useEffect(() => {
-    if (!showModal) return;
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [showModal, handleKeyDown]);
 
   if (!user) return null;
 
@@ -133,87 +82,43 @@ export default function DeleteAccount() {
       </div>
 
       {/* Confirmation modal */}
-      {showModal && (
-        <div
-          ref={overlayRef}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
-          onClick={(e) => {
-            if (e.target === overlayRef.current) handleClose();
-          }}
-        >
-          <div
-            ref={panelRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="delete-account-modal-title"
-            className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary"
-          >
-            {/* Top section */}
-            <div className="border-b border-border-default bg-surface-primary p-6">
-              <h2
-                id="delete-account-modal-title"
-                className="text-h2 font-semibold text-content-primary"
-              >
-                Delete Account
-              </h2>
-              <p className="mt-2 text-body text-content-secondary">
-                This action is permanent and cannot be undone. All your data
-                will be anonymized and your sessions will be revoked.
-              </p>
-
-              <div className="mt-4">
-                <p className="mb-2 text-body text-content-secondary">
-                  Type{" "}
-                  <span className="font-semibold text-content-primary">
-                    DELETE
-                  </span>{" "}
-                  to confirm
-                </p>
-                <Input
-                  name="confirmDelete"
-                  value={confirmText}
-                  onChange={(e) => setConfirmText(e.target.value)}
-                  placeholder="Type DELETE"
-                />
-              </div>
-
-              {requiresPassword && (
-                <div className="mt-4">
-                  <Input
-                    label="Password"
-                    name="deletePassword"
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter your password"
-                  />
-                </div>
-              )}
-            </div>
-
-            {/* Bottom section — buttons */}
-            <div className="flex justify-end gap-3 p-3">
-              <Button
-                variant="outline"
-                onClick={handleClose}
-                disabled={loading}
-                fullWidth={false}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="danger"
-                onClick={handleDelete}
-                disabled={!canConfirm}
-                loading={loading}
-                fullWidth={false}
-              >
-                Delete My Account
-              </Button>
-            </div>
-          </div>
+      <ConfirmModal
+        open={showModal}
+        onClose={handleClose}
+        onConfirm={handleDelete}
+        title="Delete Account"
+        description="This action is permanent and cannot be undone. All your data will be anonymized and your sessions will be revoked."
+        confirmLabel="Delete My Account"
+        variant="danger"
+        loading={loading}
+      >
+        <div className="mt-4">
+          <p className="mb-2 text-body text-content-secondary">
+            Type{" "}
+            <span className="font-semibold text-content-primary">DELETE</span>{" "}
+            to confirm
+          </p>
+          <Input
+            name="confirmDelete"
+            value={confirmText}
+            onChange={(e) => setConfirmText(e.target.value)}
+            placeholder="Type DELETE"
+          />
         </div>
-      )}
+
+        {requiresPassword && (
+          <div className="mt-4">
+            <Input
+              label="Password"
+              name="deletePassword"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter your password"
+            />
+          </div>
+        )}
+      </ConfirmModal>
     </>
   );
 }
