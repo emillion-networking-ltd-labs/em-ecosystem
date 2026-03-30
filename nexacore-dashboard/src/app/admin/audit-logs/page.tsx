@@ -63,23 +63,18 @@ export default function AuditLogsPage() {
     <AdminRoute>
       <DashboardLayout>
         {/* Page header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2">
-            <h1 className="text-h2 font-semibold text-content-primary">
-              Audit Logs
-            </h1>
-            <span className="inline-block h-6 w-px bg-border-strong" />
-            <Breadcrumbs
-              items={[
-                { label: "Dashboards", href: "/dashboard" },
-                { label: "Admin", href: "/admin" },
-                { label: "Audit Logs" },
-              ]}
-            />
-          </div>
-          <p className="mt-1 text-caption text-content-tertiary">
-            View security events, login attempts, and administrative actions.
-          </p>
+        <div className="mb-6 flex items-center gap-2">
+          <h1 className="text-h2 font-semibold text-content-primary">
+            Audit Logs
+          </h1>
+          <span className="inline-block h-6 w-px bg-border-strong" />
+          <Breadcrumbs
+            items={[
+              { label: "Dashboards", href: "/dashboard" },
+              { label: "Admin", href: "/admin" },
+              { label: "Audit Logs" },
+            ]}
+          />
         </div>
 
         {/* Filters */}
