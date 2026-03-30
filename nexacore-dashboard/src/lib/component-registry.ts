@@ -21,8 +21,9 @@ export const componentRegistry: ComponentEntry[] = [
     name: "Input",
     category: "atom",
     description:
-      "Text input with label, error, password toggle — default and filled variants",
-    files: ["Input.tsx"],
+      "Text input with label, error, password toggle — default and filled variants + DateInput",
+    files: ["Input.tsx", "DateInput.tsx"],
+    count: 2,
   },
   {
     name: "Badge",

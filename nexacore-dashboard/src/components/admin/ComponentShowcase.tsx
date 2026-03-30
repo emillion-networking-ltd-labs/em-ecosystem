@@ -87,6 +87,7 @@ import LanguageSelector, {
 } from "@/components/ui/LanguageSelector";
 import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
 import ConfirmModal, { confirmModalSpecs } from "@/components/ui/ConfirmModal";
+import DateInput, { dateInputSpecs } from "@/components/ui/DateInput";
 import IconBadge, { iconBadgeSpecs } from "@/components/ui/IconBadge";
 import Accordion, {
   SingleAccordion,
@@ -557,6 +558,40 @@ function InputGrid({ mode }: { mode: "light" | "dark" }) {
   );
 }
 
+function DateInputShowcase() {
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+
+  return (
+    <div className="flex flex-wrap gap-4">
+      {(["light", "dark"] as const).map((mode) => (
+        <div
+          key={`dateinput-${mode}`}
+          className={`flex-1 min-w-[200px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+        >
+          <p className="text-caption text-content-primary/50 font-mono mb-3">
+            {mode}
+          </p>
+          <div className="flex flex-col gap-3">
+            <DateInput
+              label="Start date"
+              size="md"
+              value={startDate}
+              onChange={setStartDate}
+            />
+            <DateInput
+              label="End date"
+              size="sm"
+              value={endDate}
+              onChange={setEndDate}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function InputShowcase() {
   return (
     <ShowcaseSection title="Input">
@@ -599,6 +634,12 @@ function InputShowcase() {
         </div>
       </div>
 
+      {/* Date Input */}
+      <p className="text-body font-semibold text-content-primary mb-2">
+        Date Input
+      </p>
+      <DateInputShowcase />
+
       <SpecsPanel
         specs={{
           Container: { shared: inputSpecs.container },
@@ -607,6 +648,7 @@ function InputShowcase() {
           Input: { shared: inputSpecs.input },
           States: inputSpecs.states,
           Icons: inputSpecs.icons,
+          "Date Input": dateInputSpecs.sizes,
           Dimensions: {
             "border-radius": "8px (rounded-lg)",
             "label font": "14px (text-body) / 22px line-height, semibold",

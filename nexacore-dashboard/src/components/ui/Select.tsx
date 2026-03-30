@@ -17,6 +17,7 @@ interface SelectProps {
   placeholder?: string;
   disabled?: boolean;
   className?: string;
+  size?: "sm" | "md";
 }
 
 export const selectSpecs = {
@@ -45,6 +46,11 @@ export const selectSpecs = {
   },
 };
 
+const triggerSizeClasses = {
+  sm: "h-10",
+  md: "h-12",
+};
+
 export default function Select({
   options,
   value,
@@ -52,6 +58,7 @@ export default function Select({
   placeholder = "Select...",
   disabled = false,
   className = "",
+  size = "sm",
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -159,7 +166,7 @@ export default function Select({
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openDropdown())}
         onKeyDown={handleKeyDown}
-        className={`flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-2.5 text-body font-normal transition-colors ${
+        className={`flex ${triggerSizeClasses[size]} items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-2.5 text-body font-normal transition-colors ${
           disabled
             ? "opacity-50 cursor-not-allowed"
             : "hover:text-content-primary hover:bg-surface-subtle cursor-pointer"

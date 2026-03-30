@@ -3,6 +3,7 @@
 import type { AuditAction } from "@/lib/types";
 import Select from "@/components/ui/Select";
 import Input from "@/components/ui/Input";
+import DateInput from "@/components/ui/DateInput";
 
 type AuditLogFiltersProps = {
   action: AuditAction | "";
@@ -60,6 +61,7 @@ export default function AuditLogFilters({
         value={action}
         onChange={(v) => onActionChange(v as AuditAction | "")}
         placeholder="All actions"
+        size="md"
       />
 
       {/* User ID filter */}
@@ -74,19 +76,9 @@ export default function AuditLogFilters({
       </div>
 
       {/* Date range */}
-      <input
-        type="date"
-        value={startDate}
-        onChange={(e) => onStartDateChange(e.target.value)}
-        className="h-10 rounded-md border border-border-strong bg-transparent px-3 text-body text-content-primary outline-none"
-      />
+      <DateInput value={startDate} onChange={onStartDateChange} size="md" />
       <span className="text-body text-content-tertiary">to</span>
-      <input
-        type="date"
-        value={endDate}
-        onChange={(e) => onEndDateChange(e.target.value)}
-        className="h-10 rounded-md border border-border-strong bg-transparent px-3 text-body text-content-primary outline-none"
-      />
+      <DateInput value={endDate} onChange={onEndDateChange} size="md" />
     </div>
   );
 }
