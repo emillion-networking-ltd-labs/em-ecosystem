@@ -54,7 +54,7 @@ export default function GlobalSettings() {
   };
 
   return (
-    <section className="rounded-2xl border border-border-default bg-surface-primary p-6">
+    <section className="rounded-xl border border-border-default bg-surface-primary p-6">
       <div className="mb-4 flex items-center gap-2">
         <h2 className="text-body font-semibold text-content-primary">
           Global Settings

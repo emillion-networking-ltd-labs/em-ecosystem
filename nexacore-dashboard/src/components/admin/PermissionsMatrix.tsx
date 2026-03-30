@@ -131,7 +131,7 @@ export default function PermissionsMatrix() {
 
   if (loadError && permissions.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-2xl border border-border-default bg-surface-primary">
+      <div className="flex h-64 items-center justify-center rounded-xl border border-border-default bg-surface-primary">
         <p className="text-body text-error">Failed to load permissions data.</p>
       </div>
     );
@@ -142,7 +142,7 @@ export default function PermissionsMatrix() {
   return (
     <div className="space-y-6">
       {/* Matrix table */}
-      <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary">
+      <div className="overflow-x-auto rounded-xl border border-border-default bg-surface-primary">
         <table className="w-full">
           <thead>
             <tr className="border-b border-border-default">

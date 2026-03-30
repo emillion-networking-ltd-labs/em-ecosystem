@@ -193,7 +193,7 @@ export default function AdminPage() {
             <p className="text-body text-content-tertiary">Loading users...</p>
           </div>
         ) : users.length === 0 ? (
-          <div className="flex h-64 items-center justify-center rounded-2xl border border-border-default bg-surface-primary">
+          <div className="flex h-64 items-center justify-center rounded-xl border border-border-default bg-surface-primary">
             <p className="text-body text-content-tertiary">No users found.</p>
           </div>
         ) : (

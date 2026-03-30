@@ -63,7 +63,7 @@ export default function DeleteAccount() {
   return (
     <>
       {/* Danger zone card */}
-      <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
+      <div className="rounded-xl border border-border-default bg-surface-primary p-6">
         <h2 className="mb-4 text-body font-semibold uppercase tracking-wider text-error">
           Danger Zone
         </h2>

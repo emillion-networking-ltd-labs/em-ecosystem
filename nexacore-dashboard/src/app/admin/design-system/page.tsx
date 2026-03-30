@@ -99,7 +99,7 @@ export default function DesignSystemPage() {
         </div>
 
         {/* View Toggle — nav-horizontal with icons */}
-        <div className="card mb-6">
+        <div className="card-flat mb-6">
           <div className="hidden sm:block">
             <Tabs
               tabs={viewTabs}
@@ -136,7 +136,7 @@ export default function DesignSystemPage() {
         <div key={activeView} className="animate-tab-content">
           {/* Catalog View */}
           {activeView === "catalog" && (
-            <div className="card">
+            <div className="card-flat">
               {/* Category Filter */}
               <div className="mb-6">
                 <SingleAccordion

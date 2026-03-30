@@ -171,7 +171,7 @@ export default function ConnectedAccounts() {
     <>
       <div
         id="connected-accounts"
-        className="rounded-2xl border border-border-default bg-surface-primary p-6"
+        className="rounded-xl border border-border-default bg-surface-primary p-6"
       >
         <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
           Connected Accounts

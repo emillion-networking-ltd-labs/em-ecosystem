@@ -23,7 +23,7 @@ export default function UsersTable({
   onDelete,
 }: UsersTableProps) {
   return (
-    <div className="overflow-x-auto rounded-2xl border border-border-default bg-surface-primary">
+    <div className="overflow-x-auto rounded-xl border border-border-default bg-surface-primary">
       <table className="w-full">
         <thead>
           <tr className="border-b border-border-default">

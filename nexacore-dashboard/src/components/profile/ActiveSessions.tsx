@@ -103,7 +103,7 @@ export default function ActiveSessions() {
   const otherSessions = sessions.filter((s) => !s.isCurrent);
 
   return (
-    <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
+    <div className="rounded-xl border border-border-default bg-surface-primary p-6">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
           Active Sessions

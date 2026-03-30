@@ -66,7 +66,7 @@ export default function ChangePasswordForm() {
   };
 
   return (
-    <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
+    <div className="rounded-xl border border-border-default bg-surface-primary p-6">
       <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
         {hasPassword ? "Change Password" : "Set Password"}
       </h2>

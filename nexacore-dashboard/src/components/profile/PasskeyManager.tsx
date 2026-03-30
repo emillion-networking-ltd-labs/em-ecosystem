@@ -179,7 +179,7 @@ export default function PasskeyManager() {
   };
 
   return (
-    <div className="rounded-2xl border border-border-default bg-surface-primary p-6">
+    <div className="rounded-xl border border-border-default bg-surface-primary p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
