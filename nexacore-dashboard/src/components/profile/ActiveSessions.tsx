@@ -104,7 +104,7 @@ export default function ActiveSessions() {
   const otherSessions = sessions.filter((s) => !s.isCurrent);
 
   return (
-    <div className="rounded-xl border border-border-default bg-surface-primary p-6">
+    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
       <div className="mb-6 flex items-center justify-between">
         <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
           Active Sessions
@@ -151,7 +151,7 @@ export default function ActiveSessions() {
                 className={`flex items-center gap-4 rounded-xl border p-4 ${
                   session.isCurrent
                     ? "border-status-success/30 bg-status-success/5"
-                    : "border-border-default"
+                    : "border-border-components"
                 }`}
               >
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-subtle">

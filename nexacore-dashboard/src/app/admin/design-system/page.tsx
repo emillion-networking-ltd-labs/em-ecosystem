@@ -5,6 +5,7 @@ import { LayoutGrid, Atom, Puzzle, Palette, Code2 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminRoute from "@/components/guards/AdminRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import Divider from "@/components/ui/Divider";
 import Badge from "@/components/ui/Badge";
 import Tabs from "@/components/ui/Tabs";
 import Button from "@/components/ui/Button";
@@ -88,7 +89,7 @@ export default function DesignSystemPage() {
           <h1 className="text-h2 font-semibold text-content-primary">
             Design System
           </h1>
-          <span className="inline-block h-6 w-px bg-border-strong" />
+          <Divider orientation="vertical" className="h-6" />
           <Breadcrumbs
             items={[
               { label: "Dashboards", href: "/dashboard" },

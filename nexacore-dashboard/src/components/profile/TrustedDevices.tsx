@@ -95,7 +95,7 @@ export default function TrustedDevices() {
   };
 
   return (
-    <div className="rounded-xl border border-border-default bg-surface-primary p-6">
+    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
       {/* Header */}
       <div className="mb-6 flex items-center justify-between">
         <div className="flex items-center gap-2">
@@ -144,7 +144,7 @@ export default function TrustedDevices() {
           {devices.map((device) => (
             <div
               key={device.id}
-              className="flex items-center justify-between rounded-xl border border-border-default p-4"
+              className="flex items-center justify-between rounded-xl border border-border-components p-4"
             >
               <div className="flex items-center gap-3">
                 {isMobileDevice(device.deviceName) ? (

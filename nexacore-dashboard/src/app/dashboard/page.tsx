@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import Divider from "@/components/ui/Divider";
 import { usePermissions } from "@/hooks/usePermissions";
 import { apiClient } from "@/lib/api";
 import type { SafeUser, PaginatedResponse } from "@/lib/types";
@@ -93,7 +94,7 @@ export default function DashboardPage() {
             <h1 className="text-h2 font-semibold text-content-primary">
               Overview
             </h1>
-            <span className="inline-block h-6 w-px bg-border-strong" />
+            <Divider orientation="vertical" className="h-6" />
             <Breadcrumbs
               items={[
                 { label: "Dashboards", href: "/dashboard" },

@@ -3,6 +3,7 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import Divider from "@/components/ui/Divider";
 import { usePermissions } from "@/hooks/usePermissions";
 import UserPreferences from "@/components/settings/UserPreferences";
 import GlobalSettings from "@/components/settings/GlobalSettings";
@@ -18,7 +19,7 @@ export default function SettingsPage() {
           <h1 className="text-h2 font-semibold text-content-primary">
             Settings
           </h1>
-          <span className="inline-block h-6 w-px bg-border-strong" />
+          <Divider orientation="vertical" className="h-6" />
           <Breadcrumbs
             items={[
               { label: "Dashboards", href: "/dashboard" },

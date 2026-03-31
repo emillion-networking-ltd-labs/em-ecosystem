@@ -7,9 +7,9 @@ import Button from "./Button";
 
 export const emailSelectorSpecs = {
   trigger:
-    "flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap border border-border-strong transition-colors",
+    "flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap border border-border-components transition-colors",
   dropdown:
-    "rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card",
+    "rounded-xl border border-border-components bg-surface-primary p-4 shadow-card",
   option:
     "flex h-10 w-full items-center gap-2 rounded-md bg-surface-subtle px-2 text-body font-normal text-content-primary",
 };
@@ -49,8 +49,8 @@ export default function EmailSelector({
         onClick={() => setOpen(!open)}
         className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap transition-colors ${
           open
-            ? "border border-border-strong bg-surface-subtle text-content-primary"
-            : "border border-border-strong bg-transparent text-content-primary hover:bg-surface-subtle"
+            ? "border border-border-components bg-surface-subtle text-content-primary"
+            : "border border-border-components bg-transparent text-content-primary hover:bg-surface-subtle"
         }`}
       >
         <span className="whitespace-nowrap leading-none">{email}</span>
@@ -62,7 +62,7 @@ export default function EmailSelector({
 
       {open && (
         <div className="absolute left-0 top-full z-50 mt-1 w-[300px] animate-dropdown-down">
-          <div className="rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card">
+          <div className="rounded-xl border border-border-components bg-surface-primary p-4 shadow-card">
             <button
               type="button"
               onClick={() => setOpen(false)}

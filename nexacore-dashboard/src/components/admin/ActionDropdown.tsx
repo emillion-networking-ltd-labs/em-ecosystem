@@ -48,7 +48,7 @@ export default function ActionDropdown({
         </IconButton>
 
         {open && (
-          <div className="absolute right-0 top-full z-30 mt-1 w-[241px] rounded-xl border border-border-strong bg-surface-primary p-6 shadow-card animate-dropdown-down">
+          <div className="absolute right-0 top-full z-30 mt-1 w-[241px] rounded-xl border border-border-components bg-surface-primary p-6 shadow-card animate-dropdown-down">
             <Can permission="users:write">
               <button
                 onClick={() => {

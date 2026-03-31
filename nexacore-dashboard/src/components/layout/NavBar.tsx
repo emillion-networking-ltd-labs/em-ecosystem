@@ -74,7 +74,7 @@ export default function NavBar({
   ];
 
   return (
-    <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-border-strong bg-surface-primary px-7">
+    <header className="sticky top-0 z-20 flex h-[68px] items-center justify-between border-b border-border-components bg-surface-primary px-7">
       {/* Left side */}
       <div className="flex items-center gap-2">
         {/* Mobile hamburger */}
@@ -113,7 +113,7 @@ export default function NavBar({
           <span className="text-body leading-[20px] text-content-primary/50">
             Search
           </span>
-          <kbd className="rounded-xs border border-border-strong px-1 text-caption text-content-primary/50">
+          <kbd className="rounded-xs border border-border-components px-1 text-caption text-content-primary/50">
             /
           </kbd>
         </div>
@@ -148,7 +148,7 @@ export default function NavBar({
           </button>
 
           {dropdownOpen && (
-            <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border-strong bg-surface-primary p-6 shadow-card animate-dropdown-down">
+            <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border-components bg-surface-primary p-6 shadow-card animate-dropdown-down">
               <Link
                 href="/profile"
                 onClick={() => setDropdownOpen(false)}

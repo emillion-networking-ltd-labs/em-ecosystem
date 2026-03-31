@@ -39,7 +39,7 @@ export default function ProfileForm() {
   };
 
   return (
-    <div className="rounded-xl border border-border-default bg-surface-primary p-6">
+    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
       <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
         Profile Information
       </h2>

@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminRoute from "@/components/guards/AdminRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import Divider from "@/components/ui/Divider";
 import AuditLogsTable from "@/components/admin/AuditLogsTable";
 import AuditLogFilters from "@/components/admin/AuditLogFilters";
 import Pagination from "@/components/ui/Pagination";
@@ -79,7 +80,7 @@ export default function AuditLogsPage() {
           <h1 className="text-h2 font-semibold text-content-primary">
             Audit Logs
           </h1>
-          <span className="inline-block h-6 w-px bg-border-strong" />
+          <Divider orientation="vertical" className="h-6" />
           <Breadcrumbs
             items={[
               { label: "Dashboards", href: "/dashboard" },

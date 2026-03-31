@@ -6,11 +6,11 @@ export type SegmentedVariant = "primary" | "secondary" | "outline";
 
 const activeClasses: Record<SegmentedVariant, string> = {
   primary:
-    "bg-surface-inverse text-content-inverse border border-border-strong shadow-sm",
+    "bg-surface-inverse text-content-inverse border border-border-components shadow-sm",
   secondary:
-    "bg-surface-tertiary text-content-primary border border-border-strong shadow-sm",
+    "bg-surface-tertiary text-content-primary border border-border-components shadow-sm",
   outline:
-    "bg-surface-primary text-content-primary border border-border-strong shadow-sm",
+    "bg-surface-primary text-content-primary border border-border-components shadow-sm",
 };
 
 export const sizeClasses = {
@@ -21,7 +21,7 @@ export const sizeClasses = {
 
 export const segmentedControlSpecs = {
   container:
-    "inline-flex rounded-lg border border-border-strong bg-surface-subtle p-1",
+    "inline-flex rounded-lg border border-border-components bg-surface-subtle p-1",
   option: {
     base: "flex items-center gap-1.5 rounded-md font-normal transition-all",
     inactive:
@@ -34,11 +34,11 @@ export const segmentedControlSpecs = {
   },
   variants: {
     "primary (default)":
-      "bg-surface-inverse text-content-inverse border border-border-strong shadow-sm",
+      "bg-surface-inverse text-content-inverse border border-border-components shadow-sm",
     secondary:
-      "bg-surface-tertiary text-content-primary border border-border-strong shadow-sm",
+      "bg-surface-tertiary text-content-primary border border-border-components shadow-sm",
     outline:
-      "bg-surface-primary text-content-primary border border-border-strong shadow-sm",
+      "bg-surface-primary text-content-primary border border-border-components shadow-sm",
   },
 };
 
@@ -67,7 +67,7 @@ export default function SegmentedControl<T extends string>({
 }: SegmentedControlProps<T>) {
   return (
     <div
-      className={`inline-flex rounded-lg border border-border-strong bg-surface-subtle p-1 ${className}`}
+      className={`inline-flex rounded-lg border border-border-components bg-surface-subtle p-1 ${className}`}
     >
       {options.map((option) => (
         <button

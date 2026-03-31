@@ -133,7 +133,7 @@ export default function PermissionsMatrix() {
 
   if (loadError && permissions.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-xl border border-border-default bg-surface-primary">
+      <div className="flex h-64 items-center justify-center rounded-xl border border-border-strong bg-surface-primary">
         <p className="text-body text-error">Failed to load permissions data.</p>
       </div>
     );
@@ -212,7 +212,7 @@ export default function PermissionsMatrix() {
           {EDITABLE_ROLES.map((role) => (
             <div
               key={role}
-              className="flex items-center gap-2 rounded-xl border border-border-default bg-surface-primary px-4 py-3"
+              className="flex items-center gap-2 rounded-xl border border-border-strong bg-surface-primary px-4 py-3"
             >
               <span className="text-body font-normal text-content-primary">
                 {role}
@@ -232,7 +232,7 @@ export default function PermissionsMatrix() {
               <button
                 onClick={() => resetRole(role)}
                 disabled={!isDirty(role)}
-                className="flex items-center gap-1 rounded-lg border border-border-default px-3 py-1.5 text-caption font-normal text-content-secondary transition-colors hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex items-center gap-1 rounded-lg border border-border-strong px-3 py-1.5 text-caption font-normal text-content-secondary transition-colors hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
               >
                 <RotateCcw size={14} />
                 Reset

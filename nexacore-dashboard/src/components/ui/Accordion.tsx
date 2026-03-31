@@ -21,7 +21,7 @@ export const accordionSpecs = {
   },
   container: {
     shared:
-      "rounded-md border border-border-strong overflow-hidden bg-surface-primary",
+      "rounded-md border border-border-components overflow-hidden bg-surface-primary",
     divider: "divide-y divide-border-strong",
   },
   icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open",
@@ -43,7 +43,7 @@ export default function Accordion({
 
   return (
     <div
-      className={`rounded-md border border-border-strong overflow-hidden bg-surface-primary divide-y divide-border-strong ${className}`}
+      className={`rounded-md border border-border-components overflow-hidden bg-surface-primary divide-y divide-border-strong ${className}`}
     >
       {items.map((item, i) => (
         <div key={i}>
@@ -83,7 +83,7 @@ export function SingleAccordion({
 
   return (
     <div
-      className={`rounded-md border border-border-strong overflow-hidden bg-surface-primary ${className}`}
+      className={`rounded-md border border-border-components overflow-hidden bg-surface-primary ${className}`}
     >
       <button
         onClick={() => setOpen(!open)}

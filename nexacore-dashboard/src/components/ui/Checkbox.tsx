@@ -29,7 +29,7 @@ const iconSizes = {
 export const checkboxSpecs = {
   box: {
     checked: "bg-surface-inverse border-surface-inverse",
-    unchecked: "bg-surface-primary border-border-strong",
+    unchecked: "bg-surface-primary border-border-components",
     indeterminate: "bg-surface-inverse border-surface-inverse",
     disabled: "opacity-50 cursor-not-allowed",
   },
@@ -80,7 +80,7 @@ export default function Checkbox({
           className={`${boxSizes[size]} border flex items-center justify-center transition-colors ${
             checked || indeterminate
               ? "bg-surface-inverse border-surface-inverse"
-              : "bg-surface-primary border-border-strong"
+              : "bg-surface-primary border-border-components"
           } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
           onClick={() => !disabled && onChange?.(!checked)}
           aria-hidden="true"

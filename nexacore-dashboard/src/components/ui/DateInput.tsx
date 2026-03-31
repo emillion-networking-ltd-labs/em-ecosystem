@@ -24,7 +24,7 @@ const sizeClasses = {
 
 export const dateInputSpecs = {
   container:
-    "rounded-lg border border-border-strong bg-transparent outline outline-2 outline-offset-2 transition-colors",
+    "rounded-lg border border-border-components bg-transparent outline outline-2 outline-offset-2 transition-colors",
   sizes: {
     sm: "h-10 px-3 text-body (40px)",
     "md (default)": "h-12 px-4 text-body (48px)",
@@ -120,7 +120,7 @@ export default function DateInput({
         type="button"
         onClick={() => !disabled && setOpen(!open)}
         disabled={disabled}
-        className={`flex items-center gap-2 ${sizeClasses[size]} rounded-lg border border-border-strong bg-transparent text-left outline outline-2 outline-offset-2 transition-colors ${
+        className={`flex items-center gap-2 ${sizeClasses[size]} rounded-lg border border-border-components bg-transparent text-left outline outline-2 outline-offset-2 transition-colors ${
           hasError
             ? "outline-error/75"
             : open

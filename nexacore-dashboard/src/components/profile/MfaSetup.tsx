@@ -157,7 +157,7 @@ export default function MfaSetup() {
   // Recovery codes view (after setup or regeneration)
   if (view === "recovery-codes") {
     return (
-      <div className="rounded-xl border border-border-default bg-surface-primary p-6">
+      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
         <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
           Recovery Codes
         </h2>
@@ -172,7 +172,7 @@ export default function MfaSetup() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-2 rounded-lg border border-border-default bg-surface-subtle p-4">
+          <div className="grid grid-cols-2 gap-2 rounded-lg border border-border-components bg-surface-subtle p-4">
             {recoveryCodes.map((code, i) => (
               <code
                 key={i}
@@ -215,7 +215,7 @@ export default function MfaSetup() {
   // Setup QR view
   if (view === "setup" && setupData) {
     return (
-      <div className="rounded-xl border border-border-default bg-surface-primary p-6">
+      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
         <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
           Set Up Two-Factor Authentication
         </h2>
@@ -228,7 +228,7 @@ export default function MfaSetup() {
 
           {/* QR Code */}
           <div className="flex justify-center">
-            <div className="rounded-xl border border-border-default bg-white p-4">
+            <div className="rounded-xl border border-border-components bg-white p-4">
               <img
                 src={setupData.qrCodeDataUrl}
                 alt="MFA QR Code"
@@ -244,7 +244,7 @@ export default function MfaSetup() {
               Or enter this secret manually:
             </p>
             <div className="flex items-center gap-2">
-              <code className="flex-1 select-all rounded-lg border border-border-default bg-surface-subtle px-3 py-2 font-mono text-body text-content-primary">
+              <code className="flex-1 select-all rounded-lg border border-border-components bg-surface-subtle px-3 py-2 font-mono text-body text-content-primary">
                 {setupData.secret}
               </code>
               <IconButton
@@ -306,7 +306,7 @@ export default function MfaSetup() {
   // Disable MFA view
   if (view === "disable") {
     return (
-      <div className="rounded-xl border border-border-default bg-surface-primary p-6">
+      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
         <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
           Disable Two-Factor Authentication
         </h2>
@@ -364,7 +364,7 @@ export default function MfaSetup() {
   // Regenerate recovery codes view
   if (view === "regenerate") {
     return (
-      <div className="rounded-xl border border-border-default bg-surface-primary p-6">
+      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
         <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
           Regenerate Recovery Codes
         </h2>
@@ -415,7 +415,7 @@ export default function MfaSetup() {
 
   // Default: Status view
   return (
-    <div className="rounded-xl border border-border-default bg-surface-primary p-6">
+    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
       <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
         Two-Factor Authentication
       </h2>

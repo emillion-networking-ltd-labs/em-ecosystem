@@ -171,7 +171,7 @@ export default function ConnectedAccounts() {
     <>
       <div
         id="connected-accounts"
-        className="rounded-xl border border-border-default bg-surface-primary p-6"
+        className="rounded-xl border border-border-strong bg-surface-primary p-6"
       >
         <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
           Connected Accounts
@@ -186,7 +186,7 @@ export default function ConnectedAccounts() {
             return (
               <div
                 key={provider.id}
-                className="flex items-center justify-between rounded-xl border border-border-default p-4"
+                className="flex items-center justify-between rounded-xl border border-border-components p-4"
               >
                 <div className="flex items-center gap-3">
                   {provider.icon}
@@ -255,10 +255,10 @@ export default function ConnectedAccounts() {
             role="dialog"
             aria-modal="true"
             aria-labelledby="disconnect-title"
-            className="w-[427px] overflow-hidden rounded-3xl border border-border-default bg-surface-secondary"
+            className="w-[427px] overflow-hidden rounded-3xl border border-border-components bg-surface-secondary"
           >
             {/* Top section */}
-            <div className="border-b border-border-default bg-surface-primary p-6">
+            <div className="border-b border-border-components bg-surface-primary p-6">
               <h2
                 id="disconnect-title"
                 className="text-h2 font-semibold text-content-primary"

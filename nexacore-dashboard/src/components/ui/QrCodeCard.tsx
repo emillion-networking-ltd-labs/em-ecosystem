@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import CopyField from "./CopyField";
 
 export const qrCodeCardSpecs = {
-  container: "rounded-lg border border-border-strong bg-white p-4",
+  container: "rounded-lg border border-border-components bg-white p-4",
   image: "h-48 w-48",
   secretKey: "CopyField component — copyable monospace text below QR",
 };
@@ -42,7 +42,7 @@ export default function QrCodeCard({
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      <div className="flex justify-center rounded-lg border border-border-strong bg-white p-4">
+      <div className="flex justify-center rounded-lg border border-border-components bg-white p-4">
         {qrDataUrl ? (
           <img src={qrDataUrl} alt="QR Code" className="h-48 w-48" />
         ) : (

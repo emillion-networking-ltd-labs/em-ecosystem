@@ -14,7 +14,7 @@ export const confirmModalSpecs = {
     width: "max-w-[390px]",
     radius: "rounded-xl (card inner)",
     overlay: "bg-black/40",
-    topSection: "bg-surface-primary p-6 border-b border-border-default",
+    topSection: "bg-surface-primary p-6 border-b border-border-strong",
     bottomSection: "bg-surface-secondary px-6 py-3",
   },
   accessibility: {
@@ -125,10 +125,10 @@ export default function ConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
-        className="group max-w-[390px] overflow-hidden rounded-xl border border-border-default bg-surface-secondary shadow-card"
+        className="group max-w-[390px] overflow-hidden rounded-xl border border-border-strong bg-surface-secondary shadow-card"
       >
         {/* Top section */}
-        <div className="relative border-b border-border-default bg-surface-primary p-6">
+        <div className="relative border-b border-border-strong bg-surface-primary p-6">
           <IconButton
             variant="default"
             size="sm"

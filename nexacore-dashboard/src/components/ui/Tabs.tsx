@@ -29,9 +29,9 @@ const sizeClasses = {
 const variantStyles = {
   subtle: {
     container:
-      "bg-surface-primary border border-border-strong rounded-[5px] shadow-[6px_6px_50px_rgba(0,0,0,0.05)]",
+      "bg-surface-primary border border-border-components rounded-[5px] shadow-[6px_6px_50px_rgba(0,0,0,0.05)]",
     active:
-      "bg-surface-secondary border border-border-strong font-semibold text-content-primary",
+      "bg-surface-secondary border border-border-components font-semibold text-content-primary",
     inactive: "font-semibold text-content-primary hover:bg-surface-subtle",
   },
   nav: {
@@ -58,7 +58,7 @@ export const tabsSpecs = {
     "nav-horizontal": "Same as nav but horizontal layout (top nav bar)",
   },
   container: {
-    subtle: "border border-border-strong rounded-[5px]",
+    subtle: "border border-border-components rounded-[5px]",
     nav: "flex-col gap-1 (vertical)",
     "nav-horizontal": "gap-1 (horizontal)",
   },
@@ -145,7 +145,7 @@ export default function Tabs({
             className={`whitespace-nowrap shrink-0 ${
               isNav
                 ? `flex items-center gap-1 px-2 py-2 text-body h-9 text-left ${variant === "nav" ? "w-full" : ""} ${isActive ? styles.active : styles.inactive}`
-                : `text-center ${sizeClasses[size]} ${fullWidth ? "flex-1" : ""} ${index < tabs.length - 1 ? "border-r border-border-strong" : ""} ${isActive ? styles.active : styles.inactive}`
+                : `text-center ${sizeClasses[size]} ${fullWidth ? "flex-1" : ""} ${index < tabs.length - 1 ? "border-r border-border-components" : ""} ${isActive ? styles.active : styles.inactive}`
             }`}
           >
             {isNav && !isActive && (

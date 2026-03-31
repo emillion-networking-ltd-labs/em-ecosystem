@@ -91,7 +91,7 @@ export default function SecurityActivity() {
     });
 
   return (
-    <div className="rounded-xl border border-border-default bg-surface-primary p-6">
+    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
       <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
         Security Activity
       </h2>
@@ -117,7 +117,7 @@ export default function SecurityActivity() {
                 return (
                   <div
                     key={event.id}
-                    className="flex items-center justify-between rounded-xl border border-border-default p-3"
+                    className="flex items-center justify-between rounded-xl border border-border-components p-3"
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">

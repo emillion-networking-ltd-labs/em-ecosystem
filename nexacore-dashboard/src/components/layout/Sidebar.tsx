@@ -90,7 +90,7 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-30 flex h-screen flex-col border-r border-border-strong bg-surface-primary transition-[width,transform] duration-200 ${widthClass} ${translateClass}`}
+      className={`fixed left-0 top-0 z-30 flex h-screen flex-col border-r border-border-components bg-surface-primary transition-[width,transform] duration-200 ${widthClass} ${translateClass}`}
     >
       {/* Logo area */}
       <div className="flex items-center justify-between rounded-lg p-2">
@@ -174,7 +174,7 @@ export default function Sidebar({
 
         {/* User card at bottom */}
         {user && (
-          <div className="border-t border-border-default pt-3">
+          <div className="border-t border-border-components pt-3">
             <div className="flex items-center gap-2 rounded-lg p-2">
               <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-circle bg-surface-inverse text-caption font-semibold text-content-inverse">
                 {(user.firstName?.[0] || user.email[0]).toUpperCase()}

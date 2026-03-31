@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminRoute from "@/components/guards/AdminRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import Divider from "@/components/ui/Divider";
 import UsersTable from "@/components/admin/UsersTable";
 import Pagination from "@/components/ui/Pagination";
 import ConfirmModal from "@/components/ui/ConfirmModal";
@@ -166,7 +167,7 @@ export default function AdminPage() {
             <h1 className="text-h2 font-semibold text-content-primary">
               User Management
             </h1>
-            <span className="inline-block h-6 w-px bg-border-strong" />
+            <Divider orientation="vertical" className="h-6" />
             <Breadcrumbs
               items={[
                 { label: "Dashboards", href: "/dashboard" },

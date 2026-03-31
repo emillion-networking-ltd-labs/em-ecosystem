@@ -3,6 +3,7 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminRoute from "@/components/guards/AdminRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import Divider from "@/components/ui/Divider";
 import PermissionsMatrix from "@/components/admin/PermissionsMatrix";
 
 export default function PermissionsPage() {
@@ -13,7 +14,7 @@ export default function PermissionsPage() {
           <h1 className="text-h2 font-semibold text-content-primary">
             Role Permissions
           </h1>
-          <span className="inline-block h-6 w-px bg-border-strong" />
+          <Divider orientation="vertical" className="h-6" />
           <Breadcrumbs
             items={[
               { label: "Dashboards", href: "/dashboard" },

@@ -51,7 +51,7 @@ export default function UserPreferences() {
   };
 
   return (
-    <section className="rounded-xl border border-border-default bg-surface-primary p-6">
+    <section className="rounded-xl border border-border-strong bg-surface-primary p-6">
       <h2 className="mb-4 text-body font-semibold text-content-primary">
         Preferences
       </h2>

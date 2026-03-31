@@ -67,9 +67,19 @@ const colorGroups: ColorGroup[] = [
     label: "Border & Outline",
     tokens: [
       {
-        name: "strong (8%)",
+        name: "default (5%) — dividers, separators",
+        value: "rgba(0,0,0,0.05)",
+        cssVar: "--border-default",
+      },
+      {
+        name: "strong (8%) — cards, containers",
         value: "rgba(0,0,0,0.08)",
         cssVar: "--border-strong",
+      },
+      {
+        name: "components (15%) — inputs, buttons, selects",
+        value: "rgba(0,0,0,0.15)",
+        cssVar: "--border-components",
       },
       {
         name: "outline primary/75",

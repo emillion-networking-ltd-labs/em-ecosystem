@@ -26,7 +26,7 @@ const sizeClasses = {
 
 export const inputSpecs = {
   container:
-    "flex items-center gap-2 rounded-lg border border-border-strong bg-transparent outline outline-2 outline-offset-2 transition-colors",
+    "flex items-center gap-2 rounded-lg border border-border-components bg-transparent outline outline-2 outline-offset-2 transition-colors",
   sizes: {
     sm: "h-10 px-3 text-body (40px — compact contexts)",
     "md (default)": "h-12 px-4 text-body (48px — forms, auth)",
@@ -95,7 +95,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       )}
       <div
         className={`
-          flex items-center gap-2 rounded-lg border border-border-strong
+          flex items-center gap-2 rounded-lg border border-border-components
           ${isFilled ? "bg-surface-primary" : "bg-transparent outline outline-2 outline-offset-2"}
           transition-colors
           ${sizeClasses[size]}

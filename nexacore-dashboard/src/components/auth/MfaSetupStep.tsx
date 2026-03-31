@@ -183,7 +183,7 @@ export default function MfaSetupStep() {
           )}
 
           {qrCodeDataUrl && (
-            <div className="flex justify-center rounded-lg border border-border-strong bg-white p-4">
+            <div className="flex justify-center rounded-lg border border-border-components bg-white p-4">
               <img
                 src={qrCodeDataUrl}
                 alt="MFA QR Code"
@@ -197,7 +197,7 @@ export default function MfaSetupStep() {
             <span className="text-body text-content-primary/50">
               Or enter this key manually:
             </span>
-            <div className="flex h-12 items-center gap-2 rounded-lg border border-border-strong bg-surface-subtle px-4">
+            <div className="flex h-12 items-center gap-2 rounded-lg border border-border-components bg-surface-subtle px-4">
               <code className="flex-1 break-all font-mono text-body leading-6 text-content-primary">
                 {secret}
               </code>
@@ -250,7 +250,7 @@ export default function MfaSetupStep() {
         </div>
 
         <div className="flex w-full flex-col gap-4 md:w-[348px]">
-          <div className="rounded-lg border border-border-strong bg-surface-subtle p-4">
+          <div className="rounded-lg border border-border-components bg-surface-subtle p-4">
             <div className="grid grid-cols-2 gap-2">
               {recoveryCodes.map((c, i) => (
                 <code

@@ -60,7 +60,7 @@ export default function ChangeEmailForm() {
   return (
     <div
       id="change-email"
-      className="rounded-xl border border-border-default bg-surface-primary p-6"
+      className="rounded-xl border border-border-strong bg-surface-primary p-6"
     >
       <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
         Change Email

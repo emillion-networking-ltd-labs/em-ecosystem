@@ -180,10 +180,11 @@ function SpecsPanel({
 /* Hover classes derived from Button.tsx variantClasses — static simulation of hover state */
 const hoverClasses = {
   primary:
-    "bg-surface-inverse text-content-inverse border border-border-strong opacity-90",
+    "bg-surface-inverse text-content-inverse border border-border-components opacity-90",
   secondary:
-    "bg-surface-subtle text-content-secondary border border-border-strong",
-  outline: "bg-surface-subtle text-content-primary border border-border-strong",
+    "bg-surface-subtle text-content-secondary border border-border-components",
+  outline:
+    "bg-surface-subtle text-content-primary border border-border-components",
   danger: "bg-error-bg text-error border border-error-border",
 };
 
@@ -1704,7 +1705,7 @@ function EmailSelectorCard({
       <button
         type="button"
         onClick={() => (open ? setOpen(false) : openDropdown())}
-        className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap border border-border-strong text-content-primary transition-colors w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
+        className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap border border-border-components text-content-primary transition-colors w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
       >
         <span className="leading-none">user@example.com</span>
         <ChevronDown
@@ -1716,7 +1717,7 @@ function EmailSelectorCard({
         <div
           className={`absolute z-50 w-fit min-w-[200px] left-0 ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"}`}
         >
-          <div className="rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card whitespace-nowrap">
+          <div className="rounded-xl border border-border-components bg-surface-primary p-4 shadow-card whitespace-nowrap">
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -1807,7 +1808,7 @@ function SelectShowcase() {
           "Select Position": selectSpecs.position,
           "Email Selector (auth)": {
             trigger:
-              "h-10 rounded-md px-6 py-2.5 w-fit text-body font-normal whitespace-nowrap border border-border-strong bg-transparent hover:bg-surface-subtle transition-colors",
+              "h-10 rounded-md px-6 py-2.5 w-fit text-body font-normal whitespace-nowrap border border-border-components bg-transparent hover:bg-surface-subtle transition-colors",
             dropdown:
               "rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card w-fit min-w-[200px] whitespace-nowrap",
             avatar:
@@ -2012,7 +2013,7 @@ function ToastDemo() {
               visible[variant] && (
                 <div
                   key={variant}
-                  className={`group flex items-start gap-2 rounded-full border border-border-strong bg-surface-primary px-6 py-4 ${exiting[variant] ? "animate-toast-out" : "animate-toast-in"}`}
+                  className={`group flex items-start gap-2 rounded-full border border-border-components bg-surface-primary px-6 py-4 ${exiting[variant] ? "animate-toast-out" : "animate-toast-in"}`}
                 >
                   <Icon size={16} className={`mt-px shrink-0 ${color}`} />
                   <div className="flex min-w-0 flex-1 flex-col gap-1">
@@ -2186,7 +2187,7 @@ function FeedbackShowcase() {
           },
           Toast: {
             container:
-              "rounded-full border border-border-strong bg-surface-primary px-6 py-4",
+              "rounded-full border border-border-components bg-surface-primary px-6 py-4",
             icons:
               "error: AlertTriangle, success: CircleCheck, warning: CircleAlert, info: Info — 16px",
             title:
@@ -2206,7 +2207,7 @@ function FeedbackShowcase() {
               "CircleCheck 48px text-[#166534] strokeWidth-1.5 icon-success animation",
             text: "text-body text-content-primary/50 text-center",
             button:
-              "h-10 w-full rounded-md border border-border-strong bg-transparent text-h3 font-normal — outline style",
+              "h-10 w-full rounded-md border border-border-components bg-transparent text-h3 font-normal — outline style",
           },
         }}
       />
@@ -2675,7 +2676,7 @@ function DoughnutChartMock({ isDark = false }: { isDark?: boolean }) {
                   if (!active || !payload?.length) return null;
                   const item = payload[0];
                   return (
-                    <div className="rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
+                    <div className="rounded-lg border border-border-components bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <span
                           className="h-2 w-2 shrink-0 rounded-sm"
@@ -2797,7 +2798,7 @@ function ChartsShowcase() {
             tooltip:
               "Custom HTML content via <Tooltip content={...} /> — native DOM positioning",
             "tooltip style":
-              "rounded-lg border-border-strong bg-surface-primary px-4 py-3 shadow-card (no diamond — Recharts controls position)",
+              "rounded-lg border-border-components bg-surface-primary px-4 py-3 shadow-card (no diamond — Recharts controls position)",
             "color dots": "h-2 w-2 rounded-sm with item.color",
             grid: "border-strong color, no x-grid, strokeDasharray 3 3",
             ticks: "text-caption (12px) via SVG, system font inherited",

@@ -72,7 +72,7 @@ export default function DashboardLayout({
 
       {/* Right panel (optional, desktop only) */}
       {showRightPanel && (
-        <div className="fixed right-0 top-0 hidden h-screen w-[280px] overflow-y-auto border-l border-border-default bg-surface-primary lg:block">
+        <div className="fixed right-0 top-0 hidden h-screen w-[280px] overflow-y-auto border-l border-border-strong bg-surface-primary lg:block">
           {rightPanel}
         </div>
       )}

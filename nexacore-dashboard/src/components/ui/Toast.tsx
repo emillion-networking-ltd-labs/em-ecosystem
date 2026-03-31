@@ -49,7 +49,7 @@ export default function Toast({
     <div
       role="alert"
       aria-live="assertive"
-      className={`pointer-events-auto group flex max-w-[550px] items-start gap-2 rounded-full border border-border-strong bg-surface-primary px-6 py-4 ${
+      className={`pointer-events-auto group flex max-w-[550px] items-start gap-2 rounded-full border border-border-components bg-surface-primary px-6 py-4 ${
         isExiting ? "animate-toast-out" : "animate-toast-in"
       }`}
     >

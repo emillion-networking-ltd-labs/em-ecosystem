@@ -23,14 +23,14 @@ export const languageSelectorSpecs = {
     base: "flex h-10 items-center gap-2 rounded-md px-4 text-body font-normal transition-colors",
     closed:
       "border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary",
-    open: "border border-border-strong bg-surface-primary text-content-primary",
+    open: "border border-border-components bg-surface-primary text-content-primary",
   },
   popover: {
     position: "absolute w-fit min-w-[200px]",
     container:
-      "rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card max-h-[240px] overflow-y-auto",
+      "rounded-xl border border-border-components bg-surface-primary p-4 shadow-card max-h-[240px] overflow-y-auto",
     search:
-      "h-12 rounded-lg border border-border-strong bg-surface-primary px-4 shadow-card",
+      "h-12 rounded-lg border border-border-components bg-surface-primary px-4 shadow-card",
   },
   option: {
     selected: "bg-surface-tertiary text-content-primary",
@@ -124,7 +124,7 @@ export default function LanguageSelector({
   const triggerBase =
     "flex h-10 items-center gap-2 px-4 text-body font-normal transition-colors";
   const triggerClass = isOpen
-    ? `${triggerBase} border border-border-strong bg-surface-subtle text-content-primary`
+    ? `${triggerBase} border border-border-components bg-surface-subtle text-content-primary`
     : `${triggerBase} border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary`;
 
   return (
@@ -176,7 +176,7 @@ export default function LanguageSelector({
             </div>
 
             {/* Results — appears second (stagger child 2) */}
-            <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card">
+            <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-components bg-surface-primary p-4 shadow-card">
               {filtered.length === 0 ? (
                 <p className="py-2 text-center text-body text-content-primary/50">
                   No results
