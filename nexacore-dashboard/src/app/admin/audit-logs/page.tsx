@@ -8,22 +8,41 @@ import Divider from "@/components/ui/Divider";
 import AuditLogsTable from "@/components/admin/AuditLogsTable";
 import AuditLogFilters from "@/components/admin/AuditLogFilters";
 import Pagination from "@/components/ui/Pagination";
+import Select from "@/components/ui/Select";
+import Spinner from "@/components/ui/Spinner";
 import { apiClient, SessionExpiredError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import type { AuditLog, AuditAction, PaginatedResponse } from "@/lib/types";
 
-const LIMIT = 20;
+const PAGE_SIZE_OPTIONS = [
+  { value: "10", label: "10 rows" },
+  { value: "20", label: "20 rows" },
+  { value: "50", label: "50 rows" },
+  { value: "100", label: "100 rows" },
+];
 
 export default function AuditLogsPage() {
   const { isAuthenticated } = useAuth();
   const [logs, setLogs] = useState<AuditLog[]>([]);
+  const [pageSize, setPageSize] = useState(10);
   const [meta, setMeta] = useState({
     total: 0,
     page: 1,
-    limit: LIMIT,
+    limit: 10,
     totalPages: 1,
   });
   const [loading, setLoading] = useState(true);
+  const [showSpinner, setShowSpinner] = useState(false);
+
+  // Delay spinner 300ms — fast responses never show it (no flash)
+  useEffect(() => {
+    if (!loading) {
+      setShowSpinner(false);
+      return;
+    }
+    const timer = setTimeout(() => setShowSpinner(true), 300);
+    return () => clearTimeout(timer);
+  }, [loading]);
 
   // Filters
   const [action, setAction] = useState<AuditAction | "">("");
@@ -39,7 +58,7 @@ export default function AuditLogsPage() {
       try {
         const params = new URLSearchParams({
           page: String(page),
-          limit: String(LIMIT),
+          limit: String(pageSize),
         });
         if (action) params.set("action", action);
         if (userId.trim()) params.set("userId", userId.trim());
@@ -62,7 +81,7 @@ export default function AuditLogsPage() {
         if (!signal?.aborted) setLoading(false);
       }
     },
-    [action, userId, startDate, endDate],
+    [action, userId, startDate, endDate, pageSize],
   );
 
   useEffect(() => {
@@ -109,9 +128,7 @@ export default function AuditLogsPage() {
         <div className="card-flat">
           {loading ? (
             <div className="flex h-64 items-center justify-center">
-              <p className="text-body text-content-tertiary">
-                Loading audit logs...
-              </p>
+              {showSpinner && <Spinner size="md" />}
             </div>
           ) : logs.length === 0 ? (
             <div className="flex h-64 items-center justify-center">
@@ -122,18 +139,29 @@ export default function AuditLogsPage() {
           ) : (
             <>
               <AuditLogsTable logs={logs} />
-              {meta.totalPages > 1 && (
-                <div className="mt-4">
+              <div className="mt-4 flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-caption text-content-tertiary">
+                    Rows per page
+                  </span>
+                  <Select
+                    options={PAGE_SIZE_OPTIONS}
+                    value={String(pageSize)}
+                    onChange={(v) => setPageSize(Number(v))}
+                    size="sm"
+                  />
+                  <span className="text-caption text-content-tertiary">
+                    {meta.total} total entries
+                  </span>
+                </div>
+                {meta.totalPages > 1 && (
                   <Pagination
                     currentPage={meta.page}
                     totalPages={meta.totalPages}
                     onPageChange={(page) => fetchLogs(page)}
                   />
-                </div>
-              )}
-              <p className="mt-2 text-caption text-content-tertiary">
-                {meta.total} total entries
-              </p>
+                )}
+              </div>
             </>
           )}
         </div>
