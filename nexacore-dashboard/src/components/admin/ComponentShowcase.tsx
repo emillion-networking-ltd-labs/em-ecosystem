@@ -88,6 +88,8 @@ import LanguageSelector, {
 import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
 import ConfirmModal, { confirmModalSpecs } from "@/components/ui/ConfirmModal";
 import DateInput, { dateInputSpecs } from "@/components/ui/DateInput";
+import SidebarNav, { sidebarNavSpecs } from "@/components/ui/SidebarNav";
+import type { SidebarNavSection as SidebarSection } from "@/components/ui/SidebarNav";
 import IconBadge, { iconBadgeSpecs } from "@/components/ui/IconBadge";
 import Accordion, {
   SingleAccordion,
@@ -3226,6 +3228,70 @@ function ModalShowcase() {
 }
 
 function SidebarShowcase() {
+  const [activeItem, setActiveItem] = useState("#dashboard");
+
+  const demoSections: SidebarSection[] = [
+    {
+      label: "Dashboards",
+      items: [
+        {
+          href: "#dashboard",
+          label: "Dashboard",
+          icon: BarChart3,
+          active: activeItem === "#dashboard",
+        },
+        {
+          href: "#profile",
+          label: "Profile",
+          icon: Info,
+          active: activeItem === "#profile",
+        },
+        {
+          href: "#admin",
+          label: "Admin",
+          icon: Settings,
+          children: [
+            {
+              href: "#audit",
+              label: "Audit Logs",
+              icon: Archive,
+              active: activeItem === "#audit",
+            },
+            {
+              href: "#permissions",
+              label: "Permissions",
+              icon: Copy,
+              active: activeItem === "#permissions",
+            },
+            {
+              href: "#design",
+              label: "Design System",
+              icon: Edit,
+              active: activeItem === "#design",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      label: "Account",
+      items: [
+        {
+          href: "#settings",
+          label: "Settings",
+          icon: Settings,
+          active: activeItem === "#settings",
+        },
+        {
+          href: "#docs",
+          label: "Documentation",
+          icon: Archive,
+          active: activeItem === "#docs",
+        },
+      ],
+    },
+  ];
+
   return (
     <ShowcaseSection title="Sidebar">
       <div className="flex flex-wrap gap-4">
@@ -3243,20 +3309,15 @@ function SidebarShowcase() {
                 <p className="text-caption text-content-primary/50 font-mono mb-2">
                   collapsed (68px)
                 </p>
-                <div className="w-[68px] rounded-xl border border-border-strong bg-surface-secondary p-2 flex flex-col gap-3">
-                  <div className="flex h-10 w-full items-center justify-center">
-                    <div className="h-6 w-10 rounded bg-content-primary/10" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className={`flex h-9 items-center justify-center rounded-md ${i === 1 ? "bg-surface-subtle" : ""}`}
-                      >
-                        <div className="h-5 w-5 rounded bg-content-primary/20" />
-                      </div>
-                    ))}
-                  </div>
+                <div className="w-[68px] rounded-xl border border-border-strong bg-surface-primary">
+                  <SidebarNav
+                    sections={demoSections}
+                    collapsed
+                    onNavigate={(href, e) => {
+                      e.preventDefault();
+                      setActiveItem(href);
+                    }}
+                  />
                 </div>
               </div>
               {/* Expanded */}
@@ -3264,47 +3325,14 @@ function SidebarShowcase() {
                 <p className="text-caption text-content-primary/50 font-mono mb-2">
                   expanded (212px)
                 </p>
-                <div className="w-[212px] rounded-xl border border-border-strong bg-surface-secondary p-2 flex flex-col gap-3">
-                  <div className="flex h-10 items-center gap-2 px-2">
-                    <div className="h-6 w-10 rounded bg-content-primary/10" />
-                    <span className="text-caption font-semibold text-content-primary">
-                      NexaCore
-                    </span>
-                  </div>
-                  <p className="px-2 text-caption text-content-primary/50">
-                    Dashboards
-                  </p>
-                  <div className="flex flex-col gap-1">
-                    {["Dashboard", "Profile", "Admin", "Design System"].map(
-                      (label, i) => (
-                        <div
-                          key={label}
-                          className={`flex h-9 items-center gap-2 rounded-md px-2 ${i === 0 ? "bg-surface-subtle" : ""}`}
-                        >
-                          <div className="h-5 w-5 shrink-0 rounded bg-content-primary/20" />
-                          <span className="text-body text-content-primary">
-                            {label}
-                          </span>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                  <p className="px-2 text-caption text-content-primary/50">
-                    Account
-                  </p>
-                  <div className="flex flex-col gap-1">
-                    {["Settings", "Documentation"].map((label) => (
-                      <div
-                        key={label}
-                        className="flex h-9 items-center gap-2 rounded-md px-2"
-                      >
-                        <div className="h-5 w-5 shrink-0 rounded bg-content-primary/20" />
-                        <span className="text-body text-content-primary">
-                          {label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                <div className="w-[212px] rounded-xl border border-border-strong bg-surface-primary">
+                  <SidebarNav
+                    sections={demoSections}
+                    onNavigate={(href, e) => {
+                      e.preventDefault();
+                      setActiveItem(href);
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -3313,22 +3341,9 @@ function SidebarShowcase() {
       </div>
       <SpecsPanel
         specs={{
-          Widths: {
-            collapsed: "68px",
-            expanded: "212px",
-            mobile: "212px slide-in",
-          },
-          NavItem: {
-            layout: "h-9 rounded-md px-2, icon 20px shrink-0 + label text-body",
-            active: "bg-surface-subtle text-content-primary",
-            inactive:
-              "text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary",
-          },
-          Sections: {
-            header:
-              "text-caption text-content-primary/50 (Dashboards, Account)",
-            transition: "width 200ms ease, mobile: translate-x with 300ms",
-          },
+          Container: sidebarNavSpecs.container,
+          NavItem: sidebarNavSpecs.item,
+          NavSection: sidebarNavSpecs.section,
         }}
       />
     </ShowcaseSection>

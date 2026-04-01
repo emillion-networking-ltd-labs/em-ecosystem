@@ -5,7 +5,8 @@ import { usePathname } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { usePermissions } from "@/hooks/usePermissions";
 import IconButton from "@/components/ui/IconButton";
-import type { LucideIcon } from "lucide-react";
+import SidebarNav from "@/components/ui/SidebarNav";
+import type { SidebarNavSection } from "@/components/ui/SidebarNav";
 import {
   PieChart,
   User,
@@ -23,7 +24,6 @@ type SidebarProps = {
   collapsed: boolean;
   onToggle: () => void;
   onNavigate?: () => void;
-  /** Mobile-only: controls slide-in visibility */
   mobileVisible?: boolean;
 };
 
@@ -32,27 +32,32 @@ const mainItems = [
   { href: "/profile", label: "Profile", icon: User },
 ];
 
-const adminItems = [
-  { href: "/admin", label: "Admin", icon: Shield, permission: "users:read" },
-  {
-    href: "/admin/audit-logs",
-    label: "Audit Logs",
-    icon: ScrollText,
-    permission: "audit-logs:read",
-  },
-  {
-    href: "/admin/permissions",
-    label: "Permissions",
-    icon: Key,
-    permission: "permissions:read",
-  },
-  {
-    href: "/admin/design-system",
-    label: "Design System",
-    icon: Palette,
-    permission: "permissions:read",
-  },
-];
+const adminItem = {
+  href: "/admin",
+  label: "Admin",
+  icon: Shield,
+  permission: "users:read",
+  children: [
+    {
+      href: "/admin/audit-logs",
+      label: "Audit Logs",
+      icon: ScrollText,
+      permission: "audit-logs:read",
+    },
+    {
+      href: "/admin/permissions",
+      label: "Permissions",
+      icon: Key,
+      permission: "permissions:read",
+    },
+    {
+      href: "/admin/design-system",
+      label: "Design System",
+      icon: Palette,
+      permission: "permissions:read",
+    },
+  ],
+};
 
 const accountItems = [
   {
@@ -61,7 +66,7 @@ const accountItems = [
     icon: Settings,
     permission: "settings:read",
   },
-  { href: "/docs", label: "Documentation", icon: FileText, external: true },
+  { href: "/docs", label: "Documentation", icon: FileText },
 ];
 
 export default function Sidebar({
@@ -72,10 +77,8 @@ export default function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useAuth();
-
   const { hasPermission } = usePermissions();
 
-  // When mobileVisible is defined, sidebar is in mobile mode: always 212px, slide via transform
   const isMobileMode = mobileVisible !== undefined;
   const widthClass = isMobileMode
     ? "w-[212px]"
@@ -88,169 +91,112 @@ export default function Sidebar({
       : "-translate-x-full"
     : "";
 
+  const sections: SidebarNavSection[] = [
+    {
+      label: "Dashboards",
+      items: [
+        ...mainItems.map((item) => ({
+          ...item,
+          active:
+            pathname === item.href || pathname.startsWith(item.href + "/"),
+        })),
+        ...(hasPermission(adminItem.permission)
+          ? [
+              {
+                ...adminItem,
+                children: adminItem.children
+                  .filter((c) => hasPermission(c.permission))
+                  .map((c) => ({
+                    ...c,
+                    active:
+                      pathname === c.href || pathname.startsWith(c.href + "/"),
+                  })),
+              },
+            ]
+          : []),
+      ],
+    },
+    {
+      label: "Account",
+      items: accountItems
+        .filter(
+          (item) =>
+            !("permission" in item) ||
+            !item.permission ||
+            hasPermission(item.permission),
+        )
+        .map((item) => ({
+          ...item,
+          active:
+            pathname === item.href || pathname.startsWith(item.href + "/"),
+        })),
+    },
+  ];
+
+  const userFooter = user ? (
+    <div className="border-t border-border-strong pt-3">
+      <div className="flex items-center gap-2 rounded-lg p-2">
+        <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-circle bg-surface-inverse text-caption font-semibold text-content-inverse">
+          {(user.firstName?.[0] || user.email[0]).toUpperCase()}
+        </div>
+        {!collapsed && (
+          <div className="min-w-0">
+            <p className="truncate text-body font-normal text-content-primary">
+              {user.firstName && user.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : user.email.split("@")[0]}
+            </p>
+            <p className="truncate text-caption text-content-tertiary">
+              {user.role}
+            </p>
+          </div>
+        )}
+      </div>
+    </div>
+  ) : null;
+
   return (
     <aside
       className={`fixed left-0 top-0 z-30 flex h-screen flex-col border-r border-border-components bg-surface-primary transition-[width,transform] duration-200 ${widthClass} ${translateClass}`}
     >
-      {/* Logo area */}
       <div className="flex items-center justify-between rounded-lg p-2">
         <div className="flex items-center gap-2">
           <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-black/[0.04] dark:bg-white/[0.04]">
             <span className="text-caption font-semibold text-content-primary">
-              N
+              E
             </span>
           </div>
-          {!collapsed && (
-            <span className="text-body leading-[20px] font-normal text-content-primary">
-              NexaCore
+          {!collapsed && !isMobileMode && (
+            <Link
+              href="/dashboard"
+              className="text-body font-semibold text-content-primary"
+            >
+              EM NexaCore
+            </Link>
+          )}
+          {isMobileMode && (
+            <span className="text-body font-semibold text-content-primary">
+              EM NexaCore
             </span>
           )}
         </div>
-        <IconButton
-          size="sm"
-          onClick={onToggle}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-        </IconButton>
+        {!isMobileMode && (
+          <IconButton
+            size="sm"
+            onClick={onToggle}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+          >
+            {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+          </IconButton>
+        )}
       </div>
 
-      {/* Navigation sections */}
-      <nav className="flex flex-1 flex-col overflow-y-auto px-4 pb-4">
-        {/* MAIN section */}
-        <NavSection label={collapsed ? "" : "Dashboards"}>
-          {mainItems.map((item) => (
-            <NavItem
-              key={item.href}
-              {...item}
-              active={
-                pathname === item.href || pathname.startsWith(item.href + "/")
-              }
-              collapsed={collapsed}
-              onNavigate={onNavigate}
-            />
-          ))}
-          {adminItems
-            .filter(
-              (item) => !item.permission || hasPermission(item.permission),
-            )
-            .map((item) => (
-              <NavItem
-                key={item.href}
-                {...item}
-                active={
-                  pathname === item.href || pathname.startsWith(item.href + "/")
-                }
-                collapsed={collapsed}
-                onNavigate={onNavigate}
-              />
-            ))}
-        </NavSection>
-
-        {/* ACCOUNT section */}
-        <NavSection label={collapsed ? "" : "Account"} className="mt-2">
-          {accountItems
-            .filter(
-              (item) =>
-                !("permission" in item) ||
-                !item.permission ||
-                hasPermission(item.permission),
-            )
-            .map((item) => (
-              <NavItem
-                key={item.href}
-                {...item}
-                active={
-                  pathname === item.href || pathname.startsWith(item.href + "/")
-                }
-                collapsed={collapsed}
-                onNavigate={onNavigate}
-              />
-            ))}
-        </NavSection>
-
-        {/* Spacer */}
-        <div className="flex-1" />
-
-        {/* User card at bottom */}
-        {user && (
-          <div className="border-t border-border-components pt-3">
-            <div className="flex items-center gap-2 rounded-lg p-2">
-              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-circle bg-surface-inverse text-caption font-semibold text-content-inverse">
-                {(user.firstName?.[0] || user.email[0]).toUpperCase()}
-              </div>
-              {!collapsed && (
-                <div className="min-w-0">
-                  <p className="truncate text-body font-normal text-content-primary">
-                    {user.firstName && user.lastName
-                      ? `${user.firstName} ${user.lastName}`
-                      : user.email.split("@")[0]}
-                  </p>
-                  <p className="truncate text-caption text-content-tertiary">
-                    {user.role}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </nav>
+      <SidebarNav
+        sections={sections}
+        collapsed={collapsed && !isMobileMode}
+        onNavigate={onNavigate ? (_href, _e) => onNavigate() : undefined}
+        footer={userFooter}
+      />
     </aside>
-  );
-}
-
-/* ---- Sub-components ---- */
-
-function NavSection({
-  label,
-  children,
-  className = "",
-}: {
-  label: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <div className={className}>
-      {label && (
-        <p className="mb-2 px-3 text-body leading-[20px] font-normal text-content-primary/40">
-          {label}
-        </p>
-      )}
-      <div className="flex flex-col gap-1">{children}</div>
-    </div>
-  );
-}
-
-function NavItem({
-  href,
-  label,
-  icon: Icon,
-  active,
-  collapsed,
-  onNavigate,
-}: {
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  active: boolean;
-  collapsed: boolean;
-  external?: boolean;
-  onNavigate?: () => void;
-}) {
-  return (
-    <Link
-      href={href}
-      onClick={onNavigate}
-      className={`flex h-9 items-center gap-1 rounded-xl p-2 text-body leading-[20px] transition-colors ${
-        active
-          ? "bg-black/[0.04] text-content-primary dark:bg-white/[0.04]"
-          : "text-content-primary hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
-      }`}
-      title={collapsed ? label : undefined}
-    >
-      <Icon size={20} className="shrink-0" />
-      {!collapsed && <span>{label}</span>}
-    </Link>
   );
 }

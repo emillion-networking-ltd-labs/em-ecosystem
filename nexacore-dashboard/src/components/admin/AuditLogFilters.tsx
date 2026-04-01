@@ -86,6 +86,7 @@ export default function AuditLogFilters({
         value={startDate}
         onChange={onStartDateChange}
         size="md"
+        maxDate={endDate ? new Date(endDate) : undefined}
         error={missingStart ? "Select start date" : undefined}
       />
       <span className="text-body text-content-tertiary">to</span>
@@ -93,6 +94,7 @@ export default function AuditLogFilters({
         value={endDate}
         onChange={onEndDateChange}
         size="md"
+        minDate={startDate ? new Date(startDate) : undefined}
         error={missingEnd ? "Select end date" : undefined}
       />
     </div>

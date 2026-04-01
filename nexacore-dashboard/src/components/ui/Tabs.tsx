@@ -9,6 +9,13 @@ interface Tab {
   icon?: React.ReactNode;
 }
 
+export interface TabRenderProps {
+  tab: Tab;
+  isActive: boolean;
+  className: string;
+  onClick: () => void;
+}
+
 interface TabsProps {
   tabs: Tab[];
   activeTab: string;
@@ -18,6 +25,7 @@ interface TabsProps {
   fullWidth?: boolean;
   wrap?: boolean;
   className?: string;
+  renderTab?: (props: TabRenderProps) => React.ReactNode;
 }
 
 const sizeClasses = {
@@ -26,7 +34,7 @@ const sizeClasses = {
   lg: "px-6 py-3 text-h3 h-12",
 };
 
-const variantStyles = {
+export const variantStyles = {
   subtle: {
     container:
       "bg-surface-primary border border-border-components rounded-[5px] shadow-[6px_6px_50px_rgba(0,0,0,0.05)]",
@@ -35,14 +43,14 @@ const variantStyles = {
     inactive: "font-semibold text-content-primary hover:bg-surface-subtle",
   },
   nav: {
-    container: "flex-col gap-1",
+    container: "flex-col gap-2",
     active:
       "bg-surface-subtle rounded-md text-body font-normal text-content-primary",
     inactive:
       "text-body font-normal text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
   },
   "nav-horizontal": {
-    container: "gap-1",
+    container: "gap-2",
     active:
       "bg-surface-subtle rounded-md text-body font-normal text-content-primary",
     inactive:
@@ -59,14 +67,14 @@ export const tabsSpecs = {
   },
   container: {
     subtle: "border border-border-components rounded-[5px]",
-    nav: "flex-col gap-1 (vertical)",
-    "nav-horizontal": "gap-1 (horizontal)",
+    nav: "flex-col gap-2 (vertical, 8px — matches NavBar icon spacing)",
+    "nav-horizontal": "gap-2 (horizontal, 8px — matches NavBar icon spacing)",
   },
   nav: {
     height: "h-9 (36px) — fixed for all nav items",
     icon: "16px lucide — optional per tab",
     chevron: "ChevronRight 16px text-content-primary/75 — inactive only",
-    padding: "px-2 py-2, gap-1 between elements",
+    padding: "px-2 py-2, gap-2 between items, gap-1 between inner elements",
   },
   sizes: {
     sm: "h-8 px-3 py-1.5 text-caption (32px) — subtle only",
@@ -92,6 +100,7 @@ export default function Tabs({
   fullWidth = false,
   wrap = false,
   className = "",
+  renderTab,
 }: TabsProps) {
   const styles = variantStyles[variant];
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
@@ -131,6 +140,25 @@ export default function Tabs({
     >
       {tabs.map((tab, index) => {
         const isActive = tab.value === activeTab;
+        const itemClassName = `whitespace-nowrap shrink-0 ${
+          isNav
+            ? `flex items-center gap-1 px-2 py-2 text-body h-9 text-left ${variant === "nav" ? "w-full" : ""} ${isActive ? styles.active : styles.inactive}`
+            : `text-center ${sizeClasses[size]} ${fullWidth ? "flex-1" : ""} ${index < tabs.length - 1 ? "border-r border-border-components" : ""} ${isActive ? styles.active : styles.inactive}`
+        }`;
+
+        if (renderTab) {
+          return (
+            <div key={tab.value}>
+              {renderTab({
+                tab,
+                isActive,
+                className: itemClassName,
+                onClick: () => onChange(tab.value),
+              })}
+            </div>
+          );
+        }
+
         return (
           <button
             key={tab.value}
@@ -142,11 +170,7 @@ export default function Tabs({
             tabIndex={isActive ? 0 : -1}
             onClick={() => onChange(tab.value)}
             onKeyDown={(e) => handleKeyDown(e, index)}
-            className={`whitespace-nowrap shrink-0 ${
-              isNav
-                ? `flex items-center gap-1 px-2 py-2 text-body h-9 text-left ${variant === "nav" ? "w-full" : ""} ${isActive ? styles.active : styles.inactive}`
-                : `text-center ${sizeClasses[size]} ${fullWidth ? "flex-1" : ""} ${index < tabs.length - 1 ? "border-r border-border-components" : ""} ${isActive ? styles.active : styles.inactive}`
-            }`}
+            className={itemClassName}
           >
             {isNav && !isActive && (
               <ChevronRight
