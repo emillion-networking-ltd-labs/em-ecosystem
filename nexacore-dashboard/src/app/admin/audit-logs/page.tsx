@@ -10,6 +10,7 @@ import AuditLogFilters from "@/components/admin/AuditLogFilters";
 import Pagination from "@/components/ui/Pagination";
 import Select from "@/components/ui/Select";
 import Spinner from "@/components/ui/Spinner";
+import StickyCard from "@/components/ui/StickyCard";
 import { apiClient, SessionExpiredError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import type { AuditLog, AuditAction, PaginatedResponse } from "@/lib/types";
@@ -110,18 +111,20 @@ export default function AuditLogsPage() {
         </div>
 
         {/* Filters */}
-        <div className="card-flat mb-6">
-          <AuditLogFilters
-            action={action}
-            onActionChange={setAction}
-            userId={userId}
-            onUserIdChange={setUserId}
-            startDate={startDate}
-            onStartDateChange={setStartDate}
-            endDate={endDate}
-            onEndDateChange={setEndDate}
-            dateRangePartial={dateRangePartial}
-          />
+        <div className="mb-6">
+          <StickyCard position="top">
+            <AuditLogFilters
+              action={action}
+              onActionChange={setAction}
+              userId={userId}
+              onUserIdChange={setUserId}
+              startDate={startDate}
+              onStartDateChange={setStartDate}
+              endDate={endDate}
+              onEndDateChange={setEndDate}
+              dateRangePartial={dateRangePartial}
+            />
+          </StickyCard>
         </div>
 
         {/* Table */}

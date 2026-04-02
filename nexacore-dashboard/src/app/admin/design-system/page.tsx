@@ -9,6 +9,7 @@ import Divider from "@/components/ui/Divider";
 import Badge from "@/components/ui/Badge";
 import Tabs from "@/components/ui/Tabs";
 import Button from "@/components/ui/Button";
+import StickyCard from "@/components/ui/StickyCard";
 import { SingleAccordion } from "@/components/ui/Accordion";
 import TokenInspector from "@/components/admin/TokenInspector";
 import {
@@ -100,17 +101,9 @@ export default function DesignSystemPage() {
         </div>
 
         {/* View Toggle — nav-horizontal with icons */}
-        <div className="card-flat mb-6">
-          <div className="hidden sm:block">
-            <Tabs
-              tabs={viewTabs}
-              activeTab={activeView}
-              onChange={setActiveView}
-              variant="nav-horizontal"
-            />
-          </div>
-          <div className="sm:hidden overflow-hidden">
-            <div className="overflow-x-auto scrollbar-hide -mx-6 px-6 touch-pan-x">
+        <div className="mb-6">
+          <StickyCard position="top">
+            <div className="hidden sm:block">
               <Tabs
                 tabs={viewTabs}
                 activeTab={activeView}
@@ -118,19 +111,29 @@ export default function DesignSystemPage() {
                 variant="nav-horizontal"
               />
             </div>
-            <div className="flex justify-center gap-1.5 mt-2">
-              {viewTabs.map((tab) => (
-                <div
-                  key={tab.value}
-                  className={`h-[9px] w-[9px] rounded-full transition-colors ${
-                    activeView === tab.value
-                      ? "bg-surface-inverse"
-                      : "bg-border-strong"
-                  }`}
+            <div className="sm:hidden overflow-hidden">
+              <div className="overflow-x-auto scrollbar-hide -mx-6 px-6 touch-pan-x">
+                <Tabs
+                  tabs={viewTabs}
+                  activeTab={activeView}
+                  onChange={setActiveView}
+                  variant="nav-horizontal"
                 />
-              ))}
+              </div>
+              <div className="flex justify-center gap-1.5 mt-2">
+                {viewTabs.map((tab) => (
+                  <div
+                    key={tab.value}
+                    className={`h-[9px] w-[9px] rounded-full transition-colors ${
+                      activeView === tab.value
+                        ? "bg-surface-inverse"
+                        : "bg-border-strong"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          </StickyCard>
         </div>
 
         {/* Content area */}
