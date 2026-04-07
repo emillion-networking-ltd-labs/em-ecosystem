@@ -198,8 +198,8 @@ export default function PermissionsMatrix() {
 
           return (
             <div key={resource}>
-              <p className="mb-2 text-caption font-semibold uppercase tracking-wider text-content-tertiary">
-                {resource}
+              <p className="mb-2 text-h3 font-semibold uppercase tracking-wider text-content-primary">
+                {resource.replace(/_/g, " ")}
               </p>
               <DataTable
                 data={perms}

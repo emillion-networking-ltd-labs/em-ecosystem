@@ -57,7 +57,7 @@ export default function MfaTotpStep() {
             <h1 className="text-h1 font-semibold text-content-primary">
               Recovery Code
             </h1>
-            <p className="text-justify text-body text-content-primary/50">
+            <p className="text-justify text-body text-content-secondary">
               Enter one of your recovery codes. Each code can only be used once.
             </p>
           </div>
@@ -150,7 +150,7 @@ export default function MfaTotpStep() {
           <h1 className="text-h1 font-semibold text-content-primary">
             Two-Factor Authentication
           </h1>
-          <p className="text-justify text-body text-content-primary/50">
+          <p className="text-justify text-body text-content-secondary">
             Enter the 6-digit code from your authenticator app to complete sign
             in.
           </p>

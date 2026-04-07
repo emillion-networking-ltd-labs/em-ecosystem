@@ -110,10 +110,10 @@ export default function NavBar({
         {/* Compact search bar (desktop only) */}
         <div className="hidden w-[160px] items-center gap-2 rounded-2xl bg-surface-subtle px-2 py-1 lg:flex">
           <Search size={16} className="text-content-primary/50" />
-          <span className="text-body leading-[20px] text-content-primary/50">
+          <span className="text-body leading-[20px] text-content-secondary">
             Search
           </span>
-          <kbd className="rounded-xs border border-border-components px-1 text-caption text-content-primary/50">
+          <kbd className="rounded-xs border border-border-components px-1 text-caption text-content-tertiary">
             /
           </kbd>
         </div>

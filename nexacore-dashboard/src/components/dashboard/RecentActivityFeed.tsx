@@ -87,13 +87,13 @@ export default function RecentActivityFeed() {
           ))}
 
         {error && (
-          <p className="py-4 text-center text-caption text-content-tertiary">
+          <p className="py-4 text-center text-body text-content-tertiary">
             Could not load activity
           </p>
         )}
 
         {!loading && !error && logs.length === 0 && (
-          <p className="py-4 text-center text-caption text-content-tertiary">
+          <p className="py-4 text-center text-body text-content-tertiary">
             No recent activity
           </p>
         )}

@@ -3,9 +3,6 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import ProfileForm from "@/components/profile/ProfileForm";
-import ChangeEmailForm from "@/components/profile/ChangeEmailForm";
-import ChangePasswordForm from "@/components/profile/ChangePasswordForm";
-import AccountInfo from "@/components/profile/AccountInfo";
 import MfaSetup from "@/components/profile/MfaSetup";
 import PasskeyManager from "@/components/profile/PasskeyManager";
 import TrustedDevices from "@/components/profile/TrustedDevices";
@@ -13,6 +10,7 @@ import ConnectedAccounts from "@/components/profile/ConnectedAccounts";
 import ActiveSessions from "@/components/profile/ActiveSessions";
 import DeleteAccount from "@/components/profile/DeleteAccount";
 import SecurityActivity from "@/components/profile/SecurityActivity";
+import Accordion from "@/components/ui/Accordion";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Divider from "@/components/ui/Divider";
 
@@ -32,16 +30,25 @@ export default function ProfilePage() {
             ]}
           />
         </div>
-        <div className="max-w-2xl space-y-6">
-          <ProfileForm />
-          <ChangeEmailForm />
-          <ChangePasswordForm />
-          <MfaSetup />
-          <PasskeyManager />
-          <TrustedDevices />
-          <AccountInfo />
+        <ProfileForm />
+        <div className="mt-6">
           <ConnectedAccounts />
-          <ActiveSessions />
+        </div>
+        <div className="mt-6 card-flat">
+          <Accordion
+            variant="section"
+            items={[
+              {
+                title: "Two-Factor Authentication",
+                children: <MfaSetup bare />,
+              },
+              { title: "Passkeys", children: <PasskeyManager bare /> },
+              { title: "Trusted Devices", children: <TrustedDevices bare /> },
+              { title: "Active Sessions", children: <ActiveSessions bare /> },
+            ]}
+          />
+        </div>
+        <div className="mt-6 max-w-2xl space-y-6">
           <DeleteAccount />
           <SecurityActivity />
         </div>

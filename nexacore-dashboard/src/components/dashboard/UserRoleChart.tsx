@@ -96,7 +96,7 @@ export default function UserRoleChart() {
       )}
 
       {error && (
-        <p className="py-4 text-center text-caption text-content-primary/50">
+        <p className="py-4 text-center text-body text-content-tertiary">
           Could not load user data
         </p>
       )}
@@ -157,7 +157,7 @@ export default function UserRoleChart() {
                   <span className="text-caption text-content-primary">
                     {role}
                   </span>
-                  <span className="text-caption text-content-primary/50">
+                  <span className="text-caption text-content-tertiary">
                     {count} ({pct}%)
                   </span>
                 </div>

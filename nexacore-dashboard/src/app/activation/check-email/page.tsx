@@ -14,7 +14,7 @@ export default function EmailSentPage() {
             <h1 className="text-h1 font-semibold text-content-primary">
               Check Your Email
             </h1>
-            <p className="text-justify text-body text-content-primary/50">
+            <p className="text-justify text-body text-content-secondary">
               We&apos;ve sent a verification link to your email address. Click
               the link to activate your account.
             </p>

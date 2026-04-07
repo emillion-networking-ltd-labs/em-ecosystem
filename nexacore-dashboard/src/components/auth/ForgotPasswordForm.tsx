@@ -66,7 +66,7 @@ export default function ForgotPasswordForm() {
           <h1 className="text-h1 font-semibold text-content-primary">
             Password Recovery
           </h1>
-          <p className="text-justify text-body text-content-primary/50">
+          <p className="text-justify text-body text-content-secondary">
             Start the NexaCore password reset process. A secure identity check
             will be required to restore account access.
           </p>

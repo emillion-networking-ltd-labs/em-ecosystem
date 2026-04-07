@@ -3169,6 +3169,7 @@ function EmptyStateShowcase() {
 function ModalShowcase() {
   const [primaryOpen, setPrimaryOpen] = useState(false);
   const [dangerOpen, setDangerOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
 
   return (
     <ShowcaseSection title="Modal">
@@ -3182,22 +3183,29 @@ function ModalShowcase() {
               {mode}
             </p>
             <p className="text-caption text-content-primary/50 font-mono mb-2">
-              variants — click to preview
+              variants + sizes — click to preview
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 size="md"
                 variant="outline"
                 onClick={() => setPrimaryOpen(true)}
               >
-                Primary
+                Confirm (sm)
               </Button>
               <Button
                 size="md"
                 variant="outline"
                 onClick={() => setDangerOpen(true)}
               >
-                Danger
+                Danger (sm)
+              </Button>
+              <Button
+                size="md"
+                variant="outline"
+                onClick={() => setFormOpen(true)}
+              >
+                Form (md)
               </Button>
             </div>
           </div>
@@ -3221,6 +3229,20 @@ function ModalShowcase() {
         confirmLabel="Delete"
         variant="danger"
       />
+      <ConfirmModal
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onConfirm={() => setFormOpen(false)}
+        title="Edit Profile"
+        description="Update your information."
+        confirmLabel="Save"
+        size="md"
+      >
+        <div className="mt-4 space-y-4">
+          <Input label="First Name" name="demo-first" placeholder="John" />
+          <Input label="Last Name" name="demo-last" placeholder="Doe" />
+        </div>
+      </ConfirmModal>
 
       <SpecsPanel specs={confirmModalSpecs} />
     </ShowcaseSection>

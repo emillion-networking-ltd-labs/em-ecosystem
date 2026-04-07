@@ -210,14 +210,14 @@ export default function DesignSystemPage() {
                         {entry.category}
                       </Badge>
                     </div>
-                    <p className="text-caption text-content-primary/50">
+                    <p className="text-caption text-content-tertiary">
                       {entry.description}
                     </p>
                     <div className="pt-2 border-t border-border-strong flex flex-col gap-0.5">
                       {entry.files.map((file) => (
                         <code
                           key={file}
-                          className="text-caption text-content-primary/50 font-mono"
+                          className="text-caption text-content-tertiary font-mono"
                         >
                           {file}
                         </code>

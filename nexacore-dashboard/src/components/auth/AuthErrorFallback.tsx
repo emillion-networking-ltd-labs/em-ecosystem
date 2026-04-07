@@ -29,7 +29,7 @@ export default function AuthErrorFallback({
           strokeWidth={1.5}
         />
 
-        <p className="text-center text-body text-content-primary/50">
+        <p className="text-center text-body text-content-secondary">
           Something went wrong!
           <br />
           An unexpected error occurred. Please try again.

@@ -117,7 +117,7 @@ export default function MfaSetupStep() {
     return (
       <div className="flex flex-col items-center gap-4 py-8">
         <InfinitySpinner />
-        <p className="text-body text-content-primary/50">
+        <p className="text-body text-content-secondary">
           Preparing MFA setup...
         </p>
       </div>
@@ -136,7 +136,7 @@ export default function MfaSetupStep() {
               strokeWidth={1.5}
             />
 
-            <p className="text-center text-body text-content-primary/50">
+            <p className="text-center text-body text-content-secondary">
               MFA setup failed!
               <br />
               An unexpected error occurred. Please try again.
@@ -167,7 +167,7 @@ export default function MfaSetupStep() {
             <h1 className="text-h1 font-semibold text-content-primary">
               Set Up MFA
             </h1>
-            <p className="text-justify text-body text-content-primary/50">
+            <p className="text-justify text-body text-content-secondary">
               Your account requires two-factor authentication. Scan the QR code
               with your authenticator app (Google Authenticator, Authy, etc.).
             </p>
@@ -194,7 +194,7 @@ export default function MfaSetupStep() {
 
           {/* Manual entry fallback */}
           <div className="flex flex-col gap-2">
-            <span className="text-body text-content-primary/50">
+            <span className="text-body text-content-secondary">
               Or enter this key manually:
             </span>
             <div className="flex h-12 items-center gap-2 rounded-lg border border-border-components bg-surface-subtle px-4">
@@ -242,7 +242,7 @@ export default function MfaSetupStep() {
             <h1 className="text-h1 font-semibold text-content-primary">
               Recovery Codes
             </h1>
-            <p className="text-justify text-body text-content-primary/50">
+            <p className="text-justify text-body text-content-secondary">
               Save these recovery codes in a safe place. Each code can only be
               used once if you lose access to your authenticator app.
             </p>
@@ -314,7 +314,7 @@ export default function MfaSetupStep() {
           <h1 className="text-h1 font-semibold text-content-primary">
             Verify Setup
           </h1>
-          <p className="text-justify text-body text-content-primary/50">
+          <p className="text-justify text-body text-content-secondary">
             Enter the 6-digit code from your authenticator app to confirm setup.
           </p>
         </div>

@@ -6,7 +6,7 @@ export default function OAuthCallbackPage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center">
-          <p className="text-body text-content-primary/50">Loading...</p>
+          <p className="text-body text-content-secondary">Loading...</p>
         </div>
       }
     >

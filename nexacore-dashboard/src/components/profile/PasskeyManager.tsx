@@ -95,7 +95,7 @@ function PasskeyItem({
   );
 }
 
-export default function PasskeyManager() {
+export default function PasskeyManager({ bare }: { bare?: boolean }) {
   const {
     isSupported,
     passkeys,
@@ -179,22 +179,29 @@ export default function PasskeyManager() {
   };
 
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Key size={18} className="text-content-secondary" />
-          <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
-            Passkeys
-          </h2>
-        </div>
-        {passkeys.length > 0 && (
-          <div className="flex items-center gap-1.5 text-caption text-success">
-            <ShieldCheck size={14} />
-            <span>{passkeys.length} registered</span>
+    <div
+      className={
+        bare
+          ? ""
+          : "rounded-xl border border-border-strong bg-surface-primary p-6"
+      }
+    >
+      {!bare && (
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Key size={18} className="text-content-secondary" />
+            <h2 className="text-h3 font-semibold uppercase tracking-wider text-content-primary">
+              Passkeys
+            </h2>
           </div>
-        )}
-      </div>
+          {passkeys.length > 0 && (
+            <div className="flex items-center gap-1.5 text-caption text-success">
+              <ShieldCheck size={14} />
+              <span>{passkeys.length} registered</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Browser support warning */}
       {!isSupported && (

@@ -44,7 +44,7 @@ export default function OAuthCallbackHandler() {
     <div className="flex min-h-screen items-center justify-center">
       <div className="flex flex-col items-center gap-4">
         <RingSpinner size="lg" />
-        <p className="text-body text-content-primary/50">
+        <p className="text-body text-content-secondary">
           Completing sign in...
         </p>
       </div>

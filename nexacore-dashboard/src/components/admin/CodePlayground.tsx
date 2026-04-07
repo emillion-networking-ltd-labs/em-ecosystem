@@ -107,7 +107,7 @@ export default function CodePlayground() {
     <div className="card-flat space-y-6">
       {/* Example Templates */}
       <div className="flex flex-wrap gap-2">
-        <span className="text-caption text-content-primary/50 self-center mr-1">
+        <span className="text-caption text-content-tertiary self-center mr-1">
           Examples:
         </span>
         {examples.map((ex) => (

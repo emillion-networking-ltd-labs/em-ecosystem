@@ -8,6 +8,7 @@ import { PROFILE_TOAST } from "@/lib/toast-messages";
 import { unlinkOAuth, generateLinkCode } from "@/lib/oauth-api";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
 import Tooltip from "@/components/ui/Tooltip";
 import { extractMessageByStatus } from "@/lib/error-utils";
 import { HTTP_STATUS } from "@/lib/error-constants";
@@ -173,11 +174,11 @@ export default function ConnectedAccounts() {
         id="connected-accounts"
         className="rounded-xl border border-border-strong bg-surface-primary p-6"
       >
-        <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+        <h2 className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary">
           Connected Accounts
         </h2>
 
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {providers.map((provider) => {
             const isConnected = user.oauthProviders.includes(provider.id);
             const isLastAuthMethod =
@@ -203,7 +204,7 @@ export default function ConnectedAccounts() {
                   ) : (
                     <Button
                       variant="danger"
-                      size="sm"
+                      size="md"
                       fullWidth={false}
                       onClick={() => setDisconnectingProvider(provider.id)}
                     >
@@ -212,9 +213,24 @@ export default function ConnectedAccounts() {
                   )
                 ) : (
                   <div className="flex items-center gap-2">
+                    {provider.id === "GITHUB" && (
+                      <Tooltip
+                        content="Your active GitHub session will be used. To link a different account, log out of github.com first."
+                        position="auto"
+                        maxWidth={320}
+                      >
+                        <IconButton
+                          variant="default"
+                          size="md"
+                          aria-label="GitHub info"
+                        >
+                          <Info size={16} />
+                        </IconButton>
+                      </Tooltip>
+                    )}
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="md"
                       fullWidth={false}
                       onClick={() => handleConnect(provider.id)}
                       disabled={connecting}
@@ -222,17 +238,6 @@ export default function ConnectedAccounts() {
                     >
                       Connect
                     </Button>
-                    {provider.id === "GITHUB" && (
-                      <Tooltip
-                        content="Your active GitHub session will be used. To link a different account, log out of github.com first."
-                        position="left"
-                      >
-                        <Info
-                          className="h-4 w-4 text-content-tertiary cursor-help"
-                          tabIndex={0}
-                        />
-                      </Tooltip>
-                    )}
                   </div>
                 )}
               </div>

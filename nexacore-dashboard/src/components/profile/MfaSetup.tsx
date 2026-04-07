@@ -26,7 +26,10 @@ type MfaView =
   | "disable"
   | "regenerate";
 
-export default function MfaSetup() {
+export default function MfaSetup({ bare }: { bare?: boolean }) {
+  const cardClass = bare
+    ? ""
+    : "rounded-xl border border-border-strong bg-surface-primary p-6";
   const { user, refreshSession } = useAuth();
   const [view, setView] = useState<MfaView>("status");
   const [status, setStatus] = useState<MfaStatusResponse | null>(null);
@@ -157,8 +160,8 @@ export default function MfaSetup() {
   // Recovery codes view (after setup or regeneration)
   if (view === "recovery-codes") {
     return (
-      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-        <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+      <div className={cardClass}>
+        <h2 className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary">
           Recovery Codes
         </h2>
 
@@ -215,8 +218,8 @@ export default function MfaSetup() {
   // Setup QR view
   if (view === "setup" && setupData) {
     return (
-      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-        <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+      <div className={cardClass}>
+        <h2 className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary">
           Set Up Two-Factor Authentication
         </h2>
 
@@ -306,8 +309,8 @@ export default function MfaSetup() {
   // Disable MFA view
   if (view === "disable") {
     return (
-      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-        <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+      <div className={cardClass}>
+        <h2 className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary">
           Disable Two-Factor Authentication
         </h2>
 
@@ -364,8 +367,8 @@ export default function MfaSetup() {
   // Regenerate recovery codes view
   if (view === "regenerate") {
     return (
-      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-        <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+      <div className={cardClass}>
+        <h2 className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary">
           Regenerate Recovery Codes
         </h2>
 
@@ -415,10 +418,12 @@ export default function MfaSetup() {
 
   // Default: Status view
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
-        Two-Factor Authentication
-      </h2>
+    <div className={cardClass}>
+      {!bare && (
+        <h2 className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary">
+          Two-Factor Authentication
+        </h2>
+      )}
 
       <div className="space-y-4">
         <div className="flex items-center gap-3">

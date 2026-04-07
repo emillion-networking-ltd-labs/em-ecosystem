@@ -95,7 +95,7 @@ export default function RegisterForm() {
           <h1 className="text-h1 font-semibold text-content-primary">
             Create Account
           </h1>
-          <p className="text-justify text-body text-content-primary/50">
+          <p className="text-justify text-body text-content-secondary">
             Create your NexaCore user profile. This session will be available to
             other EM Ecosystem modules in the browser.
           </p>

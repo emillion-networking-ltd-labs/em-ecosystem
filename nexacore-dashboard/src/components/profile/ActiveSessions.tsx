@@ -53,7 +53,7 @@ function formatRelativeTime(dateStr: string): string {
   });
 }
 
-export default function ActiveSessions() {
+export default function ActiveSessions({ bare }: { bare?: boolean }) {
   const { addToast } = useToast();
   const [sessions, setSessions] = useState<SessionResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,12 +103,22 @@ export default function ActiveSessions() {
 
   const otherSessions = sessions.filter((s) => !s.isCurrent);
 
+  const header = !bare && (
+    <h2 className="text-h3 font-semibold uppercase tracking-wider text-content-primary">
+      Active Sessions
+    </h2>
+  );
+
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
+    <div
+      className={
+        bare
+          ? ""
+          : "rounded-xl border border-border-strong bg-surface-primary p-6"
+      }
+    >
       <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
-          Active Sessions
-        </h2>
+        {header}
         {otherSessions.length > 0 && (
           <Button
             variant="danger"

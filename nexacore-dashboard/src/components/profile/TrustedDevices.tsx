@@ -35,7 +35,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export default function TrustedDevices() {
+export default function TrustedDevices({ bare }: { bare?: boolean }) {
   const {
     devices,
     isLoading,
@@ -95,33 +95,40 @@ export default function TrustedDevices() {
   };
 
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Shield size={18} className="text-content-secondary" />
-          <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
-            Trusted Devices
-          </h2>
-          {devices.length > 0 && (
-            <span className="rounded-full bg-surface-tertiary px-2 py-0.5 text-caption text-content-secondary">
-              {devices.length}
-            </span>
-          )}
+    <div
+      className={
+        bare
+          ? ""
+          : "rounded-xl border border-border-strong bg-surface-primary p-6"
+      }
+    >
+      {!bare && (
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield size={18} className="text-content-secondary" />
+            <h2 className="text-h3 font-semibold uppercase tracking-wider text-content-primary">
+              Trusted Devices
+            </h2>
+            {devices.length > 0 && (
+              <span className="rounded-full bg-surface-tertiary px-2 py-0.5 text-caption text-content-secondary">
+                {devices.length}
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-2">
+            {devices.length > 0 && (
+              <Button
+                variant="danger"
+                size="sm"
+                fullWidth={false}
+                onClick={() => setShowRevokeAll(true)}
+              >
+                Revoke All
+              </Button>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {devices.length > 0 && (
-            <Button
-              variant="danger"
-              size="sm"
-              fullWidth={false}
-              onClick={() => setShowRevokeAll(true)}
-            >
-              Revoke All
-            </Button>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Loading state */}
       {isLoading && devices.length === 0 && (
