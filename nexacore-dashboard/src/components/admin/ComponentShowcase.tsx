@@ -91,6 +91,7 @@ import DateInput, { dateInputSpecs } from "@/components/ui/DateInput";
 import SidebarNav, { sidebarNavSpecs } from "@/components/ui/SidebarNav";
 import type { SidebarNavSection as SidebarSection } from "@/components/ui/SidebarNav";
 import IconBadge, { iconBadgeSpecs } from "@/components/ui/IconBadge";
+import AlertBox, { alertBoxSpecs } from "@/components/ui/AlertBox";
 import Accordion, {
   SingleAccordion,
   accordionSpecs,
@@ -2153,13 +2154,21 @@ function FeedbackShowcase() {
 
               <div>
                 <p className="text-caption text-content-primary/50 font-mono mb-2">
-                  boxed error
+                  AlertBox — 4 variants
                 </p>
-                <div className="inline-flex items-center gap-2 rounded-lg border border-error/20 bg-error/5 px-3 py-2">
-                  <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="text-caption text-error whitespace-nowrap">
+                <div className="space-y-2">
+                  <AlertBox variant="warning">
+                    This action will make your account less secure.
+                  </AlertBox>
+                  <AlertBox variant="error">
                     Invalid verification code. Please try again.
-                  </span>
+                  </AlertBox>
+                  <AlertBox variant="info">
+                    Your email is managed by an external provider.
+                  </AlertBox>
+                  <AlertBox variant="success">
+                    Your changes have been saved successfully.
+                  </AlertBox>
                 </div>
               </div>
 
@@ -2176,11 +2185,8 @@ function FeedbackShowcase() {
       <SpecsPanel
         specs={{
           "Inline Validation (InlineError)": inlineErrorSpecs,
-          "Boxed Error": {
-            container: "rounded-lg border border-error/20 bg-error/5 px-3 py-2",
-            icon: "AlertTriangle 16px text-error",
-            text: "text-caption text-error",
-          },
+          AlertBox: alertBoxSpecs.variants,
+          "AlertBox Layout": alertBoxSpecs.layout,
           "Rate Limit": {
             container: "flex items-start gap-2",
             icon: "AlertTriangle 16px text-error (mt-1) or Lock 16px for lockout",
@@ -2353,30 +2359,64 @@ function DigitInputShowcase() {
           />
         </div>
       </div>
+      {/* Error state */}
+      <div className="flex flex-wrap gap-4">
+        {(["light", "dark"] as const).map((mode) => (
+          <div
+            key={mode}
+            className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+          >
+            <p className="text-caption text-content-primary/50 font-mono mb-3">
+              {mode} — error state
+            </p>
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1.5">
+                <MfaDigitInput
+                  value={["1", "2", "3", "4", "5", ""]}
+                  onChange={() => {}}
+                  error
+                  idPrefix={`demo-error-${mode}`}
+                />
+                <p className="text-caption text-error">Enter all 6 digits</p>
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <MfaDigitInput
+                  value={["7", "3", "8", "2", "9", "1"]}
+                  onChange={() => {}}
+                  error
+                  idPrefix={`demo-error-full-${mode}`}
+                />
+                <p className="text-caption text-error">Invalid code</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Sizes — auto-switches based on container width */}
       <div>
         <p className="text-body font-semibold text-content-primary mb-2">
           Sizes
         </p>
         <div className="flex flex-wrap items-end gap-4">
-          <div className="flex flex-col gap-1.5" style={{ width: 340 }}>
+          <div className="flex flex-col gap-1.5" style={{ width: 360 }}>
             <MfaDigitInput
               value={Array(6).fill("")}
               onChange={() => {}}
               idPrefix="size-md"
             />
             <span className="text-caption text-content-primary/50">
-              md · 48×48px (default — container ≥ 328px)
+              md · 48×48px gap-3 (default — container ≥ 348px)
             </span>
           </div>
-          <div className="flex flex-col gap-1.5" style={{ width: 260 }}>
+          <div className="flex flex-col gap-1.5" style={{ width: 280 }}>
             <MfaDigitInput
               value={Array(6).fill("")}
               onChange={() => {}}
               idPrefix="size-sm"
             />
             <span className="text-caption text-content-primary/50">
-              sm · 40×40px (auto — container &lt; 328px)
+              sm · 40×40px gap-2 (auto — container &lt; 348px)
             </span>
           </div>
         </div>

@@ -15,17 +15,17 @@ const ACTION_BADGE_VARIANT: Record<
 > = {
   LOGIN_SUCCESS: "success",
   LOGIN_FAILURE: "error",
-  LOGOUT: "default",
+  LOGOUT: "info",
   REGISTER: "success",
-  TOKEN_REFRESH: "default",
-  OAUTH_LOGIN: "info",
+  TOKEN_REFRESH: "info",
+  OAUTH_LOGIN: "success",
   OAUTH_LINKED: "success",
   OAUTH_REGISTER: "success",
   OAUTH_UNLINKED: "warning",
   ACCOUNT_LOCKED: "error",
   ACCOUNT_UNLOCKED: "success",
   PASSWORD_CHANGE: "warning",
-  PROFILE_UPDATE: "default",
+  PROFILE_UPDATE: "info",
   USER_ROLE_CHANGE: "warning",
   USER_DEACTIVATED: "error",
   USER_ACTIVATED: "success",
@@ -160,7 +160,10 @@ const columns: ColumnDef<AuditLog>[] = [
         size="sm"
         className="whitespace-nowrap"
       >
-        {log.action.replace(/_/g, " ")}
+        {log.action
+          .replace(/_/g, " ")
+          .toLowerCase()
+          .replace(/\b\w/g, (c) => c.toUpperCase())}
       </Badge>
     ),
   },

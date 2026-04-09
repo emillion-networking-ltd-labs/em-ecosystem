@@ -104,7 +104,7 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
   const otherSessions = sessions.filter((s) => !s.isCurrent);
 
   const header = !bare && (
-    <h2 className="text-h3 font-semibold uppercase tracking-wider text-content-primary">
+    <h2 className="text-body font-semibold text-content-primary">
       Active Sessions
     </h2>
   );
@@ -122,7 +122,7 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
         {otherSessions.length > 0 && (
           <Button
             variant="danger"
-            size="sm"
+            size="md"
             fullWidth={false}
             loading={revokingAll}
             onClick={revokeAllOtherSessions}

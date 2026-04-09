@@ -214,7 +214,7 @@ export default function ProfileForm() {
           </div>
 
           {/* Identity + Metadata + Actions */}
-          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-[auto_1px_auto_1px_1fr] sm:items-center sm:gap-6">
+          <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-[1fr_1px_1fr_1px_1fr] sm:items-center sm:gap-6">
             {/* Name + email + badge */}
             <div className="group/name flex flex-col">
               <div className="flex items-center gap-2">
@@ -245,7 +245,7 @@ export default function ProfileForm() {
             <div className="hidden self-stretch bg-border-strong sm:block" />
 
             {/* Account metadata */}
-            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+            <dl className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 sm:mx-auto">
               <dt className="text-body text-content-tertiary">Member since</dt>
               <dd className="text-body text-content-primary">{memberSince}</dd>
 

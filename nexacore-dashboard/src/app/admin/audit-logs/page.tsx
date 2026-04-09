@@ -142,8 +142,8 @@ export default function AuditLogsPage() {
           ) : (
             <>
               <AuditLogsTable logs={logs} />
-              <div className="mt-4 flex items-center justify-between">
-                <div className="flex items-center gap-2">
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="text-caption text-content-tertiary">
                     Rows per page
                   </span>

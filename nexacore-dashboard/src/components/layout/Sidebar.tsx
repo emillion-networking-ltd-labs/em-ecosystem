@@ -13,6 +13,7 @@ import {
   Shield,
   ChevronLeft,
   ChevronRight,
+  X,
   FileText,
   ScrollText,
   Key,
@@ -180,7 +181,11 @@ export default function Sidebar({
             </span>
           )}
         </div>
-        {!isMobileMode && (
+        {isMobileMode ? (
+          <IconButton size="sm" onClick={onToggle} aria-label="Close sidebar">
+            <X size={16} />
+          </IconButton>
+        ) : (
           <IconButton
             size="sm"
             onClick={onToggle}

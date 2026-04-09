@@ -3,9 +3,8 @@
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import ProfileForm from "@/components/profile/ProfileForm";
-import MfaSetup from "@/components/profile/MfaSetup";
-import PasskeyManager from "@/components/profile/PasskeyManager";
-import TrustedDevices from "@/components/profile/TrustedDevices";
+import SecurityPanel from "@/components/profile/SecurityPanel";
+import DevicesPanel from "@/components/profile/DevicesPanel";
 import ConnectedAccounts from "@/components/profile/ConnectedAccounts";
 import ActiveSessions from "@/components/profile/ActiveSessions";
 import DeleteAccount from "@/components/profile/DeleteAccount";
@@ -39,18 +38,17 @@ export default function ProfilePage() {
             variant="section"
             items={[
               {
-                title: "Two-Factor Authentication",
-                children: <MfaSetup bare />,
+                title: "Security",
+                children: <SecurityPanel />,
               },
-              { title: "Passkeys", children: <PasskeyManager bare /> },
-              { title: "Trusted Devices", children: <TrustedDevices bare /> },
-              { title: "Active Sessions", children: <ActiveSessions bare /> },
+              { title: "Devices", children: <DevicesPanel /> },
+              { title: "Active Sessions", children: <ActiveSessions /> },
+              { title: "Security Activity", children: <SecurityActivity /> },
             ]}
           />
         </div>
-        <div className="mt-6 max-w-2xl space-y-6">
+        <div className="mt-6">
           <DeleteAccount />
-          <SecurityActivity />
         </div>
       </DashboardLayout>
     </ProtectedRoute>

@@ -3,7 +3,15 @@
 import { useState, useEffect, useCallback } from "react";
 import { getSecurityActivity } from "@/lib/security-activity-api";
 import type { SecurityEvent } from "@/lib/types";
+import Badge from "@/components/ui/Badge";
 import Pagination from "@/components/ui/Pagination";
+import Select from "@/components/ui/Select";
+
+const PAGE_SIZE_OPTIONS = [
+  { value: "10", label: "10 rows" },
+  { value: "20", label: "20 rows" },
+  { value: "50", label: "50 rows" },
+];
 
 const EVENT_CONFIG: Record<
   string,
@@ -43,13 +51,22 @@ const EVENT_CONFIG: Record<
   EMAIL_CHANGED: { label: "Email Changed", category: "warning" },
   TOKEN_REFRESH: { label: "Session Refreshed", category: "info" },
   REGISTER: { label: "Account Registered", category: "success" },
+  SUPERADMIN_BYPASS: { label: "Superadmin Bypass", category: "warning" },
+  PROFILE_UPDATE: { label: "Profile Updated", category: "info" },
+  USER_ROLE_CHANGE: { label: "Role Changed", category: "warning" },
+  USER_DEACTIVATED: { label: "User Deactivated", category: "danger" },
+  USER_ACTIVATED: { label: "User Activated", category: "success" },
+  USER_DELETED: { label: "User Deleted", category: "danger" },
 };
 
-const CATEGORY_STYLES: Record<string, string> = {
-  info: "bg-surface-subtle text-content-secondary",
-  success: "bg-success/10 text-success",
-  warning: "bg-warning/10 text-warning",
-  danger: "bg-error/10 text-error",
+const CATEGORY_BADGE: Record<
+  string,
+  "default" | "success" | "warning" | "error" | "info"
+> = {
+  info: "info",
+  success: "success",
+  warning: "warning",
+  danger: "error",
 };
 
 const EVENTS_PER_PAGE = 10;
@@ -57,6 +74,7 @@ const EVENTS_PER_PAGE = 10;
 export default function SecurityActivity() {
   const [events, setEvents] = useState<SecurityEvent[]>([]);
   const [eventsPage, setEventsPage] = useState(1);
+  const [pageSize, setPageSize] = useState(EVENTS_PER_PAGE);
   const [eventsMeta, setEventsMeta] = useState({
     total: 0,
     page: 1,
@@ -65,18 +83,21 @@ export default function SecurityActivity() {
   });
   const [eventsLoading, setEventsLoading] = useState(true);
 
-  const fetchEvents = useCallback(async (page: number) => {
-    setEventsLoading(true);
-    try {
-      const res = await getSecurityActivity(page, EVENTS_PER_PAGE);
-      setEvents(res.data);
-      setEventsMeta(res.meta);
-    } catch {
-      // silent — empty state shown
-    } finally {
-      setEventsLoading(false);
-    }
-  }, []);
+  const fetchEvents = useCallback(
+    async (page: number) => {
+      setEventsLoading(true);
+      try {
+        const res = await getSecurityActivity(page, pageSize);
+        setEvents(res.data);
+        setEventsMeta(res.meta);
+      } catch {
+        // silent — empty state shown
+      } finally {
+        setEventsLoading(false);
+      }
+    },
+    [pageSize],
+  );
 
   useEffect(() => {
     fetchEvents(eventsPage);
@@ -92,7 +113,7 @@ export default function SecurityActivity() {
 
   return (
     <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      <h2 className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary">
+      <h2 className="mb-6 text-body font-semibold text-content-primary">
         Security Activity
       </h2>
 
@@ -112,7 +133,7 @@ export default function SecurityActivity() {
               {events.map((event) => {
                 const config = EVENT_CONFIG[event.action] || {
                   label: event.action,
-                  category: "info" as const,
+                  category: "warning" as const,
                 };
                 return (
                   <div
@@ -121,11 +142,12 @@ export default function SecurityActivity() {
                   >
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <span
-                          className={`rounded px-1.5 py-0.5 text-caption font-normal ${CATEGORY_STYLES[config.category]}`}
+                        <Badge
+                          variant={CATEGORY_BADGE[config.category]}
+                          size="sm"
                         >
                           {config.label}
-                        </span>
+                        </Badge>
                       </div>
                       <p className="mt-1 text-caption text-content-tertiary">
                         {event.ipAddress || "System"}
@@ -138,11 +160,32 @@ export default function SecurityActivity() {
               })}
             </div>
 
-            <Pagination
-              currentPage={eventsMeta.page}
-              totalPages={eventsMeta.totalPages}
-              onPageChange={setEventsPage}
-            />
+            <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-caption text-content-tertiary">
+                  Rows per page
+                </span>
+                <Select
+                  options={PAGE_SIZE_OPTIONS}
+                  value={String(pageSize)}
+                  onChange={(v) => {
+                    setPageSize(Number(v));
+                    setEventsPage(1);
+                  }}
+                  size="sm"
+                />
+                <span className="text-caption text-content-tertiary">
+                  {eventsMeta.total} total entries
+                </span>
+              </div>
+              {eventsMeta.totalPages > 1 && (
+                <Pagination
+                  currentPage={eventsMeta.page}
+                  totalPages={eventsMeta.totalPages}
+                  onPageChange={setEventsPage}
+                />
+              )}
+            </div>
           </>
         )}
       </div>
