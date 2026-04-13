@@ -82,7 +82,7 @@ export default function UserRoleChart() {
   return (
     <ChartCard title="Users by Role">
       {loading && (
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
           <div className="h-[120px] w-[120px] animate-pulse rounded-full bg-black/[0.08] dark:bg-white/[0.08]" />
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
@@ -102,7 +102,7 @@ export default function UserRoleChart() {
       )}
 
       {!loading && !error && pieData.length > 0 && (
-        <div className="flex items-center gap-6">
+        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
           <div className="h-[120px] w-[120px] flex-shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>

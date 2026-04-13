@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
-import { Home } from "lucide-react";
+import { Birdhouse, ChevronRight } from "lucide-react";
 
 type BreadcrumbItem = {
   label: string;
@@ -19,9 +19,8 @@ export const breadcrumbsSpecs = {
     inactive:
       "text-body font-normal text-content-primary/75 hover:text-content-primary",
   },
-  separator:
-    "en-dash (–) intermediate, em-dash (—) last level — text-caption font-normal text-content-primary/75",
-  home: "text-content-primary/75 hover:text-content-primary 16px Home icon shrink-0",
+  separator: "ChevronRight 16px text-content-tertiary — between all levels",
+  home: "text-content-tertiary hover:text-content-primary 16px Birdhouse icon shrink-0",
   collapse:
     "Auto-collapse via ResizeObserver — Home / … / Last when content overflows container",
 };
@@ -56,30 +55,29 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
   }, [items]);
 
   const linkClass =
-    "rounded-lg px-1 py-0.5 text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary";
-  const activeClass =
-    "rounded-lg px-1 py-0.5 text-body font-normal text-content-primary";
-  const sepClass = "shrink-0 text-caption font-normal text-content-primary/75";
+    "text-body font-normal text-content-tertiary transition-colors hover:text-content-primary";
+  const activeClass = "text-body font-normal text-content-primary";
+  const sepClass = "shrink-0 text-content-tertiary";
 
   return (
-    <div ref={containerRef} className="min-w-0 overflow-hidden">
+    <div ref={containerRef} className="flex min-w-0 items-center">
       {/* Full version — always rendered for measurement, hidden when collapsed */}
       <nav
         data-breadcrumb-full
         aria-label="Breadcrumb"
-        className={`flex items-center gap-0 whitespace-nowrap ${collapsed ? "invisible absolute" : ""}`}
+        className={`flex items-center gap-1 whitespace-nowrap ${collapsed ? "invisible absolute" : ""}`}
       >
         <Link
           href="/dashboard"
-          className="flex shrink-0 items-center justify-center pr-1 text-content-primary/75 transition-colors hover:text-content-primary"
+          className="flex shrink-0 items-center justify-center text-content-tertiary transition-colors hover:text-content-primary"
         >
-          <Home size={16} />
+          <Birdhouse size={16} />
         </Link>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           return (
-            <div key={item.label} className="flex items-center gap-0">
-              <span className={sepClass}>{isLast ? "—" : "–"}</span>
+            <div key={item.label} className="flex items-center gap-1">
+              <ChevronRight size={16} className={sepClass} />
               {isLast || !item.href ? (
                 <span className={activeClass}>{item.label}</span>
               ) : (
@@ -96,24 +94,24 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
       {collapsed && (
         <nav
           aria-label="Breadcrumb"
-          className="flex items-center gap-0 whitespace-nowrap"
+          className="flex items-center gap-1 whitespace-nowrap"
         >
           <Link
             href="/dashboard"
-            className="flex shrink-0 items-center justify-center pr-1 text-content-primary/75 transition-colors hover:text-content-primary"
+            className="flex shrink-0 items-center justify-center text-content-tertiary transition-colors hover:text-content-primary"
           >
-            <Home size={16} />
+            <Birdhouse size={16} />
           </Link>
           {middleItems.length > 0 && (
-            <div className="flex items-center gap-0">
-              <span className={sepClass}>–</span>
-              <span className="px-2 py-1 text-body font-normal text-content-primary/50">
+            <div className="flex items-center gap-1">
+              <ChevronRight size={16} className={sepClass} />
+              <span className="px-2 py-1 text-body font-normal text-content-tertiary">
                 …
               </span>
             </div>
           )}
-          <div className="flex items-center gap-0">
-            <span className={sepClass}>—</span>
+          <div className="flex items-center gap-1">
+            <ChevronRight size={16} className={sepClass} />
             <span className={activeClass}>{lastItem.label}</span>
           </div>
         </nav>

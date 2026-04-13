@@ -304,7 +304,7 @@ export default function PasskeyManager({
             maxLength={64}
             disabled={isRegistering}
           />
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row">
             <Button
               variant="outline"
               size="md"

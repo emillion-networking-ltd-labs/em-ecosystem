@@ -149,7 +149,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
 
       {/* Empty state */}
       {!isLoading && devices.length === 0 && (
-        <p className="py-4 text-center text-body text-content-secondary">
+        <p className="mb-4 text-body text-content-secondary">
           No trusted devices. When you log in with MFA and trust a device, it
           will appear here.
         </p>
@@ -161,7 +161,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
           {devices.map((device) => (
             <div
               key={device.id}
-              className={`flex items-center justify-between rounded-xl border border-border-components p-4 ${
+              className={`flex flex-col gap-3 rounded-xl border border-border-components p-4 sm:flex-row sm:items-center sm:justify-between ${
                 device.id === newDeviceId
                   ? "animate-slide-in-fade"
                   : device.id === removingId
@@ -169,7 +169,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
                     : ""
               }`}
             >
-              <div className="flex items-center gap-3">
+              <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-tertiary">
                   {isMobileDevice(device.deviceName) ? (
                     <Smartphone size={24} className="text-content-secondary" />
@@ -181,23 +181,25 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
                   <p className="text-body font-normal text-content-primary">
                     {device.deviceName}
                   </p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-caption text-content-secondary">
-                    <span>{device.ipAddress}</span>
-                    <span>
-                      Last verified: {formatRelativeTime(device.lastVerifiedAt)}
-                    </span>
-                    <span>Expires: {formatDate(device.expiresAt)}</span>
-                  </div>
+                  <p className="mt-0.5 text-caption text-content-tertiary">
+                    {device.ipAddress}
+                    <span className="text-content-disabled"> · </span>
+                    {formatRelativeTime(device.lastVerifiedAt)}
+                    <span className="text-content-disabled"> · </span>
+                    Expires {formatDate(device.expiresAt)}
+                  </p>
                 </div>
               </div>
-              <IconButton
-                variant="danger"
-                size="sm"
-                onClick={() => setRevokeTarget(device)}
-                aria-label={`Revoke trust for ${device.deviceName}`}
-              >
-                <Trash2 size={16} />
-              </IconButton>
+              <div className="flex justify-center sm:justify-end">
+                <IconButton
+                  variant="danger"
+                  size="sm"
+                  onClick={() => setRevokeTarget(device)}
+                  aria-label={`Revoke trust for ${device.deviceName}`}
+                >
+                  <Trash2 size={16} />
+                </IconButton>
+              </div>
             </div>
           ))}
         </div>

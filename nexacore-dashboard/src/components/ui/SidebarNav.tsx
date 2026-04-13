@@ -45,13 +45,15 @@ export const sidebarNavSpecs = {
       "Parent: ChevronDown/Right toggle | Children: nested Tabs variant=nav, pl-4 indent",
   },
   section: {
-    label: "text-body font-normal text-content-primary/40 px-3 mb-2",
+    label: "text-body font-normal text-content-tertiary px-2 mb-2",
     gap: "flex-col gap-2",
   },
   container: {
     collapsed: "w-[68px]",
-    expanded: "w-[212px]",
+    expanded: "w-[300px]",
     bg: "bg-surface-primary",
+    border: "rounded-r-xl border border-border-strong",
+    shadow: "shadow-card",
   },
 };
 
@@ -69,7 +71,7 @@ function NavSectionComponent({
   return (
     <div className={className}>
       {label && (
-        <p className="mb-2 px-3 text-body font-normal leading-[20px] text-content-primary/40">
+        <p className="mb-2 px-2 text-body font-normal leading-[20px] text-content-tertiary">
           {label}
         </p>
       )}
@@ -104,7 +106,7 @@ export default function SidebarNav({
   };
 
   return (
-    <nav className={`flex flex-1 flex-col overflow-y-auto p-4 ${className}`}>
+    <nav className={`flex flex-col p-4 ${className}`}>
       {sections.map((section, i) => {
         // Active href: leaf items or children
         const activeHref =

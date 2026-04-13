@@ -25,6 +25,9 @@
   --border-components: rgba(0, 0, 0, 0.15);
   --border-subtle: rgba(0, 0, 0, 0.03);
 
+  /* Overlay */
+  --overlay: rgba(0, 0, 0, 0.2);
+
   /* Semantic feedback colors */
   --color-error: 138 17 17;
   --color-error-bg: #fef2f2;
@@ -77,6 +80,9 @@
   --border-components: rgba(255, 255, 255, 0.2);
   --border-subtle: rgba(255, 255, 255, 0.04);
 
+  /* Overlay */
+  --overlay: rgba(0, 0, 0, 0.2);
+
   /* Semantic feedback colors */
   --color-error: 239 68 68;
   --color-error-bg: #451a1a;
@@ -123,6 +129,7 @@
   --border-strong: rgba(0, 0, 0, 0.08);
   --border-components: rgba(0, 0, 0, 0.15);
   --border-subtle: rgba(0, 0, 0, 0.03);
+  --overlay: rgba(0, 0, 0, 0.2);
   --color-error: 138 17 17;
   --color-error-bg: #fef2f2;
   --color-error-border: #f5c6c6;

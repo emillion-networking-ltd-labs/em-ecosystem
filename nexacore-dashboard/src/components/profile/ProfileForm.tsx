@@ -204,13 +204,9 @@ export default function ProfileForm() {
         <div className="px-6 pb-6">
           {/* Avatar overlapping banner */}
           <div className="-mt-10">
-            <button
-              type="button"
-              aria-label="Change avatar"
-              className="rounded-full bg-surface-tertiary p-2 ring-1 ring-border-strong cursor-pointer transition-opacity hover:opacity-80"
-            >
+            <div className="inline-flex rounded-full bg-surface-tertiary p-2 ring-1 ring-border-strong">
               <Avatar src={user.avatarUrl} name={fullName} size="lg" />
-            </button>
+            </div>
           </div>
 
           {/* Identity + Metadata + Actions */}
@@ -235,7 +231,7 @@ export default function ProfileForm() {
                 {user.email}
               </p>
               <div className="mt-2">
-                <Badge variant="info" size="md">
+                <Badge variant="info" size="sm">
                   {user.role}
                 </Badge>
               </div>
@@ -319,12 +315,14 @@ export default function ProfileForm() {
             value={firstName}
             onChange={(e) => setFirstName(e.target.value)}
             placeholder="John"
+            autoComplete="given-name"
           />
           <Input
             label="Last Name"
             name="lastName"
             value={lastName}
             onChange={(e) => setLastName(e.target.value)}
+            autoComplete="family-name"
             placeholder="Doe"
           />
         </div>

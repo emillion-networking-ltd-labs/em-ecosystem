@@ -13,7 +13,7 @@ const pageBase =
 const pageActive =
   "bg-surface-inverse text-content-inverse transition-opacity hover:opacity-90";
 const pageInactive =
-  "bg-transparent text-content-primary hover:bg-surface-subtle";
+  "bg-surface-primary text-content-primary hover:bg-surface-subtle";
 const arrowBase =
   "flex h-8 w-8 items-center justify-center rounded-md border border-border-components text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50";
 

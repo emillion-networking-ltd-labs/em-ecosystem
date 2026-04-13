@@ -51,8 +51,6 @@ export default function AuditLogsPage() {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const dateRangePartial = (startDate && !endDate) || (!startDate && endDate);
-
   const fetchLogs = useCallback(
     async (page: number, signal?: AbortSignal) => {
       setLoading(true);
@@ -96,11 +94,11 @@ export default function AuditLogsPage() {
     <AdminRoute>
       <DashboardLayout>
         {/* Page header */}
-        <div className="mb-6 flex items-center gap-2">
+        <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
           <h1 className="text-h2 font-semibold text-content-primary">
             Audit Logs
           </h1>
-          <Divider orientation="vertical" className="h-6" />
+          <Divider orientation="vertical" className="hidden sm:block" />
           <Breadcrumbs
             items={[
               { label: "Dashboards", href: "/dashboard" },
@@ -122,7 +120,6 @@ export default function AuditLogsPage() {
               onStartDateChange={setStartDate}
               endDate={endDate}
               onEndDateChange={setEndDate}
-              dateRangePartial={dateRangePartial}
             />
           </StickyCard>
         </div>

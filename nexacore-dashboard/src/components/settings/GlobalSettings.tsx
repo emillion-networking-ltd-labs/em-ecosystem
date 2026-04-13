@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Server, UserPlus, Clock, ShieldCheck } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import Badge from "@/components/ui/Badge";
 import IconBadge from "@/components/ui/IconBadge";
 import Toggle from "@/components/ui/Toggle";
 
@@ -18,17 +19,35 @@ function SettingRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl p-4">
-      <div className="flex items-center gap-3">
-        <IconBadge size="md">
-          <Icon size={24} />
-        </IconBadge>
-        <div>
+    <div className="rounded-xl p-4">
+      {/* Mobile: icon + action top, text below */}
+      <div className="sm:hidden">
+        <div className="flex items-center justify-between gap-4">
+          <IconBadge size="md">
+            <Icon size={24} />
+          </IconBadge>
+          <div className="shrink-0">{children}</div>
+        </div>
+        <div className="mt-2">
           <p className="text-body font-normal text-content-primary">{label}</p>
           <p className="text-caption text-content-tertiary">{description}</p>
         </div>
       </div>
-      <div className="shrink-0">{children}</div>
+      {/* Desktop: original layout */}
+      <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex items-center gap-3">
+          <IconBadge size="md">
+            <Icon size={24} />
+          </IconBadge>
+          <div>
+            <p className="text-body font-normal text-content-primary">
+              {label}
+            </p>
+            <p className="text-caption text-content-tertiary">{description}</p>
+          </div>
+        </div>
+        <div className="shrink-0">{children}</div>
+      </div>
     </div>
   );
 }
@@ -60,9 +79,9 @@ export default function GlobalSettings() {
         <h2 className="text-body font-semibold text-content-primary">
           Global Settings
         </h2>
-        <span className="rounded-lg bg-black/[0.04] px-2 py-0.5 text-caption text-content-tertiary dark:bg-white/[0.04]">
+        <Badge variant="default" size="sm">
           Admin
-        </span>
+        </Badge>
       </div>
       <div className="divide-y divide-border-default">
         <SettingRow
@@ -72,9 +91,9 @@ export default function GlobalSettings() {
         >
           <div className="flex items-center gap-2">
             <span className="text-caption text-content-primary">v1.0.0</span>
-            <span className="rounded-lg bg-success/10 px-2 py-0.5 text-caption text-success">
+            <Badge variant="info" size="sm">
               Production
-            </span>
+            </Badge>
           </div>
         </SettingRow>
 

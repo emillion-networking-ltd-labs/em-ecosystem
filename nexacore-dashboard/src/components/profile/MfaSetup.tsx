@@ -14,6 +14,7 @@ import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import Button from "@/components/ui/Button";
+import InlineError from "@/components/ui/InlineError";
 import Input from "@/components/ui/Input";
 import MfaDigitInput from "@/components/ui/MfaDigitInput";
 import AlertBox from "@/components/ui/AlertBox";
@@ -292,7 +293,7 @@ export default function MfaSetup({
                 autoFocus
               />
               {fieldError && (
-                <p className="mt-1 text-caption text-error">{fieldError}</p>
+                <InlineError message={fieldError} className="mt-2" />
               )}
             </div>
 
@@ -446,7 +447,7 @@ export default function MfaSetup({
       )}
 
       <div className="space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
           <div className="flex items-center gap-3">
             {mfaEnabled ? (
               <ShieldCheck size={16} className="text-success" />
@@ -467,13 +468,12 @@ export default function MfaSetup({
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
             {mfaEnabled ? (
               <>
                 <Button
                   variant="outline"
                   size="md"
-                  fullWidth={false}
                   onClick={() => {
                     setFieldError("");
                     setView("regenerate");
@@ -485,7 +485,6 @@ export default function MfaSetup({
                 <Button
                   variant="danger"
                   size="md"
-                  fullWidth={false}
                   onClick={() => {
                     setFieldError("");
                     setView("disable");
@@ -496,12 +495,7 @@ export default function MfaSetup({
                 </Button>
               </>
             ) : (
-              <Button
-                size="md"
-                fullWidth={false}
-                loading={loading}
-                onClick={handleSetup}
-              >
+              <Button size="md" loading={loading} onClick={handleSetup}>
                 <Shield size={16} />
                 Enable MFA
               </Button>

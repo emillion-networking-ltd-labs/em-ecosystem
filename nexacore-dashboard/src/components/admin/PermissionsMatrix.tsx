@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { Fragment, useState, useEffect, useCallback } from "react";
 import { Save, RotateCcw } from "lucide-react";
 import Button from "@/components/ui/Button";
+import Divider from "@/components/ui/Divider";
 import Spinner from "@/components/ui/Spinner";
 import StickyCard from "@/components/ui/StickyCard";
 import { apiClient } from "@/lib/api";
@@ -213,34 +214,42 @@ export default function PermissionsMatrix() {
 
       {/* Save/Reset — sticky action bar */}
       <Can permission="permissions:write">
-        <StickyCard className="flex flex-wrap gap-4">
-          {EDITABLE_ROLES.map((role) => (
-            <div key={role} className="flex items-center gap-2">
-              <span className="text-body font-normal text-content-primary">
-                {role}
-              </span>
-              <Button
-                variant="primary"
-                size="md"
-                fullWidth={false}
-                onClick={() => saveRole(role)}
-                disabled={!isDirty(role)}
-                loading={saving === role}
-              >
-                <Save size={16} />
-                Save
-              </Button>
-              <Button
-                variant="outline"
-                size="md"
-                fullWidth={false}
-                onClick={() => resetRole(role)}
-                disabled={!isDirty(role)}
-              >
-                <RotateCcw size={16} />
-                Reset
-              </Button>
-            </div>
+        <StickyCard className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {EDITABLE_ROLES.map((role, index) => (
+            <Fragment key={role}>
+              {index > 0 && (
+                <>
+                  <Divider className="sm:hidden" />
+                  <Divider orientation="vertical" className="hidden sm:block" />
+                </>
+              )}
+              <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-center">
+                <span className="text-body font-semibold text-content-primary">
+                  {role}
+                </span>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => saveRole(role)}
+                    disabled={!isDirty(role)}
+                    loading={saving === role}
+                  >
+                    <Save size={16} />
+                    Save
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => resetRole(role)}
+                    disabled={!isDirty(role)}
+                  >
+                    <RotateCcw size={16} />
+                    Reset
+                  </Button>
+                </div>
+              </div>
+            </Fragment>
           ))}
         </StickyCard>
       </Can>

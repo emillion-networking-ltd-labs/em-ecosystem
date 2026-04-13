@@ -138,7 +138,7 @@ export default function MfaDigitInput({
           value={value[i] || ""}
           onChange={(e) => handleDigitChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
-          className={`${compact ? "h-10 w-10" : "h-12 w-12"} ${digitBase} ${error ? "outline-error/75" : "outline-transparent hover:outline-content-primary/75 focus:outline-content-primary/75"}`}
+          className={`${compact ? "h-10 max-w-10" : "h-12 max-w-12"} min-w-0 flex-1 ${digitBase} ${error ? "outline-error/75" : "outline-transparent hover:outline-content-primary/75 focus:outline-content-primary/75"}`}
           aria-label={`Digit ${i + 1}`}
           autoFocus={autoFocus && i === 0}
         />

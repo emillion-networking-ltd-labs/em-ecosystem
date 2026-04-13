@@ -22,7 +22,7 @@ export const confirmModalSpecs = {
   },
   layout: {
     radius: "rounded-xl (card inner)",
-    overlay: "bg-black/40",
+    overlay: "bg-[var(--overlay)]",
     topSection: "bg-surface-primary p-6 border-b border-border-strong",
     bottomSection: "bg-surface-secondary px-6 py-3",
   },
@@ -131,7 +131,7 @@ export default function ConfirmModal({
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)]"
       onClick={(e) => {
         if (e.target === overlayRef.current) onClose();
       }}
@@ -141,10 +141,10 @@ export default function ConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
-        className={`group w-full ${sizeClasses[size]} mx-4 overflow-hidden rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
+        className={`group w-full ${sizeClasses[size]} mx-4 rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
       >
         {/* Top section */}
-        <div className="relative border-b border-border-strong bg-surface-primary p-6">
+        <div className="relative rounded-t-xl border-b border-border-strong bg-surface-primary p-6">
           <IconButton
             variant="default"
             size="sm"
@@ -167,7 +167,7 @@ export default function ConfirmModal({
         </div>
 
         {/* Bottom section — buttons */}
-        <div className="flex justify-end gap-3 px-6 py-3">
+        <div className="flex justify-end gap-3 rounded-b-xl px-6 py-3">
           <Button
             variant="outline"
             size="md"

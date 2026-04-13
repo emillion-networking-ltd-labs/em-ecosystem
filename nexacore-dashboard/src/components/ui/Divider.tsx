@@ -36,7 +36,7 @@ export default function Divider({
       );
     }
     return (
-      <div className={`w-px self-stretch bg-border-strong ${className}`} />
+      <div className={`mx-1 w-px self-stretch bg-border-strong ${className}`} />
     );
   }
 

@@ -85,9 +85,9 @@ export const tabsSpecs = {
     scroll:
       "overflow-x-auto scrollbar-hide touch-pan-x, drag-to-scroll (mouse + touch)",
     indicators:
-      "h-[9px] w-[9px] rounded-full — active: bg-surface-inverse, inactive: bg-border-strong, clickable (scrolls to tab)",
-    detection:
-      "ResizeObserver — dots appear only when content overflows container",
+      "h-[9px] w-[9px] rounded-full button — active: bg-surface-inverse, inactive: bg-border-strong, click: setActiveTab + scrollIntoView smooth center",
+    visibility:
+      "sm:hidden — dots only visible on mobile when tabs overflow horizontally",
   },
 };
 
