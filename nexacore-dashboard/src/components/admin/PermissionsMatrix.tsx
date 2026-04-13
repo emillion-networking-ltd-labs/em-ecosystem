@@ -1,7 +1,11 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { Save, RotateCcw, Loader2 } from "lucide-react";
+import { Fragment, useState, useEffect, useCallback } from "react";
+import { Save, RotateCcw } from "lucide-react";
+import Button from "@/components/ui/Button";
+import Divider from "@/components/ui/Divider";
+import Spinner from "@/components/ui/Spinner";
+import StickyCard from "@/components/ui/StickyCard";
 import { apiClient } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
 import Can from "@/components/guards/Can";
@@ -126,7 +130,7 @@ export default function PermissionsMatrix() {
   if (loading) {
     return (
       <div className="flex h-64 items-center justify-center">
-        <Loader2 size={24} className="animate-spin text-content-tertiary" />
+        <Spinner size="md" />
       </div>
     );
   }
@@ -144,102 +148,110 @@ export default function PermissionsMatrix() {
   return (
     <div className="space-y-6">
       {/* Matrix tables — one DataTable per resource group */}
-      {Array.from(grouped.entries()).map(([resource, perms]) => {
-        const columns: ColumnDef<Permission>[] = [
-          {
-            key: "permission",
-            label: "Permission",
-            render: (perm) => (
-              <div>
-                <span className="text-body font-normal text-content-primary">
-                  {perm.key}
-                </span>
-                <p className="text-caption text-content-tertiary">
-                  {perm.description}
-                </p>
-              </div>
-            ),
-          },
-          ...EDITABLE_ROLES.map((role) => ({
-            key: role,
-            label: role,
-            align: "center" as const,
-            render: (perm: Permission) => (
-              <Can
-                permission="permissions:write"
-                fallback={
+      <div className="card-flat space-y-6">
+        {Array.from(grouped.entries()).map(([resource, perms]) => {
+          const columns: ColumnDef<Permission>[] = [
+            {
+              key: "permission",
+              label: "Permission",
+              render: (perm) => (
+                <div>
+                  <span className="text-body font-normal text-content-primary">
+                    {perm.key}
+                  </span>
+                  <p className="text-caption text-content-tertiary">
+                    {perm.description}
+                  </p>
+                </div>
+              ),
+            },
+            ...EDITABLE_ROLES.map((role) => ({
+              key: role,
+              label: role,
+              align: "center" as const,
+              render: (perm: Permission) => (
+                <Can
+                  permission="permissions:write"
+                  fallback={
+                    <Checkbox
+                      checked={current[role]?.has(perm.key) ?? false}
+                      disabled
+                      size="md"
+                    />
+                  }
+                >
                   <Checkbox
                     checked={current[role]?.has(perm.key) ?? false}
-                    disabled
+                    onChange={() => toggle(role, perm.key)}
                     size="md"
                   />
-                }
-              >
-                <Checkbox
-                  checked={current[role]?.has(perm.key) ?? false}
-                  onChange={() => toggle(role, perm.key)}
-                  size="md"
-                />
-              </Can>
-            ),
-          })),
-          {
-            key: "superadmin",
-            label: "SUPERADMIN",
-            align: "center" as const,
-            headerClassName: "!text-brand-primary",
-            render: () => <Checkbox checked disabled size="md" />,
-          },
-        ];
+                </Can>
+              ),
+            })),
+            {
+              key: "superadmin",
+              label: "SUPERADMIN",
+              align: "center" as const,
+              headerClassName: "!text-brand-primary",
+              render: () => <Checkbox checked disabled size="md" />,
+            },
+          ];
 
-        return (
-          <div key={resource}>
-            <p className="mb-2 text-caption font-semibold uppercase tracking-wider text-content-tertiary">
-              {resource}
-            </p>
-            <DataTable
-              data={perms}
-              columns={columns}
-              keyExtractor={(perm) => perm.id}
-            />
-          </div>
-        );
-      })}
-
-      {/* Save/Reset buttons per role */}
-      <Can permission="permissions:write">
-        <div className="flex flex-wrap gap-4">
-          {EDITABLE_ROLES.map((role) => (
-            <div
-              key={role}
-              className="flex items-center gap-2 rounded-xl border border-border-strong bg-surface-primary px-4 py-3"
-            >
-              <span className="text-body font-normal text-content-primary">
-                {role}
-              </span>
-              <button
-                onClick={() => saveRole(role)}
-                disabled={!isDirty(role) || saving === role}
-                className="flex items-center gap-1 rounded-lg bg-brand-primary px-3 py-1.5 text-caption font-normal text-white transition-colors hover:bg-brand-primary/90 disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {saving === role ? (
-                  <Loader2 size={14} className="animate-spin" />
-                ) : (
-                  <Save size={14} />
-                )}
-                Save
-              </button>
-              <button
-                onClick={() => resetRole(role)}
-                disabled={!isDirty(role)}
-                className="flex items-center gap-1 rounded-lg border border-border-strong px-3 py-1.5 text-caption font-normal text-content-secondary transition-colors hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                <RotateCcw size={14} />
-                Reset
-              </button>
+          return (
+            <div key={resource}>
+              <p className="mb-2 text-h3 font-semibold uppercase tracking-wider text-content-primary">
+                {resource.replace(/_/g, " ")}
+              </p>
+              <DataTable
+                data={perms}
+                columns={columns}
+                keyExtractor={(perm) => perm.id}
+              />
             </div>
+          );
+        })}
+      </div>
+
+      {/* Save/Reset — sticky action bar */}
+      <Can permission="permissions:write">
+        <StickyCard className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          {EDITABLE_ROLES.map((role, index) => (
+            <Fragment key={role}>
+              {index > 0 && (
+                <>
+                  <Divider className="sm:hidden" />
+                  <Divider orientation="vertical" className="hidden sm:block" />
+                </>
+              )}
+              <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-center">
+                <span className="text-body font-semibold text-content-primary">
+                  {role}
+                </span>
+                <div className="grid grid-cols-2 gap-2 sm:flex sm:gap-2">
+                  <Button
+                    variant="primary"
+                    size="md"
+                    onClick={() => saveRole(role)}
+                    disabled={!isDirty(role)}
+                    loading={saving === role}
+                  >
+                    <Save size={16} />
+                    Save
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="md"
+                    onClick={() => resetRole(role)}
+                    disabled={!isDirty(role)}
+                  >
+                    <RotateCcw size={16} />
+                    Reset
+                  </Button>
+                </div>
+              </div>
+            </Fragment>
           ))}
-        </div>
+        </StickyCard>
       </Can>
     </div>
   );

@@ -8,12 +8,13 @@ import {
   Pencil,
   Trash2,
   Plus,
-  AlertTriangle,
   ShieldCheck,
 } from "lucide-react";
+import AlertBox from "@/components/ui/AlertBox";
 import { usePasskey } from "@/hooks/usePasskey";
 import { useToast } from "@/context/ToastContext";
 import { PROFILE_TOAST } from "@/lib/toast-messages";
+import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
@@ -37,9 +38,9 @@ function formatRelativeTime(dateStr: string | null): string {
 
 function DeviceIcon({ deviceType }: { deviceType: string }) {
   return deviceType === "multiDevice" ? (
-    <Smartphone size={18} className="text-content-secondary" />
+    <Smartphone size={24} className="text-content-secondary" />
   ) : (
-    <Monitor size={18} className="text-content-secondary" />
+    <Monitor size={24} className="text-content-secondary" />
   );
 }
 
@@ -64,9 +65,9 @@ function PasskeyItem({
               {passkey.name || "Passkey"}
             </span>
             {passkey.backedUp && (
-              <span className="rounded-full bg-surface-tertiary px-2 py-0.5 text-[11px] font-normal text-content-secondary">
+              <Badge variant="success" size="sm">
                 Synced
-              </span>
+              </Badge>
             )}
           </div>
           <span className="text-caption text-content-secondary">
@@ -95,7 +96,13 @@ function PasskeyItem({
   );
 }
 
-export default function PasskeyManager() {
+export default function PasskeyManager({
+  bare,
+  onExpandChange,
+}: {
+  bare?: boolean;
+  onExpandChange?: (expanded: boolean) => void;
+}) {
   const {
     isSupported,
     passkeys,
@@ -110,7 +117,11 @@ export default function PasskeyManager() {
 
   const { addToast } = useToast();
 
-  const [view, setView] = useState<View>("list");
+  const [view, setViewInternal] = useState<View>("list");
+  const setView = (v: View) => {
+    setViewInternal(v);
+    onExpandChange?.(v !== "list");
+  };
   const [regName, setRegName] = useState("");
 
   // Rename state
@@ -179,37 +190,41 @@ export default function PasskeyManager() {
   };
 
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Key size={18} className="text-content-secondary" />
-          <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
-            Passkeys
-          </h2>
-        </div>
-        {passkeys.length > 0 && (
-          <div className="flex items-center gap-1.5 text-caption text-success">
-            <ShieldCheck size={14} />
-            <span>{passkeys.length} registered</span>
+    <div
+      className={
+        bare
+          ? ""
+          : "h-full rounded-xl border border-border-strong bg-surface-primary p-6"
+      }
+    >
+      {!bare && (
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Key size={16} className="text-content-secondary" />
+            <h2 className="text-body font-semibold text-content-primary">
+              Passkeys
+            </h2>
           </div>
-        )}
-      </div>
+          {passkeys.length > 0 && (
+            <div className="flex items-center gap-1.5 text-caption text-success">
+              <ShieldCheck size={16} />
+              <span>{passkeys.length} registered</span>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Browser support warning */}
       {!isSupported && (
-        <div className="flex items-start gap-3 rounded-lg border border-warning-border bg-warning-bg p-4">
-          <AlertTriangle size={18} className="mt-0.5 shrink-0 text-warning" />
-          <div>
-            <p className="text-body font-normal text-content-primary">
-              Passkeys not supported
-            </p>
-            <p className="mt-1 text-caption text-content-secondary">
-              Your browser does not support WebAuthn. Use a modern browser like
-              Chrome, Edge, Safari, or Firefox.
-            </p>
-          </div>
-        </div>
+        <AlertBox variant="warning">
+          <p className="text-body font-normal text-content-primary">
+            Passkeys not supported
+          </p>
+          <p className="mt-1 text-caption text-content-secondary">
+            Your browser does not support WebAuthn. Use a modern browser like
+            Chrome, Edge, Safari, or Firefox.
+          </p>
+        </AlertBox>
       )}
 
       {/* Loading */}
@@ -251,16 +266,15 @@ export default function PasskeyManager() {
           )}
 
           <Button
-            variant="outline"
+            variant="primary"
             size="md"
-            fullWidth={false}
             onClick={() => {
               clearError();
               setRegName("");
               setView("registering");
             }}
             disabled={passkeys.length >= 10}
-            className="gap-2"
+            className="sm:w-auto"
           >
             <Plus size={16} />
             Add Passkey
@@ -290,7 +304,7 @@ export default function PasskeyManager() {
             maxLength={64}
             disabled={isRegistering}
           />
-          <div className="flex gap-2">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row">
             <Button
               variant="outline"
               size="md"

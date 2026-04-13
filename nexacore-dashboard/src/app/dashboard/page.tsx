@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { ChevronDown } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -14,7 +13,6 @@ import TotalUsersChart from "@/components/dashboard/TotalUsersChart";
 import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
 import UserRoleChart from "@/components/dashboard/UserRoleChart";
 import QuickActionsCard from "@/components/dashboard/QuickActionsCard";
-import RightPanel from "@/components/dashboard/RightPanel";
 
 type DashboardMetrics = {
   totalUsers: number | null;
@@ -87,25 +85,19 @@ export default function DashboardPage() {
 
   return (
     <ProtectedRoute>
-      <DashboardLayout rightPanel={<RightPanel />}>
+      <DashboardLayout>
         {/* Page header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h1 className="text-h2 font-semibold text-content-primary">
-              Overview
-            </h1>
-            <Divider orientation="vertical" className="h-6" />
-            <Breadcrumbs
-              items={[
-                { label: "Dashboards", href: "/dashboard" },
-                { label: "Overview" },
-              ]}
-            />
-          </div>
-          <button className="flex items-center gap-1 rounded-lg px-2 py-1 text-caption text-content-primary hover:bg-surface-subtle">
-            Today
-            <ChevronDown size={16} className="text-content-tertiary" />
-          </button>
+        <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+          <h1 className="text-h2 font-semibold text-content-primary">
+            Overview
+          </h1>
+          <Divider orientation="vertical" className="hidden sm:block" />
+          <Breadcrumbs
+            items={[
+              { label: "Dashboards", href: "/dashboard" },
+              { label: "Overview" },
+            ]}
+          />
         </div>
 
         {/* Metric cards */}

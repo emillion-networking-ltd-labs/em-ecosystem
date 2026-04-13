@@ -27,7 +27,7 @@ export default function VerifyEmailStatus() {
     return (
       <div className="flex flex-col items-center gap-2">
         <Loader2 size={48} className="animate-spin text-content-secondary" />
-        <p className="text-body text-content-primary/50">
+        <p className="text-body text-content-secondary">
           Verifying your email...
         </p>
       </div>
@@ -53,9 +53,9 @@ export default function VerifyEmailStatus() {
       )}
 
       {isSuccess ? (
-        <p className="text-body text-content-primary/50">Email verified!</p>
+        <p className="text-body text-content-secondary">Email verified!</p>
       ) : (
-        <p className="text-center text-body text-content-primary/50">
+        <p className="text-center text-body text-content-secondary">
           Verification failed!
           <br />
           The verification link is invalid or has expired.

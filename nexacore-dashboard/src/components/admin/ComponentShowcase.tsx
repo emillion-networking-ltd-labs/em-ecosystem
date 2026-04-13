@@ -88,7 +88,10 @@ import LanguageSelector, {
 import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
 import ConfirmModal, { confirmModalSpecs } from "@/components/ui/ConfirmModal";
 import DateInput, { dateInputSpecs } from "@/components/ui/DateInput";
+import SidebarNav, { sidebarNavSpecs } from "@/components/ui/SidebarNav";
+import type { SidebarNavSection as SidebarSection } from "@/components/ui/SidebarNav";
 import IconBadge, { iconBadgeSpecs } from "@/components/ui/IconBadge";
+import AlertBox, { alertBoxSpecs } from "@/components/ui/AlertBox";
 import Accordion, {
   SingleAccordion,
   accordionSpecs,
@@ -130,7 +133,7 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={handleCopy}
-      className="shrink-0 p-1 rounded text-content-primary/50 hover:text-content-primary transition-colors"
+      className="shrink-0 p-1 rounded text-content-tertiary hover:text-content-primary transition-colors"
       aria-label="Copy classes"
     >
       {copied ? (
@@ -152,13 +155,13 @@ function SpecsPanel({
       <div className="divide-y divide-border-strong">
         {Object.entries(specs).map(([section, entries]) => (
           <div key={section} className="py-3">
-            <p className="text-caption font-semibold uppercase tracking-wider text-content-primary/50 mb-2">
+            <p className="text-caption font-semibold uppercase tracking-wider text-content-tertiary mb-2">
               {section}
             </p>
             <div className="space-y-1.5">
               {Object.entries(entries).map(([key, value]) => (
                 <div key={key} className="flex items-center gap-2">
-                  <span className="text-caption font-normal text-content-primary/50 w-20 shrink-0">
+                  <span className="text-caption font-normal text-content-tertiary w-20 shrink-0">
                     {key}
                   </span>
                   <code className="flex-1 text-caption bg-surface-secondary rounded px-2 py-1 text-content-primary font-mono overflow-x-auto">
@@ -283,7 +286,7 @@ function ButtonShowcase() {
             <Button variant="primary" size="lg" fullWidth={false}>
               Button
             </Button>
-            <span className="text-caption text-content-primary/50">
+            <span className="text-caption text-content-tertiary">
               lg · 48px
             </span>
           </div>
@@ -291,7 +294,7 @@ function ButtonShowcase() {
             <Button variant="primary" size="md" fullWidth={false}>
               Button
             </Button>
-            <span className="text-caption text-content-primary/50">
+            <span className="text-caption text-content-tertiary">
               md · 40px (default)
             </span>
           </div>
@@ -299,7 +302,7 @@ function ButtonShowcase() {
             <Button variant="primary" size="sm" fullWidth={false}>
               Button
             </Button>
-            <span className="text-caption text-content-primary/50">
+            <span className="text-caption text-content-tertiary">
               sm · 32px
             </span>
           </div>
@@ -537,7 +540,7 @@ function InputGrid({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -570,7 +573,7 @@ function DateInputShowcase() {
           key={`dateinput-${mode}`}
           className={`flex-1 min-w-[200px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
         >
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             {mode}
           </p>
           <div className="flex flex-col gap-3">
@@ -601,33 +604,33 @@ function InputShowcase() {
       <InputGrid mode="dark" />
 
       {/* Sizes & Search */}
-      <div className="flex flex-wrap gap-8">
+      <div>
         <div>
           <p className="text-body font-semibold text-content-primary mb-2">
             Sizes
           </p>
-          <div className="flex flex-wrap items-end gap-4">
-            <div className="flex flex-col gap-1.5 w-[240px]">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="flex flex-col gap-1.5">
               <Input placeholder="md · 48px (default)" />
-              <span className="text-caption text-content-primary/50">
+              <span className="text-caption text-content-tertiary">
                 md · 48px (default)
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 w-[240px]">
+            <div className="flex flex-col gap-1.5">
               <Input size="sm" placeholder="sm · 40px" />
-              <span className="text-caption text-content-primary/50">
+              <span className="text-caption text-content-tertiary">
                 sm · 40px
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 w-[240px]">
+            <div className="flex flex-col gap-1.5">
               <Input placeholder="md · no outline" variant="filled" />
-              <span className="text-caption text-content-primary/50">
+              <span className="text-caption text-content-tertiary">
                 md · 48px (no outline)
               </span>
             </div>
-            <div className="flex flex-col gap-1.5 w-[240px]">
+            <div className="flex flex-col gap-1.5">
               <Input size="sm" placeholder="sm · no outline" variant="filled" />
-              <span className="text-caption text-content-primary/50">
+              <span className="text-caption text-content-tertiary">
                 sm · 40px (no outline)
               </span>
             </div>
@@ -668,13 +671,13 @@ function BadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {sizes.map((size) => (
           <div key={size} className="card-flat !p-4">
-            <p className="text-caption text-content-primary/50 font-mono mb-3">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
               {size} · {size === "sm" ? "12" : size === "md" ? "14" : "16"}px
               {size === "md" ? " (default)" : ""}
             </p>
@@ -722,7 +725,7 @@ function IconBadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -730,7 +733,7 @@ function IconBadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
           const iconSize = size === "sm" ? 16 : size === "md" ? 24 : 32;
           return (
             <div key={size} className="card-flat !p-4">
-              <p className="text-caption text-content-primary/50 font-mono mb-3">
+              <p className="text-caption text-content-tertiary font-mono mb-3">
                 {size} · {size === "sm" ? "32" : size === "md" ? "40" : "56"}px
                 {size === "sm" ? " (default)" : ""}
               </p>
@@ -740,7 +743,7 @@ function IconBadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
                     <IconBadge variant={v} size={size}>
                       {icons[v][iconSize]}
                     </IconBadge>
-                    <span className="text-caption text-content-primary/50 font-mono">
+                    <span className="text-caption text-content-tertiary font-mono">
                       {v}
                     </span>
                   </div>
@@ -796,13 +799,13 @@ function SpinnerGrid({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {spinnerTypes.map(({ label, Component }) => (
           <div key={label} className="card-flat !p-4">
-            <p className="text-caption text-content-primary/50 font-mono mb-3">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
               {label}
             </p>
             <div className="flex flex-wrap items-end justify-center sm:justify-start gap-4">
@@ -811,7 +814,7 @@ function SpinnerGrid({ mode }: { mode: "light" | "dark" }) {
                   <div className="flex h-8 items-center justify-center">
                     <Component size={s} />
                   </div>
-                  <span className="text-caption text-content-primary/50">
+                  <span className="text-caption text-content-tertiary">
                     {s} · {s === "sm" ? "16" : s === "md" ? "24" : "32"}px
                     {s === "md" ? " (default)" : ""}
                   </span>
@@ -864,13 +867,13 @@ function AvatarGrid({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {(["image", "initials", "icon fallback"] as const).map((type) => (
           <div key={type} className="card-flat !p-4">
-            <p className="text-caption text-content-primary/50 font-mono mb-3">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
               {type}
             </p>
             <div className="flex flex-wrap items-end justify-center sm:justify-start gap-3">
@@ -887,7 +890,7 @@ function AvatarGrid({ mode }: { mode: "light" | "dark" }) {
                   ) : (
                     <Avatar size={s} />
                   )}
-                  <span className="text-caption text-content-primary/50">
+                  <span className="text-caption text-content-tertiary">
                     {s} · {avatarDimensions[s]}
                     {s === "md" ? " (default)" : ""}
                   </span>
@@ -940,7 +943,7 @@ function ToggleCard({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="flex flex-wrap items-end justify-center sm:justify-start gap-4">
@@ -949,7 +952,7 @@ function ToggleCard({ mode }: { mode: "light" | "dark" }) {
             checked={values.off}
             onChange={(v) => setValues((s) => ({ ...s, off: v }))}
           />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             {values.off ? "On" : "Off"}
           </span>
         </div>
@@ -958,19 +961,19 @@ function ToggleCard({ mode }: { mode: "light" | "dark" }) {
             checked={values.on}
             onChange={(v) => setValues((s) => ({ ...s, on: v }))}
           />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             {values.on ? "On" : "Off"}
           </span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Toggle checked={false} disabled />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             Disabled off
           </span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Toggle checked={true} disabled />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             Disabled on
           </span>
         </div>
@@ -980,7 +983,7 @@ function ToggleCard({ mode }: { mode: "light" | "dark" }) {
             checked={values.lg}
             onChange={(v) => setValues((s) => ({ ...s, lg: v }))}
           />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             lg · 48×26px
           </span>
         </div>
@@ -990,7 +993,7 @@ function ToggleCard({ mode }: { mode: "light" | "dark" }) {
             checked={values.md}
             onChange={(v) => setValues((s) => ({ ...s, md: v }))}
           />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             md · 40×22px (default)
           </span>
         </div>
@@ -1000,7 +1003,7 @@ function ToggleCard({ mode }: { mode: "light" | "dark" }) {
             checked={values.sm}
             onChange={(v) => setValues((s) => ({ ...s, sm: v }))}
           />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             sm · 32×18px
           </span>
         </div>
@@ -1041,7 +1044,7 @@ function CheckboxCard({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="flex flex-wrap items-end justify-center sm:justify-start gap-4">
@@ -1050,7 +1053,7 @@ function CheckboxCard({ mode }: { mode: "light" | "dark" }) {
             checked={values.a}
             onChange={(v) => setValues((s) => ({ ...s, a: v }))}
           />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             {values.a ? "Checked" : "Unchecked"}
           </span>
         </div>
@@ -1059,7 +1062,7 @@ function CheckboxCard({ mode }: { mode: "light" | "dark" }) {
             checked={values.b}
             onChange={(v) => setValues((s) => ({ ...s, b: v }))}
           />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             {values.b ? "Checked" : "Unchecked"}
           </span>
         </div>
@@ -1069,19 +1072,19 @@ function CheckboxCard({ mode }: { mode: "light" | "dark" }) {
             onChange={(v) => setValues((s) => ({ ...s, c: v }))}
             indeterminate
           />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             Indeterminate
           </span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked={false} disabled />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             Disabled off
           </span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked={true} disabled />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             Disabled on
           </span>
         </div>
@@ -1091,9 +1094,7 @@ function CheckboxCard({ mode }: { mode: "light" | "dark" }) {
             checked={values.lg}
             onChange={(v) => setValues((s) => ({ ...s, lg: v }))}
           />
-          <span className="text-caption text-content-primary/50">
-            lg · 24px
-          </span>
+          <span className="text-caption text-content-tertiary">lg · 24px</span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox
@@ -1101,7 +1102,7 @@ function CheckboxCard({ mode }: { mode: "light" | "dark" }) {
             checked={values.md}
             onChange={(v) => setValues((s) => ({ ...s, md: v }))}
           />
-          <span className="text-caption text-content-primary/50">
+          <span className="text-caption text-content-tertiary">
             md · 20px (default)
           </span>
         </div>
@@ -1111,9 +1112,7 @@ function CheckboxCard({ mode }: { mode: "light" | "dark" }) {
             checked={values.sm}
             onChange={(v) => setValues((s) => ({ ...s, sm: v }))}
           />
-          <span className="text-caption text-content-primary/50">
-            sm · 16px
-          </span>
+          <span className="text-caption text-content-tertiary">sm · 16px</span>
         </div>
       </div>
     </div>
@@ -1145,7 +1144,7 @@ function TooltipCard({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="flex flex-wrap items-center justify-center sm:justify-start gap-3 py-6">
@@ -1186,59 +1185,59 @@ function DividerShowcase() {
     <ShowcaseSection title="Divider">
       <div className="flex flex-wrap gap-4">
         <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <div className="space-y-3">
             <div className="space-y-4">
-              <p className="text-body text-content-primary/50">Content above</p>
+              <p className="text-body text-content-tertiary">Content above</p>
               <Divider />
-              <p className="text-body text-content-primary/50">Content below</p>
+              <p className="text-body text-content-tertiary">Content below</p>
             </div>
             <div className="space-y-4">
-              <p className="text-body text-content-primary/50">Content above</p>
+              <p className="text-body text-content-tertiary">Content above</p>
               <Divider label="OR" />
-              <p className="text-body text-content-primary/50">Content below</p>
+              <p className="text-body text-content-tertiary">Content below</p>
             </div>
             <div className="flex items-center gap-6 h-16">
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body text-content-primary/50">Left</p>
+                <p className="text-body text-content-tertiary">Left</p>
                 <Divider orientation="vertical" />
-                <p className="text-body text-content-primary/50">Right</p>
+                <p className="text-body text-content-tertiary">Right</p>
               </div>
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body text-content-primary/50">Left</p>
+                <p className="text-body text-content-tertiary">Left</p>
                 <Divider orientation="vertical" label="OR" />
-                <p className="text-body text-content-primary/50">Right</p>
+                <p className="text-body text-content-tertiary">Right</p>
               </div>
             </div>
           </div>
         </div>
         <div className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
           <div className="space-y-3">
             <div className="space-y-4">
-              <p className="text-body text-content-primary/50">Content above</p>
+              <p className="text-body text-content-tertiary">Content above</p>
               <Divider />
-              <p className="text-body text-content-primary/50">Content below</p>
+              <p className="text-body text-content-tertiary">Content below</p>
             </div>
             <div className="space-y-4">
-              <p className="text-body text-content-primary/50">Content above</p>
+              <p className="text-body text-content-tertiary">Content above</p>
               <Divider label="OR" />
-              <p className="text-body text-content-primary/50">Content below</p>
+              <p className="text-body text-content-tertiary">Content below</p>
             </div>
             <div className="flex items-center gap-6 h-16">
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body text-content-primary/50">Left</p>
+                <p className="text-body text-content-tertiary">Left</p>
                 <Divider orientation="vertical" />
-                <p className="text-body text-content-primary/50">Right</p>
+                <p className="text-body text-content-tertiary">Right</p>
               </div>
               <div className="flex items-center gap-3 h-full">
-                <p className="text-body text-content-primary/50">Left</p>
+                <p className="text-body text-content-tertiary">Left</p>
                 <Divider orientation="vertical" label="OR" />
-                <p className="text-body text-content-primary/50">Right</p>
+                <p className="text-body text-content-tertiary">Right</p>
               </div>
             </div>
           </div>
@@ -1262,7 +1261,7 @@ function SliderCard({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="space-y-4">
@@ -1315,7 +1314,7 @@ function TabsNavCard({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`flex-1 card-flat !p-4 overflow-hidden ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode} · nav
       </p>
       <Tabs
@@ -1436,7 +1435,7 @@ function NavHorizontalColumn() {
   return (
     <div className="flex-1 min-w-[280px] flex flex-col gap-4">
       <div className="card-flat !p-4 overflow-hidden light bg-surface-primary">
-        <p className="text-caption text-content-primary/50 font-mono mb-3">
+        <p className="text-caption text-content-tertiary font-mono mb-3">
           light · nav-horizontal
         </p>
         <ScrollDotsWrapper
@@ -1453,7 +1452,7 @@ function NavHorizontalColumn() {
         </ScrollDotsWrapper>
       </div>
       <div className="card-flat !p-4 overflow-hidden dark bg-surface-primary">
-        <p className="text-caption text-content-primary/50 font-mono mb-3">
+        <p className="text-caption text-content-tertiary font-mono mb-3">
           dark · nav-horizontal
         </p>
         <ScrollDotsWrapper
@@ -1500,17 +1499,17 @@ function TabsShowcase() {
             key={`seg-${mode}`}
             className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
-            <p className="text-caption text-content-primary/50 font-mono mb-3">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
             </p>
             <div className="flex flex-col gap-4">
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   variants
                 </p>
                 <div className="flex flex-wrap items-end gap-3">
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-caption text-content-primary/50">
+                    <span className="text-caption text-content-tertiary">
                       primary
                     </span>
                     <SegmentedControl
@@ -1524,7 +1523,7 @@ function TabsShowcase() {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-caption text-content-primary/50">
+                    <span className="text-caption text-content-tertiary">
                       secondary
                     </span>
                     <SegmentedControl
@@ -1538,7 +1537,7 @@ function TabsShowcase() {
                     />
                   </div>
                   <div className="flex flex-col gap-1.5">
-                    <span className="text-caption text-content-primary/50">
+                    <span className="text-caption text-content-tertiary">
                       outline
                     </span>
                     <SegmentedControl
@@ -1554,7 +1553,7 @@ function TabsShowcase() {
                 </div>
               </div>
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   sizes
                 </p>
                 <div className="flex flex-col items-start gap-2">
@@ -1568,7 +1567,7 @@ function TabsShowcase() {
                       ]}
                       size="sm"
                     />
-                    <span className="text-caption text-content-primary/50">
+                    <span className="text-caption text-content-tertiary">
                       sm · 32px
                     </span>
                   </div>
@@ -1582,7 +1581,7 @@ function TabsShowcase() {
                       ]}
                       size="md"
                     />
-                    <span className="text-caption text-content-primary/50">
+                    <span className="text-caption text-content-tertiary">
                       md · 40px
                     </span>
                   </div>
@@ -1596,7 +1595,7 @@ function TabsShowcase() {
                       ]}
                       size="lg"
                     />
-                    <span className="text-caption text-content-primary/50">
+                    <span className="text-caption text-content-tertiary">
                       lg · 48px
                     </span>
                   </div>
@@ -1654,7 +1653,7 @@ function SelectCard({
     <div
       className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode} · select
       </p>
       {content}
@@ -1710,7 +1709,7 @@ function EmailSelectorCard({
         <span className="leading-none">user@example.com</span>
         <ChevronDown
           size={16}
-          className={`shrink-0 text-content-primary/50 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-content-tertiary transition-transform ${open ? "rotate-180" : ""}`}
         />
       </button>
       {open && (
@@ -1742,7 +1741,7 @@ function EmailSelectorCard({
     <div
       className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode} · email
       </p>
       {content}
@@ -1755,44 +1754,42 @@ function SelectShowcase() {
     <ShowcaseSection title="Select / Dropdown">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="card-flat !p-4 light bg-surface-primary space-y-6">
-          <p className="text-caption text-content-primary/50 font-mono">
-            light
-          </p>
+          <p className="text-caption text-content-tertiary font-mono">light</p>
           <div>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
+            <p className="text-caption text-content-tertiary font-mono mb-2">
               select
             </p>
             <SelectCard mode="light" bare />
           </div>
           <div>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
+            <p className="text-caption text-content-tertiary font-mono mb-2">
               language
             </p>
             <LanguageSelector />
           </div>
           <div>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
+            <p className="text-caption text-content-tertiary font-mono mb-2">
               email
             </p>
             <EmailSelectorCard mode="light" bare />
           </div>
         </div>
         <div className="card-flat !p-4 dark bg-surface-primary space-y-6">
-          <p className="text-caption text-content-primary/50 font-mono">dark</p>
+          <p className="text-caption text-content-tertiary font-mono">dark</p>
           <div>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
+            <p className="text-caption text-content-tertiary font-mono mb-2">
               select
             </p>
             <SelectCard mode="dark" bare />
           </div>
           <div>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
+            <p className="text-caption text-content-tertiary font-mono mb-2">
               language
             </p>
             <LanguageSelector />
           </div>
           <div>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
+            <p className="text-caption text-content-tertiary font-mono mb-2">
               email
             </p>
             <EmailSelectorCard mode="dark" bare />
@@ -1830,7 +1827,7 @@ function CalendarShowcase() {
     <ShowcaseSection title="Calendar">
       <div className="flex flex-wrap gap-4">
         <div className="card-flat !p-4 flex-1 light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <div className="flex justify-center">
@@ -1838,7 +1835,7 @@ function CalendarShowcase() {
           </div>
         </div>
         <div className="card-flat !p-4 flex-1 dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
           <div className="flex justify-center">
@@ -1870,7 +1867,7 @@ function NavigationShowcase() {
       </p>
       <div className="flex flex-wrap gap-4">
         <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <Breadcrumbs
@@ -1882,7 +1879,7 @@ function NavigationShowcase() {
           />
         </div>
         <div className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
           <Breadcrumbs
@@ -1900,7 +1897,7 @@ function NavigationShowcase() {
       </p>
       <div className="flex flex-wrap gap-4">
         <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <Pagination
@@ -1910,7 +1907,7 @@ function NavigationShowcase() {
           />
         </div>
         <div className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
           <Pagination
@@ -1989,7 +1986,7 @@ function ToastDemo() {
 
   return (
     <div>
-      <p className="text-caption text-content-primary/50 font-mono mb-2">
+      <p className="text-caption text-content-tertiary font-mono mb-2">
         toast variants — click to preview
       </p>
       <div className="flex flex-wrap gap-2">
@@ -2020,13 +2017,13 @@ function ToastDemo() {
                     <p className="whitespace-nowrap text-caption font-semibold leading-tight text-content-primary">
                       {title}
                     </p>
-                    <p className="whitespace-nowrap text-caption leading-tight text-content-primary/50">
+                    <p className="whitespace-nowrap text-caption leading-tight text-content-tertiary">
                       {desc}
                     </p>
                   </div>
                   <button
                     onClick={() => dismiss(variant)}
-                    className="mt-px shrink-0 text-content-primary/50 opacity-0 transition-all group-hover:opacity-100 hover:text-content-primary"
+                    className="mt-px shrink-0 text-content-tertiary opacity-0 transition-all group-hover:opacity-100 hover:text-content-primary"
                     aria-label="Close"
                   >
                     <X size={16} />
@@ -2066,7 +2063,7 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
               strokeWidth={1.5}
             />
           )}
-          <p className="text-center text-body text-content-primary/50">
+          <p className="text-center text-body text-content-tertiary">
             {isError ? (
               <>
                 Something went wrong!
@@ -2090,7 +2087,7 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
 function FullPageIconsDemo() {
   return (
     <div>
-      <p className="text-caption text-content-primary/50 font-mono mb-2">
+      <p className="text-caption text-content-tertiary font-mono mb-2">
         full page — hover to preview
       </p>
       <div className="flex flex-wrap gap-4 items-start justify-center">
@@ -2113,7 +2110,7 @@ function RateLimitDemo() {
 
   return (
     <div>
-      <p className="text-caption text-content-primary/50 font-mono mb-2">
+      <p className="text-caption text-content-tertiary font-mono mb-2">
         rate limit
       </p>
       <div role="alert" className="flex items-start gap-2">
@@ -2138,26 +2135,34 @@ function FeedbackShowcase() {
             key={mode}
             className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
-            <p className="text-caption text-content-primary/50 font-mono mb-4">
+            <p className="text-caption text-content-tertiary font-mono mb-4">
               {mode}
             </p>
             <div className="space-y-5">
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   inline validation
                 </p>
                 <InlineError message="Enter a valid email address" />
               </div>
 
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
-                  boxed error
+                <p className="text-caption text-content-tertiary font-mono mb-2">
+                  AlertBox — 4 variants
                 </p>
-                <div className="inline-flex items-center gap-2 rounded-lg border border-error/20 bg-error/5 px-3 py-2">
-                  <AlertTriangle size={16} className="shrink-0 text-error" />
-                  <span className="text-caption text-error whitespace-nowrap">
+                <div className="space-y-2">
+                  <AlertBox variant="warning">
+                    This action will make your account less secure.
+                  </AlertBox>
+                  <AlertBox variant="error">
                     Invalid verification code. Please try again.
-                  </span>
+                  </AlertBox>
+                  <AlertBox variant="info">
+                    Your email is managed by an external provider.
+                  </AlertBox>
+                  <AlertBox variant="success">
+                    Your changes have been saved successfully.
+                  </AlertBox>
                 </div>
               </div>
 
@@ -2174,11 +2179,8 @@ function FeedbackShowcase() {
       <SpecsPanel
         specs={{
           "Inline Validation (InlineError)": inlineErrorSpecs,
-          "Boxed Error": {
-            container: "rounded-lg border border-error/20 bg-error/5 px-3 py-2",
-            icon: "AlertTriangle 16px text-error",
-            text: "text-caption text-error",
-          },
+          AlertBox: alertBoxSpecs.variants,
+          "AlertBox Layout": alertBoxSpecs.layout,
           "Rate Limit": {
             container: "flex items-start gap-2",
             icon: "AlertTriangle 16px text-error (mt-1) or Lock 16px for lockout",
@@ -2192,7 +2194,7 @@ function FeedbackShowcase() {
               "error: AlertTriangle, success: CircleCheck, warning: CircleAlert, info: Info — 16px",
             title:
               "text-caption font-semibold leading-tight text-content-primary",
-            description: "text-caption leading-tight text-content-primary/50",
+            description: "text-caption leading-tight text-content-tertiary",
             close: "X 16px — opacity-0 group-hover:opacity-100",
             animation:
               "animate-toast-in / animate-toast-out (300ms), auto-dismiss 5s",
@@ -2205,7 +2207,7 @@ function FeedbackShowcase() {
               "CircleX 48px text-[#8a1111] strokeWidth-1.5 icon-error animation",
             "success icon":
               "CircleCheck 48px text-[#166534] strokeWidth-1.5 icon-success animation",
-            text: "text-body text-content-primary/50 text-center",
+            text: "text-body text-content-tertiary text-center",
             button:
               "h-10 w-full rounded-md border border-border-components bg-transparent text-h3 font-normal — outline style",
           },
@@ -2220,23 +2222,23 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
     <div
       className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
-      <p className="text-caption text-content-primary/50 font-mono mb-3">
+      <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="space-y-4">
         <div>
-          <p className="text-caption text-content-primary/50 font-mono mb-2">
+          <p className="text-caption text-content-tertiary font-mono mb-2">
             Single
           </p>
           <SingleAccordion title="Click to expand">
-            <p className="text-body text-content-primary/50">
+            <p className="text-body text-content-tertiary">
               Expandable content panel. Used for specs, FAQs, and collapsible
               sections.
             </p>
           </SingleAccordion>
         </div>
         <div>
-          <p className="text-caption text-content-primary/50 font-mono mb-2">
+          <p className="text-caption text-content-tertiary font-mono mb-2">
             Multi (exclusive)
           </p>
           <Accordion
@@ -2244,7 +2246,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
               {
                 title: "Section 1",
                 children: (
-                  <p className="text-body text-content-primary/50">
+                  <p className="text-body text-content-tertiary">
                     Content for section 1. Only one open at a time.
                   </p>
                 ),
@@ -2252,7 +2254,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
               {
                 title: "Section 2",
                 children: (
-                  <p className="text-body text-content-primary/50">
+                  <p className="text-body text-content-tertiary">
                     Content for section 2. Opening this closes section 1.
                   </p>
                 ),
@@ -2260,7 +2262,7 @@ function AccordionCard({ mode }: { mode: "light" | "dark" }) {
               {
                 title: "Section 3",
                 children: (
-                  <p className="text-body text-content-primary/50">
+                  <p className="text-body text-content-tertiary">
                     Content for section 3. Exclusive accordion behavior.
                   </p>
                 ),
@@ -2278,13 +2280,13 @@ function CopyFieldShowcase() {
     <ShowcaseSection title="CopyField">
       <div className="flex flex-wrap gap-4">
         <div className="card-flat !p-4 flex-1 min-w-[280px] light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <CopyField value="JBSWY3DPEHPK3PXP" />
         </div>
         <div className="card-flat !p-4 flex-1 min-w-[280px] dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
           <CopyField value="JBSWY3DPEHPK3PXP" />
@@ -2296,16 +2298,16 @@ function CopyFieldShowcase() {
         <p className="text-body font-semibold text-content-primary mb-2">
           Sizes
         </p>
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex flex-col gap-1.5 w-[240px]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col gap-1.5">
             <CopyField value="JBSWY3DPEHPK3PXP" />
-            <span className="text-caption text-content-primary/50">
+            <span className="text-caption text-content-tertiary">
               md · 48px (default)
             </span>
           </div>
-          <div className="flex flex-col gap-1.5 w-[240px]">
+          <div className="flex flex-col gap-1.5">
             <CopyField value="JBSWY3DPEHPK3PXP" size="sm" />
-            <span className="text-caption text-content-primary/50">
+            <span className="text-caption text-content-tertiary">
               sm · 40px
             </span>
           </div>
@@ -2331,7 +2333,7 @@ function DigitInputShowcase() {
     <ShowcaseSection title="Digit Input">
       <div className="flex flex-wrap gap-4">
         <div className="card-flat !p-4 flex-1 min-w-[300px] light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <MfaDigitInput
@@ -2341,7 +2343,7 @@ function DigitInputShowcase() {
           />
         </div>
         <div className="card-flat !p-4 flex-1 min-w-[300px] dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
           <MfaDigitInput
@@ -2351,30 +2353,69 @@ function DigitInputShowcase() {
           />
         </div>
       </div>
+      {/* Error state */}
+      <div className="flex flex-wrap gap-4">
+        {(["light", "dark"] as const).map((mode) => (
+          <div
+            key={mode}
+            className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+          >
+            <p className="text-caption text-content-tertiary font-mono mb-3">
+              {mode} — error state
+            </p>
+            <div className="space-y-4">
+              <div className="flex flex-col gap-1.5">
+                <MfaDigitInput
+                  value={["1", "2", "3", "4", "5", ""]}
+                  onChange={() => {}}
+                  error
+                  idPrefix={`demo-error-${mode}`}
+                />
+                <InlineError message="Enter all 6 digits" />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <MfaDigitInput
+                  value={["7", "3", "8", "2", "9", "1"]}
+                  onChange={() => {}}
+                  error
+                  idPrefix={`demo-error-full-${mode}`}
+                />
+                <InlineError message="Invalid code" />
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Sizes — auto-switches based on container width */}
       <div>
         <p className="text-body font-semibold text-content-primary mb-2">
           Sizes
         </p>
-        <div className="flex flex-wrap items-end gap-4">
-          <div className="flex flex-col gap-1.5" style={{ width: 340 }}>
+        <p className="mb-3 text-caption text-content-tertiary sm:hidden">
+          Both sizes appear identical on small screens — the component
+          auto-switches to sm when its container is narrower than 348px. Resize
+          to desktop to see the difference.
+        </p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col items-center gap-1.5 sm:items-start sm:max-w-[360px]">
             <MfaDigitInput
               value={Array(6).fill("")}
               onChange={() => {}}
               idPrefix="size-md"
             />
-            <span className="text-caption text-content-primary/50">
-              md · 48×48px (default — container ≥ 328px)
+            <span className="text-caption text-content-tertiary">
+              md · 48×48px gap-3 (default — container ≥ 348px)
             </span>
           </div>
-          <div className="flex flex-col gap-1.5" style={{ width: 260 }}>
+          <div className="flex flex-col items-center gap-1.5 sm:items-start sm:max-w-[280px]">
             <MfaDigitInput
               value={Array(6).fill("")}
               onChange={() => {}}
               idPrefix="size-sm"
             />
-            <span className="text-caption text-content-primary/50">
-              sm · 40×40px (auto — container &lt; 328px)
+            <span className="text-caption text-content-tertiary">
+              sm · 40×40px gap-2 (auto — container &lt; 348px)
             </span>
           </div>
         </div>
@@ -2396,13 +2437,13 @@ function QrCodeCardShowcase() {
     <ShowcaseSection title="QR Code Card">
       <div className="flex flex-wrap gap-4">
         <div className="card-flat !p-4 flex-1 min-w-[300px] light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <QrCodeCard />
         </div>
         <div className="card-flat !p-4 flex-1 min-w-[300px] dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
           <QrCodeCard />
@@ -2652,7 +2693,7 @@ function DoughnutChartMock({ isDark = false }: { isDark?: boolean }) {
           Users by Role
         </h3>
       </div>
-      <div className="flex items-center gap-6">
+      <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
         <div className="h-[120px] w-[120px] shrink-0">
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
@@ -2703,7 +2744,7 @@ function DoughnutChartMock({ isDark = false }: { isDark?: boolean }) {
                 style={{ background: fill }}
               />
               <span className="text-caption text-content-primary">{name}</span>
-              <span className="text-caption text-content-primary/50">
+              <span className="text-caption text-content-tertiary">
                 {value} ({((value / 250) * 100).toFixed(1)}%)
               </span>
             </div>
@@ -2717,24 +2758,24 @@ function DoughnutChartMock({ isDark = false }: { isDark?: boolean }) {
 function ChartsShowcase() {
   return (
     <ShowcaseSection title="Charts">
-      <div className="flex flex-wrap gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`flex-1 min-w-[400px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
-            <p className="text-caption text-content-primary/50 font-mono mb-3">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
             </p>
             <div className="space-y-4">
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   Line Chart
                 </p>
                 <TotalUsersChart forceDark={mode === "dark"} />
               </div>
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   Speedometer
                 </p>
                 <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
@@ -2746,19 +2787,19 @@ function ChartsShowcase() {
                   <div className="flex flex-wrap items-end justify-center gap-6">
                     <div className="flex flex-col items-center gap-1">
                       <SpeedometerChart value={78} size="lg" />
-                      <span className="text-caption text-content-primary/50">
+                      <span className="text-caption text-content-tertiary">
                         lg
                       </span>
                     </div>
                     <div className="flex flex-col items-center gap-1">
                       <SpeedometerChart value={65} size="md" />
-                      <span className="text-caption text-content-primary/50">
+                      <span className="text-caption text-content-tertiary">
                         md
                       </span>
                     </div>
                     <div className="flex flex-col items-center gap-1">
                       <SpeedometerChart value={42} size="sm" />
-                      <span className="text-caption text-content-primary/50">
+                      <span className="text-caption text-content-tertiary">
                         sm
                       </span>
                     </div>
@@ -2766,7 +2807,7 @@ function ChartsShowcase() {
                 </div>
               </div>
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   Doughnut Chart
                 </p>
                 <DoughnutChartMock isDark={mode === "dark"} />
@@ -2785,7 +2826,7 @@ function ChartsShowcase() {
           },
           Legend: {
             dot: "h-2 w-2 rounded-full",
-            label: "text-caption text-content-primary/50",
+            label: "text-caption text-content-tertiary",
             separator: "text-content-primary/20",
           },
           "Chart Colors": {
@@ -2858,12 +2899,12 @@ function CardShowcase() {
       <div className="flex flex-wrap gap-4">
         {/* Light */}
         <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-caption text-content-primary/50 font-mono mb-2">
+              <p className="text-caption text-content-tertiary font-mono mb-2">
                 container
               </p>
               <div className="card-container">
@@ -2873,7 +2914,7 @@ function CardShowcase() {
               </div>
             </div>
             <div>
-              <p className="text-caption text-content-primary/50 font-mono mb-2">
+              <p className="text-caption text-content-tertiary font-mono mb-2">
                 container-flat
               </p>
               <div className="card-container-flat">
@@ -2883,7 +2924,7 @@ function CardShowcase() {
               </div>
             </div>
             <div>
-              <p className="text-caption text-content-primary/50 font-mono mb-2">
+              <p className="text-caption text-content-tertiary font-mono mb-2">
                 inner
               </p>
               <div className="card">
@@ -2893,7 +2934,7 @@ function CardShowcase() {
               </div>
             </div>
             <div>
-              <p className="text-caption text-content-primary/50 font-mono mb-2">
+              <p className="text-caption text-content-tertiary font-mono mb-2">
                 inner-flat
               </p>
               <div className="card-flat">
@@ -2910,12 +2951,12 @@ function CardShowcase() {
           className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary"
           style={{ color: "rgb(var(--content-primary))" }}
         >
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-caption text-content-primary/50 font-mono mb-2">
+              <p className="text-caption text-content-tertiary font-mono mb-2">
                 container
               </p>
               <div className="card-container">
@@ -2925,7 +2966,7 @@ function CardShowcase() {
               </div>
             </div>
             <div>
-              <p className="text-caption text-content-primary/50 font-mono mb-2">
+              <p className="text-caption text-content-tertiary font-mono mb-2">
                 container-flat
               </p>
               <div className="card-container-flat">
@@ -2935,7 +2976,7 @@ function CardShowcase() {
               </div>
             </div>
             <div>
-              <p className="text-caption text-content-primary/50 font-mono mb-2">
+              <p className="text-caption text-content-tertiary font-mono mb-2">
                 inner
               </p>
               <div className="card">
@@ -2945,7 +2986,7 @@ function CardShowcase() {
               </div>
             </div>
             <div>
-              <p className="text-caption text-content-primary/50 font-mono mb-2">
+              <p className="text-caption text-content-tertiary font-mono mb-2">
                 inner-flat
               </p>
               <div className="card-flat">
@@ -3016,13 +3057,13 @@ function RecoveryCodesGridShowcase() {
     <ShowcaseSection title="Recovery Codes Grid">
       <div className="flex flex-wrap gap-4">
         <div className="card-flat !p-4 flex-1 min-w-[300px] light bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <RecoveryCodesGrid codes={demoCodes} />
         </div>
         <div className="card-flat !p-4 flex-1 min-w-[300px] dark bg-surface-primary">
-          <p className="text-caption text-content-primary/50 font-mono mb-3">
+          <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
           <RecoveryCodesGrid codes={demoCodes} />
@@ -3067,7 +3108,7 @@ function FormFieldShowcase() {
             key={mode}
             className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
-            <p className="text-caption text-content-primary/50 font-mono mb-3">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
             </p>
             <div className="flex flex-col gap-4">
@@ -3112,12 +3153,12 @@ function EmptyStateShowcase() {
             key={mode}
             className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
-            <p className="text-caption text-content-primary/50 font-mono mb-3">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
             </p>
             <div className="flex flex-col gap-6">
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   default
                 </p>
                 <div className="rounded-lg border border-border-strong">
@@ -3128,7 +3169,7 @@ function EmptyStateShowcase() {
                 </div>
               </div>
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   with action
                 </p>
                 <div className="rounded-lg border border-border-strong">
@@ -3144,7 +3185,7 @@ function EmptyStateShowcase() {
                 </div>
               </div>
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   custom icon
                 </p>
                 <div className="rounded-lg border border-border-strong">
@@ -3167,6 +3208,7 @@ function EmptyStateShowcase() {
 function ModalShowcase() {
   const [primaryOpen, setPrimaryOpen] = useState(false);
   const [dangerOpen, setDangerOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
 
   return (
     <ShowcaseSection title="Modal">
@@ -3176,26 +3218,33 @@ function ModalShowcase() {
             key={mode}
             className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
-            <p className="text-caption text-content-primary/50 font-mono mb-4">
+            <p className="text-caption text-content-tertiary font-mono mb-4">
               {mode}
             </p>
-            <p className="text-caption text-content-primary/50 font-mono mb-2">
-              variants — click to preview
+            <p className="text-caption text-content-tertiary font-mono mb-2">
+              variants + sizes — click to preview
             </p>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2">
               <Button
                 size="md"
                 variant="outline"
                 onClick={() => setPrimaryOpen(true)}
               >
-                Primary
+                Confirm (sm)
               </Button>
               <Button
                 size="md"
                 variant="outline"
                 onClick={() => setDangerOpen(true)}
               >
-                Danger
+                Danger (sm)
+              </Button>
+              <Button
+                size="md"
+                variant="outline"
+                onClick={() => setFormOpen(true)}
+              >
+                Form (md)
               </Button>
             </div>
           </div>
@@ -3219,6 +3268,20 @@ function ModalShowcase() {
         confirmLabel="Delete"
         variant="danger"
       />
+      <ConfirmModal
+        open={formOpen}
+        onClose={() => setFormOpen(false)}
+        onConfirm={() => setFormOpen(false)}
+        title="Edit Profile"
+        description="Update your information."
+        confirmLabel="Save"
+        size="md"
+      >
+        <div className="mt-4 space-y-4">
+          <Input label="First Name" name="demo-first" placeholder="John" />
+          <Input label="Last Name" name="demo-last" placeholder="Doe" />
+        </div>
+      </ConfirmModal>
 
       <SpecsPanel specs={confirmModalSpecs} />
     </ShowcaseSection>
@@ -3226,6 +3289,70 @@ function ModalShowcase() {
 }
 
 function SidebarShowcase() {
+  const [activeItem, setActiveItem] = useState("#dashboard");
+
+  const demoSections: SidebarSection[] = [
+    {
+      label: "Dashboards",
+      items: [
+        {
+          href: "#dashboard",
+          label: "Dashboard",
+          icon: BarChart3,
+          active: activeItem === "#dashboard",
+        },
+        {
+          href: "#profile",
+          label: "Profile",
+          icon: Info,
+          active: activeItem === "#profile",
+        },
+        {
+          href: "#admin",
+          label: "Admin",
+          icon: Settings,
+          children: [
+            {
+              href: "#audit",
+              label: "Audit Logs",
+              icon: Archive,
+              active: activeItem === "#audit",
+            },
+            {
+              href: "#permissions",
+              label: "Permissions",
+              icon: Copy,
+              active: activeItem === "#permissions",
+            },
+            {
+              href: "#design",
+              label: "Design System",
+              icon: Edit,
+              active: activeItem === "#design",
+            },
+          ],
+        },
+      ],
+    },
+    {
+      label: "Account",
+      items: [
+        {
+          href: "#settings",
+          label: "Settings",
+          icon: Settings,
+          active: activeItem === "#settings",
+        },
+        {
+          href: "#docs",
+          label: "Documentation",
+          icon: Archive,
+          active: activeItem === "#docs",
+        },
+      ],
+    },
+  ];
+
   return (
     <ShowcaseSection title="Sidebar">
       <div className="flex flex-wrap gap-4">
@@ -3234,77 +3361,39 @@ function SidebarShowcase() {
             key={mode}
             className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
-            <p className="text-caption text-content-primary/50 font-mono mb-3">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
             </p>
-            <div className="flex gap-4">
+            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
               {/* Collapsed */}
-              <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+              <div className="flex flex-col items-center sm:items-start">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   collapsed (68px)
                 </p>
-                <div className="w-[68px] rounded-xl border border-border-strong bg-surface-secondary p-2 flex flex-col gap-3">
-                  <div className="flex h-10 w-full items-center justify-center">
-                    <div className="h-6 w-10 rounded bg-content-primary/10" />
-                  </div>
-                  <div className="flex flex-col gap-1">
-                    {[1, 2, 3, 4].map((i) => (
-                      <div
-                        key={i}
-                        className={`flex h-9 items-center justify-center rounded-md ${i === 1 ? "bg-surface-subtle" : ""}`}
-                      >
-                        <div className="h-5 w-5 rounded bg-content-primary/20" />
-                      </div>
-                    ))}
-                  </div>
+                <div className="w-[68px] rounded-r-xl border border-border-strong bg-surface-primary shadow-card">
+                  <SidebarNav
+                    sections={demoSections}
+                    collapsed
+                    onNavigate={(href, e) => {
+                      e.preventDefault();
+                      setActiveItem(href);
+                    }}
+                  />
                 </div>
               </div>
               {/* Expanded */}
-              <div className="flex-1">
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
-                  expanded (212px)
+              <div className="flex flex-col items-center sm:items-start">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
+                  expanded (300px)
                 </p>
-                <div className="w-[212px] rounded-xl border border-border-strong bg-surface-secondary p-2 flex flex-col gap-3">
-                  <div className="flex h-10 items-center gap-2 px-2">
-                    <div className="h-6 w-10 rounded bg-content-primary/10" />
-                    <span className="text-caption font-semibold text-content-primary">
-                      NexaCore
-                    </span>
-                  </div>
-                  <p className="px-2 text-caption text-content-primary/50">
-                    Dashboards
-                  </p>
-                  <div className="flex flex-col gap-1">
-                    {["Dashboard", "Profile", "Admin", "Design System"].map(
-                      (label, i) => (
-                        <div
-                          key={label}
-                          className={`flex h-9 items-center gap-2 rounded-md px-2 ${i === 0 ? "bg-surface-subtle" : ""}`}
-                        >
-                          <div className="h-5 w-5 shrink-0 rounded bg-content-primary/20" />
-                          <span className="text-body text-content-primary">
-                            {label}
-                          </span>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                  <p className="px-2 text-caption text-content-primary/50">
-                    Account
-                  </p>
-                  <div className="flex flex-col gap-1">
-                    {["Settings", "Documentation"].map((label) => (
-                      <div
-                        key={label}
-                        className="flex h-9 items-center gap-2 rounded-md px-2"
-                      >
-                        <div className="h-5 w-5 shrink-0 rounded bg-content-primary/20" />
-                        <span className="text-body text-content-primary">
-                          {label}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
+                <div className="w-[300px] max-w-full rounded-r-xl border border-border-strong bg-surface-primary shadow-card">
+                  <SidebarNav
+                    sections={demoSections}
+                    onNavigate={(href, e) => {
+                      e.preventDefault();
+                      setActiveItem(href);
+                    }}
+                  />
                 </div>
               </div>
             </div>
@@ -3313,22 +3402,9 @@ function SidebarShowcase() {
       </div>
       <SpecsPanel
         specs={{
-          Widths: {
-            collapsed: "68px",
-            expanded: "212px",
-            mobile: "212px slide-in",
-          },
-          NavItem: {
-            layout: "h-9 rounded-md px-2, icon 20px shrink-0 + label text-body",
-            active: "bg-surface-subtle text-content-primary",
-            inactive:
-              "text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary",
-          },
-          Sections: {
-            header:
-              "text-caption text-content-primary/50 (Dashboards, Account)",
-            transition: "width 200ms ease, mobile: translate-x with 300ms",
-          },
+          Container: sidebarNavSpecs.container,
+          NavItem: sidebarNavSpecs.item,
+          NavSection: sidebarNavSpecs.section,
         }}
       />
     </ShowcaseSection>
@@ -3376,12 +3452,12 @@ function DataTableShowcase() {
             key={mode}
             className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
-            <p className="text-caption text-content-primary/50 font-mono mb-3">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
             </p>
             <div className="space-y-4">
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   with data
                 </p>
                 <DataTable
@@ -3391,7 +3467,7 @@ function DataTableShowcase() {
                 />
               </div>
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   loading
                 </p>
                 <DataTable
@@ -3403,7 +3479,7 @@ function DataTableShowcase() {
                 />
               </div>
               <div>
-                <p className="text-caption text-content-primary/50 font-mono mb-2">
+                <p className="text-caption text-content-tertiary font-mono mb-2">
                   empty
                 </p>
                 <DataTable

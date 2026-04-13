@@ -53,7 +53,7 @@ export default function RightPanel() {
     <div className="space-y-6 p-4">
       {/* Notifications */}
       <section>
-        <h3 className="px-2 py-1 text-body font-semibold text-content-primary">
+        <h3 className="px-2 py-1 text-h3 font-semibold text-content-primary">
           Notifications
         </h3>
         <div className="mt-2 space-y-1">
@@ -83,7 +83,7 @@ export default function RightPanel() {
 
       {/* Activities */}
       <section>
-        <h3 className="px-2 py-1 text-body font-semibold text-content-primary">
+        <h3 className="px-2 py-1 text-h3 font-semibold text-content-primary">
           Activities
         </h3>
         <div className="relative mt-2 space-y-1">
@@ -116,7 +116,7 @@ export default function RightPanel() {
 
       {/* Contacts */}
       <section>
-        <h3 className="px-2 py-1 text-body font-semibold text-content-primary">
+        <h3 className="px-2 py-1 text-h3 font-semibold text-content-primary">
           Contacts
         </h3>
         <div className="mt-2 space-y-1">

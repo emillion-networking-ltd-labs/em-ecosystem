@@ -14,7 +14,6 @@ type AuditLogFiltersProps = {
   onStartDateChange: (date: string) => void;
   endDate: string;
   onEndDateChange: (date: string) => void;
-  dateRangePartial?: boolean | string;
 };
 
 const AUDIT_ACTIONS: AuditAction[] = [
@@ -47,31 +46,32 @@ export default function AuditLogFilters({
   onStartDateChange,
   endDate,
   onEndDateChange,
-  dateRangePartial,
 }: AuditLogFiltersProps) {
   const missingStart = !startDate && !!endDate;
   const missingEnd = !!startDate && !endDate;
   return (
     <div
-      className={`flex flex-wrap items-center gap-3 ${missingStart || missingEnd ? "pb-4" : ""}`}
+      className={`grid grid-cols-1 gap-3 sm:flex sm:flex-wrap sm:items-center ${missingStart || missingEnd ? "pb-4" : ""}`}
     >
       {/* Action filter */}
-      <Select
-        options={[
-          { value: "", label: "All actions" },
-          ...AUDIT_ACTIONS.map((a) => ({
-            value: a,
-            label: a.replace(/_/g, " "),
-          })),
-        ]}
-        value={action}
-        onChange={(v) => onActionChange(v as AuditAction | "")}
-        placeholder="All actions"
-        size="md"
-      />
+      <div className="flex justify-end sm:justify-start">
+        <Select
+          options={[
+            { value: "", label: "All actions" },
+            ...AUDIT_ACTIONS.map((a) => ({
+              value: a,
+              label: a.replace(/_/g, " "),
+            })),
+          ]}
+          value={action}
+          onChange={(v) => onActionChange(v as AuditAction | "")}
+          placeholder="All actions"
+          size="md"
+        />
+      </div>
 
       {/* User ID filter */}
-      <div className="w-56">
+      <div className="sm:w-56">
         <Input
           name="userId"
           value={userId}
@@ -86,13 +86,17 @@ export default function AuditLogFilters({
         value={startDate}
         onChange={onStartDateChange}
         size="md"
+        maxDate={endDate ? new Date(endDate) : undefined}
         error={missingStart ? "Select start date" : undefined}
       />
-      <span className="text-body text-content-tertiary">to</span>
+      <span className="hidden text-body text-content-tertiary sm:inline">
+        to
+      </span>
       <DateInput
         value={endDate}
         onChange={onEndDateChange}
         size="md"
+        minDate={startDate ? new Date(startDate) : undefined}
         error={missingEnd ? "Select end date" : undefined}
       />
     </div>

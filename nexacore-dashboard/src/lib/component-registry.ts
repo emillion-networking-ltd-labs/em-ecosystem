@@ -199,7 +199,7 @@ export const componentRegistry: ComponentEntry[] = [
     name: "Sidebar",
     category: "molecule",
     description:
-      "Collapsible navigation — 68px collapsed, 212px expanded, mobile slide-in",
+      "SidebarNav — collapsible navigation, sections, collapsed/expanded, propagable specs",
     files: ["Sidebar.tsx"],
   },
 ];

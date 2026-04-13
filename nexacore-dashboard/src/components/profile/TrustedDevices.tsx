@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Shield, Laptop, Smartphone, Trash2, Plus } from "lucide-react";
 import { useTrustedDevices } from "@/hooks/useTrustedDevices";
 import { useToast } from "@/context/ToastContext";
 import { PROFILE_TOAST } from "@/lib/toast-messages";
+import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
 import ConfirmModal from "@/components/ui/ConfirmModal";
@@ -35,7 +36,7 @@ function formatDate(dateStr: string): string {
   });
 }
 
-export default function TrustedDevices() {
+export default function TrustedDevices({ bare }: { bare?: boolean }) {
   const {
     devices,
     isLoading,
@@ -48,6 +49,9 @@ export default function TrustedDevices() {
   const { addToast } = useToast();
 
   const [isTrusting, setIsTrusting] = useState(false);
+  const [newDeviceId, setNewDeviceId] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+  const prevDeviceIds = useRef<Set<string>>(new Set());
   const [revokeTarget, setRevokeTarget] =
     useState<TrustedDeviceResponse | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
@@ -57,6 +61,19 @@ export default function TrustedDevices() {
   useEffect(() => {
     fetchDevices();
   }, [fetchDevices]);
+
+  // Detect new device added to list
+  useEffect(() => {
+    const currentIds = new Set(devices.map((d) => d.id));
+    if (prevDeviceIds.current.size > 0) {
+      const added = devices.find((d) => !prevDeviceIds.current.has(d.id));
+      if (added) {
+        setNewDeviceId(added.id);
+        setTimeout(() => setNewDeviceId(null), 1000);
+      }
+    }
+    prevDeviceIds.current = currentIds;
+  }, [devices]);
 
   const handleTrust = async () => {
     setIsTrusting(true);
@@ -71,10 +88,15 @@ export default function TrustedDevices() {
 
   const handleRevoke = async () => {
     if (!revokeTarget) return;
-    setIsRevoking(true);
-    const ok = await revokeDevice(revokeTarget.id);
-    setIsRevoking(false);
+    const targetId = revokeTarget.id;
     setRevokeTarget(null);
+    setRemovingId(targetId);
+    // Animate out first, then revoke
+    await new Promise((r) => setTimeout(r, 500));
+    setIsRevoking(true);
+    const ok = await revokeDevice(targetId);
+    setIsRevoking(false);
+    setRemovingId(null);
     if (ok) {
       addToast(PROFILE_TOAST.DEVICE_REVOKED);
     } else {
@@ -95,33 +117,28 @@ export default function TrustedDevices() {
   };
 
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      {/* Header */}
-      <div className="mb-6 flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Shield size={18} className="text-content-secondary" />
-          <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
-            Trusted Devices
-          </h2>
-          {devices.length > 0 && (
-            <span className="rounded-full bg-surface-tertiary px-2 py-0.5 text-caption text-content-secondary">
-              {devices.length}
-            </span>
-          )}
+    <div
+      className={
+        bare
+          ? ""
+          : "h-full rounded-xl border border-border-strong bg-surface-primary p-6"
+      }
+    >
+      {!bare && (
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Shield size={16} className="text-content-secondary" />
+            <h2 className="text-body font-semibold text-content-primary">
+              Trusted Devices
+            </h2>
+            {devices.length > 0 && (
+              <Badge variant="info" size="sm">
+                {devices.length}
+              </Badge>
+            )}
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          {devices.length > 0 && (
-            <Button
-              variant="danger"
-              size="sm"
-              fullWidth={false}
-              onClick={() => setShowRevokeAll(true)}
-            >
-              Revoke All
-            </Button>
-          )}
-        </div>
-      </div>
+      )}
 
       {/* Loading state */}
       {isLoading && devices.length === 0 && (
@@ -132,7 +149,7 @@ export default function TrustedDevices() {
 
       {/* Empty state */}
       {!isLoading && devices.length === 0 && (
-        <p className="py-4 text-center text-body text-content-secondary">
+        <p className="mb-4 text-body text-content-secondary">
           No trusted devices. When you log in with MFA and trust a device, it
           will appear here.
         </p>
@@ -144,58 +161,72 @@ export default function TrustedDevices() {
           {devices.map((device) => (
             <div
               key={device.id}
-              className="flex items-center justify-between rounded-xl border border-border-components p-4"
+              className={`flex flex-col gap-3 rounded-xl border border-border-components p-4 sm:flex-row sm:items-center sm:justify-between ${
+                device.id === newDeviceId
+                  ? "animate-slide-in-fade"
+                  : device.id === removingId
+                    ? "animate-slide-out-fade"
+                    : ""
+              }`}
             >
-              <div className="flex items-center gap-3">
-                {isMobileDevice(device.deviceName) ? (
-                  <Smartphone
-                    size={20}
-                    className="shrink-0 text-content-secondary"
-                  />
-                ) : (
-                  <Laptop
-                    size={20}
-                    className="shrink-0 text-content-secondary"
-                  />
-                )}
+              <div className="flex min-w-0 flex-1 items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-tertiary">
+                  {isMobileDevice(device.deviceName) ? (
+                    <Smartphone size={24} className="text-content-secondary" />
+                  ) : (
+                    <Laptop size={24} className="text-content-secondary" />
+                  )}
+                </div>
                 <div className="min-w-0">
                   <p className="text-body font-normal text-content-primary">
                     {device.deviceName}
                   </p>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5 text-caption text-content-secondary">
-                    <span>{device.ipAddress}</span>
-                    <span>
-                      Last verified: {formatRelativeTime(device.lastVerifiedAt)}
-                    </span>
-                    <span>Expires: {formatDate(device.expiresAt)}</span>
-                  </div>
+                  <p className="mt-0.5 text-caption text-content-tertiary">
+                    {device.ipAddress}
+                    <span className="text-content-disabled"> · </span>
+                    {formatRelativeTime(device.lastVerifiedAt)}
+                    <span className="text-content-disabled"> · </span>
+                    Expires {formatDate(device.expiresAt)}
+                  </p>
                 </div>
               </div>
-              <IconButton
-                variant="danger"
-                size="sm"
-                onClick={() => setRevokeTarget(device)}
-                aria-label={`Revoke trust for ${device.deviceName}`}
-              >
-                <Trash2 size={16} />
-              </IconButton>
+              <div className="flex justify-center sm:justify-end">
+                <IconButton
+                  variant="danger"
+                  size="sm"
+                  onClick={() => setRevokeTarget(device)}
+                  aria-label={`Revoke trust for ${device.deviceName}`}
+                >
+                  <Trash2 size={16} />
+                </IconButton>
+              </div>
             </div>
           ))}
         </div>
       )}
 
-      {/* Trust This Device button */}
-      <div className="mt-4">
+      {/* Action buttons */}
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <Button
-          variant="outline"
-          size="sm"
-          fullWidth={false}
+          variant="primary"
+          size="md"
           loading={isTrusting}
           onClick={handleTrust}
+          className="sm:w-auto"
         >
           <Plus size={16} />
           Trust This Device
         </Button>
+        {devices.length > 0 && (
+          <Button
+            variant="danger"
+            size="md"
+            className="sm:w-auto"
+            onClick={() => setShowRevokeAll(true)}
+          >
+            Revoke All
+          </Button>
+        )}
       </div>
 
       {/* Revoke single device modal */}

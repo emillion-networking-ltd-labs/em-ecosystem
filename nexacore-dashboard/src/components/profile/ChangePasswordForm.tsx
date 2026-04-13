@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/useToast";
 import { PROFILE_TOAST } from "@/lib/toast-messages";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
+import AlertBox from "@/components/ui/AlertBox";
 import { validatePassword, PASSWORD_MIN_LENGTH } from "@/lib/validation";
 
 export default function ChangePasswordForm() {
@@ -67,16 +68,14 @@ export default function ChangePasswordForm() {
 
   return (
     <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+      <h2 className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary">
         {hasPassword ? "Change Password" : "Set Password"}
       </h2>
 
       {!hasPassword && (
-        <div className="mb-4 rounded-lg border border-warning/30 bg-warning/5 px-4 py-3">
-          <p className="text-caption text-warning">
-            Set a password for an alternative login method.
-          </p>
-        </div>
+        <AlertBox variant="warning" className="mb-4">
+          Set a password for an alternative login method.
+        </AlertBox>
       )}
 
       <form onSubmit={handleSubmit} className="space-y-6">

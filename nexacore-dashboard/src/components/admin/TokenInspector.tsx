@@ -91,6 +91,11 @@ const colorGroups: ColorGroup[] = [
         value: "rgba(138,17,17,0.75)",
         cssVar: "--color-error",
       },
+      {
+        name: "overlay (40%) — modals, sidebars, drawers",
+        value: "rgba(0,0,0,0.40)",
+        cssVar: "--overlay",
+      },
     ],
   },
   {
@@ -353,7 +358,7 @@ function ColorGrid({ groups }: { groups: ColorGroup[] }) {
           <h4 className="text-body font-semibold text-content-primary mb-3">
             {group.label}
           </h4>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             {group.tokens.map((token, i) => (
               <div
                 key={`${token.cssVar}-${i}`}
@@ -421,8 +426,8 @@ function TypographySection() {
       {/* Weights */}
       <div className="space-y-2">
         <p className="text-body font-semibold text-content-primary">Weights</p>
-        <div className="flex gap-4">
-          <div className="flex-1 p-3 rounded-md border border-border-strong">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="p-3 rounded-md border border-border-strong">
             <p className="text-body font-normal text-content-primary">
               font-normal (400)
             </p>
@@ -430,7 +435,7 @@ function TypographySection() {
               Body, buttons, links, inputs, descriptions
             </p>
           </div>
-          <div className="flex-1 p-3 rounded-md border border-border-strong">
+          <div className="p-3 rounded-md border border-border-strong">
             <p className="text-body font-semibold text-content-primary">
               font-semibold (600)
             </p>
@@ -475,15 +480,15 @@ function TypographySection() {
           ].map((h) => (
             <div
               key={h.level}
-              className="flex items-center gap-4 p-3 rounded-md border border-border-strong"
+              className="flex flex-col gap-1 p-3 rounded-md border border-border-strong sm:flex-row sm:items-center sm:gap-4"
             >
-              <span className="text-caption text-content-primary/50 w-20 shrink-0">
+              <span className="text-caption text-content-primary/50 sm:w-20 shrink-0">
                 {h.level}
               </span>
-              <span className="text-caption font-mono text-content-primary/50 w-48 shrink-0">
+              <span className="text-caption font-mono text-content-primary/50 sm:w-48 shrink-0">
                 {h.cls}
               </span>
-              <span className="text-caption text-content-primary/50 w-20 shrink-0">
+              <span className="text-caption text-content-primary/50 sm:w-20 shrink-0">
                 {h.size}
               </span>
               <span className={h.cls + " text-content-primary"}>
@@ -550,7 +555,7 @@ function SpacingSection() {
           const widthPercent = (px / maxPx) * 100;
           return (
             <div key={token.name} className="flex items-center gap-3">
-              <code className="w-48 shrink-0 text-caption text-content-primary/50 font-mono truncate">
+              <code className="w-32 sm:w-48 shrink-0 text-caption text-content-primary/50 font-mono truncate">
                 {token.name}
               </code>
               <div className="flex-1 h-6 flex items-center">

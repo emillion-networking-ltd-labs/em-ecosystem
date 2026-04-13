@@ -62,7 +62,7 @@ export default function ChangeEmailForm() {
       id="change-email"
       className="rounded-xl border border-border-strong bg-surface-primary p-6"
     >
-      <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+      <h2 className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary">
         Change Email
       </h2>
 

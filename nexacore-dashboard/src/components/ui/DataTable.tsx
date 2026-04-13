@@ -66,7 +66,7 @@ export default function DataTable<T>({
             {columns.map((col) => (
               <th
                 key={col.key}
-                className={`px-4 py-3 text-caption font-semibold uppercase tracking-wider text-content-primary/50 ${
+                className={`px-4 py-3 text-caption font-semibold uppercase tracking-wider text-content-tertiary ${
                   alignClasses[col.align ?? "left"]
                 } ${col.headerClassName ?? ""}`}
                 style={col.width ? { width: col.width } : undefined}
@@ -87,7 +87,7 @@ export default function DataTable<T>({
             <tr>
               <td
                 colSpan={columns.length}
-                className="px-4 py-12 text-center text-body text-content-primary/50"
+                className="px-4 py-12 text-center text-body text-content-secondary"
               >
                 {emptyMessage}
               </td>

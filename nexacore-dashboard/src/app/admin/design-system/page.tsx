@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef } from "react";
 import { LayoutGrid, Atom, Puzzle, Palette, Code2 } from "lucide-react";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminRoute from "@/components/guards/AdminRoute";
@@ -9,6 +9,7 @@ import Divider from "@/components/ui/Divider";
 import Badge from "@/components/ui/Badge";
 import Tabs from "@/components/ui/Tabs";
 import Button from "@/components/ui/Button";
+import StickyCard from "@/components/ui/StickyCard";
 import { SingleAccordion } from "@/components/ui/Accordion";
 import TokenInspector from "@/components/admin/TokenInspector";
 import {
@@ -74,6 +75,7 @@ const viewTabs = [
 
 export default function DesignSystemPage() {
   const [activeView, setActiveView] = useState("catalog");
+  const scrollRef = useRef<HTMLDivElement>(null);
   const [activeCategory, setActiveCategory] = useState<FilterCategory>("all");
 
   const filteredComponents = useMemo(() => {
@@ -85,11 +87,11 @@ export default function DesignSystemPage() {
     <AdminRoute>
       <DashboardLayout>
         {/* Breadcrumbs + Title */}
-        <div className="mb-6 flex items-center gap-2">
+        <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
           <h1 className="text-h2 font-semibold text-content-primary">
             Design System
           </h1>
-          <Divider orientation="vertical" className="h-6" />
+          <Divider orientation="vertical" className="hidden sm:block" />
           <Breadcrumbs
             items={[
               { label: "Dashboards", href: "/dashboard" },
@@ -100,17 +102,9 @@ export default function DesignSystemPage() {
         </div>
 
         {/* View Toggle — nav-horizontal with icons */}
-        <div className="card-flat mb-6">
-          <div className="hidden sm:block">
-            <Tabs
-              tabs={viewTabs}
-              activeTab={activeView}
-              onChange={setActiveView}
-              variant="nav-horizontal"
-            />
-          </div>
-          <div className="sm:hidden overflow-hidden">
-            <div className="overflow-x-auto scrollbar-hide -mx-6 px-6 touch-pan-x">
+        <div className="mb-6">
+          <StickyCard position="top">
+            <div className="hidden sm:block">
               <Tabs
                 tabs={viewTabs}
                 activeTab={activeView}
@@ -118,19 +112,47 @@ export default function DesignSystemPage() {
                 variant="nav-horizontal"
               />
             </div>
-            <div className="flex justify-center gap-1.5 mt-2">
-              {viewTabs.map((tab) => (
-                <div
-                  key={tab.value}
-                  className={`h-[9px] w-[9px] rounded-full transition-colors ${
-                    activeView === tab.value
-                      ? "bg-surface-inverse"
-                      : "bg-border-strong"
-                  }`}
+            <div className="sm:hidden overflow-hidden">
+              <div
+                ref={scrollRef}
+                className="overflow-x-auto scrollbar-hide -mx-6 px-6 touch-pan-x"
+              >
+                <Tabs
+                  tabs={viewTabs}
+                  activeTab={activeView}
+                  onChange={setActiveView}
+                  variant="nav-horizontal"
                 />
-              ))}
+              </div>
+              <div className="flex justify-center gap-1.5 mt-2">
+                {viewTabs.map((tab) => (
+                  <button
+                    key={tab.value}
+                    onClick={() => {
+                      setActiveView(tab.value);
+                      const container = scrollRef.current;
+                      if (!container) return;
+                      const buttons = container.querySelectorAll("[role=tab]");
+                      const idx = viewTabs.findIndex(
+                        (t) => t.value === tab.value,
+                      );
+                      buttons[idx]?.scrollIntoView({
+                        behavior: "smooth",
+                        inline: "center",
+                        block: "nearest",
+                      });
+                    }}
+                    aria-label={tab.label}
+                    className={`h-[9px] w-[9px] rounded-full transition-colors ${
+                      activeView === tab.value
+                        ? "bg-surface-inverse"
+                        : "bg-border-strong"
+                    }`}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
+          </StickyCard>
         </div>
 
         {/* Content area */}
@@ -202,19 +224,19 @@ export default function DesignSystemPage() {
                             | "success"
                             | "warning"
                         }
-                        size="md"
+                        size="sm"
                       >
                         {entry.category}
                       </Badge>
                     </div>
-                    <p className="text-caption text-content-primary/50">
+                    <p className="text-caption text-content-tertiary">
                       {entry.description}
                     </p>
                     <div className="pt-2 border-t border-border-strong flex flex-col gap-0.5">
                       {entry.files.map((file) => (
                         <code
                           key={file}
-                          className="text-caption text-content-primary/50 font-mono"
+                          className="text-caption text-content-tertiary font-mono"
                         >
                           {file}
                         </code>

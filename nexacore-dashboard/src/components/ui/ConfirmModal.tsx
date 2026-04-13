@@ -10,10 +10,19 @@ export const confirmModalSpecs = {
     primary: "Button primary (bg-surface-inverse)",
     danger: "Button danger (bg-error)",
   },
+  sizes: {
+    sm: "max-w-[390px] — confirmations, simple yes/no dialogs",
+    md: "max-w-[480px] — form dialogs (edit profile, change email/password)",
+    lg: "max-w-[600px] — complex forms, multi-step dialogs",
+  },
+  usage: {
+    confirm: "Default: title + description + Confirm/Cancel. Size sm.",
+    form: "With children (Input fields). Add size=md. Enter submits via onConfirm.",
+    danger: "Destructive action: variant=danger, red confirm button.",
+  },
   layout: {
-    width: "max-w-[390px]",
     radius: "rounded-xl (card inner)",
-    overlay: "bg-black/40",
+    overlay: "bg-[var(--overlay)]",
     topSection: "bg-surface-primary p-6 border-b border-border-strong",
     bottomSection: "bg-surface-secondary px-6 py-3",
   },
@@ -40,6 +49,7 @@ type ConfirmModalProps = {
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: "primary" | "danger";
+  size?: "sm" | "md" | "lg";
   loading?: boolean;
   children?: React.ReactNode;
 };
@@ -53,9 +63,15 @@ export default function ConfirmModal({
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
   variant = "primary",
+  size = "sm",
   loading = false,
   children,
 }: ConfirmModalProps) {
+  const sizeClasses = {
+    sm: "max-w-[390px]",
+    md: "max-w-[480px]",
+    lg: "max-w-[600px]",
+  };
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -115,7 +131,7 @@ export default function ConfirmModal({
   return (
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)]"
       onClick={(e) => {
         if (e.target === overlayRef.current) onClose();
       }}
@@ -125,10 +141,10 @@ export default function ConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
-        className="group max-w-[390px] overflow-hidden rounded-xl border border-border-strong bg-surface-secondary shadow-card"
+        className={`group w-full ${sizeClasses[size]} mx-4 rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
       >
         {/* Top section */}
-        <div className="relative border-b border-border-strong bg-surface-primary p-6">
+        <div className="relative rounded-t-xl border-b border-border-strong bg-surface-primary p-6">
           <IconButton
             variant="default"
             size="sm"
@@ -151,7 +167,7 @@ export default function ConfirmModal({
         </div>
 
         {/* Bottom section — buttons */}
-        <div className="flex justify-end gap-3 px-6 py-3">
+        <div className="flex justify-end gap-3 rounded-b-xl px-6 py-3">
           <Button
             variant="outline"
             size="md"

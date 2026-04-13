@@ -198,7 +198,7 @@ export default function LoginForm() {
           <h1 className="text-h1 font-semibold text-content-primary">
             Sign In
           </h1>
-          <p className="text-justify text-body text-content-primary/50">
+          <p className="text-justify text-body text-content-secondary">
             Connect using your NexaCore Account. This session will be available
             to other EM Ecosystem modules in the browser.
           </p>

@@ -15,11 +15,11 @@ export default function SettingsPage() {
     <ProtectedRoute>
       <DashboardLayout>
         {/* Page header */}
-        <div className="mb-6 flex items-center gap-2">
+        <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
           <h1 className="text-h2 font-semibold text-content-primary">
             Settings
           </h1>
-          <Divider orientation="vertical" className="h-6" />
+          <Divider orientation="vertical" className="hidden sm:block" />
           <Breadcrumbs
             items={[
               { label: "Dashboards", href: "/dashboard" },

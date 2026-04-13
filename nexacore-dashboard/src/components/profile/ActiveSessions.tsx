@@ -1,11 +1,12 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Monitor, Smartphone, Globe, Trash2 } from "lucide-react";
+import { Monitor, Smartphone, Trash2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
 import { PROFILE_TOAST } from "@/lib/toast-messages";
 import type { SessionResponse } from "@/lib/types";
+import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
 
@@ -53,7 +54,7 @@ function formatRelativeTime(dateStr: string): string {
   });
 }
 
-export default function ActiveSessions() {
+export default function ActiveSessions({ bare }: { bare?: boolean }) {
   const { addToast } = useToast();
   const [sessions, setSessions] = useState<SessionResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -103,24 +104,21 @@ export default function ActiveSessions() {
 
   const otherSessions = sessions.filter((s) => !s.isCurrent);
 
+  const header = !bare && (
+    <h2 className="text-body font-semibold text-content-primary">
+      Active Sessions
+    </h2>
+  );
+
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-body font-semibold uppercase tracking-wider text-content-primary">
-          Active Sessions
-        </h2>
-        {otherSessions.length > 0 && (
-          <Button
-            variant="danger"
-            size="sm"
-            fullWidth={false}
-            loading={revokingAll}
-            onClick={revokeAllOtherSessions}
-          >
-            Revoke all others
-          </Button>
-        )}
-      </div>
+    <div
+      className={
+        bare
+          ? ""
+          : "rounded-xl border border-border-strong bg-surface-primary p-6"
+      }
+    >
+      {!bare && <div className="mb-6">{header}</div>}
 
       {loading ? (
         <div className="flex items-center justify-center py-8">
@@ -139,62 +137,76 @@ export default function ActiveSessions() {
           No active sessions found.
         </p>
       ) : (
-        <div className="space-y-3">
-          {sessions.map((session) => {
-            const parsed = parseUserAgent(session.userAgent);
-            const label = session.deviceInfo || parsed.label;
-            const DeviceIcon = parsed.isMobile ? Smartphone : Monitor;
+        <>
+          <div className="space-y-3">
+            {sessions.map((session) => {
+              const parsed = parseUserAgent(session.userAgent);
+              const label = session.deviceInfo || parsed.label;
+              const DeviceIcon = parsed.isMobile ? Smartphone : Monitor;
 
-            return (
-              <div
-                key={session.id}
-                className={`flex items-center gap-4 rounded-xl border p-4 ${
-                  session.isCurrent
-                    ? "border-status-success/30 bg-status-success/5"
-                    : "border-border-components"
-                }`}
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-subtle">
-                  <DeviceIcon size={20} className="text-content-secondary" />
-                </div>
+              return (
+                <div
+                  key={session.id}
+                  className={`flex items-center gap-4 rounded-xl border p-4 ${
+                    session.isCurrent
+                      ? "border-status-success/30 bg-status-success/5"
+                      : "border-border-components"
+                  }`}
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-tertiary">
+                    <DeviceIcon size={24} className="text-content-secondary" />
+                  </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <span className="truncate text-body font-normal text-content-primary">
-                      {label}
-                    </span>
-                    {session.isCurrent && (
-                      <span className="shrink-0 rounded-full bg-status-success/10 px-2 py-0.5 text-caption font-normal text-status-success">
-                        Current
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <span className="text-body font-normal text-content-primary">
+                        {label}
                       </span>
-                    )}
-                  </div>
-                  <div className="mt-0.5 flex items-center gap-2 text-caption text-content-tertiary">
-                    <Globe size={12} />
-                    <span>{session.ipAddress}</span>
-                    <span className="text-content-disabled">·</span>
-                    <span>
+                      {session.isCurrent && (
+                        <Badge variant="success" size="sm">
+                          Current
+                        </Badge>
+                      )}
+                    </div>
+                    <p className="mt-0.5 text-caption text-content-tertiary">
+                      {session.ipAddress}
+                      <span className="text-content-disabled"> · </span>
                       Last active {formatRelativeTime(session.lastUsedAt)}
-                    </span>
+                    </p>
                   </div>
-                </div>
 
-                {!session.isCurrent && (
-                  <IconButton
-                    variant="danger"
-                    size="sm"
-                    onClick={() => revokeSession(session.id)}
-                    disabled={revoking === session.id}
-                    loading={revoking === session.id}
-                    aria-label="Revoke session"
-                  >
-                    <Trash2 size={16} />
-                  </IconButton>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                  {!session.isCurrent && (
+                    <IconButton
+                      variant="danger"
+                      size="sm"
+                      onClick={() => revokeSession(session.id)}
+                      disabled={revoking === session.id}
+                      loading={revoking === session.id}
+                      aria-label="Revoke session"
+                    >
+                      <Trash2 size={16} />
+                    </IconButton>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          {otherSessions.length > 0 && (
+            <div className="mt-4">
+              <Button
+                variant="danger"
+                size="md"
+                fullWidth={false}
+                loading={revokingAll}
+                onClick={revokeAllOtherSessions}
+                className="w-full sm:w-auto"
+              >
+                Revoke all others
+              </Button>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

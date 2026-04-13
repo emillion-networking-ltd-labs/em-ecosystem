@@ -1,5 +1,9 @@
 "use client";
 
+import { useState, useRef } from "react";
+import { MonitorDot, ShieldX } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
+import Badge from "@/components/ui/Badge";
 import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
 import type { SafeUser, UserRole } from "@/lib/types";
 import ActionDropdown from "./ActionDropdown";
@@ -11,11 +15,82 @@ type UsersTableProps = {
   onDelete: (user: SafeUser) => void;
 };
 
-const roleBadgeClasses: Record<UserRole, string> = {
-  SUPERADMIN: "bg-warning-bg text-warning",
-  ADMIN: "bg-info-bg text-info",
-  USER: "bg-surface-subtle text-content-secondary",
+const roleBadgeVariant: Record<UserRole, "warning" | "info" | "default"> = {
+  SUPERADMIN: "warning",
+  ADMIN: "info",
+  USER: "default",
 };
+
+function CopyCell({
+  value,
+  maxWidth,
+  className = "",
+}: {
+  value: string;
+  maxWidth: string;
+  className?: string;
+}) {
+  const [copied, setCopied] = useState(false);
+  const [hover, setHover] = useState(false);
+  const [pos, setPos] = useState({ x: 0, y: 0 });
+  const tableRef = useRef<HTMLElement | null>(null);
+
+  if (value === "—") {
+    return <span className={`text-content-tertiary ${className}`}>—</span>;
+  }
+
+  const handleClick = () => {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!tableRef.current) {
+      tableRef.current = (e.target as HTMLElement).closest(".card-flat");
+    }
+    const table = tableRef.current?.getBoundingClientRect();
+    if (table) {
+      setPos({
+        x: Math.min(e.clientX + 12, table.right - 320),
+        y: Math.min(e.clientY + 12, table.bottom - 40),
+      });
+    } else {
+      setPos({ x: e.clientX + 12, y: e.clientY + 12 });
+    }
+  };
+
+  return (
+    <div className="relative">
+      <button
+        type="button"
+        onClick={handleClick}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => {
+          setHover(false);
+          setCopied(false);
+          tableRef.current = null;
+        }}
+        onMouseMove={handleMouseMove}
+        className={`block truncate text-left transition-colors hover:text-content-primary ${maxWidth} ${className}`}
+      >
+        {value}
+      </button>
+      {hover && (
+        <div
+          className={`pointer-events-none fixed z-50 max-w-xs rounded-lg border px-3 py-2 text-caption shadow-card ${
+            copied
+              ? "border-success/30 bg-success-bg text-success"
+              : "border-border-components bg-surface-primary text-content-primary"
+          }`}
+          style={{ left: pos.x, top: pos.y }}
+        >
+          {copied ? "Copied!" : value}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function UsersTable({
   users,
@@ -27,35 +102,41 @@ export default function UsersTable({
     {
       key: "user",
       label: "User",
-      render: (user) => (
-        <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-circle bg-surface-subtle">
-            <span className="text-caption font-semibold text-content-primary">
-              {(user.firstName?.[0] || user.email[0] || "?").toUpperCase()}
-            </span>
+      render: (user) => {
+        const name =
+          user.firstName && user.lastName
+            ? `${user.firstName} ${user.lastName}`
+            : user.email.split("@")[0];
+        return (
+          <div className="flex items-center gap-3">
+            <Avatar src={user.avatarUrl} name={name} size="sm" />
+            <CopyCell
+              value={name}
+              maxWidth="max-w-[160px]"
+              className="text-body font-normal text-content-primary"
+            />
           </div>
-          <span className="text-body font-normal text-content-primary">
-            {user.firstName && user.lastName
-              ? `${user.firstName} ${user.lastName}`
-              : user.email.split("@")[0]}
-          </span>
-        </div>
-      ),
+        );
+      },
     },
     {
       key: "email",
       label: "Email",
-      render: (user) => user.email,
+      render: (user) => (
+        <CopyCell
+          value={user.email}
+          maxWidth="max-w-[200px]"
+          className="text-body text-content-secondary"
+        />
+      ),
     },
     {
       key: "role",
       label: "Role",
       render: (user) => (
-        <span
-          className={`inline-flex items-center rounded-md px-2 py-0.5 text-caption font-normal ${roleBadgeClasses[user.role]}`}
-        >
+        <Badge variant={roleBadgeVariant[user.role]} size="sm">
           {user.role}
-        </span>
+        </Badge>
       ),
     },
     {
@@ -63,15 +144,15 @@ export default function UsersTable({
       label: "Status",
       render: (user) => {
         const isLocked = !user.isActive;
-        const statusLabel = isLocked ? "Locked" : "Active";
-        const statusDotClass = isLocked ? "bg-error" : "bg-success";
         return (
-          <div className="flex items-center gap-1.5">
-            <span className={`h-2 w-2 rounded-full ${statusDotClass}`} />
-            <span
-              className={`text-body ${isLocked ? "text-error" : "text-content-primary"}`}
-            >
-              {statusLabel}
+          <div className="flex items-center gap-1.5 text-body">
+            {isLocked ? (
+              <ShieldX size={16} className="text-error" />
+            ) : (
+              <MonitorDot size={16} className="text-success" />
+            )}
+            <span className={isLocked ? "text-error" : "text-content-primary"}>
+              {isLocked ? "Locked" : "Active"}
             </span>
           </div>
         );

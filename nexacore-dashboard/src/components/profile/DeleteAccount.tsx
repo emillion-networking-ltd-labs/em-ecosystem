@@ -64,21 +64,24 @@ export default function DeleteAccount() {
     <>
       {/* Danger zone card */}
       <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-        <h2 className="mb-4 text-body font-semibold uppercase tracking-wider text-error">
+        <h2 className="mb-4 text-h3 font-semibold uppercase tracking-wider text-error">
           Danger Zone
         </h2>
-        <p className="mb-6 text-body text-content-secondary">
-          Permanently delete your account and all associated data. This action
-          cannot be undone.
-        </p>
-        <Button
-          variant="danger"
-          size="md"
-          fullWidth={false}
-          onClick={() => setShowModal(true)}
-        >
-          Delete Account
-        </Button>
+        <div className="card-flat flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-body text-content-secondary">
+            Permanently delete your account and all associated data. This action
+            cannot be undone.
+          </p>
+          <Button
+            variant="danger"
+            size="md"
+            fullWidth={false}
+            className="shrink-0 sm:w-auto"
+            onClick={() => setShowModal(true)}
+          >
+            Delete Account
+          </Button>
+        </div>
       </div>
 
       {/* Confirmation modal */}

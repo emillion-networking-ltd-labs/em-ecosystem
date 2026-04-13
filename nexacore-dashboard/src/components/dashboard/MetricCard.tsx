@@ -25,7 +25,7 @@ export default function MetricCard({
         colorVariant === "purple" ? "bg-metric-purple" : "bg-metric-blue"
       }`}
     >
-      <p className="text-caption text-content-primary">{label}</p>
+      <p className="text-body font-semibold text-content-secondary">{label}</p>
       <div className="mt-2 flex items-center gap-2">
         {loading ? (
           <div className="h-8 w-20 animate-pulse rounded-lg bg-black/[0.08] dark:bg-white/[0.08]" />

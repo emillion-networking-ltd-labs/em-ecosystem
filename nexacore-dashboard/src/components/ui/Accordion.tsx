@@ -12,6 +12,8 @@ interface AccordionProps {
   items: AccordionItem[];
   className?: string;
   defaultOpen?: number;
+  variant?: "default" | "section";
+  borderless?: boolean;
 }
 
 export const accordionSpecs = {
@@ -28,10 +30,18 @@ export const accordionSpecs = {
   content: "px-4 pt-3 pb-4",
 };
 
+const triggerStyles = {
+  default: "text-body font-normal text-content-primary",
+  section:
+    "text-h3 font-semibold uppercase tracking-wider text-content-primary",
+};
+
 export default function Accordion({
   items,
   className = "",
   defaultOpen,
+  variant = "default",
+  borderless = false,
 }: AccordionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(
     defaultOpen ?? null,
@@ -43,13 +53,13 @@ export default function Accordion({
 
   return (
     <div
-      className={`rounded-md border border-border-components overflow-hidden bg-surface-primary divide-y divide-border-strong ${className}`}
+      className={`${borderless ? "" : "rounded-md border border-border-components"} overflow-hidden bg-surface-primary divide-y divide-border-strong ${className}`}
     >
       {items.map((item, i) => (
         <div key={i}>
           <button
             onClick={() => toggle(i)}
-            className="flex w-full items-center justify-between px-4 py-3 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+            className={`flex w-full items-center justify-between px-4 py-3 ${triggerStyles[variant]} transition-colors hover:bg-surface-subtle`}
           >
             {item.title}
             <ChevronDown

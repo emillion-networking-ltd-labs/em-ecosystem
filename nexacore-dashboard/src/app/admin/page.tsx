@@ -8,9 +8,13 @@ import Divider from "@/components/ui/Divider";
 import UsersTable from "@/components/admin/UsersTable";
 import Pagination from "@/components/ui/Pagination";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import { Search } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import Spinner from "@/components/ui/Spinner";
+import AlertBox from "@/components/ui/AlertBox";
 import { apiClient, SessionExpiredError } from "@/lib/api";
+import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { ADMIN_TOAST } from "@/lib/toast-messages";
 import type {
@@ -20,15 +24,21 @@ import type {
   AdminUpdateUserDto,
 } from "@/lib/types";
 
-const LIMIT = 10;
+const PAGE_SIZE_OPTIONS = [
+  { value: "10", label: "10 rows" },
+  { value: "20", label: "20 rows" },
+  { value: "50", label: "50 rows" },
+];
 
 export default function AdminPage() {
+  const { user: currentUser } = useAuth();
   const { addToast } = useToast();
   const [users, setUsers] = useState<SafeUser[]>([]);
+  const [pageSize, setPageSize] = useState(10);
   const [meta, setMeta] = useState({
     total: 0,
     page: 1,
-    limit: LIMIT,
+    limit: 10,
     totalPages: 1,
   });
   const [search, setSearch] = useState("");
@@ -48,7 +58,7 @@ export default function AdminPage() {
       try {
         const params = new URLSearchParams({
           page: String(page),
-          limit: String(LIMIT),
+          limit: String(pageSize),
         });
         if (search) params.set("search", search);
         const res = await apiClient.get<PaginatedResponse<SafeUser>>(
@@ -66,7 +76,7 @@ export default function AdminPage() {
         if (!signal?.aborted) setLoading(false);
       }
     },
-    [search, addToast],
+    [search, pageSize, addToast],
   );
 
   useEffect(() => {
@@ -162,59 +172,80 @@ export default function AdminPage() {
     <AdminRoute>
       <DashboardLayout>
         {/* Page header */}
-        <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <h1 className="text-h2 font-semibold text-content-primary">
-              User Management
-            </h1>
-            <Divider orientation="vertical" className="h-6" />
-            <Breadcrumbs
-              items={[
-                { label: "Dashboards", href: "/dashboard" },
-                { label: "Admin", href: "/admin" },
-                { label: "User Management" },
-              ]}
-            />
-          </div>
-          <div className="w-64">
-            <Input
-              name="search"
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search users..."
-              size="md"
-            />
-          </div>
+        <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+          <h1 className="text-h2 font-semibold text-content-primary">
+            User Management
+          </h1>
+          <Divider orientation="vertical" className="hidden sm:block" />
+          <Breadcrumbs
+            items={[
+              { label: "Dashboards", href: "/dashboard" },
+              { label: "Admin", href: "/admin" },
+              { label: "User Management" },
+            ]}
+          />
         </div>
 
-        {/* Table */}
-        {loading ? (
-          <div className="flex h-64 items-center justify-center">
-            <p className="text-body text-content-tertiary">Loading users...</p>
-          </div>
-        ) : users.length === 0 ? (
-          <div className="flex h-64 items-center justify-center rounded-xl border border-border-default bg-surface-primary">
-            <p className="text-body text-content-tertiary">No users found.</p>
-          </div>
-        ) : (
-          <>
-            <UsersTable
-              users={users}
-              onChangeRole={handleChangeRole}
-              onToggleLock={handleToggleLock}
-              onDelete={handleDelete}
-            />
-            {meta.totalPages > 1 && (
-              <div className="mt-4">
-                <Pagination
-                  currentPage={meta.page}
-                  totalPages={meta.totalPages}
-                  onPageChange={(page) => fetchUsers(page)}
-                />
+        {/* Search */}
+        <div className="card-flat mb-6">
+          <Input
+            name="search"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by name or email..."
+            size="md"
+            leftIcon={<Search size={16} />}
+          />
+        </div>
+
+        {/* Content */}
+        <div className="card-flat">
+          {/* Table */}
+          {loading ? (
+            <div className="flex h-64 items-center justify-center">
+              <Spinner size="md" />
+            </div>
+          ) : users.length === 0 ? (
+            <div className="flex h-64 items-center justify-center">
+              <p className="text-body text-content-tertiary">No users found.</p>
+            </div>
+          ) : (
+            <>
+              <UsersTable
+                users={users}
+                onChangeRole={handleChangeRole}
+                onToggleLock={handleToggleLock}
+                onDelete={handleDelete}
+              />
+              <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="text-caption text-content-tertiary">
+                    Rows per page
+                  </span>
+                  <Select
+                    options={PAGE_SIZE_OPTIONS}
+                    value={String(pageSize)}
+                    onChange={(v) => {
+                      setPageSize(Number(v));
+                      fetchUsers(1);
+                    }}
+                    size="sm"
+                  />
+                  <span className="text-caption text-content-tertiary">
+                    {meta.total} total users
+                  </span>
+                </div>
+                {meta.totalPages > 1 && (
+                  <Pagination
+                    currentPage={meta.page}
+                    totalPages={meta.totalPages}
+                    onPageChange={(page) => fetchUsers(page)}
+                  />
+                )}
               </div>
-            )}
-          </>
-        )}
+            </>
+          )}
+        </div>
 
         {/* Confirm modal */}
         <ConfirmModal
@@ -228,17 +259,31 @@ export default function AdminPage() {
           loading={modalLoading}
         >
           {modalType === "role" && (
-            <div className="mt-3">
+            <div className="mt-3 space-y-3">
               <Select
                 options={[
                   { value: "USER", label: "USER" },
                   { value: "ADMIN", label: "ADMIN" },
-                  { value: "SUPERADMIN", label: "SUPERADMIN" },
+                  ...(currentUser?.role === "SUPERADMIN"
+                    ? [{ value: "SUPERADMIN", label: "SUPERADMIN" }]
+                    : []),
                 ]}
                 value={selectedRole}
                 onChange={(v) => setSelectedRole(v as UserRole)}
                 placeholder="Select role"
               />
+              {selectedRole === "ADMIN" && (
+                <AlertBox variant="warning">
+                  This will give the user access to user management, audit logs
+                  and permissions.
+                </AlertBox>
+              )}
+              {selectedRole === "SUPERADMIN" && (
+                <AlertBox variant="error">
+                  This will give the user unrestricted access to the entire
+                  system. This action should be carefully considered.
+                </AlertBox>
+              )}
             </div>
           )}
         </ConfirmModal>

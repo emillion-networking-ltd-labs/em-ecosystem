@@ -21,17 +21,35 @@ function SettingRow({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex items-center justify-between gap-4 rounded-xl p-4">
-      <div className="flex items-center gap-3">
-        <IconBadge size="md">
-          <Icon size={24} />
-        </IconBadge>
-        <div>
+    <div className="rounded-xl p-4">
+      {/* Mobile: icon + action top, text below */}
+      <div className="sm:hidden">
+        <div className="flex items-center justify-between gap-4">
+          <IconBadge size="md">
+            <Icon size={24} />
+          </IconBadge>
+          <div className="shrink-0">{children}</div>
+        </div>
+        <div className="mt-2">
           <p className="text-body font-normal text-content-primary">{label}</p>
           <p className="text-caption text-content-tertiary">{description}</p>
         </div>
       </div>
-      <div className="shrink-0">{children}</div>
+      {/* Desktop: original layout */}
+      <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-4">
+        <div className="flex items-center gap-3">
+          <IconBadge size="md">
+            <Icon size={24} />
+          </IconBadge>
+          <div>
+            <p className="text-body font-normal text-content-primary">
+              {label}
+            </p>
+            <p className="text-caption text-content-tertiary">{description}</p>
+          </div>
+        </div>
+        <div className="shrink-0">{children}</div>
+      </div>
     </div>
   );
 }

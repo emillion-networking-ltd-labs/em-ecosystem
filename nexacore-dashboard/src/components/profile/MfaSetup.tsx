@@ -9,13 +9,16 @@ import {
   Copy,
   Check,
   RefreshCw,
-  AlertTriangle,
 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 import Button from "@/components/ui/Button";
-import IconButton from "@/components/ui/IconButton";
+import InlineError from "@/components/ui/InlineError";
 import Input from "@/components/ui/Input";
+import MfaDigitInput from "@/components/ui/MfaDigitInput";
+import AlertBox from "@/components/ui/AlertBox";
+import QrCodeCard from "@/components/ui/QrCodeCard";
 import type { MfaSetupResponse, MfaStatusResponse } from "@/lib/types";
 
 type MfaView =
@@ -26,17 +29,30 @@ type MfaView =
   | "disable"
   | "regenerate";
 
-export default function MfaSetup() {
+export default function MfaSetup({
+  bare,
+  onExpandChange,
+}: {
+  bare?: boolean;
+  onExpandChange?: (expanded: boolean) => void;
+}) {
+  const cardClass = bare
+    ? ""
+    : "h-full rounded-xl border border-border-strong bg-surface-primary p-6";
   const { user, refreshSession } = useAuth();
-  const [view, setView] = useState<MfaView>("status");
+  const { addToast } = useToast();
+  const [view, setViewInternal] = useState<MfaView>("status");
+  const setView = (v: MfaView) => {
+    setViewInternal(v);
+    onExpandChange?.(v !== "status");
+  };
   const [status, setStatus] = useState<MfaStatusResponse | null>(null);
   const [setupData, setSetupData] = useState<MfaSetupResponse | null>(null);
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
-  const [verifyCode, setVerifyCode] = useState("");
+  const [verifyCode, setVerifyCode] = useState<string[]>(Array(6).fill(""));
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [copiedSecret, setCopiedSecret] = useState(false);
+  const [fieldError, setFieldError] = useState("");
   const [copiedCodes, setCopiedCodes] = useState(false);
 
   const fetchStatus = useCallback(async () => {
@@ -54,7 +70,6 @@ export default function MfaSetup() {
 
   const handleSetup = async () => {
     setLoading(true);
-    setError("");
     try {
       const data = await apiClient.post<MfaSetupResponse>(
         "/auth/mfa/setup",
@@ -65,28 +80,34 @@ export default function MfaSetup() {
       setView("setup");
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
-      setError(apiErr?.error?.message || "Failed to start MFA setup");
+      addToast({
+        variant: "error",
+        title: "MFA setup failed",
+        description: apiErr?.error?.message || "Please try again.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleVerifySetup = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!verifyCode.trim()) return;
+  const submitVerifyCode = async (code: string) => {
+    setFieldError("");
     setLoading(true);
-    setError("");
     try {
-      await apiClient.post("/auth/mfa/verify-setup", {
-        token: verifyCode.trim(),
-      });
+      await apiClient.post("/auth/mfa/verify-setup", { token: code });
       setView("recovery-codes");
-      setVerifyCode("");
+      setVerifyCode(Array(6).fill(""));
       await fetchStatus();
       await refreshSession();
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
-      setError(apiErr?.error?.message || "Invalid verification code");
+      addToast({
+        variant: "error",
+        title: "Verification failed",
+        description:
+          apiErr?.error?.message || "Invalid code. Please try again.",
+      });
+      setFieldError("Invalid code");
     } finally {
       setLoading(false);
     }
@@ -94,9 +115,12 @@ export default function MfaSetup() {
 
   const handleDisable = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password) return;
+    if (!password) {
+      setFieldError("Password is required");
+      return;
+    }
+    setFieldError("");
     setLoading(true);
-    setError("");
     try {
       await apiClient.delete("/auth/mfa", {
         body: JSON.stringify({ password }),
@@ -107,9 +131,18 @@ export default function MfaSetup() {
       setSetupData(null);
       await fetchStatus();
       await refreshSession();
+      addToast({
+        variant: "success",
+        title: "MFA disabled",
+        description: "Two-factor authentication has been disabled.",
+      });
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
-      setError(apiErr?.error?.message || "Failed to disable MFA");
+      addToast({
+        variant: "error",
+        title: "Failed to disable MFA",
+        description: apiErr?.error?.message || "Please try again.",
+      });
     } finally {
       setLoading(false);
     }
@@ -117,9 +150,12 @@ export default function MfaSetup() {
 
   const handleRegenerate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password) return;
+    if (!password) {
+      setFieldError("Password is required");
+      return;
+    }
+    setFieldError("");
     setLoading(true);
-    setError("");
     try {
       const data = await apiClient.post<{ recoveryCodes: string[] }>(
         "/auth/mfa/recovery-codes",
@@ -131,22 +167,21 @@ export default function MfaSetup() {
       await fetchStatus();
     } catch (err: unknown) {
       const apiErr = err as { error?: { message?: string } };
-      setError(apiErr?.error?.message || "Failed to regenerate recovery codes");
+      addToast({
+        variant: "error",
+        title: "Failed to regenerate",
+        description: apiErr?.error?.message || "Please try again.",
+      });
     } finally {
       setLoading(false);
     }
   };
 
-  const copyToClipboard = async (text: string, type: "secret" | "codes") => {
+  const copyCodes = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      if (type === "secret") {
-        setCopiedSecret(true);
-        setTimeout(() => setCopiedSecret(false), 2000);
-      } else {
-        setCopiedCodes(true);
-        setTimeout(() => setCopiedCodes(false), 2000);
-      }
+      setCopiedCodes(true);
+      setTimeout(() => setCopiedCodes(false), 2000);
     } catch {
       // Clipboard API may not be available
     }
@@ -157,20 +192,17 @@ export default function MfaSetup() {
   // Recovery codes view (after setup or regeneration)
   if (view === "recovery-codes") {
     return (
-      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-        <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+      <div className={cardClass}>
+        <h2 className="mb-6 text-body font-semibold text-content-primary">
           Recovery Codes
         </h2>
 
         <div className="space-y-4">
-          <div className="flex items-start gap-2 rounded-lg border border-warning-border bg-warning-bg p-3">
-            <AlertTriangle size={16} className="mt-0.5 shrink-0 text-warning" />
-            <p className="text-caption text-content-primary">
-              Save these recovery codes in a secure location. Each code can only
-              be used once. If you lose access to your authenticator app, you
-              can use these codes to sign in.
-            </p>
-          </div>
+          <AlertBox variant="warning">
+            Save these recovery codes in a secure location. Each code can only
+            be used once. If you lose access to your authenticator app, you can
+            use these codes to sign in.
+          </AlertBox>
 
           <div className="grid grid-cols-2 gap-2 rounded-lg border border-border-components bg-surface-subtle p-4">
             {recoveryCodes.map((code, i) => (
@@ -188,7 +220,7 @@ export default function MfaSetup() {
               variant="outline"
               size="md"
               fullWidth={false}
-              onClick={() => copyToClipboard(recoveryCodes.join("\n"), "codes")}
+              onClick={() => copyCodes(recoveryCodes.join("\n"))}
             >
               {copiedCodes ? <Check size={16} /> : <Copy size={16} />}
               {copiedCodes ? "Copied" : "Copy all"}
@@ -215,8 +247,8 @@ export default function MfaSetup() {
   // Setup QR view
   if (view === "setup" && setupData) {
     return (
-      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-        <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+      <div className={cardClass}>
+        <h2 className="mb-6 text-body font-semibold text-content-primary">
           Set Up Two-Factor Authentication
         </h2>
 
@@ -226,64 +258,55 @@ export default function MfaSetup() {
             Authenticator, Authy, 1Password, etc.).
           </p>
 
-          {/* QR Code */}
-          <div className="flex justify-center">
-            <div className="rounded-xl border border-border-components bg-white p-4">
-              <img
-                src={setupData.qrCodeDataUrl}
-                alt="MFA QR Code"
-                width={200}
-                height={200}
-              />
-            </div>
-          </div>
+          {/* QR Code + Secret — using design system components */}
+          <QrCodeCard
+            qrDataUrl={setupData.qrCodeDataUrl}
+            secret={setupData.secret}
+          />
 
-          {/* Manual entry secret */}
-          <div className="space-y-2">
-            <p className="text-caption text-content-secondary">
-              Or enter this secret manually:
-            </p>
-            <div className="flex items-center gap-2">
-              <code className="flex-1 select-all rounded-lg border border-border-components bg-surface-subtle px-3 py-2 font-mono text-body text-content-primary">
-                {setupData.secret}
-              </code>
-              <IconButton
-                variant="boxed"
-                size="sm"
-                onClick={() => copyToClipboard(setupData.secret, "secret")}
-                aria-label="Copy secret"
-              >
-                {copiedSecret ? <Check size={16} /> : <Copy size={16} />}
-              </IconButton>
-            </div>
-          </div>
+          <p className="text-caption text-content-secondary">
+            Or enter this secret manually:
+          </p>
 
           {/* Verify code form */}
-          <form onSubmit={handleVerifySetup} className="space-y-4">
-            <Input
-              label="Verification Code"
-              name="totpCode"
-              type="text"
-              inputMode="numeric"
-              value={verifyCode}
-              onChange={(e) => {
-                setError("");
-                setVerifyCode(e.target.value.replace(/\D/g, "").slice(0, 6));
-              }}
-              placeholder="Enter 6-digit code"
-              autoComplete="one-time-code"
-              error={error || undefined}
-            />
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              const code = verifyCode.join("");
+              if (code.length === 6) submitVerifyCode(code);
+              else setFieldError("Enter all 6 digits");
+            }}
+            className="space-y-4"
+          >
+            <div>
+              <p className="mb-2 text-body font-semibold text-content-primary">
+                Verification Code
+              </p>
+              <MfaDigitInput
+                value={verifyCode}
+                onChange={(v) => {
+                  setFieldError("");
+                  setVerifyCode(v);
+                }}
+                onComplete={(code) => submitVerifyCode(code)}
+                error={!!fieldError}
+                autoFocus
+              />
+              {fieldError && (
+                <InlineError message={fieldError} className="mt-2" />
+              )}
+            </div>
 
-            <div className="flex gap-2 justify-end">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <Button
                 variant="outline"
                 size="md"
-                fullWidth={false}
+                className="sm:w-auto"
                 onClick={() => {
                   setView("status");
                   setSetupData(null);
-                  setError("");
+                  setVerifyCode(Array(6).fill(""));
+                  setFieldError("");
                 }}
               >
                 Cancel
@@ -291,7 +314,7 @@ export default function MfaSetup() {
               <Button
                 type="submit"
                 size="md"
-                fullWidth={false}
+                className="sm:w-auto"
                 loading={loading}
               >
                 Verify & Enable
@@ -306,19 +329,16 @@ export default function MfaSetup() {
   // Disable MFA view
   if (view === "disable") {
     return (
-      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-        <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+      <div className={`${cardClass} mx-auto max-w-[480px]`}>
+        <h2 className="mb-6 text-body font-semibold text-content-primary">
           Disable Two-Factor Authentication
         </h2>
 
         <form onSubmit={handleDisable} className="space-y-4">
-          <div className="flex items-start gap-2 rounded-lg border border-error-border bg-error-bg p-3">
-            <ShieldOff size={16} className="mt-0.5 shrink-0 text-error" />
-            <p className="text-caption text-content-primary">
-              Disabling MFA will make your account less secure. You will need
-              your password to confirm.
-            </p>
-          </div>
+          <AlertBox variant="warning">
+            Disabling MFA will make your account less secure. You will need your
+            password to confirm.
+          </AlertBox>
 
           <Input
             label="Confirm Password"
@@ -326,22 +346,23 @@ export default function MfaSetup() {
             type="password"
             value={password}
             onChange={(e) => {
-              setError("");
+              setFieldError("");
+              setFieldError("");
               setPassword(e.target.value);
             }}
             placeholder="Enter your password"
-            error={error || undefined}
+            error={fieldError || undefined}
           />
 
-          <div className="flex gap-2 justify-end">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
               size="md"
-              fullWidth={false}
+              className="sm:w-auto"
               onClick={() => {
                 setView("status");
                 setPassword("");
-                setError("");
+                setFieldError("");
               }}
             >
               Cancel
@@ -350,7 +371,7 @@ export default function MfaSetup() {
               type="submit"
               variant="danger"
               size="md"
-              fullWidth={false}
+              className="sm:w-auto"
               loading={loading}
             >
               Disable MFA
@@ -364,19 +385,16 @@ export default function MfaSetup() {
   // Regenerate recovery codes view
   if (view === "regenerate") {
     return (
-      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-        <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
+      <div className={`${cardClass} mx-auto max-w-[480px]`}>
+        <h2 className="mb-6 text-body font-semibold text-content-primary">
           Regenerate Recovery Codes
         </h2>
 
         <form onSubmit={handleRegenerate} className="space-y-4">
-          <div className="flex items-start gap-2 rounded-lg border border-warning-border bg-warning-bg p-3">
-            <AlertTriangle size={16} className="mt-0.5 shrink-0 text-warning" />
-            <p className="text-caption text-content-primary">
-              This will invalidate all existing recovery codes. Make sure to
-              save the new ones.
-            </p>
-          </div>
+          <AlertBox variant="warning">
+            This will invalidate all existing recovery codes. Make sure to save
+            the new ones.
+          </AlertBox>
 
           <Input
             label="Confirm Password"
@@ -384,27 +402,33 @@ export default function MfaSetup() {
             type="password"
             value={password}
             onChange={(e) => {
-              setError("");
+              setFieldError("");
+              setFieldError("");
               setPassword(e.target.value);
             }}
             placeholder="Enter your password"
-            error={error || undefined}
+            error={fieldError || undefined}
           />
 
-          <div className="flex gap-2 justify-end">
+          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <Button
               variant="outline"
               size="md"
-              fullWidth={false}
+              className="sm:w-auto"
               onClick={() => {
                 setView("status");
                 setPassword("");
-                setError("");
+                setFieldError("");
               }}
             >
               Cancel
             </Button>
-            <Button type="submit" size="md" fullWidth={false} loading={loading}>
+            <Button
+              type="submit"
+              size="md"
+              className="sm:w-auto"
+              loading={loading}
+            >
               Regenerate
             </Button>
           </div>
@@ -415,79 +439,68 @@ export default function MfaSetup() {
 
   // Default: Status view
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      <h2 className="mb-6 text-body font-semibold uppercase tracking-wider text-content-primary">
-        Two-Factor Authentication
-      </h2>
+    <div className={cardClass}>
+      {!bare && (
+        <h2 className="mb-6 text-body font-semibold text-content-primary">
+          Two-Factor Authentication
+        </h2>
+      )}
 
       <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          {mfaEnabled ? (
-            <ShieldCheck size={20} className="text-success" />
-          ) : (
-            <Shield size={20} className="text-content-tertiary" />
-          )}
-          <div>
-            <p className="text-body font-normal text-content-primary">
-              {mfaEnabled ? "MFA is enabled" : "MFA is not enabled"}
-            </p>
-            <p className="text-caption text-content-secondary">
-              {mfaEnabled
-                ? `${status?.recoveryCodesRemaining ?? "?"} recovery codes remaining`
-                : "Add an extra layer of security to your account"}
-            </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between">
+          <div className="flex items-center gap-3">
+            {mfaEnabled ? (
+              <ShieldCheck size={16} className="text-success" />
+            ) : (
+              <Shield size={16} className="text-content-tertiary" />
+            )}
+            <div>
+              <p
+                className={`text-body font-semibold ${mfaEnabled ? "text-success" : "text-content-tertiary"}`}
+              >
+                {mfaEnabled ? "MFA is enabled" : "MFA is not enabled"}
+              </p>
+              <p className="text-caption text-content-secondary">
+                {mfaEnabled
+                  ? `${status?.recoveryCodesRemaining ?? "?"} recovery codes remaining`
+                  : "Add an extra layer of security to your account"}
+              </p>
+            </div>
           </div>
-        </div>
 
-        {error && (
-          <p
-            className="text-caption text-error"
-            role="alert"
-            aria-live="polite"
-          >
-            {error}
-          </p>
-        )}
-
-        <div className="flex flex-wrap gap-2">
-          {mfaEnabled ? (
-            <>
-              <Button
-                variant="outline"
-                size="md"
-                fullWidth={false}
-                onClick={() => {
-                  setError("");
-                  setView("regenerate");
-                }}
-              >
-                <RefreshCw size={16} />
-                Regenerate Codes
+          <div className="grid grid-cols-1 gap-2 sm:flex sm:flex-wrap">
+            {mfaEnabled ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="md"
+                  onClick={() => {
+                    setFieldError("");
+                    setView("regenerate");
+                  }}
+                >
+                  <RefreshCw size={16} />
+                  Regenerate Codes
+                </Button>
+                <Button
+                  variant="danger"
+                  size="md"
+                  onClick={() => {
+                    setFieldError("");
+                    setView("disable");
+                  }}
+                >
+                  <ShieldOff size={16} />
+                  Disable MFA
+                </Button>
+              </>
+            ) : (
+              <Button size="md" loading={loading} onClick={handleSetup}>
+                <Shield size={16} />
+                Enable MFA
               </Button>
-              <Button
-                variant="danger"
-                size="md"
-                fullWidth={false}
-                onClick={() => {
-                  setError("");
-                  setView("disable");
-                }}
-              >
-                <ShieldOff size={16} />
-                Disable MFA
-              </Button>
-            </>
-          ) : (
-            <Button
-              size="md"
-              fullWidth={false}
-              loading={loading}
-              onClick={handleSetup}
-            >
-              <Shield size={16} />
-              Enable MFA
-            </Button>
-          )}
+            )}
+          </div>
         </div>
       </div>
     </div>

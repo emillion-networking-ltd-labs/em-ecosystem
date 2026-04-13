@@ -101,7 +101,7 @@ export default function ResetPasswordForm() {
           <h1 className="text-h1 font-semibold text-content-primary">
             Reset Password
           </h1>
-          <p className="text-justify text-body text-content-primary/50">
+          <p className="text-justify text-body text-content-secondary">
             Enter your new password. It must be at least 8 characters and
             different from your current one.
           </p>
