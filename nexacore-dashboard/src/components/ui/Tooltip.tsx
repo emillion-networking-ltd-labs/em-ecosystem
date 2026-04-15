@@ -121,8 +121,8 @@ export default function Tooltip({
           ref={tooltipRef}
           id={tooltipId}
           role="tooltip"
-          className={`absolute z-50 rounded-lg border border-border-components bg-surface-primary px-4 py-3 ${positionClasses[resolved]}`}
-          style={{ width: maxWidth, maxWidth }}
+          className={`absolute z-50 whitespace-nowrap rounded-lg border border-border-components bg-surface-primary px-4 py-3 ${positionClasses[resolved]}`}
+          style={{ maxWidth }}
         >
           {typeof content === "string" ? (
             <p className="text-caption font-normal text-content-primary">

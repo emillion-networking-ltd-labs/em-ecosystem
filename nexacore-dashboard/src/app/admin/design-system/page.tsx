@@ -62,6 +62,7 @@ const componentToSection: Record<string, { tab: string; section: string }> = {
   FormField: { tab: "atoms", section: "showcase-formfield" },
   EmptyState: { tab: "atoms", section: "showcase-emptystate" },
   Modal: { tab: "molecules", section: "showcase-modal" },
+  "Image Cropper": { tab: "molecules", section: "showcase-image-cropper" },
   Sidebar: { tab: "molecules", section: "showcase-sidebar" },
 };
 

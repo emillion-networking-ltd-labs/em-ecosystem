@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   Pencil,
+  Camera,
+  Trash2,
   MonitorDot,
   ShieldCheck,
   AlertTriangle,
@@ -10,12 +12,14 @@ import {
   Lock,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import Avatar from "@/components/ui/Avatar";
+import Avatar, { resolveAvatarSrc } from "@/components/ui/Avatar";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import ImageCropper from "@/components/ui/ImageCropper";
+import type { CropData } from "@/components/ui/ImageCropper";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { PROFILE_TOAST } from "@/lib/toast-messages";
@@ -53,6 +57,19 @@ export default function ProfileForm() {
   const [passwordLoading, setPasswordLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
 
+  // Avatar upload
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [originalAvatarSrc, setOriginalAvatarSrc] = useState<string | null>(
+    null,
+  );
+  const [originalAvatarFile, setOriginalAvatarFile] = useState<File | null>(
+    null,
+  );
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [avatarLoading, setAvatarLoading] = useState(false);
+  const [removeAvatarOpen, setRemoveAvatarOpen] = useState(false);
+  const [removeAvatarLoading, setRemoveAvatarLoading] = useState(false);
+
   if (!user) return null;
 
   const fullName =
@@ -74,6 +91,57 @@ export default function ProfileForm() {
       : "Inactive";
   const hasPassword = user.hasPassword ?? true;
   const isOAuthOnly = user.oauthProviders.length > 0 && !hasPassword;
+
+  // ─── Avatar handlers ───
+
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setOriginalAvatarFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setOriginalAvatarSrc(reader.result as string);
+      setCropperOpen(true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleCrop = async (blob: Blob, cropData: CropData) => {
+    setAvatarLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append("avatar", blob, "avatar.jpg");
+      formData.append("cropData", JSON.stringify(cropData));
+      // Send original file if we have it (new upload, not re-edit)
+      if (originalAvatarFile) {
+        formData.append("original", originalAvatarFile);
+      }
+      await apiClient.upload("/users/me/avatar", formData);
+      await refreshSession();
+      addToast(PROFILE_TOAST.AVATAR_UPDATED);
+      setCropperOpen(false);
+      setOriginalAvatarFile(null);
+    } catch {
+      addToast(PROFILE_TOAST.AVATAR_UPDATE_FAILED("Could not upload avatar."));
+    } finally {
+      setAvatarLoading(false);
+    }
+  };
+
+  const handleRemoveAvatar = async () => {
+    setRemoveAvatarLoading(true);
+    try {
+      await apiClient.delete("/users/me/avatar");
+      await refreshSession();
+      addToast(PROFILE_TOAST.AVATAR_REMOVED);
+      setRemoveAvatarOpen(false);
+    } catch {
+      addToast(PROFILE_TOAST.AVATAR_UPDATE_FAILED("Could not remove avatar."));
+    } finally {
+      setRemoveAvatarLoading(false);
+    }
+  };
 
   // ─── Name handlers ───
 
@@ -204,9 +272,58 @@ export default function ProfileForm() {
         <div className="px-6 pb-6">
           {/* Avatar overlapping banner */}
           <div className="-mt-10">
-            <div className="inline-flex rounded-full bg-surface-tertiary p-2 ring-1 ring-border-strong">
+            <div className="group/avatar relative inline-flex rounded-full bg-surface-tertiary p-2 ring-1 ring-border-strong">
               <Avatar src={user.avatarUrl} name={fullName} size="lg" />
+              <div className="absolute -right-[38px] top-[2px] flex flex-col gap-[12px] opacity-0 transition-opacity group-hover/avatar:opacity-100">
+                {user.avatarUrl ? (
+                  <>
+                    <IconButton
+                      variant="boxed"
+                      size="sm"
+                      tooltip
+                      onClick={() => {
+                        const src = user.avatarOriginalUrl
+                          ? resolveAvatarSrc(user.avatarOriginalUrl)
+                          : resolveAvatarSrc(user.avatarUrl!);
+                        setOriginalAvatarSrc(src);
+                        setOriginalAvatarFile(null);
+                        setCropperOpen(true);
+                      }}
+                      aria-label="Edit photo"
+                    >
+                      <Pencil size={16} />
+                    </IconButton>
+                    <IconButton
+                      variant="danger"
+                      size="sm"
+                      tooltip
+                      tooltipPosition="bottom"
+                      onClick={() => setRemoveAvatarOpen(true)}
+                      aria-label="Remove photo"
+                    >
+                      <Trash2 size={16} />
+                    </IconButton>
+                  </>
+                ) : (
+                  <IconButton
+                    variant="boxed"
+                    size="sm"
+                    tooltip
+                    onClick={() => fileInputRef.current?.click()}
+                    aria-label="Upload photo"
+                  >
+                    <Camera size={16} />
+                  </IconButton>
+                )}
+              </div>
             </div>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              className="hidden"
+              onChange={handleFileSelect}
+            />
           </div>
 
           {/* Identity + Metadata + Actions */}
@@ -433,6 +550,28 @@ export default function ProfileForm() {
           )}
         </div>
       </ConfirmModal>
+
+      {/* Avatar crop modal */}
+      <ImageCropper
+        open={cropperOpen}
+        imageSrc={originalAvatarSrc || ""}
+        onCrop={handleCrop}
+        onClose={() => setCropperOpen(false)}
+        loading={avatarLoading}
+        initialCropData={user.avatarCropData ?? undefined}
+      />
+
+      {/* Remove avatar confirmation */}
+      <ConfirmModal
+        open={removeAvatarOpen}
+        onClose={() => setRemoveAvatarOpen(false)}
+        onConfirm={handleRemoveAvatar}
+        title="Remove Avatar"
+        description="Your profile photo will be permanently deleted. This action cannot be undone."
+        confirmLabel="Remove"
+        variant="danger"
+        loading={removeAvatarLoading}
+      />
     </>
   );
 }

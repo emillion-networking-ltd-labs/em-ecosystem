@@ -7,6 +7,8 @@ export interface User {
   firstName: string | null;
   lastName: string | null;
   avatarUrl: string | null;
+  avatarOriginalUrl: string | null;
+  avatarCropData: Record<string, number> | null;
   role: Role;
   emailVerified: boolean;
   pendingEmail: string | null;
@@ -23,7 +25,13 @@ export interface User {
 
 export type SafeUser = Omit<
   User,
-  'passwordHash' | 'pendingEmail' | 'mfaSecret' | 'mfaRecoveryCodes' | 'failedAttempts' | 'lockedUntil' | 'lockoutCount'
+  | 'passwordHash'
+  | 'pendingEmail'
+  | 'mfaSecret'
+  | 'mfaRecoveryCodes'
+  | 'failedAttempts'
+  | 'lockedUntil'
+  | 'lockoutCount'
 > & {
   hasPassword: boolean;
   oauthProviders: string[];
@@ -42,6 +50,8 @@ export function toSafeUser(
     firstName: user.firstName,
     lastName: user.lastName,
     avatarUrl: user.avatarUrl,
+    avatarOriginalUrl: user.avatarOriginalUrl,
+    avatarCropData: user.avatarCropData as Record<string, number> | null,
     role: user.role,
     emailVerified: user.emailVerified,
     isActive: user.isActive,

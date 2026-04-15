@@ -3,6 +3,13 @@
 import { useState } from "react";
 import { User } from "lucide-react";
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
+
+export function resolveAvatarSrc(src: string): string {
+  if (src.startsWith("/uploads/")) return `${API_URL}${src}`;
+  return src;
+}
+
 interface AvatarProps {
   src?: string | null;
   name?: string;
@@ -52,7 +59,7 @@ export default function Avatar({
     >
       {showImage ? (
         <img
-          src={src}
+          src={resolveAvatarSrc(src)}
           alt={alt ?? name ?? "Avatar"}
           className="w-full h-full object-cover"
           onError={() => setImgError(true)}

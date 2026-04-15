@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Tooltip, { type TooltipPosition } from "./Tooltip";
 
 export type IconButtonVariant = "default" | "danger" | "boxed" | "boxed-hover";
 
@@ -35,18 +36,24 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
   variant?: IconButtonVariant;
   size?: "sm" | "md";
   loading?: boolean;
+  /** Show tooltip on hover. If true, uses aria-label as text. Pass string for custom text. */
+  tooltip?: boolean | string;
+  /** Tooltip position. Default: auto */
+  tooltipPosition?: TooltipPosition;
 }
 
 export default function IconButton({
   variant = "default",
   size = "sm",
   loading = false,
+  tooltip,
+  tooltipPosition = "auto",
   children,
   className = "",
   disabled,
   ...props
 }: IconButtonProps) {
-  return (
+  const button = (
     <button
       type="button"
       className={`${baseClass} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
@@ -59,5 +66,18 @@ export default function IconButton({
         children
       )}
     </button>
+  );
+
+  if (!tooltip) return button;
+
+  const tooltipText =
+    typeof tooltip === "string" ? tooltip : (props["aria-label"] ?? "");
+
+  if (!tooltipText) return button;
+
+  return (
+    <Tooltip content={tooltipText} position={tooltipPosition}>
+      {button}
+    </Tooltip>
   );
 }

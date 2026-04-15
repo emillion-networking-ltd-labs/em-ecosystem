@@ -49,7 +49,7 @@ type ConfirmModalProps = {
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: "primary" | "danger";
-  size?: "sm" | "md" | "lg";
+  size?: "sm" | "md" | "lg" | "xl";
   loading?: boolean;
   children?: React.ReactNode;
 };
@@ -71,6 +71,7 @@ export default function ConfirmModal({
     sm: "max-w-[390px]",
     md: "max-w-[480px]",
     lg: "max-w-[600px]",
+    xl: "max-w-[720px]",
   };
   const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);

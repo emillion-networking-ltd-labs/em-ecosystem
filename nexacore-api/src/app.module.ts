@@ -2,6 +2,8 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { APP_GUARD } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 import {
   authConfig,
   oauthConfig,
@@ -19,6 +21,7 @@ import { MailModule } from './mail/mail.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { RedisModule } from './common/services/redis.module';
 import { GeolocationModule } from './geolocation/geolocation.module';
+import { StorageModule } from './storage';
 
 @Module({
   imports: [
@@ -44,6 +47,12 @@ import { GeolocationModule } from './geolocation/geolocation.module';
     SecurityModule,
     MailModule,
     PermissionsModule,
+    StorageModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(process.cwd(), 'uploads'),
+      serveRoot: '/uploads',
+      serveStaticOptions: { index: false },
+    }),
   ],
   controllers: [],
   providers: [
