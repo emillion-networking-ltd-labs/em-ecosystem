@@ -186,6 +186,16 @@ describe('UsersService', () => {
             denyAllForUser: jest.fn().mockResolvedValue(undefined),
           },
         },
+        {
+          provide: 'FILE_STORAGE',
+          useValue: {
+            upload: jest.fn().mockResolvedValue('/uploads/avatars/test.jpg'),
+            delete: jest.fn().mockResolvedValue(undefined),
+            getPublicUrl: jest
+              .fn()
+              .mockReturnValue('/uploads/avatars/test.jpg'),
+          },
+        },
       ],
     }).compile();
 

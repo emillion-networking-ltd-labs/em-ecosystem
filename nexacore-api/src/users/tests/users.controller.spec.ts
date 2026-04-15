@@ -12,6 +12,8 @@ describe('UsersController', () => {
   let controller: UsersController;
   let usersService: {
     updateProfile: jest.Mock;
+    uploadAvatar: jest.Mock;
+    removeAvatar: jest.Mock;
     changePassword: jest.Mock;
     requestEmailChange: jest.Mock;
     selfDeleteAccount: jest.Mock;
@@ -60,6 +62,8 @@ describe('UsersController', () => {
 
     usersService = {
       updateProfile: jest.fn(),
+      uploadAvatar: jest.fn(),
+      removeAvatar: jest.fn(),
       changePassword: jest.fn(),
       requestEmailChange: jest.fn(),
       selfDeleteAccount: jest.fn(),
@@ -89,7 +93,9 @@ describe('UsersController', () => {
         },
         {
           provide: PermissionsService,
-          useValue: { roleHasAllPermissions: jest.fn().mockResolvedValue(true) },
+          useValue: {
+            roleHasAllPermissions: jest.fn().mockResolvedValue(true),
+          },
         },
       ],
     }).compile();
@@ -299,7 +305,12 @@ describe('UsersController', () => {
   describe('getLinkedProviders', () => {
     it('should delegate to usersService.getLinkedProviders with userId', async () => {
       const mockProviders = [
-        { provider: 'GOOGLE', providerId: 'g-123', email: 'test@gmail.com', linkedAt: '2026-01-01T00:00:00.000Z' },
+        {
+          provider: 'GOOGLE',
+          providerId: 'g-123',
+          email: 'test@gmail.com',
+          linkedAt: '2026-01-01T00:00:00.000Z',
+        },
       ];
       usersService.getLinkedProviders.mockResolvedValue(mockProviders);
 
@@ -361,7 +372,9 @@ describe('UsersController', () => {
         headers: { 'user-agent': 'Mozilla/5.0' },
       };
 
-      await controller.unlinkOAuth('google', customReq, { password: 'TestPass1!' });
+      await controller.unlinkOAuth('google', customReq, {
+        password: 'TestPass1!',
+      });
 
       expect(usersService.unlinkOAuth).toHaveBeenCalledWith(
         'user-456',

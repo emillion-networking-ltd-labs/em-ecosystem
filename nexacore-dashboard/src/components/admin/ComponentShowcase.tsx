@@ -27,6 +27,7 @@ import {
   Info,
   X,
   Bell,
+  Upload,
 } from "lucide-react";
 import CountdownTimer from "@/components/ui/CountdownTimer";
 import TotalUsersChart from "@/components/dashboard/TotalUsersChart";
@@ -91,6 +92,7 @@ import DateInput, { dateInputSpecs } from "@/components/ui/DateInput";
 import SidebarNav, { sidebarNavSpecs } from "@/components/ui/SidebarNav";
 import type { SidebarNavSection as SidebarSection } from "@/components/ui/SidebarNav";
 import IconBadge, { iconBadgeSpecs } from "@/components/ui/IconBadge";
+import ImageCropper, { imageCropperSpecs } from "@/components/ui/ImageCropper";
 import AlertBox, { alertBoxSpecs } from "@/components/ui/AlertBox";
 import Accordion, {
   SingleAccordion,
@@ -3092,6 +3094,7 @@ export function MoleculeShowcase() {
       <ChartsShowcase />
       <CalendarShowcase />
       <ModalShowcase />
+      <ImageCropperShowcase />
       <SidebarShowcase />
     </div>
   );
@@ -3288,6 +3291,142 @@ function ModalShowcase() {
   );
 }
 
+function ImageCropperShowcase() {
+  const fileRef = useRef<HTMLInputElement>(null);
+  const [originalSrc, setOriginalSrc] = useState<string | null>(null);
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [croppedUrl, setCroppedUrl] = useState<string | null>(null);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setOriginalSrc(reader.result as string);
+      setCropperOpen(true);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = "";
+  };
+
+  const handleCrop = (blob: Blob) => {
+    setCroppedUrl(URL.createObjectURL(blob));
+    setCropperOpen(false);
+  };
+
+  // Wrapper to match ImageCropper's (blob, cropData) signature
+  const handleCropWrapper = (blob: Blob, _cropData: unknown) =>
+    handleCrop(blob);
+
+  return (
+    <ShowcaseSection title="Image Cropper">
+      {/* Interactive demo */}
+      <div className="card-flat !p-4 space-y-4">
+        <p className="text-caption text-content-tertiary font-mono">
+          interactive demo — select an image, crop it, see the result
+        </p>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {/* Column 1: Controls */}
+          <div className="flex flex-col gap-3">
+            <p className="text-caption text-content-tertiary">Controls</p>
+            <Button
+              variant="primary"
+              size="md"
+              fullWidth={false}
+              onClick={() => fileRef.current?.click()}
+            >
+              <Upload size={16} />
+              {croppedUrl ? "Choose Another" : "Choose Image"}
+            </Button>
+            {croppedUrl && originalSrc && (
+              <Button
+                variant="outline"
+                size="md"
+                fullWidth={false}
+                onClick={() => setCropperOpen(true)}
+              >
+                <Edit size={16} />
+                Edit Crop
+              </Button>
+            )}
+            {croppedUrl && (
+              <Button
+                variant="outline"
+                size="md"
+                fullWidth={false}
+                onClick={() => {
+                  setCroppedUrl(null);
+                  setOriginalSrc(null);
+                }}
+              >
+                Reset
+              </Button>
+            )}
+          </div>
+
+          {/* Column 2: Avatar result */}
+          <div className="flex flex-col">
+            <p className="text-caption text-content-tertiary mb-3">
+              Avatar sizes
+            </p>
+            <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-border-components p-4">
+              {croppedUrl ? (
+                <div className="flex items-end gap-4">
+                  {[
+                    { size: "lg" as const, label: "lg · 64px" },
+                    { size: "md" as const, label: "md · 40px (default)" },
+                    { size: "sm" as const, label: "sm · 32px" },
+                  ].map(({ size, label }) => (
+                    <div
+                      key={size}
+                      className="flex flex-col items-center gap-1.5"
+                    >
+                      <Avatar src={croppedUrl} name="Demo" size={size} />
+                      <span className="text-caption text-content-tertiary">
+                        {label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-caption text-content-tertiary">
+                  No image cropped yet
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="hidden"
+          onChange={handleFileChange}
+        />
+      </div>
+
+      {/* Cropper modal */}
+      <ImageCropper
+        open={cropperOpen}
+        imageSrc={originalSrc || ""}
+        onCrop={handleCropWrapper}
+        onClose={() => setCropperOpen(false)}
+      />
+
+      <SpecsPanel
+        specs={{
+          Modal: imageCropperSpecs.modal,
+          "Crop Area": imageCropperSpecs.cropArea,
+          Zoom: imageCropperSpecs.zoom,
+          Output: imageCropperSpecs.output,
+        }}
+      />
+    </ShowcaseSection>
+  );
+}
+
 function SidebarShowcase() {
   const [activeItem, setActiveItem] = useState("#dashboard");
 
@@ -3359,14 +3498,14 @@ function SidebarShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`card-flat !p-4 flex-1 min-w-[390px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
             </p>
-            <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
+            <div className="flex flex-col items-center gap-4 md:flex-row md:items-start">
               {/* Collapsed */}
-              <div className="flex flex-col items-center sm:items-start">
+              <div className="flex flex-col items-center md:items-start">
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   collapsed (68px)
                 </p>
@@ -3382,7 +3521,7 @@ function SidebarShowcase() {
                 </div>
               </div>
               {/* Expanded */}
-              <div className="flex flex-col items-center sm:items-start">
+              <div className="flex flex-col items-center md:items-start">
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   expanded (300px)
                 </p>

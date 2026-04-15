@@ -6,6 +6,11 @@ export type SafeUser = {
   firstName: string | null;
   lastName: string | null;
   avatarUrl: string | null;
+  avatarOriginalUrl: string | null;
+  avatarCropData: {
+    areaPercent: { x: number; y: number; width: number; height: number };
+    areaPixels: { x: number; y: number; width: number; height: number };
+  } | null;
   role: UserRole;
   emailVerified: boolean;
   isActive: boolean;

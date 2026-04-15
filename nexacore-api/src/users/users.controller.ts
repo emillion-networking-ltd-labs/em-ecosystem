@@ -8,6 +8,8 @@ import {
   Body,
   Query,
   UseGuards,
+  UseInterceptors,
+  UploadedFiles,
   Request,
   HttpCode,
   HttpStatus,
@@ -15,6 +17,8 @@ import {
   NotFoundException,
   BadRequestException,
 } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { Throttle } from '@nestjs/throttler';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -58,6 +62,54 @@ export class UsersController {
       dto,
       extractRequestMeta(req),
     );
+  }
+
+  @Post('me/avatar')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileFieldsInterceptor(
+      [
+        { name: 'avatar', maxCount: 1 },
+        { name: 'original', maxCount: 1 },
+      ],
+      { storage: memoryStorage(), limits: { fileSize: 5 * 1024 * 1024 } },
+    ),
+  )
+  async uploadAvatar(
+    @Request()
+    req: {
+      user: { id: string };
+      ip?: string;
+      headers?: Record<string, string>;
+    },
+    @UploadedFiles()
+    files: { avatar?: Express.Multer.File[]; original?: Express.Multer.File[] },
+    @Body() body: { cropData?: string },
+  ) {
+    const avatar = files.avatar?.[0];
+    if (!avatar) throw new BadRequestException('Avatar file is required');
+    const original = files.original?.[0];
+    const cropData = body.cropData ? JSON.parse(body.cropData) : undefined;
+    return this.usersService.uploadAvatar(
+      req.user.id,
+      avatar,
+      extractRequestMeta(req),
+      original,
+      cropData,
+    );
+  }
+
+  @Delete('me/avatar')
+  @UseGuards(JwtAuthGuard)
+  async removeAvatar(
+    @Request()
+    req: {
+      user: { id: string };
+      ip?: string;
+      headers?: Record<string, string>;
+    },
+  ) {
+    return this.usersService.removeAvatar(req.user.id, extractRequestMeta(req));
   }
 
   @Patch('me/password')

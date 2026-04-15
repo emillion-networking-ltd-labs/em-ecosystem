@@ -39,6 +39,8 @@ import * as crypto from 'crypto';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { LinkedProvider } from '../auth/interfaces/oauth-account.interface';
 import { pseudonymizeEmail } from '../common/utils/pseudonymize-email';
+import { FILE_STORAGE } from '../storage/file-storage.interface';
+import type { FileStorageService } from '../storage/file-storage.interface';
 
 const BCRYPT_ROUNDS = 12;
 const EMAIL_CHANGE_TOKEN_EXPIRY_HOURS = 24;
@@ -56,6 +58,8 @@ export class UsersService {
     private readonly trustedDeviceService: TrustedDeviceService,
     @Inject(forwardRef(() => TokenDenyListService))
     private readonly tokenDenyListService: TokenDenyListService,
+    @Inject(FILE_STORAGE)
+    private readonly storage: FileStorageService,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
@@ -489,6 +493,139 @@ export class UsersService {
       .catch(() => {});
 
     return toSafeUser(user as User);
+  }
+
+  async uploadAvatar(
+    userId: string,
+    croppedFile: Express.Multer.File,
+    ctx?: RequestContext,
+    originalFile?: Express.Multer.File,
+    cropData?: Record<string, number>,
+  ): Promise<{
+    avatarUrl: string;
+    avatarOriginalUrl: string | null;
+    avatarCropData: Record<string, number> | null;
+  }> {
+    const ts = Date.now();
+    const ext = croppedFile.originalname.split('.').pop() || 'jpg';
+    const croppedKey = `${userId}-${ts}.${ext}`;
+
+    // Delete old cropped avatar
+    const existing = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (existing?.avatarUrl?.startsWith('/uploads/')) {
+      await this.storage.delete(
+        existing.avatarUrl.replace('/uploads/avatars/', ''),
+      );
+    }
+
+    // Save new cropped avatar
+    const croppedUrl = await this.storage.upload(
+      croppedFile.buffer,
+      croppedKey,
+    );
+
+    // Save original only if a new one is provided (first upload).
+    // On re-edit, no original is sent — keep the existing one.
+    let originalUrl = existing?.avatarOriginalUrl ?? null;
+    if (originalFile) {
+      // Delete old original before saving new one
+      if (existing?.avatarOriginalUrl?.startsWith('/uploads/originals/')) {
+        await this.deleteOriginalFile(
+          existing.avatarOriginalUrl.replace('/uploads/originals/', ''),
+        );
+      }
+      const origExt = originalFile.originalname.split('.').pop() || 'jpg';
+      const origKey = `${userId}-${ts}-original.${origExt}`;
+      originalUrl = await this.uploadOriginal(originalFile.buffer, origKey);
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatarUrl: croppedUrl,
+        avatarOriginalUrl: originalUrl,
+        avatarCropData: cropData ?? Prisma.JsonNull,
+      },
+    });
+
+    this.auditService
+      .log({
+        action: AuditAction.PROFILE_UPDATE,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: { field: 'avatarUrl', action: 'upload' },
+      })
+      .catch(() => {});
+
+    return {
+      avatarUrl: croppedUrl,
+      avatarOriginalUrl: originalUrl,
+      avatarCropData: cropData ?? null,
+    };
+  }
+
+  private async uploadOriginal(buffer: Buffer, key: string): Promise<string> {
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const uploadDir = process.env.UPLOAD_DIR || './uploads';
+    const origDir = path.join(uploadDir, 'originals');
+    await fs.mkdir(origDir, { recursive: true });
+    await fs.writeFile(path.join(origDir, key), buffer);
+    return `/uploads/originals/${key}`;
+  }
+
+  private async deleteOriginalFile(key: string): Promise<void> {
+    const fs = await import('fs/promises');
+    const path = await import('path');
+    const uploadDir = process.env.UPLOAD_DIR || './uploads';
+    try {
+      await fs.unlink(path.join(uploadDir, 'originals', key));
+    } catch {
+      // File not found — no-op
+    }
+  }
+
+  async removeAvatar(
+    userId: string,
+    ctx?: RequestContext,
+  ): Promise<{ avatarUrl: null }> {
+    const existing = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (existing?.avatarUrl?.startsWith('/uploads/')) {
+      await this.storage.delete(
+        existing.avatarUrl.replace('/uploads/avatars/', ''),
+      );
+    }
+    if (existing?.avatarOriginalUrl?.startsWith('/uploads/originals/')) {
+      await this.deleteOriginalFile(
+        existing.avatarOriginalUrl.replace('/uploads/originals/', ''),
+      );
+    }
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        avatarUrl: null,
+        avatarOriginalUrl: null,
+        avatarCropData: Prisma.JsonNull,
+      },
+    });
+
+    this.auditService
+      .log({
+        action: AuditAction.PROFILE_UPDATE,
+        userId,
+        ipAddress: ctx?.ipAddress,
+        userAgent: ctx?.userAgent,
+        metadata: { field: 'avatarUrl', action: 'remove' },
+      })
+      .catch(() => {});
+
+    return { avatarUrl: null };
   }
 
   async changePassword(

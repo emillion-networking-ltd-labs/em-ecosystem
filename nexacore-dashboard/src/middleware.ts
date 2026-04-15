@@ -18,8 +18,8 @@ export function middleware(request: NextRequest) {
   const cspDirectives = [
     `default-src 'self'`,
     scriptSrc,
-    `style-src 'self' 'nonce-${nonce}'`,
-    `img-src 'self' data: blob: https://lh3.googleusercontent.com https://avatars.githubusercontent.com`,
+    `style-src 'self' 'unsafe-inline'`,
+    `img-src 'self' data: blob: ${apiUrl} https://lh3.googleusercontent.com https://avatars.githubusercontent.com`,
     `font-src 'self'`,
     connectSrc,
     `frame-src https://challenges.cloudflare.com`,

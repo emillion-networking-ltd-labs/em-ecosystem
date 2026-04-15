@@ -71,8 +71,10 @@ model User {
   passwordHash   String?
   firstName      String?
   lastName       String?
-  avatarUrl      String?
-  role           Role      @default(USER)
+  avatarUrl         String?
+  avatarOriginalUrl String?
+  avatarCropData    Json?
+  role              Role      @default(USER)
   emailVerified  Boolean   @default(false)
   pendingEmail   String?
   isActive       Boolean   @default(true)

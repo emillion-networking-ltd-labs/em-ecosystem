@@ -196,6 +196,13 @@ export const componentRegistry: ComponentEntry[] = [
     count: 2,
   },
   {
+    name: "Image Cropper",
+    category: "molecule",
+    description:
+      "Modal-based image crop with circular/rectangular selection, zoom slider, canvas output",
+    files: ["ImageCropper.tsx"],
+  },
+  {
     name: "Sidebar",
     category: "molecule",
     description:

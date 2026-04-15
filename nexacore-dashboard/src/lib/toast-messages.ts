@@ -96,6 +96,21 @@ export const PROFILE_TOAST = {
     title: "Update failed",
     description: msg,
   }),
+  AVATAR_UPDATED: {
+    variant: "success",
+    title: "Avatar updated",
+    description: "Your profile photo has been saved.",
+  } as ToastMsg,
+  AVATAR_REMOVED: {
+    variant: "success",
+    title: "Avatar removed",
+    description: "Your profile photo has been removed.",
+  } as ToastMsg,
+  AVATAR_UPDATE_FAILED: (msg: string): ToastMsg => ({
+    variant: "error",
+    title: "Avatar update failed",
+    description: msg,
+  }),
   ACCOUNT_DELETED: {
     variant: "success",
     title: "Account deleted",
