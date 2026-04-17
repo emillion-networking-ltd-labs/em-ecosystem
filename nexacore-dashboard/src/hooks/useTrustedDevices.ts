@@ -70,11 +70,14 @@ export function useTrustedDevices() {
   const revokeDevice = useCallback(
     async (id: string): Promise<boolean> => {
       setError(null);
+      // Optimistic: remove from local state first so AnimatePresence can animate exit
+      setDevices((prev) => prev.filter((d) => d.id !== id));
       try {
         await revokeDeviceApi(id);
-        await fetchDevices();
         return true;
       } catch (err) {
+        // Rollback: re-fetch on failure
+        await fetchDevices();
         setError(
           extractMessageByStatus(
             err,

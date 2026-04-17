@@ -69,7 +69,11 @@ export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
 
               {/* Figma: "Ligth / Dark" — flex-1, justify-end, p=10 */}
               <div className="flex flex-1 items-center justify-end p-2.5">
-                <IconButton onClick={toggleTheme} aria-label="Toggle theme">
+                <IconButton
+                  tooltip
+                  onClick={toggleTheme}
+                  aria-label="Toggle theme"
+                >
                   {isDark ? (
                     <SunDim size={16} strokeWidth={2} />
                   ) : (

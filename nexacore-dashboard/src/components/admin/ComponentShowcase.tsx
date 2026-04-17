@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   PieChart,
   Pie,
@@ -1968,23 +1969,11 @@ const toastVariants = [
 
 function ToastDemo() {
   const [visible, setVisible] = useState<Record<string, boolean>>({});
-  const [exiting, setExiting] = useState<Record<string, boolean>>({});
 
   const show = (variant: string) => {
     setVisible((v) => ({ ...v, [variant]: true }));
-    setExiting((e) => ({ ...e, [variant]: false }));
-    setTimeout(() => dismiss(variant), 5000);
+    setTimeout(() => setVisible((v) => ({ ...v, [variant]: false })), 5000);
   };
-
-  const dismiss = (variant: string) => {
-    setExiting((e) => ({ ...e, [variant]: true }));
-    setTimeout(() => {
-      setVisible((v) => ({ ...v, [variant]: false }));
-      setExiting((e) => ({ ...e, [variant]: false }));
-    }, 300);
-  };
-
-  const hasVisible = toastVariants.some(({ variant }) => visible[variant]);
 
   return (
     <div>
@@ -2005,36 +1994,44 @@ function ToastDemo() {
         ))}
       </div>
 
-      {hasVisible && (
-        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 max-w-[calc(100vw-2rem)]">
+      <div className="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-2 max-w-[calc(100vw-2rem)]">
+        <AnimatePresence>
           {toastVariants.map(
             ({ icon: Icon, color, title, desc, variant }) =>
               visible[variant] && (
-                <div
+                <motion.div
                   key={variant}
-                  className={`group flex items-start gap-2 rounded-full border border-border-components bg-surface-primary px-6 py-4 ${exiting[variant] ? "animate-toast-out" : "animate-toast-in"}`}
+                  layout
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, x: 40 }}
+                  transition={{ duration: 0.3 }}
+                  className="group relative grid grid-cols-[14px_1fr_auto] items-start gap-x-2 rounded-3xl border border-border-components bg-surface-primary py-3 pl-5 pr-4"
                 >
-                  <Icon size={16} className={`mt-px shrink-0 ${color}`} />
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <p className="whitespace-nowrap text-caption font-semibold leading-tight text-content-primary">
-                      {title}
-                    </p>
-                    <p className="whitespace-nowrap text-caption leading-tight text-content-tertiary">
-                      {desc}
-                    </p>
-                  </div>
+                  <Icon
+                    size={14}
+                    className={`row-span-2 self-start shrink-0 ${color}`}
+                  />
+                  <p className="whitespace-nowrap text-caption font-semibold leading-4 text-content-primary">
+                    {title}
+                  </p>
                   <button
-                    onClick={() => dismiss(variant)}
-                    className="mt-px shrink-0 text-content-tertiary opacity-0 transition-all group-hover:opacity-100 hover:text-content-primary"
+                    onClick={() =>
+                      setVisible((v) => ({ ...v, [variant]: false }))
+                    }
+                    className="row-span-2 -mt-[7px] -mr-[7px] self-start shrink-0 rounded-md p-1 text-content-tertiary opacity-0 transition-all hover:text-content-primary group-hover:opacity-100"
                     aria-label="Close"
                   >
-                    <X size={16} />
+                    <X size={12} />
                   </button>
-                </div>
+                  <p className="col-start-2 whitespace-nowrap text-caption leading-4 text-content-tertiary">
+                    {desc}
+                  </p>
+                </motion.div>
               ),
           )}
-        </div>
-      )}
+        </AnimatePresence>
+      </div>
     </div>
   );
 }
@@ -2199,7 +2196,7 @@ function FeedbackShowcase() {
             description: "text-caption leading-tight text-content-tertiary",
             close: "X 16px — opacity-0 group-hover:opacity-100",
             animation:
-              "animate-toast-in / animate-toast-out (300ms), auto-dismiss 5s",
+              "Framer Motion: enter (opacity+y), exit (opacity+x), auto-dismiss 5s",
           },
           "Full Page Card": {
             card: "rounded-3xl border border-border-strong bg-surface-secondary shadow-[0_8px_32px_rgba(0,0,0,0.04)]",
@@ -2474,6 +2471,7 @@ function AccordionShowcase() {
           Container: accordionSpecs.container,
           Icon: { shared: accordionSpecs.icon },
           Content: { shared: accordionSpecs.content },
+          Animation: accordionSpecs.animation,
         }}
       />
     </ShowcaseSection>

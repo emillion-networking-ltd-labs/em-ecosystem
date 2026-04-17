@@ -81,11 +81,12 @@ export default function SecurityActivity() {
     limit: EVENTS_PER_PAGE,
     totalPages: 1,
   });
-  const [eventsLoading, setEventsLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
 
   const fetchEvents = useCallback(
     async (page: number) => {
-      setEventsLoading(true);
+      setIsFetching(true);
       try {
         const res = await getSecurityActivity(page, pageSize);
         setEvents(res.data);
@@ -93,7 +94,8 @@ export default function SecurityActivity() {
       } catch {
         // silent — empty state shown
       } finally {
-        setEventsLoading(false);
+        setIsFetching(false);
+        setInitialLoading(false);
       }
     },
     [pageSize],
@@ -119,17 +121,19 @@ export default function SecurityActivity() {
 
       {/* Recent Security Events */}
       <div>
-        {eventsLoading ? (
-          <p className="py-4 text-center text-body text-content-tertiary">
-            Loading events...
-          </p>
+        {initialLoading ? (
+          <div className="flex items-center justify-center py-8">
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-content-secondary border-t-transparent" />
+          </div>
         ) : events.length === 0 ? (
           <p className="py-4 text-center text-body text-content-tertiary">
             No security events.
           </p>
         ) : (
           <>
-            <div className="space-y-2">
+            <div
+              className={`space-y-2 transition-opacity duration-150 ${isFetching ? "opacity-50 pointer-events-none" : "opacity-100"}`}
+            >
               {events.map((event) => {
                 const config = EVENT_CONFIG[event.action] || {
                   label: event.action,

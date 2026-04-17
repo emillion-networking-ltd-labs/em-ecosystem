@@ -92,6 +92,7 @@ export default function NavBar({
             <IconButton
               variant="boxed"
               size="sm"
+              tooltip
               onClick={onRightPanelToggle}
               aria-label="Notifications"
             >

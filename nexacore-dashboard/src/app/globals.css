@@ -246,46 +246,20 @@
   }
 }
 
+/* ===== Page transition — fade on key change (pagination, tab content) ===== */
+@keyframes pageFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.animate-page-transition {
+  animation: pageFadeIn 0.15s ease;
+}
+
 /* ===== Auth Page Transitions ===== */
-/* Card entrance — fade + slide-up on page load / route change */
-@keyframes slideInFade {
-  0% {
-    opacity: 0;
-    transform: translateY(-12px) scale(0.96);
-  }
-  60% {
-    opacity: 1;
-    transform: translateY(2px) scale(1.01);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-}
-
-@keyframes slideOutFade {
-  0% {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-    max-height: 100px;
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(-20px) scale(0.95);
-    max-height: 0;
-    padding-top: 0;
-    padding-bottom: 0;
-    margin-bottom: 0;
-  }
-}
-
-.animate-slide-in-fade {
-  animation: slideInFade 0.7s ease-out;
-}
-
-.animate-slide-out-fade {
-  animation: slideOutFade 0.5s ease-in forwards;
-}
 
 @keyframes auth-card-enter {
   from {
@@ -439,37 +413,6 @@ input:-webkit-autofill:focus {
     transform: translateY(0);
     opacity: 1;
   }
-}
-
-/* ===== Toast Animations ===== */
-@keyframes toast-in {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes toast-out {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-}
-
-.animate-toast-in {
-  animation: toast-in 300ms ease-out forwards;
-}
-
-.animate-toast-out {
-  animation: toast-out 300ms ease-in forwards;
 }
 
 /* ===== Global Error Boundary ===== */

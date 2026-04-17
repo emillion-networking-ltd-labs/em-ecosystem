@@ -32,18 +32,8 @@ export default function AuditLogsPage() {
     limit: 10,
     totalPages: 1,
   });
-  const [loading, setLoading] = useState(true);
-  const [showSpinner, setShowSpinner] = useState(false);
-
-  // Delay spinner 300ms — fast responses never show it (no flash)
-  useEffect(() => {
-    if (!loading) {
-      setShowSpinner(false);
-      return;
-    }
-    const timer = setTimeout(() => setShowSpinner(true), 300);
-    return () => clearTimeout(timer);
-  }, [loading]);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
 
   // Filters
   const [action, setAction] = useState<AuditAction | "">("");
@@ -53,7 +43,7 @@ export default function AuditLogsPage() {
 
   const fetchLogs = useCallback(
     async (page: number, signal?: AbortSignal) => {
-      setLoading(true);
+      setIsFetching(true);
       try {
         const params = new URLSearchParams({
           page: String(page),
@@ -77,7 +67,10 @@ export default function AuditLogsPage() {
         if (signal?.aborted) return;
         if (err instanceof SessionExpiredError) return;
       } finally {
-        if (!signal?.aborted) setLoading(false);
+        if (!signal?.aborted) {
+          setIsFetching(false);
+          setInitialLoading(false);
+        }
       }
     },
     [action, userId, startDate, endDate, pageSize],
@@ -126,9 +119,9 @@ export default function AuditLogsPage() {
 
         {/* Table */}
         <div className="card-flat">
-          {loading ? (
+          {initialLoading ? (
             <div className="flex h-64 items-center justify-center">
-              {showSpinner && <Spinner size="md" />}
+              <Spinner size="md" />
             </div>
           ) : logs.length === 0 ? (
             <div className="flex h-64 items-center justify-center">
@@ -137,7 +130,9 @@ export default function AuditLogsPage() {
               </p>
             </div>
           ) : (
-            <>
+            <div
+              className={`transition-opacity duration-150 ${isFetching ? "opacity-50 pointer-events-none" : "opacity-100"}`}
+            >
               <AuditLogsTable logs={logs} />
               <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex flex-wrap items-center gap-2">
@@ -162,7 +157,7 @@ export default function AuditLogsPage() {
                   />
                 )}
               </div>
-            </>
+            </div>
           )}
         </div>
       </DashboardLayout>
