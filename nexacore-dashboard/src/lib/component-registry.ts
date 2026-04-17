@@ -209,6 +209,13 @@ export const componentRegistry: ComponentEntry[] = [
       "SidebarNav — collapsible navigation, sections, collapsed/expanded, propagable specs",
     files: ["Sidebar.tsx"],
   },
+  {
+    name: "Motion Patterns",
+    category: "molecule",
+    description:
+      "Animation decision guide — Framer Motion vs CSS @keyframes vs Tailwind animate-*",
+    files: ["framer-motion", "globals.css"],
+  },
 ];
 
 export const categoryMeta: {

@@ -3094,7 +3094,184 @@ export function MoleculeShowcase() {
       <ModalShowcase />
       <ImageCropperShowcase />
       <SidebarShowcase />
+      <MotionPatternsShowcase />
     </div>
+  );
+}
+
+/* ===== Motion Patterns Documentation ===== */
+
+const motionPatterns = [
+  {
+    id: "1",
+    situation: "Hover / focus states",
+    use: "CSS transition",
+    example: "Buttons, links, inputs",
+    highlight: false,
+  },
+  {
+    id: "2",
+    situation: "Entry animation (always visible)",
+    use: "CSS @keyframes",
+    example: "Auth cards, dropdowns, tab content",
+    highlight: false,
+  },
+  {
+    id: "3",
+    situation: "Spinners / loops",
+    use: "Tailwind animate-*",
+    example: "animate-spin, animate-pulse",
+    highlight: false,
+  },
+  {
+    id: "4",
+    situation: "Accordion expand / collapse",
+    use: "CSS grid-rows 0fr/1fr",
+    example: "Profile sections, filter panels",
+    highlight: false,
+  },
+  {
+    id: "5",
+    situation: "List item enter / exit",
+    use: "Framer Motion",
+    example: "Trusted Devices, Passkeys, Toasts",
+    highlight: true,
+  },
+  {
+    id: "6",
+    situation: "React controls mount / unmount",
+    use: "Framer Motion",
+    example: "AnimatePresence delays unmount until exit completes",
+    highlight: true,
+  },
+];
+
+const motionColumns: ColumnDef<(typeof motionPatterns)[0]>[] = [
+  {
+    key: "situation",
+    label: "Situation",
+    render: (row) => (
+      <span className={row.highlight ? "font-semibold" : ""}>
+        {row.situation}
+      </span>
+    ),
+  },
+  {
+    key: "use",
+    label: "Use",
+    render: (row) => (
+      <span
+        className={`font-mono ${row.highlight ? "font-semibold" : "text-content-secondary"}`}
+      >
+        {row.use}
+      </span>
+    ),
+  },
+  {
+    key: "example",
+    label: "Example",
+    render: (row) => (
+      <span className="text-content-tertiary">{row.example}</span>
+    ),
+  },
+];
+
+function MotionPatternsShowcase() {
+  return (
+    <ShowcaseSection title="Motion Patterns">
+      <div className="space-y-4">
+        <p className="text-body text-content-secondary">
+          Decision guide for choosing the right animation approach. Based on
+          GitHub, Linear, Stripe, and Vercel patterns.
+        </p>
+
+        <DataTable
+          data={motionPatterns}
+          columns={motionColumns}
+          keyExtractor={(row) => row.id}
+          hoverRows={false}
+        />
+
+        {/* Key rule */}
+        <div className="card-flat !p-4">
+          <p className="text-body font-semibold text-content-primary">
+            Key rule
+          </p>
+          <p className="mt-1 text-caption text-content-secondary">
+            Use Framer Motion{" "}
+            <span className="font-semibold text-content-primary">only</span>{" "}
+            when React state controls mount/unmount timing and you need to
+            animate before unmount. For everything else, CSS is simpler and more
+            performant.
+          </p>
+        </div>
+
+        {/* Patterns used */}
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="card-flat !p-4">
+            <p className="text-caption font-semibold text-content-primary mb-2">
+              AnimatePresence pattern
+            </p>
+            <pre className="overflow-x-auto text-caption font-mono text-content-tertiary">
+              {`<AnimatePresence>
+  {items.map(item => (
+    <motion.div
+      key={item.id}
+      initial={{ opacity: 0, y: -8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.35 }}
+    />
+  ))}
+</AnimatePresence>`}
+            </pre>
+          </div>
+          <div className="card-flat !p-4">
+            <p className="text-caption font-semibold text-content-primary mb-2">
+              Accordion pattern (CSS only)
+            </p>
+            <pre className="overflow-x-auto text-caption font-mono text-content-tertiary">
+              {`<div className={
+  \`grid transition-[grid-template-rows]
+   duration-200 ease-out \${
+    open ? "grid-rows-[1fr]"
+         : "grid-rows-[0fr]"
+  }\`
+}>
+  <div className="overflow-hidden">
+    {children}
+  </div>
+</div>`}
+            </pre>
+          </div>
+        </div>
+      </div>
+
+      <SpecsPanel
+        specs={{
+          "Framer Motion": {
+            dep: "framer-motion (~30KB gzipped)",
+            components: "AnimatePresence, motion.div",
+            usage: "List enter/exit (TrustedDevices, Passkeys, Toast)",
+            duration: "0.35s ease [0.4, 0, 0.2, 1] (Material Design)",
+          },
+          "CSS Grid Accordion": {
+            technique: "grid-template-rows: 0fr → 1fr",
+            duration: "200ms ease-out",
+            benefit: "No JS, no scroll jumps, content always mounted",
+          },
+          "CSS @keyframes (keep)": {
+            "auth-card-enter": "Auth page card entrance",
+            "dropdown-down/up": "Dropdown open animation",
+            "tab-content-in": "Tab content fade",
+            "stagger-fade-in": "List item stagger",
+            "icon-success/error": "Status icon bounce/shake",
+            "infinity-spin": "Infinity spinner",
+            "countdown-slide": "Countdown digit slide",
+          },
+        }}
+      />
+    </ShowcaseSection>
   );
 }
 
