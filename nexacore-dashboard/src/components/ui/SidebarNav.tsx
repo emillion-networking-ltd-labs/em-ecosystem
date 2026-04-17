@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Tooltip from "./Tooltip";
-import Tabs, { variantStyles as tabVariants } from "./Tabs";
+import Tabs from "./Tabs";
 import {
   baseClass as iconBtnBase,
   variantClasses as iconBtnVariants,
@@ -41,7 +41,8 @@ export const sidebarNavSpecs = {
   item: {
     expanded: "Inherits from Tabs variant=nav (active/inactive/chevron/icon)",
     collapsed:
-      "Inherits from IconButton boxed (active: bg-surface-subtle, no chevron)",
+      "IconButton boxed + aria-pressed=true for active (ring-1 ring-border-components)",
+    tooltip: "Tooltip position=right on collapsed items (portal, 200ms delay)",
     submenu:
       "Parent: ChevronDown/Right toggle | Children: nested Tabs variant=nav, pl-4 indent",
   },
@@ -145,16 +146,14 @@ export default function SidebarNav({
                 if (collapsed) {
                   const parentActive =
                     hasChildren && item.children!.some((c) => c.active);
+                  const itemActive = isActive || parentActive || !!item.active;
                   return (
                     <Tooltip content={item.label} position="right">
                       <Link
                         href={item.href}
                         onClick={(e) => onNavigate?.(item.href, e)}
-                        className={`${iconBtnBase} ${iconBtnSizes.sm} ${
-                          isActive || parentActive
-                            ? tabVariants.nav.active
-                            : iconBtnVariants.boxed
-                        }`}
+                        aria-pressed={itemActive ? "true" : undefined}
+                        className={`${iconBtnBase} ${iconBtnSizes.sm} ${iconBtnVariants.boxed}`}
                       >
                         <Icon size={16} className="shrink-0" />
                       </Link>

@@ -14,7 +14,8 @@ export const variantClasses: Record<string, string> = {
   "inside input":
     "text-content-secondary transition-colors hover:text-content-primary/75 hover:bg-surface-tertiary",
   danger: "text-error transition-colors hover:bg-error-bg",
-  boxed: "bg-surface-tertiary text-content-primary hover:bg-surface-subtle",
+  boxed:
+    "bg-surface-tertiary text-content-primary hover:bg-surface-subtle focus-visible:ring-1 focus-visible:ring-border-components aria-pressed:ring-1 aria-pressed:ring-border-components",
   "boxed-hover":
     "text-content-primary/50 transition-colors hover:bg-surface-tertiary hover:text-content-primary",
 };

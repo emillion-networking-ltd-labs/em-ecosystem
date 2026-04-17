@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import AdminRoute from "@/components/guards/AdminRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
@@ -33,6 +34,7 @@ const PAGE_SIZE_OPTIONS = [
 export default function AdminPage() {
   const { user: currentUser } = useAuth();
   const { addToast } = useToast();
+  const searchParams = useSearchParams();
   const [users, setUsers] = useState<SafeUser[]>([]);
   const [pageSize, setPageSize] = useState(10);
   const [meta, setMeta] = useState({
@@ -41,8 +43,16 @@ export default function AdminPage() {
     limit: 10,
     totalPages: 1,
   });
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [initialLoading, setInitialLoading] = useState(true);
+
+  // Sync search from URL params (when navigating from command palette)
+  useEffect(() => {
+    const urlSearch = searchParams.get("search") || "";
+    if (urlSearch && urlSearch !== search) {
+      setSearch(urlSearch);
+    }
+  }, [searchParams]); // eslint-disable-line react-hooks/exhaustive-deps
   const [isFetching, setIsFetching] = useState(false);
 
   // Modal state

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Bell, X } from "lucide-react";
 import IconButton from "@/components/ui/IconButton";
+import CommandPalette from "@/components/ui/CommandPalette";
 import Sidebar from "./Sidebar";
 import NavBar from "./NavBar";
 import RightPanel from "@/components/dashboard/RightPanel";
@@ -16,12 +17,25 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const pathname = usePathname();
   const [sidebarExpanded, setSidebarExpanded] = useState(false);
   const [rightPanelOpen, setRightPanelOpen] = useState(false);
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
 
   // Close panels on navigation
   useEffect(() => {
     setSidebarExpanded(false);
     setRightPanelOpen(false);
   }, [pathname]);
+
+  // Global Cmd+K / Ctrl+K shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setCommandPaletteOpen((prev) => !prev);
+      }
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, []);
 
   const showRightPanel = rightPanelOpen;
   const hasOverlay = sidebarExpanded || showRightPanel;
@@ -86,6 +100,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             setSidebarExpanded(false);
             setRightPanelOpen((prev) => !prev);
           }}
+          onCommandPaletteOpen={() => setCommandPaletteOpen(true)}
         />
       </div>
 
@@ -118,6 +133,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
           </div>
         </aside>
       )}
+
+      {/* Command Palette */}
+      <CommandPalette
+        open={commandPaletteOpen}
+        onClose={() => setCommandPaletteOpen(false)}
+      />
     </div>
   );
 }

@@ -29,6 +29,11 @@ import {
   X,
   Bell,
   Upload,
+  Shield,
+  ScrollText,
+  Key,
+  Palette,
+  FileText,
 } from "lucide-react";
 import CountdownTimer from "@/components/ui/CountdownTimer";
 import TotalUsersChart from "@/components/dashboard/TotalUsersChart";
@@ -95,6 +100,12 @@ import type { SidebarNavSection as SidebarSection } from "@/components/ui/Sideba
 import IconBadge, { iconBadgeSpecs } from "@/components/ui/IconBadge";
 import ImageCropper, { imageCropperSpecs } from "@/components/ui/ImageCropper";
 import AlertBox, { alertBoxSpecs } from "@/components/ui/AlertBox";
+import SearchTrigger, {
+  searchTriggerSpecs,
+} from "@/components/ui/SearchTrigger";
+import CommandPalette, {
+  commandPaletteSpecs,
+} from "@/components/ui/CommandPalette";
 import Accordion, {
   SingleAccordion,
   accordionSpecs,
@@ -467,6 +478,22 @@ function ButtonShowcase() {
             ),
           },
           {
+            key: "boxed-active",
+            label: "BOXED ACTIVE",
+            align: "center",
+            render: () => (
+              <div className="flex justify-center">
+                <IconButton
+                  variant="boxed"
+                  aria-label="Boxed Active"
+                  aria-pressed="true"
+                >
+                  <Settings size={16} />
+                </IconButton>
+              </div>
+            ),
+          },
+          {
             key: "boxed-hover",
             label: "BOXED-HOVER",
             align: "center",
@@ -668,7 +695,14 @@ function InputShowcase() {
 }
 
 function BadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
-  const variants = ["default", "success", "warning", "error", "info"] as const;
+  const variants = [
+    "default",
+    "success",
+    "warning",
+    "error",
+    "info",
+    "kbd",
+  ] as const;
   const sizes = ["lg", "md", "sm"] as const;
   return (
     <div
@@ -687,7 +721,7 @@ function BadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
             <div className="flex flex-wrap items-center gap-2">
               {variants.map((v) => (
                 <Badge key={v} variant={v} size={size}>
-                  {v.charAt(0).toUpperCase() + v.slice(1)}
+                  {v === "kbd" ? "⌘K" : v.charAt(0).toUpperCase() + v.slice(1)}
                 </Badge>
               ))}
             </div>
@@ -3094,8 +3128,71 @@ export function MoleculeShowcase() {
       <ModalShowcase />
       <ImageCropperShowcase />
       <SidebarShowcase />
+      <CommandPaletteShowcase />
       <MotionPatternsShowcase />
     </div>
+  );
+}
+
+/* ===== Command Palette Showcase ===== */
+
+function CommandPaletteShowcase() {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <ShowcaseSection title="Command Palette">
+      <div className="space-y-4">
+        <p className="text-body text-content-secondary">
+          Quick navigation, user search, and actions via Cmd+K / Ctrl+K. Uses
+          cmdk library (Linear/Vercel pattern).
+        </p>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {/* Trigger demo */}
+          <div className="card-flat !p-4">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
+              SearchTrigger component
+            </p>
+            <SearchTrigger onClick={() => setOpen(true)} />
+          </div>
+
+          {/* Info */}
+          <div className="card-flat !p-4">
+            <p className="text-caption text-content-tertiary font-mono mb-3">
+              Keyboard shortcut
+            </p>
+            <div className="flex items-center gap-3">
+              <kbd className="rounded-md bg-surface-tertiary px-2 py-1 font-mono text-body text-content-primary">
+                ⌘K
+              </kbd>
+              <span className="text-caption text-content-tertiary">Mac</span>
+              <kbd className="rounded-md bg-surface-tertiary px-2 py-1 font-mono text-body text-content-primary">
+                Ctrl+K
+              </kbd>
+              <span className="text-caption text-content-tertiary">
+                Windows / Linux
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <CommandPalette open={open} onClose={() => setOpen(false)} />
+
+      <SpecsPanel
+        specs={{
+          "Trigger Container": searchTriggerSpecs.container,
+          "Trigger Icon": { shared: searchTriggerSpecs.icon },
+          "Trigger Label": { shared: searchTriggerSpecs.label },
+          "Trigger Shortcut": searchTriggerSpecs.shortcut,
+          Dialog: commandPaletteSpecs.dialog,
+          Input: commandPaletteSpecs.input,
+          Item: commandPaletteSpecs.item,
+          Group: commandPaletteSpecs.group,
+          "Shortcut Badge": commandPaletteSpecs.shortcut,
+        }}
+      />
+    </ShowcaseSection>
   );
 }
 
@@ -3624,24 +3721,25 @@ function SidebarShowcase() {
         {
           href: "#admin",
           label: "Admin",
-          icon: Settings,
+          icon: Shield,
+          active: activeItem === "#admin",
           children: [
             {
               href: "#audit",
               label: "Audit Logs",
-              icon: Archive,
+              icon: ScrollText,
               active: activeItem === "#audit",
             },
             {
               href: "#permissions",
               label: "Permissions",
-              icon: Copy,
+              icon: Key,
               active: activeItem === "#permissions",
             },
             {
               href: "#design",
               label: "Design System",
-              icon: Edit,
+              icon: Palette,
               active: activeItem === "#design",
             },
           ],
@@ -3660,7 +3758,7 @@ function SidebarShowcase() {
         {
           href: "#docs",
           label: "Documentation",
-          icon: Archive,
+          icon: FileText,
           active: activeItem === "#docs",
         },
       ],

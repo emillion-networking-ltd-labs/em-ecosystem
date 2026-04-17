@@ -210,6 +210,14 @@ export const componentRegistry: ComponentEntry[] = [
     files: ["Sidebar.tsx"],
   },
   {
+    name: "Command Palette",
+    category: "molecule",
+    description:
+      "Cmd+K command menu — quick navigation, user search, actions. SearchTrigger + cmdk dialog",
+    files: ["CommandPalette.tsx", "SearchTrigger.tsx"],
+    count: 2,
+  },
+  {
     name: "Motion Patterns",
     category: "molecule",
     description:
