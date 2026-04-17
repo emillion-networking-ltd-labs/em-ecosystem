@@ -9,9 +9,11 @@ import ThemeToggle from "@/components/ui/ThemeToggle";
 import Avatar from "@/components/ui/Avatar";
 import Divider from "@/components/ui/Divider";
 import IconButton from "@/components/ui/IconButton";
+import SearchTrigger from "@/components/ui/SearchTrigger";
 import {
   PanelLeftOpen,
   Bell,
+  Search,
   User,
   Shield,
   LogOut,
@@ -22,12 +24,14 @@ type NavBarProps = {
   onMenuClick?: () => void;
   showSidebarButton?: boolean;
   onRightPanelToggle?: () => void;
+  onCommandPaletteOpen?: () => void;
 };
 
 export default function NavBar({
   onMenuClick,
   showSidebarButton = false,
   onRightPanelToggle,
+  onCommandPaletteOpen,
 }: NavBarProps) {
   const { user, logout } = useAuth();
   const [dropdownOpen, setDropdownOpen] = useState(false);
@@ -85,6 +89,25 @@ export default function NavBar({
 
         {/* Right side */}
         <div className="flex items-center gap-3">
+          {/* Command Palette trigger */}
+          {onCommandPaletteOpen && (
+            <>
+              <SearchTrigger
+                onClick={onCommandPaletteOpen}
+                className="hidden lg:inline-flex"
+              />
+              <IconButton
+                variant="boxed"
+                size="sm"
+                onClick={onCommandPaletteOpen}
+                aria-label="Search"
+                className="lg:hidden"
+              >
+                <Search size={16} />
+              </IconButton>
+            </>
+          )}
+
           <ThemeToggle />
 
           {/* Notifications */}

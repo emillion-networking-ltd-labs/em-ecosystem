@@ -64,6 +64,10 @@ const componentToSection: Record<string, { tab: string; section: string }> = {
   Modal: { tab: "molecules", section: "showcase-modal" },
   "Image Cropper": { tab: "molecules", section: "showcase-image-cropper" },
   Sidebar: { tab: "molecules", section: "showcase-sidebar" },
+  "Command Palette": {
+    tab: "molecules",
+    section: "showcase-command-palette",
+  },
   "Motion Patterns": {
     tab: "molecules",
     section: "showcase-motion-patterns",

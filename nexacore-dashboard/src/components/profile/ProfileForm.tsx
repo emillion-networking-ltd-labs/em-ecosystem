@@ -69,6 +69,7 @@ export default function ProfileForm() {
   const [avatarLoading, setAvatarLoading] = useState(false);
   const [removeAvatarOpen, setRemoveAvatarOpen] = useState(false);
   const [removeAvatarLoading, setRemoveAvatarLoading] = useState(false);
+  const [emailFieldError, setEmailFieldError] = useState("");
 
   if (!user) return null;
 
@@ -182,7 +183,6 @@ export default function ProfileForm() {
 
   const isValidEmail = EMAIL_REGEX.test(newEmail);
   const isSameEmail = newEmail.toLowerCase() === user.email.toLowerCase();
-  const [emailFieldError, setEmailFieldError] = useState("");
   const handleSaveEmail = async () => {
     if (!newEmail.trim()) {
       setEmailFieldError("Email is required");
