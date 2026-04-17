@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useCallback } from "react";
+import { motion } from "framer-motion";
 import { TriangleAlert, CircleCheck, CircleAlert, Info, X } from "lucide-react";
-import IconButton from "./IconButton";
 
 type ToastVariant = "error" | "success" | "warning" | "info";
 
@@ -32,12 +32,10 @@ export default function Toast({
   duration,
   onClose,
 }: ToastProps) {
-  const [isExiting, setIsExiting] = useState(false);
   const { icon: Icon, className: variantClass } = VARIANT_CONFIG[variant];
 
   const dismiss = useCallback(() => {
-    setIsExiting(true);
-    setTimeout(() => onClose(id), 300);
+    onClose(id);
   }, [id, onClose]);
 
   useEffect(() => {
@@ -46,34 +44,39 @@ export default function Toast({
   }, [dismiss, duration]);
 
   return (
-    <div
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, x: 40, transition: { duration: 0.25 } }}
+      transition={{ duration: 0.3 }}
       role="alert"
       aria-live="assertive"
-      className={`pointer-events-auto group flex max-w-[550px] items-start gap-2 rounded-full border border-border-components bg-surface-primary px-6 py-4 ${
-        isExiting ? "animate-toast-out" : "animate-toast-in"
-      }`}
+      className="pointer-events-auto group grid max-w-[550px] grid-cols-[14px_1fr_auto] items-start gap-x-2 rounded-3xl border border-border-components bg-surface-primary py-3 pl-5 pr-4"
     >
-      <Icon size={16} className={`mt-px shrink-0 ${variantClass}`} />
-
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <p className="text-caption font-semibold leading-tight text-content-primary">
-          {title}
-        </p>
-        {description && (
-          <p className="text-caption leading-tight text-content-primary/50">
-            {description}
-          </p>
-        )}
-      </div>
-
-      <IconButton
-        size="sm"
+      {/* Col 1: icon — centered vertically */}
+      <Icon
+        size={14}
+        className={`row-span-2 self-start shrink-0 ${variantClass}`}
+      />
+      {/* Col 2: title */}
+      <p className="min-w-0 text-caption font-semibold leading-4 text-content-primary">
+        {title}
+      </p>
+      {/* Col 3: close button — top aligned */}
+      <button
         onClick={dismiss}
-        className="mt-px opacity-0 transition-all group-hover:opacity-100"
+        className="row-span-2 -mt-[7px] -mr-[7px] self-start shrink-0 rounded-md p-1 text-content-tertiary opacity-0 transition-all hover:text-content-primary group-hover:opacity-100"
         aria-label="Close notification"
       >
-        <X size={16} />
-      </IconButton>
-    </div>
+        <X size={12} />
+      </button>
+      {/* Col 2 row 2: description */}
+      {description && (
+        <p className="col-start-2 text-caption leading-4 text-content-primary/50">
+          {description}
+        </p>
+      )}
+    </motion.div>
   );
 }

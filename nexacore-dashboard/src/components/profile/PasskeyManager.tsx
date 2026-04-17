@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Key,
   Smartphone,
@@ -20,8 +21,6 @@ import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import type { PasskeyResponse } from "@/lib/types";
-
-type View = "list" | "registering";
 
 function formatRelativeTime(dateStr: string | null): string {
   if (!dateStr) return "Never";
@@ -44,17 +43,32 @@ function DeviceIcon({ deviceType }: { deviceType: string }) {
   );
 }
 
+const itemVariants = {
+  hidden: { opacity: 0, scale: 0.96, y: -8 },
+  visible: { opacity: 1, scale: 1, y: 0 },
+  exit: { opacity: 0, scale: 0.96, y: -8 },
+};
+
 function PasskeyItem({
   passkey,
   onRename,
   onDelete,
+  isNew,
 }: {
   passkey: PasskeyResponse;
   onRename: (pk: PasskeyResponse) => void;
   onDelete: (pk: PasskeyResponse) => void;
+  isNew: boolean;
 }) {
   return (
-    <div className="flex items-center justify-between rounded-xl border border-border-components p-4">
+    <motion.div
+      variants={itemVariants}
+      initial={isNew ? "hidden" : false}
+      animate="visible"
+      exit="exit"
+      transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+      className="flex items-center justify-between rounded-xl border border-border-components p-4"
+    >
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-tertiary">
           <DeviceIcon deviceType={passkey.deviceType} />
@@ -92,17 +106,11 @@ function PasskeyItem({
           <Trash2 size={16} />
         </IconButton>
       </div>
-    </div>
+    </motion.div>
   );
 }
 
-export default function PasskeyManager({
-  bare,
-  onExpandChange,
-}: {
-  bare?: boolean;
-  onExpandChange?: (expanded: boolean) => void;
-}) {
+export default function PasskeyManager({ bare }: { bare?: boolean }) {
   const {
     isSupported,
     passkeys,
@@ -117,11 +125,7 @@ export default function PasskeyManager({
 
   const { addToast } = useToast();
 
-  const [view, setViewInternal] = useState<View>("list");
-  const setView = (v: View) => {
-    setViewInternal(v);
-    onExpandChange?.(v !== "list");
-  };
+  const [registerOpen, setRegisterOpen] = useState(false);
   const [regName, setRegName] = useState("");
 
   // Rename state
@@ -137,17 +141,27 @@ export default function PasskeyManager({
   const [deleteFieldError, setDeleteFieldError] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Block enter animations until first fetch completes
+  const allowAnimations = useRef(false);
   useEffect(() => {
-    fetchPasskeys();
+    fetchPasskeys().then(() => {
+      requestAnimationFrame(() => {
+        allowAnimations.current = true;
+      });
+    });
   }, [fetchPasskeys]);
 
   const handleRegister = async () => {
     clearError();
     const result = await registerPasskey(regName.trim() || undefined);
     if (result) {
-      addToast(PROFILE_TOAST.PASSKEY_REGISTERED);
+      setRegisterOpen(false);
       setRegName("");
-      setView("list");
+      // Wait for modal to close, then fetch so the new item animates in
+      setTimeout(async () => {
+        await fetchPasskeys();
+        addToast(PROFILE_TOAST.PASSKEY_REGISTERED);
+      }, 350);
     } else {
       addToast(
         PROFILE_TOAST.PASSKEY_FAILED(
@@ -234,8 +248,8 @@ export default function PasskeyManager({
         </div>
       )}
 
-      {/* List View */}
-      {isSupported && view === "list" && (
+      {/* Passkey list — always visible */}
+      {isSupported && (
         <>
           {!isLoadingList && passkeys.length === 0 && (
             <p className="mb-4 text-body text-content-secondary">
@@ -244,12 +258,13 @@ export default function PasskeyManager({
             </p>
           )}
 
-          {passkeys.length > 0 && (
-            <div className="mb-4 space-y-3">
+          <div className="mb-4 flex flex-col gap-3">
+            <AnimatePresence initial={false}>
               {passkeys.map((pk) => (
                 <PasskeyItem
                   key={pk.id}
                   passkey={pk}
+                  isNew={allowAnimations.current}
                   onRename={(p) => {
                     clearError();
                     setRenameValue(p.name || "");
@@ -262,8 +277,8 @@ export default function PasskeyManager({
                   }}
                 />
               ))}
-            </div>
-          )}
+            </AnimatePresence>
+          </div>
 
           <Button
             variant="primary"
@@ -271,7 +286,7 @@ export default function PasskeyManager({
             onClick={() => {
               clearError();
               setRegName("");
-              setView("registering");
+              setRegisterOpen(true);
             }}
             disabled={passkeys.length >= 10}
             className="sm:w-auto"
@@ -288,13 +303,18 @@ export default function PasskeyManager({
         </>
       )}
 
-      {/* Registering View */}
-      {isSupported && view === "registering" && (
-        <div className="flex flex-col gap-4">
-          <p className="text-body text-content-secondary">
-            Give your passkey a name to identify it later, then follow the
-            biometric prompt.
-          </p>
+      {/* Rename Modal */}
+      {/* Register Modal */}
+      <ConfirmModal
+        open={registerOpen}
+        onClose={() => setRegisterOpen(false)}
+        onConfirm={handleRegister}
+        title="Add Passkey"
+        description="Give your passkey a name to identify it later, then follow the biometric prompt."
+        confirmLabel="Register Passkey"
+        loading={isRegistering}
+      >
+        <div className="mt-4">
           <Input
             label="Passkey name (optional)"
             name="passkey-name"
@@ -304,31 +324,8 @@ export default function PasskeyManager({
             maxLength={64}
             disabled={isRegistering}
           />
-          <div className="flex flex-col-reverse gap-2 sm:flex-row">
-            <Button
-              variant="outline"
-              size="md"
-              fullWidth
-              onClick={() => {
-                clearError();
-                setView("list");
-              }}
-              disabled={isRegistering}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              fullWidth
-              loading={isRegistering}
-              onClick={handleRegister}
-            >
-              Register Passkey
-            </Button>
-          </div>
         </div>
-      )}
+      </ConfirmModal>
 
       {/* Rename Modal */}
       <ConfirmModal

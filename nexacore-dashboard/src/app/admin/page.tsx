@@ -42,7 +42,8 @@ export default function AdminPage() {
     totalPages: 1,
   });
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(true);
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [isFetching, setIsFetching] = useState(false);
 
   // Modal state
   const [modalType, setModalType] = useState<
@@ -54,7 +55,7 @@ export default function AdminPage() {
 
   const fetchUsers = useCallback(
     async (page: number, signal?: AbortSignal) => {
-      setLoading(true);
+      setIsFetching(true);
       try {
         const params = new URLSearchParams({
           page: String(page),
@@ -73,7 +74,10 @@ export default function AdminPage() {
         if (err instanceof SessionExpiredError) return;
         addToast(ADMIN_TOAST.LOAD_USERS_FAILED);
       } finally {
-        if (!signal?.aborted) setLoading(false);
+        if (!signal?.aborted) {
+          setIsFetching(false);
+          setInitialLoading(false);
+        }
       }
     },
     [search, pageSize, addToast],
@@ -201,7 +205,7 @@ export default function AdminPage() {
         {/* Content */}
         <div className="card-flat">
           {/* Table */}
-          {loading ? (
+          {initialLoading ? (
             <div className="flex h-64 items-center justify-center">
               <Spinner size="md" />
             </div>
@@ -210,7 +214,9 @@ export default function AdminPage() {
               <p className="text-body text-content-tertiary">No users found.</p>
             </div>
           ) : (
-            <>
+            <div
+              className={`transition-opacity duration-150 ${isFetching ? "opacity-50 pointer-events-none" : "opacity-100"}`}
+            >
               <UsersTable
                 users={users}
                 onChangeRole={handleChangeRole}
@@ -243,7 +249,7 @@ export default function AdminPage() {
                   />
                 )}
               </div>
-            </>
+            </div>
           )}
         </div>
 

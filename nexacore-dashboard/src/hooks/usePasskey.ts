@@ -64,7 +64,7 @@ export function usePasskey() {
           credential as unknown as Record<string, unknown>,
           name,
         );
-        await fetchPasskeys();
+        // Don't fetchPasskeys here — let the component control timing for animation
         return result;
       } catch (err: unknown) {
         if ((err as Error)?.name === "NotAllowedError") return null;
@@ -121,11 +121,14 @@ export function usePasskey() {
   const handleDelete = useCallback(
     async (id: string, password?: string): Promise<string | null> => {
       setError(null);
+      // Optimistic: remove from local state so AnimatePresence can animate exit
+      setPasskeys((prev) => prev.filter((pk) => pk.id !== id));
       try {
         await apiDeletePasskey(id, password);
-        await fetchPasskeys();
         return null;
       } catch (err) {
+        // Rollback on failure
+        await fetchPasskeys();
         const msg = extractMessage(err, "Failed to delete passkey.");
         setError(msg);
         return msg;

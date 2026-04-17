@@ -21,6 +21,7 @@ export default function DeleteAccount() {
   const [confirmText, setConfirmText] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [fieldError, setFieldError] = useState("");
 
   const requiresPassword = user?.hasPassword ?? false;
   const isConfirmValid = confirmText === "DELETE";
@@ -32,10 +33,18 @@ export default function DeleteAccount() {
     setShowModal(false);
     setConfirmText("");
     setPassword("");
+    setFieldError("");
   };
 
   const handleDelete = async () => {
-    if (!canConfirm) return;
+    if (!isConfirmValid) {
+      setFieldError("Type DELETE to confirm");
+      return;
+    }
+    if (!isPasswordValid) {
+      setFieldError("Password is required");
+      return;
+    }
     setLoading(true);
     try {
       await deleteAccount(requiresPassword ? password : undefined);
@@ -104,8 +113,12 @@ export default function DeleteAccount() {
           <Input
             name="confirmDelete"
             value={confirmText}
-            onChange={(e) => setConfirmText(e.target.value)}
+            onChange={(e) => {
+              setConfirmText(e.target.value);
+              setFieldError("");
+            }}
             placeholder="Type DELETE"
+            error={fieldError && !isConfirmValid ? fieldError : undefined}
           />
         </div>
 
@@ -116,8 +129,16 @@ export default function DeleteAccount() {
               name="deletePassword"
               type="password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                setFieldError("");
+              }}
               placeholder="Enter your password"
+              error={
+                fieldError && isConfirmValid && !isPasswordValid
+                  ? fieldError
+                  : undefined
+              }
             />
           </div>
         )}

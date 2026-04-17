@@ -26,8 +26,13 @@ export const accordionSpecs = {
       "rounded-md border border-border-components overflow-hidden bg-surface-primary",
     divider: "divide-y divide-border-strong",
   },
-  icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open",
+  icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open (duration-200)",
   content: "px-4 pt-3 pb-4",
+  animation: {
+    style: "CSS grid-template-rows 0fr/1fr transition (Radix UI pattern)",
+    duration: "200ms ease-out",
+    technique: "Content always mounted, height controlled by grid row sizing",
+  },
 };
 
 const triggerStyles = {
@@ -55,23 +60,32 @@ export default function Accordion({
     <div
       className={`${borderless ? "" : "rounded-md border border-border-components"} overflow-hidden bg-surface-primary divide-y divide-border-strong ${className}`}
     >
-      {items.map((item, i) => (
-        <div key={i}>
-          <button
-            onClick={() => toggle(i)}
-            className={`flex w-full items-center justify-between px-4 py-3 ${triggerStyles[variant]} transition-colors hover:bg-surface-subtle`}
-          >
-            {item.title}
-            <ChevronDown
-              size={16}
-              className={`shrink-0 text-content-primary/50 transition-transform ${openIndex === i ? "rotate-180" : ""}`}
-            />
-          </button>
-          {openIndex === i && (
-            <div className="px-4 pt-3 pb-4">{item.children}</div>
-          )}
-        </div>
-      ))}
+      {items.map((item, i) => {
+        const isOpen = openIndex === i;
+        return (
+          <div key={i}>
+            <button
+              onClick={() => toggle(i)}
+              className={`flex w-full items-center justify-between px-4 py-3 ${triggerStyles[variant]} transition-colors hover:bg-surface-subtle`}
+            >
+              {item.title}
+              <ChevronDown
+                size={16}
+                className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            <div
+              className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+                isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="px-4 pt-3 pb-4">{item.children}</div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -102,10 +116,18 @@ export function SingleAccordion({
         {title}
         <ChevronDown
           size={16}
-          className={`shrink-0 text-content-primary/50 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
-      {open && <div className="px-4 pt-3 pb-4">{children}</div>}
+      <div
+        className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="px-4 pt-3 pb-4">{children}</div>
+        </div>
+      </div>
     </div>
   );
 }

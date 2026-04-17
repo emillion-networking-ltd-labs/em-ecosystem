@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import Tooltip from "./Tooltip";
 import Tabs, { variantStyles as tabVariants } from "./Tabs";
 import {
   baseClass as iconBtnBase,
@@ -145,18 +146,19 @@ export default function SidebarNav({
                   const parentActive =
                     hasChildren && item.children!.some((c) => c.active);
                   return (
-                    <Link
-                      href={item.href}
-                      onClick={(e) => onNavigate?.(item.href, e)}
-                      className={`${iconBtnBase} ${iconBtnSizes.sm} ${
-                        isActive || parentActive
-                          ? tabVariants.nav.active
-                          : iconBtnVariants.boxed
-                      }`}
-                      title={item.label}
-                    >
-                      <Icon size={16} className="shrink-0" />
-                    </Link>
+                    <Tooltip content={item.label} position="right">
+                      <Link
+                        href={item.href}
+                        onClick={(e) => onNavigate?.(item.href, e)}
+                        className={`${iconBtnBase} ${iconBtnSizes.sm} ${
+                          isActive || parentActive
+                            ? tabVariants.nav.active
+                            : iconBtnVariants.boxed
+                        }`}
+                      >
+                        <Icon size={16} className="shrink-0" />
+                      </Link>
+                    </Tooltip>
                   );
                 }
 

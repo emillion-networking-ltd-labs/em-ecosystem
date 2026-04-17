@@ -25,6 +25,7 @@ export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
     <IconButton
       variant="boxed"
       size="sm"
+      tooltip
       onClick={toggleTheme}
       className={className}
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}

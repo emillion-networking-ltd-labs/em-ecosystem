@@ -176,12 +176,31 @@ export default function ProfileForm() {
   const openEmailModal = () => {
     setNewEmail("");
     setEmailPassword("");
+    setEmailFieldError("");
     setEmailOpen(true);
   };
 
   const isValidEmail = EMAIL_REGEX.test(newEmail);
   const isSameEmail = newEmail.toLowerCase() === user.email.toLowerCase();
+  const [emailFieldError, setEmailFieldError] = useState("");
   const handleSaveEmail = async () => {
+    if (!newEmail.trim()) {
+      setEmailFieldError("Email is required");
+      return;
+    }
+    if (!isValidEmail) {
+      setEmailFieldError("Enter a valid email address");
+      return;
+    }
+    if (isSameEmail) {
+      setEmailFieldError("New email must be different from current email");
+      return;
+    }
+    if (!emailPassword.trim()) {
+      setEmailFieldError("Password is required");
+      return;
+    }
+    setEmailFieldError("");
     setEmailLoading(true);
     try {
       await requestEmailChange(newEmail, emailPassword);
@@ -214,6 +233,14 @@ export default function ProfileForm() {
 
   const handleSavePassword = async () => {
     setPasswordError("");
+    if (hasPassword && !currentPassword.trim()) {
+      setPasswordError("Current password is required");
+      return;
+    }
+    if (!newPassword) {
+      setPasswordError("New password is required");
+      return;
+    }
     const pwError = validatePassword(newPassword);
     if (pwError) {
       setPasswordError(pwError);
@@ -272,9 +299,9 @@ export default function ProfileForm() {
         <div className="px-6 pb-6">
           {/* Avatar overlapping banner */}
           <div className="-mt-10">
-            <div className="group/avatar relative inline-flex rounded-full bg-surface-tertiary p-2 ring-1 ring-border-strong">
+            <div className="group/avatar relative inline-flex h-20 w-20 items-center justify-center rounded-full bg-surface-tertiary ring-1 ring-border-strong">
               <Avatar src={user.avatarUrl} name={fullName} size="lg" />
-              <div className="absolute -right-[38px] top-[2px] flex flex-col gap-[12px] opacity-0 transition-opacity group-hover/avatar:opacity-100">
+              <div className="absolute -right-[38px] top-[2px] flex flex-col gap-[12px] opacity-0 -translate-x-2 transition-all duration-200 group-hover/avatar:opacity-100 group-hover/avatar:translate-x-0 [&>*:nth-child(2)]:transition-all [&>*:nth-child(2)]:duration-200 [&>*:nth-child(2)]:delay-75">
                 {user.avatarUrl ? (
                   <>
                     <IconButton
@@ -463,14 +490,20 @@ export default function ProfileForm() {
             name="newEmail"
             type="email"
             value={newEmail}
-            onChange={(e) => setNewEmail(e.target.value)}
+            onChange={(e) => {
+              setNewEmail(e.target.value);
+              setEmailFieldError("");
+            }}
             placeholder="Enter new email address"
             error={
-              newEmail && !isValidEmail
-                ? "Enter a valid email address"
-                : newEmail && isSameEmail
-                  ? "New email must be different from current email"
-                  : undefined
+              emailFieldError &&
+              (!newEmail.trim() || !isValidEmail || isSameEmail)
+                ? emailFieldError
+                : newEmail && !isValidEmail
+                  ? "Enter a valid email address"
+                  : newEmail && isSameEmail
+                    ? "New email must be different from current email"
+                    : undefined
             }
           />
           <Input
@@ -478,8 +511,19 @@ export default function ProfileForm() {
             name="emailChangePassword"
             type="password"
             value={emailPassword}
-            onChange={(e) => setEmailPassword(e.target.value)}
+            onChange={(e) => {
+              setEmailPassword(e.target.value);
+              setEmailFieldError("");
+            }}
             placeholder="Enter your password"
+            error={
+              emailFieldError &&
+              isValidEmail &&
+              !isSameEmail &&
+              !emailPassword.trim()
+                ? emailFieldError
+                : undefined
+            }
           />
         </div>
       </ConfirmModal>
@@ -507,8 +551,16 @@ export default function ProfileForm() {
               name="currentPassword"
               type="password"
               value={currentPassword}
-              onChange={(e) => setCurrentPassword(e.target.value)}
+              onChange={(e) => {
+                setCurrentPassword(e.target.value);
+                setPasswordError("");
+              }}
               placeholder="Enter current password"
+              error={
+                passwordError === "Current password is required"
+                  ? passwordError
+                  : undefined
+              }
             />
           )}
           <div>
@@ -517,10 +569,20 @@ export default function ProfileForm() {
               name="newPassword"
               type="password"
               value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
+              onChange={(e) => {
+                setNewPassword(e.target.value);
+                setPasswordError("");
+              }}
               placeholder="Enter new password"
+              error={
+                passwordError &&
+                passwordError !== "Current password is required" &&
+                passwordError !== "Passwords do not match"
+                  ? passwordError
+                  : undefined
+              }
             />
-            {newPassword && (
+            {newPassword && !passwordError && (
               <p
                 className={`mt-1 text-caption ${newPassword.length >= PASSWORD_MIN_LENGTH ? "text-success" : "text-error"}`}
               >
@@ -535,18 +597,21 @@ export default function ProfileForm() {
             name="confirmPassword"
             type="password"
             value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            onChange={(e) => {
+              setConfirmPassword(e.target.value);
+              setPasswordError("");
+            }}
             placeholder="Confirm new password"
             error={
-              confirmPassword && newPassword !== confirmPassword
-                ? "Passwords do not match"
-                : undefined
+              passwordError === "Passwords do not match"
+                ? passwordError
+                : confirmPassword && newPassword !== confirmPassword
+                  ? "Passwords do not match"
+                  : undefined
             }
           />
-          {passwordError && (
-            <p className="text-caption text-error" role="alert">
-              {passwordError}
-            </p>
+          {confirmPassword && newPassword === confirmPassword && (
+            <p className="mt-1 text-caption text-success">Passwords match</p>
           )}
         </div>
       </ConfirmModal>

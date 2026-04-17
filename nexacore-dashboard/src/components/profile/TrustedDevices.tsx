@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Laptop, Smartphone, Trash2, Plus } from "lucide-react";
 import { useTrustedDevices } from "@/hooks/useTrustedDevices";
 import { useToast } from "@/context/ToastContext";
@@ -49,31 +50,22 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
   const { addToast } = useToast();
 
   const [isTrusting, setIsTrusting] = useState(false);
-  const [newDeviceId, setNewDeviceId] = useState<string | null>(null);
-  const [removingId, setRemovingId] = useState<string | null>(null);
-  const prevDeviceIds = useRef<Set<string>>(new Set());
   const [revokeTarget, setRevokeTarget] =
     useState<TrustedDeviceResponse | null>(null);
   const [isRevoking, setIsRevoking] = useState(false);
   const [showRevokeAll, setShowRevokeAll] = useState(false);
   const [isRevokingAll, setIsRevokingAll] = useState(false);
 
+  // Block enter animations until first fetch completes
+  const allowAnimations = useRef(false);
   useEffect(() => {
-    fetchDevices();
+    fetchDevices().then(() => {
+      // Enable animations after a tick so the first render doesn't animate
+      requestAnimationFrame(() => {
+        allowAnimations.current = true;
+      });
+    });
   }, [fetchDevices]);
-
-  // Detect new device added to list
-  useEffect(() => {
-    const currentIds = new Set(devices.map((d) => d.id));
-    if (prevDeviceIds.current.size > 0) {
-      const added = devices.find((d) => !prevDeviceIds.current.has(d.id));
-      if (added) {
-        setNewDeviceId(added.id);
-        setTimeout(() => setNewDeviceId(null), 1000);
-      }
-    }
-    prevDeviceIds.current = currentIds;
-  }, [devices]);
 
   const handleTrust = async () => {
     setIsTrusting(true);
@@ -90,13 +82,9 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
     if (!revokeTarget) return;
     const targetId = revokeTarget.id;
     setRevokeTarget(null);
-    setRemovingId(targetId);
-    // Animate out first, then revoke
-    await new Promise((r) => setTimeout(r, 500));
     setIsRevoking(true);
     const ok = await revokeDevice(targetId);
     setIsRevoking(false);
-    setRemovingId(null);
     if (ok) {
       addToast(PROFILE_TOAST.DEVICE_REVOKED);
     } else {
@@ -156,18 +144,20 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
       )}
 
       {/* Device list */}
-      {devices.length > 0 && (
-        <div className="space-y-3">
+      <div className="flex flex-col gap-3">
+        <AnimatePresence>
           {devices.map((device) => (
-            <div
+            <motion.div
               key={device.id}
-              className={`flex flex-col gap-3 rounded-xl border border-border-components p-4 sm:flex-row sm:items-center sm:justify-between ${
-                device.id === newDeviceId
-                  ? "animate-slide-in-fade"
-                  : device.id === removingId
-                    ? "animate-slide-out-fade"
-                    : ""
-              }`}
+              initial={
+                allowAnimations.current
+                  ? { opacity: 0, scale: 0.96, y: -8 }
+                  : false
+              }
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.96, y: -8 }}
+              transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
+              className="flex flex-col gap-3 rounded-xl border border-border-components p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-tertiary">
@@ -200,10 +190,10 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
                   <Trash2 size={16} />
                 </IconButton>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
-      )}
+        </AnimatePresence>
+      </div>
 
       {/* Action buttons */}
       <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
