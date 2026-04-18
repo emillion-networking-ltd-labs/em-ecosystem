@@ -19,6 +19,7 @@ import { MailService } from '../../mail/mail.service';
 import { PasswordBreachService } from '../../auth/password-breach.service';
 import { TrustedDeviceService } from '../../auth/trusted-device.service';
 import { TokenDenyListService } from '../../auth/token-deny-list.service';
+import { ConfigService } from '@nestjs/config';
 
 jest.mock('bcrypt');
 
@@ -28,6 +29,11 @@ describe('UsersService', () => {
   let sessionsService: { revokeAllUserSessions: jest.Mock };
   let passwordBreachService: { isBreached: jest.Mock };
   let trustedDeviceService: { revokeAllDevices: jest.Mock };
+  let storage: {
+    upload: jest.Mock;
+    delete: jest.Mock;
+    getPublicUrl: jest.Mock;
+  };
   let mailService: {
     sendPasswordChangeNotification: jest.Mock;
     sendEmailChangeVerificationEmail: jest.Mock;
@@ -215,11 +221,18 @@ describe('UsersService', () => {
               .mockReturnValue('/uploads/avatars/test.jpg'),
           },
         },
+        {
+          provide: ConfigService,
+          useValue: {
+            get: jest.fn().mockReturnValue('./uploads'),
+          },
+        },
       ],
     }).compile();
 
     usersService = module.get<UsersService>(UsersService);
     mailService = module.get(MailService);
+    storage = module.get('FILE_STORAGE');
   });
 
   describe('findByEmail', () => {
@@ -601,6 +614,168 @@ describe('UsersService', () => {
 
       // Login should succeed with null avatar
       expect(result).toEqual({ user: newUser, action: 'created' });
+    });
+  });
+
+  // ─── uploadAvatar (SCRUM-312) ──────────────────────────────────
+
+  describe('uploadAvatar', () => {
+    const mockCroppedFile = {
+      buffer: Buffer.from('cropped'),
+      originalname: 'avatar.jpg',
+    } as Express.Multer.File;
+    const mockOriginalFile = {
+      buffer: Buffer.from('original'),
+      originalname: 'original.png',
+    } as Express.Multer.File;
+
+    it('should save cropped avatar and return URLs', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        avatarUrl: null,
+      });
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      const result = await usersService.uploadAvatar(
+        'uuid-123',
+        mockCroppedFile,
+      );
+
+      expect(storage.upload).toHaveBeenCalledWith(
+        mockCroppedFile.buffer,
+        expect.stringContaining('uuid-123-'),
+      );
+      expect(result.avatarUrl).toBe('/uploads/avatars/test.jpg');
+    });
+
+    it('should delete old avatar before saving new one', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        avatarUrl: '/uploads/avatars/old.jpg',
+      });
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      await usersService.uploadAvatar('uuid-123', mockCroppedFile);
+
+      expect(storage.delete).toHaveBeenCalledWith('old.jpg');
+    });
+
+    it('should preserve existing original on re-edit (no originalFile)', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        avatarUrl: '/uploads/avatars/old.jpg',
+        avatarOriginalUrl: '/uploads/originals/existing-orig.png',
+      });
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      const result = await usersService.uploadAvatar(
+        'uuid-123',
+        mockCroppedFile,
+      );
+
+      // Original should be preserved (not deleted, not re-uploaded)
+      expect(result.avatarOriginalUrl).toBe(
+        '/uploads/originals/existing-orig.png',
+      );
+    });
+
+    it('should store cropData in DB', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        avatarUrl: null,
+      });
+      prisma.user.update.mockResolvedValue(mockUser);
+      const cropData = { x: 10, y: 20, width: 100, height: 100 };
+
+      await usersService.uploadAvatar(
+        'uuid-123',
+        mockCroppedFile,
+        undefined,
+        undefined,
+        cropData,
+      );
+
+      expect(prisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            avatarCropData: cropData,
+          }),
+        }),
+      );
+    });
+
+    it('should fire audit log', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        avatarUrl: null,
+      });
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      await usersService.uploadAvatar('uuid-123', mockCroppedFile);
+
+      expect(auditService.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: AuditAction.PROFILE_UPDATE,
+          metadata: { field: 'avatarUrl', action: 'upload' },
+        }),
+      );
+    });
+  });
+
+  // ─── removeAvatar (SCRUM-312) ─────────────────────────────────
+
+  describe('removeAvatar', () => {
+    it('should delete cropped avatar file and null DB fields', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        avatarUrl: '/uploads/avatars/old.jpg',
+        avatarOriginalUrl: null,
+      });
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      const result = await usersService.removeAvatar('uuid-123');
+
+      expect(storage.delete).toHaveBeenCalledWith('old.jpg');
+      expect(prisma.user.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {
+            avatarUrl: null,
+            avatarOriginalUrl: null,
+            avatarCropData: expect.anything(),
+          },
+        }),
+      );
+      expect(result).toEqual({ avatarUrl: null });
+    });
+
+    it('should handle user without avatar (no-op on files)', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        avatarUrl: null,
+        avatarOriginalUrl: null,
+      });
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      await usersService.removeAvatar('uuid-123');
+
+      expect(storage.delete).not.toHaveBeenCalled();
+    });
+
+    it('should fire audit log', async () => {
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        avatarUrl: null,
+      });
+      prisma.user.update.mockResolvedValue(mockUser);
+
+      await usersService.removeAvatar('uuid-123');
+
+      expect(auditService.log).toHaveBeenCalledWith(
+        expect.objectContaining({
+          action: AuditAction.PROFILE_UPDATE,
+          metadata: { field: 'avatarUrl', action: 'remove' },
+        }),
+      );
     });
   });
 

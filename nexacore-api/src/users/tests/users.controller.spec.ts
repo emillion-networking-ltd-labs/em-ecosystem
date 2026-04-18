@@ -276,6 +276,70 @@ describe('UsersController', () => {
     });
   });
 
+  // ─── POST /users/me/avatar (SCRUM-312) ─────────────────────
+
+  describe('uploadAvatar', () => {
+    it('should delegate to usersService.uploadAvatar and return result', async () => {
+      const avatarResult = {
+        avatarUrl: '/uploads/avatars/uuid-123-1234.jpg',
+        avatarOriginalUrl: null,
+        avatarCropData: null,
+      };
+      usersService.uploadAvatar.mockResolvedValue(avatarResult);
+
+      const mockFiles = {
+        avatar: [{ buffer: Buffer.from('test'), originalname: 'avatar.jpg' }],
+      };
+
+      const result = await controller.uploadAvatar(
+        mockReq,
+        mockFiles as unknown as {
+          avatar?: Express.Multer.File[];
+          original?: Express.Multer.File[];
+        },
+        {},
+      );
+
+      expect(usersService.uploadAvatar).toHaveBeenCalledWith(
+        'uuid-123',
+        mockFiles.avatar[0],
+        { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
+        undefined,
+        undefined,
+      );
+      expect(result).toEqual(avatarResult);
+    });
+
+    it('should throw BadRequestException when no avatar file', async () => {
+      await expect(
+        controller.uploadAvatar(
+          mockReq,
+          {} as unknown as {
+            avatar?: Express.Multer.File[];
+            original?: Express.Multer.File[];
+          },
+          {},
+        ),
+      ).rejects.toThrow('Avatar file is required');
+    });
+  });
+
+  // ─── DELETE /users/me/avatar (SCRUM-312) ──────────────────
+
+  describe('removeAvatar', () => {
+    it('should delegate to usersService.removeAvatar and return result', async () => {
+      usersService.removeAvatar.mockResolvedValue({ avatarUrl: null });
+
+      const result = await controller.removeAvatar(mockReq);
+
+      expect(usersService.removeAvatar).toHaveBeenCalledWith('uuid-123', {
+        ipAddress: '127.0.0.1',
+        userAgent: 'test-agent',
+      });
+      expect(result).toEqual({ avatarUrl: null });
+    });
+  });
+
   // ─── POST /users/me/email ───────────────────────────────────
 
   describe('requestEmailChange', () => {
