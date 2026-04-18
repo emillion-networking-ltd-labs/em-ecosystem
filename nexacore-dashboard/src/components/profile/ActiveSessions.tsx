@@ -179,6 +179,7 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
                     <IconButton
                       variant="danger"
                       size="sm"
+                      tooltip
                       onClick={() => revokeSession(session.id)}
                       disabled={revoking === session.id}
                       loading={revoking === session.id}

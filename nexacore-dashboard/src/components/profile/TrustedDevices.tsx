@@ -184,6 +184,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
                 <IconButton
                   variant="danger"
                   size="sm"
+                  tooltip
                   onClick={() => setRevokeTarget(device)}
                   aria-label={`Revoke trust for ${device.deviceName}`}
                 >

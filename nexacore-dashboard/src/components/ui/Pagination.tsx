@@ -50,6 +50,7 @@ export default function Pagination({
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 1}
         className={arrowBase}
+        aria-label="Previous page"
       >
         <ChevronLeft size={16} />
       </button>
@@ -77,6 +78,7 @@ export default function Pagination({
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage === totalPages}
         className={arrowBase}
+        aria-label="Next page"
       >
         <ChevronRight size={16} />
       </button>

@@ -289,6 +289,7 @@ export default function ProfileForm() {
           <IconButton
             variant="boxed"
             size="sm"
+            tooltip
             aria-label="Change banner"
             className="absolute right-4 top-4 sm:opacity-0 transition-opacity sm:group-hover/banner:opacity-100"
           >
@@ -364,6 +365,7 @@ export default function ProfileForm() {
                 <IconButton
                   variant="boxed"
                   size="sm"
+                  tooltip
                   onClick={openEdit}
                   aria-label="Edit name"
                   className="sm:opacity-0 transition-opacity sm:group-hover/name:opacity-100"

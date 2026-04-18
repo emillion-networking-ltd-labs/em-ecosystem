@@ -92,6 +92,7 @@ function PasskeyItem({
       <div className="flex items-center gap-1">
         <IconButton
           size="sm"
+          tooltip
           onClick={() => onRename(passkey)}
           aria-label={`Rename ${passkey.name || "passkey"}`}
         >
@@ -100,6 +101,7 @@ function PasskeyItem({
         <IconButton
           variant="danger"
           size="sm"
+          tooltip
           onClick={() => onDelete(passkey)}
           aria-label={`Delete ${passkey.name || "passkey"}`}
         >
