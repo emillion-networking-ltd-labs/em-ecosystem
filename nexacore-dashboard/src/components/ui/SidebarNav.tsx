@@ -264,7 +264,7 @@ export default function SidebarNav({
                 const item = section.items.find((it) => it.href === tab.value);
                 if (!item) return null;
                 const Icon = item.icon;
-                const hasChildren = item.children && item.children.length > 0;
+                const hasChildren = Array.isArray(item.children);
 
                 // ─── Collapsed ───
                 if (collapsed) {
