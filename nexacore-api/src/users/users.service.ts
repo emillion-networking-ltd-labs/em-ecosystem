@@ -138,10 +138,10 @@ export class UsersService {
     action: 'login' | 'created' | 'linked' | 'auto-verified';
   }> {
     // Profile fields to populate from OAuth provider
+    // avatarUrl handled separately via downloadAndStoreAvatar (needs userId)
     const profileData = {
       ...(profile.firstName && { firstName: profile.firstName }),
       ...(profile.lastName && { lastName: profile.lastName }),
-      ...(profile.avatarUrl && { avatarUrl: profile.avatarUrl }),
     };
 
     // 1. Look up OAuthAccount by (provider, providerId)
@@ -175,8 +175,7 @@ export class UsersService {
         // Update profile fields if they were empty and OAuth provides them
         const needsProfileUpdate =
           (!existingUser.firstName && profileData.firstName) ||
-          (!existingUser.lastName && profileData.lastName) ||
-          (!existingUser.avatarUrl && profileData.avatarUrl);
+          (!existingUser.lastName && profileData.lastName);
 
         if (needsVerify || needsProfileUpdate) {
           const user = (await this.prisma.user.update({
@@ -190,8 +189,6 @@ export class UsersService {
                 profileData.firstName && { firstName: profileData.firstName }),
               ...(!existingUser.lastName &&
                 profileData.lastName && { lastName: profileData.lastName }),
-              ...(!existingUser.avatarUrl &&
-                profileData.avatarUrl && { avatarUrl: profileData.avatarUrl }),
             },
             include: { oauthAccounts: { select: { provider: true } } },
           })) as User;
@@ -207,7 +204,41 @@ export class UsersService {
               .sendWelcomeEmail(existingUser.email, existingUser.firstName)
               .catch(() => {});
           }
+          // Download OAuth avatar if user has none
+          if (!user.avatarUrl && profile.avatarUrl) {
+            const localAvatar = await this.downloadAndStoreAvatar(
+              profile.avatarUrl,
+              user.id,
+            );
+            if (localAvatar) {
+              const updated = (await this.prisma.user.update({
+                where: { id: user.id },
+                data: { avatarUrl: localAvatar },
+                include: { oauthAccounts: { select: { provider: true } } },
+              })) as User;
+              return {
+                user: updated,
+                action: needsVerify ? 'auto-verified' : 'login',
+              };
+            }
+          }
           return { user, action: needsVerify ? 'auto-verified' : 'login' };
+        }
+
+        // No profile update needed, but still check avatar
+        if (!existingUser.avatarUrl && profile.avatarUrl) {
+          const localAvatar = await this.downloadAndStoreAvatar(
+            profile.avatarUrl,
+            existingUser.id,
+          );
+          if (localAvatar) {
+            const updated = (await this.prisma.user.update({
+              where: { id: existingUser.id },
+              data: { avatarUrl: localAvatar },
+              include: { oauthAccounts: { select: { provider: true } } },
+            })) as User;
+            return { user: updated, action: 'login' };
+          }
         }
         return { user: existingUser, action: 'login' };
       }
@@ -250,6 +281,21 @@ export class UsersService {
           this.mailService
             .sendWelcomeEmail(existingUser.email, existingUser.firstName)
             .catch(() => {});
+          // Download OAuth avatar if user has none
+          if (!existingUser.avatarUrl && profile.avatarUrl) {
+            const localAvatar = await this.downloadAndStoreAvatar(
+              profile.avatarUrl,
+              existingUser.id,
+            );
+            if (localAvatar) {
+              const updated = (await this.prisma.user.update({
+                where: { id: existingUser.id },
+                data: { avatarUrl: localAvatar },
+                include: { oauthAccounts: { select: { provider: true } } },
+              })) as User;
+              return { user: updated, action: 'auto-verified' };
+            }
+          }
           return { user: user as User, action: 'auto-verified' };
         }
         throw new ConflictException(
@@ -276,6 +322,21 @@ export class UsersService {
           },
         }),
       ]);
+      // Download OAuth avatar if user has none
+      if (!existingUser.avatarUrl && profile.avatarUrl) {
+        const localAvatar = await this.downloadAndStoreAvatar(
+          profile.avatarUrl,
+          existingUser.id,
+        );
+        if (localAvatar) {
+          const updated = (await this.prisma.user.update({
+            where: { id: existingUser.id },
+            data: { avatarUrl: localAvatar },
+            include: { oauthAccounts: { select: { provider: true } } },
+          })) as User;
+          return { user: updated, action: 'linked' };
+        }
+      }
       return { user: user as User, action: 'linked' };
     }
 
@@ -298,6 +359,21 @@ export class UsersService {
     this.mailService
       .sendWelcomeEmail(user.email, user.firstName)
       .catch(() => {});
+    // Download OAuth avatar for new user
+    if (profile.avatarUrl) {
+      const localAvatar = await this.downloadAndStoreAvatar(
+        profile.avatarUrl,
+        user.id,
+      );
+      if (localAvatar) {
+        const updated = (await this.prisma.user.update({
+          where: { id: user.id },
+          data: { avatarUrl: localAvatar },
+          include: { oauthAccounts: { select: { provider: true } } },
+        })) as User;
+        return { user: updated, action: 'created' };
+      }
+    }
     return { user, action: 'created' };
   }
 
@@ -858,6 +934,34 @@ export class UsersService {
     this.tokenDenyListService
       .denyAllForUser(userId, ACCESS_TOKEN_TTL_SECONDS)
       .catch(() => {});
+  }
+
+  // ── OAuth avatar download (SCRUM-311) ──
+
+  private async downloadAndStoreAvatar(
+    externalUrl: string,
+    userId: string,
+  ): Promise<string | null> {
+    try {
+      const response = await fetch(externalUrl, {
+        signal: AbortSignal.timeout(5000),
+      });
+      if (!response.ok) return null;
+
+      const contentType = response.headers.get('content-type') || '';
+      const ext = contentType.includes('png')
+        ? 'png'
+        : contentType.includes('webp')
+          ? 'webp'
+          : 'jpg';
+
+      const buffer = Buffer.from(await response.arrayBuffer());
+      const key = `${userId}-oauth.${ext}`;
+      return await this.storage.upload(buffer, key);
+    } catch {
+      // Download failure must NOT block login
+      return null;
+    }
   }
 
   // ── MFA data access methods (SCRUM-28) ──
