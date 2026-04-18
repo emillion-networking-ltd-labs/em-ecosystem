@@ -58,8 +58,16 @@ export default function ActionDropdown({
         setOpen(false);
       }
     }
+    const closeOnScroll = () => setOpen(false);
+
     document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    window.addEventListener("scroll", closeOnScroll, true);
+    window.addEventListener("resize", closeOnScroll);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("scroll", closeOnScroll, true);
+      window.removeEventListener("resize", closeOnScroll);
+    };
   }, [open]);
 
   const isLocked = !user.isActive;
