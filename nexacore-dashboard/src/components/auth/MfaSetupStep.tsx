@@ -201,7 +201,11 @@ export default function MfaSetupStep() {
               <code className="flex-1 break-all font-mono text-body leading-6 text-content-primary">
                 {secret}
               </code>
-              <IconButton onClick={copySecret} aria-label="Copy secret key">
+              <IconButton
+                onClick={copySecret}
+                tooltip
+                aria-label="Copy secret key"
+              >
                 {copiedSecret ? (
                   <Check size={14} className="text-green-600" />
                 ) : (

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
+import Tooltip from "./Tooltip";
 
 export const copyFieldSpecs = {
   container:
@@ -47,18 +48,20 @@ export default function CopyField({
       <code className="flex-1 truncate font-mono text-body leading-6 text-content-primary">
         {value}
       </code>
-      <button
-        type="button"
-        onClick={handleCopy}
-        className="shrink-0 text-content-primary/50 transition-colors hover:text-content-primary"
-        aria-label="Copy to clipboard"
-      >
-        {copied ? (
-          <Check size={14} className="text-green-600" />
-        ) : (
-          <Copy size={14} />
-        )}
-      </button>
+      <Tooltip content={copied ? "Copied!" : "Copy to clipboard"}>
+        <button
+          type="button"
+          onClick={handleCopy}
+          className="shrink-0 text-content-primary/50 transition-colors hover:text-content-primary"
+          aria-label="Copy to clipboard"
+        >
+          {copied ? (
+            <Check size={14} className="text-green-600" />
+          ) : (
+            <Copy size={14} />
+          )}
+        </button>
+      </Tooltip>
     </div>
   );
 }
