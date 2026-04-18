@@ -4,10 +4,11 @@ import {
   IsEnum,
   IsIn,
   IsInt,
+  IsBoolean,
   Min,
   Max,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { Role } from '../enums/role.enum';
 
 export class ListUsersQueryDto {
@@ -39,4 +40,9 @@ export class ListUsersQueryDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => value === 'true' || value === true)
+  isActive?: boolean;
 }

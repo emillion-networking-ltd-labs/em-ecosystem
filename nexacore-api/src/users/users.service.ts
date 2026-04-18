@@ -417,7 +417,11 @@ export class UsersService {
     const limit = query.limit ?? 10;
     const skip = (page - 1) * limit;
 
-    const where: Record<string, unknown> = {};
+    const where: Record<string, unknown> = { deletedAt: null };
+
+    if (query.isActive !== undefined) {
+      where.isActive = query.isActive;
+    }
 
     if (query.role) {
       where.role = query.role;
@@ -780,17 +784,16 @@ export class UsersService {
       throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
-    await this.prisma.user.update({
-      where: { id: targetId },
-      data: { isActive: false },
-    });
+    // Send confirmation email BEFORE anonymization (needs real email)
+    await this.mailService.sendAccountDeletionConfirmation(
+      target.email,
+      target.firstName,
+    );
 
-    // Revoke all sessions on soft delete (immediate lockout)
-    await this.sessionsService.revokeAllUserSessions(targetId);
-    this.tokenDenyListService
-      .denyAllForUser(targetId, ACCESS_TOKEN_TTL_SECONDS)
-      .catch(() => {});
+    // Anonymize PII + delete related data
+    await this.anonymizeAndDelete(targetId);
 
+    // Audit log AFTER anonymization
     this.auditService
       .log({
         action: AuditAction.USER_DELETED,
@@ -800,6 +803,60 @@ export class UsersService {
         userAgent: ctx?.userAgent,
         metadata: { email: pseudonymizeEmail(target.email) },
       })
+      .catch(() => {});
+  }
+
+  // ── Shared anonymization (SCRUM-310) ──
+
+  private async anonymizeAndDelete(userId: string): Promise<void> {
+    const anonymizedEmail = `deleted-${userId}@anonymized.local`;
+
+    await this.prisma.$transaction([
+      // 1. Anonymize user PII (tombstone)
+      this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          email: anonymizedEmail,
+          passwordHash: null,
+          firstName: null,
+          lastName: null,
+          avatarUrl: null,
+          avatarOriginalUrl: null,
+          avatarCropData: Prisma.JsonNull,
+          pendingEmail: null,
+          emailVerified: false,
+          isActive: false,
+          deletedAt: new Date(),
+          failedAttempts: 0,
+          lockedUntil: null,
+          lockoutCount: 0,
+          mfaEnabled: false,
+          mfaSecret: null,
+          mfaRecoveryCodes: [],
+        },
+      }),
+      // 2. Delete all sessions (contain IP/UA PII)
+      this.prisma.session.deleteMany({ where: { userId } }),
+      // 3. Delete all email verification tokens
+      this.prisma.emailVerificationToken.deleteMany({ where: { userId } }),
+      // 4. Delete all password reset tokens
+      this.prisma.passwordResetToken.deleteMany({ where: { userId } }),
+      // 5. Delete OAuth accounts
+      this.prisma.oAuthAccount.deleteMany({ where: { userId } }),
+      // 6. Delete trusted devices
+      this.prisma.trustedDevice.deleteMany({ where: { userId } }),
+      // 7. Delete WebAuthn credentials (passkeys)
+      this.prisma.webAuthnCredential.deleteMany({ where: { userId } }),
+      // 8. Scrub audit log PII (ipAddress, userAgent, metadata)
+      this.prisma.auditLog.updateMany({
+        where: { OR: [{ userId }, { targetUserId: userId }] },
+        data: { ipAddress: null, userAgent: null, metadata: Prisma.DbNull },
+      }),
+    ]);
+
+    // Deny all access tokens (immediate invalidation)
+    this.tokenDenyListService
+      .denyAllForUser(userId, ACCESS_TOKEN_TTL_SECONDS)
       .catch(() => {});
   }
 
@@ -978,44 +1035,10 @@ export class UsersService {
       user.firstName,
     );
 
-    // Anonymize PII + delete related data in a single transaction
-    const anonymizedEmail = `deleted-${userId}@anonymized.local`;
+    // Anonymize PII + delete related data (shared with admin softDelete)
+    await this.anonymizeAndDelete(userId);
 
-    await this.prisma.$transaction([
-      // 1. Anonymize user PII (tombstone)
-      this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          email: anonymizedEmail,
-          passwordHash: null,
-          firstName: null,
-          lastName: null,
-          avatarUrl: null,
-          pendingEmail: null,
-          emailVerified: false,
-          isActive: false,
-          failedAttempts: 0,
-          lockedUntil: null,
-          lockoutCount: 0,
-          mfaEnabled: false,
-          mfaSecret: null,
-          mfaRecoveryCodes: [],
-        },
-      }),
-      // 2. Delete all sessions (contain IP/UA PII)
-      this.prisma.session.deleteMany({ where: { userId } }),
-      // 3. Delete all email verification tokens
-      this.prisma.emailVerificationToken.deleteMany({ where: { userId } }),
-      // 4. Delete all password reset tokens
-      this.prisma.passwordResetToken.deleteMany({ where: { userId } }),
-      // 5. Scrub audit log PII (ipAddress, userAgent, metadata)
-      this.prisma.auditLog.updateMany({
-        where: { OR: [{ userId }, { targetUserId: userId }] },
-        data: { ipAddress: null, userAgent: null, metadata: Prisma.DbNull },
-      }),
-    ]);
-
-    // Audit log AFTER transaction (intentionally keeps IP/UA for the deletion event)
+    // Audit log AFTER anonymization (intentionally keeps IP/UA for the deletion event)
     this.auditService
       .log({
         action: AuditAction.ACCOUNT_SELF_DELETED,

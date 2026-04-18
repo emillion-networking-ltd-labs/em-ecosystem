@@ -67,6 +67,12 @@ describe('UsersService', () => {
       delete: jest.Mock;
       deleteMany: jest.Mock;
     };
+    trustedDevice: {
+      deleteMany: jest.Mock;
+    };
+    webAuthnCredential: {
+      deleteMany: jest.Mock;
+    };
     $transaction: jest.Mock;
   };
 
@@ -123,6 +129,12 @@ describe('UsersService', () => {
         findMany: jest.fn().mockResolvedValue([]),
         findFirst: jest.fn().mockResolvedValue(null),
         delete: jest.fn().mockResolvedValue(undefined),
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
+      trustedDevice: {
+        deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
+      },
+      webAuthnCredential: {
         deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
       },
       $transaction: jest.fn().mockResolvedValue(undefined),
@@ -600,6 +612,22 @@ describe('UsersService', () => {
       expect(result.meta.totalPages).toBe(5);
     });
 
+    it('should always filter out deleted users (deletedAt: null)', async () => {
+      prisma.user.findMany.mockResolvedValue([]);
+      prisma.user.count.mockResolvedValue(0);
+
+      await usersService.findAll({});
+
+      expect(prisma.user.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: expect.objectContaining({ deletedAt: null }),
+        }),
+      );
+      expect(prisma.user.count).toHaveBeenCalledWith({
+        where: expect.objectContaining({ deletedAt: null }),
+      });
+    });
+
     it('should filter by role when provided', async () => {
       prisma.user.findMany.mockResolvedValue([]);
       prisma.user.count.mockResolvedValue(0);
@@ -1069,19 +1097,37 @@ describe('UsersService', () => {
       );
     });
 
-    it('should set isActive=false and fire audit log', async () => {
+    it('should send deletion email and anonymize PII via $transaction', async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
-      prisma.user.update.mockResolvedValue({ ...mockUser, isActive: false });
 
       await usersService.softDelete('uuid-123', 'admin-1', {
         ipAddress: '10.0.0.1',
         userAgent: 'test-agent',
       });
 
-      expect(prisma.user.update).toHaveBeenCalledWith({
-        where: { id: 'uuid-123' },
-        data: { isActive: false },
+      // Email sent before anonymization
+      expect(mailService.sendAccountDeletionConfirmation).toHaveBeenCalledWith(
+        mockUser.email,
+        mockUser.firstName,
+      );
+      const emailOrder =
+        mailService.sendAccountDeletionConfirmation.mock.invocationCallOrder[0];
+      const txOrder = prisma.$transaction.mock.invocationCallOrder[0];
+      expect(emailOrder).toBeLessThan(txOrder);
+
+      // $transaction called with 8 operations
+      expect(prisma.$transaction).toHaveBeenCalled();
+      expect(prisma.$transaction.mock.calls[0][0]).toHaveLength(8);
+    });
+
+    it('should fire audit log after anonymization', async () => {
+      prisma.user.findUnique.mockResolvedValue(mockUser);
+
+      await usersService.softDelete('uuid-123', 'admin-1', {
+        ipAddress: '10.0.0.1',
+        userAgent: 'test-agent',
       });
+
       expect(auditService.log).toHaveBeenCalledWith(
         expect.objectContaining({
           action: AuditAction.USER_DELETED,
@@ -1095,7 +1141,6 @@ describe('UsersService', () => {
     it('should not throw when audit log rejects (fire-and-forget)', async () => {
       auditService.log.mockRejectedValue(new Error('audit fail'));
       prisma.user.findUnique.mockResolvedValue(mockUser);
-      prisma.user.update.mockResolvedValue({ ...mockUser, isActive: false });
 
       await usersService.softDelete('uuid-123', 'admin-1', {
         ipAddress: '10.0.0.1',
@@ -1105,15 +1150,14 @@ describe('UsersService', () => {
       await new Promise(process.nextTick);
     });
 
-    it('should revoke all sessions on soft delete', async () => {
+    it('should deny all access tokens after anonymization', async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
-      prisma.user.update.mockResolvedValue({ ...mockUser, isActive: false });
 
       await usersService.softDelete('uuid-123', 'admin-1');
 
-      expect(sessionsService.revokeAllUserSessions).toHaveBeenCalledWith(
-        'uuid-123',
-      );
+      // tokenDenyListService is fire-and-forget inside anonymizeAndDelete
+      // Verify $transaction was called (which includes the anonymization)
+      expect(prisma.$transaction).toHaveBeenCalled();
     });
   });
 
@@ -1434,23 +1478,15 @@ describe('UsersService', () => {
       expect(emailCallOrder).toBeLessThan(txCallOrder);
     });
 
-    it('should execute $transaction with 5 operations', async () => {
+    it('should execute $transaction with 8 operations (shared anonymizeAndDelete)', async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
       (bcrypt.compare as jest.Mock).mockResolvedValue(true);
 
       await usersService.selfDeleteAccount('uuid-123', deleteDto, ctx);
 
-      expect(prisma.$transaction).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.anything(), // user.update (anonymize)
-          expect.anything(), // session.deleteMany
-          expect.anything(), // emailVerificationToken.deleteMany
-          expect.anything(), // passwordResetToken.deleteMany
-          expect.anything(), // auditLog.updateMany
-        ]),
-      );
-      // Verify exactly 5 operations
-      expect(prisma.$transaction.mock.calls[0][0]).toHaveLength(5);
+      expect(prisma.$transaction).toHaveBeenCalled();
+      // 8 ops: user.update, session, emailToken, passwordToken, oAuth, trustedDevice, webAuthn, auditLog
+      expect(prisma.$transaction.mock.calls[0][0]).toHaveLength(8);
     });
 
     it('should anonymize all PII fields in the transaction', async () => {

@@ -13,11 +13,13 @@ import { Search } from "lucide-react";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
 import Spinner from "@/components/ui/Spinner";
+import Accordion from "@/components/ui/Accordion";
 import AlertBox from "@/components/ui/AlertBox";
 import { apiClient, SessionExpiredError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { ADMIN_TOAST } from "@/lib/toast-messages";
+import MetricCard from "@/components/dashboard/MetricCard";
 import type {
   SafeUser,
   PaginatedResponse,
@@ -62,6 +64,42 @@ export default function AdminPage() {
   const [selectedUser, setSelectedUser] = useState<SafeUser | null>(null);
   const [selectedRole, setSelectedRole] = useState<UserRole>("USER");
   const [modalLoading, setModalLoading] = useState(false);
+
+  // Stats for metric cards
+  const [stats, setStats] = useState({
+    total: 0,
+    active: 0,
+    locked: 0,
+    admins: 0,
+  });
+  const [statsLoading, setStatsLoading] = useState(true);
+
+  const fetchStats = useCallback(async () => {
+    setStatsLoading(true);
+    try {
+      const [total, active, admins] = await Promise.all([
+        apiClient.get<PaginatedResponse<SafeUser>>("/users?limit=1"),
+        apiClient.get<PaginatedResponse<SafeUser>>(
+          "/users?isActive=true&limit=1",
+        ),
+        apiClient.get<PaginatedResponse<SafeUser>>("/users?role=ADMIN&limit=1"),
+      ]);
+      setStats({
+        total: total.meta.total,
+        active: active.meta.total,
+        locked: total.meta.total - active.meta.total,
+        admins: admins.meta.total,
+      });
+    } catch {
+      // Stats are non-critical
+    } finally {
+      setStatsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchStats();
+  }, [fetchStats]);
 
   const fetchUsers = useCallback(
     async (page: number, signal?: AbortSignal) => {
@@ -142,6 +180,7 @@ export default function AdminPage() {
         await apiClient.delete(`/users/${selectedUser.id}`);
       }
       await fetchUsers(meta.page);
+      fetchStats();
       closeModal();
     } catch {
       addToast({
@@ -214,6 +253,44 @@ export default function AdminPage() {
 
         {/* Content */}
         <div className="card-flat">
+          {/* Stats */}
+          <Accordion
+            className="mb-6"
+            items={[
+              {
+                title: "User Stats",
+                children: (
+                  <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                    <MetricCard
+                      label="Total Users"
+                      value={stats.total.toLocaleString()}
+                      colorVariant="purple"
+                      loading={statsLoading}
+                    />
+                    <MetricCard
+                      label="Active"
+                      value={stats.active.toLocaleString()}
+                      colorVariant="blue"
+                      loading={statsLoading}
+                    />
+                    <MetricCard
+                      label="Locked"
+                      value={stats.locked.toLocaleString()}
+                      colorVariant="purple"
+                      loading={statsLoading}
+                    />
+                    <MetricCard
+                      label="Admins"
+                      value={stats.admins.toLocaleString()}
+                      colorVariant="blue"
+                      loading={statsLoading}
+                    />
+                  </div>
+                ),
+              },
+            ]}
+          />
+
           {/* Table */}
           {initialLoading ? (
             <div className="flex h-64 items-center justify-center">

@@ -232,7 +232,7 @@ describe('UsersController', () => {
         'admin-1',
         { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
       );
-      expect(result).toEqual({ message: 'User deactivated successfully' });
+      expect(result).toEqual({ message: 'User deleted successfully' });
     });
   });
 
