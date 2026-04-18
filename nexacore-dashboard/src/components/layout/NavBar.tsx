@@ -69,6 +69,8 @@ export default function NavBar({
             <IconButton
               variant="boxed"
               size="sm"
+              tooltip
+              tooltipPosition="right"
               onClick={onMenuClick}
               className="lg:hidden"
               aria-label="Toggle sidebar"
@@ -99,6 +101,7 @@ export default function NavBar({
               <IconButton
                 variant="boxed"
                 size="sm"
+                tooltip="Search (Ctrl+K)"
                 onClick={onCommandPaletteOpen}
                 aria-label="Search"
                 className="lg:hidden"

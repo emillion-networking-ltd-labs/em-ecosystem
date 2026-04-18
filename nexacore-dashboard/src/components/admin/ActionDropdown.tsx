@@ -78,8 +78,7 @@ export default function ActionDropdown({
         <IconButton
           variant="boxed"
           size="sm"
-          tooltip
-          tooltipPosition="bottom"
+          tooltip={!open}
           onClick={() => (open ? setOpen(false) : openDropdown())}
           aria-label="Actions"
         >
