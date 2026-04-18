@@ -30,11 +30,12 @@ export const commandPaletteSpecs = {
     overlay: "bg-[var(--overlay)] fixed inset-0",
     container:
       "max-w-[550px] rounded-xl border-border-strong bg-surface-primary shadow-card",
-    position: "pt-[20vh] — above fold (Linear/Vercel pattern)",
+    position:
+      "mobile: pt-[68px] px-4 (below header) | desktop: pt-[20vh] (Linear/Vercel pattern)",
   },
   input: {
     style:
-      "text-body placeholder:text-content-tertiary px-4 py-3 border-b border-border-strong",
+      "h-12 text-body leading-6 placeholder:text-content-placeholder px-4 border-b border-border-strong (matches Input md)",
     icon: "Search 16px text-content-tertiary",
   },
   item: {
@@ -112,6 +113,25 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
     }
   }, [open]);
 
+  // Lock body scroll while open
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  // Lock body scroll while open
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
+
   // Close on Escape
   useEffect(() => {
     if (!open) return;
@@ -171,20 +191,20 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
       {/* Overlay */}
       <div className="fixed inset-0 bg-[var(--overlay)]" onClick={onClose} />
 
-      {/* Dialog */}
-      <div className="fixed inset-0 flex items-start justify-center pt-[20vh]">
+      {/* Dialog — mobile: below header (68px), desktop: 20vh from top */}
+      <div className="fixed inset-0 flex items-start justify-center px-4 pt-[68px] lg:px-0 lg:pt-[20vh]">
         <Command
           className="w-full max-w-[550px] overflow-hidden rounded-xl border border-border-strong bg-surface-primary shadow-card"
           shouldFilter={true}
         >
-          {/* Input */}
-          <div className="flex items-center gap-2 border-b border-border-strong px-4">
+          {/* Input — matches Input md (h-12 px-4 text-body placeholder:text-content-placeholder) */}
+          <div className="flex h-12 items-center gap-2 border-b border-border-strong px-4">
             <Search size={16} className="shrink-0 text-content-tertiary" />
             <Command.Input
               value={search}
               onValueChange={setSearch}
               placeholder="Type a command or search..."
-              className="w-full bg-transparent py-3 text-body text-content-primary placeholder:text-content-tertiary outline-none"
+              className="min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary placeholder:text-content-placeholder outline-none"
             />
             <IconButton size="sm" onClick={onClose} aria-label="Close search">
               <X size={16} />
