@@ -9,6 +9,7 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -60,6 +61,7 @@ export class UsersService {
     private readonly tokenDenyListService: TokenDenyListService,
     @Inject(FILE_STORAGE)
     private readonly storage: FileStorageService,
+    private readonly configService: ConfigService,
   ) {}
 
   async findByEmail(email: string): Promise<User | null> {
@@ -650,7 +652,7 @@ export class UsersService {
   private async uploadOriginal(buffer: Buffer, key: string): Promise<string> {
     const fs = await import('fs/promises');
     const path = await import('path');
-    const uploadDir = process.env.UPLOAD_DIR || './uploads';
+    const uploadDir = this.configService.get<string>('UPLOAD_DIR', './uploads');
     const origDir = path.join(uploadDir, 'originals');
     await fs.mkdir(origDir, { recursive: true });
     await fs.writeFile(path.join(origDir, key), buffer);
@@ -660,7 +662,7 @@ export class UsersService {
   private async deleteOriginalFile(key: string): Promise<void> {
     const fs = await import('fs/promises');
     const path = await import('path');
-    const uploadDir = process.env.UPLOAD_DIR || './uploads';
+    const uploadDir = this.configService.get<string>('UPLOAD_DIR', './uploads');
     try {
       await fs.unlink(path.join(uploadDir, 'originals', key));
     } catch {
