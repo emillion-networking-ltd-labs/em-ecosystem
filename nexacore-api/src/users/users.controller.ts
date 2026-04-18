@@ -290,6 +290,6 @@ export class UsersController {
       req.user.id,
       extractRequestMeta(req),
     );
-    return { message: 'User deactivated successfully' };
+    return { message: 'User deleted successfully' };
   }
 }
