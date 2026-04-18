@@ -3816,6 +3816,7 @@ function SidebarShowcase() {
         specs={{
           Container: sidebarNavSpecs.container,
           NavItem: sidebarNavSpecs.item,
+          Flyout: sidebarNavSpecs.flyout,
           NavSection: sidebarNavSpecs.section,
         }}
       />

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Tooltip from "./Tooltip";
-import Tabs from "./Tabs";
+import Tabs, { variantStyles } from "./Tabs";
 import {
   baseClass as iconBtnBase,
   variantClasses as iconBtnVariants,
@@ -40,11 +41,26 @@ interface SidebarNavProps {
 export const sidebarNavSpecs = {
   item: {
     expanded: "Inherits from Tabs variant=nav (active/inactive/chevron/icon)",
+    expandedParent:
+      "Accordion: click entire row → toggle children. Parent page added as explicit first child in config",
     collapsed:
       "IconButton boxed + aria-pressed=true for active (ring-1 ring-border-components)",
-    tooltip: "Tooltip position=right on collapsed items (portal, 200ms delay)",
+    collapsedWithChildren:
+      "Flyout popover on hover (no Tooltip) — section label + child Links",
+    tooltip:
+      "Tooltip position=right on collapsed leaf items only (portal, 200ms delay)",
     submenu:
       "Parent: ChevronDown/Right toggle | Children: nested Tabs variant=nav, pl-4 indent",
+  },
+  flyout: {
+    container:
+      "rounded-xl border-border-strong bg-surface-primary shadow-card p-2 min-w-[180px]",
+    position:
+      "createPortal to body, fixed, left: icon.right + 8px, top: icon.top",
+    delay: "200ms hover delay (same as Tooltip)",
+    header:
+      "text-body font-normal text-content-tertiary px-3 py-1.5 (matches section label)",
+    item: "flex items-center gap-2 px-3 py-2 rounded-lg text-body hover:bg-surface-subtle",
   },
   section: {
     label: "text-body font-normal text-content-tertiary px-2 mb-2",
@@ -58,6 +74,114 @@ export const sidebarNavSpecs = {
     shadow: "shadow-card",
   },
 };
+
+// ─── Flyout (collapsed items with children) ───
+
+function SidebarFlyout({
+  parentLabel,
+  items,
+  onNavigate,
+  children,
+}: {
+  parentLabel: string;
+  items: SidebarNavItem[];
+  onNavigate?: (href: string, e: React.MouseEvent) => void;
+  children: React.ReactNode;
+}) {
+  const [visible, setVisible] = useState(false);
+  const enterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const triggerRef = useRef<HTMLDivElement>(null);
+  const [style, setStyle] = useState<React.CSSProperties>({});
+
+  const updatePosition = useCallback(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    setStyle({ left: rect.right + 8, top: rect.top });
+  }, []);
+
+  useEffect(() => {
+    if (visible) updatePosition();
+  }, [visible, updatePosition]);
+
+  const startEnter = useCallback(() => {
+    // Cancel any pending leave — mouse moved back in
+    if (leaveTimer.current) {
+      clearTimeout(leaveTimer.current);
+      leaveTimer.current = null;
+    }
+    if (enterTimer.current) clearTimeout(enterTimer.current);
+    enterTimer.current = setTimeout(() => setVisible(true), 200);
+  }, []);
+
+  const startLeave = useCallback(() => {
+    if (enterTimer.current) {
+      clearTimeout(enterTimer.current);
+      enterTimer.current = null;
+    }
+    // 150ms delay to bridge the gap between trigger and flyout
+    leaveTimer.current = setTimeout(() => setVisible(false), 150);
+  }, []);
+
+  const isTouchDevice =
+    typeof window !== "undefined" &&
+    window.matchMedia("(pointer: coarse)").matches;
+
+  const flyoutEl = visible ? (
+    <div
+      className="fixed z-[9999] rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card min-w-[180px]"
+      style={style}
+      onMouseEnter={startEnter}
+      onMouseLeave={startLeave}
+    >
+      <p className="px-3 py-1.5 text-body font-normal text-content-tertiary">
+        {parentLabel}
+      </p>
+      {items.map((child) => {
+        const ChildIcon = child.icon;
+        return (
+          <Link
+            key={child.href}
+            href={child.href}
+            onClick={(e) => {
+              onNavigate?.(child.href, e);
+              setVisible(false);
+            }}
+            className="flex items-center gap-2 rounded-lg px-3 py-2 text-body text-content-primary hover:bg-surface-subtle"
+          >
+            <ChildIcon size={16} className="shrink-0" />
+            <span>{child.label}</span>
+          </Link>
+        );
+      })}
+    </div>
+  ) : null;
+
+  return (
+    <div
+      ref={triggerRef}
+      className="relative inline-flex"
+      onMouseEnter={isTouchDevice ? undefined : startEnter}
+      onMouseLeave={isTouchDevice ? undefined : startLeave}
+      onClick={
+        isTouchDevice
+          ? () => {
+              setVisible((v) => {
+                if (!v) updatePosition();
+                return !v;
+              });
+            }
+          : undefined
+      }
+    >
+      {children}
+      {flyoutEl &&
+        typeof document !== "undefined" &&
+        createPortal(flyoutEl, document.body)}
+    </div>
+  );
+}
 
 // ─── Section wrapper ───
 
@@ -140,13 +264,33 @@ export default function SidebarNav({
                 const item = section.items.find((it) => it.href === tab.value);
                 if (!item) return null;
                 const Icon = item.icon;
-                const hasChildren = item.children && item.children.length > 0;
+                const hasChildren = Array.isArray(item.children);
 
                 // ─── Collapsed ───
                 if (collapsed) {
                   const parentActive =
                     hasChildren && item.children!.some((c) => c.active);
                   const itemActive = isActive || parentActive || !!item.active;
+
+                  // Items with children → flyout popover
+                  if (hasChildren) {
+                    return (
+                      <SidebarFlyout
+                        parentLabel={item.label}
+                        items={item.children!}
+                        onNavigate={onNavigate}
+                      >
+                        <button
+                          aria-pressed={itemActive ? "true" : undefined}
+                          className={`${iconBtnBase} ${iconBtnSizes.sm} ${iconBtnVariants.boxed}`}
+                        >
+                          <Icon size={16} className="shrink-0" />
+                        </button>
+                      </SidebarFlyout>
+                    );
+                  }
+
+                  // Leaf items → Tooltip + Link
                   return (
                     <Tooltip content={item.label} position="right">
                       <Link
@@ -161,7 +305,7 @@ export default function SidebarNav({
                   );
                 }
 
-                // ─── Expanded: parent with children ───
+                // ─── Expanded: parent with children (accordion) ───
                 if (hasChildren) {
                   const open = isParentOpen(item);
                   const activeChildHref =
@@ -172,11 +316,14 @@ export default function SidebarNav({
                     icon: <child.icon size={16} className="shrink-0" />,
                   }));
 
+                  // Parent row is NEVER active — only children can be
+                  const parentClassName = `whitespace-nowrap shrink-0 flex items-center gap-1 px-2 py-2 text-body h-9 w-full ${variantStyles.nav.inactive}`;
+
                   return (
                     <>
                       <button
                         onClick={() => toggleParent(item.href)}
-                        className={tabClassName}
+                        className={parentClassName}
                       >
                         {open ? (
                           <ChevronDown
