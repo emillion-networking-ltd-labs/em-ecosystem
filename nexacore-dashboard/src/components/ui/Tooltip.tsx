@@ -1,12 +1,23 @@
 "use client";
 
-import { useState, useId, useRef, useEffect, useCallback } from "react";
+import {
+  useState,
+  useId,
+  useRef,
+  useEffect,
+  useCallback,
+  cloneElement,
+  isValidElement,
+} from "react";
 import { createPortal } from "react-dom";
 
 export type TooltipPosition = "top" | "bottom" | "left" | "right" | "auto";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type TriggerProps = Record<string, any>;
+
 interface TooltipProps {
-  children: React.ReactNode;
+  children: React.ReactElement<TriggerProps>;
   content: React.ReactNode;
   position?: TooltipPosition;
   maxWidth?: number;
@@ -117,21 +128,32 @@ export default function Tooltip({
     position === "auto" ? "top" : position,
   );
   const [style, setStyle] = useState<React.CSSProperties>({});
-  const wrapperRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLElement>(null);
   const tooltipRef = useRef<HTMLDivElement>(null);
   const enterTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const tooltipId = useId();
 
   const updatePosition = useCallback(() => {
-    const wrapper = wrapperRef.current;
-    if (!wrapper) return;
-    const rect = wrapper.getBoundingClientRect();
+    const el = triggerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
     const tooltipEl = tooltipRef.current;
     const w = tooltipEl?.offsetWidth || maxWidth;
     const h = tooltipEl?.offsetHeight || 40;
     const pos = position === "auto" ? detectBestPosition(rect, w, h) : position;
     setResolved(pos);
     setStyle(getTooltipStyle(rect, pos));
+  }, [position, maxWidth]);
+
+  const showTooltip = useCallback(() => {
+    const el = triggerRef.current;
+    if (!el) return;
+    const rect = el.getBoundingClientRect();
+    const pos =
+      position === "auto" ? detectBestPosition(rect, maxWidth, 40) : position;
+    setResolved(pos);
+    setStyle(getTooltipStyle(rect, pos));
+    setVisible(true);
   }, [position, maxWidth]);
 
   useEffect(() => {
@@ -141,6 +163,18 @@ export default function Tooltip({
   const isTouchDevice =
     typeof window !== "undefined" &&
     window.matchMedia("(pointer: coarse)").matches;
+
+  const handleEnter = useCallback(() => {
+    if (isTouchDevice) return;
+    if (enterTimer.current) clearTimeout(enterTimer.current);
+    enterTimer.current = setTimeout(showTooltip, 200);
+  }, [isTouchDevice, showTooltip]);
+
+  const handleLeave = useCallback(() => {
+    if (enterTimer.current) clearTimeout(enterTimer.current);
+    enterTimer.current = null;
+    setVisible(false);
+  }, []);
 
   const tooltipEl =
     visible && !isTouchDevice ? (
@@ -165,33 +199,38 @@ export default function Tooltip({
       </div>
     ) : null;
 
+  if (!isValidElement(children)) return children;
+
+  // Inject ref + event handlers directly into the child — no wrapper div (Radix pattern)
+  const child = cloneElement(children, {
+    ref: triggerRef,
+    onMouseEnter: (e: React.MouseEvent) => {
+      handleEnter();
+      children.props.onMouseEnter?.(e);
+    },
+    onMouseLeave: (e: React.MouseEvent) => {
+      handleLeave();
+      children.props.onMouseLeave?.(e);
+    },
+    onFocus: (e: React.FocusEvent) => {
+      handleEnter();
+      children.props.onFocus?.(e);
+    },
+    onBlur: (e: React.FocusEvent) => {
+      handleLeave();
+      children.props.onBlur?.(e);
+    },
+    "aria-describedby": visible
+      ? tooltipId
+      : children.props["aria-describedby"],
+  } as React.HTMLAttributes<HTMLElement>);
+
   return (
-    <div
-      ref={wrapperRef}
-      className="relative inline-flex"
-      onMouseEnter={() => {
-        if (isTouchDevice) return;
-        enterTimer.current = setTimeout(() => setVisible(true), 200);
-      }}
-      onMouseLeave={() => {
-        if (enterTimer.current) clearTimeout(enterTimer.current);
-        enterTimer.current = null;
-        setVisible(false);
-      }}
-      onFocus={() => {
-        if (isTouchDevice) return;
-        enterTimer.current = setTimeout(() => setVisible(true), 200);
-      }}
-      onBlur={() => {
-        if (enterTimer.current) clearTimeout(enterTimer.current);
-        enterTimer.current = null;
-        setVisible(false);
-      }}
-    >
-      <div aria-describedby={visible ? tooltipId : undefined}>{children}</div>
+    <>
+      {child}
       {tooltipEl &&
         typeof document !== "undefined" &&
         createPortal(tooltipEl, document.body)}
-    </div>
+    </>
   );
 }

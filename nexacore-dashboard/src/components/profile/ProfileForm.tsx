@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Avatar, { resolveAvatarSrc } from "@/components/ui/Avatar";
+
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
@@ -290,6 +291,7 @@ export default function ProfileForm() {
             variant="boxed"
             size="sm"
             tooltip
+            tooltipPosition="left"
             aria-label="Change banner"
             className="absolute right-4 top-4 sm:opacity-0 transition-opacity sm:group-hover/banner:opacity-100"
           >

@@ -173,6 +173,7 @@ export default function Sidebar({
           variant="boxed"
           size="sm"
           tooltip
+          tooltipPosition="right"
           onClick={onToggle}
           className={collapsed && !isMobileMode ? "mx-auto" : ""}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
