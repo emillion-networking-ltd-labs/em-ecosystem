@@ -118,7 +118,12 @@ class ApiClient {
     }
 
     // Handle 401 with silent refresh
-    if (response.status === 401 && this.accessToken) {
+    if (response.status === 401) {
+      // Token already cleared by another concurrent request, no refresh in-flight
+      if (!this.accessToken && !this.refreshPromise) {
+        throw new SessionExpiredError();
+      }
+
       const newToken = await this.silentRefresh();
       if (newToken) {
         headers.Authorization = `Bearer ${newToken}`;
@@ -152,9 +157,11 @@ class ApiClient {
         }
         return retryResponse.json();
       }
-      // Refresh failed — session unrecoverable, notify auth context
-      this.accessToken = null;
-      this.onAuthFailure?.();
+      // Refresh failed — notify auth context once, then throw
+      if (this.accessToken) {
+        this.accessToken = null;
+        this.onAuthFailure?.();
+      }
       throw new SessionExpiredError();
     }
 
