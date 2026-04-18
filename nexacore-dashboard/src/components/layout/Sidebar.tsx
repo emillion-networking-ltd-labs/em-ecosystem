@@ -11,6 +11,7 @@ import type { SidebarNavSection } from "@/components/ui/SidebarNav";
 import {
   PieChart,
   User,
+  Users,
   Shield,
   PanelLeftClose,
   PanelLeftOpen,
@@ -39,6 +40,12 @@ const adminItem = {
   icon: Shield,
   permission: "users:read",
   children: [
+    {
+      href: "/admin",
+      label: "User Management",
+      icon: Users,
+      permission: "users:read",
+    },
     {
       href: "/admin/audit-logs",
       label: "Audit Logs",
@@ -116,7 +123,10 @@ export default function Sidebar({
                   .map((c) => ({
                     ...c,
                     active:
-                      pathname === c.href || pathname.startsWith(c.href + "/"),
+                      c.href === adminItem.href
+                        ? pathname === c.href
+                        : pathname === c.href ||
+                          pathname.startsWith(c.href + "/"),
                   })),
               },
             ]
