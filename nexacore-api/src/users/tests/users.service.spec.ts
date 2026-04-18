@@ -100,6 +100,13 @@ describe('UsersService', () => {
   beforeEach(async () => {
     jest.clearAllMocks();
 
+    // Mock global fetch for OAuth avatar download
+    global.fetch = jest.fn().mockResolvedValue({
+      ok: true,
+      headers: { get: () => 'image/jpeg' },
+      arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
+    }) as jest.Mock;
+
     prisma = {
       user: {
         findUnique: jest.fn(),
@@ -512,14 +519,20 @@ describe('UsersService', () => {
         ...existingOAuthUser,
         firstName: 'John',
         lastName: 'Doe',
-        avatarUrl: 'https://example.com/avatar.jpg',
+      };
+      const withAvatar = {
+        ...updatedUser,
+        avatarUrl: '/uploads/avatars/test.jpg',
       };
       prisma.oAuthAccount.findUnique.mockResolvedValue({
         provider: Provider.GOOGLE,
         providerId: 'google-id-123',
         user: existingOAuthUser,
       });
-      prisma.user.update.mockResolvedValue(updatedUser);
+      // First update: profile fields. Second update: avatar
+      prisma.user.update
+        .mockResolvedValueOnce(updatedUser)
+        .mockResolvedValueOnce(withAvatar);
 
       const result = await usersService.findOrCreateByOAuth({
         ...googleProfile,
@@ -528,16 +541,66 @@ describe('UsersService', () => {
         avatarUrl: 'https://example.com/avatar.jpg',
       });
 
-      expect(result).toEqual({ user: updatedUser, action: 'login' });
+      // Profile update should NOT include avatarUrl (handled separately)
       expect(prisma.user.update).toHaveBeenCalledWith({
         where: { id: existingOAuthUser.id },
         data: {
           firstName: 'John',
           lastName: 'Doe',
-          avatarUrl: 'https://example.com/avatar.jpg',
         },
         include: { oauthAccounts: { select: { provider: true } } },
       });
+      // Avatar downloaded and stored locally
+      expect(global.fetch).toHaveBeenCalledWith(
+        'https://example.com/avatar.jpg',
+        expect.objectContaining({ signal: expect.anything() }),
+      );
+      expect(result.user.avatarUrl).toBe('/uploads/avatars/test.jpg');
+    });
+
+    it('should not overwrite existing user avatar on OAuth re-login', async () => {
+      const userWithAvatar = {
+        ...mockUser,
+        email: 'oauth@example.com',
+        emailVerified: true,
+        avatarUrl: '/uploads/avatars/existing.jpg',
+        oauthAccounts: [{ provider: Provider.GOOGLE }],
+      };
+      prisma.oAuthAccount.findUnique.mockResolvedValue({
+        provider: Provider.GOOGLE,
+        providerId: 'google-id-123',
+        user: userWithAvatar,
+      });
+
+      await usersService.findOrCreateByOAuth({
+        ...googleProfile,
+        avatarUrl: 'https://example.com/new-avatar.jpg',
+      });
+
+      // Should NOT download — user already has avatar
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('should not block login when avatar download fails', async () => {
+      (global.fetch as jest.Mock).mockRejectedValue(new Error('Network error'));
+      const newUser = {
+        ...mockUser,
+        email: 'oauth@example.com',
+        emailVerified: true,
+        avatarUrl: null,
+        oauthAccounts: [{ provider: Provider.GOOGLE }],
+      };
+      prisma.oAuthAccount.findUnique.mockResolvedValue(null);
+      prisma.user.findUnique.mockResolvedValue(null);
+      prisma.user.create.mockResolvedValue(newUser);
+
+      const result = await usersService.findOrCreateByOAuth({
+        ...googleProfile,
+        avatarUrl: 'https://example.com/avatar.jpg',
+      });
+
+      // Login should succeed with null avatar
+      expect(result).toEqual({ user: newUser, action: 'created' });
     });
   });
 
