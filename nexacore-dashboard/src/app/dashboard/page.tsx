@@ -6,7 +6,7 @@ import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Divider from "@/components/ui/Divider";
 import { usePermissions } from "@/hooks/usePermissions";
-import { apiClient } from "@/lib/api";
+import { apiClient, SessionExpiredError } from "@/lib/api";
 import type { SafeUser, PaginatedResponse } from "@/lib/types";
 import MetricCard from "@/components/dashboard/MetricCard";
 import TotalUsersChart from "@/components/dashboard/TotalUsersChart";
@@ -49,6 +49,9 @@ export default function DashboardPage() {
             .get<PaginatedResponse<SafeUser>>("/users?limit=1")
             .then((res) => {
               results.totalUsers = res.meta.total;
+            })
+            .catch((err) => {
+              if (err instanceof SessionExpiredError) return;
             }),
         );
         promises.push(
@@ -56,6 +59,9 @@ export default function DashboardPage() {
             .get<PaginatedResponse<SafeUser>>("/users?isActive=true&limit=1")
             .then((res) => {
               results.activeUsers = res.meta.total;
+            })
+            .catch((err) => {
+              if (err instanceof SessionExpiredError) return;
             }),
         );
       }
@@ -66,6 +72,9 @@ export default function DashboardPage() {
             .get<{ total: number }>("/audit-logs?limit=1&page=1")
             .then((res) => {
               results.totalActivity = res.total;
+            })
+            .catch((err) => {
+              if (err instanceof SessionExpiredError) return;
             }),
         );
       }
