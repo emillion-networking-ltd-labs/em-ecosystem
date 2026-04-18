@@ -28,20 +28,25 @@ export default function ActionDropdown({
   const [open, setOpen] = useState(false);
   const btnRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
-  const [pos, setPos] = useState({ top: 0, right: 0 });
+  const [pos, setPos] = useState<React.CSSProperties>({});
 
-  const updatePos = useCallback(() => {
+  const openDropdown = useCallback(() => {
     if (!btnRef.current) return;
     const rect = btnRef.current.getBoundingClientRect();
-    setPos({
-      top: rect.bottom + 4,
-      right: window.innerWidth - rect.right,
-    });
+    const menuH = 160;
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const right = window.innerWidth - rect.right;
+
+    setPos(
+      spaceBelow < menuH + 8 && rect.top > menuH
+        ? { bottom: window.innerHeight - rect.top + 4, right }
+        : { top: rect.bottom + 4, right },
+    );
+    setOpen(true);
   }, []);
 
   useEffect(() => {
     if (!open) return;
-    updatePos();
 
     function handleClickOutside(e: MouseEvent) {
       if (
@@ -55,7 +60,7 @@ export default function ActionDropdown({
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
-  }, [open, updatePos]);
+  }, [open]);
 
   const isLocked = !user.isActive;
 
@@ -67,7 +72,7 @@ export default function ActionDropdown({
           size="sm"
           tooltip
           tooltipPosition="bottom"
-          onClick={() => setOpen(!open)}
+          onClick={() => (open ? setOpen(false) : openDropdown())}
           aria-label="Actions"
         >
           <MoreHorizontal size={16} />
@@ -77,8 +82,8 @@ export default function ActionDropdown({
       {open && (
         <div
           ref={menuRef}
-          className="fixed z-50 w-[241px] rounded-xl border border-border-components bg-surface-primary p-2 shadow-card animate-dropdown-down"
-          style={{ top: pos.top, right: pos.right }}
+          className="fixed z-50 w-[241px] rounded-xl border border-border-components bg-surface-primary p-2 shadow-card"
+          style={pos}
         >
           <Can permission="users:write">
             <button
