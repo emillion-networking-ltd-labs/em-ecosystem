@@ -20,6 +20,7 @@ import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import RateLimitBanner from "@/components/ui/RateLimitBanner";
 import type { PasskeyResponse } from "@/lib/types";
 
 function formatRelativeTime(dateStr: string | null): string {
@@ -123,6 +124,8 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
     renamePasskey,
     deletePasskey,
     clearError,
+    rateLimitInfo,
+    clearRateLimit,
   } = usePasskey();
 
   const { addToast } = useToast();
@@ -290,7 +293,7 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
               setRegName("");
               setRegisterOpen(true);
             }}
-            disabled={passkeys.length >= 10}
+            disabled={passkeys.length >= 10 || !!rateLimitInfo}
             className="sm:w-auto"
           >
             <Plus size={16} />
@@ -301,6 +304,16 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
             <p className="mt-2 text-caption text-content-secondary">
               Maximum of 10 passkeys reached. Remove one before adding another.
             </p>
+          )}
+
+          {rateLimitInfo && (
+            <div className="mt-3">
+              <RateLimitBanner
+                retryAfter={rateLimitInfo.retryAfter}
+                message="Too many attempts."
+                onExpired={clearRateLimit}
+              />
+            </div>
           )}
         </>
       )}

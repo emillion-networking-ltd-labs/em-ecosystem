@@ -131,6 +131,11 @@ export const PROFILE_TOAST = {
     title: "Trust failed",
     description: "Could not trust this device.",
   } as ToastMsg,
+  TOO_MANY_REQUESTS: {
+    variant: "error",
+    title: "Too many requests",
+    description: "Please wait a moment before trying again.",
+  } as ToastMsg,
   DEVICE_REVOKED: {
     variant: "success",
     title: "Device revoked",

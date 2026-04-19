@@ -16,7 +16,9 @@ import {
 } from "@/lib/passkey-api";
 import type { PasskeyResponse, PasskeyRegisterResult } from "@/lib/types";
 
-type ApiError = { error?: { message?: string } };
+type ApiError = {
+  error?: { message?: string; statusCode?: number; retryAfter?: number };
+};
 
 function extractMessage(err: unknown, fallback: string): string {
   const msg = (err as ApiError)?.error?.message ?? fallback;
@@ -30,6 +32,10 @@ export function usePasskey() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [rateLimitInfo, setRateLimitInfo] = useState<{
+    retryAfter: number;
+  } | null>(null);
+  const clearRateLimit = useCallback(() => setRateLimitInfo(null), []);
   const abortRef = useRef(false);
   const [isConditionalAvailable, setIsConditionalAvailable] = useState(false);
   const conditionalAbortRef = useRef<AbortController | null>(null);
@@ -68,6 +74,11 @@ export function usePasskey() {
         return result;
       } catch (err: unknown) {
         if ((err as Error)?.name === "NotAllowedError") return null;
+        const apiErr = err as ApiError;
+        if (apiErr?.error?.statusCode === 429) {
+          setRateLimitInfo({ retryAfter: apiErr.error.retryAfter ?? 60 });
+          return null;
+        }
         setError(extractMessage(err, "Passkey registration failed."));
         return null;
       } finally {
@@ -129,6 +140,11 @@ export function usePasskey() {
       } catch (err) {
         // Rollback on failure
         await fetchPasskeys();
+        const apiErr = err as ApiError;
+        if (apiErr?.error?.statusCode === 429) {
+          setRateLimitInfo({ retryAfter: apiErr.error.retryAfter ?? 60 });
+          return "rate-limited";
+        }
         const msg = extractMessage(err, "Failed to delete passkey.");
         setError(msg);
         return msg;
@@ -200,6 +216,8 @@ export function usePasskey() {
     deletePasskey: handleDelete,
     error,
     clearError,
+    rateLimitInfo,
+    clearRateLimit,
     isConditionalAvailable,
     startConditionalUI,
     abortConditionalUI,

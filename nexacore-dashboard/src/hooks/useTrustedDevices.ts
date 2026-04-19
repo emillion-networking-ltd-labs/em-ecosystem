@@ -42,7 +42,10 @@ export function useTrustedDevices() {
   }, []);
 
   const trustCurrentDevice = useCallback(async (): Promise<
-    "trusted" | "already" | false
+    | "trusted"
+    | "already"
+    | { status: "rate-limited"; retryAfter: number }
+    | false
   > => {
     setError(null);
     try {
@@ -55,17 +58,20 @@ export function useTrustedDevices() {
       await fetchDevices();
       return result.alreadyTrusted ? "already" : "trusted";
     } catch (err) {
-      setError(
-        extractMessageByStatus(
-          err,
-          {
-            [HTTP_STATUS.TOO_MANY_REQUESTS]:
-              "Too many requests. Try again later.",
-          },
-          "Failed to trust device.",
-        ),
-      );
-      return false;
+      const apiErr = err as {
+        error?: { statusCode?: number; retryAfter?: number; message?: string };
+      };
+      const isRateLimited =
+        apiErr?.error?.statusCode === HTTP_STATUS.TOO_MANY_REQUESTS;
+      if (!isRateLimited) {
+        setError("Failed to trust device.");
+      }
+      return isRateLimited
+        ? {
+            status: "rate-limited" as const,
+            retryAfter: apiErr.error?.retryAfter ?? 60,
+          }
+        : false;
     }
   }, [fetchDevices]);
 

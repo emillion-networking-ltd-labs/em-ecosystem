@@ -10,7 +10,9 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import RateLimitBanner from "@/components/ui/RateLimitBanner";
 import Spinner from "@/components/ui/Spinner";
+import { useRateLimit } from "@/hooks/useRateLimit";
 import type { TrustedDeviceResponse } from "@/lib/types";
 
 function isMobileDevice(name: string): boolean {
@@ -48,6 +50,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
   } = useTrustedDevices();
 
   const { addToast } = useToast();
+  const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
 
   const [isTrusting, setIsTrusting] = useState(false);
   const [revokeTarget, setRevokeTarget] =
@@ -75,6 +78,8 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
       addToast(PROFILE_TOAST.DEVICE_TRUSTED);
     } else if (result === "already") {
       addToast(PROFILE_TOAST.DEVICE_ALREADY_TRUSTED);
+    } else if (typeof result === "object" && result.status === "rate-limited") {
+      setRateLimit(result.retryAfter, "Too many attempts.", "throttle");
     } else {
       addToast(PROFILE_TOAST.DEVICE_TRUST_FAILED);
     }
@@ -204,6 +209,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
           variant="primary"
           size="md"
           loading={isTrusting}
+          disabled={rateLimitInfo.isRateLimited}
           onClick={handleTrust}
           className="sm:w-auto"
         >
@@ -221,6 +227,17 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
           </Button>
         )}
       </div>
+
+      {/* Rate limit banner — below buttons */}
+      {rateLimitInfo.isRateLimited && rateLimitInfo.retryAfter && (
+        <div className="mt-3">
+          <RateLimitBanner
+            retryAfter={rateLimitInfo.retryAfter}
+            message="Too many attempts."
+            onExpired={clearRateLimit}
+          />
+        </div>
+      )}
 
       {/* Revoke single device modal */}
       <ConfirmModal
