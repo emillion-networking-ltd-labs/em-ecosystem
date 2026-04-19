@@ -22,20 +22,24 @@ export const confirmModalSpecs = {
   },
   layout: {
     radius: "rounded-xl (card inner)",
-    overlay: "bg-[var(--overlay)]",
-    topSection: "bg-surface-primary p-6 border-b border-border-strong",
+    overlay: "bg-[var(--overlay)] — click does NOT close (Escape + X only)",
+    topSection:
+      "bg-surface-primary p-6 sm:p-6 p-4 border-b border-border-strong",
     bottomSection: "bg-surface-secondary px-6 py-3",
   },
   accessibility: {
     role: "dialog, aria-modal=true",
     focusTrap: "Tab/Shift+Tab cycles within modal",
     escape: "Closes modal",
-    overlayClick: "Closes modal",
+    overlayClick: "Does NOT close modal (prevents accidental dismissal)",
+    enterKey: "Triggers onConfirm (standard form submission)",
     focusRestore: "Previous focus restored on close",
+    autofocus:
+      "Input → first input | Danger no input → Cancel | Primary no input → Confirm (W3C WAI ARIA APG)",
   },
   close: {
     position: "absolute right-4 top-4",
-    visibility: "opacity-0 group-hover:opacity-100",
+    visibility: "Always visible (not hover-only — mobile needs it)",
     component: "IconButton default sm + X 16px",
   },
 };
@@ -73,38 +77,74 @@ export default function ConfirmModal({
     lg: "max-w-[600px]",
     xl: "max-w-[720px]",
   };
-  const overlayRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
-  // Save previous focus and focus first element on open
+  // Smart autofocus: input > cancel (danger) > confirm (primary)
   useEffect(() => {
     if (!open) return;
     previousFocusRef.current = document.activeElement as HTMLElement;
-    const panel = panelRef.current;
-    if (panel) {
-      const focusable = panel.querySelectorAll<HTMLElement>(
-        'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+
+    // Wait for children to render
+    requestAnimationFrame(() => {
+      const panel = panelRef.current;
+      if (!panel) return;
+
+      // 1. Focus first input if present
+      const firstInput = panel.querySelector<HTMLElement>(
+        "input:not([disabled]), textarea:not([disabled])",
       );
-      if (focusable.length > 0) focusable[0].focus();
-    }
+      if (firstInput) {
+        firstInput.focus();
+        return;
+      }
+
+      // 2. Danger without input → focus Cancel
+      if (variant === "danger") {
+        const cancelBtn = panel.querySelector<HTMLElement>(
+          "[data-role='modal-cancel']",
+        );
+        if (cancelBtn) {
+          cancelBtn.focus();
+          return;
+        }
+      }
+
+      // 3. Primary without input → focus Confirm
+      const confirmBtn = panel.querySelector<HTMLElement>(
+        "[data-role='modal-confirm']",
+      );
+      if (confirmBtn) confirmBtn.focus();
+    });
+
     return () => {
       previousFocusRef.current?.focus();
     };
-  }, [open]);
+  }, [open, variant]);
 
-  // Keyboard handler: Escape + focus trap
+  // Keyboard handler: Escape + Enter + focus trap
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         onClose();
         return;
       }
+
+      // Enter triggers confirm (unless in textarea or button)
+      if (e.key === "Enter" && !loading) {
+        const target = e.target as HTMLElement;
+        if (target.tagName !== "TEXTAREA" && target.tagName !== "BUTTON") {
+          e.preventDefault();
+          onConfirm();
+          return;
+        }
+      }
+
       if (e.key === "Tab") {
         const panel = panelRef.current;
         if (!panel) return;
         const focusable = panel.querySelectorAll<HTMLElement>(
-          'button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          'button:not([disabled]), input:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
         );
         if (focusable.length === 0) return;
         const first = focusable[0];
@@ -118,7 +158,7 @@ export default function ConfirmModal({
         }
       }
     },
-    [onClose],
+    [onClose, onConfirm, loading],
   );
 
   useEffect(() => {
@@ -127,29 +167,32 @@ export default function ConfirmModal({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, handleKeyDown]);
 
+  // Lock body scroll while open
+  useEffect(() => {
+    if (!open) return;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
   if (!open) return null;
 
   return (
-    <div
-      ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)]"
-      onClick={(e) => {
-        if (e.target === overlayRef.current) onClose();
-      }}
-    >
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)] p-4">
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
-        className={`group w-full ${sizeClasses[size]} mx-4 rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
+        className={`w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
       >
         {/* Top section */}
-        <div className="relative rounded-t-xl border-b border-border-strong bg-surface-primary p-6">
+        <div className="relative border-b border-border-strong bg-surface-primary p-4 sm:p-6">
           <IconButton
             variant="default"
             size="sm"
-            className="absolute right-6 top-6 opacity-0 transition-opacity group-hover:opacity-100"
+            className="absolute right-4 top-4 sm:right-6 sm:top-6"
             aria-label="Close"
             onClick={onClose}
           >
@@ -157,7 +200,7 @@ export default function ConfirmModal({
           </IconButton>
           <h2
             id="confirm-modal-title"
-            className="text-h2 font-semibold text-content-primary"
+            className="pr-8 text-h2 font-semibold text-content-primary"
           >
             {title}
           </h2>
@@ -168,23 +211,25 @@ export default function ConfirmModal({
         </div>
 
         {/* Bottom section — buttons */}
-        <div className="flex justify-end gap-3 rounded-b-xl px-6 py-3">
+        <div className="flex justify-end gap-3 px-4 py-3 sm:px-6">
           <Button
             variant="outline"
-            size="md"
+            size="sm"
             fullWidth={false}
             onClick={onClose}
             disabled={loading}
+            data-role="modal-cancel"
           >
             {cancelLabel}
           </Button>
           <Button
             variant={variant === "danger" ? "danger" : "primary"}
-            size="md"
+            size="sm"
             fullWidth={false}
             onClick={onConfirm}
             disabled={loading}
             loading={loading}
+            data-role="modal-confirm"
           >
             {confirmLabel}
           </Button>
