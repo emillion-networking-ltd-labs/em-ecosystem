@@ -69,8 +69,7 @@ export default function DeleteAccount() {
 
   if (!user) return null;
 
-  // SUPERADMIN cannot self-delete (AWS/GitHub/Stripe pattern)
-  if (user.role === "SUPERADMIN") return null;
+  const isSuperadmin = user.role === "SUPERADMIN";
 
   return (
     <>
@@ -81,13 +80,15 @@ export default function DeleteAccount() {
         </h2>
         <div className="card-flat flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-body text-content-secondary">
-            Permanently delete your account and all associated data. This action
-            cannot be undone.
+            {isSuperadmin
+              ? "The root account cannot be deleted. Transfer ownership before this action can be performed."
+              : "Permanently delete your account and all associated data. This action cannot be undone."}
           </p>
           <Button
             variant="danger"
             size="md"
             fullWidth={false}
+            disabled={isSuperadmin}
             className="shrink-0 sm:w-auto"
             onClick={() => setShowModal(true)}
           >
