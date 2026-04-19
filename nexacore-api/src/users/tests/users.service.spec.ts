@@ -1149,14 +1149,14 @@ describe('UsersService', () => {
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('should throw ForbiddenException when non-SUPERADMIN assigns SUPERADMIN role', async () => {
+    it('should reject SUPERADMIN role assignment even from SUPERADMIN', async () => {
       prisma.user.findUnique.mockResolvedValue(mockUser);
 
       await expect(
         usersService.adminUpdateUser(
           'uuid-123',
           { role: Role.SUPERADMIN },
-          actingAdmin,
+          actingSuperadmin,
         ),
       ).rejects.toThrow(ForbiddenException);
     });
