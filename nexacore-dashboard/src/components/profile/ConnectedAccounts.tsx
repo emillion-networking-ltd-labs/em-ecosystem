@@ -155,7 +155,7 @@ export default function ConnectedAccounts() {
     try {
       const { code } = await generateLinkCode();
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-      window.location.href = `${apiUrl}/auth/link/${providerId.toLowerCase()}?code=${encodeURIComponent(code)}`;
+      window.location.href = `${apiUrl}/auth/link/${providerId.toLowerCase()}?link_code=${encodeURIComponent(code)}`;
     } catch {
       addToast(
         PROFILE_TOAST.OAUTH_FAILED(
