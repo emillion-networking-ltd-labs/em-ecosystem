@@ -16,7 +16,6 @@ import Spinner from "@/components/ui/Spinner";
 import Accordion from "@/components/ui/Accordion";
 import AlertBox from "@/components/ui/AlertBox";
 import { apiClient, SessionExpiredError } from "@/lib/api";
-import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/useToast";
 import { ADMIN_TOAST } from "@/lib/toast-messages";
 import MetricCard from "@/components/dashboard/MetricCard";
@@ -34,7 +33,6 @@ const PAGE_SIZE_OPTIONS = [
 ];
 
 export default function AdminPage() {
-  const { user: currentUser } = useAuth();
   const { addToast } = useToast();
   const searchParams = useSearchParams();
   const [users, setUsers] = useState<SafeUser[]>([]);
@@ -357,9 +355,6 @@ export default function AdminPage() {
                 options={[
                   { value: "USER", label: "USER" },
                   { value: "ADMIN", label: "ADMIN" },
-                  ...(currentUser?.role === "SUPERADMIN"
-                    ? [{ value: "SUPERADMIN", label: "SUPERADMIN" }]
-                    : []),
                 ]}
                 value={selectedRole}
                 onChange={(v) => setSelectedRole(v as UserRole)}
@@ -369,12 +364,6 @@ export default function AdminPage() {
                 <AlertBox variant="warning">
                   This will give the user access to user management, audit logs
                   and permissions.
-                </AlertBox>
-              )}
-              {selectedRole === "SUPERADMIN" && (
-                <AlertBox variant="error">
-                  This will give the user unrestricted access to the entire
-                  system. This action should be carefully considered.
                 </AlertBox>
               )}
             </div>

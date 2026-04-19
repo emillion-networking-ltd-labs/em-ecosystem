@@ -788,10 +788,15 @@ export class UsersService {
       throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
-    // Only SUPERADMIN can assign ADMIN or SUPERADMIN roles
+    // SUPERADMIN role cannot be assigned — only 1 root SUPERADMIN exists (seed)
+    if (dto.role === Role.SUPERADMIN) {
+      throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
+    }
+
+    // Only SUPERADMIN can assign ADMIN role
     if (
       dto.role &&
-      (dto.role === Role.ADMIN || dto.role === Role.SUPERADMIN) &&
+      dto.role === Role.ADMIN &&
       actingUser.role !== Role.SUPERADMIN
     ) {
       throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
