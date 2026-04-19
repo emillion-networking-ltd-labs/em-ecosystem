@@ -204,6 +204,7 @@ export class OAuthController {
     },
   })
   @UseGuards(OAuthLinkGuard, GoogleAuthGuard)
+  @UseFilters(OAuthCallbackFilter)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Link Google account to authenticated user' })
   @ApiResponse({
@@ -227,6 +228,7 @@ export class OAuthController {
     },
   })
   @UseGuards(OAuthLinkGuard, GitHubAuthGuard)
+  @UseFilters(OAuthCallbackFilter)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Link GitHub account to authenticated user' })
   @ApiResponse({

@@ -24,7 +24,9 @@ export class OAuthCallbackFilter implements ExceptionFilter {
     const response = host.switchToHttp().getResponse<Response>();
     const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
 
-    const isLinkFlow = request.oauthAction === 'link';
+    const isLinkFlow =
+      request.oauthAction === 'link' ||
+      (request.url && request.url.includes('/auth/link/'));
     const message =
       exception instanceof HttpException
         ? exception.message
@@ -36,9 +38,12 @@ export class OAuthCallbackFilter implements ExceptionFilter {
 
     if (isLinkFlow) {
       // Link failure: redirect to profile with error (don't kill session)
-      const encoded = encodeURIComponent(
-        'This account is already linked to another user.',
-      );
+      const isRateLimit =
+        exception instanceof HttpException && exception.getStatus() === 429;
+      const errorMsg = isRateLimit
+        ? 'Too many requests. Please wait before trying again.'
+        : 'This account is already linked to another user.';
+      const encoded = encodeURIComponent(errorMsg);
       response.redirect(`${frontendUrl}/profile?link_error=${encoded}`);
     } else {
       // Login failure: redirect to auth callback with error
