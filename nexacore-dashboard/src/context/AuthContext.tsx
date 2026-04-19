@@ -149,7 +149,7 @@ type AuthContextType = AuthState & {
     password: string,
     turnstileToken?: string,
   ) => Promise<boolean>;
-  handleOAuthCallback: () => Promise<void>;
+  handleOAuthCallback: () => Promise<string | undefined>;
   passkeyLogin: (
     challengeId: string,
     credential: Record<string, unknown>,
@@ -365,7 +365,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [addToast],
   );
 
-  const handleOAuthCallback = useCallback(async () => {
+  const handleOAuthCallback = useCallback(async (): Promise<
+    string | undefined
+  > => {
     dispatch({ type: "AUTH_START" });
     try {
       const data = await apiClient.post<AuthResponse>(
@@ -414,6 +416,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           description: `Your account has been linked to ${providerName}.`,
         });
       }
+      return data.oauthAction;
     } catch (err: unknown) {
       apiClient.clearAccessToken();
       addToast({
@@ -422,6 +425,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         description: extractErrorMessage(err),
       });
       dispatch({ type: "AUTH_STOP" });
+      return undefined;
     }
   }, [addToast]);
 

@@ -6,7 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import RingSpinner from "@/components/ui/RingSpinner";
 
 export default function OAuthCallbackHandler() {
-  const { handleOAuthCallback, isAuthenticated } = useAuth();
+  const { handleOAuthCallback } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const processed = useRef(false);
@@ -28,17 +28,19 @@ export default function OAuthCallbackHandler() {
       return;
     }
 
-    handleOAuthCallback().catch(() => {
-      router.replace(
-        "/login?oauth_error=" +
-          encodeURIComponent("Authentication failed. Please try again."),
-      );
+    handleOAuthCallback().then((action) => {
+      if (action === "linked") {
+        router.replace("/profile");
+      } else if (action) {
+        router.replace("/dashboard");
+      } else {
+        router.replace(
+          "/login?oauth_error=" +
+            encodeURIComponent("Authentication failed. Please try again."),
+        );
+      }
     });
   }, [searchParams, handleOAuthCallback, router]);
-
-  useEffect(() => {
-    if (isAuthenticated) router.replace("/dashboard");
-  }, [isAuthenticated, router]);
 
   return (
     <div className="flex min-h-screen items-center justify-center">
