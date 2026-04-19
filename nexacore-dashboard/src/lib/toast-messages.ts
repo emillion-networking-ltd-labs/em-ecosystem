@@ -121,6 +121,16 @@ export const PROFILE_TOAST = {
     title: "Device trusted",
     description: "This device has been added to your trusted list.",
   } as ToastMsg,
+  DEVICE_ALREADY_TRUSTED: {
+    variant: "info",
+    title: "Already trusted",
+    description: "This device is already in your trusted list.",
+  } as ToastMsg,
+  DEVICE_TRUST_FAILED: {
+    variant: "error",
+    title: "Trust failed",
+    description: "Could not trust this device.",
+  } as ToastMsg,
   DEVICE_REVOKED: {
     variant: "success",
     title: "Device revoked",

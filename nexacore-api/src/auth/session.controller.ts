@@ -117,6 +117,7 @@ export class SessionController {
       id: device.id,
       deviceName: device.deviceName,
       expiresAt: device.expiresAt,
+      alreadyTrusted: device.alreadyTrusted,
     };
   }
 

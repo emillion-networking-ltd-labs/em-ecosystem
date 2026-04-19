@@ -38,10 +38,28 @@ export class TrustedDeviceService {
     fingerprint: string,
     ipAddress: string,
     userAgent: string | null,
-  ) {
+  ): Promise<{
+    id: string;
+    deviceName: string;
+    expiresAt: Date;
+    alreadyTrusted: boolean;
+  }> {
     const fingerprintHash = this.hashFingerprint(userId, fingerprint);
     const deviceName = this.parseDeviceName(userAgent);
     const expiresAt = new Date(Date.now() + daysToMs(TRUSTED_DEVICE_TTL_DAYS));
+
+    // Check if device is already trusted and active
+    const existing = await this.prisma.trustedDevice.findUnique({
+      where: { userId_fingerprintHash: { userId, fingerprintHash } },
+    });
+    if (existing && !existing.isRevoked && existing.expiresAt > new Date()) {
+      return {
+        id: existing.id,
+        deviceName: existing.deviceName,
+        expiresAt: existing.expiresAt,
+        alreadyTrusted: true,
+      };
+    }
 
     // Enforce max trusted devices limit — revoke oldest if exceeded
     const activeCount = await this.prisma.trustedDevice.count({
@@ -90,7 +108,12 @@ export class TrustedDeviceService {
       })
       .catch(() => {});
 
-    return device;
+    return {
+      id: device.id,
+      deviceName: device.deviceName,
+      expiresAt: device.expiresAt,
+      alreadyTrusted: false,
+    };
   }
 
   async isTrustedDevice(userId: string, fingerprint: string): Promise<boolean> {

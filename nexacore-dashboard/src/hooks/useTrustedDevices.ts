@@ -41,7 +41,9 @@ export function useTrustedDevices() {
     }
   }, []);
 
-  const trustCurrentDevice = useCallback(async (): Promise<boolean> => {
+  const trustCurrentDevice = useCallback(async (): Promise<
+    "trusted" | "already" | false
+  > => {
     setError(null);
     try {
       const fp = await getFingerprint();
@@ -49,9 +51,9 @@ export function useTrustedDevices() {
         setError("Device fingerprinting not available.");
         return false;
       }
-      await trustDevice(fp);
+      const result = await trustDevice(fp);
       await fetchDevices();
-      return true;
+      return result.alreadyTrusted ? "already" : "trusted";
     } catch (err) {
       setError(
         extractMessageByStatus(

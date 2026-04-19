@@ -36,6 +36,7 @@ describe('TrustedDeviceService', () => {
     prisma = {
       trustedDevice: {
         count: jest.fn().mockResolvedValue(0),
+        findUnique: jest.fn().mockResolvedValue(null),
         findFirst: jest.fn(),
         findMany: jest.fn().mockResolvedValue([]),
         update: jest.fn().mockResolvedValue(mockDevice),
