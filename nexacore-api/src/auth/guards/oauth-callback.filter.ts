@@ -37,7 +37,7 @@ export class OAuthCallbackFilter implements ExceptionFilter {
     if (isLinkFlow) {
       // Link failure: redirect to profile with error (don't kill session)
       const encoded = encodeURIComponent(
-        'Unable to link this provider. It may already be linked to another account.',
+        'This account is already linked to another user.',
       );
       response.redirect(`${frontendUrl}/profile?link_error=${encoded}`);
     } else {
