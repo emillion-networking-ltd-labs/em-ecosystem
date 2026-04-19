@@ -8,7 +8,7 @@ import { OAuthLinkCodeStore } from '../stores/oauth-link-code.store';
 import { ErrorMessages } from '../../common/constants/error-messages';
 
 /**
- * Validates a short-lived, single-use link code from the ?code= query param,
+ * Validates a short-lived, single-use link code from the ?link_code= query param,
  * then sets req.oauthAction='link' and req.user = { id } so the subsequent
  * OAuth guard can embed these in the OAuth state parameter.
  *
@@ -22,7 +22,7 @@ export class OAuthLinkGuard implements CanActivate {
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
 
-    const code = request.query?.code as string | undefined;
+    const code = request.query?.link_code as string | undefined;
     if (!code) {
       throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }

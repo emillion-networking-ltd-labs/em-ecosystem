@@ -29,7 +29,7 @@ describe('OAuthLinkGuard', () => {
 
   it('should return true and set req.user + req.oauthAction with valid link code', async () => {
     store.consume.mockResolvedValue('user-123');
-    const context = createMockContext({ code: 'valid-code' });
+    const context = createMockContext({ link_code: 'valid-code' });
 
     const result = await guard.canActivate(context);
 
@@ -50,7 +50,7 @@ describe('OAuthLinkGuard', () => {
 
   it('should throw UnauthorizedException when code is invalid or expired', async () => {
     store.consume.mockResolvedValue(null);
-    const context = createMockContext({ code: 'invalid-code' });
+    const context = createMockContext({ link_code: 'invalid-code' });
 
     await expect(guard.canActivate(context)).rejects.toThrow(
       UnauthorizedException,
@@ -60,7 +60,7 @@ describe('OAuthLinkGuard', () => {
 
   it('should throw UnauthorizedException when code has already been consumed', async () => {
     store.consume.mockResolvedValue(null);
-    const context = createMockContext({ code: 'already-used-code' });
+    const context = createMockContext({ link_code: 'already-used-code' });
 
     await expect(guard.canActivate(context)).rejects.toThrow(
       UnauthorizedException,
