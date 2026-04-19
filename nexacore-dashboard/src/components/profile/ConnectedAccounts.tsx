@@ -61,7 +61,7 @@ export default function ConnectedAccounts() {
   >(null);
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [connecting, setConnecting] = useState(false);
+  const [connecting, setConnecting] = useState<string | null>(null);
 
   const canConfirm = password.length >= 8 && !loading;
 
@@ -151,7 +151,7 @@ export default function ConnectedAccounts() {
   if (!user) return null;
 
   const handleConnect = async (providerId: string) => {
-    setConnecting(true);
+    setConnecting(providerId);
     try {
       const { code } = await generateLinkCode();
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -162,7 +162,7 @@ export default function ConnectedAccounts() {
           "Could not initiate account linking. Please try again.",
         ),
       );
-      setConnecting(false);
+      setConnecting(null);
     }
   };
 
@@ -233,8 +233,8 @@ export default function ConnectedAccounts() {
                       size="md"
                       fullWidth={false}
                       onClick={() => handleConnect(provider.id)}
-                      disabled={connecting}
-                      loading={connecting}
+                      disabled={!!connecting}
+                      loading={connecting === provider.id}
                     >
                       Connect
                     </Button>

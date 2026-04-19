@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { forwardRef } from "react";
 import Tooltip, { type TooltipPosition } from "./Tooltip";
 
 export type IconButtonVariant = "default" | "danger" | "boxed" | "boxed-hover";
@@ -43,42 +43,50 @@ interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> 
   tooltipPosition?: TooltipPosition;
 }
 
-export default function IconButton({
-  variant = "default",
-  size = "sm",
-  loading = false,
-  tooltip,
-  tooltipPosition = "auto",
-  children,
-  className = "",
-  disabled,
-  ...props
-}: IconButtonProps) {
-  const button = (
-    <button
-      type="button"
-      className={`${baseClass} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
-      disabled={loading || disabled}
-      {...props}
-    >
-      {loading ? (
-        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current/20 border-t-current" />
-      ) : (
-        children
-      )}
-    </button>
-  );
+const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
+  function IconButton(
+    {
+      variant = "default",
+      size = "sm",
+      loading = false,
+      tooltip,
+      tooltipPosition = "auto",
+      children,
+      className = "",
+      disabled,
+      ...props
+    },
+    ref,
+  ) {
+    const button = (
+      <button
+        ref={ref}
+        type="button"
+        className={`${baseClass} ${variantClasses[variant]} ${sizeClasses[size]} ${className}`}
+        disabled={loading || disabled}
+        {...props}
+      >
+        {loading ? (
+          <div className="h-4 w-4 animate-spin rounded-full border-2 border-current/20 border-t-current" />
+        ) : (
+          children
+        )}
+      </button>
+    );
 
-  if (!tooltip) return button;
+    if (!tooltip) return button;
 
-  const tooltipText =
-    typeof tooltip === "string" ? tooltip : (props["aria-label"] ?? "");
+    const tooltipText =
+      typeof tooltip === "string" ? tooltip : (props["aria-label"] ?? "");
 
-  if (!tooltipText) return button;
+    if (!tooltipText) return button;
 
-  return (
-    <Tooltip content={tooltipText} position={tooltipPosition}>
-      {button}
-    </Tooltip>
-  );
-}
+    return (
+      <Tooltip content={tooltipText} position={tooltipPosition}>
+        {button}
+      </Tooltip>
+    );
+  },
+);
+
+export default IconButton;
