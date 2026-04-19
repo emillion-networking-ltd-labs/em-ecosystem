@@ -1845,19 +1845,26 @@ describe('UsersService', () => {
     };
     const ctx = { ipAddress: '10.0.0.1', userAgent: 'test-agent' };
 
-    it('rejects when OAuth email differs from user email', async () => {
+    it('allows linking OAuth with different email (GitHub/Stripe pattern)', async () => {
       prisma.user.findUnique.mockResolvedValue({
         ...mockUser,
         email: 'alice@example.com',
       });
+      prisma.oAuthAccount.findUnique.mockResolvedValue(null);
+      prisma.oAuthAccount.create.mockResolvedValue({
+        provider: Provider.GOOGLE,
+        providerId: 'google-123',
+        email: 'bob@different.com',
+        createdAt: new Date(),
+      });
 
-      await expect(
-        usersService.linkOAuthProvider(
-          mockUser.id,
-          { ...oauthProfile, email: 'bob@different.com' },
-          ctx,
-        ),
-      ).rejects.toThrow(BadRequestException);
+      const result = await usersService.linkOAuthProvider(
+        mockUser.id,
+        { ...oauthProfile, email: 'bob@different.com' },
+        ctx,
+      );
+
+      expect(result.provider).toBe(Provider.GOOGLE);
     });
 
     it('accepts matching email case-insensitively', async () => {

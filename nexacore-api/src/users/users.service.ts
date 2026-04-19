@@ -399,13 +399,11 @@ export class UsersService {
     profile: OAuthProfile,
     ctx?: RequestContext,
   ): Promise<LinkedProvider> {
-    // Verify OAuth email matches user's account email (CWE-287)
+    // User is already authenticated via JWT — no email match required
+    // (GitHub/Stripe pattern: OAuth link is an auth method, not email proof)
     const user = await this.findById(userId);
     if (!user) {
       throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
-    }
-    if (user.email.toLowerCase() !== profile.email.toLowerCase()) {
-      throw new BadRequestException(ErrorMessages.oauth.EMAIL_MISMATCH);
     }
 
     // Check if this OAuth identity is already linked to any user
