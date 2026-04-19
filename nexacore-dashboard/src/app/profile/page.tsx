@@ -30,7 +30,7 @@ export default function ProfilePage() {
       addToast({
         variant: "error",
         title: "Account linking failed",
-        description: decodeURIComponent(linkError),
+        description: linkError,
       });
       // Clean URL without reload
       window.history.replaceState({}, "", "/profile");
