@@ -157,15 +157,18 @@ export default function ConnectedAccounts() {
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
       window.location.href = `${apiUrl}/auth/link/${providerId.toLowerCase()}?link_code=${encodeURIComponent(code)}`;
     } catch (err) {
-      const msg = extractMessageByStatus(
-        err,
-        {
-          [HTTP_STATUS.TOO_MANY_REQUESTS]:
-            "Too many requests. Please wait before trying again.",
-        },
-        "Could not initiate account linking. Please try again.",
-      );
-      addToast(PROFILE_TOAST.OAUTH_FAILED(msg));
+      const isRateLimit =
+        (err as { error?: { statusCode?: number } })?.error?.statusCode ===
+        HTTP_STATUS.TOO_MANY_REQUESTS;
+      if (isRateLimit) {
+        addToast(PROFILE_TOAST.TOO_MANY_REQUESTS);
+      } else {
+        addToast(
+          PROFILE_TOAST.OAUTH_FAILED(
+            "Could not initiate account linking. Please try again.",
+          ),
+        );
+      }
       setConnecting(null);
     }
   };

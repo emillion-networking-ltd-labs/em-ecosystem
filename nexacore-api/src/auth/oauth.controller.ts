@@ -184,6 +184,12 @@ export class OAuthController {
 
   @Post('link/code')
   @UseGuards(JwtAuthGuard)
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.oauth.ttl,
+      limit: AUTH_RATE_LIMITS.oauth.limit,
+    },
+  })
   @HttpCode(HttpStatus.CREATED)
   @ApiBearerAuth()
   @ApiOperation({
@@ -191,6 +197,7 @@ export class OAuthController {
   })
   @ApiResponse({ status: 201, description: 'Link code generated' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   async generateLinkCode(@Request() req: { user: { id: string } }) {
     const code = await this.oauthLinkCodeStore.generate(req.user.id);
     return { code };
