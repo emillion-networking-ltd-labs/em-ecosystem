@@ -247,6 +247,7 @@ export type TrustDeviceResult = {
   id: string;
   deviceName: string;
   expiresAt: string;
+  alreadyTrusted: boolean;
 };
 
 export type RevokeAllDevicesResponse = {

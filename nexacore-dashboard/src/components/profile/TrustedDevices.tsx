@@ -69,12 +69,14 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
 
   const handleTrust = async () => {
     setIsTrusting(true);
-    const ok = await trustCurrentDevice();
+    const result = await trustCurrentDevice();
     setIsTrusting(false);
-    if (ok) {
+    if (result === "trusted") {
       addToast(PROFILE_TOAST.DEVICE_TRUSTED);
+    } else if (result === "already") {
+      addToast(PROFILE_TOAST.DEVICE_ALREADY_TRUSTED);
     } else {
-      addToast(PROFILE_TOAST.DEVICE_REVOKE_FAILED);
+      addToast(PROFILE_TOAST.DEVICE_TRUST_FAILED);
     }
   };
 
