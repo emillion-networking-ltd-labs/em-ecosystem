@@ -69,6 +69,9 @@ export default function DeleteAccount() {
 
   if (!user) return null;
 
+  // SUPERADMIN cannot self-delete (AWS/GitHub/Stripe pattern)
+  if (user.role === "SUPERADMIN") return null;
+
   return (
     <>
       {/* Danger zone card */}
