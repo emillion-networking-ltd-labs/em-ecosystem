@@ -156,12 +156,16 @@ export default function ConnectedAccounts() {
       const { code } = await generateLinkCode();
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
       window.location.href = `${apiUrl}/auth/link/${providerId.toLowerCase()}?link_code=${encodeURIComponent(code)}`;
-    } catch {
-      addToast(
-        PROFILE_TOAST.OAUTH_FAILED(
-          "Could not initiate account linking. Please try again.",
-        ),
+    } catch (err) {
+      const msg = extractMessageByStatus(
+        err,
+        {
+          [HTTP_STATUS.TOO_MANY_REQUESTS]:
+            "Too many requests. Please wait before trying again.",
+        },
+        "Could not initiate account linking. Please try again.",
       );
+      addToast(PROFILE_TOAST.OAUTH_FAILED(msg));
       setConnecting(null);
     }
   };
