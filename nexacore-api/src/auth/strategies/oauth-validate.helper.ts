@@ -33,6 +33,9 @@ export async function validateOAuthCallback(
 
   const requestMeta = extractRequestMeta(req);
 
+  // Propagate action to request so OAuthCallbackFilter can distinguish link vs login errors
+  (req as Record<string, unknown>).oauthAction = stateData.action;
+
   try {
     if (stateData.action === 'link' && stateData.userId) {
       const result = await oauthAuthService.validateOAuthLink(

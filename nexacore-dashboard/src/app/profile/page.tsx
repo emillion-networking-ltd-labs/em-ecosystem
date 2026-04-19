@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+import { useSearchParams } from "next/navigation";
 import DashboardLayout from "@/components/layout/DashboardLayout";
 import ProtectedRoute from "@/components/guards/ProtectedRoute";
 import ProfileForm from "@/components/profile/ProfileForm";
@@ -12,8 +14,28 @@ import SecurityActivity from "@/components/profile/SecurityActivity";
 import Accordion from "@/components/ui/Accordion";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import Divider from "@/components/ui/Divider";
+import { useToast } from "@/hooks/useToast";
 
 export default function ProfilePage() {
+  const searchParams = useSearchParams();
+  const { addToast } = useToast();
+  const shownRef = useRef(false);
+
+  // Show link error toast from OAuth callback redirect
+  useEffect(() => {
+    if (shownRef.current) return;
+    const linkError = searchParams.get("link_error");
+    if (linkError) {
+      shownRef.current = true;
+      addToast({
+        variant: "error",
+        title: "Account linking failed",
+        description: decodeURIComponent(linkError),
+      });
+      // Clean URL without reload
+      window.history.replaceState({}, "", "/profile");
+    }
+  }, [searchParams, addToast]);
   return (
     <ProtectedRoute>
       <DashboardLayout>
