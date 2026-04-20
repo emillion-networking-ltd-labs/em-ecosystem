@@ -325,6 +325,7 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
         onClose={() => setRegisterOpen(false)}
         onConfirm={handleRegister}
         title="Add Passkey"
+        size="md"
         description="Give your passkey a name to identify it later, then follow the biometric prompt."
         confirmLabel="Register Passkey"
         loading={isRegistering}
@@ -348,6 +349,7 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
         onClose={() => setRenamingPasskey(null)}
         onConfirm={handleRenameSubmit}
         title="Rename Passkey"
+        size="md"
         description={`Enter a new name for "${renamingPasskey?.name || "Passkey"}".`}
         confirmLabel="Save"
         loading={isRenaming}
@@ -377,6 +379,7 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
         description={`Are you sure you want to delete "${deletingPasskey?.name || "Passkey"}"? This action cannot be undone.`}
         confirmLabel="Delete"
         variant="danger"
+        size="md"
         loading={isDeleting}
       >
         <div className="mt-4">

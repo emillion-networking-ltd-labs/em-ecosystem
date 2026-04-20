@@ -106,6 +106,7 @@ export default function DeleteAccount() {
         description="This action is permanent and cannot be undone. All your data will be anonymized and your sessions will be revoked."
         confirmLabel="Delete My Account"
         variant="danger"
+        size="md"
         loading={loading}
       >
         <div className="mt-4">

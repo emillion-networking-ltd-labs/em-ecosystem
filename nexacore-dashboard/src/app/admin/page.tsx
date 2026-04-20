@@ -347,6 +347,7 @@ export default function AdminPage() {
           description={currentModal?.description || ""}
           confirmLabel={currentModal?.confirmLabel}
           variant={currentModal?.variant}
+          size={modalType === "role" ? "md" : "sm"}
           loading={modalLoading}
         >
           {modalType === "role" && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { Info } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/context/ToastContext";
@@ -10,6 +10,7 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
 import Tooltip from "@/components/ui/Tooltip";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import { extractMessageByStatus } from "@/lib/error-utils";
 import { HTTP_STATUS } from "@/lib/error-constants";
 
@@ -52,9 +53,6 @@ const providers = [
 export default function ConnectedAccounts() {
   const { user, refreshSession } = useAuth();
   const { addToast } = useToast();
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const previousFocusRef = useRef<HTMLElement | null>(null);
 
   const [disconnectingProvider, setDisconnectingProvider] = useState<
     string | null
@@ -62,8 +60,6 @@ export default function ConnectedAccounts() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [connecting, setConnecting] = useState<string | null>(null);
-
-  const canConfirm = password.length >= 8 && !loading;
 
   const handleClose = () => {
     if (loading) return;
@@ -99,55 +95,6 @@ export default function ConnectedAccounts() {
     }
   };
 
-  useEffect(() => {
-    if (!disconnectingProvider) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleClose();
-    };
-    document.addEventListener("keydown", handler);
-    return () => document.removeEventListener("keydown", handler);
-  });
-
-  // Focus trap: capture focus on open, cycle Tab within dialog, restore on close
-  useEffect(() => {
-    if (!disconnectingProvider) return;
-
-    previousFocusRef.current = document.activeElement as HTMLElement | null;
-
-    const dialog = dialogRef.current;
-    if (!dialog) return;
-
-    const focusableSelector =
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-
-    // Focus first focusable element on open
-    const firstFocusable = dialog.querySelector<HTMLElement>(focusableSelector);
-    firstFocusable?.focus();
-
-    const handleTab = (e: KeyboardEvent) => {
-      if (e.key !== "Tab") return;
-      const focusable = dialog.querySelectorAll<HTMLElement>(focusableSelector);
-      if (focusable.length === 0) return;
-
-      const first = focusable[0];
-      const last = focusable[focusable.length - 1];
-
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault();
-        last.focus();
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault();
-        first.focus();
-      }
-    };
-
-    document.addEventListener("keydown", handleTab);
-    return () => {
-      document.removeEventListener("keydown", handleTab);
-      previousFocusRef.current?.focus();
-    };
-  }, [disconnectingProvider]);
-
   if (!user) return null;
 
   const handleConnect = async (providerId: string) => {
@@ -177,47 +124,41 @@ export default function ConnectedAccounts() {
 
   return (
     <>
-      <div
-        id="connected-accounts"
-        className="rounded-xl border border-border-strong bg-surface-primary p-6"
-      >
-        <h2 className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary">
+      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
+        <h2
+          id="connected-accounts"
+          className="mb-6 text-body font-semibold text-content-primary"
+        >
           Connected Accounts
         </h2>
-
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="space-y-4">
           {providers.map((provider) => {
-            const isConnected = user.oauthProviders.includes(provider.id);
-            const isLastAuthMethod =
-              !user.hasPassword && user.oauthProviders.length === 1;
-
+            const isLinked = user.oauthProviders?.includes(provider.id);
             return (
               <div
                 key={provider.id}
-                className="flex items-center justify-between rounded-xl border border-border-components p-4"
+                className="flex items-center justify-between rounded-lg border border-border-components p-4"
               >
                 <div className="flex items-center gap-3">
                   {provider.icon}
-                  <span className="text-body font-normal text-content-primary">
-                    {provider.name}
-                  </span>
+                  <div>
+                    <p className="text-body font-normal text-content-primary">
+                      {provider.name}
+                    </p>
+                    <p className="text-caption text-content-tertiary">
+                      {isLinked ? "Connected" : "Not connected"}
+                    </p>
+                  </div>
                 </div>
-
-                {isConnected ? (
-                  isLastAuthMethod ? (
-                    <span className="text-caption text-content-tertiary">
-                      Set a password first
-                    </span>
-                  ) : (
-                    <Button
-                      variant="danger"
-                      size="md"
-                      fullWidth={false}
-                      onClick={() => setDisconnectingProvider(provider.id)}
-                    >
-                      Disconnect
-                    </Button>
-                  )
+                {isLinked ? (
+                  <Button
+                    variant="outline"
+                    size="md"
+                    fullWidth={false}
+                    onClick={() => setDisconnectingProvider(provider.id)}
+                  >
+                    Disconnect
+                  </Button>
                 ) : (
                   <div className="flex items-center gap-2">
                     {provider.id === "GITHUB" && (
@@ -254,69 +195,28 @@ export default function ConnectedAccounts() {
       </div>
 
       {/* Disconnect confirmation modal */}
-      {disconnectingProvider && (
-        <div
-          ref={overlayRef}
-          className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)]"
-          onClick={(e) => {
-            if (e.target === overlayRef.current) handleClose();
-          }}
-        >
-          <div
-            ref={dialogRef}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="disconnect-title"
-            className="w-[427px] overflow-hidden rounded-3xl border border-border-components bg-surface-secondary"
-          >
-            {/* Top section */}
-            <div className="border-b border-border-components bg-surface-primary p-6">
-              <h2
-                id="disconnect-title"
-                className="text-h2 font-semibold text-content-primary"
-              >
-                Disconnect {activeProvider?.name}
-              </h2>
-              <p className="mt-2 text-body text-content-secondary">
-                This provider will be removed from your account. You can
-                reconnect it later.
-              </p>
-
-              <div className="mt-4">
-                <Input
-                  label="Password"
-                  name="unlinkPassword"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your password"
-                />
-              </div>
-            </div>
-
-            {/* Bottom section — buttons */}
-            <div className="flex justify-end gap-3 p-3">
-              <Button
-                variant="outline"
-                onClick={handleClose}
-                disabled={loading}
-                fullWidth={false}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="danger"
-                onClick={handleUnlink}
-                disabled={!canConfirm}
-                loading={loading}
-                fullWidth={false}
-              >
-                Disconnect
-              </Button>
-            </div>
-          </div>
+      <ConfirmModal
+        open={!!disconnectingProvider}
+        onClose={handleClose}
+        onConfirm={handleUnlink}
+        title={`Disconnect ${activeProvider?.name || ""}`}
+        description="This provider will be removed from your account. You can reconnect it later."
+        confirmLabel="Disconnect"
+        variant="danger"
+        size="md"
+        loading={loading}
+      >
+        <div className="mt-4">
+          <Input
+            label="Password"
+            name="unlinkPassword"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter your password"
+          />
         </div>
-      )}
+      </ConfirmModal>
     </>
   );
 }
