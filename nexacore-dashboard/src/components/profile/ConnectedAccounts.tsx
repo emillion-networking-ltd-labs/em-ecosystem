@@ -72,6 +72,10 @@ export default function ConnectedAccounts() {
 
   const handleUnlink = async () => {
     if (!disconnectingProvider) return;
+    if (!password.trim()) {
+      setFieldError("Password is required");
+      return;
+    }
     if (password.length < 8) {
       setFieldError("Password must be at least 8 characters");
       return;
