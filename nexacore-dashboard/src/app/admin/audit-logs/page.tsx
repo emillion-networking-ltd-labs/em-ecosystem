@@ -13,6 +13,7 @@ import Spinner from "@/components/ui/Spinner";
 import StickyCard from "@/components/ui/StickyCard";
 import { apiClient, SessionExpiredError } from "@/lib/api";
 import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/hooks/useToast";
 import type { AuditLog, AuditAction, PaginatedResponse } from "@/lib/types";
 
 const PAGE_SIZE_OPTIONS = [
@@ -24,6 +25,7 @@ const PAGE_SIZE_OPTIONS = [
 
 export default function AuditLogsPage() {
   const { isAuthenticated } = useAuth();
+  const { addToast } = useToast();
   const [logs, setLogs] = useState<AuditLog[]>([]);
   const [pageSize, setPageSize] = useState(10);
   const [meta, setMeta] = useState({
@@ -66,6 +68,11 @@ export default function AuditLogsPage() {
       } catch (err) {
         if (signal?.aborted) return;
         if (err instanceof SessionExpiredError) return;
+        addToast({
+          variant: "error",
+          title: "Load failed",
+          description: "Could not retrieve audit logs.",
+        });
       } finally {
         if (!signal?.aborted) {
           setIsFetching(false);

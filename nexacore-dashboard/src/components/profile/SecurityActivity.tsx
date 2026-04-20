@@ -83,6 +83,7 @@ export default function SecurityActivity() {
   });
   const [initialLoading, setInitialLoading] = useState(true);
   const [isFetching, setIsFetching] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   const fetchEvents = useCallback(
     async (page: number) => {
@@ -92,7 +93,7 @@ export default function SecurityActivity() {
         setEvents(res.data);
         setEventsMeta(res.meta);
       } catch {
-        // silent — empty state shown
+        setLoadError(true);
       } finally {
         setIsFetching(false);
         setInitialLoading(false);
@@ -102,7 +103,9 @@ export default function SecurityActivity() {
   );
 
   useEffect(() => {
+    const controller = new AbortController();
     fetchEvents(eventsPage);
+    return () => controller.abort();
   }, [fetchEvents, eventsPage]);
 
   const formatDate = (iso: string) =>
@@ -125,6 +128,10 @@ export default function SecurityActivity() {
           <div className="flex items-center justify-center py-8">
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-content-secondary border-t-transparent" />
           </div>
+        ) : loadError ? (
+          <p className="py-4 text-center text-body text-error">
+            Failed to load security events.
+          </p>
         ) : events.length === 0 ? (
           <p className="py-4 text-center text-body text-content-tertiary">
             No security events.
