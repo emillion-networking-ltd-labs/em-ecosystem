@@ -138,19 +138,24 @@ export default function RecentActivityFeed() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function fetchActivity() {
       try {
         const res = await apiClient.get<{ data: AuditLog[] }>(
           "/audit-logs?limit=5&page=1",
+          { signal: controller.signal },
         );
+        if (controller.signal.aborted) return;
         setLogs(res.data);
       } catch {
+        if (controller.signal.aborted) return;
         setError(true);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
     fetchActivity();
+    return () => controller.abort();
   }, []);
 
   return (

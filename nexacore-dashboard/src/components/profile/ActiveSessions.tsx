@@ -75,7 +75,9 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
     fetchSessions();
+    return () => controller.abort();
   }, [fetchSessions]);
 
   const revokeSession = async (sessionId: string) => {

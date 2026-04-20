@@ -43,31 +43,39 @@ export default function UserRoleChart() {
   const [error, setError] = useState(false);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function fetchCounts() {
       try {
+        const opts = { signal: controller.signal };
         const [userRes, adminRes, superadminRes] = await Promise.all([
           apiClient.get<PaginatedResponse<SafeUser>>(
             "/users?role=USER&limit=1",
+            opts,
           ),
           apiClient.get<PaginatedResponse<SafeUser>>(
             "/users?role=ADMIN&limit=1",
+            opts,
           ),
           apiClient.get<PaginatedResponse<SafeUser>>(
             "/users?role=SUPERADMIN&limit=1",
+            opts,
           ),
         ]);
+        if (controller.signal.aborted) return;
         setCounts({
           USER: userRes.meta.total,
           ADMIN: adminRes.meta.total,
           SUPERADMIN: superadminRes.meta.total,
         });
       } catch {
+        if (controller.signal.aborted) return;
         setError(true);
       } finally {
-        setLoading(false);
+        if (!controller.signal.aborted) setLoading(false);
       }
     }
     fetchCounts();
+    return () => controller.abort();
   }, []);
 
   const roles = ["USER", "ADMIN", "SUPERADMIN"] as const;

@@ -69,7 +69,9 @@ export default function PermissionsMatrix() {
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
     fetchData();
+    return () => controller.abort();
   }, [fetchData]);
 
   const toggle = (role: UserRole, key: string) => {
