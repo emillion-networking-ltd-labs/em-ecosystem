@@ -65,10 +65,17 @@ export default function ConnectedAccounts() {
     if (loading) return;
     setDisconnectingProvider(null);
     setPassword("");
+    setFieldError("");
   };
+
+  const [fieldError, setFieldError] = useState("");
 
   const handleUnlink = async () => {
     if (!disconnectingProvider) return;
+    if (password.length < 8) {
+      setFieldError("Password must be at least 8 characters");
+      return;
+    }
     setLoading(true);
     try {
       await unlinkOAuth(disconnectingProvider, password);
@@ -212,8 +219,12 @@ export default function ConnectedAccounts() {
             name="unlinkPassword"
             type="password"
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => {
+              setPassword(e.target.value);
+              setFieldError("");
+            }}
             placeholder="Enter your password"
+            error={fieldError || undefined}
           />
         </div>
       </ConfirmModal>
