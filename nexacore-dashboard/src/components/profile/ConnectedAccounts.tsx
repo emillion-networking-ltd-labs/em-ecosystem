@@ -138,17 +138,17 @@ export default function ConnectedAccounts() {
       <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
         <h2
           id="connected-accounts"
-          className="mb-6 text-body font-semibold text-content-primary"
+          className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary"
         >
           Connected Accounts
         </h2>
-        <div className="space-y-4">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {providers.map((provider) => {
             const isLinked = user.oauthProviders?.includes(provider.id);
             return (
               <div
                 key={provider.id}
-                className="flex items-center justify-between rounded-lg border border-border-components p-4"
+                className="flex items-center justify-between rounded-xl border border-border-components p-4"
               >
                 <div className="flex items-center gap-3">
                   {provider.icon}
