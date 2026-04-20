@@ -167,6 +167,19 @@ export default function ConfirmModal({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, handleKeyDown]);
 
+  // Lock body scroll — compensate scrollbar width to prevent layout shift
+  useEffect(() => {
+    if (!open) return;
+    const scrollbarWidth =
+      window.innerWidth - document.documentElement.clientWidth;
+    document.body.style.overflow = "hidden";
+    document.body.style.paddingRight = `${scrollbarWidth}px`;
+    return () => {
+      document.body.style.overflow = "";
+      document.body.style.paddingRight = "";
+    };
+  }, [open]);
+
   if (!open) return null;
 
   return (
