@@ -167,25 +167,16 @@ export default function ConfirmModal({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [open, handleKeyDown]);
 
-  // Lock body scroll while open
-  useEffect(() => {
-    if (!open) return;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = "";
-    };
-  }, [open]);
-
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)] p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)]">
       <div
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
-        className={`w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
+        className={`w-full ${sizeClasses[size]} mx-4 max-h-[90vh] overflow-y-auto rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
       >
         {/* Top section */}
         <div className="relative rounded-t-xl border-b border-border-strong bg-surface-primary p-4 sm:p-6">
@@ -214,7 +205,7 @@ export default function ConfirmModal({
         <div className="flex justify-end gap-3 rounded-b-xl px-4 py-3 sm:px-6">
           <Button
             variant="outline"
-            size="sm"
+            size={children ? "md" : "sm"}
             fullWidth={false}
             onClick={onClose}
             disabled={loading}
@@ -224,7 +215,7 @@ export default function ConfirmModal({
           </Button>
           <Button
             variant={variant === "danger" ? "danger" : "primary"}
-            size="sm"
+            size={children ? "md" : "sm"}
             fullWidth={false}
             onClick={onConfirm}
             disabled={loading}
