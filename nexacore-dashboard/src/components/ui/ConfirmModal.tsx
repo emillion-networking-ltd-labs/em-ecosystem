@@ -205,7 +205,7 @@ export default function ConfirmModal({
         <div className="flex justify-end gap-3 rounded-b-xl px-4 py-3 sm:px-6">
           <Button
             variant="outline"
-            size={children ? "md" : "sm"}
+            size="md"
             fullWidth={false}
             onClick={onClose}
             disabled={loading}
@@ -215,7 +215,7 @@ export default function ConfirmModal({
           </Button>
           <Button
             variant={variant === "danger" ? "danger" : "primary"}
-            size={children ? "md" : "sm"}
+            size="md"
             fullWidth={false}
             onClick={onConfirm}
             disabled={loading}
