@@ -188,7 +188,7 @@ export default function ConfirmModal({
         className={`w-full ${sizeClasses[size]} max-h-[90vh] overflow-y-auto rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
       >
         {/* Top section */}
-        <div className="relative border-b border-border-strong bg-surface-primary p-4 sm:p-6">
+        <div className="relative rounded-t-xl border-b border-border-strong bg-surface-primary p-4 sm:p-6">
           <IconButton
             variant="default"
             size="sm"
@@ -211,7 +211,7 @@ export default function ConfirmModal({
         </div>
 
         {/* Bottom section — buttons */}
-        <div className="flex justify-end gap-3 px-4 py-3 sm:px-6">
+        <div className="flex justify-end gap-3 rounded-b-xl px-4 py-3 sm:px-6">
           <Button
             variant="outline"
             size="sm"
