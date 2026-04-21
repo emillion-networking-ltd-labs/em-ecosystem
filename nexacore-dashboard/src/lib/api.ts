@@ -17,6 +17,7 @@ class ApiClient {
   private refreshPromise: Promise<string | null> | null = null;
   private deviceFingerprint: string | null = null;
   private onAuthFailure: (() => void) | null = null;
+  private authFailureTriggered = false;
 
   setOnAuthFailure(callback: (() => void) | null) {
     this.onAuthFailure = callback;
@@ -24,6 +25,7 @@ class ApiClient {
 
   setAccessToken(token: string | null) {
     this.accessToken = token;
+    if (token) this.authFailureTriggered = false;
   }
 
   getAccessToken(): string | null {
@@ -119,11 +121,6 @@ class ApiClient {
 
     // Handle 401 with silent refresh
     if (response.status === 401) {
-      // Token already cleared by another concurrent request, no refresh in-flight
-      if (!this.accessToken && !this.refreshPromise) {
-        throw new SessionExpiredError();
-      }
-
       const newToken = await this.silentRefresh();
       if (newToken) {
         headers.Authorization = `Bearer ${newToken}`;
@@ -158,8 +155,9 @@ class ApiClient {
         return retryResponse.json();
       }
       // Refresh failed — notify auth context once, then throw
-      if (this.accessToken) {
-        this.accessToken = null;
+      this.accessToken = null;
+      if (!this.authFailureTriggered) {
+        this.authFailureTriggered = true;
         this.onAuthFailure?.();
       }
       throw new SessionExpiredError();
