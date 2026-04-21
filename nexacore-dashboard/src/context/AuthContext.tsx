@@ -687,7 +687,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Warning modal appears 2 min before logout
   const isAuthenticated = !!state.user && !!state.accessToken;
   const { showWarning, secondsLeft, keepAlive } = useIdleTimeout(
-    30 * 60 * 1000, // 30 min (OWASP ASVS V3.3.2)
+    28 * 60 * 1000, // 28 min — 2 min buffer before backend revokes at 30 min (OWASP ASVS V3.3.2)
     () => {
       addToast({
         variant: "warning",
