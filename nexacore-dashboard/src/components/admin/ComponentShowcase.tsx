@@ -48,6 +48,9 @@ import Badge, {
   sizeClasses as badgeSizes,
   baseClass as badgeBase,
 } from "@/components/ui/Badge";
+import BeforeAfterSlider, {
+  beforeAfterSliderSpecs,
+} from "@/components/ui/BeforeAfterSlider";
 import Spinner, { spinnerSpecs } from "@/components/ui/Spinner";
 import InfinitySpinner, {
   infinitySpinnerSpecs,
@@ -702,6 +705,7 @@ function BadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
     "error",
     "info",
     "kbd",
+    "overlay",
   ] as const;
   const sizes = ["lg", "md", "sm"] as const;
   return (
@@ -818,6 +822,8 @@ function BadgeShowcase() {
             "md (default)": "14px font · 10/4px padding",
             lg: "16px font · 12/6px padding",
           },
+          "Overlay usage":
+            "Chip version of the primary Button style — bg-surface-inverse + text-content-inverse + border + backdrop-blur-sm. Use on images, video, or surfaces where default's 5% subtle tint disappears. Theme-aware: light mode → dark chip (not pure black) with inverse text; dark mode → light chip with inverse text. Matches the visual weight of primary CTAs.",
           "Icon Badge": iconBadgeSpecs.sizes,
         }}
       />
@@ -1332,6 +1338,78 @@ function SliderShowcase() {
           Thumb: sliderSpecs.thumb,
           Label: { shared: sliderSpecs.label },
           Value: { shared: sliderSpecs.value },
+        }}
+      />
+    </ShowcaseSection>
+  );
+}
+
+function BeforeAfterSliderCard({
+  mode,
+  orientation,
+}: {
+  mode: "light" | "dark";
+  orientation: "horizontal" | "vertical";
+}) {
+  return (
+    <div
+      className={`flex-1 min-w-[240px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+    >
+      <p className="text-caption text-content-tertiary font-mono mb-3">
+        {mode} · {orientation}
+      </p>
+      <div className="max-w-[240px]">
+        <BeforeAfterSlider
+          before={{
+            src: "/em-wordmark-black.png",
+            alt: "EMILLION logotype — black on white",
+          }}
+          after={{
+            src: "/em-wordmark-white.png",
+            alt: "EMILLION logotype — white on black",
+          }}
+          orientation={orientation}
+          aspectRatio="16/9"
+        >
+          <div className="pointer-events-none absolute top-3 left-3">
+            <Badge variant="overlay" size="sm">
+              BEFORE
+            </Badge>
+          </div>
+          <div className="pointer-events-none absolute bottom-3 right-3">
+            <Badge variant="overlay" size="sm">
+              AFTER
+            </Badge>
+          </div>
+        </BeforeAfterSlider>
+      </div>
+    </div>
+  );
+}
+
+function BeforeAfterSliderShowcase() {
+  return (
+    <ShowcaseSection title="Before / After Slider">
+      <div className="flex flex-wrap gap-4">
+        <BeforeAfterSliderCard mode="light" orientation="horizontal" />
+        <BeforeAfterSliderCard mode="dark" orientation="horizontal" />
+      </div>
+      <div className="flex flex-wrap gap-4">
+        <BeforeAfterSliderCard mode="light" orientation="vertical" />
+        <BeforeAfterSliderCard mode="dark" orientation="vertical" />
+      </div>
+
+      <SpecsPanel
+        specs={{
+          Container: { shared: beforeAfterSliderSpecs.container },
+          Divider: { shared: beforeAfterSliderSpecs.divider },
+          Handle: { shared: beforeAfterSliderSpecs.handle },
+          Arrows: { shared: beforeAfterSliderSpecs.arrows },
+          "Clip path": beforeAfterSliderSpecs.clipPath,
+          Interaction: beforeAfterSliderSpecs.interaction,
+          Usage: { shared: beforeAfterSliderSpecs.usage },
+          "Showcase assets":
+            "EMILLION logotype B&W (em-wordmark-black.png + em-wordmark-white.png, generated via ffmpeg negate from em-wordmark.png). Demonstrates clear visual contrast between before/after states. Production usages should supply actual before/after photo pairs.",
         }}
       />
     </ShowcaseSection>
@@ -3129,6 +3207,7 @@ export function MoleculeShowcase() {
       <ImageCropperShowcase />
       <SidebarShowcase />
       <CommandPaletteShowcase />
+      <BeforeAfterSliderShowcase />
       <MotionPatternsShowcase />
     </div>
   );

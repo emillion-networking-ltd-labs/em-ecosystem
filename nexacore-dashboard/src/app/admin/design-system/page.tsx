@@ -68,6 +68,10 @@ const componentToSection: Record<string, { tab: string; section: string }> = {
     tab: "molecules",
     section: "showcase-command-palette",
   },
+  "Before / After Slider": {
+    tab: "molecules",
+    section: "showcase-before-after-slider",
+  },
   "Motion Patterns": {
     tab: "molecules",
     section: "showcase-motion-patterns",

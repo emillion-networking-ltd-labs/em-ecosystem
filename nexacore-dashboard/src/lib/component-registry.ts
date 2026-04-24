@@ -29,7 +29,7 @@ export const componentRegistry: ComponentEntry[] = [
     name: "Badge",
     category: "atom",
     description:
-      "Status indicator — 5 color variants, 3 sizes + Icon Badge (sm/md/lg)",
+      "Status indicator — 6 color variants + kbd + overlay (for media), 3 sizes + Icon Badge (sm/md/lg)",
     files: ["Badge.tsx", "IconBadge.tsx"],
     count: 2,
   },
@@ -216,6 +216,13 @@ export const componentRegistry: ComponentEntry[] = [
       "Cmd+K command menu — quick navigation, user search, actions. SearchTrigger + cmdk dialog",
     files: ["CommandPalette.tsx", "SearchTrigger.tsx"],
     count: 2,
+  },
+  {
+    name: "Before / After Slider",
+    category: "molecule",
+    description:
+      "Image comparison slider — horizontal + vertical, drag/click-to-jump, blocks native image drag, composes overlay Badges as children",
+    files: ["BeforeAfterSlider.tsx"],
   },
   {
     name: "Motion Patterns",

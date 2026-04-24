@@ -1,7 +1,14 @@
 "use client";
 
 interface BadgeProps {
-  variant?: "default" | "success" | "warning" | "error" | "info" | "kbd";
+  variant?:
+    | "default"
+    | "success"
+    | "warning"
+    | "error"
+    | "info"
+    | "kbd"
+    | "overlay";
   size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   className?: string;
@@ -16,6 +23,8 @@ export const variantClasses = {
   error: "bg-error-bg text-error",
   info: "bg-info-bg text-info",
   kbd: "bg-surface-tertiary text-content-primary font-mono",
+  overlay:
+    "bg-surface-inverse text-content-inverse border border-border-components backdrop-blur-sm",
 };
 
 export const sizeClasses = {
