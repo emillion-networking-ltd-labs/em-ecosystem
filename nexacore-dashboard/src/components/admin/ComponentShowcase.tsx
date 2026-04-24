@@ -1361,27 +1361,31 @@ function BeforeAfterSliderCard({
       <div className="max-w-[240px]">
         <BeforeAfterSlider
           before={{
-            src: "/em-wordmark-black.png",
-            alt: "EMILLION logotype — black on white",
+            src: "/em-icon-black.png",
+            alt: "EMILLION icon — black on white",
+            label: (
+              <div className="absolute top-3 left-3">
+                <Badge variant="overlay" size="sm">
+                  BEFORE
+                </Badge>
+              </div>
+            ),
           }}
           after={{
-            src: "/em-wordmark-white.png",
-            alt: "EMILLION logotype — white on black",
+            src: "/em-icon-white.png",
+            alt: "EMILLION icon — white on black",
+            label: (
+              <div className="absolute bottom-3 right-3">
+                <Badge variant="overlay" size="sm">
+                  AFTER
+                </Badge>
+              </div>
+            ),
           }}
           orientation={orientation}
           aspectRatio="16/9"
-        >
-          <div className="pointer-events-none absolute top-3 left-3">
-            <Badge variant="overlay" size="sm">
-              BEFORE
-            </Badge>
-          </div>
-          <div className="pointer-events-none absolute bottom-3 right-3">
-            <Badge variant="overlay" size="sm">
-              AFTER
-            </Badge>
-          </div>
-        </BeforeAfterSlider>
+          objectFit="contain"
+        />
       </div>
     </div>
   );
@@ -1405,11 +1409,14 @@ function BeforeAfterSliderShowcase() {
           Divider: { shared: beforeAfterSliderSpecs.divider },
           Handle: { shared: beforeAfterSliderSpecs.handle },
           Arrows: { shared: beforeAfterSliderSpecs.arrows },
-          "Clip path": beforeAfterSliderSpecs.clipPath,
+          Labels: beforeAfterSliderSpecs.labels,
+          "Clip path — horizontal": beforeAfterSliderSpecs.clipPath.horizontal,
+          "Clip path — vertical": beforeAfterSliderSpecs.clipPath.vertical,
+          "Object fit": { shared: beforeAfterSliderSpecs.objectFit },
           Interaction: beforeAfterSliderSpecs.interaction,
           Usage: { shared: beforeAfterSliderSpecs.usage },
           "Showcase assets":
-            "EMILLION logotype B&W (em-wordmark-black.png + em-wordmark-white.png, generated via ffmpeg negate from em-wordmark.png). Demonstrates clear visual contrast between before/after states. Production usages should supply actual before/after photo pairs.",
+            "EMILLION icon B&W (em-icon-black.png + em-icon-white.png, generated via ffmpeg negate from em-icon.png). Same small logo used in Sidebar/NavBar/AuthLayout across the dashboard. Demonstrates clear visual contrast between before/after states. Production usages should supply actual before/after photo pairs.",
         }}
       />
     </ShowcaseSection>

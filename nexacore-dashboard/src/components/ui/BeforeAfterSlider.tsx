@@ -6,10 +6,12 @@ import Image from "next/image";
 interface Media {
   src: string;
   alt: string;
+  label?: React.ReactNode;
 }
 
 type Orientation = "horizontal" | "vertical";
 type AspectRatio = "4/5" | "1/1" | "16/9" | "3/4";
+type ObjectFit = "cover" | "contain";
 
 interface BeforeAfterSliderProps {
   before: Media;
@@ -17,6 +19,7 @@ interface BeforeAfterSliderProps {
   orientation?: Orientation;
   initialPosition?: number;
   aspectRatio?: AspectRatio;
+  objectFit?: ObjectFit;
   className?: string;
   children?: React.ReactNode;
 }
@@ -31,12 +34,28 @@ export const beforeAfterSliderSpecs = {
   arrows:
     "h-4 w-4 svg. Horizontal: vertical arrows (⇅). Vertical: horizontal arrows (⇄, via 90deg rotate).",
   clipPath: {
-    horizontal: "inset(0 0 ${100-position}% 0) on the before layer",
-    vertical: "inset(0 ${100-position}% 0 0) on the before layer",
+    horizontal: {
+      before:
+        "inset(0 0 ${100-position}% 0) — on the BEFORE image + before.label",
+      afterLabel: "inset(${position}% 0 0 0) — inverse, on after.label only",
+    },
+    vertical: {
+      before:
+        "inset(0 ${100-position}% 0 0) — on the BEFORE image + before.label",
+      afterLabel: "inset(0 0 0 ${position}%) — inverse, on after.label only",
+    },
+  },
+  labels: {
+    "before.label":
+      "Optional ReactNode rendered inside the BEFORE clip container. Clipped with the BEFORE image — visible only where BEFORE is visible.",
+    "after.label":
+      "Optional ReactNode rendered inside an inverse-clip container. Visible only where the AFTER image is exposed (divider past it). Not rendered if undefined.",
+    children:
+      "Always-visible overlay content (metadata chips, etc.). Renders above both clipped label containers.",
   },
   interaction: {
     click:
-      "300ms ease-out transition on clip-path + divider position. Uses requestAnimationFrame so first click transitions smoothly before drag mode engages.",
+      "300ms ease-out transition on clip-path + divider position + label containers. Uses requestAnimationFrame so first click transitions smoothly before drag mode engages.",
     drag: "zero transition, direct cursor follow for immediate response.",
     listenerLifecycle:
       "Global mousemove/touchmove/mouseup/touchend attached only while isDragging === true.",
@@ -46,7 +65,9 @@ export const beforeAfterSliderSpecs = {
       "touch-none on container + passive:false on touchmove to prevent page scroll during drag.",
   },
   usage:
-    "Use for before/after image comparison. Place overlay labels (e.g. Badge variant=overlay) as children — they render absolutely over the slider.",
+    "Use for before/after image comparison. Three composition slots: before.label (clipped with BEFORE), after.label (clipped with AFTER), children (always visible). Labels animate in sync with the slider; children never clip.",
+  objectFit:
+    "Default 'cover' — image fills container, crops to match aspectRatio (ideal for photos where framing is already good). Set 'contain' when the full image must be visible without cropping (ideal for logos, diagrams, technical illustrations); empty space around the image shows bg-surface-tertiary.",
 };
 
 export default function BeforeAfterSlider({
@@ -55,6 +76,7 @@ export default function BeforeAfterSlider({
   orientation = "horizontal",
   initialPosition = 50,
   aspectRatio = "4/5",
+  objectFit = "cover",
   className = "",
   children,
 }: BeforeAfterSliderProps) {
@@ -115,6 +137,11 @@ export default function BeforeAfterSlider({
       ? `inset(0 0 ${100 - position}% 0)`
       : `inset(0 ${100 - position}% 0 0)`;
 
+  const afterLabelClipPath =
+    orientation === "horizontal"
+      ? `inset(${position}% 0 0 0)`
+      : `inset(0 0 0 ${position}%)`;
+
   const dividerStyle =
     orientation === "horizontal"
       ? { top: `${position}%`, transition: transitionStyle }
@@ -146,7 +173,7 @@ export default function BeforeAfterSlider({
         alt={after.alt}
         fill
         draggable={false}
-        className="pointer-events-none object-cover"
+        className={`pointer-events-none ${objectFit === "contain" ? "object-contain" : "object-cover"}`}
         sizes="(max-width:768px) 100vw, 50vw"
       />
 
@@ -160,10 +187,21 @@ export default function BeforeAfterSlider({
           alt={before.alt}
           fill
           draggable={false}
-          className="pointer-events-none object-cover"
+          className={`pointer-events-none ${objectFit === "contain" ? "object-contain" : "object-cover"}`}
           sizes="(max-width:768px) 100vw, 50vw"
         />
+        {before.label}
       </div>
+
+      {/* After label — inverse-clipped so it shows only where the AFTER image is exposed */}
+      {after.label && (
+        <div
+          className="pointer-events-none absolute inset-0"
+          style={{ clipPath: afterLabelClipPath, transition: transitionStyle }}
+        >
+          {after.label}
+        </div>
+      )}
 
       {/* Divider + handle */}
       <div className={dividerClass} style={dividerStyle}>
