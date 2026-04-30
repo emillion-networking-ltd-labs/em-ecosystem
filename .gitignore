@@ -72,3 +72,14 @@ coverage/
 prisma.config.js
 prisma.config.d.ts
 prisma.config.js.map
+
+# ────────────────────────────────────────────
+# Local working materials (not part of the codebase)
+# ────────────────────────────────────────────
+# Raw assets handed off by clients before processing into satellites/*/public/images.
+# Keep on disk for re-processing / archival, but never commit.
+attachments/
+
+# Ad-hoc / temporary Python scripts used for local automation (Jira, etc.).
+# Permanent automation lives in integrations/ instead.
+tmp-*.py
