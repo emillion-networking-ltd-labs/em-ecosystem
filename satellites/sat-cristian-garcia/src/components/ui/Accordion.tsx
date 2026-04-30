@@ -1,0 +1,133 @@
+"use client";
+
+import { useState } from "react";
+import { ChevronDown } from "lucide-react";
+
+interface AccordionItem {
+  title: string;
+  children: React.ReactNode;
+}
+
+interface AccordionProps {
+  items: AccordionItem[];
+  className?: string;
+  defaultOpen?: number;
+  variant?: "default" | "section";
+  borderless?: boolean;
+}
+
+export const accordionSpecs = {
+  trigger: {
+    shared: "w-full px-4 py-3 text-body font-normal text-content-primary",
+    hover: "hover:bg-surface-subtle transition-colors",
+  },
+  container: {
+    shared:
+      "rounded-md border border-border-components overflow-hidden bg-surface-primary",
+    divider: "divide-y divide-border-strong",
+  },
+  icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open (duration-200)",
+  content: "px-4 pt-3 pb-4",
+  animation: {
+    style: "CSS grid-template-rows 0fr/1fr transition (Radix UI pattern)",
+    duration: "200ms ease-out",
+    technique: "Content always mounted, height controlled by grid row sizing",
+  },
+};
+
+const triggerStyles = {
+  default: "text-body font-normal text-content-primary",
+  section:
+    "text-h3 font-semibold uppercase tracking-wider text-content-primary",
+};
+
+export default function Accordion({
+  items,
+  className = "",
+  defaultOpen,
+  variant = "default",
+  borderless = false,
+}: AccordionProps) {
+  const [openIndex, setOpenIndex] = useState<number | null>(
+    defaultOpen ?? null,
+  );
+
+  const toggle = (index: number) => {
+    setOpenIndex(openIndex === index ? null : index);
+  };
+
+  return (
+    <div
+      className={`${borderless ? "" : "rounded-md border border-border-components"} overflow-hidden bg-surface-primary divide-y divide-border-strong ${className}`}
+    >
+      {items.map((item, i) => {
+        const isOpen = openIndex === i;
+        return (
+          <div key={i}>
+            <button
+              onClick={() => toggle(i)}
+              className={`flex w-full items-center justify-between px-4 py-3 ${triggerStyles[variant]} transition-colors hover:bg-surface-subtle`}
+            >
+              {item.title}
+              <ChevronDown
+                size={16}
+                className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+              />
+            </button>
+            <div
+              className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+                isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+              }`}
+            >
+              <div className="overflow-hidden">
+                <div className="px-4 pt-3 pb-4">{item.children}</div>
+              </div>
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+interface SingleAccordionProps {
+  title: string;
+  children: React.ReactNode;
+  className?: string;
+  defaultOpen?: boolean;
+}
+
+export function SingleAccordion({
+  title,
+  children,
+  className = "",
+  defaultOpen = false,
+}: SingleAccordionProps) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div
+      className={`rounded-md border border-border-components overflow-hidden bg-surface-primary ${className}`}
+    >
+      <button
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between px-4 py-3 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+      >
+        {title}
+        <ChevronDown
+          size={16}
+          className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+        />
+      </button>
+      <div
+        className={`grid transition-[grid-template-rows] duration-200 ease-out ${
+          open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
+        }`}
+      >
+        <div className="overflow-hidden">
+          <div className="px-4 pt-3 pb-4">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}

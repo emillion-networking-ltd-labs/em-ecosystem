@@ -1,0 +1,410 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== Design Tokens — Light Mode (Default) ===== */
+/* Copied from nexacore-dashboard. ONLY --accent changed from green to gold. */
+:root {
+  /* Surface colors */
+  --surface-primary: #ffffff;
+  --surface-secondary: #fbfbfb;
+  --surface-tertiary: #f5f7f9;
+  --surface-subtle: rgba(28, 28, 28, 0.05);
+  --surface-inverse: #1c1c1c;
+
+  /* Content colors (RGB channels for Tailwind opacity modifier support) */
+  --content-primary: 28 28 28;
+  --content-secondary: rgba(28, 28, 28, 0.65);
+  --content-tertiary: rgba(28, 28, 28, 0.55);
+  --content-disabled: #73787d;
+  --content-placeholder: rgba(28, 28, 28, 0.3);
+  --content-inverse: #ffffff;
+
+  /* Border colors */
+  --border-default: rgba(0, 0, 0, 0.05);
+  --border-strong: rgba(0, 0, 0, 0.08);
+  --border-components: rgba(0, 0, 0, 0.15);
+  --border-subtle: rgba(0, 0, 0, 0.03);
+
+  /* Overlay */
+  --overlay: rgba(0, 0, 0, 0.2);
+
+  /* Semantic feedback colors */
+  --color-error: 138 17 17;
+  --color-error-bg: #fef2f2;
+  --color-error-border: #f5c6c6;
+  --color-warning: #92400e;
+  --color-warning-bg: #fffbeb;
+  --color-warning-border: #fde68a;
+  --color-info: #1e40af;
+  --color-info-bg: #eff6ff;
+  --color-info-border: #bfdbfe;
+  --color-success: #166534;
+  --color-success-bg: #f0fdf4;
+  --color-success-border: #bbf7d0;
+
+  /* Interactive */
+  --hover-bg: rgba(251, 251, 251, 0.75);
+
+  /* Accent — SATELLITE OVERRIDE: gold (from logotipo) instead of green */
+  --accent: #8B6914;
+  --accent-light: #D4A843;
+
+  /* Input states */
+  --input-border-focus: #1c1c1c;
+  --input-bg-disabled: #f5f5f5;
+
+  /* Satellite-specific (not in dashboard) */
+  --metric-purple: #edeefc;
+  --metric-blue: #e6f1fd;
+  --notification-purple: #edeefc;
+  --notification-blue: #e6f1fd;
+}
+
+/* ===== Design Tokens — Dark Mode ===== */
+.dark {
+  --surface-primary: #1a1a1a;
+  --surface-secondary: #242424;
+  --surface-tertiary: #2d2d2d;
+  --surface-subtle: rgba(255, 255, 255, 0.06);
+  --surface-inverse: #f5f5f5;
+
+  --content-primary: 245 245 245;
+  --content-secondary: rgba(245, 245, 245, 0.75);
+  --content-tertiary: rgba(245, 245, 245, 0.55);
+  --content-disabled: #6b7280;
+  --content-placeholder: rgba(245, 245, 245, 0.3);
+  --content-inverse: #1a1a1a;
+
+  --border-default: rgba(255, 255, 255, 0.08);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --border-components: rgba(255, 255, 255, 0.2);
+  --border-subtle: rgba(255, 255, 255, 0.04);
+
+  --overlay: rgba(0, 0, 0, 0.2);
+
+  --color-error: 239 68 68;
+  --color-error-bg: #451a1a;
+  --color-error-border: #7f1d1d;
+  --color-warning: #f59e0b;
+  --color-warning-bg: #451a03;
+  --color-warning-border: #78350f;
+  --color-info: #60a5fa;
+  --color-info-bg: #172554;
+  --color-info-border: #1e3a5f;
+  --color-success: #22c55e;
+  --color-success-bg: #14261c;
+  --color-success-border: #166534;
+
+  --hover-bg: rgba(255, 255, 255, 0.06);
+
+  /* Accent — SATELLITE OVERRIDE: gold (lighter in dark mode for contrast) */
+  --accent: #D4A843;
+  --accent-light: #E0BC6A;
+
+  --input-border-focus: #f5f5f5;
+  --input-bg-disabled: #2d2d2d;
+
+  --metric-purple: #2a2a3d;
+  --metric-blue: #1e2d3d;
+  --notification-purple: #2a2a3d;
+  --notification-blue: #1e2d3d;
+}
+
+/* Ensure .dark class propagates color for currentColor inheritance */
+.dark {
+  color: rgb(var(--content-primary));
+}
+
+/* ===== Base Styles ===== */
+@layer base {
+  *, *::before, *::after { box-sizing: border-box; }
+  button, input, select, textarea { font: inherit; }
+  svg text { font-family: inherit; }
+  html {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    scroll-behavior: smooth;
+  }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
+    background-color: var(--surface-secondary);
+    color: rgb(var(--content-primary));
+    letter-spacing: 0.01em;
+  }
+}
+
+/* ===== Component Layer ===== */
+@layer components {
+  .card-container {
+    background: var(--surface-primary);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+    border-radius: 24px;
+    padding: 24px;
+  }
+  .card {
+    background: var(--surface-primary);
+    border: 1px solid var(--border-strong);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+    border-radius: 12px;
+    padding: 24px;
+  }
+  .card-flat {
+    background: var(--surface-primary);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 24px;
+  }
+}
+
+/* ===== Animations ===== */
+@keyframes pageFadeIn { from { opacity: 0; } to { opacity: 1; } }
+.animate-page-transition { animation: pageFadeIn 0.15s ease; }
+
+@keyframes infinity-spin { 0% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: 256.589; } }
+.infinity-spinner { animation: infinity-spin 2s linear infinite; }
+
+@keyframes dropdown-down { from { opacity: 0; transform: translateY(-4px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes dropdown-up { from { opacity: 0; transform: translateY(4px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+@layer utilities {
+  .text-balance { text-wrap: balance; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .animate-dropdown-down { animation: dropdown-down 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .animate-dropdown-up { animation: dropdown-up 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+}
+
+/* Autofill override */
+input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus {
+  -webkit-box-shadow: 0 0 0 1000px var(--surface-primary) inset;
+  -webkit-text-fill-color: rgb(var(--content-primary));
+  caret-color: rgb(var(--content-primary));
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+/* Stagger animation for lists */
+@keyframes stagger-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.animate-stagger > * { opacity: 0; animation: stagger-fade-in 200ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-stagger > *:nth-child(1) { animation-delay: 0ms; }
+.animate-stagger > *:nth-child(2) { animation-delay: 40ms; }
+.animate-stagger > *:nth-child(3) { animation-delay: 80ms; }
+.animate-stagger > *:nth-child(4) { animation-delay: 120ms; }
+.animate-stagger > *:nth-child(5) { animation-delay: 160ms; }
+.animate-stagger > *:nth-child(6) { animation-delay: 200ms; }
+
+/* Slow stagger for hero stats (entry moment) */
+@keyframes stagger-fade-in-slow { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.animate-stagger-slow > * { opacity: 0; animation: stagger-fade-in-slow 800ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-stagger-slow > *:nth-child(1) { animation-delay: 100ms; }
+.animate-stagger-slow > *:nth-child(2) { animation-delay: 250ms; }
+.animate-stagger-slow > *:nth-child(3) { animation-delay: 400ms; }
+.animate-stagger-slow > *:nth-child(4) { animation-delay: 550ms; }
+.animate-stagger-slow > *:nth-child(5) { animation-delay: 700ms; }
+.animate-stagger-slow > *:nth-child(6) { animation-delay: 850ms; }
+
+/* Pre-animation state for viewport-triggered stagger — children hidden until in view */
+.stagger-init > * { opacity: 0; }
+
+/* Fade-up: more pronounced rise (24px) for sections where movement should be crisp */
+@keyframes fade-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+/* Fade-in from left/right (used by useFadeInOnView with from: "left" | "right") */
+@keyframes fade-from-left { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes fade-from-right { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+.animate-fade-up > * { opacity: 0; animation: fade-up 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-fade-up > *:nth-child(1) { animation-delay: 0ms; }
+.animate-fade-up > *:nth-child(2) { animation-delay: 80ms; }
+.animate-fade-up > *:nth-child(3) { animation-delay: 160ms; }
+.animate-fade-up > *:nth-child(4) { animation-delay: 240ms; }
+.animate-fade-up > *:nth-child(5) { animation-delay: 320ms; }
+.animate-fade-up > *:nth-child(6) { animation-delay: 400ms; }
+
+/* Fade-up synchronized: all children animate at the same time (no stagger).
+   Fixed 1350ms delay chains Services after Hero's last stat card (Hero card 4 ends at 1350ms). */
+.animate-fade-up-sync > * {
+  opacity: 0;
+  animation: fade-up 500ms cubic-bezier(0.16, 1, 0.3, 1) 1350ms forwards;
+}
+
+/* Section-level fade-up entry. Uses CSS var --scroll-y for parallax coexistence:
+   keyframes compose (scroll parallax + 24px entry offset → 0 + parallax). */
+@keyframes section-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(calc(var(--scroll-y, 0px) + 24px));
+  }
+  to {
+    opacity: 1;
+    transform: translateY(var(--scroll-y, 0px));
+  }
+}
+.animate-section-enter {
+  opacity: 0;
+  animation: section-fade-up 500ms cubic-bezier(0.16, 1, 0.3, 1) 100ms forwards;
+}
+
+/* Carousel directional slide-in (fade + horizontal translate from a side) */
+@keyframes slide-in-from-right { from { opacity: 0; transform: translateX(60px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slide-in-from-left { from { opacity: 0; transform: translateX(-60px); } to { opacity: 1; transform: translateX(0); } }
+.animate-slide-in-from-right { animation: slide-in-from-right 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-slide-in-from-left { animation: slide-in-from-left 400ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* Carousel sequential transition: text exits down → slider exits → slider enters → text enters up.
+   Total ~2.4s. Used by Transformations slider for premium "stage transition" feel. */
+@keyframes slide-text-fade-down { from { opacity: 1; transform: translateY(0); } to { opacity: 0; transform: translateY(24px); } }
+@keyframes slide-text-fade-up { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slide-media-fade-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes slide-media-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* Phase: exiting (text fade-down 600ms, then slider fade-out 300ms) */
+.phase-exiting .slide-text { animation: slide-text-fade-down 600ms cubic-bezier(0.4, 0, 0.6, 1) forwards; }
+.phase-exiting .slide-media { animation: slide-media-fade-out 300ms ease-out 600ms forwards; }
+
+/* Phase: entering (slider fade-in 300ms, then text fade-up 600ms) */
+.phase-entering .slide-text { opacity: 0; animation: slide-text-fade-up 600ms cubic-bezier(0.16, 1, 0.3, 1) 300ms forwards; }
+.phase-entering .slide-media { opacity: 0; animation: slide-media-fade-in 300ms ease-out forwards; }
+
+/* Accessibility: respect prefers-reduced-motion (WCAG 2.3.3) */
+@media (prefers-reduced-motion: reduce) {
+  .animate-stagger > *,
+  .animate-stagger-slow > *,
+  .animate-fade-up > *,
+  .animate-fade-up-sync > *,
+  .stagger-init > *,
+  .animate-section-enter,
+  .animate-slide-in-from-right,
+  .animate-slide-in-from-left,
+  .phase-exiting .slide-text,
+  .phase-exiting .slide-media,
+  .phase-entering .slide-text,
+  .phase-entering .slide-media {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+/* ===== Satellite-specific: display typography ===== */
+.text-display {
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  font-size: clamp(2.5rem, 1.5rem + 5vw, 4rem);
+}
+
+/* ===== Intro splash loader (first-visit overlay) =====
+   Acts as a REAL loading screen: appears immediately on first visit, runs the
+   entry animation (words → phrase → period), then HOLDS until both:
+     (a) minimum branding hold has elapsed (2700ms — guarantees the entry plays in full)
+     (b) `window.load` has fired (page resources fully loaded)
+   The exit (tremble → punch-out → overlay fade) only fires when JS adds the
+   `.exiting` class — so the page never reveals while splash content is still
+   animating, and the splash provides actual loading feedback on slow networks.
+   Always dark (black bg, white text) — branding choice for splash. */
+.intro-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #000;
+}
+.intro-frame {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.02em;
+  line-height: 0.9;
+  font-size: clamp(2.5rem, 1.5rem + 5vw, 4rem);
+  color: #fff;
+  opacity: 0;
+  text-align: center;
+  white-space: nowrap;
+  pointer-events: none;
+  padding: 0 1.5rem;
+  max-width: 100vw;
+}
+.intro-frame-w1 { animation: intro-word-flash 350ms ease-in-out 0ms forwards; }
+.intro-frame-w2 { animation: intro-word-flash 400ms ease-in-out 350ms forwards; }
+.intro-frame-w3 { animation: intro-word-flash 300ms ease-in-out 750ms forwards; }
+.intro-frame-w4 { animation: intro-word-flash 350ms ease-in-out 1050ms forwards; }
+.intro-frame-phrase {
+  white-space: normal;
+  animation: intro-phrase-in 800ms cubic-bezier(0.16, 1, 0.3, 1) 1400ms forwards;
+}
+
+/* Exit sequence — only runs when JS adds `.exiting` to .intro-loader.
+     0-200ms:   phrase trembles  (overlay still 100% black)
+     200-400ms: phrase punches out + fades  (overlay still 100% black)
+     400-650ms: overlay fades to reveal page  (phrase already invisible)
+   The opacity:1 override keeps the phrase visible while tremble runs (tremble
+   keyframes don't set opacity, so the element would otherwise revert to base opacity:0). */
+.intro-loader.exiting .intro-frame-phrase {
+  opacity: 1;
+  animation:
+    intro-tremble 200ms linear 0ms,
+    intro-punch-out 200ms cubic-bezier(0.4, 0, 0.6, 1) 200ms forwards;
+}
+.intro-loader.exiting {
+  animation: intro-overlay-out 250ms ease-in 400ms forwards;
+}
+.intro-period {
+  color: var(--accent);
+  display: inline-block;
+  margin-left: 0.05em;
+  opacity: 0;
+  animation: intro-period-in 500ms cubic-bezier(0.34, 1.56, 0.64, 1) 2200ms forwards;
+}
+
+@keyframes intro-word-flash {
+  0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.96); }
+  30%, 70% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+}
+@keyframes intro-phrase-in {
+  from { opacity: 0; transform: translate(-50%, -45%); }
+  to { opacity: 1; transform: translate(-50%, -50%); }
+}
+@keyframes intro-period-in {
+  0% { opacity: 0; transform: scale(0); }
+  60% { opacity: 1; transform: scale(1.3); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes intro-overlay-out {
+  from { opacity: 1; }
+  to { opacity: 0; pointer-events: none; visibility: hidden; }
+}
+/* Video-game impact tremble: high-frequency ±4px shake. */
+@keyframes intro-tremble {
+  0%   { transform: translate(-50%, -50%); }
+  10%  { transform: translate(calc(-50% + 3px), calc(-50% - 2px)); }
+  20%  { transform: translate(calc(-50% - 4px), calc(-50% + 2px)); }
+  30%  { transform: translate(calc(-50% + 2px), calc(-50% + 3px)); }
+  40%  { transform: translate(calc(-50% - 3px), calc(-50% - 1px)); }
+  50%  { transform: translate(calc(-50% + 4px), calc(-50% + 1px)); }
+  60%  { transform: translate(calc(-50% - 2px), calc(-50% - 3px)); }
+  70%  { transform: translate(calc(-50% + 3px), calc(-50% + 2px)); }
+  80%  { transform: translate(calc(-50% - 4px), calc(-50% - 1px)); }
+  90%  { transform: translate(calc(-50% + 1px), calc(-50% + 2px)); }
+  100% { transform: translate(-50%, -50%); }
+}
+/* Punch-out: phrase scales forward into the camera while fading. */
+@keyframes intro-punch-out {
+  0%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+  30%  { opacity: 1; transform: translate(-50%, -50%) scale(1.08); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(1.18); }
+}
+
+/* Reduced motion: skip splash entirely (component also bails in JS, this is a safety net) */
+@media (prefers-reduced-motion: reduce) {
+  .intro-loader { display: none; }
+}
+
+/* Repeat-visitor skip — synchronous head script (INTRO_INIT_SCRIPT in layout.tsx)
+   adds `intro-skip` to <html> when sessionStorage has the flag set.
+   This rule fires before the body parses, so the overlay never paints for
+   repeat visitors — no flash of page content while React hydrates. */
+.intro-skip .intro-loader { display: none; }
