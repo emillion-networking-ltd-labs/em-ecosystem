@@ -155,20 +155,7 @@ export default function BeforeAfterSlider({
   return (
     <div
       ref={containerRef}
-      className={`group relative ${aspectClass} w-full ${cursorClass} select-none touch-none overflow-hidden rounded-xl bg-surface-tertiary ${className}`}
-      onMouseDown={(e) => {
-        e.preventDefault();
-        updatePosition(e.clientX, e.clientY);
-        requestAnimationFrame(() => setIsDragging(true));
-      }}
-      onTouchStart={(e) => {
-        // Mirror onMouseDown's preventDefault so swipe-aware parents
-        // (e.g. carousels using e.defaultPrevented as a bail signal)
-        // see defaultPrevented=true and skip their drag init.
-        e.preventDefault();
-        updatePosition(e.touches[0].clientX, e.touches[0].clientY);
-        requestAnimationFrame(() => setIsDragging(true));
-      }}
+      className={`group relative ${aspectClass} w-full overflow-hidden rounded-xl bg-surface-tertiary ${className}`}
       onDragStart={(e) => e.preventDefault()}
     >
       {/* After — full base layer */}
@@ -207,9 +194,29 @@ export default function BeforeAfterSlider({
         </div>
       )}
 
-      {/* Divider + handle */}
+      {/* Divider + handle. Drag handlers live ONLY on the handle (not the
+          container) so on touch devices the user can scroll the page vertically
+          by dragging the image — only the small handle initiates a slider drag.
+          Same UX pattern as Apple Photos / Mapbox / Material Design. */}
       <div className={dividerClass} style={dividerStyle}>
-        <div className="absolute top-1/2 left-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border-components bg-surface-primary">
+        <button
+          type="button"
+          aria-label="Drag to compare before and after"
+          className={`pointer-events-auto absolute top-1/2 left-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border-components bg-surface-primary touch-none select-none ${cursorClass}`}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            updatePosition(e.clientX, e.clientY);
+            requestAnimationFrame(() => setIsDragging(true));
+          }}
+          onTouchStart={(e) => {
+            // Mirror onMouseDown's preventDefault so swipe-aware parents
+            // (e.g. carousels using e.defaultPrevented as a bail signal)
+            // see defaultPrevented=true and skip their drag init.
+            e.preventDefault();
+            updatePosition(e.touches[0].clientX, e.touches[0].clientY);
+            requestAnimationFrame(() => setIsDragging(true));
+          }}
+        >
           <svg
             className={`h-4 w-4 text-content-primary/50 transition-colors group-hover:text-content-primary ${
               orientation === "vertical" ? "rotate-90" : ""
@@ -225,7 +232,7 @@ export default function BeforeAfterSlider({
               d="M7 8l5-5 5 5M7 16l5 5 5-5"
             />
           </svg>
-        </div>
+        </button>
       </div>
 
       {/* Consumer-provided overlays (Badges, labels, etc.) */}

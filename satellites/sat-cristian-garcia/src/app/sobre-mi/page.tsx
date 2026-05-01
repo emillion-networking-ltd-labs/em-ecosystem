@@ -74,7 +74,7 @@ export default function SobreMiPage() {
                 className={`w-full overflow-hidden rounded-lg rounded-b-none lg:max-w-[256px] lg:flex-shrink-0 lg:rounded-bl-lg lg:rounded-r-none ${storyImageFade.className}`}
                 style={storyImageFade.style}
               >
-                <Image src="/images/about-portrait.png" alt="Cristian García — retrato" width={940} height={1672} className="h-auto w-full" sizes="(max-width:1024px) 100vw, 256px" />
+                <Image src="/images/about-portrait.png" alt="Cristian García — retrato" width={940} height={1672} className="h-auto w-full" sizes="(max-width:1024px) 100vw, 256px" priority />
               </div>
               <div className="flex flex-1">
                 <div className="card-flat flex h-full w-full flex-col justify-center rounded-t-none text-center lg:rounded-l-none lg:rounded-tr-xl lg:text-left">
