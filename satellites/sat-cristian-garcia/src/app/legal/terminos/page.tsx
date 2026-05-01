@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import PublicNavbar from "@/components/layout/PublicNavbar";
 import PublicFooter from "@/components/layout/PublicFooter";
 
-export const metadata: Metadata = { title: "Términos y Condiciones" };
+export const metadata: Metadata = {
+  title: "Términos y Condiciones",
+  description:
+    "Términos y condiciones de uso del sitio web cristiangarcia.com y de los servicios de entrenamiento personal ofrecidos por Cristian García Espadas.",
+  alternates: { canonical: "/legal/terminos" },
+  robots: { index: true, follow: true },
+};
 
 export default function TerminosPage() {
   return (

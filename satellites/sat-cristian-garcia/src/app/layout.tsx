@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import Providers from "./providers";
 import IntroLoader from "@/components/layout/IntroLoader";
 import "./globals.css";
@@ -11,14 +13,21 @@ const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');i
 // React waits to hydrate. Mirror logic in IntroLoader.tsx.
 const INTRO_INIT_SCRIPT = `(function(){try{if(sessionStorage.getItem('intro_seen')){document.documentElement.classList.add('intro-skip')}}catch(e){}})()`;
 
+// Site URL is sourced from env so we can flip from the Vercel default to the
+// custom domain (cristiangarcia.com) without a code change. Mirror in robots.ts
+// and sitemap.ts.
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://sat-cristian-garcia.vercel.app";
+
 export const metadata: Metadata = {
-  metadataBase: new URL("https://cristiangarcia.com"),
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "Cristian García Espadas | Entrenador Personal",
     template: "%s | Cristian García Espadas",
   },
   description:
     "Entrenamiento personalizado y asesoramiento nutricional con Cristian García Espadas. Campeón de España Sub 23. Finalista Míster Universo.",
+  alternates: { canonical: "/" },
   openGraph: {
     title: "Cristian García Espadas | Aquí cambiarás tu vida",
     description: "Entrenamiento personalizado y nutrición científica. +500 clientes transformados.",
@@ -42,6 +51,8 @@ export default function RootLayout({
       <body>
         <IntroLoader />
         <Providers>{children}</Providers>
+        <SpeedInsights />
+        <Analytics />
       </body>
     </html>
   );

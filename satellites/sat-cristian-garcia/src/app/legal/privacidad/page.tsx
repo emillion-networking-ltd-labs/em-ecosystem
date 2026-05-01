@@ -2,7 +2,13 @@ import type { Metadata } from "next";
 import PublicNavbar from "@/components/layout/PublicNavbar";
 import PublicFooter from "@/components/layout/PublicFooter";
 
-export const metadata: Metadata = { title: "Política de Privacidad" };
+export const metadata: Metadata = {
+  title: "Política de Privacidad",
+  description:
+    "Política de privacidad y tratamiento de datos personales de cristiangarcia.com conforme al Reglamento General de Protección de Datos (RGPD).",
+  alternates: { canonical: "/legal/privacidad" },
+  robots: { index: true, follow: true },
+};
 
 export default function PrivacidadPage() {
   return (
