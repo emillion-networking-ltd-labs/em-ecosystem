@@ -1,25 +1,20 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
-import { useFadeInOnView } from "@/lib/useFadeInOnView";
+import { useStaggerOnView } from "@/lib/useStaggerOnView";
 
 import { services } from "@/lib/data";
 
 type Service = (typeof services)[number];
 
-function ServiceCard({ service, index }: { service: Service; index: number }) {
-  const { ref, className, style } = useFadeInOnView<HTMLAnchorElement>({
-    delay: (index % 3) * 120,
-  });
+function ServiceCard({ service }: { service: Service }) {
   return (
     <Link
-      ref={ref}
       href={`/servicios#${service.id}`}
-      className={`card-flat block transition-all hover:border-border-components ${className}`}
-      style={style}
+      className="card-flat block transition-all hover:border-border-components"
     >
       <Badge variant="default" size="sm" className="!text-accent">{service.id.toUpperCase()}</Badge>
       <h3 className="mt-3 text-h2 font-semibold text-content-primary">{service.title}</h3>
@@ -29,20 +24,41 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
 }
 
 export default function ServicesPreview() {
+  const sectionRef = useRef<HTMLElement>(null);
   const [offset, setOffset] = useState(0);
+  const grid = useStaggerOnView<HTMLDivElement>("animate-fade-up");
 
   useEffect(() => {
     const handleScroll = () => {
-      const progress = Math.min(window.scrollY / 400, 1);
-      setOffset(progress * 40);
+      const el = sectionRef.current;
+      if (!el) return;
+
+      // Mobile/tablet: standard rect-based parallax (matches Portfolio,
+      // Transformations, AppPreview, CTA — progressive as the section enters
+      // the viewport). Desktop keeps the scrollY-based effect that visually
+      // anchors the section to Hero on initial load.
+      if (window.matchMedia("(max-width: 1023px)").matches) {
+        const rect = el.getBoundingClientRect();
+        const trigger = window.innerHeight;
+        const progress = Math.min(Math.max((trigger - rect.top) / trigger, 0), 1);
+        setOffset(progress * 40);
+      } else {
+        const progress = Math.min(window.scrollY / 400, 1);
+        setOffset(progress * 40);
+      }
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener("scroll", handleScroll);
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleScroll);
+    };
   }, []);
 
   return (
     <section
+      ref={sectionRef}
       className="bg-surface-secondary py-12"
       style={{ transform: `translateY(${offset}px)` }}
     >
@@ -51,9 +67,9 @@ export default function ServicesPreview() {
           <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Servicios »»</span>
           <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">Lo que ofrezco</h2>
         </div>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-          {services.slice(0, 3).map((s, i) => (
-            <ServiceCard key={s.id} service={s} index={i} />
+        <div ref={grid.ref} className={`grid grid-cols-1 gap-6 md:grid-cols-3 ${grid.className}`}>
+          {services.slice(0, 3).map((s) => (
+            <ServiceCard key={s.id} service={s} />
           ))}
         </div>
       </div>

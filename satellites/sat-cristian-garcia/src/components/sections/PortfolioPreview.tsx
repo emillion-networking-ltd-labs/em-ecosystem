@@ -58,9 +58,9 @@ export default function PortfolioPreview() {
 
         {/* Newspaper-style card — overlapping the image */}
         <div
-          className="relative z-10 -mt-6 w-full -rotate-1 overflow-hidden rounded-xl border border-border-strong shadow-card md:-mt-8"
+          className="relative z-10 -mt-6 w-full overflow-hidden rounded-xl border border-border-strong shadow-card md:-mt-8"
           style={{
-            backgroundColor: "#f5efdf",
+            backgroundColor: "#f0e9d6",
             backgroundImage:
               "radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), radial-gradient(rgba(0,0,0,0.04) 1px, transparent 1px)",
             backgroundSize: "4px 4px, 8px 8px",
@@ -70,7 +70,7 @@ export default function PortfolioPreview() {
           <div className="px-8 py-5 sm:px-10 sm:py-6" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
             {/* Headline — newspaper style */}
             <h3 className="text-[28px] font-bold leading-tight text-[#1c1c1c]" style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}>
-              Un granadino entre los grandes
+              Un granadino<br className="md:hidden" /> entre los grandes
             </h3>
 
             {/* Article body — newspaper style, 2 columns, drop cap */}

@@ -24,6 +24,15 @@ export const designTokens = {
 const config: Config = {
   darkMode: "class",
   content: ["./src/**/*.{ts,tsx}"],
+  // Gate `hover:` styles behind @media (hover: hover) so they only apply on
+  // devices with a real pointer (mouse). Without this, touch devices keep the
+  // :hover state stuck on the last tapped element until the user taps somewhere
+  // else — e.g. tapping the lightbox right-arrow IconButton on mobile leaves
+  // hover:bg-surface-subtle applied (looks transparent against the dark
+  // overlay, button disappears). Standard Tailwind solution; default in v4.
+  future: {
+    hoverOnlyWhenSupported: true,
+  },
   theme: {
     extend: {
       fontFamily: {

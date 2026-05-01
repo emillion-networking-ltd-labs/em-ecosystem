@@ -22,7 +22,11 @@ export function useStaggerOnView<T extends HTMLElement>(
   animationClass:
     | "animate-stagger-slow"
     | "animate-fade-up" = "animate-stagger-slow",
-  threshold = 0.15,
+  threshold = 0.1,
+  /** Negative bottom margin prevents the group from firing when only its top
+   *  edge is peeking into the viewport bottom. Default excludes the bottom 15%
+   *  of the viewport from the trigger zone. */
+  rootMargin = "0% 0% -15% 0%",
 ) {
   const ref = useRef<T>(null);
   const [inView, setInView] = useState(false);
@@ -31,18 +35,43 @@ export function useStaggerOnView<T extends HTMLElement>(
     const el = ref.current;
     if (!el) return;
 
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          io.disconnect();
-        }
-      },
-      { threshold },
-    );
-    io.observe(el);
+    const startObserving = () => {
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setInView(true);
+            io.disconnect();
+          }
+        },
+        { threshold, rootMargin },
+      );
+      io.observe(el);
+      return io;
+    };
+
+    // Splash gate: while the IntroLoader is covering the page, defer the IO so
+    // above-fold groups don't stagger invisibly behind the splash. See same
+    // pattern in useFadeInOnView.
+    const splashActive =
+      typeof window !== "undefined" &&
+      !sessionStorage.getItem("intro_seen") &&
+      document.querySelector(".intro-loader") !== null;
+
+    if (splashActive) {
+      let io: IntersectionObserver | null = null;
+      const onIntroExit = () => {
+        io = startObserving();
+      };
+      window.addEventListener("intro:exit", onIntroExit, { once: true });
+      return () => {
+        window.removeEventListener("intro:exit", onIntroExit);
+        io?.disconnect();
+      };
+    }
+
+    const io = startObserving();
     return () => io.disconnect();
-  }, [threshold]);
+  }, [threshold, rootMargin]);
 
   return {
     ref,

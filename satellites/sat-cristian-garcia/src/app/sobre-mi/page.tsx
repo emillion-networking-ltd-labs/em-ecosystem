@@ -11,12 +11,17 @@ import { aboutContent } from "@/lib/data";
 
 type TimelineItem = (typeof aboutContent.timeline)[number];
 
-function TimelineEntry({ item, index, isLast }: { item: TimelineItem; index: number; isLast: boolean }) {
-  const { ref, className, style } = useFadeInOnView<HTMLDivElement>({
-    delay: (index % 3) * 100,
-  });
+function TimelineEntry({ item, isLast }: { item: TimelineItem; isLast: boolean }) {
+  // Per-item fade: timeline is a tall vertical column (~1200px total for 5
+  // entries), longer than one viewport. Section-level stagger would fire all
+  // entries at once when the parent crosses the trigger line, animating items
+  // 4-5 behind the fold. Per-item IO observes each entry individually, so each
+  // animates as the user scrolls past it. The IO uses the global rootMargin
+  // -15% buffer (set in useFadeInOnView default) to fire when the entry is
+  // genuinely in view, not when it merely peeks into the viewport bottom.
+  const { ref, style } = useFadeInOnView<HTMLDivElement>();
   return (
-    <div ref={ref} className={`relative pl-10 ${className}`} style={style}>
+    <div ref={ref} className="relative pl-10" style={style}>
       {/* Vertical guideline + dot */}
       <span
         aria-hidden
@@ -144,7 +149,6 @@ export default function SobreMiPage() {
                 <TimelineEntry
                   key={item.title}
                   item={item}
-                  index={i}
                   isLast={i === aboutContent.timeline.length - 1}
                 />
               ))}

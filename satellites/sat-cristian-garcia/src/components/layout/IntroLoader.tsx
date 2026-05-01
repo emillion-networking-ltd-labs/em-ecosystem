@@ -67,6 +67,10 @@ export default function IntroLoader() {
         // also means a reload mid-splash will replay the splash next time
         // (the user hasn't really "seen" it if it didn't finish).
         sessionStorage.setItem("intro_seen", "1");
+        // Notify in-view animation hooks so above-fold cards (which were
+        // hidden behind the splash) start observing/animating now.
+        // See useFadeInOnView / useStaggerOnView splash gate.
+        window.dispatchEvent(new CustomEvent("intro:exit"));
         setShow(false);
         document.body.style.overflow = "";
       }, EXIT_MS);
