@@ -18,12 +18,13 @@ type ContactMethod = {
 function ContactMethodCard({ method, index }: { method: ContactMethod; index: number }) {
   const Icon = method.icon;
   const isClickable = !!method.href;
-  // Cards staggered cada 100ms (norma del proyecto, igual que Portfolio/Servicios/Testimonios).
-  // index 0 → 100ms, index 1 → 200ms, index 2 → 300ms, index 3 → 400ms.
-  // Animación viewport-triggered: cada card anima cuando entra al viewport (IO).
-  const cardDelay = 100 + index * 100;
-  const linkFade = useFadeInOnView<HTMLAnchorElement>({ delay: cardDelay });
-  const divFade = useFadeInOnView<HTMLDivElement>({ delay: cardDelay });
+  // Per-item IntersectionObserver: each card animates only when *it* enters
+  // the viewport. Cards stack vertically on mobile (~350px each), so a section-
+  // level stagger would fire all 4 at once when the first comes into view —
+  // cards 2-4 animate invisibly below the fold. Same fix as /sobre-mi timeline.
+  const { ref, className, style } = useFadeInOnView<HTMLDivElement>({
+    delay: index * 100,
+  });
 
   const inner = (
     <div className="flex items-start gap-4">
@@ -43,11 +44,11 @@ function ContactMethodCard({ method, index }: { method: ContactMethod; index: nu
       : {};
     return (
       <a
-        ref={linkFade.ref}
+        ref={ref as unknown as React.Ref<HTMLAnchorElement>}
         href={method.href}
         {...externalProps}
-        className="card-flat block transition-colors hover:border-border-components"
-        style={linkFade.style}
+        style={style}
+        className={`card-flat block transition-colors hover:border-border-components ${className}`}
       >
         {inner}
       </a>
@@ -55,25 +56,18 @@ function ContactMethodCard({ method, index }: { method: ContactMethod; index: nu
   }
 
   return (
-    <div ref={divFade.ref} className="card-flat" style={divFade.style}>
+    <div ref={ref} style={style} className={`card-flat ${className}`}>
       {inner}
     </div>
   );
 }
 
 export default function ContactoPage() {
-  // Secuencia viewport-triggered (cada elemento anima al entrar al viewport):
-  //   Badge:   0ms (sin delay)
-  //   Card 1:  100ms
-  //   Card 2:  200ms
-  //   Card 3:  300ms
-  //   Card 4:  400ms
-  //   Form:    500ms
-  // Todos los elementos están sobre el fold en /contacto, así que entran al
-  // viewport simultáneamente en page load. Sus CSS animations con delays
-  // diferentes producen el orden secuencial deterministically.
+  // Per-element fade-ins. The 4 contact-method cards each get their own IO
+  // inside ContactMethodCard so each fires when *that card* enters the viewport
+  // (mobile stack > 1 viewport tall — section stagger would fire all at once).
   const trustBadgeFade = useFadeInOnView<HTMLDivElement>({ delay: 0 });
-  const formFade = useFadeInOnView<HTMLDivElement>({ delay: 500 });
+  const formFade = useFadeInOnView<HTMLDivElement>({ delay: 200 });
 
   // Numeric WhatsApp for wa.me link (strip + and any spaces)
   const whatsappDigits = siteConfig.whatsapp.replace(/[^\d]/g, "");

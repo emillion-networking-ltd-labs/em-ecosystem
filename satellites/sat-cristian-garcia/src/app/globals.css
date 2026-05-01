@@ -124,7 +124,9 @@
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    scroll-behavior: smooth;
+    /* scroll-behavior intentionally NOT set globally — let the browser
+       handle native scroll restoration (auto) on reload. JS-driven
+       scrolls that want smooth use `behavior: 'smooth'` per-call. */
   }
   body {
     margin: 0;
@@ -195,15 +197,17 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .animate-stagger > *:nth-child(5) { animation-delay: 160ms; }
 .animate-stagger > *:nth-child(6) { animation-delay: 200ms; }
 
-/* Slow stagger for hero stats (entry moment) */
+/* Slow stagger for hero stats and similar slow-build groups.
+   Step between cards: 200ms (~25% of 800ms duration — tuned per industry best
+   practice of 30-70% of duration for perceptible sequential separation). */
 @keyframes stagger-fade-in-slow { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 .animate-stagger-slow > * { opacity: 0; animation: stagger-fade-in-slow 800ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 .animate-stagger-slow > *:nth-child(1) { animation-delay: 100ms; }
-.animate-stagger-slow > *:nth-child(2) { animation-delay: 250ms; }
-.animate-stagger-slow > *:nth-child(3) { animation-delay: 400ms; }
-.animate-stagger-slow > *:nth-child(4) { animation-delay: 550ms; }
-.animate-stagger-slow > *:nth-child(5) { animation-delay: 700ms; }
-.animate-stagger-slow > *:nth-child(6) { animation-delay: 850ms; }
+.animate-stagger-slow > *:nth-child(2) { animation-delay: 300ms; }
+.animate-stagger-slow > *:nth-child(3) { animation-delay: 500ms; }
+.animate-stagger-slow > *:nth-child(4) { animation-delay: 700ms; }
+.animate-stagger-slow > *:nth-child(5) { animation-delay: 900ms; }
+.animate-stagger-slow > *:nth-child(6) { animation-delay: 1100ms; }
 
 /* Pre-animation state for viewport-triggered stagger — children hidden until in view */
 .stagger-init > * { opacity: 0; }
@@ -213,13 +217,15 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 /* Fade-in from left/right (used by useFadeInOnView with from: "left" | "right") */
 @keyframes fade-from-left { from { opacity: 0; transform: translateX(-16px); } to { opacity: 1; transform: translateX(0); } }
 @keyframes fade-from-right { from { opacity: 0; transform: translateX(16px); } to { opacity: 1; transform: translateX(0); } }
+/* Step between cards: 150ms (~30% of 500ms duration — within industry best
+   practice 30-70% range for perceptible sequential separation). */
 .animate-fade-up > * { opacity: 0; animation: fade-up 500ms cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 .animate-fade-up > *:nth-child(1) { animation-delay: 0ms; }
-.animate-fade-up > *:nth-child(2) { animation-delay: 80ms; }
-.animate-fade-up > *:nth-child(3) { animation-delay: 160ms; }
-.animate-fade-up > *:nth-child(4) { animation-delay: 240ms; }
-.animate-fade-up > *:nth-child(5) { animation-delay: 320ms; }
-.animate-fade-up > *:nth-child(6) { animation-delay: 400ms; }
+.animate-fade-up > *:nth-child(2) { animation-delay: 150ms; }
+.animate-fade-up > *:nth-child(3) { animation-delay: 300ms; }
+.animate-fade-up > *:nth-child(4) { animation-delay: 450ms; }
+.animate-fade-up > *:nth-child(5) { animation-delay: 600ms; }
+.animate-fade-up > *:nth-child(6) { animation-delay: 750ms; }
 
 /* Fade-up synchronized: all children animate at the same time (no stagger).
    Fixed 1350ms delay chains Services after Hero's last stat card (Hero card 4 ends at 1350ms). */
@@ -286,13 +292,22 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   }
 }
 
-/* ===== Satellite-specific: display typography ===== */
+/* ===== Satellite-specific: display typography =====
+   Display headings load Inter (weight 900) via next/font in layout.tsx
+   exposed as the --font-display CSS variable. Falls back to the system-ui
+   stack if the font fails to load. Body text continues to use system-ui
+   (set on body in the @layer base section above) for native feel. */
 .text-display {
+  font-family: var(--font-display), -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.02em;
   line-height: 0.9;
-  font-size: clamp(2.5rem, 1.5rem + 5vw, 4rem);
+  /* Tuned in SAT01-5: max reduced from 4rem (64px) to 3.5rem (56px) so that
+     internal page H1s ('Hablemos.', 'En tarima.', etc.) don't shout at hero
+     scale. Hero on /home retains brand impact at 56px Inter Black. Mobile
+     baseline 40px unchanged. */
+  font-size: clamp(2.5rem, 1.5rem + 4vw, 3.5rem);
 }
 
 /* ===== Intro splash loader (first-visit overlay) =====
@@ -315,6 +330,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  font-family: var(--font-display), -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif;
   font-weight: 900;
   text-transform: uppercase;
   letter-spacing: -0.02em;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight, ExternalLink, X } from "lucide-react";
 import PublicNavbar from "@/components/layout/PublicNavbar";
@@ -17,15 +17,14 @@ type PalmaresEntry = (typeof portfolioPalmares)[number];
 type MediaEntry = (typeof portfolioMedia)[number];
 
 function PalmaresCard({ entry, index }: { entry: PalmaresEntry; index: number }) {
+  // Per-card IntersectionObserver. On mobile the 3 entries stack vertically
+  // (~400px each) — total > 1 viewport. Section-level stagger would fire all
+  // 3 at once when the first comes into view. Same fix as /sobre-mi timeline.
   const { ref, className, style } = useFadeInOnView<HTMLDivElement>({
-    delay: (index % 3) * 100,
+    delay: index * 100,
   });
   return (
-    <div
-      ref={ref}
-      className={`card-flat ${className}`}
-      style={style}
-    >
+    <div ref={ref} style={style} className={`card-flat ${className}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
         <p className="text-h1 font-black text-accent leading-none">{entry.year}</p>
         <div className="flex-1">
@@ -78,6 +77,13 @@ function PortfolioCard({
   );
 }
 
+// Drag-to-swipe constants — mirror TransformationsPreview carousel for
+// consistent feel across the site. SWIPE_THRESHOLD is raw cursor delta,
+// DRAG_DAMPING is the visual translation factor (image moves ~30% of the
+// cursor distance for tactile resistance feedback).
+const SWIPE_THRESHOLD = 80;
+const DRAG_DAMPING = 0.3;
+
 function Lightbox({
   index,
   onClose,
@@ -91,6 +97,14 @@ function Lightbox({
 }) {
   const image = portfolioImages[index];
   const total = portfolioImages.length;
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartXRef = useRef(0);
+  // True when a drag just crossed the threshold and triggered a slide change.
+  // Read by the backdrop onClick to suppress the close that would otherwise
+  // fire when mouseup lands outside the image container.
+  const justDraggedRef = useRef(false);
+  const reducedMotionRef = useRef(false);
 
   // Lock body scroll + bind keyboard navigation while lightbox is open.
   useEffect(() => {
@@ -101,11 +115,54 @@ function Lightbox({
     };
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", onKey);
+    reducedMotionRef.current = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", onKey);
     };
   }, [onClose, onNext, onPrev]);
+
+  // Global pointer move/up handlers — active only while dragging. Mirrors the
+  // TransformationsPreview carousel pattern so feel is consistent across the site.
+  useEffect(() => {
+    if (!isDragging) return;
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      const x = "touches" in e ? e.touches[0].clientX : e.clientX;
+      setDragX(x - dragStartXRef.current);
+    };
+    const onUp = () => {
+      setIsDragging(false);
+      setDragX((current) => {
+        if (Math.abs(current) > SWIPE_THRESHOLD) {
+          justDraggedRef.current = true;
+          if (current > 0) onPrev();
+          else onNext();
+        }
+        return 0;
+      });
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [isDragging, onNext, onPrev]);
+
+  const handleBackdropClick = () => {
+    // Suppress close if mouseup landed outside the image container after a drag.
+    if (justDraggedRef.current) {
+      justDraggedRef.current = false;
+      return;
+    }
+    onClose();
+  };
 
   return (
     <div
@@ -117,10 +174,13 @@ function Lightbox({
       // patrón "boxed" del dashboard se renderizan con valores apropiados para
       // un overlay oscuro, sin importar el tema del usuario.
       className="dark fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm"
-      onClick={onClose}
+      onClick={handleBackdropClick}
     >
       {/* IconButton boxed sm — componente del design system (importado, no inline).
-          Usa el patrón exacto documentado en IconButton.tsx del dashboard. */}
+          Usa el patrón exacto documentado en IconButton.tsx del dashboard.
+          h-8 w-8 hace el tamaño total 32×32px explícito (no derivado del padding),
+          con icono 16px centrado. Colores: bg-surface-tertiary + text-content-primary
+          (tokens del proyecto, vía variant=boxed). */}
       <IconButton
         variant="boxed"
         size="sm"
@@ -129,7 +189,7 @@ function Lightbox({
           onClose();
         }}
         aria-label="Cerrar"
-        className="absolute right-4 top-4 z-10 sm:right-8 sm:top-8"
+        className="absolute right-4 top-4 z-10 h-8 w-8 sm:right-8 sm:top-8"
       >
         <X size={16} />
       </IconButton>
@@ -142,7 +202,7 @@ function Lightbox({
           onPrev();
         }}
         aria-label="Imagen anterior"
-        className="absolute left-3 top-1/2 z-10 -translate-y-1/2 sm:left-8"
+        className="absolute left-3 top-1/2 z-10 h-8 w-8 -translate-y-1/2 sm:left-8"
       >
         <ChevronLeft size={16} />
       </IconButton>
@@ -155,23 +215,49 @@ function Lightbox({
           onNext();
         }}
         aria-label="Imagen siguiente"
-        className="absolute right-3 top-1/2 z-10 -translate-y-1/2 sm:right-8"
+        className="absolute right-3 top-1/2 z-10 h-8 w-8 -translate-y-1/2 sm:right-8"
       >
         <ChevronRight size={16} />
       </IconButton>
 
-      {/* Image */}
+      {/* Image — drag to swipe between images. cursor-grab/grabbing signals
+          draggability; threshold-based commit so short taps still bubble as
+          clicks (and stopPropagation keeps them from closing the lightbox).
+          touch-none suppresses iOS Safari's edge-swipe-back gesture (the
+          native blue back arrow that would otherwise hijack horizontal drags
+          starting near the screen edge). Same pattern as BeforeAfterSlider. */}
       <div
-        className="relative h-[85vh] w-[90vw]"
+        className={`relative h-[85vh] w-[90vw] touch-none select-none ${
+          isDragging ? "cursor-grabbing" : "cursor-grab"
+        }`}
         onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          dragStartXRef.current = e.clientX;
+          setIsDragging(true);
+        }}
+        onTouchStart={(e) => {
+          dragStartXRef.current = e.touches[0].clientX;
+          setIsDragging(true);
+        }}
+        onDragStart={(e) => e.preventDefault()}
+        style={
+          isDragging && !reducedMotionRef.current
+            ? {
+                transform: `translateX(${dragX * DRAG_DAMPING}px)`,
+                transition: "none",
+              }
+            : undefined
+        }
       >
         <Image
           src={image.src}
           alt={image.alt}
           fill
           priority
+          draggable={false}
           sizes="90vw"
-          className="object-contain"
+          className="pointer-events-none object-contain"
         />
       </div>
 

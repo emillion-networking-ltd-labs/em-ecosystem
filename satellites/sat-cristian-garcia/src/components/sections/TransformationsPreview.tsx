@@ -125,6 +125,27 @@ export default function TransformationsPreview({
 
   const current = transformations[activeIndex];
 
+  // Dots renderer — used twice: ABOVE the grid on mobile (carousel awareness)
+  // and BELOW the grid on desktop (familiar position alongside visible content).
+  const renderDots = () =>
+    transformations.map((t, idx) => (
+      <button
+        key={t.id}
+        onClick={() => goTo(idx)}
+        aria-label={`Ver testimonio ${idx + 1}: ${t.name}`}
+        aria-current={idx === activeIndex ? "true" : undefined}
+        className="group flex h-7 w-7 items-center justify-center rounded-full"
+      >
+        <span
+          className={`h-3 w-3 rounded-full transition-all ${
+            idx === activeIndex
+              ? "bg-content-primary outline outline-2 outline-offset-2 outline-content-primary/75"
+              : "bg-border-components group-hover:bg-content-tertiary"
+          }`}
+        />
+      </button>
+    ));
+
   return (
     <section
       ref={ref}
@@ -144,6 +165,13 @@ export default function TransformationsPreview({
           <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">
             Resultados reales
           </h2>
+        </div>
+
+        {/* Mobile-only dots: ABOVE the grid so carousel awareness is established
+            before the user engages with the testimonial content. Hidden on
+            desktop (md+) where dots stay below the grid alongside visible content. */}
+        <div className="mb-8 flex items-center justify-center gap-4 md:hidden">
+          {renderDots()}
         </div>
 
         {/* Slide content — sequential transition driven by `phase` class:
@@ -168,8 +196,10 @@ export default function TransformationsPreview({
             isDragging ? "cursor-grabbing" : "cursor-grab"
           }`}
         >
-          {/* Left column (3/5) — testimonial */}
-          <div className="md:col-span-3 flex flex-col justify-center slide-text">
+          {/* Left column (3/5) — testimonial.
+              Mobile: order-2 → renders BELOW the image (image is the visual hook).
+              Desktop (md+): order-1 → renders LEFT of the image. */}
+          <div className="order-2 md:order-1 md:col-span-3 flex flex-col justify-center slide-text">
             {/* Stars */}
             <div
               ref={starsFade.ref}
@@ -241,11 +271,13 @@ export default function TransformationsPreview({
             </p>
           </div>
 
-          {/* Right column (2/5) — before/after slider */}
-          <div className="md:col-span-2 slide-media">
+          {/* Right column (2/5) — before/after slider.
+              Mobile: order-1 → renders ABOVE the testimonial text (image-first hook).
+              Desktop (md+): order-2 → renders RIGHT of the text column. */}
+          <div className="order-1 md:order-2 md:col-span-2 slide-media">
             <div
               ref={sliderFade.ref}
-              className={`card-flat !p-0 overflow-hidden w-3/4 mx-auto ${sliderFade.className}`}
+              className={`card-flat !p-0 overflow-hidden w-full md:w-3/4 md:mx-auto ${sliderFade.className}`}
               style={sliderFade.style}
             >
               <BeforeAfterSlider
@@ -284,26 +316,12 @@ export default function TransformationsPreview({
           </div>
         </div>
 
-        {/* Dots navigation: bigger filled dots; active gets an outline halo
+        {/* Desktop-only dots: BELOW the grid where they sit alongside the
+            visible content (in mobile they live ABOVE the grid — see top of
+            this section). Bigger filled dots; active gets an outline halo
             inspired by the Input focus pattern (outline + offset). */}
-        <div className="mt-10 flex items-center justify-center gap-4">
-          {transformations.map((t, idx) => (
-            <button
-              key={t.id}
-              onClick={() => goTo(idx)}
-              aria-label={`Ver testimonio ${idx + 1}: ${t.name}`}
-              aria-current={idx === activeIndex ? "true" : undefined}
-              className="group flex h-7 w-7 items-center justify-center rounded-full"
-            >
-              <span
-                className={`h-3 w-3 rounded-full transition-all ${
-                  idx === activeIndex
-                    ? "bg-content-primary outline outline-2 outline-offset-2 outline-content-primary/75"
-                    : "bg-border-components group-hover:bg-content-tertiary"
-                }`}
-              />
-            </button>
-          ))}
+        <div className="mt-10 hidden items-center justify-center gap-4 md:flex">
+          {renderDots()}
         </div>
       </div>
 

@@ -8,14 +8,17 @@ import { pricingPlans } from "@/lib/data";
 type Plan = (typeof pricingPlans)[number];
 
 function PricingPlanCard({ plan, index }: { plan: Plan; index: number }) {
+  // Per-card IntersectionObserver. On mobile the 3 plan cards stack vertically
+  // (~500px each) — total > 1 viewport. Section-level stagger would fire all
+  // 3 at once when the first comes into view. Same fix as /sobre-mi timeline.
   const { ref, className, style } = useFadeInOnView<HTMLDivElement>({
-    delay: (index % 3) * 120,
+    delay: index * 100,
   });
   return (
     <div
       ref={ref}
-      className={`card-flat relative flex flex-col ${plan.highlighted ? "border-accent ring-1 ring-accent/20" : ""} ${className}`}
       style={style}
+      className={`card-flat relative flex flex-col ${plan.highlighted ? "border-accent ring-1 ring-accent/20" : ""} ${className}`}
     >
       {plan.highlighted && (
         <div className="absolute -top-3 left-6">

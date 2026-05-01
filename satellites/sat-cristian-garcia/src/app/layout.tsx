@@ -1,9 +1,22 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import Providers from "./providers";
 import IntroLoader from "@/components/layout/IntroLoader";
 import "./globals.css";
+
+// Display font for marketing headings (.text-display) and IntroLoader splash.
+// Loaded via next/font/google → self-hosted, optimized, zero CLS, zero FOUT.
+// Body text keeps the system-ui stack (defined in globals.css body) for native
+// feel + zero load cost. This dual-font split mirrors GitHub's pattern: custom
+// font for marketing pages, system-ui inside the app/dashboard.
+const interDisplay = Inter({
+  subsets: ["latin"],
+  weight: ["900"],
+  display: "swap",
+  variable: "--font-display",
+});
 
 const THEME_INIT_SCRIPT = `(function(){try{var t=localStorage.getItem('theme');if(t!=='light'){document.documentElement.classList.add('dark')}}catch(e){document.documentElement.classList.add('dark')}})()`;
 
@@ -43,7 +56,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es" suppressHydrationWarning>
+    <html lang="es" suppressHydrationWarning className={interDisplay.variable}>
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script dangerouslySetInnerHTML={{ __html: INTRO_INIT_SCRIPT }} />

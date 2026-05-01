@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { Hourglass } from "lucide-react";
 import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
 import { useFadeInOnView } from "@/lib/useFadeInOnView";
 
 /* Official Google Play store icon (single-color path, recognizable shape).
@@ -111,9 +112,8 @@ export default function AppPreview() {
           </Badge>
         </div>
 
-        {/* Left-aligned content block (under the CRISFIT row) */}
+        {/* Left-aligned tagline (constrained to max-w-xl so it wraps naturally) */}
         <div className="max-w-xl">
-          {/* Tagline */}
           <p
             ref={taglineFade.ref}
             className={`mt-4 text-h3 leading-relaxed text-white/80 md:text-h2 ${taglineFade.className}`}
@@ -123,37 +123,36 @@ export default function AppPreview() {
             <br />
             y nutrición en tu bolsillo.
           </p>
+        </div>
+
+        {/* Action row — spans full max-w-7xl so the CTA can sit at the right
+            edge of the section, aligned horizontally with the Google Play
+            mockup on the left. flex-wrap keeps it graceful on narrow screens. */}
+        <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
           {/* Google Play button mockup (disabled — coming soon) */}
           <div
             ref={playStoreFade.ref}
-            className={`mt-10 flex flex-wrap items-center gap-3 ${playStoreFade.className}`}
+            aria-disabled
+            className={`flex h-12 cursor-not-allowed items-center gap-3 rounded-md border border-white/20 bg-black/40 px-5 backdrop-blur-sm opacity-90 ${playStoreFade.className}`}
             style={playStoreFade.style}
           >
-            <div
-              aria-disabled
-              className="flex h-12 cursor-not-allowed items-center gap-3 rounded-md border border-white/20 bg-black/40 px-5 backdrop-blur-sm opacity-90"
-            >
-              <span className="text-white">
-                <GooglePlayIcon size={22} />
-              </span>
-              <span className="text-body font-semibold text-white">
-                Google Play
-              </span>
-            </div>
+            <span className="text-white">
+              <GooglePlayIcon size={22} />
+            </span>
+            <span className="text-body font-semibold text-white">
+              Google Play
+            </span>
           </div>
 
-          {/* Bottom CTA — same outlined style as Hero "EMPIEZA TU TRANSFORMACIÓN" */}
+          {/* CTA — primary/lg Button to match CTASection's "EMPIEZA AHORA" */}
           <div
             ref={ctaFade.ref}
-            className={`mt-12 ${ctaFade.className}`}
+            className={ctaFade.className}
             style={ctaFade.style}
           >
-            <a
-              href="/contacto"
-              className="inline-flex h-12 items-center justify-center rounded-md border border-white/30 px-5 md:px-8 py-3 text-body md:text-h3 font-normal uppercase tracking-wider text-white transition-all hover:bg-white/10"
-            >
+            <Button variant="primary" size="lg" href="/contacto" fullWidth={false}>
               ÚNETE A LA LISTA DE ESPERA
-            </a>
+            </Button>
           </div>
         </div>
       </div>

@@ -164,6 +164,10 @@ export default function BeforeAfterSlider({
         requestAnimationFrame(() => setIsDragging(true));
       }}
       onTouchStart={(e) => {
+        // Mirror onMouseDown's preventDefault so swipe-aware parents
+        // (e.g. TransformationsPreview carousel) see defaultPrevented=true
+        // and skip their drag init. Without this, the parent grabs the swipe.
+        e.preventDefault();
         updatePosition(e.touches[0].clientX, e.touches[0].clientY);
         requestAnimationFrame(() => setIsDragging(true));
       }}

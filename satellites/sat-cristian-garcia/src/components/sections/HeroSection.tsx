@@ -82,7 +82,7 @@ export default function HeroSection() {
 
   return (
     <>
-      <section className="relative z-20 flex h-[60vh] flex-col">
+      <section className="relative z-20 flex h-[50vh] flex-col landscape:max-lg:min-h-[440px] lg:h-[60vh]">
         {/* Video + overlay contained (so they don't overflow hero) */}
         <div className="absolute inset-0 overflow-hidden">
           <video
@@ -125,7 +125,7 @@ export default function HeroSection() {
       </section>
 
       {/* Mobile: stats outside hero, normal theme */}
-      <div className="relative z-20 lg:hidden bg-surface-secondary py-12 px-6">
+      <div className="relative z-20 lg:hidden bg-surface-secondary py-10 px-6">
         <div className="grid grid-cols-2 gap-4">
           {socialProofStats.map((s, i) => (
             <HeroStatCard key={s.label} stat={s} index={i} variant="mobile" />

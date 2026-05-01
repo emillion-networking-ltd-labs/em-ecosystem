@@ -23,29 +23,67 @@ import { useEffect, useRef, useState } from "react";
  * the keyframe animations — items render at natural opacity.
  */
 export function useFadeInOnView<T extends HTMLElement>({
-  threshold = 0.15,
+  threshold = 0.1,
+  rootMargin = "0% 0% -15% 0%",
   delay = 0,
   duration = 700,
   from = "bottom",
-}: { threshold?: number; delay?: number; duration?: number; from?: "bottom" | "left" | "right" } = {}) {
+}: {
+  threshold?: number;
+  /** Negative bottom margin (e.g. "0% 0% -15% 0%") prevents the element from
+   *  firing when its top edge is merely peeking into the viewport bottom.
+   *  See https://developer.mozilla.org/en-US/docs/Web/API/Intersection_Observer_API */
+  rootMargin?: string;
+  delay?: number;
+  duration?: number;
+  from?: "bottom" | "left" | "right";
+} = {}) {
   const ref = useRef<T>(null);
   const [inView, setInView] = useState(false);
 
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setInView(true);
-          io.disconnect();
-        }
-      },
-      { threshold },
-    );
-    io.observe(el);
+
+    const startObserving = () => {
+      const io = new IntersectionObserver(
+        ([entry]) => {
+          if (entry.isIntersecting) {
+            setInView(true);
+            io.disconnect();
+          }
+        },
+        { threshold, rootMargin },
+      );
+      io.observe(el);
+      return io;
+    };
+
+    // Splash gate: while the IntroLoader is covering the page, defer the IO so
+    // above-fold elements don't run their fade-in animation invisibly behind the
+    // splash. Detection: sessionStorage flag absent AND a `.intro-loader` element
+    // currently in the DOM. Reduced-motion users have no `.intro-loader`, so this
+    // path is skipped and the IO starts immediately.
+    const splashActive =
+      typeof window !== "undefined" &&
+      !sessionStorage.getItem("intro_seen") &&
+      document.querySelector(".intro-loader") !== null;
+
+    if (splashActive) {
+      let io: IntersectionObserver | null = null;
+      const onIntroExit = () => {
+        io = startObserving();
+      };
+      window.addEventListener("intro:exit", onIntroExit, { once: true });
+      return () => {
+        window.removeEventListener("intro:exit", onIntroExit);
+        io?.disconnect();
+      };
+    }
+
+    const io = startObserving();
     return () => io.disconnect();
-  }, [threshold]);
+  }, [threshold, rootMargin]);
 
   const animationName =
     from === "left" ? "fade-from-left" : from === "right" ? "fade-from-right" : "fade-up";
