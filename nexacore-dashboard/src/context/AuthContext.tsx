@@ -9,6 +9,7 @@ import {
   useRef,
   type ReactNode,
 } from "react";
+import { useRouter } from "next/navigation";
 import { apiClient, API_BASE_URL } from "@/lib/api";
 import { getCsrfToken, clearCsrfToken } from "@/lib/csrf";
 import { passkeyLoginVerify } from "@/lib/passkey-api";
@@ -204,6 +205,7 @@ function isMfaSetupResponse(data: LoginResponse): data is {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const { addToast } = useToast();
+  const router = useRouter();
   const [state, dispatch] = useReducer(authReducer, {
     user: null,
     accessToken: null,
@@ -238,7 +240,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  // Register auth failure callback — when ApiClient's silentRefresh fails, trigger logout
+  // Register auth failure callback — when ApiClient's silentRefresh fails,
+  // we MUST guarantee three things regardless of which page is mounted:
+  //   1. Toast informs the user (warning, "Session expired").
+  //   2. Local React state is cleaned (LOGOUT dispatch).
+  //   3. Browser is sent to /login NOW — do not rely on ProtectedRoute's
+  //      effect alone. There are pages without ProtectedRoute, and there
+  //      are race conditions during navigation where the effect may not
+  //      observe the state change in time. Calling router.replace here
+  //      makes the redirect deterministic.
   const handleAuthFailure = useCallback(() => {
     addToast({
       variant: "warning",
@@ -246,16 +256,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       description: "Please sign in again.",
     });
     dispatch({ type: "LOGOUT" });
-  }, [addToast]);
+    router.replace("/login");
+  }, [addToast, router]);
 
   // Generate fingerprint then attempt silent refresh on mount (ref guard prevents StrictMode double-fire)
   // Skip refresh on /auth/callback — the OAuth exchange handler will authenticate;
   // running both causes a race condition where refresh's LOGOUT overwrites exchange's AUTH_SUCCESS.
+  // Register the auth-failure callback in its OWN effect, separate from the
+  // mount-once initialization. This is critical: in React StrictMode (dev),
+  // the previous combined effect ran body→cleanup→body, and the second body
+  // run was skipped by mountedRef, leaving onAuthFailure permanently null.
+  // Result: cascade-401s in other tabs never fired the toast/LOGOUT/redirect.
+  // Splitting the effects makes the callback registration safely re-runnable
+  // and idempotent without depending on the mount-once guard.
+  useEffect(() => {
+    apiClient.setOnAuthFailure(handleAuthFailure);
+    return () => {
+      apiClient.setOnAuthFailure(null);
+    };
+  }, [handleAuthFailure]);
+
   const mountedRef = useRef(false);
   useEffect(() => {
     if (mountedRef.current) return;
     mountedRef.current = true;
-    apiClient.setOnAuthFailure(handleAuthFailure);
     (async () => {
       const fp = await getFingerprint();
       if (fp) apiClient.setDeviceFingerprint(fp);
@@ -265,10 +289,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       await refreshSession();
     })();
-    return () => {
-      apiClient.setOnAuthFailure(null);
-    };
-  }, [refreshSession, handleAuthFailure]);
+  }, [refreshSession]);
 
   const login = useCallback(
     async (email: string, password: string, turnstileToken?: string) => {
@@ -314,11 +335,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             kind,
           );
         }
-        const message = extractErrorMessage(err);
         addToast({
           variant: "error",
           title: "Sign in failed",
-          description: message,
+          description: extractErrorMessage(err),
         });
         dispatch({ type: "AUTH_STOP" });
         throw err;

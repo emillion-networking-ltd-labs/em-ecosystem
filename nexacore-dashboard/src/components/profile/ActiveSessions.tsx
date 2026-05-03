@@ -4,10 +4,12 @@ import { useState, useEffect, useCallback } from "react";
 import { Monitor, Smartphone, Trash2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
+import { useAuth } from "@/hooks/useAuth";
 import { PROFILE_TOAST } from "@/lib/toast-messages";
 import type { SessionResponse } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import ConfirmModal from "@/components/ui/ConfirmModal";
 import IconButton from "@/components/ui/IconButton";
 
 function parseUserAgent(ua: string | null): {
@@ -56,10 +58,12 @@ function formatRelativeTime(dateStr: string): string {
 
 export default function ActiveSessions({ bare }: { bare?: boolean }) {
   const { addToast } = useToast();
+  const { logout } = useAuth();
   const [sessions, setSessions] = useState<SessionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
   const [revokingAll, setRevokingAll] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
   const fetchSessions = useCallback(async () => {
@@ -92,15 +96,33 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
     }
   };
 
-  const revokeAllOtherSessions = async () => {
+  // Backend /auth/logout-all revokes ALL user sessions (including current) and
+  // deny-lists every active access token. The button label and behavior must
+  // reflect that — we sign out everywhere AND immediately exit this dashboard
+  // session via AuthContext.logout(). Otherwise the user is left with a stale
+  // in-memory access token and a confusing UX where pages render without data
+  // until the next 401 cascade catches up. See OWASP Session Management Cheat
+  // Sheet §5.4: explicit session termination must end the UI session too.
+  const signOutAllSessions = async () => {
     setRevokingAll(true);
     try {
       await apiClient.post("/auth/logout-all", {});
-      setSessions((prev) => prev.filter((s) => s.isCurrent));
+      addToast({
+        variant: "success",
+        title: "All sessions ended",
+        description:
+          "You have been signed out from this device and all others.",
+      });
+      // logout() clears local state, dispatches LOGOUT, which routes to /login
+      // via handleAuthFailure-style cleanup. The /auth/logout call inside is a
+      // no-op (refresh cookie already cleared by /auth/logout-all) but keeps
+      // local cleanup symmetric with the regular logout flow.
+      await logout();
     } catch {
       addToast(PROFILE_TOAST.SESSIONS_REVOKE_FAILED);
-    } finally {
       setRevokingAll(false);
+    } finally {
+      setConfirmOpen(false);
     }
   };
 
@@ -202,15 +224,27 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
                 size="md"
                 fullWidth={false}
                 loading={revokingAll}
-                onClick={revokeAllOtherSessions}
+                onClick={() => setConfirmOpen(true)}
                 className="w-full sm:w-auto"
               >
-                Revoke all others
+                Sign out from all sessions
               </Button>
             </div>
           )}
         </>
       )}
+
+      <ConfirmModal
+        open={confirmOpen}
+        onClose={() => !revokingAll && setConfirmOpen(false)}
+        onConfirm={signOutAllSessions}
+        title="Sign out from all sessions?"
+        description="This will sign you out from this device and every other device where you are currently signed in. You will need to sign in again to continue."
+        confirmLabel="Sign out everywhere"
+        cancelLabel="Cancel"
+        variant="danger"
+        loading={revokingAll}
+      />
     </div>
   );
 }

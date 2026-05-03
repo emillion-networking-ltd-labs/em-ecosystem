@@ -10,11 +10,14 @@ import MfaDigitInput from "@/components/ui/MfaDigitInput";
 import RateLimitBanner from "@/components/ui/RateLimitBanner";
 import { useAuth } from "@/hooks/useAuth";
 import { useRateLimit } from "@/hooks/useRateLimit";
+import { useToast } from "@/hooks/useToast";
+import { AUTH_TOAST } from "@/lib/toast-messages";
 import { RateLimitError } from "@/lib/types";
 
 export default function MfaTotpStep() {
   const { verifyMfaLogin, cancelMfa, isLoading, error, clearError } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
+  const { addToast } = useToast();
   const showRateLimit = rateLimitInfo.isRateLimited;
   const showError = !showRateLimit && !!error;
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;
@@ -30,10 +33,13 @@ export default function MfaTotpStep() {
       } catch (err) {
         if (err instanceof RateLimitError) {
           setRateLimit(err.retryAfter, err.message);
+          // Toast-only convention. Generic copy — user is in MFA challenge,
+          // no security email is sent in this flow; just inform and ask wait.
+          addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
         }
       }
     },
-    [verifyMfaLogin, setRateLimit, trustDevice],
+    [verifyMfaLogin, setRateLimit, addToast, trustDevice],
   );
 
   const handleRecoverySubmit = (e: React.FormEvent) => {

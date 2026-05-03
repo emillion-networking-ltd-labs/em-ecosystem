@@ -17,10 +17,42 @@ export const AUTH_TOAST = {
     title: "Sign in failed",
     description: msg,
   }),
-  TOO_MANY_ATTEMPTS: (desc: string): ToastMsg => ({
+  // First 429 within a throttle window — full copy carries the email hint
+  // for legitimate users whose account just emitted a security email.
+  TOO_MANY_ATTEMPTS_FIRST: (desc: string): ToastMsg => ({
     variant: "warning",
     title: "Too many attempts",
     description: desc,
+  }),
+  // Subsequent 429s within the same window — device-scoped copy, no email
+  // assumption. Selection is by an absolute-time ref in LoginForm (never by
+  // email), so anti-enumeration (CWE-204/203) is preserved. Variant escalates
+  // to "error" (red) to signal "stop retrying" with more weight than the
+  // first warning.
+  TOO_MANY_ATTEMPTS_REPEAT: (): ToastMsg => ({
+    variant: "error",
+    title: "Too many attempts",
+    description: "Sign-ins temporarily blocked from this device. Please wait.",
+  }),
+  // Generic rate-limit toast for flows where the email-hint variant doesn't
+  // apply (no security email is sent for these actions): password reset
+  // submission, MFA TOTP verification, trusted-device actions, etc.
+  TOO_MANY_ATTEMPTS_GENERIC: (): ToastMsg => ({
+    variant: "warning",
+    title: "Too many attempts",
+    description: "Please try again later.",
+  }),
+  // Rate-limit toast for flows where the user MAY have received a security
+  // email but their registration status must NOT be confirmed/denied: register
+  // and forgot-password. The conditional wording ("If we sent you an email…")
+  // is anti-enumeration safe — it does not disclose whether an email was sent
+  // — and avoids the "registered user" wording that contradicts the intent of
+  // the /register flow (where the user is explicitly NOT yet registered).
+  TOO_MANY_ATTEMPTS_INBOX_HINT: (): ToastMsg => ({
+    variant: "warning",
+    title: "Too many attempts",
+    description:
+      "If we sent you an email, please check your inbox for instructions.",
   }),
   RECOVERY_SENT: {
     variant: "success",
@@ -32,13 +64,18 @@ export const AUTH_TOAST = {
     title: "Account created",
     description: "Check your inbox to verify your email.",
   } as ToastMsg,
+  // Severity = error: the user landed on /reset-password without a usable
+  // token, blocking the flow they came to complete. Per Carbon/Atlassian/
+  // Salesforce conventions, "action cannot proceed" maps to error variant.
   MISSING_RESET_TOKEN: {
-    variant: "warning",
+    variant: "error",
     title: "Missing reset token",
     description: "Please request a new password reset link.",
   } as ToastMsg,
+  // Severity = error: same reasoning as MISSING_RESET_TOKEN — the reset
+  // workflow cannot continue with an invalid/expired token.
   EXPIRED_LINK: {
-    variant: "warning",
+    variant: "error",
     title: "Expired or invalid link",
     description: "Your reset link has expired. Request a new one.",
   } as ToastMsg,

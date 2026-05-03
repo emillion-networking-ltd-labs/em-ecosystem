@@ -12,6 +12,16 @@ export class SessionExpiredError extends Error {
 
 const CSRF_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 
+// 401 from these endpoints means "credentials invalid" or "no session yet" —
+// NOT "session expired". They must NOT trigger silentRefresh, otherwise the
+// genuine error body is swallowed and replaced with SessionExpiredError.
+const SKIP_REFRESH_ON_401 = new Set([
+  "/auth/login",
+  "/auth/register",
+  "/auth/refresh",
+  "/auth/forgot-password",
+]);
+
 class ApiClient {
   private accessToken: string | null = null;
   private refreshPromise: Promise<string | null> | null = null;
@@ -119,8 +129,9 @@ class ApiClient {
       }
     }
 
-    // Handle 401 with silent refresh
-    if (response.status === 401) {
+    // Handle 401 with silent refresh (skip for unauthenticated auth endpoints —
+    // their 401 means "invalid credentials", not "expired session")
+    if (response.status === 401 && !SKIP_REFRESH_ON_401.has(endpoint)) {
       const newToken = await this.silentRefresh();
       if (newToken) {
         headers.Authorization = `Bearer ${newToken}`;
@@ -258,7 +269,10 @@ class ApiClient {
         });
         if (!res.ok) return null;
         const data = await res.json();
-        this.accessToken = data.accessToken;
+        // Use the setter (not direct field assignment) so authFailureTriggered
+        // resets to false on a successful refresh. Otherwise a prior auth
+        // failure could leave the flag stuck at true and silence future toasts.
+        this.setAccessToken(data.accessToken);
         return data.accessToken as string;
       } catch {
         return null;

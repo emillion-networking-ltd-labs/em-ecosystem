@@ -62,6 +62,14 @@ export default function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const oauthErrorShown = useRef(false);
+  // Tracks the absolute time when the current throttle window ends.
+  // Independent of `rateLimitInfo` (which is form-step-scoped and gets cleared
+  // on navigation per existing UX). This ref survives navigation between email
+  // and password steps because LoginForm itself does not unmount. Used solely
+  // to decide whether a 429 is the FIRST hit in the window (full toast copy)
+  // or a REPEAT hit (short toast copy). Resets on page reload, which is the
+  // correct UX (fresh page = user gets the full hint again).
+  const throttleWindowEndsAtRef = useRef<number | null>(null);
 
   // Clear stale errors from other auth forms on mount + read OAuth error from URL
   useEffect(() => {
@@ -139,11 +147,25 @@ export default function LoginForm() {
       );
     } catch (err) {
       if (err instanceof RateLimitError) {
+        // FIRST vs REPEAT detection uses an absolute-time ref independent of
+        // rateLimitInfo (which gets cleared on step navigation per audited UX).
+        // First hit in a window carries the email hint; repeat hits drop it
+        // to avoid misleading users who switched the email field mid-cooldown.
+        const now = Date.now();
+        const inThrottleWindow =
+          throttleWindowEndsAtRef.current !== null &&
+          now < throttleWindowEndsAtRef.current;
+        const isFirstHit = !inThrottleWindow;
+        if (isFirstHit) {
+          throttleWindowEndsAtRef.current = now + err.retryAfter * 1000;
+        }
         setRateLimit(err.retryAfter, err.message, "throttle");
         addToast(
-          AUTH_TOAST.TOO_MANY_ATTEMPTS(
-            "If you are a registered user, please check your email for further instructions.",
-          ),
+          isFirstHit
+            ? AUTH_TOAST.TOO_MANY_ATTEMPTS_FIRST(
+                "If you are a registered user, please check your email for further instructions.",
+              )
+            : AUTH_TOAST.TOO_MANY_ATTEMPTS_REPEAT(),
         );
       }
     } finally {

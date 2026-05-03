@@ -73,6 +73,12 @@ export default function RegisterForm() {
     } catch (err) {
       if (err instanceof RateLimitError) {
         setRateLimit(err.retryAfter, err.message);
+        // Toast-only convention. INBOX_HINT copy — alludes to email so a
+        // legitimate user (whose address may have triggered a security
+        // notification email if already registered) is informed, but the
+        // wording is conditional ("if we sent you an email") and never
+        // confirms registration status. Anti-enumeration safe.
+        addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_INBOX_HINT());
       }
     } finally {
       setTurnstileToken(null);

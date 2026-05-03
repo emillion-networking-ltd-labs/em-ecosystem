@@ -45,6 +45,10 @@ export default function ForgotPasswordForm() {
     } catch (err) {
       if (err instanceof RateLimitError) {
         setRateLimit(err.retryAfter, err.message);
+        // Toast-only convention. INBOX_HINT copy — neutral wording that
+        // alludes to a possible recovery email without confirming whether the
+        // address corresponds to an existing account. Anti-enumeration safe.
+        addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_INBOX_HINT());
       }
     } finally {
       setTurnstileToken(null);

@@ -84,6 +84,9 @@ export default function ResetPasswordForm() {
     } catch (err) {
       if (err instanceof RateLimitError) {
         setRateLimit(err.retryAfter, err.message);
+        // Toast-only convention. Generic copy — the user already used the
+        // reset link; no further security email is sent during this flow.
+        addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
       }
     }
   };
