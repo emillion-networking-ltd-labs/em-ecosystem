@@ -103,6 +103,8 @@ import type { SidebarNavSection as SidebarSection } from "@/components/ui/Sideba
 import IconBadge, { iconBadgeSpecs } from "@/components/ui/IconBadge";
 import ImageCropper, { imageCropperSpecs } from "@/components/ui/ImageCropper";
 import AlertBox, { alertBoxSpecs } from "@/components/ui/AlertBox";
+import ThemeToggle from "@/components/ui/ThemeToggle";
+import TurnstileWidget from "@/components/ui/TurnstileWidget";
 import SearchTrigger, {
   searchTriggerSpecs,
 } from "@/components/ui/SearchTrigger";
@@ -3008,6 +3010,8 @@ export function AtomShowcase() {
       <EmptyStateShowcase />
       <AccordionShowcase />
       <CardShowcase />
+      <StickyCardShowcase />
+      <ThemeToggleShowcase />
     </div>
   );
 }
@@ -3215,6 +3219,7 @@ export function MoleculeShowcase() {
       <SidebarShowcase />
       <CommandPaletteShowcase />
       <BeforeAfterSliderShowcase />
+      <TurnstileWidgetShowcase />
       <MotionPatternsShowcase />
     </div>
   );
@@ -3991,6 +3996,111 @@ function DataTableShowcase() {
             </div>
           </div>
         ))}
+      </div>
+    </ShowcaseSection>
+  );
+}
+
+function StickyCardShowcase() {
+  return (
+    <ShowcaseSection title="StickyCard">
+      <p className="text-caption text-content-tertiary">
+        Card that becomes <code>position: fixed</code> when scrolled out of
+        view, snapping to the top or bottom edge of the page viewport. Uses
+        IntersectionObserver (threshold detection) + ResizeObserver + window
+        resize to keep the floating card aligned with the slot it left behind.
+        Two positions: <code>top</code> and <code>bottom</code>. Mobile variant
+        collapses into a chevron strip.
+      </p>
+
+      {/* Interactive demo using CSS position:sticky scoped to this scrollable
+          container. NOT the real <StickyCard> component (which uses
+          position:fixed against the page viewport and would hijack the page
+          on scroll). Pure CSS illustration of the visual concept; the real
+          component lives in this page's tab bar — scroll the page to see it. */}
+      <div className="h-64 overflow-y-auto rounded-xl border border-border-strong bg-surface-secondary">
+        <div className="px-4 pt-3 pb-2 text-caption text-content-tertiary text-center">
+          ↓ Scroll inside this container to see the card stick to the top ↓
+        </div>
+        <div className="sticky top-0 z-10 mx-4 rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card">
+          <div className="flex items-center justify-between gap-4">
+            <p className="text-body font-semibold text-content-primary">
+              StickyCard content
+            </p>
+            <span className="text-caption text-content-tertiary font-mono">
+              position=&quot;top&quot;
+            </span>
+          </div>
+        </div>
+        <div className="p-4 space-y-3 text-caption text-content-tertiary">
+          <p>
+            Filler paragraph 1 — scroll up to see the card stick to the
+            container top while content scrolls behind.
+          </p>
+          <p>Filler paragraph 2 — Lorem ipsum dolor sit amet consectetur.</p>
+          <p>Filler paragraph 3 — Adipiscing elit sed do eiusmod tempor.</p>
+          <p>Filler paragraph 4 — Incididunt ut labore et dolore magna.</p>
+          <p>Filler paragraph 5 — Aliqua ut enim ad minim veniam quis.</p>
+          <p>Filler paragraph 6 — Nostrud exercitation ullamco laboris nisi.</p>
+          <p>Filler paragraph 7 — Ut aliquip ex ea commodo consequat duis.</p>
+          <p>Filler paragraph 8 — End of demo content.</p>
+        </div>
+      </div>
+
+      <div className="card-flat !p-3 bg-surface-secondary/40 border border-dashed border-border-strong">
+        <p className="text-caption text-content-tertiary">
+          <strong className="text-content-primary">Note:</strong> the demo above
+          uses CSS <code>position: sticky</code> scoped to its own scroll
+          container, illustrating the visual behavior. The real{" "}
+          <code>&lt;StickyCard&gt;</code> uses <code>position: fixed</code>{" "}
+          against the page viewport plus IntersectionObserver — see it live in
+          this page&apos;s tab bar (Catalog / Atoms / Molecules / Tokens /
+          Playground): scroll the page down and the bar sticks to the top.
+        </p>
+      </div>
+    </ShowcaseSection>
+  );
+}
+
+function ThemeToggleShowcase() {
+  return (
+    <ShowcaseSection title="ThemeToggle">
+      <p className="text-caption text-content-tertiary">
+        JSX-only. Composes <code>IconButton</code> with dynamic aria-label
+        (Switch to dark mode / Switch to light mode). SSR-safe via mounted state
+        — renders nothing until hydration to avoid hydration mismatch. Consumes{" "}
+        <code>ThemeContext</code>.
+      </p>
+      <div className="flex items-center gap-4 p-4 border border-border-strong rounded-xl bg-surface-secondary">
+        <ThemeToggle tooltipPosition="right" />
+        <span className="text-caption text-content-tertiary">
+          Click to toggle the entire app between light and dark
+        </span>
+      </div>
+    </ShowcaseSection>
+  );
+}
+
+function TurnstileWidgetShowcase() {
+  return (
+    <ShowcaseSection title="TurnstileWidget">
+      <p className="text-caption text-content-tertiary">
+        Cloudflare Turnstile CAPTCHA wrapper for auth forms. JSX-only. Exports{" "}
+        <code>useTurnstileReset</code> hook for explicit retry after submission
+        failures. Production usage requires{" "}
+        <code>NEXT_PUBLIC_TURNSTILE_SITE_KEY</code>. Demo uses Cloudflare&apos;s
+        official test site key (always passes verification).
+      </p>
+      <div className="border border-border-strong rounded-xl p-4 bg-surface-secondary">
+        <p className="text-caption text-content-tertiary mb-3">
+          Test site key (always passes):
+        </p>
+        <TurnstileWidget
+          siteKey="1x00000000000000000000AA"
+          onVerify={(token) =>
+            console.log("Turnstile verified:", token.slice(0, 16) + "...")
+          }
+        />
       </div>
     </ShowcaseSection>
   );

@@ -14,8 +14,9 @@ export const componentRegistry: ComponentEntry[] = [
     name: "Button",
     category: "atom",
     description:
-      "Primary, secondary, outline, danger + link buttons + icon buttons + circle",
-    files: ["Button.tsx"],
+      "Primary, secondary, outline, danger + link buttons + IconButton (default/danger/boxed/boxed-hover) + SegmentedControl",
+    files: ["Button.tsx", "IconButton.tsx", "SegmentedControl.tsx"],
+    count: 3,
   },
   {
     name: "Input",
@@ -122,6 +123,20 @@ export const componentRegistry: ComponentEntry[] = [
     files: ["globals.css"],
     count: 4,
   },
+  {
+    name: "StickyCard",
+    category: "atom",
+    description:
+      "Card that becomes sticky on scroll — IntersectionObserver + ResizeObserver + window.resize trio, top/bottom positioning, mobile collapsible strip",
+    files: ["StickyCard.tsx"],
+  },
+  {
+    name: "ThemeToggle",
+    category: "atom",
+    description:
+      "Light/dark theme toggle — composes IconButton, dynamic aria-label, SSR-safe mounted state",
+    files: ["ThemeToggle.tsx"],
+  },
 
   // ─── Molecules ──────────────────────────────────────────
   {
@@ -135,7 +150,7 @@ export const componentRegistry: ComponentEntry[] = [
     category: "molecule",
     description:
       "Select, LanguageSelector, EmailSelector — auto edge detection",
-    files: ["Select.tsx", "LanguageSelector.tsx"],
+    files: ["Select.tsx", "LanguageSelector.tsx", "EmailSelector.tsx"],
     count: 3,
   },
   {
@@ -157,10 +172,11 @@ export const componentRegistry: ComponentEntry[] = [
     name: "Feedback / Alerts",
     category: "molecule",
     description:
-      "Toast, inline error, boxed error, rate limit, countdown, full page",
+      "Toast, ToastContainer, AlertBox, ErrorAlert, InlineError, RateLimitBanner, CountdownTimer",
     files: [
       "Toast.tsx",
       "ToastContainer.tsx",
+      "AlertBox.tsx",
       "InlineError.tsx",
       "RateLimitBanner.tsx",
       "CountdownTimer.tsx",
@@ -203,11 +219,18 @@ export const componentRegistry: ComponentEntry[] = [
     files: ["ImageCropper.tsx"],
   },
   {
+    name: "TurnstileWidget",
+    category: "molecule",
+    description:
+      "Cloudflare Turnstile CAPTCHA widget for auth forms — exposes useTurnstileReset hook for retry",
+    files: ["TurnstileWidget.tsx"],
+  },
+  {
     name: "Sidebar",
     category: "molecule",
     description:
       "SidebarNav — collapsible navigation, sections, collapsed/expanded, propagable specs",
-    files: ["Sidebar.tsx"],
+    files: ["SidebarNav.tsx"],
   },
   {
     name: "Command Palette",
