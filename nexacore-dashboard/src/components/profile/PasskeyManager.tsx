@@ -97,6 +97,7 @@ function PasskeyItem({
         <IconButton
           size="sm"
           tooltip
+          disabled={isRateLimited}
           onClick={() => onRename(passkey)}
           aria-label={`Rename ${passkey.name || "passkey"}`}
         >
