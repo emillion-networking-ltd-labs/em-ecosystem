@@ -84,6 +84,27 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
     return () => controller.abort();
   }, [fetchSessions]);
 
+  // SCRUM-347: refresh the list when the user comes back to the tab. We don't
+  // poll (would add load) and we don't have WebSocket/SSE infra. The focus +
+  // visibilitychange listener pair covers the common cases:
+  // - User logged in from another device while this tab was in the background.
+  // - User came back to this tab after several minutes.
+  // Pattern matches the GitHub/Google Active Sessions UX (refresh on entry,
+  // not real-time push). See OWASP Session Management Cheat Sheet §3.5.
+  useEffect(() => {
+    const handleRefresh = () => {
+      if (document.visibilityState === "visible") {
+        void fetchSessions();
+      }
+    };
+    window.addEventListener("focus", handleRefresh);
+    document.addEventListener("visibilitychange", handleRefresh);
+    return () => {
+      window.removeEventListener("focus", handleRefresh);
+      document.removeEventListener("visibilitychange", handleRefresh);
+    };
+  }, [fetchSessions]);
+
   const revokeSession = async (sessionId: string) => {
     setRevoking(sessionId);
     try {
