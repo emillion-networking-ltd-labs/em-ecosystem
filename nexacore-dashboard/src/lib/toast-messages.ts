@@ -183,6 +183,15 @@ export const PROFILE_TOAST = {
     title: "Revoke failed",
     description: "Could not revoke the trusted device.",
   } as ToastMsg,
+  // SCRUM-327: backend 401 ("Invalid password") on any sensitive Profile
+  // action (trust/revoke device, register passkey). Per
+  // feedback_toast_only_for_backend_errors.md: backend errors are toast-only.
+  // Inline errors are reserved for client-side validation (empty field).
+  INVALID_PASSWORD: {
+    variant: "error",
+    title: "Invalid password",
+    description: "The password you entered is incorrect. Try again.",
+  } as ToastMsg,
   PASSKEY_REGISTERED: {
     variant: "success",
     title: "Passkey registered",

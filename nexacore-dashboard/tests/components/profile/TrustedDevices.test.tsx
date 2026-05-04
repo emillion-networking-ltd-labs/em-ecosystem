@@ -140,7 +140,7 @@ describe("TrustedDevices", () => {
     expect(mockTrustCurrentDevice).toHaveBeenCalledWith("SecureP@ss1");
   });
 
-  it("trust modal shows inline error for invalid-password (SCRUM-327)", async () => {
+  it("trust modal fires INVALID_PASSWORD toast (not inline) on backend 401 (SCRUM-327)", async () => {
     hookState.devices = [];
     mockTrustCurrentDevice.mockResolvedValue("invalid-password");
 
@@ -155,8 +155,14 @@ describe("TrustedDevices", () => {
     );
     await user.click(screen.getByRole("button", { name: /trust device/i }));
 
-    expect(await screen.findByText("Invalid password")).toBeInTheDocument();
-    // Modal stays open
+    // Backend errors → toast (per feedback_toast_only_for_backend_errors.md).
+    expect(mockAddToast).toHaveBeenCalledWith(
+      expect.objectContaining({
+        variant: "error",
+        title: "Invalid password",
+      }),
+    );
+    // Modal stays open so the user can retry.
     expect(
       screen.getByText("Trust This Device", { selector: "h2" }),
     ).toBeInTheDocument();

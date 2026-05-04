@@ -135,7 +135,7 @@ describe("PasskeyManager", () => {
     });
   });
 
-  it("register modal shows inline error for invalid-password (SCRUM-327)", async () => {
+  it("register modal fires INVALID_PASSWORD toast (not inline) on backend 401 (SCRUM-327)", async () => {
     mockRegisterPasskey.mockResolvedValue("invalid-password");
 
     render(<PasskeyManager />);
@@ -147,8 +147,16 @@ describe("PasskeyManager", () => {
     );
     await user.click(screen.getByRole("button", { name: "Register Passkey" }));
 
-    expect(await screen.findByText("Invalid password")).toBeInTheDocument();
-    // Modal stays open
+    // Backend errors → toast (per feedback_toast_only_for_backend_errors.md).
+    await waitFor(() => {
+      expect(mockAddToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          variant: "error",
+          title: "Invalid password",
+        }),
+      );
+    });
+    // Modal stays open so the user can retry.
     expect(
       screen.getByRole("button", { name: "Register Passkey" }),
     ).toBeInTheDocument();

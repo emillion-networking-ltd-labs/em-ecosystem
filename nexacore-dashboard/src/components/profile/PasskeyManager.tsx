@@ -181,7 +181,9 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
       regName.trim() || undefined,
     );
     if (result === "invalid-password") {
-      setRegFieldError("Invalid password");
+      // Backend 401 → toast (per feedback_toast_only_for_backend_errors.md).
+      // Modal stays open; field keeps its value so the user can edit.
+      addToast(PROFILE_TOAST.INVALID_PASSWORD);
       return;
     }
     if (result) {
