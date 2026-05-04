@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Laptop, Smartphone, Trash2, Plus } from "lucide-react";
 import { useTrustedDevices } from "@/hooks/useTrustedDevices";
 import { useToast } from "@/context/ToastContext";
-import { PROFILE_TOAST } from "@/lib/toast-messages";
+import { PROFILE_TOAST, AUTH_TOAST } from "@/lib/toast-messages";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
@@ -120,6 +120,8 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
     } else if (result === "invalid-password") {
       setTrustFieldError("Invalid password");
     } else if (typeof result === "object" && result.status === "rate-limited") {
+      // SCRUM-349 sub-task 1: toast alongside the existing inline banner.
+      addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
       setRateLimit(result.retryAfter, "Too many attempts.", "throttle");
       closeTrustModal();
     } else {

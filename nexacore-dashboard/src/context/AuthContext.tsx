@@ -15,6 +15,7 @@ import { getCsrfToken, clearCsrfToken } from "@/lib/csrf";
 import { passkeyLoginVerify } from "@/lib/passkey-api";
 import { getFingerprint } from "@/lib/fingerprint";
 import { useIdleTimeout } from "@/hooks/useIdleTimeout";
+import { useCrossTabAuth } from "@/hooks/useCrossTabAuth";
 import IdleWarningModal from "@/components/ui/IdleWarningModal";
 import { useToast } from "@/context/ToastContext";
 import { RateLimitError } from "@/lib/types";
@@ -249,15 +250,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   //      are race conditions during navigation where the effect may not
   //      observe the state change in time. Calling router.replace here
   //      makes the redirect deterministic.
+  // SCRUM-349 sub-task 2: cross-tab auth sync via BroadcastChannel.
+  // Receiving a LOGOUT event from another tab dispatches LOGOUT locally and
+  // redirects to /login without waiting for a 401 cascade. AUTH_SUCCESS is
+  // emitted but currently a no-op listener (each tab owns its own state).
+  const handleCrossTabEvent = useCallback(
+    (event: "LOGOUT" | "AUTH_SUCCESS") => {
+      if (event === "LOGOUT") {
+        dispatch({ type: "LOGOUT" });
+        router.replace("/login");
+      }
+    },
+    [router],
+  );
+  const { broadcast: broadcastAuthEvent } =
+    useCrossTabAuth(handleCrossTabEvent);
+
   const handleAuthFailure = useCallback(() => {
     addToast({
       variant: "warning",
       title: "Session expired",
       description: "Please sign in again.",
     });
+    broadcastAuthEvent("LOGOUT");
     dispatch({ type: "LOGOUT" });
     router.replace("/login");
-  }, [addToast, router]);
+  }, [addToast, broadcastAuthEvent, router]);
 
   // Generate fingerprint then attempt silent refresh on mount (ref guard prevents StrictMode double-fire)
   // Skip refresh on /auth/callback — the OAuth exchange handler will authenticate;
@@ -486,9 +504,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } finally {
       apiClient.clearAccessToken();
       clearCsrfToken();
+      // SCRUM-349 sub-task 2: notify other tabs BEFORE local dispatch so
+      // they can redirect in parallel.
+      broadcastAuthEvent("LOGOUT");
       dispatch({ type: "LOGOUT" });
     }
-  }, []);
+  }, [broadcastAuthEvent]);
 
   const verifyMfaLogin = useCallback(
     async (code: string, isRecoveryCode = false, trustDevice = false) => {

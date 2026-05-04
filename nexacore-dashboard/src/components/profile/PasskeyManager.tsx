@@ -14,7 +14,7 @@ import {
 import AlertBox from "@/components/ui/AlertBox";
 import { usePasskey } from "@/hooks/usePasskey";
 import { useToast } from "@/context/ToastContext";
-import { PROFILE_TOAST } from "@/lib/toast-messages";
+import { PROFILE_TOAST, AUTH_TOAST } from "@/lib/toast-messages";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
@@ -157,6 +157,17 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
       });
     });
   }, [fetchPasskeys]);
+
+  // SCRUM-349 sub-task 1: toast on rate-limit transitions (null -> set).
+  // The rate-limit lives inside usePasskey (not surfaced via callback return),
+  // so observe via effect.
+  const previousRateLimitRef = useRef<typeof rateLimitInfo>(null);
+  useEffect(() => {
+    if (rateLimitInfo && !previousRateLimitRef.current) {
+      addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
+    }
+    previousRateLimitRef.current = rateLimitInfo;
+  }, [rateLimitInfo, addToast]);
 
   const handleRegister = async () => {
     clearError();
