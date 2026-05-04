@@ -190,12 +190,12 @@ export const PROFILE_TOAST = {
   // description = standard error reason). Action-scoped variants below.
   DEVICE_TRUST_INVALID_PASSWORD: {
     variant: "error",
-    title: "Trust failed",
+    title: "Add trusted device failed",
     description: "Invalid password.",
   } as ToastMsg,
   DEVICE_REVOKE_INVALID_PASSWORD: {
     variant: "error",
-    title: "Revoke failed",
+    title: "Revoke devices failed",
     description: "Invalid password.",
   } as ToastMsg,
   PASSKEY_REGISTERED: {

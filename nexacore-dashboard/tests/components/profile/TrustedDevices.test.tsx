@@ -160,7 +160,7 @@ describe("TrustedDevices", () => {
     expect(mockAddToast).toHaveBeenCalledWith(
       expect.objectContaining({
         variant: "error",
-        title: "Trust failed",
+        title: "Add trusted device failed",
         description: "Invalid password.",
       }),
     );
