@@ -182,11 +182,8 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
     );
     if (result === "invalid-password") {
       // Backend 401 → toast (per feedback_toast_only_for_backend_errors.md).
-      // Reuse the existing PASSKEY_FAILED factory: title "Passkey error",
-      // description "Invalid password." Matches the SCRUM-342 login pattern
-      // (title = action that failed, description = standard error reason).
-      // Modal stays open; field keeps its value so the user can edit.
-      addToast(PROFILE_TOAST.PASSKEY_FAILED("Invalid password."));
+      // Action-specific title matches SCRUM-342 login pattern.
+      addToast(PROFILE_TOAST.PASSKEY_REGISTER_INVALID_PASSWORD);
       return;
     }
     if (result) {
@@ -235,6 +232,10 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
       addToast(PROFILE_TOAST.PASSKEY_DELETED);
       setDeletingPasskey(null);
       setDeletePassword("");
+    } else if (errMsg === "invalid-password") {
+      // SCRUM-327: action-specific toast title for invalid password
+      // (matches SCRUM-342 login pattern). Modal stays open.
+      addToast(PROFILE_TOAST.PASSKEY_DELETE_INVALID_PASSWORD);
     } else {
       addToast(PROFILE_TOAST.PASSKEY_FAILED(errMsg));
     }

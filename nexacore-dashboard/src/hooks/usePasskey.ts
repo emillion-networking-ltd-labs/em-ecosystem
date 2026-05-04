@@ -148,6 +148,12 @@ export function usePasskey() {
         // Rollback on failure
         await fetchPasskeys();
         const apiErr = err as ApiError;
+        if (apiErr?.error?.statusCode === 401) {
+          // SCRUM-327: invalid password — surface to caller for a specific toast
+          // ("Delete passkey failed" / "Invalid password.") rather than the
+          // generic PASSKEY_FAILED fallback.
+          return "invalid-password";
+        }
         if (apiErr?.error?.statusCode === 429) {
           setRateLimitInfo({ retryAfter: apiErr.error.retryAfter ?? 60 });
           return "rate-limited";

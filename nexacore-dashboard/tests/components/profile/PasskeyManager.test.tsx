@@ -148,12 +148,12 @@ describe("PasskeyManager", () => {
     await user.click(screen.getByRole("button", { name: "Register Passkey" }));
 
     // Backend errors → toast (per feedback_toast_only_for_backend_errors.md).
-    // Reuses PASSKEY_FAILED factory: title "Passkey error", description = reason.
+    // Action-specific title (matches SCRUM-342 login pattern).
     await waitFor(() => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           variant: "error",
-          title: "Passkey error",
+          title: "Add passkey failed",
           description: "Invalid password.",
         }),
       );

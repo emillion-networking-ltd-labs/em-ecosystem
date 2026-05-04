@@ -198,6 +198,16 @@ export const PROFILE_TOAST = {
     title: "Revoke devices failed",
     description: "Invalid password.",
   } as ToastMsg,
+  PASSKEY_REGISTER_INVALID_PASSWORD: {
+    variant: "error",
+    title: "Add passkey failed",
+    description: "Invalid password.",
+  } as ToastMsg,
+  PASSKEY_DELETE_INVALID_PASSWORD: {
+    variant: "error",
+    title: "Delete passkey failed",
+    description: "Invalid password.",
+  } as ToastMsg,
   PASSKEY_REGISTERED: {
     variant: "success",
     title: "Passkey registered",
