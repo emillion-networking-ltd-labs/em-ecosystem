@@ -6,7 +6,7 @@ import Tooltip, { type TooltipPosition } from "./Tooltip";
 export type IconButtonVariant = "default" | "danger" | "boxed" | "boxed-hover";
 
 export const baseClass =
-  "inline-flex items-center justify-center shrink-0 p-2 rounded-md cursor-pointer";
+  "inline-flex items-center justify-center shrink-0 p-2 rounded-md cursor-pointer disabled:pointer-events-none disabled:opacity-50";
 
 export const variantClasses: Record<string, string> = {
   default:
