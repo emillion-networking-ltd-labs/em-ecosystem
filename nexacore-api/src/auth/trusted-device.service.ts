@@ -1,8 +1,15 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHmac } from 'crypto';
+import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
+import { UsersService } from '../users/users.service';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import {
@@ -20,6 +27,7 @@ export class TrustedDeviceService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly configService: ConfigService,
+    private readonly usersService: UsersService,
   ) {
     const jwtSecret = this.configService.get<string>('auth.jwtSecret')!;
     this.fingerprintSecret = createHmac('sha256', jwtSecret)
@@ -200,6 +208,64 @@ export class TrustedDeviceService {
     }
 
     return result.count;
+  }
+
+  // Re-authenticated wrappers (SCRUM-327): require password verification before
+  // delegating to the existing internal methods. Internal callers (mfa.service,
+  // login.service, mfa.controller fire-and-forget) keep using the bare methods
+  // because they have already authenticated via a different factor.
+  async trustDeviceWithReauth(
+    userId: string,
+    fingerprint: string,
+    ipAddress: string,
+    userAgent: string | null,
+    password: string,
+  ): Promise<{
+    id: string;
+    deviceName: string;
+    expiresAt: Date;
+    alreadyTrusted: boolean;
+  }> {
+    await this.verifyPassword(userId, password);
+    return this.trustDevice(userId, fingerprint, ipAddress, userAgent);
+  }
+
+  async revokeDeviceWithReauth(
+    userId: string,
+    deviceId: string,
+    password: string,
+  ): Promise<void> {
+    await this.verifyPassword(userId, password);
+    return this.revokeDevice(userId, deviceId);
+  }
+
+  async revokeAllDevicesWithReauth(
+    userId: string,
+    password: string,
+  ): Promise<number> {
+    await this.verifyPassword(userId, password);
+    return this.revokeAllDevices(userId);
+  }
+
+  private async verifyPassword(
+    userId: string,
+    password: string,
+  ): Promise<void> {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
+    }
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        ErrorMessages.mfa.PASSWORD_REQUIRED_NO_PASSWORD,
+      );
+    }
+    const isValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isValid) {
+      throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
+    }
   }
 
   parseDeviceName(userAgent: string | null): string {

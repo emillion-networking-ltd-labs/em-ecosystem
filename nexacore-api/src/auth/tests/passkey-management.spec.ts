@@ -143,35 +143,20 @@ describe('PasskeyService — Management', () => {
       });
     });
 
-    it('should delete passkey without password for OAuth user', async () => {
+    it('should reject OAuth-only user with BadRequestException', async () => {
       (ctx.usersService.findById as jest.Mock).mockResolvedValue(
         mockPasskeyUser({ passwordHash: null }),
       );
-      ctx.prisma.webAuthnCredential.findFirst.mockResolvedValue({
-        id: 'pk-1',
-        userId: 'user-1',
-        name: 'My Key',
-      });
-      ctx.prisma.webAuthnCredential.delete.mockResolvedValue({});
-
-      await ctx.service.deletePasskey(
-        'user-1',
-        'pk-1',
-        undefined,
-        mockPasskeyMeta,
-      );
-
-      expect(ctx.prisma.webAuthnCredential.delete).toHaveBeenCalled();
-    });
-
-    it('should require password when user has passwordHash', async () => {
-      (ctx.usersService.findById as jest.Mock).mockResolvedValue(
-        mockPasskeyUser(),
-      );
 
       await expect(
-        ctx.service.deletePasskey('user-1', 'pk-1', undefined, mockPasskeyMeta),
+        ctx.service.deletePasskey(
+          'user-1',
+          'pk-1',
+          'any-password',
+          mockPasskeyMeta,
+        ),
       ).rejects.toThrow(BadRequestException);
+      expect(ctx.prisma.webAuthnCredential.delete).not.toHaveBeenCalled();
     });
 
     it('should throw UnauthorizedException for invalid password', async () => {
@@ -215,8 +200,9 @@ describe('PasskeyService — Management', () => {
     });
 
     it('should audit PASSKEY_DELETED on success', async () => {
+      const hashedPw = await bcrypt.hash('correct-pw', 10);
       (ctx.usersService.findById as jest.Mock).mockResolvedValue(
-        mockPasskeyUser({ passwordHash: null }),
+        mockPasskeyUser({ passwordHash: hashedPw }),
       );
       ctx.prisma.webAuthnCredential.findFirst.mockResolvedValue({
         id: 'pk-1',
@@ -228,7 +214,7 @@ describe('PasskeyService — Management', () => {
       await ctx.service.deletePasskey(
         'user-1',
         'pk-1',
-        undefined,
+        'correct-pw',
         mockPasskeyMeta,
       );
 
@@ -242,8 +228,9 @@ describe('PasskeyService — Management', () => {
     });
 
     it('should use null for audit fields when ctx is undefined', async () => {
+      const hashedPw = await bcrypt.hash('correct-pw', 10);
       (ctx.usersService.findById as jest.Mock).mockResolvedValue(
-        mockPasskeyUser({ passwordHash: null }),
+        mockPasskeyUser({ passwordHash: hashedPw }),
       );
       ctx.prisma.webAuthnCredential.findFirst.mockResolvedValue({
         id: 'pk-1',
@@ -252,7 +239,7 @@ describe('PasskeyService — Management', () => {
       });
       ctx.prisma.webAuthnCredential.delete.mockResolvedValue({});
 
-      await ctx.service.deletePasskey('user-1', 'pk-1');
+      await ctx.service.deletePasskey('user-1', 'pk-1', 'correct-pw');
 
       expect(ctx.auditService.log).toHaveBeenCalledWith(
         expect.objectContaining({

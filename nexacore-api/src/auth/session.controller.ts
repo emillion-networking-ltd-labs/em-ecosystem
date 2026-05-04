@@ -23,6 +23,7 @@ import { JwtService } from '@nestjs/jwt';
 import { SessionsService } from '../sessions/sessions.service';
 import { TrustedDeviceService } from './trusted-device.service';
 import { TrustDeviceDto } from './dto/trust-device.dto';
+import { TrustedDeviceRevokeDto } from './dto/trusted-device-revoke.dto';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
@@ -100,18 +101,20 @@ export class SessionController {
     summary: 'Mark current device as trusted (skips MFA on future logins)',
   })
   @ApiResponse({ status: 201, description: 'Device trusted' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'Password required' })
+  @ApiResponse({ status: 401, description: 'Invalid password' })
   @ApiResponse({ status: 429, description: 'Too many requests' })
   async trustDevice(
     @Body() dto: TrustDeviceDto,
     @Request() req: AuthenticatedRequest,
   ) {
     const meta = extractRequestMeta(req);
-    const device = await this.trustedDeviceService.trustDevice(
+    const device = await this.trustedDeviceService.trustDeviceWithReauth(
       req.user.id,
       dto.fingerprint,
       meta.ipAddress,
       meta.userAgent,
+      dto.password,
     );
     return {
       id: device.id,
@@ -137,9 +140,16 @@ export class SessionController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Revoke all trusted devices' })
   @ApiResponse({ status: 200, description: 'All trusted devices revoked' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
-  async revokeAllTrustedDevices(@Request() req: AuthenticatedRequest) {
-    const count = await this.trustedDeviceService.revokeAllDevices(req.user.id);
+  @ApiResponse({ status: 400, description: 'Password required' })
+  @ApiResponse({ status: 401, description: 'Invalid password' })
+  async revokeAllTrustedDevices(
+    @Body() dto: TrustedDeviceRevokeDto,
+    @Request() req: AuthenticatedRequest,
+  ) {
+    const count = await this.trustedDeviceService.revokeAllDevicesWithReauth(
+      req.user.id,
+      dto.password,
+    );
     return { message: 'All trusted devices revoked', count };
   }
 
@@ -148,13 +158,19 @@ export class SessionController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Revoke trust for a specific device' })
   @ApiResponse({ status: 200, description: 'Device trust revoked' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'Password required' })
+  @ApiResponse({ status: 401, description: 'Invalid password' })
   @ApiResponse({ status: 404, description: 'Device not found' })
   async revokeTrustedDevice(
     @Param('id', ParseUUIDPipe) deviceId: string,
+    @Body() dto: TrustedDeviceRevokeDto,
     @Request() req: AuthenticatedRequest,
   ) {
-    await this.trustedDeviceService.revokeDevice(req.user.id, deviceId);
+    await this.trustedDeviceService.revokeDeviceWithReauth(
+      req.user.id,
+      deviceId,
+      dto.password,
+    );
     return { message: 'Device trust revoked' };
   }
 }

@@ -58,11 +58,14 @@ export function usePasskey() {
   }, []);
 
   const registerPasskey = useCallback(
-    async (name?: string): Promise<PasskeyRegisterResult | null> => {
+    async (
+      password: string,
+      name?: string,
+    ): Promise<PasskeyRegisterResult | "invalid-password" | null> => {
       setIsRegistering(true);
       setError(null);
       try {
-        const options = await passkeyRegisterOptions();
+        const options = await passkeyRegisterOptions(password);
         const credential = await startRegistration({
           optionsJSON: options as never,
         });
@@ -75,6 +78,10 @@ export function usePasskey() {
       } catch (err: unknown) {
         if ((err as Error)?.name === "NotAllowedError") return null;
         const apiErr = err as ApiError;
+        if (apiErr?.error?.statusCode === 401) {
+          // SCRUM-327: invalid password — surface to caller for inline field error
+          return "invalid-password";
+        }
         if (apiErr?.error?.statusCode === 429) {
           setRateLimitInfo({ retryAfter: apiErr.error.retryAfter ?? 60 });
           return null;
@@ -130,7 +137,7 @@ export function usePasskey() {
   );
 
   const handleDelete = useCallback(
-    async (id: string, password?: string): Promise<string | null> => {
+    async (id: string, password: string): Promise<string | null> => {
       setError(null);
       // Optimistic: remove from local state so AnimatePresence can animate exit
       setPasskeys((prev) => prev.filter((pk) => pk.id !== id));

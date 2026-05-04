@@ -41,51 +41,66 @@ export function useTrustedDevices() {
     }
   }, []);
 
-  const trustCurrentDevice = useCallback(async (): Promise<
-    | "trusted"
-    | "already"
-    | { status: "rate-limited"; retryAfter: number }
-    | false
-  > => {
-    setError(null);
-    try {
-      const fp = await getFingerprint();
-      if (!fp) {
-        setError("Device fingerprinting not available.");
-        return false;
-      }
-      const result = await trustDevice(fp);
-      await fetchDevices();
-      return result.alreadyTrusted ? "already" : "trusted";
-    } catch (err) {
-      const apiErr = err as {
-        error?: { statusCode?: number; retryAfter?: number; message?: string };
-      };
-      const isRateLimited =
-        apiErr?.error?.statusCode === HTTP_STATUS.TOO_MANY_REQUESTS;
-      if (!isRateLimited) {
-        setError("Failed to trust device.");
-      }
-      return isRateLimited
-        ? {
+  const trustCurrentDevice = useCallback(
+    async (
+      password: string,
+    ): Promise<
+      | "trusted"
+      | "already"
+      | "invalid-password"
+      | { status: "rate-limited"; retryAfter: number }
+      | false
+    > => {
+      setError(null);
+      try {
+        const fp = await getFingerprint();
+        if (!fp) {
+          setError("Device fingerprinting not available.");
+          return false;
+        }
+        const result = await trustDevice(fp, password);
+        await fetchDevices();
+        return result.alreadyTrusted ? "already" : "trusted";
+      } catch (err) {
+        const apiErr = err as {
+          error?: {
+            statusCode?: number;
+            retryAfter?: number;
+            message?: string;
+          };
+        };
+        const status = apiErr?.error?.statusCode;
+        if (status === HTTP_STATUS.UNAUTHORIZED) {
+          return "invalid-password";
+        }
+        if (status === HTTP_STATUS.TOO_MANY_REQUESTS) {
+          return {
             status: "rate-limited" as const,
             retryAfter: apiErr.error?.retryAfter ?? 60,
-          }
-        : false;
-    }
-  }, [fetchDevices]);
+          };
+        }
+        setError("Failed to trust device.");
+        return false;
+      }
+    },
+    [fetchDevices],
+  );
 
   const revokeDevice = useCallback(
-    async (id: string): Promise<boolean> => {
+    async (
+      id: string,
+      password: string,
+    ): Promise<boolean | "invalid-password"> => {
       setError(null);
-      // Optimistic: remove from local state first so AnimatePresence can animate exit
-      setDevices((prev) => prev.filter((d) => d.id !== id));
       try {
-        await revokeDeviceApi(id);
+        await revokeDeviceApi(id, password);
+        await fetchDevices();
         return true;
       } catch (err) {
-        // Rollback: re-fetch on failure
-        await fetchDevices();
+        const apiErr = err as { error?: { statusCode?: number } };
+        if (apiErr?.error?.statusCode === HTTP_STATUS.UNAUTHORIZED) {
+          return "invalid-password";
+        }
         setError(
           extractMessageByStatus(
             err,
@@ -102,26 +117,33 @@ export function useTrustedDevices() {
     [fetchDevices],
   );
 
-  const revokeAllDevicesAction = useCallback(async (): Promise<boolean> => {
-    setError(null);
-    try {
-      await revokeAllDevicesApi();
-      await fetchDevices();
-      return true;
-    } catch (err) {
-      setError(
-        extractMessageByStatus(
-          err,
-          {
-            [HTTP_STATUS.TOO_MANY_REQUESTS]:
-              "Too many requests. Try again later.",
-          },
-          "Failed to revoke all devices.",
-        ),
-      );
-      return false;
-    }
-  }, [fetchDevices]);
+  const revokeAllDevicesAction = useCallback(
+    async (password: string): Promise<boolean | "invalid-password"> => {
+      setError(null);
+      try {
+        await revokeAllDevicesApi(password);
+        await fetchDevices();
+        return true;
+      } catch (err) {
+        const apiErr = err as { error?: { statusCode?: number } };
+        if (apiErr?.error?.statusCode === HTTP_STATUS.UNAUTHORIZED) {
+          return "invalid-password";
+        }
+        setError(
+          extractMessageByStatus(
+            err,
+            {
+              [HTTP_STATUS.TOO_MANY_REQUESTS]:
+                "Too many requests. Try again later.",
+            },
+            "Failed to revoke all devices.",
+          ),
+        );
+        return false;
+      }
+    },
+    [fetchDevices],
+  );
 
   return {
     devices,

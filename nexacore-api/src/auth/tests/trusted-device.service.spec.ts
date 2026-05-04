@@ -1,5 +1,10 @@
-import { NotFoundException } from '@nestjs/common';
+import {
+  NotFoundException,
+  BadRequestException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as bcrypt from 'bcrypt';
 import { TrustedDeviceService } from '../trusted-device.service';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
 
@@ -16,6 +21,7 @@ describe('TrustedDeviceService', () => {
     };
   };
   let auditService: { log: jest.Mock };
+  let usersService: { findById: jest.Mock };
 
   const mockDevice = {
     id: 'device-1',
@@ -47,6 +53,10 @@ describe('TrustedDeviceService', () => {
 
     auditService = {
       log: jest.fn().mockResolvedValue(undefined),
+    };
+
+    usersService = {
+      findById: jest.fn(),
     };
 
     const mockConfigService = {
@@ -83,6 +93,7 @@ describe('TrustedDeviceService', () => {
       prisma as any,
       auditService as any,
       mockConfigService as unknown as ConfigService,
+      usersService as any,
     );
   });
 
@@ -527,6 +538,158 @@ describe('TrustedDeviceService', () => {
 
       expect(count).toBe(3);
       await flushPromises();
+    });
+  });
+
+  // ─── SCRUM-327: re-authenticated wrappers ───────────────────────
+  describe('re-authenticated wrappers (SCRUM-327)', () => {
+    let passwordHash: string;
+    const correctPassword = 'correct-password';
+
+    beforeAll(async () => {
+      // Real bcrypt hash so the service's bcrypt.compare can verify it.
+      passwordHash = await bcrypt.hash(correctPassword, 4);
+    });
+
+    const userWithPassword = () => ({
+      id: 'user-1',
+      passwordHash,
+    });
+
+    describe('trustDeviceWithReauth', () => {
+      it('should call trustDevice when password is correct', async () => {
+        usersService.findById.mockResolvedValue(userWithPassword());
+
+        const result = await service.trustDeviceWithReauth(
+          'user-1',
+          'fingerprint-abc',
+          '127.0.0.1',
+          'Chrome UA',
+          correctPassword,
+        );
+
+        expect(result.id).toBe('device-1');
+        expect(prisma.trustedDevice.upsert).toHaveBeenCalled();
+      });
+
+      it('should throw UnauthorizedException when password is wrong', async () => {
+        usersService.findById.mockResolvedValue(userWithPassword());
+
+        await expect(
+          service.trustDeviceWithReauth(
+            'user-1',
+            'fingerprint-abc',
+            '127.0.0.1',
+            'Chrome UA',
+            'wrong-pw',
+          ),
+        ).rejects.toThrow(UnauthorizedException);
+        expect(prisma.trustedDevice.upsert).not.toHaveBeenCalled();
+      });
+
+      it('should throw BadRequestException for OAuth-only user', async () => {
+        usersService.findById.mockResolvedValue({
+          id: 'user-1',
+          passwordHash: null,
+        });
+
+        await expect(
+          service.trustDeviceWithReauth(
+            'user-1',
+            'fingerprint-abc',
+            '127.0.0.1',
+            'Chrome UA',
+            'any',
+          ),
+        ).rejects.toThrow(BadRequestException);
+        expect(prisma.trustedDevice.upsert).not.toHaveBeenCalled();
+      });
+
+      it('should throw UnauthorizedException when user not found', async () => {
+        usersService.findById.mockResolvedValue(null);
+
+        await expect(
+          service.trustDeviceWithReauth(
+            'ghost-user',
+            'fingerprint-abc',
+            '127.0.0.1',
+            'Chrome UA',
+            'any',
+          ),
+        ).rejects.toThrow(UnauthorizedException);
+      });
+    });
+
+    describe('revokeDeviceWithReauth', () => {
+      it('should call revokeDevice when password is correct', async () => {
+        usersService.findById.mockResolvedValue(userWithPassword());
+        prisma.trustedDevice.findFirst.mockResolvedValue(mockDevice);
+
+        await service.revokeDeviceWithReauth(
+          'user-1',
+          'device-1',
+          correctPassword,
+        );
+
+        expect(prisma.trustedDevice.update).toHaveBeenCalledWith({
+          where: { id: 'device-1' },
+          data: { isRevoked: true },
+        });
+      });
+
+      it('should throw UnauthorizedException without revoking when password is wrong', async () => {
+        usersService.findById.mockResolvedValue(userWithPassword());
+
+        await expect(
+          service.revokeDeviceWithReauth('user-1', 'device-1', 'wrong-pw'),
+        ).rejects.toThrow(UnauthorizedException);
+        expect(prisma.trustedDevice.update).not.toHaveBeenCalled();
+      });
+
+      it('should throw BadRequestException for OAuth-only user', async () => {
+        usersService.findById.mockResolvedValue({
+          id: 'user-1',
+          passwordHash: null,
+        });
+
+        await expect(
+          service.revokeDeviceWithReauth('user-1', 'device-1', 'any'),
+        ).rejects.toThrow(BadRequestException);
+      });
+    });
+
+    describe('revokeAllDevicesWithReauth', () => {
+      it('should call revokeAllDevices when password is correct', async () => {
+        usersService.findById.mockResolvedValue(userWithPassword());
+        prisma.trustedDevice.updateMany.mockResolvedValue({ count: 4 });
+
+        const count = await service.revokeAllDevicesWithReauth(
+          'user-1',
+          correctPassword,
+        );
+
+        expect(count).toBe(4);
+      });
+
+      it('should throw UnauthorizedException without revoking when password is wrong', async () => {
+        usersService.findById.mockResolvedValue(userWithPassword());
+
+        await expect(
+          service.revokeAllDevicesWithReauth('user-1', 'wrong-pw'),
+        ).rejects.toThrow(UnauthorizedException);
+        expect(prisma.trustedDevice.updateMany).not.toHaveBeenCalled();
+      });
+
+      it('should throw BadRequestException for OAuth-only user', async () => {
+        usersService.findById.mockResolvedValue({
+          id: 'user-1',
+          passwordHash: null,
+        });
+
+        await expect(
+          service.revokeAllDevicesWithReauth('user-1', 'any'),
+        ).rejects.toThrow(BadRequestException);
+      });
     });
   });
 });

@@ -10,6 +10,7 @@ import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import Input from "@/components/ui/Input";
 import RateLimitBanner from "@/components/ui/RateLimitBanner";
 import Spinner from "@/components/ui/Spinner";
 import { useRateLimit } from "@/hooks/useRateLimit";
@@ -52,11 +53,23 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
   const { addToast } = useToast();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
 
+  // Trust modal
+  const [trustModalOpen, setTrustModalOpen] = useState(false);
+  const [trustPassword, setTrustPassword] = useState("");
+  const [trustFieldError, setTrustFieldError] = useState("");
   const [isTrusting, setIsTrusting] = useState(false);
+
+  // Revoke single modal
   const [revokeTarget, setRevokeTarget] =
     useState<TrustedDeviceResponse | null>(null);
+  const [revokePassword, setRevokePassword] = useState("");
+  const [revokeFieldError, setRevokeFieldError] = useState("");
   const [isRevoking, setIsRevoking] = useState(false);
+
+  // Revoke all modal
   const [showRevokeAll, setShowRevokeAll] = useState(false);
+  const [revokeAllPassword, setRevokeAllPassword] = useState("");
+  const [revokeAllFieldError, setRevokeAllFieldError] = useState("");
   const [isRevokingAll, setIsRevokingAll] = useState(false);
 
   // Block enter animations until first fetch completes
@@ -70,44 +83,91 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
     });
   }, [fetchDevices]);
 
+  const closeTrustModal = () => {
+    setTrustModalOpen(false);
+    setTrustPassword("");
+    setTrustFieldError("");
+  };
+
+  const closeRevokeModal = () => {
+    setRevokeTarget(null);
+    setRevokePassword("");
+    setRevokeFieldError("");
+  };
+
+  const closeRevokeAllModal = () => {
+    setShowRevokeAll(false);
+    setRevokeAllPassword("");
+    setRevokeAllFieldError("");
+  };
+
   const handleTrust = async () => {
+    if (!trustPassword) {
+      setTrustFieldError("Enter your password");
+      return;
+    }
+    setTrustFieldError("");
     setIsTrusting(true);
-    const result = await trustCurrentDevice();
+    const result = await trustCurrentDevice(trustPassword);
     setIsTrusting(false);
+
     if (result === "trusted") {
       addToast(PROFILE_TOAST.DEVICE_TRUSTED);
+      closeTrustModal();
     } else if (result === "already") {
       addToast(PROFILE_TOAST.DEVICE_ALREADY_TRUSTED);
+      closeTrustModal();
+    } else if (result === "invalid-password") {
+      setTrustFieldError("Invalid password");
     } else if (typeof result === "object" && result.status === "rate-limited") {
       setRateLimit(result.retryAfter, "Too many attempts.", "throttle");
+      closeTrustModal();
     } else {
       addToast(PROFILE_TOAST.DEVICE_TRUST_FAILED);
+      closeTrustModal();
     }
   };
 
   const handleRevoke = async () => {
     if (!revokeTarget) return;
-    const targetId = revokeTarget.id;
-    setRevokeTarget(null);
+    if (!revokePassword) {
+      setRevokeFieldError("Enter your password");
+      return;
+    }
+    setRevokeFieldError("");
     setIsRevoking(true);
-    const ok = await revokeDevice(targetId);
+    const result = await revokeDevice(revokeTarget.id, revokePassword);
     setIsRevoking(false);
-    if (ok) {
+
+    if (result === true) {
       addToast(PROFILE_TOAST.DEVICE_REVOKED);
+      closeRevokeModal();
+    } else if (result === "invalid-password") {
+      setRevokeFieldError("Invalid password");
     } else {
       addToast(PROFILE_TOAST.DEVICE_REVOKE_FAILED);
+      closeRevokeModal();
     }
   };
 
   const handleRevokeAll = async () => {
+    if (!revokeAllPassword) {
+      setRevokeAllFieldError("Enter your password");
+      return;
+    }
+    setRevokeAllFieldError("");
     setIsRevokingAll(true);
-    const ok = await revokeAllDevices();
+    const result = await revokeAllDevices(revokeAllPassword);
     setIsRevokingAll(false);
-    setShowRevokeAll(false);
-    if (ok) {
+
+    if (result === true) {
       addToast(PROFILE_TOAST.DEVICE_REVOKED);
+      closeRevokeAllModal();
+    } else if (result === "invalid-password") {
+      setRevokeAllFieldError("Invalid password");
     } else {
       addToast(PROFILE_TOAST.DEVICE_REVOKE_FAILED);
+      closeRevokeAllModal();
     }
   };
 
@@ -192,7 +252,11 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
                   variant="danger"
                   size="sm"
                   tooltip
-                  onClick={() => setRevokeTarget(device)}
+                  onClick={() => {
+                    setRevokePassword("");
+                    setRevokeFieldError("");
+                    setRevokeTarget(device);
+                  }}
                   aria-label={`Revoke trust for ${device.deviceName}`}
                 >
                   <Trash2 size={16} />
@@ -208,9 +272,12 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
         <Button
           variant="primary"
           size="md"
-          loading={isTrusting}
           disabled={rateLimitInfo.isRateLimited}
-          onClick={handleTrust}
+          onClick={() => {
+            setTrustPassword("");
+            setTrustFieldError("");
+            setTrustModalOpen(true);
+          }}
           className="sm:w-auto"
         >
           <Plus size={16} />
@@ -221,7 +288,11 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
             variant="danger"
             size="md"
             className="sm:w-auto"
-            onClick={() => setShowRevokeAll(true)}
+            onClick={() => {
+              setRevokeAllPassword("");
+              setRevokeAllFieldError("");
+              setShowRevokeAll(true);
+            }}
           >
             Revoke All
           </Button>
@@ -239,29 +310,91 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
         </div>
       )}
 
+      {/* Trust device modal */}
+      <ConfirmModal
+        open={trustModalOpen}
+        onClose={closeTrustModal}
+        onConfirm={handleTrust}
+        title="Trust This Device"
+        description="This device will skip MFA on future logins. Confirm with your password."
+        confirmLabel="Trust Device"
+        size="md"
+        loading={isTrusting}
+      >
+        <div className="mt-4">
+          <Input
+            label="Confirm with your password"
+            type="password"
+            name="trust-device-password"
+            value={trustPassword}
+            onChange={(e) => {
+              setTrustPassword(e.target.value);
+              setTrustFieldError("");
+            }}
+            placeholder="Enter your password"
+            error={trustFieldError || undefined}
+            autoFocus
+          />
+        </div>
+      </ConfirmModal>
+
       {/* Revoke single device modal */}
       <ConfirmModal
         open={!!revokeTarget}
-        onClose={() => setRevokeTarget(null)}
+        onClose={closeRevokeModal}
         onConfirm={handleRevoke}
         title="Revoke Device Trust"
         description="This device will require MFA verification on next login."
         confirmLabel="Revoke"
         variant="danger"
+        size="md"
         loading={isRevoking}
-      />
+      >
+        <div className="mt-4">
+          <Input
+            label="Confirm with your password"
+            type="password"
+            name="revoke-device-password"
+            value={revokePassword}
+            onChange={(e) => {
+              setRevokePassword(e.target.value);
+              setRevokeFieldError("");
+            }}
+            placeholder="Enter your password"
+            error={revokeFieldError || undefined}
+            autoFocus
+          />
+        </div>
+      </ConfirmModal>
 
       {/* Revoke all devices modal */}
       <ConfirmModal
         open={showRevokeAll}
-        onClose={() => setShowRevokeAll(false)}
+        onClose={closeRevokeAllModal}
         onConfirm={handleRevokeAll}
         title="Revoke All Devices"
         description={`All devices will require MFA verification on next login. ${devices.length} device${devices.length !== 1 ? "s" : ""} will be affected.`}
         confirmLabel="Revoke All"
         variant="danger"
+        size="md"
         loading={isRevokingAll}
-      />
+      >
+        <div className="mt-4">
+          <Input
+            label="Confirm with your password"
+            type="password"
+            name="revoke-all-devices-password"
+            value={revokeAllPassword}
+            onChange={(e) => {
+              setRevokeAllPassword(e.target.value);
+              setRevokeAllFieldError("");
+            }}
+            placeholder="Enter your password"
+            error={revokeAllFieldError || undefined}
+            autoFocus
+          />
+        </div>
+      </ConfirmModal>
     </div>
   );
 }

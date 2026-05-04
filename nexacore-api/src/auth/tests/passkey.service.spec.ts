@@ -1,4 +1,5 @@
 import { BadRequestException, UnauthorizedException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
 import {
   MAX_PASSKEYS_PER_USER,
@@ -46,15 +47,24 @@ describe('PasskeyService — Registration', () => {
       pubKeyCredParams: [{ type: 'public-key', alg: -7 }],
     };
 
+    let passwordHash: string;
+
+    beforeAll(async () => {
+      passwordHash = await bcrypt.hash('correct-pw', 4);
+    });
+
     it('should return registration options and store in Redis', async () => {
       (ctx.usersService.findById as jest.Mock).mockResolvedValue(
-        mockPasskeyUser(),
+        mockPasskeyUser({ passwordHash }),
       );
       ctx.prisma.webAuthnCredential.count.mockResolvedValue(0);
       ctx.prisma.webAuthnCredential.findMany.mockResolvedValue([]);
       mockGenerateRegistrationOptions.mockResolvedValue(mockOptions);
 
-      const result = await ctx.service.generateRegOptions('user-1');
+      const result = await ctx.service.generateRegOptions(
+        'user-1',
+        'correct-pw',
+      );
 
       expect(result).toEqual(mockOptions);
       expect(ctx.redis.set).toHaveBeenCalledWith(
@@ -68,27 +78,49 @@ describe('PasskeyService — Registration', () => {
     it('should throw UnauthorizedException if user not found', async () => {
       (ctx.usersService.findById as jest.Mock).mockResolvedValue(null);
 
-      await expect(ctx.service.generateRegOptions('user-1')).rejects.toThrow(
-        UnauthorizedException,
+      await expect(
+        ctx.service.generateRegOptions('user-1', 'any'),
+      ).rejects.toThrow(UnauthorizedException);
+    });
+
+    it('should throw BadRequestException for OAuth-only user (no passwordHash)', async () => {
+      (ctx.usersService.findById as jest.Mock).mockResolvedValue(
+        mockPasskeyUser({ passwordHash: null }),
       );
+
+      await expect(
+        ctx.service.generateRegOptions('user-1', 'any'),
+      ).rejects.toThrow(BadRequestException);
+      expect(ctx.prisma.webAuthnCredential.count).not.toHaveBeenCalled();
+    });
+
+    it('should throw UnauthorizedException when password is wrong', async () => {
+      (ctx.usersService.findById as jest.Mock).mockResolvedValue(
+        mockPasskeyUser({ passwordHash }),
+      );
+
+      await expect(
+        ctx.service.generateRegOptions('user-1', 'wrong-pw'),
+      ).rejects.toThrow(UnauthorizedException);
+      expect(ctx.prisma.webAuthnCredential.count).not.toHaveBeenCalled();
     });
 
     it('should throw BadRequestException if max passkeys reached', async () => {
       (ctx.usersService.findById as jest.Mock).mockResolvedValue(
-        mockPasskeyUser(),
+        mockPasskeyUser({ passwordHash }),
       );
       ctx.prisma.webAuthnCredential.count.mockResolvedValue(
         MAX_PASSKEYS_PER_USER,
       );
 
-      await expect(ctx.service.generateRegOptions('user-1')).rejects.toThrow(
-        BadRequestException,
-      );
+      await expect(
+        ctx.service.generateRegOptions('user-1', 'correct-pw'),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should include excludeCredentials from existing passkeys', async () => {
       (ctx.usersService.findById as jest.Mock).mockResolvedValue(
-        mockPasskeyUser(),
+        mockPasskeyUser({ passwordHash }),
       );
       ctx.prisma.webAuthnCredential.count.mockResolvedValue(2);
       ctx.prisma.webAuthnCredential.findMany.mockResolvedValue([
@@ -97,7 +129,7 @@ describe('PasskeyService — Registration', () => {
       ]);
       mockGenerateRegistrationOptions.mockResolvedValue(mockOptions);
 
-      await ctx.service.generateRegOptions('user-1');
+      await ctx.service.generateRegOptions('user-1', 'correct-pw');
 
       expect(mockGenerateRegistrationOptions).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -111,13 +143,13 @@ describe('PasskeyService — Registration', () => {
 
     it('should use correct RP parameters', async () => {
       (ctx.usersService.findById as jest.Mock).mockResolvedValue(
-        mockPasskeyUser(),
+        mockPasskeyUser({ passwordHash }),
       );
       ctx.prisma.webAuthnCredential.count.mockResolvedValue(0);
       ctx.prisma.webAuthnCredential.findMany.mockResolvedValue([]);
       mockGenerateRegistrationOptions.mockResolvedValue(mockOptions);
 
-      await ctx.service.generateRegOptions('user-1');
+      await ctx.service.generateRegOptions('user-1', 'correct-pw');
 
       expect(mockGenerateRegistrationOptions).toHaveBeenCalledWith(
         expect.objectContaining({

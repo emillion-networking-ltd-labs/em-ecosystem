@@ -12,4 +12,12 @@ export class TrustDeviceDto {
   @MinLength(16)
   @MaxLength(512)
   fingerprint!: string;
+
+  @ApiProperty({
+    description: 'Current account password for re-authentication',
+    example: 'SecureP@ss1',
+  })
+  @IsString()
+  @IsNotEmpty()
+  password!: string;
 }

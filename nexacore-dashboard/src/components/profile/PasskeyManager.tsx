@@ -132,6 +132,8 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
 
   const [registerOpen, setRegisterOpen] = useState(false);
   const [regName, setRegName] = useState("");
+  const [regPassword, setRegPassword] = useState("");
+  const [regFieldError, setRegFieldError] = useState("");
 
   // Rename state
   const [renamingPasskey, setRenamingPasskey] =
@@ -158,10 +160,24 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
 
   const handleRegister = async () => {
     clearError();
-    const result = await registerPasskey(regName.trim() || undefined);
+    if (!regPassword) {
+      setRegFieldError("Enter your password");
+      return;
+    }
+    setRegFieldError("");
+    const result = await registerPasskey(
+      regPassword,
+      regName.trim() || undefined,
+    );
+    if (result === "invalid-password") {
+      setRegFieldError("Invalid password");
+      return;
+    }
     if (result) {
       setRegisterOpen(false);
       setRegName("");
+      setRegPassword("");
+      setRegFieldError("");
       // Wait for modal to close, then fetch so the new item animates in
       setTimeout(async () => {
         await fetchPasskeys();
@@ -291,6 +307,8 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
             onClick={() => {
               clearError();
               setRegName("");
+              setRegPassword("");
+              setRegFieldError("");
               setRegisterOpen(true);
             }}
             disabled={passkeys.length >= 10 || !!rateLimitInfo}
@@ -318,19 +336,35 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
         </>
       )}
 
-      {/* Rename Modal */}
       {/* Register Modal */}
       <ConfirmModal
         open={registerOpen}
-        onClose={() => setRegisterOpen(false)}
+        onClose={() => {
+          setRegisterOpen(false);
+          setRegFieldError("");
+        }}
         onConfirm={handleRegister}
         title="Add Passkey"
         size="md"
-        description="Give your passkey a name to identify it later, then follow the biometric prompt."
+        description="Confirm with your password, then follow the biometric prompt to register the new passkey."
         confirmLabel="Register Passkey"
         loading={isRegistering}
       >
-        <div className="mt-4">
+        <div className="mt-4 flex flex-col gap-3">
+          <Input
+            label="Confirm with your password"
+            type="password"
+            name="passkey-password"
+            value={regPassword}
+            onChange={(e) => {
+              setRegPassword(e.target.value);
+              setRegFieldError("");
+            }}
+            placeholder="Enter your password"
+            error={regFieldError || undefined}
+            disabled={isRegistering}
+            autoFocus
+          />
           <Input
             label="Passkey name (optional)"
             name="passkey-name"

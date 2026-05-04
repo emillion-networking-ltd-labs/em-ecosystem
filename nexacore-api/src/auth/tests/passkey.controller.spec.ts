@@ -87,14 +87,17 @@ describe('PasskeyController', () => {
   // ─── POST /auth/passkeys/register/options ───────────────────
 
   describe('registerOptions', () => {
-    it('should delegate to passkeyService.generateRegOptions with userId', async () => {
+    it('should delegate to passkeyService.generateRegOptions with userId and password', async () => {
       const regOptions = { challenge: 'abc', rp: { name: 'test' } };
       passkeyService.generateRegOptions.mockResolvedValue(regOptions);
 
-      const result = await controller.registerOptions(mockReq);
+      const result = await controller.registerOptions(mockReq, {
+        password: 'SecureP@ss1',
+      });
 
       expect(passkeyService.generateRegOptions).toHaveBeenCalledWith(
         'uuid-123',
+        'SecureP@ss1',
       );
       expect(result).toEqual(regOptions);
     });
@@ -297,20 +300,6 @@ describe('PasskeyController', () => {
         'pk-1',
         'my-password',
         { ipAddress: '127.0.0.1', userAgent: 'test-agent' },
-      );
-      expect(result).toEqual({ message: 'Passkey deleted successfully' });
-    });
-
-    it('should work without password', async () => {
-      passkeyService.deletePasskey.mockResolvedValue(undefined);
-
-      const result = await controller.remove(mockReq, 'pk-1', {});
-
-      expect(passkeyService.deletePasskey).toHaveBeenCalledWith(
-        'uuid-123',
-        'pk-1',
-        undefined,
-        expect.any(Object),
       );
       expect(result).toEqual({ message: 'Passkey deleted successfully' });
     });

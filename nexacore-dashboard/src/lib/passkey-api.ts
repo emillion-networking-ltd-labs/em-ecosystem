@@ -8,10 +8,12 @@ import type {
 } from "./types";
 
 // Registration (authenticated)
-export function passkeyRegisterOptions(): Promise<Record<string, unknown>> {
+export function passkeyRegisterOptions(
+  password: string,
+): Promise<Record<string, unknown>> {
   return apiClient.post<Record<string, unknown>>(
     "/auth/passkeys/register/options",
-    {},
+    { password },
   );
 }
 
@@ -61,7 +63,7 @@ export function renamePasskey(
 
 export function deletePasskey(
   id: string,
-  password?: string,
+  password: string,
 ): Promise<MessageResponse> {
   return apiClient.deleteWithBody<MessageResponse>(`/auth/passkeys/${id}`, {
     password,

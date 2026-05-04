@@ -6,9 +6,13 @@ import type {
   MessageResponse,
 } from "./types";
 
-export function trustDevice(fingerprint: string): Promise<TrustDeviceResult> {
+export function trustDevice(
+  fingerprint: string,
+  password: string,
+): Promise<TrustDeviceResult> {
   return apiClient.post<TrustDeviceResult>("/auth/trusted-devices", {
     fingerprint,
+    password,
   });
 }
 
@@ -16,10 +20,21 @@ export function listTrustedDevices(): Promise<TrustedDeviceResponse[]> {
   return apiClient.get<TrustedDeviceResponse[]>("/auth/trusted-devices");
 }
 
-export function revokeDevice(id: string): Promise<MessageResponse> {
-  return apiClient.delete<MessageResponse>(`/auth/trusted-devices/${id}`);
+export function revokeDevice(
+  id: string,
+  password: string,
+): Promise<MessageResponse> {
+  return apiClient.deleteWithBody<MessageResponse>(
+    `/auth/trusted-devices/${id}`,
+    { password },
+  );
 }
 
-export function revokeAllDevices(): Promise<RevokeAllDevicesResponse> {
-  return apiClient.delete<RevokeAllDevicesResponse>("/auth/trusted-devices");
+export function revokeAllDevices(
+  password: string,
+): Promise<RevokeAllDevicesResponse> {
+  return apiClient.deleteWithBody<RevokeAllDevicesResponse>(
+    "/auth/trusted-devices",
+    { password },
+  );
 }

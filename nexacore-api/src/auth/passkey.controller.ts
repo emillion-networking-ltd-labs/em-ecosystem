@@ -26,6 +26,7 @@ import { PasskeyService } from './passkey.service';
 import { TokenService } from './token.service';
 import { AUTH_RATE_LIMITS } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { PasskeyRegisterOptionsDto } from './dto/passkey-register-options.dto';
 import { PasskeyRegisterVerifyDto } from './dto/passkey-register-verify.dto';
 import { PasskeyLoginOptionsDto } from './dto/passkey-login-options.dto';
 import { PasskeyLoginVerifyDto } from './dto/passkey-login-verify.dto';
@@ -56,9 +57,16 @@ export class PasskeyController {
   })
   @ApiOperation({ summary: 'Generate WebAuthn registration options' })
   @ApiResponse({ status: 201, description: 'Registration options returned' })
-  @ApiResponse({ status: 400, description: 'Max passkeys reached' })
-  async registerOptions(@Request() req: { user: SafeUser }) {
-    return this.passkeyService.generateRegOptions(req.user.id);
+  @ApiResponse({
+    status: 400,
+    description: 'Max passkeys reached or password required',
+  })
+  @ApiResponse({ status: 401, description: 'Invalid password' })
+  async registerOptions(
+    @Request() req: { user: SafeUser },
+    @Body() dto: PasskeyRegisterOptionsDto,
+  ) {
+    return this.passkeyService.generateRegOptions(req.user.id, dto.password);
   }
 
   @Post('register/verify')
@@ -169,7 +177,7 @@ export class PasskeyController {
     },
   })
   @ApiOperation({
-    summary: 'Delete a passkey (password confirmation may be required)',
+    summary: 'Delete a passkey (password confirmation required)',
   })
   @ApiResponse({ status: 200, description: 'Passkey deleted' })
   @ApiResponse({ status: 400, description: 'Password required' })

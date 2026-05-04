@@ -63,12 +63,27 @@ export class PasskeyService {
     this.logAuditEvent = createAuditLogger(this.auditService);
   }
 
-  async generateRegOptions(userId: string): Promise<Record<string, unknown>> {
+  async generateRegOptions(
+    userId: string,
+    password: string,
+  ): Promise<Record<string, unknown>> {
     const user = await this.usersService.findById(userId);
     if (!user) {
       throw new UnauthorizedException(
         ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
       );
+    }
+
+    // SCRUM-327: re-authenticate before issuing the WebAuthn challenge so a
+    // session hijacker cannot silently register a backdoor passkey.
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        ErrorMessages.mfa.PASSWORD_REQUIRED_NO_PASSWORD,
+      );
+    }
+    const isPasswordValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
     }
 
     const count = await this.prisma.webAuthnCredential.count({
@@ -309,7 +324,7 @@ export class PasskeyService {
   async deletePasskey(
     userId: string,
     passkeyId: string,
-    password?: string,
+    password: string,
     ctx?: { ipAddress: string; userAgent: string | null },
   ): Promise<void> {
     const user = await this.usersService.findById(userId);
@@ -319,16 +334,16 @@ export class PasskeyService {
       );
     }
 
-    if (user.passwordHash) {
-      if (!password) {
-        throw new BadRequestException(
-          ErrorMessages.passkey.PASSWORD_REQUIRED_FOR_DELETE,
-        );
-      }
-      const isValid = await bcrypt.compare(password, user.passwordHash);
-      if (!isValid) {
-        throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
-      }
+    // SCRUM-327: password is mandatory at the DTO layer. OAuth-only accounts
+    // (no passwordHash) cannot delete passkeys until they set a password.
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        ErrorMessages.mfa.PASSWORD_REQUIRED_NO_PASSWORD,
+      );
+    }
+    const isValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isValid) {
+      throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
     }
 
     const passkey = await this.prisma.webAuthnCredential.findFirst({

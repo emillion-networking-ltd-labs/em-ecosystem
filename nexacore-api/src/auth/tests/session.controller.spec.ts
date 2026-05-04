@@ -40,6 +40,9 @@ describe('SessionController', () => {
             listTrustedDevices: jest.fn(),
             revokeDevice: jest.fn(),
             revokeAllDevices: jest.fn(),
+            trustDeviceWithReauth: jest.fn(),
+            revokeDeviceWithReauth: jest.fn(),
+            revokeAllDevicesWithReauth: jest.fn(),
           },
         },
         {
@@ -162,16 +165,18 @@ describe('SessionController', () => {
       user: { id: 'uuid-123' },
     };
 
-    it('should trust device and return id, deviceName, expiresAt', async () => {
+    it('should trust device with re-auth and return id, deviceName, expiresAt', async () => {
       const mockDevice = {
         id: 'device-1',
         deviceName: 'Chrome on Windows',
         expiresAt: new Date('2026-04-02'),
       };
-      trustedDeviceService.trustDevice.mockResolvedValue(mockDevice as any);
+      trustedDeviceService.trustDeviceWithReauth.mockResolvedValue(
+        mockDevice as any,
+      );
 
       const result = await controller.trustDevice(
-        { fingerprint: 'abcdef1234567890' },
+        { fingerprint: 'abcdef1234567890', password: 'SecureP@ss1' },
         mockAuthReq,
       );
 
@@ -180,11 +185,12 @@ describe('SessionController', () => {
         deviceName: 'Chrome on Windows',
         expiresAt: mockDevice.expiresAt,
       });
-      expect(trustedDeviceService.trustDevice).toHaveBeenCalledWith(
+      expect(trustedDeviceService.trustDeviceWithReauth).toHaveBeenCalledWith(
         'uuid-123',
         'abcdef1234567890',
         '127.0.0.1',
         'test-agent',
+        'SecureP@ss1',
       );
     });
   });
@@ -214,15 +220,21 @@ describe('SessionController', () => {
       user: { id: 'uuid-123' },
     };
 
-    it('should revoke all devices and return count', async () => {
-      trustedDeviceService.revokeAllDevices.mockResolvedValue(3);
+    it('should revoke all devices with re-auth and return count', async () => {
+      trustedDeviceService.revokeAllDevicesWithReauth.mockResolvedValue(3);
 
-      const result = await controller.revokeAllTrustedDevices(mockAuthReq);
+      const result = await controller.revokeAllTrustedDevices(
+        { password: 'SecureP@ss1' },
+        mockAuthReq,
+      );
 
       expect(result).toEqual({
         message: 'All trusted devices revoked',
         count: 3,
       });
+      expect(
+        trustedDeviceService.revokeAllDevicesWithReauth,
+      ).toHaveBeenCalledWith('uuid-123', 'SecureP@ss1');
     });
   });
 
@@ -232,28 +244,34 @@ describe('SessionController', () => {
       user: { id: 'uuid-123' },
     };
 
-    it('should revoke a specific device', async () => {
-      trustedDeviceService.revokeDevice.mockResolvedValue(undefined);
+    it('should revoke a specific device with re-auth', async () => {
+      trustedDeviceService.revokeDeviceWithReauth.mockResolvedValue(undefined);
 
       const result = await controller.revokeTrustedDevice(
         'device-uuid',
+        { password: 'SecureP@ss1' },
         mockAuthReq,
       );
 
       expect(result).toEqual({ message: 'Device trust revoked' });
-      expect(trustedDeviceService.revokeDevice).toHaveBeenCalledWith(
+      expect(trustedDeviceService.revokeDeviceWithReauth).toHaveBeenCalledWith(
         'uuid-123',
         'device-uuid',
+        'SecureP@ss1',
       );
     });
 
     it('should propagate NotFoundException when device not found', async () => {
-      trustedDeviceService.revokeDevice.mockRejectedValue(
+      trustedDeviceService.revokeDeviceWithReauth.mockRejectedValue(
         new NotFoundException(ErrorMessages.device.NOT_FOUND),
       );
 
       await expect(
-        controller.revokeTrustedDevice('unknown-id', mockAuthReq),
+        controller.revokeTrustedDevice(
+          'unknown-id',
+          { password: 'SecureP@ss1' },
+          mockAuthReq,
+        ),
       ).rejects.toThrow(NotFoundException);
     });
   });
