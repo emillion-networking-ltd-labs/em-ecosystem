@@ -9,7 +9,6 @@ import { createHmac } from 'crypto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
-import { UsersService } from '../users/users.service';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import {
@@ -27,7 +26,6 @@ export class TrustedDeviceService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly configService: ConfigService,
-    private readonly usersService: UsersService,
   ) {
     const jwtSecret = this.configService.get<string>('auth.jwtSecret')!;
     this.fingerprintSecret = createHmac('sha256', jwtSecret)
@@ -247,11 +245,17 @@ export class TrustedDeviceService {
     return this.revokeAllDevices(userId);
   }
 
+  // Inline lookup avoids injecting UsersService (which would create a DI
+  // cycle: UsersService already injects TrustedDeviceService via forwardRef).
+  // Reads only `passwordHash` — minimal surface, no business logic needed.
   private async verifyPassword(
     userId: string,
     password: string,
   ): Promise<void> {
-    const user = await this.usersService.findById(userId);
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { passwordHash: true },
+    });
     if (!user) {
       throw new UnauthorizedException(
         ErrorMessages.mfa.AUTHENTICATION_REQUIRED,

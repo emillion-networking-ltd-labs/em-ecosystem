@@ -19,9 +19,11 @@ describe('TrustedDeviceService', () => {
       updateMany: jest.Mock;
       upsert: jest.Mock;
     };
+    user: {
+      findUnique: jest.Mock;
+    };
   };
   let auditService: { log: jest.Mock };
-  let usersService: { findById: jest.Mock };
 
   const mockDevice = {
     id: 'device-1',
@@ -49,14 +51,13 @@ describe('TrustedDeviceService', () => {
         updateMany: jest.fn().mockResolvedValue({ count: 0 }),
         upsert: jest.fn().mockResolvedValue(mockDevice),
       },
+      user: {
+        findUnique: jest.fn(),
+      },
     };
 
     auditService = {
       log: jest.fn().mockResolvedValue(undefined),
-    };
-
-    usersService = {
-      findById: jest.fn(),
     };
 
     const mockConfigService = {
@@ -93,7 +94,6 @@ describe('TrustedDeviceService', () => {
       prisma as any,
       auditService as any,
       mockConfigService as unknown as ConfigService,
-      usersService as any,
     );
   });
 
@@ -558,7 +558,7 @@ describe('TrustedDeviceService', () => {
 
     describe('trustDeviceWithReauth', () => {
       it('should call trustDevice when password is correct', async () => {
-        usersService.findById.mockResolvedValue(userWithPassword());
+        prisma.user.findUnique.mockResolvedValue(userWithPassword());
 
         const result = await service.trustDeviceWithReauth(
           'user-1',
@@ -573,7 +573,7 @@ describe('TrustedDeviceService', () => {
       });
 
       it('should throw UnauthorizedException when password is wrong', async () => {
-        usersService.findById.mockResolvedValue(userWithPassword());
+        prisma.user.findUnique.mockResolvedValue(userWithPassword());
 
         await expect(
           service.trustDeviceWithReauth(
@@ -588,7 +588,7 @@ describe('TrustedDeviceService', () => {
       });
 
       it('should throw BadRequestException for OAuth-only user', async () => {
-        usersService.findById.mockResolvedValue({
+        prisma.user.findUnique.mockResolvedValue({
           id: 'user-1',
           passwordHash: null,
         });
@@ -606,7 +606,7 @@ describe('TrustedDeviceService', () => {
       });
 
       it('should throw UnauthorizedException when user not found', async () => {
-        usersService.findById.mockResolvedValue(null);
+        prisma.user.findUnique.mockResolvedValue(null);
 
         await expect(
           service.trustDeviceWithReauth(
@@ -622,7 +622,7 @@ describe('TrustedDeviceService', () => {
 
     describe('revokeDeviceWithReauth', () => {
       it('should call revokeDevice when password is correct', async () => {
-        usersService.findById.mockResolvedValue(userWithPassword());
+        prisma.user.findUnique.mockResolvedValue(userWithPassword());
         prisma.trustedDevice.findFirst.mockResolvedValue(mockDevice);
 
         await service.revokeDeviceWithReauth(
@@ -638,7 +638,7 @@ describe('TrustedDeviceService', () => {
       });
 
       it('should throw UnauthorizedException without revoking when password is wrong', async () => {
-        usersService.findById.mockResolvedValue(userWithPassword());
+        prisma.user.findUnique.mockResolvedValue(userWithPassword());
 
         await expect(
           service.revokeDeviceWithReauth('user-1', 'device-1', 'wrong-pw'),
@@ -647,7 +647,7 @@ describe('TrustedDeviceService', () => {
       });
 
       it('should throw BadRequestException for OAuth-only user', async () => {
-        usersService.findById.mockResolvedValue({
+        prisma.user.findUnique.mockResolvedValue({
           id: 'user-1',
           passwordHash: null,
         });
@@ -660,7 +660,7 @@ describe('TrustedDeviceService', () => {
 
     describe('revokeAllDevicesWithReauth', () => {
       it('should call revokeAllDevices when password is correct', async () => {
-        usersService.findById.mockResolvedValue(userWithPassword());
+        prisma.user.findUnique.mockResolvedValue(userWithPassword());
         prisma.trustedDevice.updateMany.mockResolvedValue({ count: 4 });
 
         const count = await service.revokeAllDevicesWithReauth(
@@ -672,7 +672,7 @@ describe('TrustedDeviceService', () => {
       });
 
       it('should throw UnauthorizedException without revoking when password is wrong', async () => {
-        usersService.findById.mockResolvedValue(userWithPassword());
+        prisma.user.findUnique.mockResolvedValue(userWithPassword());
 
         await expect(
           service.revokeAllDevicesWithReauth('user-1', 'wrong-pw'),
@@ -681,7 +681,7 @@ describe('TrustedDeviceService', () => {
       });
 
       it('should throw BadRequestException for OAuth-only user', async () => {
-        usersService.findById.mockResolvedValue({
+        prisma.user.findUnique.mockResolvedValue({
           id: 'user-1',
           passwordHash: null,
         });
