@@ -14,6 +14,7 @@ import {
 import AlertBox from "@/components/ui/AlertBox";
 import { usePasskey } from "@/hooks/usePasskey";
 import { useRateLimit } from "@/hooks/useRateLimit";
+import { useNow } from "@/hooks/useNow";
 import { useToast } from "@/context/ToastContext";
 import { PROFILE_TOAST, AUTH_TOAST } from "@/lib/toast-messages";
 import Badge from "@/components/ui/Badge";
@@ -136,6 +137,8 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
   // TrustedDevices pattern). Hooks return discriminator on 429; component
   // dispatches toast + setRateLimit + closeModal.
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
+  // Re-render every 30 s so 'Last used: Xm ago' captions tick forward.
+  useNow();
 
   const [registerOpen, setRegisterOpen] = useState(false);
   const [regName, setRegName] = useState("");

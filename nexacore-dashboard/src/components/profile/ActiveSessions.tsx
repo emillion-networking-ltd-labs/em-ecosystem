@@ -11,6 +11,7 @@ import { HTTP_STATUS } from "@/lib/error-constants";
 import { useToast } from "@/hooks/useToast";
 import { useAuth } from "@/hooks/useAuth";
 import { useRateLimit } from "@/hooks/useRateLimit";
+import { useNow } from "@/hooks/useNow";
 import { PROFILE_TOAST, AUTH_TOAST } from "@/lib/toast-messages";
 import type { SessionResponse } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
@@ -89,6 +90,8 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
   const { addToast } = useToast();
   const { logout } = useAuth();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
+  // Re-render every 30 s so 'Last active Xm ago' captions tick forward.
+  useNow();
   const [sessions, setSessions] = useState<SessionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);

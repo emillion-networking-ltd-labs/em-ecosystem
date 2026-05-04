@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Shield, Laptop, Smartphone, Trash2, Plus } from "lucide-react";
 import { useTrustedDevices } from "@/hooks/useTrustedDevices";
 import { useToast } from "@/context/ToastContext";
+import { useNow } from "@/hooks/useNow";
 import { PROFILE_TOAST, AUTH_TOAST } from "@/lib/toast-messages";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -52,6 +53,8 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
 
   const { addToast } = useToast();
   const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
+  // Re-render every 30 s so 'X min ago' / 'Expires Y' captions tick forward.
+  useNow();
 
   // Trust modal
   const [trustModalOpen, setTrustModalOpen] = useState(false);
