@@ -256,3 +256,95 @@ describe("AuthContext.login — failure handling (SCRUM-342)", () => {
     expect(captured.error).toBeNull();
   });
 });
+
+/**
+ * SCRUM-347: regression for the double "Session expired" toast bug observed
+ * after a long-idle wake-up. Two sources can call addToast within ms:
+ *   1) handleAuthFailure (apiClient 401 cascade)
+ *   2) useIdleTimeout callback (browser un-throttles setTimeout)
+ * The fix introduces a 3-second timestamp dedupe in showSessionExpiredToast.
+ *
+ * We don't have a direct seam to the idle callback (mocked at the top of
+ * this file). But both sources call the SAME helper internally, so testing
+ * the dedupe via two rapid handleAuthFailure invocations proves the contract
+ * for both paths by symmetry.
+ */
+describe("AuthContext — Session expired toast dedupe (SCRUM-347)", () => {
+  beforeEach(() => {
+    mockSetOnAuthFailure.mockReset();
+    mockAddToast.mockReset();
+    mockClearAccessToken.mockReset();
+    mockRouterReplace.mockReset();
+  });
+
+  function captureAuthFailureHandler(): () => void {
+    // The most recent setOnAuthFailure call carries the latest handleAuthFailure
+    // — the effect re-runs when handleAuthFailure changes (its deps include
+    // showSessionExpiredToast, broadcastAuthEvent, router).
+    const calls = mockSetOnAuthFailure.mock.calls;
+    expect(calls.length).toBeGreaterThan(0);
+    const handler = calls[calls.length - 1][0];
+    if (typeof handler !== "function") {
+      throw new Error("handleAuthFailure not registered");
+    }
+    return handler as () => void;
+  }
+
+  it("suppresses the second 'Session expired' toast within 3s of the first", async () => {
+    render(
+      <AuthProvider>
+        <TestConsumer trigger={0} />
+      </AuthProvider>,
+    );
+
+    const handleAuthFailure = captureAuthFailureHandler();
+
+    // Fire twice in quick succession (mimicking handleAuthFailure + idle
+    // callback racing on tab wake-up).
+    await act(async () => {
+      handleAuthFailure();
+      handleAuthFailure();
+    });
+
+    const sessionExpiredCalls = mockAddToast.mock.calls
+      .map((c) => c[0] as { title?: string } | undefined)
+      .filter((t) => t?.title === "Session expired");
+
+    expect(sessionExpiredCalls).toHaveLength(1);
+  });
+
+  it("allows a new 'Session expired' toast after the 3s dedupe window", async () => {
+    const realDateNow = Date.now;
+    let mockedNow = realDateNow();
+    jest.spyOn(Date, "now").mockImplementation(() => mockedNow);
+
+    try {
+      render(
+        <AuthProvider>
+          <TestConsumer trigger={0} />
+        </AuthProvider>,
+      );
+
+      const handleAuthFailure = captureAuthFailureHandler();
+
+      await act(async () => {
+        handleAuthFailure();
+      });
+
+      // Advance 3.5 s — past the dedupe window.
+      mockedNow += 3500;
+
+      await act(async () => {
+        handleAuthFailure();
+      });
+
+      const sessionExpiredCalls = mockAddToast.mock.calls
+        .map((c) => c[0] as { title?: string } | undefined)
+        .filter((t) => t?.title === "Session expired");
+
+      expect(sessionExpiredCalls).toHaveLength(2);
+    } finally {
+      (Date.now as unknown as jest.SpyInstance).mockRestore();
+    }
+  });
+});
