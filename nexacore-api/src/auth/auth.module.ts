@@ -42,7 +42,10 @@ import { JWT_ISSUER, JWT_AUDIENCE } from './constants/auth.constants';
   imports: [
     forwardRef(() => UsersModule),
     AuditModule,
-    SessionsModule,
+    // forwardRef on SessionsModule completes the bidirectional cycle:
+    // SessionsModule now imports AuthModule (forwardRef) to receive
+    // TokenDenyListService for SCRUM-347's instant per-session revocation.
+    forwardRef(() => SessionsModule),
     CryptoModule,
     MailModule,
     SecurityModule,

@@ -112,6 +112,7 @@ describe('JwtStrategy', () => {
         'test-jti-123',
         'uuid-123',
         expect.any(Number),
+        undefined, // SCRUM-347: sessionId param — undefined here (legacy payload shape)
       );
     });
 
@@ -155,6 +156,45 @@ describe('JwtStrategy', () => {
           email: 'test@example.com',
           role: Role.USER,
           jti: 'denied-jti',
+          iat: Math.floor(Date.now() / 1000),
+        }),
+      ).rejects.toThrow(new UnauthorizedException('Authentication failed'));
+    });
+
+    // SCRUM-347 — per-session deny propagation
+    it('should pass payload.sessionId to isDenied when present', async () => {
+      usersService.findById.mockResolvedValue(mockUser);
+
+      await strategy.validate({
+        sub: 'uuid-123',
+        email: 'test@example.com',
+        role: Role.USER,
+        jti: 'test-jti-session',
+        sessionId: 'session-abc',
+        iat: Math.floor(Date.now() / 1000),
+      });
+
+      expect(tokenDenyListService.isDenied).toHaveBeenCalledWith(
+        'test-jti-session',
+        'uuid-123',
+        expect.any(Number),
+        'session-abc',
+      );
+    });
+
+    it('should reject token when sessionId-based deny applies (instant per-session revocation)', async () => {
+      // Simulate isDenied returning true because of the sessionId leg of the
+      // composite deny check (not jti, not user). The strategy doesn't see
+      // which leg triggered — only that isDenied returned true.
+      tokenDenyListService.isDenied.mockResolvedValue(true);
+
+      await expect(
+        strategy.validate({
+          sub: 'uuid-123',
+          email: 'test@example.com',
+          role: Role.USER,
+          jti: 'fresh-jti',
+          sessionId: 'revoked-session-id',
           iat: Math.floor(Date.now() / 1000),
         }),
       ).rejects.toThrow(new UnauthorizedException('Authentication failed'));

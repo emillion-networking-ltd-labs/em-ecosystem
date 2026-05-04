@@ -85,6 +85,27 @@ describe('TokenDenyListService', () => {
     });
   });
 
+  describe('denyBySessionId', () => {
+    it('should call Redis SET with correct session key and TTL (SCRUM-347)', async () => {
+      await service.denyBySessionId('session-abc', 900);
+
+      expect(redis.set).toHaveBeenCalledWith(
+        'deny:session:session-abc',
+        '1',
+        'EX',
+        900,
+      );
+    });
+
+    it('should not throw when Redis fails (fail-open)', async () => {
+      redis.set.mockRejectedValue(new Error('Redis connection lost'));
+
+      await expect(
+        service.denyBySessionId('session-abc', 900),
+      ).resolves.toBeUndefined();
+    });
+  });
+
   describe('isDenied', () => {
     it('should return true when jti key exists', async () => {
       mockPipeline.exec.mockResolvedValue([
@@ -168,6 +189,58 @@ describe('TokenDenyListService', () => {
       const result = await service.isDenied('test-jti', 'user-123', 1000);
 
       expect(result).toBe(false);
+    });
+
+    // SCRUM-347: per-session deny-list checks
+    it('should return true when sessionId is in deny-list', async () => {
+      mockPipeline.exec.mockResolvedValue([
+        [null, 0], // jti not denied
+        [null, null], // no user deny
+        [null, 1], // session denied
+      ]);
+
+      const result = await service.isDenied(
+        'test-jti',
+        'user-123',
+        1000,
+        'session-abc',
+      );
+
+      expect(result).toBe(true);
+      expect(mockPipeline.exists).toHaveBeenCalledWith(
+        'deny:session:session-abc',
+      );
+    });
+
+    it('should return false when sessionId is NOT in deny-list and no other deny matches', async () => {
+      mockPipeline.exec.mockResolvedValue([
+        [null, 0],
+        [null, null],
+        [null, 0], // session not denied
+      ]);
+
+      const result = await service.isDenied(
+        'test-jti',
+        'user-123',
+        1000,
+        'session-abc',
+      );
+
+      expect(result).toBe(false);
+    });
+
+    it('should NOT check session deny when sessionId is undefined (legacy in-flight tokens)', async () => {
+      mockPipeline.exec.mockResolvedValue([
+        [null, 0],
+        [null, null],
+      ]);
+
+      const result = await service.isDenied('test-jti', 'user-123', 1000);
+
+      expect(result).toBe(false);
+      // Pipeline should only have 2 commands, not 3
+      expect(mockPipeline.exists).toHaveBeenCalledTimes(1); // jti only
+      expect(mockPipeline.exists).toHaveBeenCalledWith('deny:jti:test-jti');
     });
   });
 });

@@ -7,6 +7,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../../audit/audit.service';
 import { AuditAction } from '../../audit/enums/audit-action.enum';
 import { GeolocationService } from '../../geolocation/geolocation.service';
+import { TokenDenyListService } from '../../auth/token-deny-list.service';
 import { Session } from '../entities/session.entity';
 
 jest.mock('bcrypt');
@@ -19,6 +20,10 @@ describe('SessionsService', () => {
   let sessionsService: SessionsService;
   let auditService: { log: jest.Mock };
   let geolocationService: { lookupIp: jest.Mock };
+  let tokenDenyListService: {
+    denyBySessionId: jest.Mock;
+    denyAllForUser: jest.Mock;
+  };
   let prisma: {
     session: {
       create: jest.Mock;
@@ -74,6 +79,11 @@ describe('SessionsService', () => {
       lookupIp: jest.fn().mockReturnValue(null),
     };
 
+    tokenDenyListService = {
+      denyBySessionId: jest.fn().mockResolvedValue(undefined),
+      denyAllForUser: jest.fn().mockResolvedValue(undefined),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SessionsService,
@@ -88,6 +98,10 @@ describe('SessionsService', () => {
         {
           provide: GeolocationService,
           useValue: geolocationService,
+        },
+        {
+          provide: TokenDenyListService,
+          useValue: tokenDenyListService,
         },
       ],
     }).compile();
@@ -460,6 +474,32 @@ describe('SessionsService', () => {
         sessionsService.revokeSession('session-1', 'other-user'),
       ).rejects.toThrow(NotFoundException);
     });
+
+    // SCRUM-347: pair DB revoke with Redis deny-list (instant invalidation)
+    it('should call tokenDenyListService.denyBySessionId after revoking', async () => {
+      prisma.session.findUnique.mockResolvedValue(mockSession);
+      prisma.session.update.mockResolvedValue({
+        ...mockSession,
+        isRevoked: true,
+      });
+
+      await sessionsService.revokeSession('session-1', 'user-1');
+
+      expect(tokenDenyListService.denyBySessionId).toHaveBeenCalledWith(
+        'session-1',
+        900, // ACCESS_TOKEN_TTL_SECONDS
+      );
+    });
+
+    it('should NOT call denyBySessionId when session belongs to another user (NotFoundException short-circuits)', async () => {
+      prisma.session.findUnique.mockResolvedValue(mockSession);
+
+      await expect(
+        sessionsService.revokeSession('session-1', 'other-user'),
+      ).rejects.toThrow(NotFoundException);
+
+      expect(tokenDenyListService.denyBySessionId).not.toHaveBeenCalled();
+    });
   });
 
   // ─── revokeAllUserSessions ──────────────────────────────────────
@@ -474,6 +514,18 @@ describe('SessionsService', () => {
         where: { userId: 'user-1', isRevoked: false },
         data: { isRevoked: true },
       });
+    });
+
+    // SCRUM-347: pair DB-mass-revoke with Redis user-level deny-list
+    it('should call tokenDenyListService.denyAllForUser after revoking', async () => {
+      prisma.session.updateMany.mockResolvedValue({ count: 3 });
+
+      await sessionsService.revokeAllUserSessions('user-1');
+
+      expect(tokenDenyListService.denyAllForUser).toHaveBeenCalledWith(
+        'user-1',
+        900, // ACCESS_TOKEN_TTL_SECONDS
+      );
     });
   });
 

@@ -31,19 +31,40 @@ export class TokenDenyListService {
     }
   }
 
-  async isDenied(jti: string, userId: string, iat?: number): Promise<boolean> {
+  // Deny every access token bound to a specific session (instant revocation).
+  // Pairs with Session.isRevoked=true on the DB side so JwtStrategy.validate
+  // rejects further use of the access token within ~1 sec instead of waiting
+  // up to ACCESS_TOKEN_TTL_SECONDS for the JWT to expire by clock. SCRUM-347.
+  async denyBySessionId(sessionId: string, ttlSeconds: number): Promise<void> {
+    try {
+      await this.redis.set(`deny:session:${sessionId}`, '1', 'EX', ttlSeconds);
+    } catch (err) {
+      this.logger.warn(
+        `Failed to deny session=${sessionId}: ${(err as Error).message}`,
+      );
+    }
+  }
+
+  async isDenied(
+    jti: string,
+    userId: string,
+    iat?: number,
+    sessionId?: string,
+  ): Promise<boolean> {
     try {
       const pipeline = this.redis.pipeline();
       pipeline.exists(`deny:jti:${jti}`);
       pipeline.get(`deny:user:${userId}`);
+      if (sessionId) pipeline.exists(`deny:session:${sessionId}`);
       const results = await pipeline.exec();
 
       if (!results) return false;
 
       const jtiDenied = results[0]?.[1] === 1;
       const denyBefore = results[1]?.[1] as string | null;
+      const sessionDenied = sessionId ? results[2]?.[1] === 1 : false;
 
-      if (jtiDenied) return true;
+      if (jtiDenied || sessionDenied) return true;
 
       // User-level deny: only reject tokens issued BEFORE the deny timestamp
       if (denyBefore && iat) {

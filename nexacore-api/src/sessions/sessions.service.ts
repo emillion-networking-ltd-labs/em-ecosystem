@@ -1,4 +1,6 @@
 import {
+  forwardRef,
+  Inject,
   Injectable,
   UnauthorizedException,
   NotFoundException,
@@ -9,9 +11,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { GeolocationService } from '../geolocation/geolocation.service';
+import { TokenDenyListService } from '../auth/token-deny-list.service';
 import {
   SESSION_IDLE_TIMEOUT_HOURS,
   MAX_CONCURRENT_SESSIONS,
+  ACCESS_TOKEN_TTL_SECONDS,
   BCRYPT_ROUNDS,
   hoursToMs,
 } from '../auth/constants/auth.constants';
@@ -53,6 +57,11 @@ export class SessionsService {
     private readonly prisma: PrismaService,
     private readonly auditService: AuditService,
     private readonly geolocationService: GeolocationService,
+    // forwardRef breaks the AuthModule <-> SessionsModule cycle: AuthModule
+    // already imports SessionsModule, so SessionsModule importing AuthModule
+    // (to access TokenDenyListService) requires forwardRef on both sides.
+    @Inject(forwardRef(() => TokenDenyListService))
+    private readonly tokenDenyListService: TokenDenyListService,
   ) {}
 
   async createSession(params: {
@@ -163,6 +172,16 @@ export class SessionsService {
       where: { id: sessionId },
       data: { isRevoked: true },
     });
+
+    // SCRUM-347: pair the DB revocation with a Redis deny-list entry so any
+    // access token bound to this session is rejected by JwtStrategy within
+    // ~1 sec instead of waiting up to ACCESS_TOKEN_TTL_SECONDS for the JWT
+    // to expire by clock. Without this, the revoked session keeps working
+    // until the access token's natural TTL elapses (eventual consistency).
+    await this.tokenDenyListService.denyBySessionId(
+      sessionId,
+      ACCESS_TOKEN_TTL_SECONDS,
+    );
   }
 
   async revokeAllUserSessions(userId: string): Promise<void> {
@@ -170,6 +189,17 @@ export class SessionsService {
       where: { userId, isRevoked: false },
       data: { isRevoked: true },
     });
+
+    // SCRUM-347: pair with user-level deny so every access token previously
+    // bound to ANY of this user's sessions is rejected immediately. Closes
+    // the same eventual-consistency gap for callers that revoke all sessions
+    // without their own deny-list call (email-verification, password-reset,
+    // password-change). The admin lock-user flow and logoutAll already pair
+    // this call; the redundancy is idempotent (Redis SET refreshes TTL).
+    await this.tokenDenyListService.denyAllForUser(
+      userId,
+      ACCESS_TOKEN_TTL_SECONDS,
+    );
   }
 
   async getActiveSessions(

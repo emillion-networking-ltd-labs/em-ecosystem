@@ -27,10 +27,14 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: JwtPayload): Promise<SafeUser> {
+    // sessionId may be undefined for in-flight tokens minted before SCRUM-347
+    // deployed. isDenied skips the session check when the value is missing —
+    // legacy tokens validate as before until they expire (15 min TTL window).
     const isDenied = await this.tokenDenyListService.isDenied(
       payload.jti,
       payload.sub,
       payload.iat,
+      payload.sessionId,
     );
     if (isDenied) {
       throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);

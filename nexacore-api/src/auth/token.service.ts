@@ -77,18 +77,6 @@ export class TokenService {
     user: User,
     requestMeta: { ipAddress: string; userAgent?: string | null },
   ): Promise<{ accessToken: string; refreshToken: string; sessionId: string }> {
-    const accessToken = this.jwtService.sign(
-      {
-        sub: user.id,
-        email: user.email,
-        role: user.role,
-        jti: crypto.randomUUID(),
-      } satisfies JwtPayload,
-      {
-        expiresIn: this.accessExpiration as StringValue,
-      },
-    );
-
     const tokenFamily = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + this.refreshMaxAgeMs);
 
@@ -98,7 +86,9 @@ export class TokenService {
       userAgent: requestMeta.userAgent,
     });
 
-    // Create session with temp token, then sign JWT with session ID, then update hash
+    // SCRUM-347: create session BEFORE signing the access token so the access
+    // token can carry sessionId in its JwtPayload. Pairs with the per-session
+    // deny-list (`deny:session:{sessionId}`) checked by JwtStrategy.validate.
     const tempToken = crypto.randomUUID();
     const session = await this.sessionsService.createSession({
       userId: user.id,
@@ -108,6 +98,19 @@ export class TokenService {
       userAgent: requestMeta.userAgent || null,
       expiresAt,
     });
+
+    const accessToken = this.jwtService.sign(
+      {
+        sub: user.id,
+        email: user.email,
+        role: user.role,
+        jti: crypto.randomUUID(),
+        sessionId: session.id,
+      } satisfies JwtPayload,
+      {
+        expiresIn: this.accessExpiration as StringValue,
+      },
+    );
 
     const refreshToken = this.jwtService.sign(
       {
@@ -278,6 +281,7 @@ export class TokenService {
         email: user.email,
         role: user.role,
         jti: crypto.randomUUID(),
+        sessionId: newSessionId,
       } satisfies JwtPayload,
       { expiresIn: this.accessExpiration as StringValue },
     );
