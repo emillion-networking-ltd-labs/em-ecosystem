@@ -23,10 +23,16 @@ export function getActiveSessions(): Promise<SessionResponse[]> {
   return apiClient.get<SessionResponse[]>("/auth/sessions");
 }
 
-export function revokeSession(sessionId: string): Promise<MessageResponse> {
-  return apiClient.delete<MessageResponse>(`/auth/sessions/${sessionId}`);
+export function revokeSession(
+  sessionId: string,
+  password: string,
+): Promise<MessageResponse> {
+  return apiClient.deleteWithBody<MessageResponse>(
+    `/auth/sessions/${sessionId}`,
+    { password },
+  );
 }
 
-export function revokeAllSessions(): Promise<MessageResponse> {
-  return apiClient.post<MessageResponse>("/auth/logout-all", {});
+export function revokeAllSessions(password: string): Promise<MessageResponse> {
+  return apiClient.post<MessageResponse>("/auth/logout-all", { password });
 }

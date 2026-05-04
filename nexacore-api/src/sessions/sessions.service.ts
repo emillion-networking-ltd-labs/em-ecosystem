@@ -2,6 +2,7 @@ import {
   forwardRef,
   Inject,
   Injectable,
+  BadRequestException,
   UnauthorizedException,
   NotFoundException,
 } from '@nestjs/common';
@@ -299,6 +300,60 @@ export class SessionsService {
       where: { id: sessionId },
       data: { isRevoked: true },
     });
+  }
+
+  /**
+   * SCRUM-347 follow-up: re-authenticated wrappers. Bare revokeSession /
+   * revokeAllUserSessions stay for INTERNAL callers (token rotation, admin
+   * lockout, password change cleanup) where the user has already proven
+   * authority via another path. UI-initiated revokes (DELETE /auth/sessions/
+   * :id, POST /auth/logout-all) MUST go through these wrappers — same threat
+   * model as trusted-device password gating: a session-hijacker should not
+   * be able to lock the legitimate user out of all their sessions without
+   * proving they hold the password.
+   *
+   * Inline prisma.user.findUnique avoids a DI cycle (UsersService injects
+   * SessionsService directly without forwardRef).
+   */
+  async revokeSessionWithReauth(
+    sessionId: string,
+    userId: string,
+    password: string,
+  ): Promise<void> {
+    await this.verifyUserPassword(userId, password);
+    return this.revokeSession(sessionId, userId);
+  }
+
+  async revokeAllUserSessionsWithReauth(
+    userId: string,
+    password: string,
+  ): Promise<void> {
+    await this.verifyUserPassword(userId, password);
+    return this.revokeAllUserSessions(userId);
+  }
+
+  private async verifyUserPassword(
+    userId: string,
+    password: string,
+  ): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { passwordHash: true },
+    });
+    if (!user) {
+      throw new UnauthorizedException(
+        ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
+      );
+    }
+    if (!user.passwordHash) {
+      throw new BadRequestException(
+        ErrorMessages.mfa.PASSWORD_REQUIRED_NO_PASSWORD,
+      );
+    }
+    const isValid = await bcrypt.compare(password, user.passwordHash);
+    if (!isValid) {
+      throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
+    }
   }
 
   /**

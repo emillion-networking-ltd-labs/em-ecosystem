@@ -131,6 +131,19 @@ export class AuthService {
     return this.tokenService.logoutAll(userId, ctx);
   }
 
+  /**
+   * SCRUM-347 follow-up: password-gated logoutAll. Same end state as
+   * logoutAll() but requires a fresh password proof — defense against a
+   * session-hijacker locking the legitimate user out of all their sessions.
+   */
+  async logoutAllWithReauth(
+    userId: string,
+    password: string,
+    ctx?: RequestContext,
+  ): Promise<CookieConfig> {
+    return this.tokenService.logoutAllWithReauth(userId, password, ctx);
+  }
+
   // ── Email Verification ──
 
   async verifyEmail(token: string): Promise<{ status: 'success' | 'invalid' }> {

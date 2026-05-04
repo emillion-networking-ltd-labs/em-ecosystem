@@ -363,4 +363,31 @@ export class TokenService {
 
     return this.buildClearCookie();
   }
+
+  /**
+   * SCRUM-347 follow-up: password-gated logoutAll. SessionsService verifies
+   * the password (throws on mismatch / OAuth-only / user not found) before
+   * the bare logoutAll runs. Internal callers (admin lockout, password
+   * change auto-logout) keep using bare logoutAll.
+   */
+  async logoutAllWithReauth(
+    userId: string,
+    password: string,
+    ctx?: RequestContext,
+  ): Promise<CookieConfig> {
+    await this.sessionsService.revokeAllUserSessionsWithReauth(
+      userId,
+      password,
+    );
+    this.tokenDenyListService
+      .denyAllForUser(userId, ACCESS_TOKEN_TTL_SECONDS)
+      .catch(() => {});
+
+    this.logAuditEvent(AuditAction.LOGOUT, ctx, userId, {
+      scope: 'all_sessions',
+      reauth: true,
+    });
+
+    return this.buildClearCookie();
+  }
 }

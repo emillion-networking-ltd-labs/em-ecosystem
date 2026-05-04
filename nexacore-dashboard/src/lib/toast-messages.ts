@@ -208,6 +208,16 @@ export const PROFILE_TOAST = {
     title: "Delete passkey failed",
     description: "Invalid password.",
   } as ToastMsg,
+  SESSION_REVOKE_INVALID_PASSWORD: {
+    variant: "error",
+    title: "Revoke session failed",
+    description: "Invalid password.",
+  } as ToastMsg,
+  SESSIONS_REVOKE_ALL_INVALID_PASSWORD: {
+    variant: "error",
+    title: "Sign out everywhere failed",
+    description: "Invalid password.",
+  } as ToastMsg,
   PASSKEY_REGISTERED: {
     variant: "success",
     title: "Passkey registered",

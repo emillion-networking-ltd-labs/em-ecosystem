@@ -77,6 +77,7 @@ describe('AuthController', () => {
             refreshTokens: jest.fn(),
             logout: jest.fn(),
             logoutAll: jest.fn(),
+            logoutAllWithReauth: jest.fn(),
             buildClearCookie: jest.fn().mockReturnValue(mockClearCookie),
           },
         },
@@ -305,14 +306,19 @@ describe('AuthController', () => {
   });
 
   describe('logoutAll', () => {
-    it('should revoke all sessions and return success message', async () => {
+    it('should revoke all sessions with re-auth (SCRUM-347 follow-up)', async () => {
       const reqWithUser = { ...mockReq, user: { id: 'uuid-123' } };
-      authService.logoutAll.mockResolvedValue(mockClearCookie);
+      authService.logoutAllWithReauth.mockResolvedValue(mockClearCookie);
 
-      const result = await controller.logoutAll(reqWithUser, mockRes as any);
+      const result = await controller.logoutAll(
+        reqWithUser,
+        { password: 'SecureP@ss1' },
+        mockRes as any,
+      );
 
-      expect(authService.logoutAll).toHaveBeenCalledWith(
+      expect(authService.logoutAllWithReauth).toHaveBeenCalledWith(
         'uuid-123',
+        'SecureP@ss1',
         expect.objectContaining({ ipAddress: '127.0.0.1' }),
       );
       expect(result.message).toBe('All sessions revoked');

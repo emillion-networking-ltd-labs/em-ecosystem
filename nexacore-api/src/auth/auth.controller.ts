@@ -23,6 +23,7 @@ import { AuthService } from './auth.service';
 import { setCookieFromConfig } from '../common/utils/cookie.util';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { LogoutAllDto } from './dto/logout-all.dto';
 import {
   AUTH_RATE_LIMITS,
   DEVICE_FINGERPRINT_HEADER,
@@ -201,15 +202,28 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ summary: 'Logout from all sessions' })
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.trust_device.ttl,
+      limit: AUTH_RATE_LIMITS.trust_device.limit,
+    },
+  })
+  @ApiOperation({ summary: 'Logout from all sessions (requires password)' })
   @ApiResponse({ status: 200, description: 'All sessions revoked' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'Password required' })
+  @ApiResponse({ status: 401, description: 'Invalid password' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   async logoutAll(
     @Request() req: AuthenticatedRequest,
+    @Body() dto: LogoutAllDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     const meta = extractRequestMeta(req);
-    const clearCookie = await this.authService.logoutAll(req.user.id, meta);
+    const clearCookie = await this.authService.logoutAllWithReauth(
+      req.user.id,
+      dto.password,
+      meta,
+    );
     setCookieFromConfig(res, clearCookie);
     return { message: 'All sessions revoked' };
   }

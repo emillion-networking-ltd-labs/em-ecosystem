@@ -3,14 +3,22 @@
 import { useState, useEffect, useCallback } from "react";
 import { Monitor, Smartphone, Trash2 } from "lucide-react";
 import { apiClient } from "@/lib/api";
+import {
+  revokeSession as apiRevokeSession,
+  revokeAllSessions as apiRevokeAllSessions,
+} from "@/lib/security-activity-api";
+import { HTTP_STATUS } from "@/lib/error-constants";
 import { useToast } from "@/hooks/useToast";
 import { useAuth } from "@/hooks/useAuth";
-import { PROFILE_TOAST } from "@/lib/toast-messages";
+import { useRateLimit } from "@/hooks/useRateLimit";
+import { PROFILE_TOAST, AUTH_TOAST } from "@/lib/toast-messages";
 import type { SessionResponse } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import IconButton from "@/components/ui/IconButton";
+import Input from "@/components/ui/Input";
+import RateLimitBanner from "@/components/ui/RateLimitBanner";
 
 function parseUserAgent(ua: string | null): {
   label: string;
@@ -80,12 +88,26 @@ function stalenessClass(dateStr: string): string {
 export default function ActiveSessions({ bare }: { bare?: boolean }) {
   const { addToast } = useToast();
   const { logout } = useAuth();
+  const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
   const [sessions, setSessions] = useState<SessionResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [revoking, setRevoking] = useState<string | null>(null);
   const [revokingAll, setRevokingAll] = useState(false);
-  const [confirmOpen, setConfirmOpen] = useState(false);
   const [loadError, setLoadError] = useState(false);
+
+  // SCRUM-347 follow-up: revoke single session modal (with password input).
+  // Pre-fix this was a direct delete on trash icon click; matches the
+  // SCRUM-327 trust-device pattern now.
+  const [revokeTarget, setRevokeTarget] = useState<SessionResponse | null>(
+    null,
+  );
+  const [revokePassword, setRevokePassword] = useState("");
+  const [revokeFieldError, setRevokeFieldError] = useState("");
+
+  // Existing sign-out-all confirm modal (now also gets password input).
+  const [confirmAllOpen, setConfirmAllOpen] = useState(false);
+  const [revokeAllPassword, setRevokeAllPassword] = useState("");
+  const [revokeAllFieldError, setRevokeAllFieldError] = useState("");
 
   const fetchSessions = useCallback(async () => {
     try {
@@ -126,13 +148,54 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
     };
   }, [fetchSessions]);
 
-  const revokeSession = async (sessionId: string) => {
-    setRevoking(sessionId);
+  const closeRevokeModal = () => {
+    setRevokeTarget(null);
+    setRevokePassword("");
+    setRevokeFieldError("");
+  };
+
+  const closeRevokeAllModal = () => {
+    setConfirmAllOpen(false);
+    setRevokeAllPassword("");
+    setRevokeAllFieldError("");
+  };
+
+  // SCRUM-347 follow-up: revoke single session with password re-auth.
+  // Pattern matches SCRUM-327 trust-device wrappers — modal stays open on
+  // wrong password (toast + retain field value), closes on rate-limit
+  // (toast + banner + button-disable), generic error closes with toast.
+  const handleRevokeSubmit = async () => {
+    if (!revokeTarget) return;
+    if (!revokePassword) {
+      setRevokeFieldError("Enter your password");
+      return;
+    }
+    setRevokeFieldError("");
+    const targetId = revokeTarget.id;
+    setRevoking(targetId);
     try {
-      await apiClient.delete(`/auth/sessions/${sessionId}`);
-      setSessions((prev) => prev.filter((s) => s.id !== sessionId));
-    } catch {
-      addToast(PROFILE_TOAST.SESSION_REVOKE_FAILED);
+      await apiRevokeSession(targetId, revokePassword);
+      setSessions((prev) => prev.filter((s) => s.id !== targetId));
+      closeRevokeModal();
+    } catch (err) {
+      const apiErr = err as {
+        error?: { statusCode?: number; retryAfter?: number };
+      };
+      const status = apiErr?.error?.statusCode;
+      if (status === HTTP_STATUS.UNAUTHORIZED) {
+        addToast(PROFILE_TOAST.SESSION_REVOKE_INVALID_PASSWORD);
+      } else if (status === HTTP_STATUS.TOO_MANY_REQUESTS) {
+        addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
+        setRateLimit(
+          apiErr.error?.retryAfter ?? 60,
+          "Too many attempts.",
+          "throttle",
+        );
+        closeRevokeModal();
+      } else {
+        addToast(PROFILE_TOAST.SESSION_REVOKE_FAILED);
+        closeRevokeModal();
+      }
     } finally {
       setRevoking(null);
     }
@@ -146,25 +209,46 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
   // until the next 401 cascade catches up. See OWASP Session Management Cheat
   // Sheet §5.4: explicit session termination must end the UI session too.
   const signOutAllSessions = async () => {
+    if (!revokeAllPassword) {
+      setRevokeAllFieldError("Enter your password");
+      return;
+    }
+    setRevokeAllFieldError("");
     setRevokingAll(true);
     try {
-      await apiClient.post("/auth/logout-all", {});
+      await apiRevokeAllSessions(revokeAllPassword);
       addToast({
         variant: "success",
         title: "All sessions ended",
         description:
           "You have been signed out from this device and all others.",
       });
+      closeRevokeAllModal();
       // logout() clears local state, dispatches LOGOUT, which routes to /login
       // via handleAuthFailure-style cleanup. The /auth/logout call inside is a
       // no-op (refresh cookie already cleared by /auth/logout-all) but keeps
       // local cleanup symmetric with the regular logout flow.
       await logout();
-    } catch {
-      addToast(PROFILE_TOAST.SESSIONS_REVOKE_FAILED);
+    } catch (err) {
+      const apiErr = err as {
+        error?: { statusCode?: number; retryAfter?: number };
+      };
+      const status = apiErr?.error?.statusCode;
       setRevokingAll(false);
-    } finally {
-      setConfirmOpen(false);
+      if (status === HTTP_STATUS.UNAUTHORIZED) {
+        addToast(PROFILE_TOAST.SESSIONS_REVOKE_ALL_INVALID_PASSWORD);
+      } else if (status === HTTP_STATUS.TOO_MANY_REQUESTS) {
+        addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
+        setRateLimit(
+          apiErr.error?.retryAfter ?? 60,
+          "Too many attempts.",
+          "throttle",
+        );
+        closeRevokeAllModal();
+      } else {
+        addToast(PROFILE_TOAST.SESSIONS_REVOKE_FAILED);
+        closeRevokeAllModal();
+      }
     }
   };
 
@@ -254,9 +338,15 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
                       variant="danger"
                       size="sm"
                       tooltip
-                      onClick={() => revokeSession(session.id)}
-                      disabled={revoking === session.id}
+                      disabled={
+                        revoking === session.id || rateLimitInfo.isRateLimited
+                      }
                       loading={revoking === session.id}
+                      onClick={() => {
+                        setRevokePassword("");
+                        setRevokeFieldError("");
+                        setRevokeTarget(session);
+                      }}
                       aria-label="Revoke session"
                     >
                       <Trash2 size={16} />
@@ -274,27 +364,88 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
                 size="md"
                 fullWidth={false}
                 loading={revokingAll}
-                onClick={() => setConfirmOpen(true)}
+                disabled={rateLimitInfo.isRateLimited}
+                onClick={() => {
+                  setRevokeAllPassword("");
+                  setRevokeAllFieldError("");
+                  setConfirmAllOpen(true);
+                }}
                 className="w-full sm:w-auto"
               >
                 Sign out from all sessions
               </Button>
             </div>
           )}
+
+          {rateLimitInfo.isRateLimited && rateLimitInfo.retryAfter && (
+            <div className="mt-3">
+              <RateLimitBanner
+                retryAfter={rateLimitInfo.retryAfter}
+                message="Too many attempts."
+                onExpired={clearRateLimit}
+              />
+            </div>
+          )}
         </>
       )}
 
+      {/* SCRUM-347 follow-up: revoke single session modal with password */}
       <ConfirmModal
-        open={confirmOpen}
-        onClose={() => !revokingAll && setConfirmOpen(false)}
+        open={!!revokeTarget}
+        onClose={() => !revoking && closeRevokeModal()}
+        onConfirm={handleRevokeSubmit}
+        title="Revoke session"
+        description="The selected device will be signed out immediately."
+        confirmLabel="Revoke"
+        variant="danger"
+        size="md"
+        loading={revoking === revokeTarget?.id}
+      >
+        <div className="mt-4">
+          <Input
+            label="Confirm with your password"
+            type="password"
+            name="revoke-session-password"
+            value={revokePassword}
+            onChange={(e) => {
+              setRevokePassword(e.target.value);
+              setRevokeFieldError("");
+            }}
+            placeholder="Enter your password"
+            error={revokeFieldError || undefined}
+            autoFocus
+          />
+        </div>
+      </ConfirmModal>
+
+      <ConfirmModal
+        open={confirmAllOpen}
+        onClose={() => !revokingAll && closeRevokeAllModal()}
         onConfirm={signOutAllSessions}
         title="Sign out from all sessions?"
         description="This will sign you out from this device and every other device where you are currently signed in. You will need to sign in again to continue."
         confirmLabel="Sign out everywhere"
         cancelLabel="Cancel"
         variant="danger"
+        size="md"
         loading={revokingAll}
-      />
+      >
+        <div className="mt-4">
+          <Input
+            label="Confirm with your password"
+            type="password"
+            name="revoke-all-sessions-password"
+            value={revokeAllPassword}
+            onChange={(e) => {
+              setRevokeAllPassword(e.target.value);
+              setRevokeAllFieldError("");
+            }}
+            placeholder="Enter your password"
+            error={revokeAllFieldError || undefined}
+            autoFocus
+          />
+        </div>
+      </ConfirmModal>
     </div>
   );
 }

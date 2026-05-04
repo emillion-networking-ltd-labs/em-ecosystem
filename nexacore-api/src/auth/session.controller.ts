@@ -24,6 +24,7 @@ import { SessionsService } from '../sessions/sessions.service';
 import { TrustedDeviceService } from './trusted-device.service';
 import { TrustDeviceDto } from './dto/trust-device.dto';
 import { TrustedDeviceRevokeDto } from './dto/trusted-device-revoke.dto';
+import { RevokeSessionDto } from './dto/revoke-session.dto';
 import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interface';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
@@ -74,14 +75,27 @@ export class SessionController {
   @Delete('sessions/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.trust_device.ttl,
+      limit: AUTH_RATE_LIMITS.trust_device.limit,
+    },
+  })
   @ApiOperation({ summary: 'Revoke a specific session' })
   @ApiResponse({ status: 200, description: 'Session revoked' })
-  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 400, description: 'Password required' })
+  @ApiResponse({ status: 401, description: 'Invalid password' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   async revokeSession(
     @Param('id', ParseUUIDPipe) sessionId: string,
+    @Body() dto: RevokeSessionDto,
     @Request() req: AuthenticatedRequest,
   ) {
-    await this.sessionsService.revokeSession(sessionId, req.user.id);
+    await this.sessionsService.revokeSessionWithReauth(
+      sessionId,
+      req.user.id,
+      dto.password,
+    );
     return { message: 'Session revoked' };
   }
 

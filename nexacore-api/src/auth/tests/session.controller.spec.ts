@@ -31,6 +31,7 @@ describe('SessionController', () => {
           useValue: {
             getActiveSessions: jest.fn(),
             revokeSession: jest.fn(),
+            revokeSessionWithReauth: jest.fn(),
           },
         },
         {
@@ -143,15 +144,20 @@ describe('SessionController', () => {
   });
 
   describe('revokeSession', () => {
-    it('should revoke the specified session', async () => {
+    it('should revoke the specified session with re-auth (SCRUM-347)', async () => {
       const reqWithUser = { ...mockReq, user: { id: 'uuid-123' } };
-      sessionsService.revokeSession.mockResolvedValue(undefined);
+      sessionsService.revokeSessionWithReauth.mockResolvedValue(undefined);
 
-      const result = await controller.revokeSession('session-id', reqWithUser);
+      const result = await controller.revokeSession(
+        'session-id',
+        { password: 'SecureP@ss1' },
+        reqWithUser,
+      );
 
-      expect(sessionsService.revokeSession).toHaveBeenCalledWith(
+      expect(sessionsService.revokeSessionWithReauth).toHaveBeenCalledWith(
         'session-id',
         'uuid-123',
+        'SecureP@ss1',
       );
       expect(result.message).toBe('Session revoked');
     });
