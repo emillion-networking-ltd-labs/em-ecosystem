@@ -266,16 +266,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { broadcast: broadcastAuthEvent } =
     useCrossTabAuth(handleCrossTabEvent);
 
+  // SCRUM-347: dedupe "Session expired" toasts. Two sources can fire near-
+  // simultaneously when a long-idle tab is brought back to foreground:
+  //   1) handleAuthFailure (apiClient 401 cascade from a focus-triggered
+  //      refetch hitting a backend that already lazy-revoked the session)
+  //   2) the useIdleTimeout callback (frontend setTimeout finally fires
+  //      after browser un-throttles background tabs)
+  // Either can fire first depending on timing. Without dedupe the user sees
+  // two "Session expired" toasts stacked. We use a timestamp ref so whoever
+  // wins the race shows the canonical toast; the laggard skips.
+  const lastSessionExpiredAt = useRef<number>(0);
+  const showSessionExpiredToast = useCallback(
+    (description: string) => {
+      const now = Date.now();
+      if (now - lastSessionExpiredAt.current < 3000) return;
+      lastSessionExpiredAt.current = now;
+      addToast({ variant: "warning", title: "Session expired", description });
+    },
+    [addToast],
+  );
+
   const handleAuthFailure = useCallback(() => {
-    addToast({
-      variant: "warning",
-      title: "Session expired",
-      description: "Please sign in again.",
-    });
+    showSessionExpiredToast("Please sign in again.");
     broadcastAuthEvent("LOGOUT");
     dispatch({ type: "LOGOUT" });
     router.replace("/login");
-  }, [addToast, broadcastAuthEvent, router]);
+  }, [showSessionExpiredToast, broadcastAuthEvent, router]);
 
   // Generate fingerprint then attempt silent refresh on mount (ref guard prevents StrictMode double-fire)
   // Skip refresh on /auth/callback — the OAuth exchange handler will authenticate;
@@ -743,11 +759,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const { showWarning, secondsLeft, keepAlive } = useIdleTimeout(
     28 * 60 * 1000, // 28 min — 2 min buffer before backend revokes at 30 min (OWASP ASVS V3.3.2)
     () => {
-      addToast({
-        variant: "warning",
-        title: "Session expired",
-        description: "You were signed out due to inactivity.",
-      });
+      // Toast deduped via showSessionExpiredToast — handleAuthFailure may
+      // fire near-simultaneously from a 401 cascade; whoever wins the race
+      // shows the canonical toast. See SCRUM-347 dedupe note above.
+      showSessionExpiredToast("You were signed out due to inactivity.");
       // Fire-and-forget — UI already redirects via dispatch inside logout().
       void logout();
     },
