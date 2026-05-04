@@ -147,8 +147,13 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
       addToast(PROFILE_TOAST.DEVICE_REVOKED);
       closeRevokeModal();
     } else if (result === "invalid-password") {
-      // Backend 401 → toast. Modal stays open.
+      // Backend 401 → toast. Modal stays open so the user can retry.
       addToast(PROFILE_TOAST.DEVICE_REVOKE_INVALID_PASSWORD);
+    } else if (typeof result === "object" && result.status === "rate-limited") {
+      // SCRUM-327: rate-limited → toast + banner + close modal (matches Trust).
+      addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
+      setRateLimit(result.retryAfter, "Too many attempts.", "throttle");
+      closeRevokeModal();
     } else {
       addToast(PROFILE_TOAST.DEVICE_REVOKE_FAILED);
       closeRevokeModal();
@@ -171,6 +176,11 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
     } else if (result === "invalid-password") {
       // Backend 401 → toast. Modal stays open.
       addToast(PROFILE_TOAST.DEVICE_REVOKE_INVALID_PASSWORD);
+    } else if (typeof result === "object" && result.status === "rate-limited") {
+      // SCRUM-327: rate-limited → toast + banner + close modal.
+      addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
+      setRateLimit(result.retryAfter, "Too many attempts.", "throttle");
+      closeRevokeAllModal();
     } else {
       addToast(PROFILE_TOAST.DEVICE_REVOKE_FAILED);
       closeRevokeAllModal();
@@ -258,6 +268,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
                   variant="danger"
                   size="sm"
                   tooltip
+                  disabled={rateLimitInfo.isRateLimited}
                   onClick={() => {
                     setRevokePassword("");
                     setRevokeFieldError("");
@@ -294,6 +305,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
             variant="danger"
             size="md"
             className="sm:w-auto"
+            disabled={rateLimitInfo.isRateLimited}
             onClick={() => {
               setRevokeAllPassword("");
               setRevokeAllFieldError("");

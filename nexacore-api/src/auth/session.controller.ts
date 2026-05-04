@@ -138,10 +138,17 @@ export class SessionController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.trust_device.ttl,
+      limit: AUTH_RATE_LIMITS.trust_device.limit,
+    },
+  })
   @ApiOperation({ summary: 'Revoke all trusted devices' })
   @ApiResponse({ status: 200, description: 'All trusted devices revoked' })
   @ApiResponse({ status: 400, description: 'Password required' })
   @ApiResponse({ status: 401, description: 'Invalid password' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   async revokeAllTrustedDevices(
     @Body() dto: TrustedDeviceRevokeDto,
     @Request() req: AuthenticatedRequest,
@@ -156,11 +163,18 @@ export class SessionController {
   @Delete('trusted-devices/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
+  @Throttle({
+    global: {
+      ttl: AUTH_RATE_LIMITS.trust_device.ttl,
+      limit: AUTH_RATE_LIMITS.trust_device.limit,
+    },
+  })
   @ApiOperation({ summary: 'Revoke trust for a specific device' })
   @ApiResponse({ status: 200, description: 'Device trust revoked' })
   @ApiResponse({ status: 400, description: 'Password required' })
   @ApiResponse({ status: 401, description: 'Invalid password' })
   @ApiResponse({ status: 404, description: 'Device not found' })
+  @ApiResponse({ status: 429, description: 'Too many requests' })
   async revokeTrustedDevice(
     @Param('id', ParseUUIDPipe) deviceId: string,
     @Body() dto: TrustedDeviceRevokeDto,

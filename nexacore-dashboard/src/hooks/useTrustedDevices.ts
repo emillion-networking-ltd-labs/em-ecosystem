@@ -90,27 +90,33 @@ export function useTrustedDevices() {
     async (
       id: string,
       password: string,
-    ): Promise<boolean | "invalid-password"> => {
+    ): Promise<
+      | true
+      | "invalid-password"
+      | { status: "rate-limited"; retryAfter: number }
+      | false
+    > => {
       setError(null);
       try {
         await revokeDeviceApi(id, password);
         await fetchDevices();
         return true;
       } catch (err) {
-        const apiErr = err as { error?: { statusCode?: number } };
-        if (apiErr?.error?.statusCode === HTTP_STATUS.UNAUTHORIZED) {
+        const apiErr = err as {
+          error?: { statusCode?: number; retryAfter?: number };
+        };
+        const status = apiErr?.error?.statusCode;
+        if (status === HTTP_STATUS.UNAUTHORIZED) {
           return "invalid-password";
         }
-        setError(
-          extractMessageByStatus(
-            err,
-            {
-              [HTTP_STATUS.TOO_MANY_REQUESTS]:
-                "Too many requests. Try again later.",
-            },
-            "Failed to revoke device.",
-          ),
-        );
+        if (status === HTTP_STATUS.TOO_MANY_REQUESTS) {
+          // SCRUM-327: caller decides UI (toast + banner + close).
+          return {
+            status: "rate-limited" as const,
+            retryAfter: apiErr.error?.retryAfter ?? 60,
+          };
+        }
+        setError(extractMessageByStatus(err, {}, "Failed to revoke device."));
         return false;
       }
     },
@@ -118,26 +124,35 @@ export function useTrustedDevices() {
   );
 
   const revokeAllDevicesAction = useCallback(
-    async (password: string): Promise<boolean | "invalid-password"> => {
+    async (
+      password: string,
+    ): Promise<
+      | true
+      | "invalid-password"
+      | { status: "rate-limited"; retryAfter: number }
+      | false
+    > => {
       setError(null);
       try {
         await revokeAllDevicesApi(password);
         await fetchDevices();
         return true;
       } catch (err) {
-        const apiErr = err as { error?: { statusCode?: number } };
-        if (apiErr?.error?.statusCode === HTTP_STATUS.UNAUTHORIZED) {
+        const apiErr = err as {
+          error?: { statusCode?: number; retryAfter?: number };
+        };
+        const status = apiErr?.error?.statusCode;
+        if (status === HTTP_STATUS.UNAUTHORIZED) {
           return "invalid-password";
         }
+        if (status === HTTP_STATUS.TOO_MANY_REQUESTS) {
+          return {
+            status: "rate-limited" as const,
+            retryAfter: apiErr.error?.retryAfter ?? 60,
+          };
+        }
         setError(
-          extractMessageByStatus(
-            err,
-            {
-              [HTTP_STATUS.TOO_MANY_REQUESTS]:
-                "Too many requests. Try again later.",
-            },
-            "Failed to revoke all devices.",
-          ),
+          extractMessageByStatus(err, {}, "Failed to revoke all devices."),
         );
         return false;
       }

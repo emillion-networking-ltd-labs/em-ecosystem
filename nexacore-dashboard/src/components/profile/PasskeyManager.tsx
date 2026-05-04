@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import AlertBox from "@/components/ui/AlertBox";
 import { usePasskey } from "@/hooks/usePasskey";
+import { useRateLimit } from "@/hooks/useRateLimit";
 import { useToast } from "@/context/ToastContext";
 import { PROFILE_TOAST, AUTH_TOAST } from "@/lib/toast-messages";
 import Badge from "@/components/ui/Badge";
@@ -55,11 +56,13 @@ function PasskeyItem({
   onRename,
   onDelete,
   isNew,
+  isRateLimited,
 }: {
   passkey: PasskeyResponse;
   onRename: (pk: PasskeyResponse) => void;
   onDelete: (pk: PasskeyResponse) => void;
   isNew: boolean;
+  isRateLimited: boolean;
 }) {
   return (
     <motion.div
@@ -103,6 +106,7 @@ function PasskeyItem({
           variant="danger"
           size="sm"
           tooltip
+          disabled={isRateLimited}
           onClick={() => onDelete(passkey)}
           aria-label={`Delete ${passkey.name || "passkey"}`}
         >
@@ -124,11 +128,13 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
     renamePasskey,
     deletePasskey,
     clearError,
-    rateLimitInfo,
-    clearRateLimit,
   } = usePasskey();
 
   const { addToast } = useToast();
+  // SCRUM-327: rate-limit state owned by the component (matches the
+  // TrustedDevices pattern). Hooks return discriminator on 429; component
+  // dispatches toast + setRateLimit + closeModal.
+  const { rateLimitInfo, setRateLimit, clearRateLimit } = useRateLimit();
 
   const [registerOpen, setRegisterOpen] = useState(false);
   const [regName, setRegName] = useState("");
@@ -158,17 +164,6 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
     });
   }, [fetchPasskeys]);
 
-  // SCRUM-349 sub-task 1: toast on rate-limit transitions (null -> set).
-  // The rate-limit lives inside usePasskey (not surfaced via callback return),
-  // so observe via effect.
-  const previousRateLimitRef = useRef<typeof rateLimitInfo>(null);
-  useEffect(() => {
-    if (rateLimitInfo && !previousRateLimitRef.current) {
-      addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
-    }
-    previousRateLimitRef.current = rateLimitInfo;
-  }, [rateLimitInfo, addToast]);
-
   const handleRegister = async () => {
     clearError();
     if (!regPassword) {
@@ -181,9 +176,24 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
       regName.trim() || undefined,
     );
     if (result === "invalid-password") {
-      // Backend 401 → toast (per feedback_toast_only_for_backend_errors.md).
-      // Action-specific title matches SCRUM-342 login pattern.
+      // Backend 401 → action-specific toast. Modal stays open.
       addToast(PROFILE_TOAST.PASSKEY_REGISTER_INVALID_PASSWORD);
+      return;
+    }
+    if (
+      result &&
+      typeof result === "object" &&
+      "status" in result &&
+      result.status === "rate-limited"
+    ) {
+      // SCRUM-327: rate-limited → toast + banner + close modal. Single source
+      // of truth via useRateLimit.
+      addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
+      setRateLimit(result.retryAfter, "Too many attempts.", "throttle");
+      setRegisterOpen(false);
+      setRegName("");
+      setRegPassword("");
+      setRegFieldError("");
       return;
     }
     if (result) {
@@ -226,18 +236,28 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
     }
     setDeleteFieldError("");
     setIsDeleting(true);
-    const errMsg = await deletePasskey(deletingPasskey.id, deletePassword);
+    const result = await deletePasskey(deletingPasskey.id, deletePassword);
     setIsDeleting(false);
-    if (!errMsg) {
+    if (!result) {
       addToast(PROFILE_TOAST.PASSKEY_DELETED);
       setDeletingPasskey(null);
       setDeletePassword("");
-    } else if (errMsg === "invalid-password") {
-      // SCRUM-327: action-specific toast title for invalid password
-      // (matches SCRUM-342 login pattern). Modal stays open.
+    } else if (result === "invalid-password") {
+      // Backend 401 → action-specific toast. Modal stays open.
       addToast(PROFILE_TOAST.PASSKEY_DELETE_INVALID_PASSWORD);
-    } else {
-      addToast(PROFILE_TOAST.PASSKEY_FAILED(errMsg));
+    } else if (
+      typeof result === "object" &&
+      "status" in result &&
+      result.status === "rate-limited"
+    ) {
+      // SCRUM-327: rate-limited → toast + banner + close modal.
+      addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
+      setRateLimit(result.retryAfter, "Too many attempts.", "throttle");
+      setDeletingPasskey(null);
+      setDeletePassword("");
+    } else if (typeof result === "string") {
+      // Generic error message from server.
+      addToast(PROFILE_TOAST.PASSKEY_FAILED(result));
     }
   };
 
@@ -303,6 +323,7 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
                   key={pk.id}
                   passkey={pk}
                   isNew={allowAnimations.current}
+                  isRateLimited={rateLimitInfo.isRateLimited}
                   onRename={(p) => {
                     clearError();
                     setRenameValue(p.name || "");
@@ -328,7 +349,7 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
               setRegFieldError("");
               setRegisterOpen(true);
             }}
-            disabled={passkeys.length >= 10 || !!rateLimitInfo}
+            disabled={passkeys.length >= 10 || rateLimitInfo.isRateLimited}
             className="sm:w-auto"
           >
             <Plus size={16} />
@@ -341,7 +362,7 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
             </p>
           )}
 
-          {rateLimitInfo && (
+          {rateLimitInfo.isRateLimited && rateLimitInfo.retryAfter && (
             <div className="mt-3">
               <RateLimitBanner
                 retryAfter={rateLimitInfo.retryAfter}

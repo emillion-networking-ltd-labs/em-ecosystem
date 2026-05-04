@@ -32,10 +32,9 @@ export function usePasskey() {
   const [isRegistering, setIsRegistering] = useState(false);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [rateLimitInfo, setRateLimitInfo] = useState<{
-    retryAfter: number;
-  } | null>(null);
-  const clearRateLimit = useCallback(() => setRateLimitInfo(null), []);
+  // SCRUM-327: rate-limit state is owned by the COMPONENT (via useRateLimit
+  // hook), not by this hook. Hook returns a discriminator on 429 — caller
+  // decides UI strategy (toast, banner, button-disable, modal-close).
   const abortRef = useRef(false);
   const [isConditionalAvailable, setIsConditionalAvailable] = useState(false);
   const conditionalAbortRef = useRef<AbortController | null>(null);
@@ -61,7 +60,12 @@ export function usePasskey() {
     async (
       password: string,
       name?: string,
-    ): Promise<PasskeyRegisterResult | "invalid-password" | null> => {
+    ): Promise<
+      | PasskeyRegisterResult
+      | "invalid-password"
+      | { status: "rate-limited"; retryAfter: number }
+      | null
+    > => {
       setIsRegistering(true);
       setError(null);
       try {
@@ -79,12 +83,15 @@ export function usePasskey() {
         if ((err as Error)?.name === "NotAllowedError") return null;
         const apiErr = err as ApiError;
         if (apiErr?.error?.statusCode === 401) {
-          // SCRUM-327: invalid password — surface to caller for inline field error
+          // SCRUM-327: invalid password — surface to caller for action toast.
           return "invalid-password";
         }
         if (apiErr?.error?.statusCode === 429) {
-          setRateLimitInfo({ retryAfter: apiErr.error.retryAfter ?? 60 });
-          return null;
+          // SCRUM-327: rate-limited — caller decides UI (toast + banner + close).
+          return {
+            status: "rate-limited" as const,
+            retryAfter: apiErr.error.retryAfter ?? 60,
+          };
         }
         setError(extractMessage(err, "Passkey registration failed."));
         return null;
@@ -137,27 +144,33 @@ export function usePasskey() {
   );
 
   const handleDelete = useCallback(
-    async (id: string, password: string): Promise<string | null> => {
+    async (
+      id: string,
+      password: string,
+    ): Promise<
+      | null
+      | "invalid-password"
+      | { status: "rate-limited"; retryAfter: number }
+      | string
+    > => {
       setError(null);
       // SCRUM-327: NO optimistic removal. The action is gated by re-auth, so
       // a server-side rejection (401 invalid password) is a real possibility.
-      // Optimistic removal + rollback caused a flicker (item disappears, then
-      // reappears) — bad UX for destructive actions. Wait for server confirm.
-      // (Same decision as useTrustedDevices.revokeDevice — see SCRUM-327 verify.)
+      // Wait for server confirm; AnimatePresence animates exit on success.
       try {
         await apiDeletePasskey(id, password);
-        // Refetch on success — AnimatePresence will animate the exit.
         await fetchPasskeys();
         return null;
       } catch (err) {
         const apiErr = err as ApiError;
         if (apiErr?.error?.statusCode === 401) {
-          // Invalid password — surface to caller for action-specific toast.
           return "invalid-password";
         }
         if (apiErr?.error?.statusCode === 429) {
-          setRateLimitInfo({ retryAfter: apiErr.error.retryAfter ?? 60 });
-          return "rate-limited";
+          return {
+            status: "rate-limited" as const,
+            retryAfter: apiErr.error.retryAfter ?? 60,
+          };
         }
         const msg = extractMessage(err, "Failed to delete passkey.");
         setError(msg);
@@ -230,8 +243,6 @@ export function usePasskey() {
     deletePasskey: handleDelete,
     error,
     clearError,
-    rateLimitInfo,
-    clearRateLimit,
     isConditionalAvailable,
     startConditionalUI,
     abortConditionalUI,
