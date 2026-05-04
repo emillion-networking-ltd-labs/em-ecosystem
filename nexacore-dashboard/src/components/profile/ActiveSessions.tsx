@@ -56,6 +56,27 @@ function formatRelativeTime(dateStr: string): string {
   });
 }
 
+/**
+ * SCRUM-347 — staleness color cue. Backend filters sessions with
+ * `lastUsedAt < now - 30 min` from the active list, so anything we render
+ * is by definition < 30 min old. The visual gradient warns the user that a
+ * row may be a force-closed "ghost" session before it disappears:
+ *
+ *   < 5 min   → tertiary (default, no concern)
+ *   5–14 min  → warning (amber: stale, may be ghost)
+ *   ≥ 15 min  → error (red: about to disappear)
+ *
+ * Returns the Tailwind class for the timestamp text only.
+ */
+function stalenessClass(dateStr: string): string {
+  const minutes = Math.floor(
+    (Date.now() - new Date(dateStr).getTime()) / 60000,
+  );
+  if (minutes < 5) return "text-content-tertiary";
+  if (minutes < 15) return "text-warning";
+  return "text-error";
+}
+
 export default function ActiveSessions({ bare }: { bare?: boolean }) {
   const { addToast } = useToast();
   const { logout } = useAuth();
@@ -216,7 +237,15 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
                     <p className="mt-0.5 text-caption text-content-tertiary">
                       {session.ipAddress}
                       <span className="text-content-disabled"> · </span>
-                      Last active {formatRelativeTime(session.lastUsedAt)}
+                      <span
+                        className={
+                          session.isCurrent
+                            ? "text-content-tertiary"
+                            : stalenessClass(session.lastUsedAt)
+                        }
+                      >
+                        Last active {formatRelativeTime(session.lastUsedAt)}
+                      </span>
                     </p>
                   </div>
 
