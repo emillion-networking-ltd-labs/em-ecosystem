@@ -139,19 +139,20 @@ export function usePasskey() {
   const handleDelete = useCallback(
     async (id: string, password: string): Promise<string | null> => {
       setError(null);
-      // Optimistic: remove from local state so AnimatePresence can animate exit
-      setPasskeys((prev) => prev.filter((pk) => pk.id !== id));
+      // SCRUM-327: NO optimistic removal. The action is gated by re-auth, so
+      // a server-side rejection (401 invalid password) is a real possibility.
+      // Optimistic removal + rollback caused a flicker (item disappears, then
+      // reappears) — bad UX for destructive actions. Wait for server confirm.
+      // (Same decision as useTrustedDevices.revokeDevice — see SCRUM-327 verify.)
       try {
         await apiDeletePasskey(id, password);
+        // Refetch on success — AnimatePresence will animate the exit.
+        await fetchPasskeys();
         return null;
       } catch (err) {
-        // Rollback on failure
-        await fetchPasskeys();
         const apiErr = err as ApiError;
         if (apiErr?.error?.statusCode === 401) {
-          // SCRUM-327: invalid password — surface to caller for a specific toast
-          // ("Delete passkey failed" / "Invalid password.") rather than the
-          // generic PASSKEY_FAILED fallback.
+          // Invalid password — surface to caller for action-specific toast.
           return "invalid-password";
         }
         if (apiErr?.error?.statusCode === 429) {
