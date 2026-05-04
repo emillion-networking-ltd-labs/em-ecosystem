@@ -182,8 +182,11 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
     );
     if (result === "invalid-password") {
       // Backend 401 → toast (per feedback_toast_only_for_backend_errors.md).
+      // Reuse the existing PASSKEY_FAILED factory: title "Passkey error",
+      // description "Invalid password." Matches the SCRUM-342 login pattern
+      // (title = action that failed, description = standard error reason).
       // Modal stays open; field keeps its value so the user can edit.
-      addToast(PROFILE_TOAST.INVALID_PASSWORD);
+      addToast(PROFILE_TOAST.PASSKEY_FAILED("Invalid password."));
       return;
     }
     if (result) {

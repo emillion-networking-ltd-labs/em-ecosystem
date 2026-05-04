@@ -156,10 +156,12 @@ describe("TrustedDevices", () => {
     await user.click(screen.getByRole("button", { name: /trust device/i }));
 
     // Backend errors → toast (per feedback_toast_only_for_backend_errors.md).
+    // Pattern matches SCRUM-342 login: title = action, description = reason.
     expect(mockAddToast).toHaveBeenCalledWith(
       expect.objectContaining({
         variant: "error",
-        title: "Invalid password",
+        title: "Trust failed",
+        description: "Invalid password.",
       }),
     );
     // Modal stays open so the user can retry.

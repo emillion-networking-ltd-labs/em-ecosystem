@@ -120,7 +120,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
     } else if (result === "invalid-password") {
       // Backend 401 → toast (per feedback_toast_only_for_backend_errors.md).
       // Modal stays open; field retains the wrong value so the user can edit.
-      addToast(PROFILE_TOAST.INVALID_PASSWORD);
+      addToast(PROFILE_TOAST.DEVICE_TRUST_INVALID_PASSWORD);
     } else if (typeof result === "object" && result.status === "rate-limited") {
       // SCRUM-349 sub-task 1: toast alongside the existing inline banner.
       addToast(AUTH_TOAST.TOO_MANY_ATTEMPTS_GENERIC());
@@ -148,7 +148,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
       closeRevokeModal();
     } else if (result === "invalid-password") {
       // Backend 401 → toast. Modal stays open.
-      addToast(PROFILE_TOAST.INVALID_PASSWORD);
+      addToast(PROFILE_TOAST.DEVICE_REVOKE_INVALID_PASSWORD);
     } else {
       addToast(PROFILE_TOAST.DEVICE_REVOKE_FAILED);
       closeRevokeModal();
@@ -170,7 +170,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
       closeRevokeAllModal();
     } else if (result === "invalid-password") {
       // Backend 401 → toast. Modal stays open.
-      addToast(PROFILE_TOAST.INVALID_PASSWORD);
+      addToast(PROFILE_TOAST.DEVICE_REVOKE_INVALID_PASSWORD);
     } else {
       addToast(PROFILE_TOAST.DEVICE_REVOKE_FAILED);
       closeRevokeAllModal();

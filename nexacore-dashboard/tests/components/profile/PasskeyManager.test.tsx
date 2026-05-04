@@ -148,11 +148,13 @@ describe("PasskeyManager", () => {
     await user.click(screen.getByRole("button", { name: "Register Passkey" }));
 
     // Backend errors → toast (per feedback_toast_only_for_backend_errors.md).
+    // Reuses PASSKEY_FAILED factory: title "Passkey error", description = reason.
     await waitFor(() => {
       expect(mockAddToast).toHaveBeenCalledWith(
         expect.objectContaining({
           variant: "error",
-          title: "Invalid password",
+          title: "Passkey error",
+          description: "Invalid password.",
         }),
       );
     });
