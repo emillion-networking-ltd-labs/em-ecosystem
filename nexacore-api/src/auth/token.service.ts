@@ -80,6 +80,12 @@ export class TokenService {
     const tokenFamily = crypto.randomUUID();
     const expiresAt = new Date(Date.now() + this.refreshMaxAgeMs);
 
+    // SCRUM-347 / Issue 2 fix: clean up idle sessions left behind by an
+    // unclean exit (browser crash, abrupt close before idle handler fired).
+    // Defense-in-depth — frontend idle now also calls /auth/logout, but that
+    // only covers the live-tab case. This eager cleanup covers the rest.
+    await this.sessionsService.cleanupIdleSessionsForUser(user.id);
+
     // Enforce concurrent session limit — evict oldest if over limit
     await this.sessionsService.enforceSessionLimit(user.id, {
       ipAddress: requestMeta.ipAddress,

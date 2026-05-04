@@ -119,6 +119,7 @@ export async function createAuthTestModule(): Promise<AuthTestContext> {
           isSessionIdle: jest.fn().mockReturnValue(false),
           getActiveNonIdleSessions: jest.fn().mockResolvedValue([]),
           enforceSessionLimit: jest.fn().mockResolvedValue(undefined),
+          cleanupIdleSessionsForUser: jest.fn().mockResolvedValue(0),
           revokeSessionDirect: jest.fn().mockResolvedValue(undefined),
           findPreviousActiveSessions: jest.fn().mockResolvedValue([]),
         },

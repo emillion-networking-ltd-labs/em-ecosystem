@@ -301,6 +301,37 @@ export class SessionsService {
     });
   }
 
+  /**
+   * SCRUM-347 / Issue 2 fix (ghost sessions): mark as revoked any non-revoked
+   * sessions of the user that are already past the idle threshold. Lazy
+   * cleanup that backstops the frontend idle handler — covers cases where the
+   * user's browser crashed or was closed without dispatching the idle logout
+   * (no /auth/logout call ever reached the backend, so sessions sit in DB
+   * with `isRevoked: false` until a refresh attempt eventually fails).
+   *
+   * Called on login (`tokenService.generateTokens`). Idempotent: zero-cost
+   * when no idle sessions exist. Bounded: at most MAX_CONCURRENT_SESSIONS
+   * per user.
+   *
+   * Returns the number of sessions revoked (for audit/logging).
+   */
+  async cleanupIdleSessionsForUser(userId: string): Promise<number> {
+    const idleThreshold = new Date(
+      Date.now() - hoursToMs(SESSION_IDLE_TIMEOUT_HOURS),
+    );
+
+    const result = await this.prisma.session.updateMany({
+      where: {
+        userId,
+        isRevoked: false,
+        lastUsedAt: { lt: idleThreshold },
+      },
+      data: { isRevoked: true },
+    });
+
+    return result.count;
+  }
+
   async findPreviousActiveSessions(
     userId: string,
     excludeSessionId: string,

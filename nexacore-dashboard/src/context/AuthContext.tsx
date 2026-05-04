@@ -725,7 +725,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   // Idle timeout: logout after 30 min of user inactivity (OWASP ASVS V3.3.2)
-  // Warning modal appears 2 min before logout
+  // Warning modal appears 2 min before logout.
+  //
+  // SCRUM-347 fix: on idle fire we MUST call the full `logout()` flow — not
+  // just `dispatch({ type: "LOGOUT" })`. The full flow:
+  //   1. POST /auth/logout — backend marks the session as revoked + denyList
+  //      (otherwise it sits in DB with isRevoked=false; on a re-login within
+  //      30 min the stale session still passes the lastUsedAt filter and
+  //      shows up as a "ghost" entry alongside the new one in the active
+  //      sessions list).
+  //   2. Broadcast LOGOUT cross-tab (SCRUM-349).
+  //   3. Local LOGOUT dispatch.
+  // OWASP Session Management Cheat Sheet §5.3: "Sessions should be
+  // invalidated on the server side as soon as they are no longer needed,
+  // regardless of how the user ends them."
   const isAuthenticated = !!state.user && !!state.accessToken;
   const { showWarning, secondsLeft, keepAlive } = useIdleTimeout(
     28 * 60 * 1000, // 28 min — 2 min buffer before backend revokes at 30 min (OWASP ASVS V3.3.2)
@@ -735,7 +748,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         title: "Session expired",
         description: "You were signed out due to inactivity.",
       });
-      dispatch({ type: "LOGOUT" });
+      // Fire-and-forget — UI already redirects via dispatch inside logout().
+      void logout();
     },
     isAuthenticated,
     2 * 60 * 1000, // 2 min warning before logout
