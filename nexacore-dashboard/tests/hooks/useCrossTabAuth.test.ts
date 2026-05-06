@@ -124,7 +124,7 @@ describe("useCrossTabAuth", () => {
     expect(onEventA).not.toHaveBeenCalled();
   });
 
-  it("falls back to no-op when BroadcastChannel is unavailable", () => {
+  it("does not throw and writes to localStorage when BroadcastChannel is unavailable", () => {
     const original = (global as unknown as { BroadcastChannel: unknown })
       .BroadcastChannel;
     delete (global as unknown as { BroadcastChannel?: unknown })
@@ -134,12 +134,104 @@ describe("useCrossTabAuth", () => {
     const { result } = renderHook(() => useCrossTabAuth(onEvent));
 
     act(() => {
-      // Should not throw.
       result.current.broadcast("LOGOUT");
     });
+    // Same-window: storage event does not synthesize a self-event in jsdom,
+    // mirroring real browser behavior. Other tabs would receive via storage.
     expect(onEvent).not.toHaveBeenCalled();
 
     (global as unknown as { BroadcastChannel: unknown }).BroadcastChannel =
       original;
+  });
+
+  it("delivers LOGOUT via storage event fallback", () => {
+    const onEvent = jest.fn();
+    renderHook(() => useCrossTabAuth(onEvent));
+
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "em-auth-event",
+          newValue: JSON.stringify({ type: "LOGOUT", id: "test-id-1" }),
+        }),
+      );
+    });
+
+    expect(onEvent).toHaveBeenCalledTimes(1);
+    expect(onEvent).toHaveBeenCalledWith("LOGOUT");
+  });
+
+  it("ignores storage events for unrelated keys", () => {
+    const onEvent = jest.fn();
+    renderHook(() => useCrossTabAuth(onEvent));
+
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "some-other-key",
+          newValue: JSON.stringify({ type: "LOGOUT", id: "x" }),
+        }),
+      );
+    });
+
+    expect(onEvent).not.toHaveBeenCalled();
+  });
+
+  it("ignores storage events with null newValue (removeItem firing)", () => {
+    const onEvent = jest.fn();
+    renderHook(() => useCrossTabAuth(onEvent));
+
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "em-auth-event",
+          newValue: null,
+        }),
+      );
+    });
+
+    expect(onEvent).not.toHaveBeenCalled();
+  });
+
+  it("dedupes same id arriving via both BroadcastChannel and storage event", () => {
+    const onEvent = jest.fn();
+    renderHook(() => useCrossTabAuth(onEvent));
+
+    const id = "dup-id-42";
+    const peer = new MockBroadcastChannel("em-auth");
+
+    act(() => {
+      peer.postMessage({ type: "LOGOUT", id });
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "em-auth-event",
+          newValue: JSON.stringify({ type: "LOGOUT", id }),
+        }),
+      );
+    });
+
+    expect(onEvent).toHaveBeenCalledTimes(1);
+  });
+
+  it("delivers two distinct events with different ids back-to-back", () => {
+    const onEvent = jest.fn();
+    renderHook(() => useCrossTabAuth(onEvent));
+
+    act(() => {
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "em-auth-event",
+          newValue: JSON.stringify({ type: "LOGOUT", id: "id-1" }),
+        }),
+      );
+      window.dispatchEvent(
+        new StorageEvent("storage", {
+          key: "em-auth-event",
+          newValue: JSON.stringify({ type: "LOGOUT", id: "id-2" }),
+        }),
+      );
+    });
+
+    expect(onEvent).toHaveBeenCalledTimes(2);
   });
 });
