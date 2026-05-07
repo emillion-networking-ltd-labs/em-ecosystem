@@ -23,6 +23,13 @@ jest.mock('@/hooks/useRateLimit', () => ({
   }),
 }));
 
+jest.mock('@/hooks/useToast', () => ({
+  useToast: () => ({
+    addToast: jest.fn(),
+    removeToast: jest.fn(),
+  }),
+}));
+
 describe('MfaTotpStep', () => {
   beforeEach(() => {
     jest.clearAllMocks();

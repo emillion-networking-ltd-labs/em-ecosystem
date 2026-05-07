@@ -38,10 +38,13 @@ describe('SecurityActivity', () => {
     jest.clearAllMocks();
   });
 
-  it('shows loading text during fetch', () => {
+  it('shows loading indicator during fetch', () => {
     mockGetSecurityActivity.mockReturnValue(new Promise(() => {})); // never resolves
     render(<SecurityActivity />);
-    expect(screen.getByText('Loading events...')).toBeInTheDocument();
+    // Component uses an icon-only spinner with role=status + aria-label
+    expect(
+      screen.getByRole('status', { name: /loading events/i }),
+    ).toBeInTheDocument();
   });
 
   it('renders events list with data', async () => {
@@ -132,13 +135,17 @@ describe('SecurityActivity', () => {
     });
   });
 
-  it('shows empty state on API error', async () => {
+  it('shows error state on API error', async () => {
     mockGetSecurityActivity.mockRejectedValue(new Error('Network error'));
 
     render(<SecurityActivity />);
 
+    // Component distinguishes error from empty: error shows
+    // "Failed to load security events.", empty shows "No security events."
     await waitFor(() => {
-      expect(screen.getByText('No security events.')).toBeInTheDocument();
+      expect(
+        screen.getByText('Failed to load security events.'),
+      ).toBeInTheDocument();
     });
   });
 });

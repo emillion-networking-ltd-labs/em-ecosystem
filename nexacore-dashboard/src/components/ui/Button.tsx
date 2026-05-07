@@ -84,6 +84,8 @@ export default function Button({
     loading && (
       <span
         key="spinner"
+        role="status"
+        aria-label="Loading"
         className="absolute inset-0 flex items-center justify-center"
       >
         <InfinitySpinner size={size === "sm" ? "sm" : "md"} />

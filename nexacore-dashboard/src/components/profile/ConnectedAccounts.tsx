@@ -145,6 +145,14 @@ export default function ConnectedAccounts() {
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           {providers.map((provider) => {
             const isLinked = user.oauthProviders?.includes(provider.id);
+            // Lockout guard: a user with no password and only this OAuth
+            // provider linked cannot disconnect — doing so would leave them
+            // with zero auth methods. Backend enforces this too; UI surfaces
+            // the constraint upfront so the user sets a password first.
+            const isLastAuthMethod =
+              isLinked &&
+              !user.hasPassword &&
+              (user.oauthProviders?.length ?? 0) <= 1;
             return (
               <div
                 key={provider.id}
@@ -161,7 +169,11 @@ export default function ConnectedAccounts() {
                     </p>
                   </div>
                 </div>
-                {isLinked ? (
+                {isLastAuthMethod ? (
+                  <p className="text-caption text-content-tertiary">
+                    Set a password first
+                  </p>
+                ) : isLinked ? (
                   <Button
                     variant="outline"
                     size="md"

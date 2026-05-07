@@ -23,7 +23,8 @@ describe('Pagination', () => {
     render(
       <Pagination currentPage={1} totalPages={5} onPageChange={() => {}} />,
     );
-    const prevBtn = screen.getByText('Prev').closest('button')!;
+    // Component uses chevron icons + aria-label (no visible text)
+    const prevBtn = screen.getByRole('button', { name: /previous page/i });
     expect(prevBtn).toBeDisabled();
   });
 
@@ -31,7 +32,7 @@ describe('Pagination', () => {
     render(
       <Pagination currentPage={5} totalPages={5} onPageChange={() => {}} />,
     );
-    const nextBtn = screen.getByText('Next').closest('button')!;
+    const nextBtn = screen.getByRole('button', { name: /next page/i });
     expect(nextBtn).toBeDisabled();
   });
 
