@@ -373,7 +373,7 @@ export class PasskeyService {
       throw new BadRequestException(ErrorMessages.passkey.CHALLENGE_EXPIRED);
     }
     await this.redis.del(regKey);
-    return JSON.parse(stored);
+    return JSON.parse(stored) as Record<string, unknown>;
   }
 
   private async performRegistrationVerification(

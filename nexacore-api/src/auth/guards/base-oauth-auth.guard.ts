@@ -1,5 +1,6 @@
 import { ExecutionContext, Injectable, Type } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import type { Request } from 'express';
 import { OAuthStateStore, OAuthAction } from '../stores/oauth-state.store';
 
 export function createOAuthAuthGuard(strategyName: string): Type<any> {
@@ -10,7 +11,7 @@ export function createOAuthAuthGuard(strategyName: string): Type<any> {
     }
 
     async getAuthenticateOptions(context: ExecutionContext) {
-      const request = context.switchToHttp().getRequest();
+      const request = context.switchToHttp().getRequest<Request>();
       if (!request.query?.code) {
         const action: OAuthAction = request.oauthAction || 'login';
         const userId: string | undefined = request.user?.id;

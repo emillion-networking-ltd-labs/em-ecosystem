@@ -35,7 +35,7 @@ export class CsrfGuard implements CanActivate {
     const cookieName = SecurityConfig.csrf.cookieName;
     const headerName = SecurityConfig.csrf.headerName;
 
-    const cookieToken = request.cookies?.[cookieName];
+    const cookieToken = request.cookies?.[cookieName] as string | undefined;
     const headerToken = request.headers[headerName] as string | undefined;
 
     if (!cookieToken || !headerToken) {

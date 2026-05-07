@@ -4,6 +4,7 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { TokenService } from '../token.service';
 import { UsersService } from '../../users/users.service';
 import { toSafeUser } from '../../users/entities/user.entity';
@@ -23,7 +24,7 @@ export class MfaSetupGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
     const authHeader: string | undefined = request.headers?.authorization;
 
     if (!authHeader?.startsWith('Bearer ')) {

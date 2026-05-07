@@ -165,7 +165,9 @@ export class AuthController {
     @Request() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE_NAME];
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE_NAME] as
+      | string
+      | undefined;
     if (!refreshToken) {
       throw new UnauthorizedException(ErrorMessages.auth.INVALID_REFRESH_TOKEN);
     }
@@ -187,7 +189,9 @@ export class AuthController {
     @Request() req: AuthenticatedRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE_NAME];
+    const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE_NAME] as
+      | string
+      | undefined;
     const meta = extractRequestMeta(req);
     if (refreshToken) {
       const clearCookie = await this.authService.logout(refreshToken, meta);

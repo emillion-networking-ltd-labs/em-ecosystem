@@ -3,6 +3,7 @@ import { AuditService } from '../audit/audit.service';
 import { AuditAction } from '../audit/enums/audit-action.enum';
 import { MailService } from '../mail/mail.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { Role } from '../users/enums/role.enum';
 import {
   BRUTE_FORCE_WINDOW_MINUTES,
   BRUTE_FORCE_THRESHOLD,
@@ -172,7 +173,7 @@ export class SuspiciousLoginService {
     try {
       const recentLogins = await this.prisma.auditLog.findMany({
         where: {
-          action: AuditAction.LOGIN_SUCCESS as any,
+          action: AuditAction.LOGIN_SUCCESS,
           userId: params.userId,
         },
         orderBy: { createdAt: 'desc' },
@@ -309,7 +310,7 @@ export class SuspiciousLoginService {
   private async getAdminEmails(): Promise<string[]> {
     const admins = await this.prisma.user.findMany({
       where: {
-        role: { in: ['ADMIN', 'SUPERADMIN'] as any },
+        role: { in: [Role.ADMIN, Role.SUPERADMIN] },
         isActive: true,
       },
       select: { email: true },

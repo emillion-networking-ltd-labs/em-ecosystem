@@ -65,6 +65,9 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/require-await': 'off',
       '@typescript-eslint/no-misused-promises': 'off',
+      // Allow Jest's dynamic require() pattern for re-loading modules with
+      // mutated env or jest.isolateModules-style fresh imports.
+      '@typescript-eslint/no-require-imports': 'off',
       // Relax security rules in test files
       'security/detect-non-literal-require': 'off',
       'security/detect-non-literal-regexp': 'off',

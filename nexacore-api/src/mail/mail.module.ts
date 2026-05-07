@@ -23,6 +23,10 @@ import { MailService } from './mail.service';
       },
       template: {
         dir: join(__dirname, 'templates'),
+        // @nestjs-modules/mailer's HandlebarsAdapter has weak constructor types
+        // (TemplateAdapter resolves to `any`). The NestJS docs use exactly this
+        // construction; suppress unsafe-* at this single boundary site.
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true,

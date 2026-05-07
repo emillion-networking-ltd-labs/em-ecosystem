@@ -5,7 +5,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Injectable()
 export class CustomThrottlerGuard extends ThrottlerGuard {
@@ -22,7 +22,7 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
       generateKey,
     } = requestProps;
     const response = context.switchToHttp().getResponse<Response>();
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
 
     const tracker = await getTracker(request, context);
     const throttlerName = throttler.name || 'default';
@@ -76,8 +76,8 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
     suffix: string,
     throttlerName: string,
   ): string {
-    const request = context.switchToHttp().getRequest();
-    const ip = request.ip || request.connection?.remoteAddress || 'unknown';
+    const request = context.switchToHttp().getRequest<Request>();
+    const ip = request.ip || request.socket?.remoteAddress || 'unknown';
     const handler = context.getHandler().name;
     const classRef = context.getClass().name;
     return `${throttlerName}-${classRef}-${handler}-${ip}-${suffix}`;
