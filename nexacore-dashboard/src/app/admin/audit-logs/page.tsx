@@ -80,6 +80,9 @@ export default function AuditLogsPage() {
         }
       }
     },
+    // addToast is intentionally omitted: it's a stable reference from
+    // ToastContext that does not change across renders.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [action, userId, startDate, endDate, pageSize],
   );
 

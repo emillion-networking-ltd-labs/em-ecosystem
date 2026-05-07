@@ -149,7 +149,7 @@ export class PasskeyService {
         credentialId: regCredential.id,
         publicKey: Buffer.from(regCredential.publicKey),
         signCount: regCredential.counter,
-        transports: (regCredential.transports ?? []) as string[],
+        transports: regCredential.transports ?? [],
         backedUp: credentialBackedUp,
         deviceType: credentialDeviceType,
         name: passkeyName,
@@ -373,7 +373,7 @@ export class PasskeyService {
       throw new BadRequestException(ErrorMessages.passkey.CHALLENGE_EXPIRED);
     }
     await this.redis.del(regKey);
-    return JSON.parse(stored);
+    return JSON.parse(stored) as Record<string, unknown>;
   }
 
   private async performRegistrationVerification(

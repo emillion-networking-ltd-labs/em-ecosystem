@@ -3,8 +3,7 @@ import { INestApplication } from '@nestjs/common';
 import { SecurityConfig } from '../../security/security.config';
 
 export function registerHelmetMiddleware(app: INestApplication): void {
-  const { contentSecurityPolicy, hsts, referrerPolicy } =
-    SecurityConfig.helmet;
+  const { contentSecurityPolicy, hsts, referrerPolicy } = SecurityConfig.helmet;
 
   app.use(
     helmet({

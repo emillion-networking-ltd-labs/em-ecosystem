@@ -5,17 +5,24 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { ThrottlerGuard } from '@nestjs/throttler';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 
 @Injectable()
 export class CustomThrottlerGuard extends ThrottlerGuard {
   protected async handleRequest(
     requestProps: Parameters<ThrottlerGuard['handleRequest']>[0],
   ): Promise<boolean> {
-    const { context, limit, ttl, throttler, blockDuration, getTracker, generateKey } =
-      requestProps;
+    const {
+      context,
+      limit,
+      ttl,
+      throttler,
+      blockDuration,
+      getTracker,
+      generateKey,
+    } = requestProps;
     const response = context.switchToHttp().getResponse<Response>();
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
 
     const tracker = await getTracker(request, context);
     const throttlerName = throttler.name || 'default';
@@ -23,7 +30,13 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
     // Note: storageService.increment returns timeToExpire and timeToBlockExpire
     // already in SECONDS (via getExpirationTime which divides by 1000).
     const { totalHits, timeToExpire, isBlocked, timeToBlockExpire } =
-      await this.storageService.increment(key, ttl, limit, blockDuration, throttlerName);
+      await this.storageService.increment(
+        key,
+        ttl,
+        limit,
+        blockDuration,
+        throttlerName,
+      );
 
     const resetTime = Math.ceil(Date.now() / 1000) + timeToExpire;
 
@@ -63,8 +76,8 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
     suffix: string,
     throttlerName: string,
   ): string {
-    const request = context.switchToHttp().getRequest();
-    const ip = request.ip || request.connection?.remoteAddress || 'unknown';
+    const request = context.switchToHttp().getRequest<Request>();
+    const ip = request.ip || request.socket?.remoteAddress || 'unknown';
     const handler = context.getHandler().name;
     const classRef = context.getClass().name;
     return `${throttlerName}-${classRef}-${handler}-${ip}-${suffix}`;

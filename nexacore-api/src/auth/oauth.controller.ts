@@ -33,7 +33,6 @@ import { GitHubAuthGuard } from './guards/github-auth.guard';
 import { OAuthCallbackFilter } from './guards/oauth-callback.filter';
 import { OAuthLinkGuard } from './guards/oauth-link.guard';
 import { OAuthLinkCodeStore } from './stores/oauth-link-code.store';
-import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
 import { SafeUser } from '../users/entities/user.entity';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';

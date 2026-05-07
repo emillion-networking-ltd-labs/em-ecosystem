@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common';
 import * as maxmind from 'maxmind';
 import { GeolocationResult } from './interfaces/geolocation-result.interface';
 import {
@@ -23,7 +28,9 @@ export class GeolocationService implements OnModuleInit, OnModuleDestroy {
   async onModuleInit(): Promise<void> {
     try {
       this.reader = await maxmind.open<maxmind.CityResponse>(MAXMIND_DB_PATH);
-      this.logger.log(`MaxMind GeoLite2 database loaded from ${MAXMIND_DB_PATH}`);
+      this.logger.log(
+        `MaxMind GeoLite2 database loaded from ${MAXMIND_DB_PATH}`,
+      );
     } catch (error) {
       this.logger.warn(
         `MaxMind GeoLite2 database not available at ${MAXMIND_DB_PATH}. ` +
@@ -55,7 +62,11 @@ export class GeolocationService implements OnModuleInit, OnModuleDestroy {
 
     try {
       const response = this.reader.get(ip);
-      if (!response || !response.location?.latitude || !response.location?.longitude) {
+      if (
+        !response ||
+        !response.location?.latitude ||
+        !response.location?.longitude
+      ) {
         this.cacheSet(ip, null);
         return null;
       }

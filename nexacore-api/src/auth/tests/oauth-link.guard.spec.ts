@@ -1,7 +1,6 @@
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 import { OAuthLinkGuard } from '../guards/oauth-link.guard';
 import { OAuthLinkCodeStore } from '../stores/oauth-link-code.store';
-import { ErrorMessages } from '../../common/constants/error-messages';
 
 describe('OAuthLinkGuard', () => {
   let guard: OAuthLinkGuard;

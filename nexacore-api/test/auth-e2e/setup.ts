@@ -9,7 +9,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 // APP_GUARD is not used — we override specific guard classes instead
 import { randomUUID } from 'crypto';
-import * as crypto from 'crypto';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { GoogleStrategy } from '../../src/auth/strategies/google.strategy';
@@ -133,9 +132,17 @@ export function createMockStore(): MockStore {
   };
 }
 
-function matchesWhere(record: Record<string, any>, where: Record<string, any>): boolean {
+function matchesWhere(
+  record: Record<string, any>,
+  where: Record<string, any>,
+): boolean {
   for (const [key, val] of Object.entries(where)) {
-    if (val && typeof val === 'object' && !Array.isArray(val) && !(val instanceof Date)) {
+    if (
+      val &&
+      typeof val === 'object' &&
+      !Array.isArray(val) &&
+      !(val instanceof Date)
+    ) {
       if ('gt' in val) {
         if (!(record[key] > val.gt)) return false;
       }
@@ -185,7 +192,9 @@ export function createMockPrisma(store: MockStore) {
       }),
       create: jest.fn(({ data }: any) => {
         if (store.users.some((u) => u.email === data.email)) {
-          const err = new Error('Unique constraint') as Error & { code: string };
+          const err = new Error('Unique constraint') as Error & {
+            code: string;
+          };
           err.code = 'P2002';
           return Promise.reject(err);
         }
@@ -233,14 +242,16 @@ export function createMockPrisma(store: MockStore) {
         user.updatedAt = new Date();
         return Promise.resolve({ ...user });
       }),
-      findMany: jest.fn(({ where, orderBy, skip, take }: any = {}) => {
+      findMany: jest.fn(({ where }: any = {}) => {
         let results = [...store.users];
-        if (where) results = results.filter((u) => matchesWhere(u as any, where));
+        if (where)
+          results = results.filter((u) => matchesWhere(u as any, where));
         return Promise.resolve(results);
       }),
       count: jest.fn(({ where }: any = {}) => {
         let results = [...store.users];
-        if (where) results = results.filter((u) => matchesWhere(u as any, where));
+        if (where)
+          results = results.filter((u) => matchesWhere(u as any, where));
         return Promise.resolve(results.length);
       }),
     },
@@ -274,7 +285,8 @@ export function createMockPrisma(store: MockStore) {
       }),
       findFirst: jest.fn(({ where, orderBy }: any = {}) => {
         let results = [...store.sessions];
-        if (where) results = results.filter((s) => matchesWhere(s as any, where));
+        if (where)
+          results = results.filter((s) => matchesWhere(s as any, where));
         if (orderBy) {
           const key = Object.keys(orderBy)[0];
           const dir = orderBy[key];
@@ -290,7 +302,8 @@ export function createMockPrisma(store: MockStore) {
       }),
       findMany: jest.fn(({ where, orderBy, select }: any = {}) => {
         let results = [...store.sessions];
-        if (where) results = results.filter((s) => matchesWhere(s as any, where));
+        if (where)
+          results = results.filter((s) => matchesWhere(s as any, where));
         if (orderBy) {
           const key = Object.keys(orderBy)[0];
           const dir = orderBy[key];
@@ -359,13 +372,11 @@ export function createMockPrisma(store: MockStore) {
         return Promise.resolve(result);
       }),
       findFirst: jest.fn(({ where, orderBy }: any) => {
-        let results = store.emailVerificationTokens.filter((t) =>
+        const results = store.emailVerificationTokens.filter((t) =>
           matchesWhere(t as any, where),
         );
         if (orderBy?.createdAt === 'desc') {
-          results.sort(
-            (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
-          );
+          results.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
         }
         return Promise.resolve(results[0] ?? null);
       }),
@@ -470,30 +481,32 @@ export function createMockPrisma(store: MockStore) {
         store.auditLogs.push(log);
         return Promise.resolve({ ...log });
       }),
-      findMany: jest.fn(({ where, orderBy }: any = {}) => {
+      findMany: jest.fn(({ where }: any = {}) => {
         let results = [...store.auditLogs];
-        if (where) results = results.filter((l) => matchesWhere(l as any, where));
+        if (where)
+          results = results.filter((l) => matchesWhere(l as any, where));
         return Promise.resolve(results);
       }),
       count: jest.fn(({ where }: any = {}) => {
         let results = [...store.auditLogs];
-        if (where) results = results.filter((l) => matchesWhere(l as any, where));
+        if (where)
+          results = results.filter((l) => matchesWhere(l as any, where));
         return Promise.resolve(results.length);
       }),
     },
 
     permission: {
-      findMany: jest.fn(({ where }: any = {}) => {
+      findMany: jest.fn(() => {
         // Return empty — no seeded permissions needed for auth E2E
         return Promise.resolve([]);
       }),
-      upsert: jest.fn(({ where, update, create }: any) => {
+      upsert: jest.fn(({ create }: any) => {
         return Promise.resolve({ id: randomUUID(), ...create });
       }),
     },
 
     rolePermission: {
-      findMany: jest.fn(({ where, include }: any) => {
+      findMany: jest.fn(() => {
         return Promise.resolve([]);
       }),
       count: jest.fn(() => Promise.resolve(0)),
@@ -505,8 +518,12 @@ export function createMockPrisma(store: MockStore) {
     trustedDevice: {
       findMany: jest.fn(() => Promise.resolve([])),
       findFirst: jest.fn(() => Promise.resolve(null)),
-      create: jest.fn(({ data }: any) => Promise.resolve({ id: randomUUID(), ...data, createdAt: new Date() })),
-      update: jest.fn(({ where, data }: any) => Promise.resolve({ ...where, ...data })),
+      create: jest.fn(({ data }: any) =>
+        Promise.resolve({ id: randomUUID(), ...data, createdAt: new Date() }),
+      ),
+      update: jest.fn(({ where, data }: any) =>
+        Promise.resolve({ ...where, ...data }),
+      ),
       updateMany: jest.fn(() => Promise.resolve({ count: 0 })),
       deleteMany: jest.fn(() => Promise.resolve({ count: 0 })),
       count: jest.fn(() => Promise.resolve(0)),
@@ -515,8 +532,12 @@ export function createMockPrisma(store: MockStore) {
     passkey: {
       findMany: jest.fn(() => Promise.resolve([])),
       findFirst: jest.fn(() => Promise.resolve(null)),
-      create: jest.fn(({ data }: any) => Promise.resolve({ id: randomUUID(), ...data })),
-      update: jest.fn(({ where, data }: any) => Promise.resolve({ ...where, ...data })),
+      create: jest.fn(({ data }: any) =>
+        Promise.resolve({ id: randomUUID(), ...data }),
+      ),
+      update: jest.fn(({ where, data }: any) =>
+        Promise.resolve({ ...where, ...data }),
+      ),
       delete: jest.fn(() => Promise.resolve({})),
       count: jest.fn(() => Promise.resolve(0)),
     },
@@ -596,14 +617,26 @@ export function createMockMailService() {
 
   return {
     captured,
-    sendVerificationEmail: jest.fn((email: string, token: string, firstName?: string) => {
-      captured.push({ type: 'verification', to: email, args: [email, token, firstName] });
-      return Promise.resolve();
-    }),
-    sendPasswordResetEmail: jest.fn((email: string, token: string, firstName?: string) => {
-      captured.push({ type: 'password-reset', to: email, args: [email, token, firstName] });
-      return Promise.resolve();
-    }),
+    sendVerificationEmail: jest.fn(
+      (email: string, token: string, firstName?: string) => {
+        captured.push({
+          type: 'verification',
+          to: email,
+          args: [email, token, firstName],
+        });
+        return Promise.resolve();
+      },
+    ),
+    sendPasswordResetEmail: jest.fn(
+      (email: string, token: string, firstName?: string) => {
+        captured.push({
+          type: 'password-reset',
+          to: email,
+          args: [email, token, firstName],
+        });
+        return Promise.resolve();
+      },
+    ),
     sendAccountLockedEmail: jest.fn((...args: any[]) => {
       captured.push({ type: 'account-locked', to: args[0], args });
       return Promise.resolve();
@@ -636,14 +669,6 @@ export function createMockMailService() {
       captured.length = 0;
     },
   };
-}
-
-// ── No-op Guard (replaces CSRF, Throttler) ──────────────────────────
-
-class NoopGuard {
-  canActivate() {
-    return true;
-  }
 }
 
 // ── App Factory ─────────────────────────────────────────────────────

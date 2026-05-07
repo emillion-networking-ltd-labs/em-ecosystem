@@ -13,9 +13,16 @@ export class LocalStorageProvider implements FileStorageService {
   }
 
   async upload(buffer: Buffer, key: string): Promise<string> {
+    // `key` is generated upstream as a content-hash UUID by the avatar
+    // service (no user input flows into the filename). `uploadDir` is
+    // config-controlled. Path traversal is contract-prevented; the
+    // security/detect-non-literal-fs-filename warnings here are for
+    // dev awareness only.
     const dir = path.join(this.uploadDir, 'avatars');
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fs.mkdir(dir, { recursive: true });
     const filePath = path.join(dir, key);
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     await fs.writeFile(filePath, buffer);
     return `/uploads/avatars/${key}`;
   }
@@ -23,6 +30,7 @@ export class LocalStorageProvider implements FileStorageService {
   async delete(key: string): Promise<void> {
     const filePath = path.join(this.uploadDir, 'avatars', key);
     try {
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       await fs.unlink(filePath);
     } catch {
       // File not found — no-op

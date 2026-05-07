@@ -8,10 +8,7 @@ import request from 'supertest';
 import type { App } from 'supertest/types';
 import type { INestApplication } from '@nestjs/common';
 import { TOTP, NobleCryptoPlugin, ScureBase32Plugin } from 'otplib';
-import {
-  createE2EApp,
-  type E2EContext,
-} from './setup';
+import { createE2EApp, type E2EContext } from './setup';
 import {
   registerAndLogin,
   loginUser,
@@ -56,7 +53,6 @@ describe('MFA Flows (E2E)', () => {
     const password = 'SecureP@ss1';
     let accessToken: string;
     let mfaSecret: string;
-    let recoveryCodes: string[];
 
     it('2.1 — Setup: register, verify, login', async () => {
       const result = await registerAndLogin(app, ctx.store, email, password);
@@ -75,7 +71,6 @@ describe('MFA Flows (E2E)', () => {
       expect(res.body.recoveryCodes.length).toBe(10);
 
       mfaSecret = res.body.secret;
-      recoveryCodes = res.body.recoveryCodes;
     });
 
     it('2.3 — POST /auth/mfa/verify-setup with valid TOTP enables MFA', async () => {
@@ -171,9 +166,7 @@ describe('MFA Flows (E2E)', () => {
 
   describe('MFA edge cases', () => {
     it('MFA setup requires authentication (401)', async () => {
-      await request(app.getHttpServer())
-        .post('/auth/mfa/setup')
-        .expect(401);
+      await request(app.getHttpServer()).post('/auth/mfa/setup').expect(401);
     });
 
     it('MFA setup rejected if already enabled (400)', async () => {

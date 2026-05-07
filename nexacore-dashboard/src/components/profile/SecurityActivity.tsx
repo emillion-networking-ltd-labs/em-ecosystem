@@ -125,7 +125,11 @@ export default function SecurityActivity() {
       {/* Recent Security Events */}
       <div>
         {initialLoading ? (
-          <div className="flex items-center justify-center py-8">
+          <div
+            role="status"
+            aria-label="Loading events"
+            className="flex items-center justify-center py-8"
+          >
             <div className="h-6 w-6 animate-spin rounded-full border-2 border-content-secondary border-t-transparent" />
           </div>
         ) : loadError ? (

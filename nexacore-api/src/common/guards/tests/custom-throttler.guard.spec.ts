@@ -25,12 +25,12 @@ describe('CustomThrottlerGuard', () => {
       expect(key).toBe('default-AuthController-login-192.168.1.1-short');
     });
 
-    it('should use connection.remoteAddress when ip is not available', () => {
+    it('should use socket.remoteAddress when ip is not available', () => {
       const mockContext = {
         switchToHttp: () => ({
           getRequest: () => ({
             ip: undefined,
-            connection: { remoteAddress: '10.0.0.1' },
+            socket: { remoteAddress: '10.0.0.1' },
           }),
         }),
         getHandler: () => ({ name: 'register' }),
@@ -45,7 +45,7 @@ describe('CustomThrottlerGuard', () => {
     it('should use "unknown" when no IP source is available', () => {
       const mockContext = {
         switchToHttp: () => ({
-          getRequest: () => ({ ip: undefined, connection: {} }),
+          getRequest: () => ({ ip: undefined, socket: {} }),
         }),
         getHandler: () => ({ name: 'test' }),
         getClass: () => ({ name: 'TestController' }),
@@ -96,7 +96,7 @@ describe('CustomThrottlerGuard', () => {
         blockDuration: 0,
         getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
         generateKey: jest.fn().mockReturnValue('test-key'),
-      } as any);
+      });
 
       expect(result).toBe(true);
       expect(mockResponse.setHeader).toHaveBeenCalledWith(
@@ -130,7 +130,7 @@ describe('CustomThrottlerGuard', () => {
           blockDuration: 0,
           getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
           generateKey: jest.fn().mockReturnValue('test-key'),
-        } as any);
+        });
         fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
@@ -167,7 +167,7 @@ describe('CustomThrottlerGuard', () => {
           blockDuration: 60000,
           getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
           generateKey: jest.fn().mockReturnValue('test-key'),
-        } as any);
+        });
         fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
@@ -202,7 +202,7 @@ describe('CustomThrottlerGuard', () => {
         blockDuration: 0,
         getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
         generateKey: jest.fn().mockReturnValue('test-key'),
-      } as any);
+      });
 
       expect(mockStorageService.increment).toHaveBeenCalledWith(
         'test-key',

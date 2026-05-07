@@ -26,7 +26,6 @@ export default function DeleteAccount() {
   const requiresPassword = user?.hasPassword ?? false;
   const isConfirmValid = confirmText === "DELETE";
   const isPasswordValid = !requiresPassword || password.length >= 8;
-  const canConfirm = isConfirmValid && isPasswordValid && !loading;
 
   const handleClose = () => {
     if (loading) return;

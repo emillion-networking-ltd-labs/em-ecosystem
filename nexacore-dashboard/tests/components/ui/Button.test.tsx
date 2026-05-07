@@ -11,8 +11,11 @@ describe('Button', () => {
 
   it('shows spinner when loading', () => {
     render(<Button loading>Submit</Button>);
-    expect(screen.getByRole('status')).toBeInTheDocument();
-    expect(screen.queryByText('Submit')).not.toBeInTheDocument();
+    // Spinner is announced as a status live-region for screen readers.
+    expect(screen.getByRole('status', { name: /loading/i })).toBeInTheDocument();
+    // Children remain rendered (dimmed to opacity-30 visually) so the layout
+    // doesn't collapse during the async transition.
+    expect(screen.getByText('Submit')).toBeInTheDocument();
   });
 
   it('is disabled when disabled prop is set', () => {

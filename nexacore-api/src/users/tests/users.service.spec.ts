@@ -111,7 +111,7 @@ describe('UsersService', () => {
       ok: true,
       headers: { get: () => 'image/jpeg' },
       arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
-    }) as jest.Mock;
+    });
 
     prisma = {
       user: {
@@ -623,10 +623,6 @@ describe('UsersService', () => {
     const mockCroppedFile = {
       buffer: Buffer.from('cropped'),
       originalname: 'avatar.jpg',
-    } as Express.Multer.File;
-    const mockOriginalFile = {
-      buffer: Buffer.from('original'),
-      originalname: 'original.png',
     } as Express.Multer.File;
 
     it('should save cropped avatar and return URLs', async () => {

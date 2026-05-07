@@ -35,6 +35,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     return applyPkceAuthorizationParams(options);
   }
 
+  // Passport's authenticate() base signature is synchronous void; we override
+  // with an async variant because PKCE state lookup hits Redis. Outcomes are
+  // still reported via Passport's success/fail/error callbacks installed on
+  // `this` by AuthGuard, so Passport itself never awaits the Promise we
+  // return — the async return type is purely for typed in-method awaits.
+  // The two suppressions document this passport+TS friction at the
+  // contractual boundary between framework and override (well-known in
+  // @nestjs/passport + passport-* OAuth2 strategies).
+  /* eslint-disable @typescript-eslint/no-misused-promises, @typescript-eslint/unbound-method */
   async authenticate(
     req: { query?: { code?: string; state?: string } },
     options?: Record<string, unknown>,
@@ -47,6 +56,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       super.authenticate,
     );
   }
+  /* eslint-enable @typescript-eslint/no-misused-promises, @typescript-eslint/unbound-method */
 
   async validate(
     req: {

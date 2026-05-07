@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '../../test-utils';
+import { render, screen, waitFor, within } from '../../test-utils';
 import userEvent from '@testing-library/user-event';
 import ConnectedAccounts from '@/components/profile/ConnectedAccounts';
 import { mockUser } from '../../helpers/profile-mocks';
@@ -132,11 +132,14 @@ describe('ConnectedAccounts', () => {
 
     await user.type(screen.getByLabelText('Password'), 'password123');
 
-    // Find the modal's Disconnect button (not the row button)
-    const modalDisconnect = screen.getAllByText('Disconnect').find(
-      (el) => el.tagName === 'BUTTON' && el.closest('.fixed'),
-    );
-    if (modalDisconnect) await user.click(modalDisconnect);
+    // Find the modal's Disconnect button — scope the query to the dialog
+    // (ConfirmModal renders with role="dialog") so we don't hit the row's
+    // own Disconnect button that opened the modal.
+    const dialog = await screen.findByRole('dialog');
+    const modalDisconnect = within(dialog).getByRole('button', {
+      name: /^disconnect$/i,
+    });
+    await user.click(modalDisconnect);
 
     await waitFor(() => {
       expect(mockUnlinkOAuth).toHaveBeenCalledWith('GOOGLE', 'password123');
@@ -166,10 +169,11 @@ describe('ConnectedAccounts', () => {
 
     await user.type(screen.getByLabelText('Password'), 'password123');
 
-    const modalDisconnect = screen.getAllByText('Disconnect').find(
-      (el) => el.tagName === 'BUTTON' && el.closest('.fixed'),
-    );
-    if (modalDisconnect) await user.click(modalDisconnect);
+    const dialog = await screen.findByRole('dialog');
+    const modalDisconnect = within(dialog).getByRole('button', {
+      name: /^disconnect$/i,
+    });
+    await user.click(modalDisconnect);
 
     await waitFor(() => {
       expect(mockAddToast).toHaveBeenCalledWith(

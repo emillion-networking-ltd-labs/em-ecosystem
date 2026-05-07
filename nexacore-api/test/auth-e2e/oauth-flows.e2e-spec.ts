@@ -11,10 +11,7 @@ import request from 'supertest';
 import { randomUUID } from 'crypto';
 import type { App } from 'supertest/types';
 import type { INestApplication } from '@nestjs/common';
-import {
-  createE2EApp,
-  type E2EContext,
-} from './setup';
+import { createE2EApp, type E2EContext } from './setup';
 
 jest.setTimeout(30_000);
 

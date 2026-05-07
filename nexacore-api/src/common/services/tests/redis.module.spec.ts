@@ -11,7 +11,6 @@ jest.mock('ioredis', () => ({
 }));
 
 import { Test } from '@nestjs/testing';
-import { REDIS_CLIENT } from '../redis.constants';
 import { RedisModule } from '../redis.module';
 
 describe('RedisModule', () => {
@@ -130,16 +129,13 @@ describe('RedisModule', () => {
       expect(connectHandler).toBeDefined();
 
       const logSpy = jest.spyOn(
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
         require('@nestjs/common').Logger.prototype,
         'log',
       );
 
       connectHandler[1]();
 
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('(TLS)'),
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('(TLS)'));
 
       logSpy.mockRestore();
     });
@@ -153,16 +149,13 @@ describe('RedisModule', () => {
       expect(connectHandler).toBeDefined();
 
       const logSpy = jest.spyOn(
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
         require('@nestjs/common').Logger.prototype,
         'log',
       );
 
       connectHandler[1]();
 
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.not.stringContaining('(TLS)'),
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.not.stringContaining('(TLS)'));
 
       logSpy.mockRestore();
     });

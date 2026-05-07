@@ -15,3 +15,15 @@ Object.defineProperty(window, "matchMedia", {
     dispatchEvent: jest.fn(),
   })),
 });
+
+// Polyfill ResizeObserver for jsdom — required by MfaDigitInput (and any
+// component that observes element size changes). jsdom has no layout engine
+// so this is a no-op stub; tests that need to assert observer behaviour
+// should mock it per-test.
+class ResizeObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+(globalThis as unknown as { ResizeObserver: typeof ResizeObserverStub }).ResizeObserver =
+  ResizeObserverStub;

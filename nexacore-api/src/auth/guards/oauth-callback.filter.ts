@@ -6,7 +6,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { Response } from 'express';
+import { Request, Response } from 'express';
 import { ErrorMessages } from '../../common/constants/error-messages';
 
 /**
@@ -20,7 +20,7 @@ export class OAuthCallbackFilter implements ExceptionFilter {
   constructor(private readonly configService: ConfigService) {}
 
   catch(exception: unknown, host: ArgumentsHost) {
-    const request = host.switchToHttp().getRequest();
+    const request = host.switchToHttp().getRequest<Request>();
     const response = host.switchToHttp().getResponse<Response>();
     const frontendUrl = this.configService.get<string>('app.frontendUrl')!;
 

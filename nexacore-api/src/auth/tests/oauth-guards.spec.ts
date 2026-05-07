@@ -1,7 +1,6 @@
 import { createOAuthAuthGuard } from '../guards/base-oauth-auth.guard';
 import { GoogleAuthGuard } from '../guards/google-auth.guard';
 import { GitHubAuthGuard } from '../guards/github-auth.guard';
-import { OAuthStateStore } from '../stores/oauth-state.store';
 
 describe('OAuth Guards', () => {
   let stateStore: { generate: jest.Mock; validate: jest.Mock };
@@ -38,7 +37,7 @@ describe('OAuth Guards', () => {
 
     it('should create an instance with getAuthenticateOptions method', () => {
       const Guard = createOAuthAuthGuard('test');
-      const instance = new Guard(stateStore as unknown as OAuthStateStore);
+      const instance = new Guard(stateStore);
       expect(typeof instance.getAuthenticateOptions).toBe('function');
     });
   });
@@ -47,7 +46,7 @@ describe('OAuth Guards', () => {
     let guard: InstanceType<typeof GoogleAuthGuard>;
 
     beforeEach(() => {
-      guard = new GoogleAuthGuard(stateStore as unknown as OAuthStateStore);
+      guard = new GoogleAuthGuard(stateStore);
     });
 
     it('should return state when initiating OAuth (no code in query)', async () => {
@@ -93,7 +92,7 @@ describe('OAuth Guards', () => {
     let guard: InstanceType<typeof GitHubAuthGuard>;
 
     beforeEach(() => {
-      guard = new GitHubAuthGuard(stateStore as unknown as OAuthStateStore);
+      guard = new GitHubAuthGuard(stateStore);
     });
 
     it('should return state when initiating OAuth (no code in query)', async () => {

@@ -4,6 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
+import type { Request } from 'express';
 import { OAuthLinkCodeStore } from '../stores/oauth-link-code.store';
 import { ErrorMessages } from '../../common/constants/error-messages';
 
@@ -20,7 +21,7 @@ export class OAuthLinkGuard implements CanActivate {
   constructor(private readonly oauthLinkCodeStore: OAuthLinkCodeStore) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const request = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest<Request>();
 
     const code = request.query?.link_code as string | undefined;
     if (!code) {

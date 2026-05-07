@@ -5,7 +5,11 @@ export function registerHttpsRedirectMiddleware(app: INestApplication): void {
 
   app.use(
     (
-      req: { headers: Record<string, string | undefined>; url: string; hostname: string },
+      req: {
+        headers: Record<string, string | undefined>;
+        url: string;
+        hostname: string;
+      },
       res: { redirect: (status: number, url: string) => void },
       next: () => void,
     ) => {

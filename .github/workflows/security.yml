@@ -95,6 +95,9 @@ jobs:
             const missing = [];
             function check(deps, path) {
               for (const [name, info] of Object.entries(deps || {})) {
+                // Skip the root project entry (empty name at root path).
+                // It represents the workspace itself and never carries an integrity hash.
+                if (name === '' && path === '') continue;
                 if (!info.integrity && !info.link) missing.push(path + name);
                 if (info.dependencies) check(info.dependencies, path + name + '/');
               }
@@ -193,8 +196,17 @@ jobs:
         working-directory: nexacore-dashboard
         run: |
           echo "=== Checking for dangerouslySetInnerHTML ==="
-          if grep -rn "dangerouslySetInnerHTML" src/ --include="*.tsx" --include="*.ts"; then
-            echo "::error::dangerouslySetInnerHTML detected — XSS risk"
+          # dangerouslySetInnerHTML is XSS-prone and forbidden by default.
+          # Path-based allowlist for legitimate uses (each entry must have
+          # a SECURITY-ALLOW comment in-file documenting the rationale):
+          #
+          #   src/app/layout.tsx — SSR theme-flash prevention with static
+          #     THEME_INIT_SCRIPT (build-time constant, never user-controlled),
+          #     CSP nonce-protected. Required pre-hydration to avoid FOUC.
+          #     Reviewed 2026-05-07.
+          if grep -rn "dangerouslySetInnerHTML" src/ --include="*.tsx" --include="*.ts" \
+              | grep -v "^src/app/layout.tsx:"; then
+            echo "::error::dangerouslySetInnerHTML detected outside allowlist — XSS risk"
             exit 1
           fi
 

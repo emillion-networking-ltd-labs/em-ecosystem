@@ -99,7 +99,7 @@ export function usePasskey() {
         setIsRegistering(false);
       }
     },
-    [fetchPasskeys],
+    [],
   );
 
   const loginWithPasskey = useCallback(

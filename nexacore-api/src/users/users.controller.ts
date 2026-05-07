@@ -89,7 +89,9 @@ export class UsersController {
     const avatar = files.avatar?.[0];
     if (!avatar) throw new BadRequestException('Avatar file is required');
     const original = files.original?.[0];
-    const cropData = body.cropData ? JSON.parse(body.cropData) : undefined;
+    const cropData = body.cropData
+      ? (JSON.parse(body.cropData) as Record<string, number>)
+      : undefined;
     return this.usersService.uploadAvatar(
       req.user.id,
       avatar,
