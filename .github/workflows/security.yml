@@ -95,6 +95,9 @@ jobs:
             const missing = [];
             function check(deps, path) {
               for (const [name, info] of Object.entries(deps || {})) {
+                // Skip the root project entry (empty name at root path).
+                // It represents the workspace itself and never carries an integrity hash.
+                if (name === '' && path === '') continue;
                 if (!info.integrity && !info.link) missing.push(path + name);
                 if (info.dependencies) check(info.dependencies, path + name + '/');
               }
