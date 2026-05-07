@@ -20,6 +20,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        {/* SECURITY-ALLOW: theme-flash prevention. Static, build-time-known
+            script content (THEME_INIT_SCRIPT constant) — never user-controlled.
+            CSP nonce-protected. Required to run before React hydration to set
+            data-theme on <html> and avoid the FOUC. Reviewed 2026-05-07. */}
         <script
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
