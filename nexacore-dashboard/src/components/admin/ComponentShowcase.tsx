@@ -824,8 +824,10 @@ function BadgeShowcase() {
             "md (default)": "14px font · 10/4px padding",
             lg: "16px font · 12/6px padding",
           },
-          "Overlay usage":
-            "Chip version of the primary Button style — bg-surface-inverse + text-content-inverse + border + backdrop-blur-sm. Use on images, video, or surfaces where default's 5% subtle tint disappears. Theme-aware: light mode → dark chip (not pure black) with inverse text; dark mode → light chip with inverse text. Matches the visual weight of primary CTAs.",
+          "Overlay usage": {
+            description:
+              "Chip version of the primary Button style — bg-surface-inverse + text-content-inverse + border + backdrop-blur-sm. Use on images, video, or surfaces where default's 5% subtle tint disappears. Theme-aware: light mode → dark chip (not pure black) with inverse text; dark mode → light chip with inverse text. Matches the visual weight of primary CTAs.",
+          },
           "Icon Badge": iconBadgeSpecs.sizes,
         }}
       />
@@ -1417,8 +1419,10 @@ function BeforeAfterSliderShowcase() {
           "Object fit": { shared: beforeAfterSliderSpecs.objectFit },
           Interaction: beforeAfterSliderSpecs.interaction,
           Usage: { shared: beforeAfterSliderSpecs.usage },
-          "Showcase assets":
-            "EMILLION icon B&W (em-icon-black.png + em-icon-white.png, generated via ffmpeg negate from em-icon.png). Same small logo used in Sidebar/NavBar/AuthLayout across the dashboard. Demonstrates clear visual contrast between before/after states. Production usages should supply actual before/after photo pairs.",
+          "Showcase assets": {
+            description:
+              "EMILLION icon B&W (em-icon-black.png + em-icon-white.png, generated via ffmpeg negate from em-icon.png). Same small logo used in Sidebar/NavBar/AuthLayout across the dashboard. Demonstrates clear visual contrast between before/after states. Production usages should supply actual before/after photo pairs.",
+          },
         }}
       />
     </ShowcaseSection>
@@ -4096,8 +4100,7 @@ function TurnstileWidgetShowcase() {
           Test site key (always passes):
         </p>
         <TurnstileWidget
-          siteKey="1x00000000000000000000AA"
-          onVerify={(token) =>
+          onToken={(token) =>
             console.log("Turnstile verified:", token.slice(0, 16) + "...")
           }
         />

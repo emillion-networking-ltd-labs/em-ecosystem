@@ -6,7 +6,6 @@ import Link from "next/link";
 import { Key } from "lucide-react";
 import EmailSelector from "@/components/ui/EmailSelector";
 import Input from "@/components/ui/Input";
-import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 import InlineError from "@/components/ui/InlineError";
 import RateLimitBanner from "@/components/ui/RateLimitBanner";
@@ -357,7 +356,6 @@ function PasswordStep({
     }
   }, [isEmailOpen]);
 
-  const emailInitial = email.charAt(0).toUpperCase();
   const activeError = passwordError || error;
   const showError = !!activeError && !rateLimitInfo.isRateLimited;
   const isDisabled = isLoading || rateLimitInfo.isRateLimited;

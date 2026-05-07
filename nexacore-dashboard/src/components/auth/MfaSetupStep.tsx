@@ -43,43 +43,6 @@ export default function MfaSetupStep() {
     })();
   }, [setupMfa]);
 
-  const handleDigitChange = (index: number, value: string) => {
-    setError(null);
-    if (!/^\d*$/.test(value)) return;
-    const digit = value.slice(-1);
-    const updated = [...code];
-    updated[index] = digit;
-    setCode(updated);
-    if (digit && index < 5) inputRefs.current[index + 1]?.focus();
-    if (digit && index === 5) {
-      const full = updated.join("");
-      if (full.length === 6) handleVerify(full);
-    }
-  };
-
-  const handleKeyDown = (
-    index: number,
-    e: React.KeyboardEvent<HTMLInputElement>,
-  ) => {
-    if (e.key === "Backspace" && !code[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pasted = e.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-    if (!pasted) return;
-    const updated = Array(6).fill("");
-    for (let i = 0; i < pasted.length; i++) updated[i] = pasted[i];
-    setCode(updated);
-    if (pasted.length === 6) handleVerify(pasted);
-    else inputRefs.current[pasted.length]?.focus();
-  };
-
   const handleVerify = useCallback(
     async (codeStr: string) => {
       setError(null);
@@ -184,6 +147,10 @@ export default function MfaSetupStep() {
 
           {qrCodeDataUrl && (
             <div className="flex justify-center rounded-lg border border-border-components bg-white p-4">
+              {/* next/image cannot optimize data: URLs (qrcode.js output)
+                  and the size is fixed at 48×48 client-side; raw <img>
+                  is intentional. */}
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={qrCodeDataUrl}
                 alt="MFA QR Code"

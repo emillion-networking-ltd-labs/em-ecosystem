@@ -58,6 +58,10 @@ export default function Avatar({
       role="img"
     >
       {showImage ? (
+        // next/image is unsuitable here: avatar src is a runtime user-supplied
+        // URL or data URL (no fixed remote pattern allowlist), and its
+        // dimensions are container-driven (object-cover w-full h-full).
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={resolveAvatarSrc(src)}
           alt={alt ?? name ?? "Avatar"}

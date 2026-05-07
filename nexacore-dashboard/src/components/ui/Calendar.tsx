@@ -283,7 +283,7 @@ export default function Calendar({
               disabled={day.isDisabled}
               onClick={() => !day.isDisabled && onChange(day.date)}
               aria-label={day.date.toLocaleDateString()}
-              aria-selected={day.isSelected}
+              aria-pressed={day.isSelected}
               className={`min-w-9 h-9 px-2 mx-auto flex items-center justify-center text-body font-normal rounded-full transition-colors ${
                 day.isSelected
                   ? "bg-surface-inverse text-content-inverse font-normal"
