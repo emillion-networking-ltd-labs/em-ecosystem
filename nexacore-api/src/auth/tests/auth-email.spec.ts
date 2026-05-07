@@ -1,11 +1,8 @@
-import { UnauthorizedException, BadRequestException } from '@nestjs/common';
-import * as bcrypt from 'bcrypt';
-import { User } from '../../users/entities/user.entity';
+import { UnauthorizedException } from '@nestjs/common';
 import {
   createAuthTestModule,
   AuthTestContext,
   mockUser,
-  requestMeta,
 } from './auth-test.helpers';
 
 jest.mock('bcrypt');

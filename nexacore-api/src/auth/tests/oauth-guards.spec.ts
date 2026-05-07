@@ -1,7 +1,6 @@
 import { createOAuthAuthGuard } from '../guards/base-oauth-auth.guard';
 import { GoogleAuthGuard } from '../guards/google-auth.guard';
 import { GitHubAuthGuard } from '../guards/github-auth.guard';
-import { OAuthStateStore } from '../stores/oauth-state.store';
 
 describe('OAuth Guards', () => {
   let stateStore: { generate: jest.Mock; validate: jest.Mock };

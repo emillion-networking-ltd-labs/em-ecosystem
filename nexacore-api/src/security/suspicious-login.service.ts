@@ -205,7 +205,6 @@ export class SuspiciousLoginService {
       const R = Math.sqrt(
         Math.pow(sinSum / hours.length, 2) + Math.pow(cosSum / hours.length, 2),
       );
-      const circularVariance = 1 - R;
       const circularStdDev = Math.sqrt(-2 * Math.log(Math.max(R, 0.0001)));
       const stdDevHours = (circularStdDev * 12) / Math.PI;
 

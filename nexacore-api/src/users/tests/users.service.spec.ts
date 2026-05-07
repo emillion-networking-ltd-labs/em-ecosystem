@@ -624,10 +624,6 @@ describe('UsersService', () => {
       buffer: Buffer.from('cropped'),
       originalname: 'avatar.jpg',
     } as Express.Multer.File;
-    const mockOriginalFile = {
-      buffer: Buffer.from('original'),
-      originalname: 'original.png',
-    } as Express.Multer.File;
 
     it('should save cropped avatar and return URLs', async () => {
       prisma.user.findUnique.mockResolvedValue({

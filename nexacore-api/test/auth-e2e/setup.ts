@@ -9,7 +9,6 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 // APP_GUARD is not used — we override specific guard classes instead
 import { randomUUID } from 'crypto';
-import * as crypto from 'crypto';
 import { AppModule } from '../../src/app.module';
 import { PrismaService } from '../../src/prisma/prisma.service';
 import { GoogleStrategy } from '../../src/auth/strategies/google.strategy';
@@ -243,7 +242,7 @@ export function createMockPrisma(store: MockStore) {
         user.updatedAt = new Date();
         return Promise.resolve({ ...user });
       }),
-      findMany: jest.fn(({ where, orderBy, skip, take }: any = {}) => {
+      findMany: jest.fn(({ where }: any = {}) => {
         let results = [...store.users];
         if (where)
           results = results.filter((u) => matchesWhere(u as any, where));
@@ -482,7 +481,7 @@ export function createMockPrisma(store: MockStore) {
         store.auditLogs.push(log);
         return Promise.resolve({ ...log });
       }),
-      findMany: jest.fn(({ where, orderBy }: any = {}) => {
+      findMany: jest.fn(({ where }: any = {}) => {
         let results = [...store.auditLogs];
         if (where)
           results = results.filter((l) => matchesWhere(l as any, where));
@@ -497,17 +496,17 @@ export function createMockPrisma(store: MockStore) {
     },
 
     permission: {
-      findMany: jest.fn(({ where }: any = {}) => {
+      findMany: jest.fn(() => {
         // Return empty — no seeded permissions needed for auth E2E
         return Promise.resolve([]);
       }),
-      upsert: jest.fn(({ where, update, create }: any) => {
+      upsert: jest.fn(({ create }: any) => {
         return Promise.resolve({ id: randomUUID(), ...create });
       }),
     },
 
     rolePermission: {
-      findMany: jest.fn(({ where, include }: any) => {
+      findMany: jest.fn(() => {
         return Promise.resolve([]);
       }),
       count: jest.fn(() => Promise.resolve(0)),
@@ -670,14 +669,6 @@ export function createMockMailService() {
       captured.length = 0;
     },
   };
-}
-
-// ── No-op Guard (replaces CSRF, Throttler) ──────────────────────────
-
-class NoopGuard {
-  canActivate() {
-    return true;
-  }
 }
 
 // ── App Factory ─────────────────────────────────────────────────────

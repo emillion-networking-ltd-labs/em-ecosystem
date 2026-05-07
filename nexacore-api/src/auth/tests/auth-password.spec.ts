@@ -1,11 +1,9 @@
-import { BadRequestException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { ErrorMessages } from '../../common/constants/error-messages';
 import {
   createAuthTestModule,
   AuthTestContext,
   mockUser,
-  requestMeta,
 } from './auth-test.helpers';
 
 jest.mock('bcrypt');

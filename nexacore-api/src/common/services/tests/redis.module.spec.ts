@@ -11,7 +11,6 @@ jest.mock('ioredis', () => ({
 }));
 
 import { Test } from '@nestjs/testing';
-import { REDIS_CLIENT } from '../redis.constants';
 import { RedisModule } from '../redis.module';
 
 describe('RedisModule', () => {
@@ -130,7 +129,6 @@ describe('RedisModule', () => {
       expect(connectHandler).toBeDefined();
 
       const logSpy = jest.spyOn(
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
         require('@nestjs/common').Logger.prototype,
         'log',
       );
@@ -151,7 +149,6 @@ describe('RedisModule', () => {
       expect(connectHandler).toBeDefined();
 
       const logSpy = jest.spyOn(
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
         require('@nestjs/common').Logger.prototype,
         'log',
       );

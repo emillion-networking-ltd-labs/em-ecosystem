@@ -53,7 +53,6 @@ describe('MFA Flows (E2E)', () => {
     const password = 'SecureP@ss1';
     let accessToken: string;
     let mfaSecret: string;
-    let recoveryCodes: string[];
 
     it('2.1 — Setup: register, verify, login', async () => {
       const result = await registerAndLogin(app, ctx.store, email, password);
@@ -72,7 +71,6 @@ describe('MFA Flows (E2E)', () => {
       expect(res.body.recoveryCodes.length).toBe(10);
 
       mfaSecret = res.body.secret;
-      recoveryCodes = res.body.recoveryCodes;
     });
 
     it('2.3 — POST /auth/mfa/verify-setup with valid TOTP enables MFA', async () => {

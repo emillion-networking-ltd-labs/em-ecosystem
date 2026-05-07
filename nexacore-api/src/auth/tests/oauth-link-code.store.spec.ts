@@ -1,5 +1,4 @@
 import { OAuthLinkCodeStore } from '../stores/oauth-link-code.store';
-import { REDIS_CLIENT } from '../../common/services/redis.constants';
 
 describe('OAuthLinkCodeStore', () => {
   let store: OAuthLinkCodeStore;
