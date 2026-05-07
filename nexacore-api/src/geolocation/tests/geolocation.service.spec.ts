@@ -87,7 +87,9 @@ describe('GeolocationService', () => {
     });
 
     it('should return null when reader is null (DB not loaded)', async () => {
-      (maxmind.open as jest.Mock).mockRejectedValue(new Error('File not found'));
+      (maxmind.open as jest.Mock).mockRejectedValue(
+        new Error('File not found'),
+      );
       const module = await Test.createTestingModule({
         providers: [GeolocationService],
       }).compile();

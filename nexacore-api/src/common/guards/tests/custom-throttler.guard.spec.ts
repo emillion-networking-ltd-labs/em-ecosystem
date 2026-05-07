@@ -96,7 +96,7 @@ describe('CustomThrottlerGuard', () => {
         blockDuration: 0,
         getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
         generateKey: jest.fn().mockReturnValue('test-key'),
-      } as any);
+      });
 
       expect(result).toBe(true);
       expect(mockResponse.setHeader).toHaveBeenCalledWith(
@@ -130,7 +130,7 @@ describe('CustomThrottlerGuard', () => {
           blockDuration: 0,
           getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
           generateKey: jest.fn().mockReturnValue('test-key'),
-        } as any);
+        });
         fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
@@ -167,7 +167,7 @@ describe('CustomThrottlerGuard', () => {
           blockDuration: 60000,
           getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
           generateKey: jest.fn().mockReturnValue('test-key'),
-        } as any);
+        });
         fail('Should have thrown');
       } catch (error) {
         expect(error).toBeInstanceOf(HttpException);
@@ -202,7 +202,7 @@ describe('CustomThrottlerGuard', () => {
         blockDuration: 0,
         getTracker: jest.fn().mockResolvedValue('127.0.0.1'),
         generateKey: jest.fn().mockReturnValue('test-key'),
-      } as any);
+      });
 
       expect(mockStorageService.increment).toHaveBeenCalledWith(
         'test-key',

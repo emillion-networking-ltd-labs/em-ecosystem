@@ -111,7 +111,7 @@ describe('UsersService', () => {
       ok: true,
       headers: { get: () => 'image/jpeg' },
       arrayBuffer: () => Promise.resolve(new ArrayBuffer(8)),
-    }) as jest.Mock;
+    });
 
     prisma = {
       user: {

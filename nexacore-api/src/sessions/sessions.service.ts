@@ -96,13 +96,13 @@ export class SessionsService {
         longitude: geo?.longitude || null,
         expiresAt: params.expiresAt,
       },
-    }) as Promise<Session>;
+    });
   }
 
   async findById(id: string): Promise<Session | null> {
     return this.prisma.session.findUnique({
       where: { id },
-    }) as Promise<Session | null>;
+    });
   }
 
   async rotateRefreshToken(params: {
@@ -257,7 +257,7 @@ export class SessionsService {
         lastUsedAt: { gte: idleThreshold },
       },
       orderBy: { lastUsedAt: 'asc' },
-    }) as Promise<Session[]>;
+    });
   }
 
   async enforceSessionLimit(

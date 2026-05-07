@@ -201,15 +201,11 @@ export class SuspiciousLoginService {
       const meanHour = ((meanAngle * 12) / Math.PI + 24) % 24;
 
       // Circular standard deviation
-      const R =
-        Math.sqrt(
-          Math.pow(sinSum / hours.length, 2) +
-            Math.pow(cosSum / hours.length, 2),
-        );
-      const circularVariance = 1 - R;
-      const circularStdDev = Math.sqrt(
-        -2 * Math.log(Math.max(R, 0.0001)),
+      const R = Math.sqrt(
+        Math.pow(sinSum / hours.length, 2) + Math.pow(cosSum / hours.length, 2),
       );
+      const circularVariance = 1 - R;
+      const circularStdDev = Math.sqrt(-2 * Math.log(Math.max(R, 0.0001)));
       const stdDevHours = (circularStdDev * 12) / Math.PI;
 
       // Circular distance from mean
@@ -218,7 +214,10 @@ export class SuspiciousLoginService {
       if (angularDist > Math.PI) angularDist = 2 * Math.PI - angularDist;
       const hourDist = (angularDist * 12) / Math.PI;
 
-      if (stdDevHours > 0 && hourDist / stdDevHours > UNUSUAL_HOURS_STDDEV_THRESHOLD) {
+      if (
+        stdDevHours > 0 &&
+        hourDist / stdDevHours > UNUSUAL_HOURS_STDDEV_THRESHOLD
+      ) {
         this.auditService
           .log({
             action: AuditAction.UNUSUAL_LOGIN_HOURS,
@@ -227,8 +226,7 @@ export class SuspiciousLoginService {
               loginHour: currentHour,
               meanHour: Math.round(meanHour * 10) / 10,
               stdDevHours: Math.round(stdDevHours * 10) / 10,
-              deviations:
-                Math.round((hourDist / stdDevHours) * 10) / 10,
+              deviations: Math.round((hourDist / stdDevHours) * 10) / 10,
               sampleSize: hours.length,
             },
           })

@@ -135,9 +135,7 @@ export class PermissionsService implements OnModuleInit {
 
     // Prevent ADMIN from escalating their own role's permissions
     if (actingUserRole === Role.ADMIN && role === Role.ADMIN) {
-      throw new ForbiddenException(
-        ErrorMessages.user.OPERATION_NOT_PERMITTED,
-      );
+      throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
     // Validate all keys exist

@@ -51,7 +51,7 @@ export function toSafeUser(
     lastName: user.lastName,
     avatarUrl: user.avatarUrl,
     avatarOriginalUrl: user.avatarOriginalUrl,
-    avatarCropData: user.avatarCropData as Record<string, number> | null,
+    avatarCropData: user.avatarCropData,
     role: user.role,
     emailVerified: user.emailVerified,
     isActive: user.isActive,

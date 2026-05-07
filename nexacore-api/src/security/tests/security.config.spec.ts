@@ -19,7 +19,8 @@ describe('SecurityConfig', () => {
 
   describe('cors.getAllowedOrigins', () => {
     it('should parse CORS_ALLOWED_ORIGINS when set', () => {
-      process.env.CORS_ALLOWED_ORIGINS = 'https://app.example.com, https://admin.example.com';
+      process.env.CORS_ALLOWED_ORIGINS =
+        'https://app.example.com, https://admin.example.com';
 
       const config = loadConfig();
       const origins = config.cors.getAllowedOrigins();
@@ -111,8 +112,12 @@ describe('SecurityConfig', () => {
     it('should have CSP directives with self defaults', () => {
       const config = loadConfig();
 
-      expect(config.helmet.contentSecurityPolicy.directives.defaultSrc).toEqual(["'self'"]);
-      expect(config.helmet.contentSecurityPolicy.directives.objectSrc).toEqual(["'none'"]);
+      expect(config.helmet.contentSecurityPolicy.directives.defaultSrc).toEqual(
+        ["'self'"],
+      );
+      expect(config.helmet.contentSecurityPolicy.directives.objectSrc).toEqual([
+        "'none'",
+      ]);
     });
 
     it('should have HSTS maxAge of 1 year', () => {

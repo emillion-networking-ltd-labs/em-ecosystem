@@ -12,8 +12,15 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
   protected async handleRequest(
     requestProps: Parameters<ThrottlerGuard['handleRequest']>[0],
   ): Promise<boolean> {
-    const { context, limit, ttl, throttler, blockDuration, getTracker, generateKey } =
-      requestProps;
+    const {
+      context,
+      limit,
+      ttl,
+      throttler,
+      blockDuration,
+      getTracker,
+      generateKey,
+    } = requestProps;
     const response = context.switchToHttp().getResponse<Response>();
     const request = context.switchToHttp().getRequest();
 
@@ -23,7 +30,13 @@ export class CustomThrottlerGuard extends ThrottlerGuard {
     // Note: storageService.increment returns timeToExpire and timeToBlockExpire
     // already in SECONDS (via getExpirationTime which divides by 1000).
     const { totalHits, timeToExpire, isBlocked, timeToBlockExpire } =
-      await this.storageService.increment(key, ttl, limit, blockDuration, throttlerName);
+      await this.storageService.increment(
+        key,
+        ttl,
+        limit,
+        blockDuration,
+        throttlerName,
+      );
 
     const resetTime = Math.ceil(Date.now() / 1000) + timeToExpire;
 

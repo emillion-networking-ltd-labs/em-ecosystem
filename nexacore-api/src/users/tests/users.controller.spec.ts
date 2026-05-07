@@ -311,16 +311,9 @@ describe('UsersController', () => {
     });
 
     it('should throw BadRequestException when no avatar file', async () => {
-      await expect(
-        controller.uploadAvatar(
-          mockReq,
-          {} as unknown as {
-            avatar?: Express.Multer.File[];
-            original?: Express.Multer.File[];
-          },
-          {},
-        ),
-      ).rejects.toThrow('Avatar file is required');
+      await expect(controller.uploadAvatar(mockReq, {}, {})).rejects.toThrow(
+        'Avatar file is required',
+      );
     });
   });
 

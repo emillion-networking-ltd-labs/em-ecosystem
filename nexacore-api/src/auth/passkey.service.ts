@@ -149,7 +149,7 @@ export class PasskeyService {
         credentialId: regCredential.id,
         publicKey: Buffer.from(regCredential.publicKey),
         signCount: regCredential.counter,
-        transports: (regCredential.transports ?? []) as string[],
+        transports: regCredential.transports ?? [],
         backedUp: credentialBackedUp,
         deviceType: credentialDeviceType,
         name: passkeyName,

@@ -33,7 +33,9 @@ export class ListAuditLogsQueryDto {
   @IsEnum(AuditAction)
   action?: AuditAction;
 
-  @ApiPropertyOptional({ description: 'Filter by user ID (as actor or target)' })
+  @ApiPropertyOptional({
+    description: 'Filter by user ID (as actor or target)',
+  })
   @IsOptional()
   @IsString()
   userId?: string;

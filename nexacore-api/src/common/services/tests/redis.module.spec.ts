@@ -137,9 +137,7 @@ describe('RedisModule', () => {
 
       connectHandler[1]();
 
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.stringContaining('(TLS)'),
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.stringContaining('(TLS)'));
 
       logSpy.mockRestore();
     });
@@ -160,9 +158,7 @@ describe('RedisModule', () => {
 
       connectHandler[1]();
 
-      expect(logSpy).toHaveBeenCalledWith(
-        expect.not.stringContaining('(TLS)'),
-      );
+      expect(logSpy).toHaveBeenCalledWith(expect.not.stringContaining('(TLS)'));
 
       logSpy.mockRestore();
     });

@@ -44,11 +44,11 @@ export const IMPOSSIBLE_TRAVEL_MIN_DISTANCE_KM = parseInt(
  * - challenge: Force MFA re-verification (override trusted device). If no MFA, alert_only.
  * - block: Reject login with 403 + send email alert.
  */
-export const IMPOSSIBLE_TRAVEL_ALERT_STRATEGY =
-  (process.env.IMPOSSIBLE_TRAVEL_ALERT_STRATEGY || 'alert_only') as
-    | 'alert_only'
-    | 'challenge'
-    | 'block';
+export const IMPOSSIBLE_TRAVEL_ALERT_STRATEGY = (process.env
+  .IMPOSSIBLE_TRAVEL_ALERT_STRATEGY || 'alert_only') as
+  | 'alert_only'
+  | 'challenge'
+  | 'block';
 
 /**
  * Private/reserved IP prefixes that cannot be geolocated.

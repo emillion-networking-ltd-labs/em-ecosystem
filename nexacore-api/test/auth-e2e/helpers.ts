@@ -243,7 +243,10 @@ export async function revokeSession(
 
 // ── Store Utilities ─────────────────────────────────────────────────
 
-export function findUserInStore(store: MockStore, email: string): MockUser | undefined {
+export function findUserInStore(
+  store: MockStore,
+  email: string,
+): MockUser | undefined {
   return store.users.find((u) => u.email === email);
 }
 

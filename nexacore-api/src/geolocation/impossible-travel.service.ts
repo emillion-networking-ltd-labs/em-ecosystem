@@ -74,7 +74,11 @@ export class ImpossibleTravelService {
       },
     });
 
-    if (!previousSession || !previousSession.latitude || !previousSession.longitude) {
+    if (
+      !previousSession ||
+      !previousSession.latitude ||
+      !previousSession.longitude
+    ) {
       return null;
     }
 
@@ -91,8 +95,7 @@ export class ImpossibleTravelService {
 
     const elapsedMs = Date.now() - previousSession.createdAt.getTime();
     const elapsedHours = Math.max(elapsedMs / (1000 * 60 * 60), 0.001);
-    const requiredSpeedKmh =
-      Math.round((distanceKm / elapsedHours) * 10) / 10;
+    const requiredSpeedKmh = Math.round((distanceKm / elapsedHours) * 10) / 10;
 
     const previousLocation: GeolocationResult = {
       city: previousSession.locationCity,

@@ -207,7 +207,7 @@ describe('AuthService — Email Verification', () => {
         ...mockUser,
         id: 'other-user-id',
         email: 'new@example.com',
-      } as User);
+      });
 
       const result = await ctx.authService.verifyEmailChange('valid-token');
 

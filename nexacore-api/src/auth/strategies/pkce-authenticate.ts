@@ -13,7 +13,7 @@ export async function applyPkceAuthenticate(
   oauthStateStore: OAuthStateStore,
   req: { query?: { code?: string; state?: string } },
   options: Record<string, unknown>,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   superAuthenticate: (...args: any[]) => void,
 ): Promise<void> {
   if (req.query?.code && req.query?.state) {
