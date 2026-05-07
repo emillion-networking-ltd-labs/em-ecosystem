@@ -166,12 +166,100 @@ jobs:
           }
 
   # ==========================================================================
+  # Branch Hygiene Audit
+  # Lists feature/fix branches whose tip is reachable from main and were last
+  # updated >7 days ago. With delete_branch_on_merge=true these should not
+  # exist; this job is defence-in-depth for cases where the setting was
+  # disabled or branches were created outside the PR flow.
+  # Standards: workflow-standards.mdc §2 Required Repository Configuration C
+  # ==========================================================================
+  branch-audit:
+    name: 'Branch Hygiene Audit'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout repo (full history)
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Find merged stale branches
+        id: find_stale
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git fetch --prune origin
+
+          stale_count=0
+          stale_list=""
+          cutoff=$(date -u -d '7 days ago' +%s)
+
+          # Iterate every remote branch except main / dependabot/*
+          while IFS= read -r branch; do
+            short="${branch#origin/}"
+            [ "$short" = "main" ] && continue
+            case "$short" in dependabot/*) continue ;; esac
+
+            # Is it merged into main?
+            if ! git merge-base --is-ancestor "$branch" origin/main 2>/dev/null; then
+              continue
+            fi
+
+            # Last update time of the branch tip (UTC seconds)
+            last_update=$(git log -1 --format=%ct "$branch" 2>/dev/null || echo "0")
+            [ "$last_update" -ge "$cutoff" ] && continue
+
+            stale_count=$((stale_count + 1))
+            iso=$(date -u -d "@$last_update" +%Y-%m-%d 2>/dev/null || echo "?")
+            stale_list="${stale_list}- \`${short}\` — last updated ${iso}\n"
+          done < <(git branch -r | sed 's/^[[:space:]]*//' | grep '^origin/' || true)
+
+          echo "stale_count=${stale_count}" >> "$GITHUB_OUTPUT"
+          # Save list to file (multi-line outputs in GHA are awkward via $GITHUB_OUTPUT)
+          printf "%b" "$stale_list" > stale-branches.md
+
+          echo "Stale merged branches found: ${stale_count}"
+          if [ "$stale_count" -gt 0 ]; then
+            echo ""
+            echo "List:"
+            printf "%b" "$stale_list"
+          fi
+
+      - name: Open or update tracking issue
+        if: steps.find_stale.outputs.stale_count != '0'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          today=$(date -u +%Y-%m-%d)
+          title="[branch-audit] $(cat stale-branches.md | wc -l | tr -d ' ') stale merged branches detected ($today)"
+          body="## Stale merged branches\n\nThe weekly branch-audit found branches that are reachable from \`main\` but whose tip has not been updated in over 7 days. With \`delete_branch_on_merge=true\` enabled at the repo level, these should not exist.\n\n$(cat stale-branches.md)\n\n## How to fix\n\nFor each branch above:\n\n\`\`\`bash\ngh api -X DELETE repos/\${GITHUB_REPOSITORY}/git/refs/heads/<branch-name>\n\`\`\`\n\nIf many appear simultaneously, also re-verify the repo setting:\n\n\`\`\`bash\ngh api repos/\${GITHUB_REPOSITORY} --jq .delete_branch_on_merge\n\`\`\`\n\nMust return \`true\`. If \`false\`, re-apply per workflow-standards.mdc §2 (Required Repository Configuration A).\n\n## References\n\n- workflow-standards.mdc §2 Required Repository Configuration\n- workflow-standards.mdc §2 Case Study: SCRUM-359 Incident\n"
+
+          # Look for an existing open issue with this title pattern (last 30 days)
+          existing=$(gh issue list --state open --search "in:title [branch-audit]" --json number,title --jq '.[0].number // empty')
+
+          if [ -n "$existing" ]; then
+            echo "Updating existing issue #$existing"
+            printf "%b" "$body" | gh issue comment "$existing" --body-file -
+          else
+            echo "Opening new issue: $title"
+            printf "%b" "$body" | gh issue create --title "$title" --label "tech-debt,branch-audit" --body-file -
+          fi
+
+      - name: All clean
+        if: steps.find_stale.outputs.stale_count == '0'
+        run: echo "No stale merged branches found. Repo hygiene OK."
+
+  # ==========================================================================
   # Weekly Summary Report
   # ==========================================================================
   summary:
     name: 'Weekly Summary'
     runs-on: ubuntu-latest
-    needs: [full-dependency-audit, supply-chain]
+    needs: [full-dependency-audit, supply-chain, branch-audit]
     if: always()
     steps:
       - name: Generate summary
@@ -185,5 +273,6 @@ jobs:
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Dependency Audit | ${{ needs.full-dependency-audit.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Supply Chain | ${{ needs.supply-chain.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch Hygiene | ${{ needs.branch-audit.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Standards: OWASP A06:2021, NIST SA-11, SOC 2 CC7.1" >> $GITHUB_STEP_SUMMARY
+          echo "Standards: OWASP A06:2021, NIST SA-11, SOC 2 CC7.1, workflow-standards.mdc §2.C" >> $GITHUB_STEP_SUMMARY
