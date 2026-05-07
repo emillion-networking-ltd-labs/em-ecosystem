@@ -29,7 +29,7 @@
     "audit:deps": "npm audit --audit-level=high && npm audit --omit=dev --audit-level=moderate"
   },
   "dependencies": {
-    "@nestjs-modules/mailer": "^2.0.2",
+    "@nestjs-modules/mailer": "^2.3.4",
     "@nestjs/common": "^11.1.17",
     "@nestjs/config": "^4.0.3",
     "@nestjs/core": "^11.1.17",
@@ -52,7 +52,7 @@
     "ioredis": "^5.10.0",
     "joi": "^18.0.2",
     "maxmind": "^5.0.5",
-    "nodemailer": "^8.0.1",
+    "nodemailer": "^8.0.7",
     "otplib": "^13.3.0",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
@@ -108,7 +108,14 @@
     "lodash": ">=4.17.24",
     "flatted": ">=3.4.2",
     "liquidjs": ">=10.25.7",
-    "picomatch": ">=4.0.4"
+    "picomatch": ">=4.0.4",
+    "brace-expansion": ">=2.0.3",
+    "preview-email": {
+      "nodemailer": "$nodemailer"
+    },
+    "mailparser": {
+      "nodemailer": "$nodemailer"
+    }
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
