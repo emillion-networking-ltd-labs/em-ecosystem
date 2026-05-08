@@ -15,7 +15,7 @@ describe('RolesGuard', () => {
 
     reflector = {
       getAllAndOverride: jest.fn(),
-    } as unknown as jest.Mocked<Reflector>;
+    };
 
     auditService = {
       log: jest.fn().mockResolvedValue(undefined),

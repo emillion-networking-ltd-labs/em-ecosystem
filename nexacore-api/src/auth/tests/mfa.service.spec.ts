@@ -112,9 +112,9 @@ describe('MfaService', () => {
     };
 
     service = new MfaService(
-      usersService as unknown as UsersService,
-      cryptoService as unknown as CryptoService,
-      jwtService as unknown as JwtService,
+      usersService,
+      cryptoService,
+      jwtService,
       auditService as any,
       trustedDeviceService as unknown as TrustedDeviceService,
       mockConfigService as unknown as ConfigService,

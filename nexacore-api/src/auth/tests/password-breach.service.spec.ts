@@ -29,7 +29,7 @@ describe('PasswordBreachService', () => {
     jest.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
       text: async () => mockResponse,
-    } as Response);
+    });
 
     const result = await service.isBreached('password');
 
@@ -51,7 +51,7 @@ describe('PasswordBreachService', () => {
     jest.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
       text: async () => mockResponse,
-    } as Response);
+    });
 
     const result = await service.isBreached('password');
 
@@ -75,7 +75,7 @@ describe('PasswordBreachService', () => {
       ok: false,
       status: 500,
       text: async () => 'Internal Server Error',
-    } as Response);
+    });
 
     const result = await service.isBreached('password');
 
@@ -96,7 +96,7 @@ describe('PasswordBreachService', () => {
     jest.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
       text: async () => 'this is not a valid response format',
-    } as Response);
+    });
 
     const result = await service.isBreached('password');
 
@@ -107,7 +107,7 @@ describe('PasswordBreachService', () => {
     const fetchSpy = jest.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
       text: async () => '',
-    } as Response);
+    });
 
     await service.isBreached('test-password');
 
@@ -122,7 +122,7 @@ describe('PasswordBreachService', () => {
     jest.spyOn(global, 'fetch').mockResolvedValue({
       ok: true,
       text: async () => '',
-    } as Response);
+    });
 
     const result = await service.isBreached('');
 
