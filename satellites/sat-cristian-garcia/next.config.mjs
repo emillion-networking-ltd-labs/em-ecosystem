@@ -26,6 +26,12 @@ const nextConfig = {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
 
+  // Next 16 defaults to Turbopack. Empty config opts in explicitly and
+  // silences the Turbopack-vs-webpack-config detection warning. The
+  // `webpack:` block below remains as a fallback for `next build --webpack`
+  // and the OneDrive dev-polling workaround if Turbopack regresses on it.
+  turbopack: {},
+
   webpack: (config, { dev }) => {
     // Polling-based file watching: native FS events are unreliable inside
     // OneDrive-synced folders on Windows, so HMR misses changes. Polling adds

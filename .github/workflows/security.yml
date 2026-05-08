@@ -196,7 +196,8 @@ jobs:
 
       - name: Run ESLint
         working-directory: nexacore-dashboard
-        run: npx next lint --max-warnings 0
+        # Next 16 removed `next lint` — use eslint directly with the flat config (SCRUM-364).
+        run: npx eslint "src/**/*.{ts,tsx}" --max-warnings 0
 
       - name: Check for dangerous frontend patterns
         working-directory: nexacore-dashboard
