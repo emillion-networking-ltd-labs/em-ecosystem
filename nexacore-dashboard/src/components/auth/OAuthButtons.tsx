@@ -1,4 +1,4 @@
-import { Github } from "lucide-react";
+import GitHubIcon from "@/components/icons/GitHubIcon";
 import GoogleIcon from "@/components/icons/GoogleIcon";
 import Button from "@/components/ui/Button";
 
@@ -19,7 +19,11 @@ export default function OAuthButtons() {
 
       {/* GitHub — full page redirect to backend OAuth initiation */}
       <Button as="a" href={`${API_BASE_URL}/auth/github`} variant="outline">
-        <Github size={16} className="text-content-primary/50" />
+        <GitHubIcon
+          width={16}
+          height={16}
+          className="text-content-primary/50"
+        />
         Continue with GitHub
       </Button>
     </div>
