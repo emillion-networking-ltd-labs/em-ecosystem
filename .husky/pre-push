@@ -1,32 +1,118 @@
 #!/bin/sh
 
 # ============================================================================
-# Pre-push hook — EM NexaCore
+# Pre-push hook — EM NexaCore — CI Parity (SCRUM-370)
 # ============================================================================
-# Runs tests and build verification before pushing.
-# Standards: SOC 2 CC8.2, ISO 25010
+# Runs the SAME checks that .github/workflows/security.yml will run on every
+# PR, so failures surface locally in seconds-to-minutes instead of after the
+# 10-15-minute CI cycle.
+#
+# Standards:
+#   - workflow-standards.mdc §12 Tier 2 (CI gate at developer push time)
+#   - SOC 2 CC8.2, ISO 25010 Modifiability
+#
+# Mapping pre-push step → CI workflow job:
+#   1. npm ci (per package)        → Layer 2 setup (catches lock drift)
+#   2. npx prisma generate (api)   → Layer 4/5 setup
+#   3. npx eslint (api)            → Layer 3 SAST Backend
+#   4. npx next lint (dashboard)   → Layer 3 SAST Frontend
+#   5. npm run build (per package) → Layer 5 Build
+#   6. npm run test:cov (per pkg)  → Layer 4 Tests (coverage matches CI)
+#   7. npm audit (warn-only)       → Layer 2 Dep Audit (informational here;
+#                                     enforced by CI; warn-only because of
+#                                     known SCRUM-364 dashboard residuals)
+#
+# To bypass (last resort, requires documented reason): git push --no-verify
 # ============================================================================
 
-echo "Running pre-push checks..."
+set -e
 
-# Backend tests
-echo "=== Backend Tests ==="
+echo ""
+echo "▶ Pre-push CI parity checks (target ~3-5 min total)"
+echo "  Bypass with --no-verify if absolutely necessary."
+echo ""
+
+# ----------------------------------------------------------------------------
+# nexacore-api
+# ----------------------------------------------------------------------------
 cd nexacore-api
-npx prisma generate --no-hints 2>/dev/null
-npm test -- --passWithNoTests
-if [ $? -ne 0 ]; then
-  echo "ERROR: Backend tests failed. Push aborted."
-  exit 1
-fi
 
-# Backend build
-echo "=== Backend Build ==="
+echo "  [api 1/5] npm ci (catches lock-package.json drift)"
+npm ci --silent
+
+echo "  [api 2/5] prisma generate"
+npx prisma generate --no-hints 2>&1 | tail -1
+
+echo "  [api 3/5] eslint --max-warnings 0  (Layer 3 SAST Backend)"
+npx eslint "{src,apps,libs,test}/**/*.ts" --max-warnings 0
+
+echo "  [api 4/5] nest build  (Layer 5 Build Backend)"
 npm run build
-if [ $? -ne 0 ]; then
-  echo "ERROR: Backend build failed. Push aborted."
-  exit 1
-fi
+
+echo "  [api 5/5] jest --coverage  (Layer 4 Tests Backend)"
+# CI measures branch coverage at 82.97% on Linux; on Windows the same
+# tests measure 79.76% (consistent across multiple clean runs). The
+# 3.21% delta is OS-specific — file enumeration order + async timing
+# differ between platforms. The 80% threshold defined in package.json
+# is calibrated for CI/Linux.
+#
+# We disable the threshold here (--coverageThreshold='{}') so tests
+# still need to PASS but coverage thresholds don't false-fail on
+# Windows. CI Linux still enforces the threshold via the same
+# `npm run test:cov` invocation. Long-term fix is a Linux devcontainer
+# (separate ticket if pursued).
+npm run test:cov -- --silent --forceExit --coverageThreshold='{}'
 
 cd ..
 
-echo "All pre-push checks passed."
+# ----------------------------------------------------------------------------
+# nexacore-dashboard
+# ----------------------------------------------------------------------------
+cd nexacore-dashboard
+
+echo "  [dashboard 1/4] npm ci (catches lock drift)"
+npm ci --silent
+
+echo "  [dashboard 2/4] next lint --max-warnings 0  (Layer 3 SAST Frontend)"
+npx next lint --max-warnings 0
+
+echo "  [dashboard 3/4] next build  (Layer 5 Build Frontend)"
+npm run build
+
+echo "  [dashboard 4/4] jest --coverage  (Layer 4 Tests Frontend)"
+# Same OS-specific coverage delta rationale as api — see above.
+npm run test:cov -- --silent --forceExit --coverageThreshold='{}'
+
+cd ..
+
+# ----------------------------------------------------------------------------
+# npm audit — warn-only at pre-push (CI enforces)
+# ----------------------------------------------------------------------------
+# Reason: dashboard currently has known residual highs scoped to SCRUM-364
+# (Next 14 → 15+ migration). Failing pre-push on those would block every push
+# until SCRUM-364 lands. CI Layer 2 still enforces. Once SCRUM-364 closes the
+# residuals, this section can be tightened to fail-on-find.
+
+echo ""
+echo "▶ npm audit (warn-only — Layer 2 enforced by CI)"
+
+audit_warn() {
+  pkg="$1"
+  cd "$pkg"
+  out=$(npm audit --audit-level=high 2>&1 || true)
+  high=$(echo "$out" | grep -oE "[0-9]+ high" | head -1 || true)
+  crit=$(echo "$out" | grep -oE "[0-9]+ critical" | head -1 || true)
+  if [ -n "$crit" ] || [ -n "$high" ]; then
+    echo "  [audit:$pkg] WARN: ${crit:-0 critical}, ${high:-0 high} (CI will block; SCRUM-364 may apply)"
+  else
+    echo "  [audit:$pkg] OK"
+  fi
+  cd ..
+}
+
+audit_warn nexacore-api
+audit_warn nexacore-dashboard
+
+echo ""
+echo "✓ All CI-parity pre-push checks passed."
+echo ""
