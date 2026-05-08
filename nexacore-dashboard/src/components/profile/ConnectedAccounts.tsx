@@ -6,6 +6,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/context/ToastContext";
 import { PROFILE_TOAST } from "@/lib/toast-messages";
 import { unlinkOAuth, generateLinkCode } from "@/lib/oauth-api";
+import { navigateTo } from "@/lib/navigation";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
@@ -113,7 +114,9 @@ export default function ConnectedAccounts() {
     try {
       const { code } = await generateLinkCode();
       const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
-      window.location.href = `${apiUrl}/auth/link/${providerId.toLowerCase()}?link_code=${encodeURIComponent(code)}`;
+      navigateTo(
+        `${apiUrl}/auth/link/${providerId.toLowerCase()}?link_code=${encodeURIComponent(code)}`,
+      );
     } catch (err) {
       const isRateLimit =
         (err as { error?: { statusCode?: number } })?.error?.statusCode ===
