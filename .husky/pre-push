@@ -15,7 +15,8 @@
 #   1. npm ci (per package)        → Layer 2 setup (catches lock drift)
 #   2. npx prisma generate (api)   → Layer 4/5 setup
 #   3. npx eslint (api)            → Layer 3 SAST Backend
-#   4. npx next lint (dashboard)   → Layer 3 SAST Frontend
+#   4. npx eslint (dashboard)      → Layer 3 SAST Frontend
+#                                     (Next 16 removed `next lint`; SCRUM-364)
 #   5. npm run build (per package) → Layer 5 Build
 #   6. npm run test:cov (per pkg)  → Layer 4 Tests (coverage matches CI)
 #   7. npm audit (warn-only)       → Layer 2 Dep Audit (informational here;
@@ -73,8 +74,8 @@ cd nexacore-dashboard
 echo "  [dashboard 1/4] npm ci (catches lock drift)"
 npm ci --silent
 
-echo "  [dashboard 2/4] next lint --max-warnings 0  (Layer 3 SAST Frontend)"
-npx next lint --max-warnings 0
+echo "  [dashboard 2/4] eslint --max-warnings 0  (Layer 3 SAST Frontend)"
+npx eslint "src/**/*.{ts,tsx}" --max-warnings 0
 
 echo "  [dashboard 3/4] next build  (Layer 5 Build Frontend)"
 npm run build
