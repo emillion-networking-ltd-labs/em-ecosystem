@@ -80,10 +80,13 @@ jest.mock("@/context/ToastContext", () => ({
   }),
 }));
 
-Object.defineProperty(window, "location", {
-  value: { pathname: "/login", replace: jest.fn() },
-  writable: true,
-});
+// jsdom 26+/jest 30 locked down window.location's properties. The whole
+// location object is still deletable, so we replace it wholesale.
+delete (window as { location?: Location }).location;
+(window as unknown as { location: unknown }).location = {
+  pathname: "/login",
+  replace: jest.fn(),
+};
 
 beforeEach(() => {
   global.fetch = jest.fn().mockResolvedValue({

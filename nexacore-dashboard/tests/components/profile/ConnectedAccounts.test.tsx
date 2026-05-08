@@ -28,22 +28,14 @@ jest.mock('@/lib/oauth-api', () => ({
   generateLinkCode: (...args: unknown[]) => mockGenerateLinkCode(...args),
 }));
 
-// Mock window.location
-const originalLocation = window.location;
-
-beforeAll(() => {
-  Object.defineProperty(window, 'location', {
-    writable: true,
-    value: { ...originalLocation, href: '' },
-  });
-});
-
-afterAll(() => {
-  Object.defineProperty(window, 'location', {
-    writable: true,
-    value: originalLocation,
-  });
-});
+// jsdom 26+/jest 30 locked down window.location entirely (assign/replace/href
+// are non-writable + non-configurable). We mock the navigation wrapper module
+// instead — the component imports navigateTo() from @/lib/navigation, so this
+// gives a clean assertion surface without fighting jsdom.
+const mockNavigateTo = jest.fn();
+jest.mock('@/lib/navigation', () => ({
+  navigateTo: (...args: unknown[]) => mockNavigateTo(...args),
+}));
 
 // --- Tests ---
 
@@ -54,7 +46,7 @@ describe('ConnectedAccounts', () => {
     jest.clearAllMocks();
     mockUserValue = mockUser();
     mockGenerateLinkCode.mockResolvedValue({ code: 'test-link-code' });
-    window.location.href = '';
+    mockNavigateTo.mockClear();
   });
 
   it('renders connected providers with status', () => {
@@ -88,8 +80,10 @@ describe('ConnectedAccounts', () => {
 
     await waitFor(() => {
       expect(mockGenerateLinkCode).toHaveBeenCalled();
-      expect(window.location.href).toContain('/auth/link/google');
-      expect(window.location.href).toContain('code=test-link-code');
+      expect(mockNavigateTo).toHaveBeenCalled();
+      const lastUrl = mockNavigateTo.mock.calls.at(-1)?.[0] as string;
+      expect(lastUrl).toContain('/auth/link/google');
+      expect(lastUrl).toContain('code=test-link-code');
     });
   });
 
