@@ -372,7 +372,7 @@ export function createPasskeyTestSetup(): PasskeyTestContext {
 
   const service = new PasskeyService(
     prisma as any,
-    usersService as unknown as UsersService,
+    usersService,
     auditService as any,
     redis as any,
     mockConfigService as unknown as ConfigService,

@@ -20,7 +20,7 @@ describe('registerHelmetMiddleware', () => {
       use: jest.fn((...args) => {
         useCalls.push(args[0]);
       }),
-    } as unknown as jest.Mocked<INestApplication>;
+    };
   });
 
   it('should register helmet middleware with CSP, HSTS, and xFrameOptions', () => {

@@ -10,7 +10,7 @@ describe('registerHttpsRedirectMiddleware', () => {
     originalNodeEnv = process.env.NODE_ENV;
     mockApp = {
       use: jest.fn(),
-    } as unknown as jest.Mocked<INestApplication>;
+    };
   });
 
   afterEach(() => {
