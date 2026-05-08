@@ -48,6 +48,12 @@ jobs:
     name: 'Layer 2: Dependency Audit'
     runs-on: ubuntu-latest
     strategy:
+      # SCRUM-370: ensure both api and dashboard always run independently.
+      # Default fail-fast: true cancels siblings on first failure, costing
+      # visibility (e.g. cannot tell if api is passing while debugging
+      # dashboard). With fail-fast: false, every CI run reports both
+      # outcomes — essential for incremental triage.
+      fail-fast: false
       matrix:
         package: [nexacore-api, nexacore-dashboard]
     steps:
