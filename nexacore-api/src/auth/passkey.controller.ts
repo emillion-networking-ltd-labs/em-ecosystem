@@ -24,7 +24,7 @@ import { Throttle } from '@nestjs/throttler';
 import type { Response } from 'express';
 import { PasskeyService } from './passkey.service';
 import { TokenService } from './token.service';
-import { AUTH_RATE_LIMITS } from './constants/auth.constants';
+import { AUTH_RATE_LIMITS, THROTTLE_CONFIGS } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { PasskeyRegisterOptionsDto } from './dto/passkey-register-options.dto';
 import { PasskeyRegisterVerifyDto } from './dto/passkey-register-verify.dto';
@@ -49,12 +49,7 @@ export class PasskeyController {
   @Post('register/options')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.mfa.ttl,
-      limit: AUTH_RATE_LIMITS.mfa.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.mfa)
   @ApiOperation({ summary: 'Generate WebAuthn registration options' })
   @ApiResponse({ status: 201, description: 'Registration options returned' })
   @ApiResponse({
@@ -73,12 +68,7 @@ export class PasskeyController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.mfa.ttl,
-      limit: AUTH_RATE_LIMITS.mfa.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.mfa)
   @ApiOperation({ summary: 'Verify WebAuthn registration and store passkey' })
   @ApiResponse({ status: 201, description: 'Passkey registered successfully' })
   @ApiResponse({ status: 401, description: 'Verification failed' })
@@ -170,12 +160,7 @@ export class PasskeyController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.mfa.ttl,
-      limit: AUTH_RATE_LIMITS.mfa.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.mfa)
   @ApiOperation({
     summary: 'Delete a passkey (password confirmation required)',
   })

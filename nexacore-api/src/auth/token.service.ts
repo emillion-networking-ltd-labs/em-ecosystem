@@ -193,10 +193,39 @@ export class TokenService {
         ErrorMessages.mfa.AUTHENTICATION_REQUIRED,
       );
     }
-    const { accessToken, refreshToken, sessionId } = await this.generateTokens(
-      user,
-      requestMeta,
-    );
+    return this.issueAuthSession(user, requestMeta);
+  }
+
+  /**
+   * Centralizes the post-token-issuance "login success" flow shared by
+   * MFA verification, trusted-device login, and any future
+   * already-authenticated path: travel-anomaly check, new-device
+   * notification, suspicious-login signal, and the AuthResult shape with
+   * the refresh-token cookie.
+   *
+   * SCRUM-356 / DU-04 — extracted from login.service.ts:completeTrustedDeviceLogin
+   * and the inline body that used to live in generateTokensForMfa above.
+   *
+   * @param user            The authenticated user.
+   * @param requestMeta     IP + user agent for security checks.
+   * @param preGenerated    Optional already-generated tokens. When omitted,
+   *                        new tokens are generated for `user`. Callers that
+   *                        need to issue audit logs between token creation
+   *                        and the success-flow (e.g. trusted-device login)
+   *                        pass tokens here so the audit landing point sits
+   *                        between the two.
+   */
+  async issueAuthSession(
+    user: User,
+    requestMeta: { ipAddress: string; userAgent?: string | null },
+    preGenerated?: {
+      accessToken: string;
+      refreshToken: string;
+      sessionId: string;
+    },
+  ): Promise<AuthResult> {
+    const { accessToken, refreshToken, sessionId } =
+      preGenerated ?? (await this.generateTokens(user, requestMeta));
 
     const travelResult = await this.loginSecurityService.checkImpossibleTravel(
       user,

@@ -81,6 +81,22 @@ export const AUTH_RATE_LIMITS = {
 };
 
 /**
+ * Pre-shaped @Throttle({ global: ... }) configs.
+ *
+ * SCRUM-356 / DU-04: extracts the repeated `@Throttle({ global: { ttl, limit } })`
+ * decorator stacks that previously appeared in mfa.controller (4×), passkey.controller,
+ * and account.controller. Centralizing here means a rate-limit change touches one place
+ * and the @Throttle callsites become a single line each.
+ */
+export const THROTTLE_CONFIGS = {
+  mfa: { global: AUTH_RATE_LIMITS.mfa },
+  sensitiveAction: { global: AUTH_RATE_LIMITS.sensitive_action },
+  userSettings: { global: AUTH_RATE_LIMITS.user_settings },
+  trustDevice: { global: AUTH_RATE_LIMITS.trust_device },
+  oauth: { global: AUTH_RATE_LIMITS.oauth },
+} as const;
+
+/**
  * Session idle timeout in hours.
  * Sessions with lastUsedAt older than this are rejected on refresh.
  * NIST SP 800-63B §7.2 / OWASP ASVS V3.3.2: idle timeout <= 30 min at AAL2.

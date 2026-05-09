@@ -28,6 +28,7 @@ import {
   AUTH_RATE_LIMITS,
   DEVICE_FINGERPRINT_HEADER,
   REFRESH_TOKEN_COOKIE_NAME,
+  THROTTLE_CONFIGS,
 } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from './guards/roles.guard';
@@ -206,12 +207,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.trust_device.ttl,
-      limit: AUTH_RATE_LIMITS.trust_device.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.trustDevice)
   @ApiOperation({ summary: 'Logout from all sessions (requires password)' })
   @ApiResponse({ status: 200, description: 'All sessions revoked' })
   @ApiResponse({ status: 400, description: 'Password required' })
