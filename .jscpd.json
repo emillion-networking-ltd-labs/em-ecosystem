@@ -1,0 +1,25 @@
+{
+  "_comment": "jscpd config — SCRUM-357. Thresholds match audit-standards.mdc Phase 10c (production code: >=10 lines / >=50 tokens). Pre-commit hook narrows to staged files via --pattern.",
+  "minLines": 10,
+  "minTokens": 50,
+  "threshold": 100,
+  "reporters": ["console"],
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/.next/**",
+    "**/coverage/**",
+    "**/build/**",
+    "**/*.spec.ts",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/tests/**",
+    "**/__tests__/**",
+    "**/*.d.ts",
+    "**/*.lock.json",
+    "**/package-lock.json"
+  ],
+  "format": ["typescript", "tsx"],
+  "absolute": true,
+  "gitignore": true
+}

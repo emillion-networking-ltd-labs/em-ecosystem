@@ -3,8 +3,9 @@
 # ============================================================================
 # Pre-commit hook — EM NexaCore
 # ============================================================================
-# Runs lint-staged on staged files + gitleaks on staged changes.
-# Standards: CWE-798, OWASP A07:2021
+# Runs lint-staged + gitleaks + jscpd on staged files.
+# Standards: CWE-798, OWASP A07:2021, ISO 27001 Cl.10.2 (DU-04 recurrence
+#   prevention via SCRUM-357), CISQ ASCMM-MNT-19, ISO 25010 Reusability.
 # ============================================================================
 
 # Run lint-staged (ESLint security + formatting on staged files)
@@ -17,6 +18,39 @@ if command -v gitleaks &> /dev/null; then
     echo ""
     echo "ERROR: Gitleaks detected secrets in staged files."
     echo "Please remove sensitive data before committing."
+    echo ""
+    exit 1
+  fi
+fi
+
+# ----------------------------------------------------------------------------
+# Duplication check (SCRUM-357 — ISO 27001 Cl.10.2 DU-04 recurrence prevention)
+# ----------------------------------------------------------------------------
+# Scans staged production .ts files for cross-file duplication >=10 lines /
+# >=50 tokens (matches /audit Phase 10c threshold). Test helpers, specs, and
+# .d.ts are excluded via .jscpd.json. Override (after refactor evaluation):
+#   git commit --no-verify  AND document the rationale in commit body.
+# ----------------------------------------------------------------------------
+STAGED_TS=$(git diff --cached --name-only --diff-filter=ACMR | grep -E '^(nexacore-api|nexacore-dashboard|satellites/[^/]+)/src/.*\.tsx?$' | grep -vE '\.spec\.ts$|\.test\.tsx?$|/tests/|/__tests__/|\.d\.ts$' || true)
+
+if [ -n "$STAGED_TS" ]; then
+  # jscpd output format: "Duplications detection: Found N exact clones with M(P%) duplicated lines"
+  # Threshold in .jscpd.json is set to 100% so jscpd never auto-fails; we read
+  # the clone count from stdout and fail the hook only when N >= 1.
+  JSCPD_OUT=$(npx jscpd --config .jscpd.json $STAGED_TS 2>&1 || true)
+  if echo "$JSCPD_OUT" | grep -qE "Found [1-9][0-9]* (exact )?clones?\.?"; then
+    echo ""
+    echo "ERROR: jscpd detected new cross-file duplication in staged production .ts files."
+    echo ""
+    echo "$JSCPD_OUT"
+    echo ""
+    echo "Per backend-standards.mdc 'Code Reuse & Duplication' (Rule of Three):"
+    echo "  - 1st copy: OK"
+    echo "  - 2nd copy: leave a TODO(refactor) comment"
+    echo "  - 3rd copy: extract a helper before completing the ticket"
+    echo ""
+    echo "Override only after refactor evaluation: git commit --no-verify"
+    echo "AND document the rationale in the commit body."
     echo ""
     exit 1
   fi
