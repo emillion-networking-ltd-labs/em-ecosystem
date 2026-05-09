@@ -45,3 +45,5 @@ export default async function RootLayout({
     </html>
   );
 }
+
+// SCRUM-379 VRT diff trigger
