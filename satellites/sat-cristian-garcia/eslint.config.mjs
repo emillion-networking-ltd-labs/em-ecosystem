@@ -12,9 +12,12 @@ export default [
   },
   {
     rules: {
-      // The react-hooks plugin v6 (shipped with Next 16) introduces several
-      // new rules not active under Next 14. Keeping the lint baseline equal
-      // to pre-migration: tracked as tech-debt for a follow-up ticket.
+      // SCRUM-377: kept disabled after audit. See nexacore-dashboard's
+      // eslint.config.mjs for the full rationale — react-hooks v6 rules
+      // produce too many false positives on canonical React patterns
+      // (data fetching, theme/locale hydration, click-outside handlers).
+      // Satellite has 100 such violations, all spot-checked as legitimate
+      // patterns. Revisit when react-hooks v7 lands with calibrated heuristics.
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/refs": "off",
       "react-hooks/immutability": "off",
