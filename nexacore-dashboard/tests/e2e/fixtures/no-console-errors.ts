@@ -42,6 +42,14 @@ const ALLOWLIST: RegExp[] = [
   // Real fix (set the image's intrinsic aspect or use a wrapper) tracked
   // under SCRUM-381.
   /Image with src ".*em-icon.*" has either width or height modified/i,
+  // Generic resource load failures from missing CI backend (any 4xx/5xx).
+  /Failed to load resource: the server responded with a status of \d+/i,
+  // React 19 added a runtime warning about <script> tags inside React
+  // component trees. We use one in layout.tsx (THEME_INIT_SCRIPT for
+  // FOUC prevention) — intentional pattern, also used by next-themes.
+  // SCRUM-381 may revisit using the dangerouslySetInnerHTML+template
+  // approach if the warning becomes a real defect signal.
+  /Encountered a script tag while rendering React component/i,
 ];
 
 function isAllowlisted(text: string): boolean {
