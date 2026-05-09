@@ -23,10 +23,20 @@ export default async function RootLayout({
         {/* SECURITY-ALLOW: theme-flash prevention. Static, build-time-known
             script content (THEME_INIT_SCRIPT constant) — never user-controlled.
             CSP nonce-protected. Required to run before React hydration to set
-            data-theme on <html> and avoid the FOUC. Reviewed 2026-05-07. */}
+            data-theme on <html> and avoid the FOUC. Reviewed 2026-05-07.
+
+            suppressHydrationWarning: Next 16 rewrites the `nonce` attribute
+            on inline scripts using the response CSP header at HTML transform
+            time. The server-rendered tree may have nonce="" (when
+            `headers().get('x-nonce')` returns null during prefetch / first
+            render in dev) while the browser receives the rewritten value,
+            triggering a benign hydration mismatch on this specific attribute.
+            The script content itself is identical on both sides; only the
+            CSP nonce attribute differs. Same pattern used by next-themes. */}
         <script
           nonce={nonce}
           dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+          suppressHydrationWarning
         />
       </head>
       <body>

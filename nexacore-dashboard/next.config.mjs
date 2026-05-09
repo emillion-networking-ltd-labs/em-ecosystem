@@ -1,5 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  // Hide the Next.js dev-tools floating "N" indicator in the bottom-left corner
+  // during `next dev`. Cosmetic only; does not affect production builds.
+  devIndicators: false,
+
   images: {
     remotePatterns: [
       { hostname: 'lh3.googleusercontent.com' },
