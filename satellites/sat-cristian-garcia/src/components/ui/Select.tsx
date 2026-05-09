@@ -24,6 +24,9 @@ interface SelectProps {
    * (false) keeps the original inline-block menu/filter behavior.
    */
   fullWidth?: boolean;
+  // axe button-name on role="combobox" treats inner text as the value, not
+  // the name — an explicit accessible name is required.
+  ariaLabel?: string;
 }
 
 export const selectSpecs = {
@@ -66,6 +69,7 @@ export default function Select({
   className = "",
   size = "sm",
   fullWidth = false,
+  ariaLabel,
 }: SelectProps) {
   const [open, setOpen] = useState(false);
   const [focusedIndex, setFocusedIndex] = useState(-1);
@@ -184,6 +188,7 @@ export default function Select({
         aria-expanded={open}
         aria-haspopup="listbox"
         aria-controls={listboxId}
+        aria-label={ariaLabel}
         disabled={disabled}
         onClick={() => (open ? setOpen(false) : openDropdown())}
         onKeyDown={handleKeyDown}

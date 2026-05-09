@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures/no-console-errors";
 
 /**
  * Visual Regression Tests — SCRUM-379.
@@ -28,6 +28,25 @@ const PUBLIC_ROUTES = [
   { path: "/password-reset/check-email", name: "password-reset-check-email" },
   { path: "/activation/check-email", name: "activation-check-email" },
 ] as const;
+
+/**
+ * Post-auth routes — only snapshot when VRT_BYPASS is enabled (CI sets
+ * NEXT_PUBLIC_VRT_BYPASS_AUTH=1 so AuthContext seeds a mock SafeUser).
+ * Tests are skipped locally unless the env var is set.
+ *
+ * SCRUM-380 Step 3: extended coverage so post-auth pages stop being
+ * blind to framework-bump visual regressions.
+ */
+const POST_AUTH_ROUTES = [
+  { path: "/dashboard", name: "dashboard" },
+  { path: "/admin/audit-logs", name: "admin-audit-logs" },
+  { path: "/admin/permissions", name: "admin-permissions" },
+  { path: "/admin/design-system", name: "admin-design-system" },
+  { path: "/profile", name: "profile" },
+  { path: "/settings", name: "settings" },
+] as const;
+
+const VRT_AUTH_BYPASS = process.env.NEXT_PUBLIC_VRT_BYPASS_AUTH === "1";
 
 test.describe("Visual regression — public routes (light theme)", () => {
   test.beforeEach(async ({ page }) => {
@@ -70,6 +89,58 @@ test.describe("Visual regression — public routes (dark theme)", () => {
       await page.goto(route.path, { waitUntil: "domcontentloaded" });
       await page.evaluate(() => document.fonts.ready);
       await page.waitForTimeout(500);
+
+      await expect(page).toHaveScreenshot(`${route.name}-dark.png`, {
+        fullPage: true,
+      });
+    });
+  }
+});
+
+// =============================================================================
+// POST-AUTH ROUTES — gated on NEXT_PUBLIC_VRT_BYPASS_AUTH=1
+// =============================================================================
+
+test.describe("Visual regression — post-auth routes (light theme)", () => {
+  test.skip(!VRT_AUTH_BYPASS, "VRT_BYPASS_AUTH not set — skipping post-auth routes");
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem("theme", "light");
+      } catch {}
+    });
+  });
+
+  for (const route of POST_AUTH_ROUTES) {
+    test(`${route.name} renders consistently`, async ({ page }) => {
+      await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForTimeout(800);
+
+      await expect(page).toHaveScreenshot(`${route.name}-light.png`, {
+        fullPage: true,
+      });
+    });
+  }
+});
+
+test.describe("Visual regression — post-auth routes (dark theme)", () => {
+  test.skip(!VRT_AUTH_BYPASS, "VRT_BYPASS_AUTH not set — skipping post-auth routes");
+
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => {
+      try {
+        localStorage.setItem("theme", "dark");
+      } catch {}
+    });
+  });
+
+  for (const route of POST_AUTH_ROUTES) {
+    test(`${route.name} dark mode renders consistently`, async ({ page }) => {
+      await page.goto(route.path, { waitUntil: "domcontentloaded" });
+      await page.evaluate(() => document.fonts.ready);
+      await page.waitForTimeout(800);
 
       await expect(page).toHaveScreenshot(`${route.name}-dark.png`, {
         fullPage: true,

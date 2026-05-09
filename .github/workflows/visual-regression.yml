@@ -26,12 +26,12 @@ on:
       - "nexacore-dashboard/src/**"
       - "nexacore-dashboard/public/**"
       - "nexacore-dashboard/playwright.config.ts"
-      - "nexacore-dashboard/tests/e2e/visual.spec.ts"
+      - "nexacore-dashboard/tests/e2e/**"
       - "nexacore-dashboard/package.json"
       - "satellites/sat-cristian-garcia/src/**"
       - "satellites/sat-cristian-garcia/public/**"
       - "satellites/sat-cristian-garcia/playwright.config.ts"
-      - "satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts"
+      - "satellites/sat-cristian-garcia/tests/e2e/**"
       - "satellites/sat-cristian-garcia/package.json"
       - ".github/workflows/visual-regression.yml"
   workflow_dispatch:
@@ -90,31 +90,43 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'dashboard' || inputs.package == 'both')
         env:
           VRT: "1"
+          # SCRUM-380: enable AuthContext bypass so post-auth routes render
+          # with a deterministic mock SafeUser. The bypass code lives in HEAD
+          # (not in the baseline_ref), so we restore AuthContext + spec +
+          # fixtures from HEAD before running.
+          NEXT_PUBLIC_VRT_BYPASS_AUTH: "1"
         run: |
-          # Run from the repo root so git checkout paths resolve correctly.
           set -e
           BASELINE_REF="${{ inputs.baseline_ref }}"
           echo "Capturing dashboard baseline from $BASELINE_REF"
-          # Stash any uncommitted changes (none expected, defensive)
           git stash -u || true
           # Restore the dashboard source tree to the baseline ref — captures
           # what the UI looked like then, including package.json/lock so the
           # right framework versions install for the snapshot.
           git checkout "$BASELINE_REF" -- nexacore-dashboard
-          # Reinstall against the baseline-ref's package-lock so render matches.
+          # SCRUM-380: restore the VRT-bypass code + test harness from HEAD
+          # so the baseline_ref's source can be rendered post-auth via the
+          # bypass. AuthContext from HEAD honors NEXT_PUBLIC_VRT_BYPASS_AUTH;
+          # the baseline_ref's AuthContext doesn't.
+          git checkout HEAD -- \
+            nexacore-dashboard/src/context/AuthContext.tsx \
+            nexacore-dashboard/tests/e2e/visual.spec.ts \
+            nexacore-dashboard/tests/e2e/fixtures/
           (cd nexacore-dashboard && npm ci && npx playwright install chromium --with-deps)
-          # Boot dev server in background.
-          (cd nexacore-dashboard && npm run dev &)
-          # Wait for server up (up to 90s).
+          (cd nexacore-dashboard && NEXT_PUBLIC_VRT_BYPASS_AUTH=1 npm run dev &)
           (cd nexacore-dashboard && npx wait-on http://localhost:3001 -t 90000)
-          # Capture baseline (this writes tests/e2e/visual.spec.ts-snapshots/).
-          (cd nexacore-dashboard && npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
-          # Kill any next-dev process bound to 3001.
+          (cd nexacore-dashboard && NEXT_PUBLIC_VRT_BYPASS_AUTH=1 npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
           (pgrep -f "next dev -p 3001" | xargs -r kill -9) || true
-          # Restore EVERYTHING in nexacore-dashboard back to the current HEAD,
-          # EXCEPT the freshly captured snapshots (those are NEW files, untracked
-          # at HEAD, so `git checkout HEAD -- path` leaves them alone).
+          # Preserve freshly captured snapshots across the post-capture restore.
+          # If the snapshots dir is already committed (re-baseline scenario),
+          # `git checkout HEAD -- nexacore-dashboard` would wipe the new content.
+          # Cache to /tmp, restore source, then put snapshots back.
+          rm -rf /tmp/dash-snapshots && mkdir -p /tmp/dash-snapshots
+          cp -a nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots/. /tmp/dash-snapshots/ 2>/dev/null || true
           git checkout HEAD -- nexacore-dashboard
+          rm -rf nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots
+          mkdir -p nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots
+          cp -a /tmp/dash-snapshots/. nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots/ 2>/dev/null || true
           ls nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots/ || (echo "No snapshots produced!" && exit 1)
         timeout-minutes: 30
 
@@ -133,19 +145,32 @@ jobs:
           git push origin HEAD:${{ github.ref_name }}
 
       # ----- COMPARISON PATH (PR trigger) -----
-      - name: Run VRT against committed baseline (PR)
+      - name: Run VRT + a11y against committed baseline (PR)
         if: github.event_name == 'pull_request'
         working-directory: nexacore-dashboard
         env:
           VRT: "1"
+          # SCRUM-380: NEXT_PUBLIC_VRT_BYPASS_AUTH intentionally NOT set
+          # in PR-comparison runs. The bypass triggers redirects on
+          # public auth pages (/login etc. detect authenticated state and
+          # redirect to /dashboard) which would change the rendered DOM
+          # for those routes. Post-auth route tests are gated by the
+          # env var in visual.spec.ts (test.skip when missing) so they
+          # auto-skip in this run. Re-enable in a follow-up ticket
+          # (SCRUM-381) that scopes the bypass to post-auth tests only.
         run: |
+          set -e
           npm run dev &
           DEV_PID=$!
           npx wait-on http://localhost:3001 -t 90000
-          # Run WITHOUT --update-snapshots → fails on diff
+          # SCRUM-380: visual + a11y both run; either failing fails the
+          # gate. Visual is run WITHOUT --update-snapshots so any diff
+          # against the committed baseline fails immediately.
+          EXIT=0
           npx playwright test visual.spec.ts --workers=1 --reporter=list || EXIT=$?
+          npx playwright test a11y.spec.ts --workers=1 --reporter=list || EXIT=$?
           kill $DEV_PID || true
-          exit ${EXIT:-0}
+          exit ${EXIT}
         timeout-minutes: 30
 
       - name: Upload diff report (on failure)
@@ -219,7 +244,16 @@ jobs:
           (cd satellites/sat-cristian-garcia && npx wait-on http://localhost:3002 -t 90000)
           (cd satellites/sat-cristian-garcia && npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
           (pgrep -f "next dev -p 3002" | xargs -r kill -9) || true
+          # Preserve freshly captured snapshots across the post-capture restore.
+          # The snapshots dir is committed in HEAD (initial baseline), so a plain
+          # `git checkout HEAD -- satellites/...` would wipe the new content.
+          # Cache to /tmp, restore source, then put snapshots back.
+          rm -rf /tmp/sat-snapshots && mkdir -p /tmp/sat-snapshots
+          cp -a satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots/. /tmp/sat-snapshots/
           git checkout HEAD -- satellites/sat-cristian-garcia
+          rm -rf satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots
+          mkdir -p satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots
+          cp -a /tmp/sat-snapshots/. satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots/
           ls satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots/ || (echo "No snapshots produced!" && exit 1)
         timeout-minutes: 30
 
@@ -237,18 +271,21 @@ jobs:
           git commit -m "chore(SCRUM-379): refresh satellite VRT baseline from ${{ inputs.baseline_ref }} [skip ci]"
           git push origin HEAD:${{ github.ref_name }}
 
-      - name: Run VRT against committed baseline (PR)
+      - name: Run VRT + a11y against committed baseline (PR)
         if: github.event_name == 'pull_request'
         working-directory: satellites/sat-cristian-garcia
         env:
           VRT: "1"
         run: |
+          set -e
           npm run dev &
           DEV_PID=$!
           npx wait-on http://localhost:3002 -t 90000
+          EXIT=0
           npx playwright test visual.spec.ts --workers=1 --reporter=list || EXIT=$?
+          npx playwright test a11y.spec.ts --workers=1 --reporter=list || EXIT=$?
           kill $DEV_PID || true
-          exit ${EXIT:-0}
+          exit ${EXIT}
         timeout-minutes: 30
 
       - name: Upload satellite diff report
