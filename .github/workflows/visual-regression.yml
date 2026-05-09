@@ -88,36 +88,34 @@ jobs:
       # ----- BASELINE CAPTURE PATH (manual trigger) -----
       - name: Capture baseline from ${{ inputs.baseline_ref }}
         if: github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'dashboard' || inputs.package == 'both')
-        working-directory: nexacore-dashboard
         env:
           VRT: "1"
         run: |
-          # Stash any uncommitted changes (none expected, but defensive)
-          git stash -u || true
-          # Checkout source files only from the baseline ref (keep package*.json from current HEAD)
+          # Run from the repo root so git checkout paths resolve correctly.
+          set -e
           BASELINE_REF="${{ inputs.baseline_ref }}"
-          echo "Capturing baseline from $BASELINE_REF"
-          # Switch the SOURCE CODE to baseline ref. Keep package.json/lock from current ref
-          # so we get the latest framework versions that we want to use long-term — the
-          # baseline is purely the SOURCE rendered with current frameworks (which is
-          # actually what we want to compare against in PRs anyway).
-          # Wait — that's wrong. Baseline should be the visual at that ref AS IT WAS,
-          # i.e. with whatever package.json existed then. Let me checkout fully.
-          git checkout "$BASELINE_REF" -- nexacore-dashboard/
-          npm ci
-          npx playwright install chromium --with-deps
-          # Boot dev server in background
-          npm run dev &
-          DEV_PID=$!
-          # Wait for server up (up to 90s)
-          npx wait-on http://localhost:3001 -t 90000
-          # Capture baseline
-          npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list
-          # Kill dev server
-          kill $DEV_PID || true
-          # Switch source back to current ref so we can commit only the baselines
-          git checkout HEAD -- nexacore-dashboard/src/
-          # Note: snapshots are in tests/e2e/visual.spec.ts-snapshots/ — keep them.
+          echo "Capturing dashboard baseline from $BASELINE_REF"
+          # Stash any uncommitted changes (none expected, defensive)
+          git stash -u || true
+          # Restore the dashboard source tree to the baseline ref — captures
+          # what the UI looked like then, including package.json/lock so the
+          # right framework versions install for the snapshot.
+          git checkout "$BASELINE_REF" -- nexacore-dashboard
+          # Reinstall against the baseline-ref's package-lock so render matches.
+          (cd nexacore-dashboard && npm ci && npx playwright install chromium --with-deps)
+          # Boot dev server in background.
+          (cd nexacore-dashboard && npm run dev &)
+          # Wait for server up (up to 90s).
+          (cd nexacore-dashboard && npx wait-on http://localhost:3001 -t 90000)
+          # Capture baseline (this writes tests/e2e/visual.spec.ts-snapshots/).
+          (cd nexacore-dashboard && npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
+          # Kill any next-dev process bound to 3001.
+          (pgrep -f "next dev -p 3001" | xargs -r kill -9) || true
+          # Restore EVERYTHING in nexacore-dashboard back to the current HEAD,
+          # EXCEPT the freshly captured snapshots (those are NEW files, untracked
+          # at HEAD, so `git checkout HEAD -- path` leaves them alone).
+          git checkout HEAD -- nexacore-dashboard
+          ls nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots/ || (echo "No snapshots produced!" && exit 1)
         timeout-minutes: 30
 
       - name: Commit + push baseline (dashboard, workflow_dispatch only)
@@ -196,21 +194,21 @@ jobs:
 
       - name: Capture baseline from ${{ inputs.baseline_ref }}
         if: github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'satellite' || inputs.package == 'both')
-        working-directory: satellites/sat-cristian-garcia
         env:
           VRT: "1"
         run: |
+          set -e
           BASELINE_REF="${{ inputs.baseline_ref }}"
           echo "Capturing satellite baseline from $BASELINE_REF"
-          git checkout "$BASELINE_REF" -- satellites/sat-cristian-garcia/
-          npm ci
-          npx playwright install chromium --with-deps
-          npm run dev &
-          DEV_PID=$!
-          npx wait-on http://localhost:3002 -t 90000
-          npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list
-          kill $DEV_PID || true
-          git checkout HEAD -- satellites/sat-cristian-garcia/src/
+          git stash -u || true
+          git checkout "$BASELINE_REF" -- satellites/sat-cristian-garcia
+          (cd satellites/sat-cristian-garcia && npm ci && npx playwright install chromium --with-deps)
+          (cd satellites/sat-cristian-garcia && npm run dev &)
+          (cd satellites/sat-cristian-garcia && npx wait-on http://localhost:3002 -t 90000)
+          (cd satellites/sat-cristian-garcia && npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
+          (pgrep -f "next dev -p 3002" | xargs -r kill -9) || true
+          git checkout HEAD -- satellites/sat-cristian-garcia
+          ls satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots/ || (echo "No snapshots produced!" && exit 1)
         timeout-minutes: 30
 
       - name: Commit + push baseline (satellite)
