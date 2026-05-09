@@ -65,7 +65,6 @@ export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
                 height={24}
                 priority
                 className="dark:invert"
-                style={{ width: "auto", height: "auto" }}
               />
 
               {/* Figma: "Ligth / Dark" — flex-1, justify-end, p=10 */}
