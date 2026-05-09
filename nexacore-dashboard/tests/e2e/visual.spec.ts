@@ -41,11 +41,13 @@ test.describe("Visual regression — public routes (light theme)", () => {
 
   for (const route of PUBLIC_ROUTES) {
     test(`${route.name} renders consistently`, async ({ page }) => {
-      await page.goto(route.path);
+      await page.goto(route.path, { waitUntil: "domcontentloaded" });
       // Wait for fonts to settle to avoid font-flicker false positives.
       await page.evaluate(() => document.fonts.ready);
-      // Wait for any opening transitions to settle.
-      await page.waitForLoadState("networkidle");
+      // Settle pending layout work; avoid `networkidle` because the auth
+      // context attempts a CSRF-token fetch that fails in CI (no backend),
+      // causing the page to never reach networkidle.
+      await page.waitForTimeout(500);
 
       await expect(page).toHaveScreenshot(`${route.name}-light.png`, {
         fullPage: true,
