@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { test, expect } from "./fixtures/no-console-errors";
 
 /**
  * Visual Regression Tests — SCRUM-379 (satellite).

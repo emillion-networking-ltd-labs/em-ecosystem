@@ -314,6 +314,34 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (mountedRef.current) return;
     mountedRef.current = true;
+
+    // SCRUM-380 — Visual Regression Testing bypass.
+    // When NEXT_PUBLIC_VRT_BYPASS_AUTH=1 is set at BUILD time (only in CI
+    // VRT runs), short-circuit the auth flow with a deterministic mock
+    // user. Lets Playwright snapshot post-auth pages without a backend.
+    // Never enabled in production builds.
+    if (process.env.NEXT_PUBLIC_VRT_BYPASS_AUTH === "1") {
+      dispatch({
+        type: "AUTH_SUCCESS",
+        payload: {
+          user: {
+            id: "00000000-0000-0000-0000-000000000000",
+            email: "vrt@example.com",
+            firstName: "VRT",
+            lastName: "User",
+            role: "SUPERADMIN",
+            avatarUrl: null,
+            mfaEnabled: false,
+            hasPassword: true,
+            oauthProviders: [],
+            emailVerified: true,
+          } as unknown as SafeUser,
+          accessToken: "vrt-mock-token",
+        },
+      });
+      return;
+    }
+
     (async () => {
       const fp = await getFingerprint();
       if (fp) apiClient.setDeviceFingerprint(fp);
