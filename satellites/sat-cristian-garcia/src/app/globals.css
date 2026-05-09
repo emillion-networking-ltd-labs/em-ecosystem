@@ -276,6 +276,14 @@
   *, *::before, *::after { box-sizing: border-box; }
   button, input, select, textarea { font: inherit; }
   svg text { font-family: inherit; }
+  /* Tailwind v4 dropped the implicit `cursor: pointer` on <button>. Restore
+     it at the base layer so every interactive element looks clickable. The
+     `cursor-not-allowed` and `cursor-default` utilities still override
+     because they're in the utilities layer, which has higher specificity. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
   html {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
