@@ -25,6 +25,9 @@ const ALLOWLIST: RegExp[] = [
   // SCRUM-381 (TODO ticket): pre-existing RSC violation. Same allowlist
   // as dashboard for parity. Remove when SCRUM-381 fixes the root cause.
   /Functions cannot be passed directly to Client Components/i,
+  // CI runs without backend — these are expected.
+  /TypeError: Failed to fetch/i,
+  /Failed to load resource: net::ERR_CONNECTION_REFUSED/i,
 ];
 
 function isAllowlisted(text: string): boolean {
