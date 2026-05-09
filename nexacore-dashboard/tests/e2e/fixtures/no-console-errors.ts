@@ -28,6 +28,12 @@ const ALLOWLIST: RegExp[] = [
   // without blocking the SCRUM-380 PR. Remove this entry when SCRUM-381
   // fixes the underlying RSC violation.
   /Functions cannot be passed directly to Client Components/i,
+  // CI has no backend running; the auth context's optional CSRF token
+  // fetch fails with TypeError: Failed to fetch and retries. Expected
+  // in CI — auto-blocking on this would require booting nexacore-api in
+  // every PR run, which is too heavy for VRT scope.
+  /Error fetching CSRF token: TypeError: Failed to fetch/i,
+  /TypeError: Failed to fetch/i,
 ];
 
 function isAllowlisted(text: string): boolean {
