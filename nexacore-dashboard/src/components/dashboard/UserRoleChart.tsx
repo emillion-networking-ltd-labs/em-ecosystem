@@ -111,8 +111,11 @@ export default function UserRoleChart() {
 
       {!loading && !error && pieData.length > 0 && (
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
-          <div className="h-[120px] w-[120px] shrink-0">
-            <ResponsiveContainer width="100%" height="100%">
+          {/* React 19 + Recharts 3 ResponsiveContainer regression: pass
+              numeric width/height directly instead of "100%" — see
+              TotalUsersChart for the same pattern. */}
+          <div className="shrink-0">
+            <ResponsiveContainer width={120} height={120}>
               <PieChart>
                 <Pie
                   data={pieData}

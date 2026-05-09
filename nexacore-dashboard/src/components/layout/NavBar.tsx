@@ -85,6 +85,7 @@ export default function NavBar({
               width={60}
               height={24}
               className="shrink-0 dark:invert"
+              style={{ width: "auto", height: "auto" }}
             />
           </Link>
         </div>
