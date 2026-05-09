@@ -8,14 +8,19 @@
     "lint:api": "cd nexacore-api && npx eslint \"{src}/**/*.ts\" --no-fix",
     "lint:dashboard": "cd nexacore-dashboard && npx next lint",
     "test:api": "cd nexacore-api && npm test",
-    "test:dashboard": "cd nexacore-dashboard && npm test"
+    "test:dashboard": "cd nexacore-dashboard && npm test",
+    "dup:check": "jscpd --config .jscpd.json"
   },
   "devDependencies": {
     "husky": "^9.1.7",
+    "jscpd": "^4.0.9",
     "lint-staged": "^15.4.3"
   },
   "lint-staged": {
     "nexacore-api/src/**/*.ts": "npx prettier --check --config nexacore-api/.prettierrc",
     "nexacore-dashboard/src/**/*.{ts,tsx}": "npx prettier --check"
+  },
+  "overrides": {
+    "yaml": ">=2.8.3"
   }
 }
