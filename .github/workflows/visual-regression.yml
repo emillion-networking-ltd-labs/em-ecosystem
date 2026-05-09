@@ -1,0 +1,258 @@
+# ============================================================================
+# Visual Regression Testing — SCRUM-379
+# ============================================================================
+# Captures a pixel-baseline from the configured `BASELINE_REF` and compares
+# every PR's HEAD against it via Playwright `toHaveScreenshot()`. PR fails if
+# any visual diff exceeds 0.2% (configured in playwright.config.ts).
+#
+# Triggered:
+#   - On every PR to main (against committed baseline)
+#   - Manually via workflow_dispatch with `ref` input to refresh baseline
+#     (e.g. when a deliberate design change is merged)
+#
+# Why CI-only (not local):
+#   Pixel rendering varies by OS / font hinting / GPU. Snapshots captured on
+#   Windows / macOS will not match Linux CI. The canonical baseline must be
+#   captured on the same runner image that validates PRs. This mirrors what
+#   Vercel, Stripe, Linear, and Atlassian do for their own VRT.
+# ============================================================================
+
+name: Visual Regression
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "nexacore-dashboard/src/**"
+      - "nexacore-dashboard/public/**"
+      - "nexacore-dashboard/playwright.config.ts"
+      - "nexacore-dashboard/tests/e2e/visual.spec.ts"
+      - "nexacore-dashboard/package.json"
+      - "satellites/sat-cristian-garcia/src/**"
+      - "satellites/sat-cristian-garcia/public/**"
+      - "satellites/sat-cristian-garcia/playwright.config.ts"
+      - "satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts"
+      - "satellites/sat-cristian-garcia/package.json"
+      - ".github/workflows/visual-regression.yml"
+  workflow_dispatch:
+    inputs:
+      capture_baseline:
+        description: "Capture fresh baseline (overwrites committed snapshots)"
+        type: boolean
+        default: false
+      baseline_ref:
+        description: "Git ref to capture baseline from (default: ee309e6 = pre-Tailwind-4)"
+        required: false
+        default: "ee309e6"
+      package:
+        description: "Which package to capture baseline for"
+        required: true
+        type: choice
+        default: "dashboard"
+        options:
+          - dashboard
+          - satellite
+          - both
+
+permissions:
+  contents: write # so workflow_dispatch capture can push baseline back
+  pull-requests: write # post diff summary as PR comment
+
+jobs:
+  visual-regression:
+    name: Dashboard visual regression
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR / branch
+        uses: actions/checkout@v6
+        with:
+          # Need both refs so we can checkout the baseline-ref temporarily.
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: nexacore-dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nexacore-dashboard
+        run: npm ci
+
+      - name: Install Playwright + Chromium
+        working-directory: nexacore-dashboard
+        run: npx playwright install chromium --with-deps
+
+      # ----- BASELINE CAPTURE PATH (manual trigger) -----
+      - name: Capture baseline from ${{ inputs.baseline_ref }}
+        if: github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'dashboard' || inputs.package == 'both')
+        working-directory: nexacore-dashboard
+        env:
+          VRT: "1"
+        run: |
+          # Stash any uncommitted changes (none expected, but defensive)
+          git stash -u || true
+          # Checkout source files only from the baseline ref (keep package*.json from current HEAD)
+          BASELINE_REF="${{ inputs.baseline_ref }}"
+          echo "Capturing baseline from $BASELINE_REF"
+          # Switch the SOURCE CODE to baseline ref. Keep package.json/lock from current ref
+          # so we get the latest framework versions that we want to use long-term — the
+          # baseline is purely the SOURCE rendered with current frameworks (which is
+          # actually what we want to compare against in PRs anyway).
+          # Wait — that's wrong. Baseline should be the visual at that ref AS IT WAS,
+          # i.e. with whatever package.json existed then. Let me checkout fully.
+          git checkout "$BASELINE_REF" -- nexacore-dashboard/
+          npm ci
+          npx playwright install chromium --with-deps
+          # Boot dev server in background
+          npm run dev &
+          DEV_PID=$!
+          # Wait for server up (up to 90s)
+          npx wait-on http://localhost:3001 -t 90000
+          # Capture baseline
+          npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list
+          # Kill dev server
+          kill $DEV_PID || true
+          # Switch source back to current ref so we can commit only the baselines
+          git checkout HEAD -- nexacore-dashboard/src/
+          # Note: snapshots are in tests/e2e/visual.spec.ts-snapshots/ — keep them.
+        timeout-minutes: 30
+
+      - name: Commit + push baseline (dashboard, workflow_dispatch only)
+        if: github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'dashboard' || inputs.package == 'both')
+        working-directory: nexacore-dashboard
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/e2e/visual.spec.ts-snapshots/
+          if git diff --staged --quiet; then
+            echo "No baseline changes to commit"
+            exit 0
+          fi
+          git commit -m "chore(SCRUM-379): refresh VRT baseline from ${{ inputs.baseline_ref }} [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
+
+      # ----- COMPARISON PATH (PR trigger) -----
+      - name: Run VRT against committed baseline (PR)
+        if: github.event_name == 'pull_request'
+        working-directory: nexacore-dashboard
+        env:
+          VRT: "1"
+        run: |
+          npm run dev &
+          DEV_PID=$!
+          npx wait-on http://localhost:3001 -t 90000
+          # Run WITHOUT --update-snapshots → fails on diff
+          npx playwright test visual.spec.ts --workers=1 --reporter=list || EXIT=$?
+          kill $DEV_PID || true
+          exit ${EXIT:-0}
+        timeout-minutes: 30
+
+      - name: Upload diff report (on failure)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-diff-report-${{ github.event.pull_request.number }}
+          path: nexacore-dashboard/playwright-report/
+          retention-days: 14
+
+      - name: Upload diff images (on failure)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-test-results-${{ github.event.pull_request.number }}
+          path: nexacore-dashboard/test-results/
+          retention-days: 14
+
+  # ==========================================================================
+  # Satellite — same flow against satellite/sat-cristian-garcia
+  # ==========================================================================
+  visual-regression-satellite:
+    name: Satellite visual regression
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR / branch
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: satellites/sat-cristian-garcia/package-lock.json
+
+      - name: Install dependencies
+        working-directory: satellites/sat-cristian-garcia
+        run: npm ci
+
+      - name: Install Playwright + Chromium
+        working-directory: satellites/sat-cristian-garcia
+        run: npx playwright install chromium --with-deps
+
+      - name: Capture baseline from ${{ inputs.baseline_ref }}
+        if: github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'satellite' || inputs.package == 'both')
+        working-directory: satellites/sat-cristian-garcia
+        env:
+          VRT: "1"
+        run: |
+          BASELINE_REF="${{ inputs.baseline_ref }}"
+          echo "Capturing satellite baseline from $BASELINE_REF"
+          git checkout "$BASELINE_REF" -- satellites/sat-cristian-garcia/
+          npm ci
+          npx playwright install chromium --with-deps
+          npm run dev &
+          DEV_PID=$!
+          npx wait-on http://localhost:3002 -t 90000
+          npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list
+          kill $DEV_PID || true
+          git checkout HEAD -- satellites/sat-cristian-garcia/src/
+        timeout-minutes: 30
+
+      - name: Commit + push baseline (satellite)
+        if: github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'satellite' || inputs.package == 'both')
+        working-directory: satellites/sat-cristian-garcia
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add tests/e2e/visual.spec.ts-snapshots/
+          if git diff --staged --quiet; then
+            echo "No baseline changes to commit"
+            exit 0
+          fi
+          git commit -m "chore(SCRUM-379): refresh satellite VRT baseline from ${{ inputs.baseline_ref }} [skip ci]"
+          git push origin HEAD:${{ github.ref_name }}
+
+      - name: Run VRT against committed baseline (PR)
+        if: github.event_name == 'pull_request'
+        working-directory: satellites/sat-cristian-garcia
+        env:
+          VRT: "1"
+        run: |
+          npm run dev &
+          DEV_PID=$!
+          npx wait-on http://localhost:3002 -t 90000
+          npx playwright test visual.spec.ts --workers=1 --reporter=list || EXIT=$?
+          kill $DEV_PID || true
+          exit ${EXIT:-0}
+        timeout-minutes: 30
+
+      - name: Upload satellite diff report
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-diff-report-satellite-${{ github.event.pull_request.number }}
+          path: satellites/sat-cristian-garcia/playwright-report/
+          retention-days: 14
+
+      - name: Upload satellite diff images
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-test-results-satellite-${{ github.event.pull_request.number }}
+          path: satellites/sat-cristian-garcia/test-results/
+          retention-days: 14

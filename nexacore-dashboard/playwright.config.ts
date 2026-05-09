@@ -23,9 +23,21 @@ export default defineConfig({
   // Skip Jest-style *.test.* files — those are unit/integration covered by Jest.
   testIgnore: ["**/*.test.ts", "**/*.test.tsx"],
 
-  // Each individual test gets 30s; tune up if a flow needs more.
-  timeout: 30_000,
-  expect: { timeout: 5_000 },
+  // Each individual test gets 30s; VRT tests get longer because Turbopack
+  // first-render of a fresh route can take 60-90s on Windows OneDrive.
+  timeout: process.env.VRT === "1" ? 120_000 : 30_000,
+  expect: {
+    timeout: 5_000,
+    // SCRUM-379 — Visual Regression Testing thresholds.
+    // 0.2% pixel diff allowed before flagging a regression.
+    // Snapshots are platform-specific (Playwright suffixes -<platform>.png).
+    toHaveScreenshot: {
+      maxDiffPixelRatio: 0.002,
+      // Mask volatile regions (timestamps, animation frames). Tests can
+      // override per-call when needed.
+      animations: "disabled",
+    },
+  },
 
   // 2 retries on CI; 0 locally.
   retries: process.env.CI ? 2 : 0,
