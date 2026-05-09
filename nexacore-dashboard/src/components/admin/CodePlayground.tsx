@@ -139,7 +139,7 @@ export default function CodePlayground() {
             </div>
             <LiveEditor
               onChange={setCode}
-              className="!font-mono !text-body !bg-surface-primary !p-4 !min-h-[200px]"
+              className="font-mono! text-body! bg-surface-primary! p-4! min-h-[200px]!"
             />
           </div>
 

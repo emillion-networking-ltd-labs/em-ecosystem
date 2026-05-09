@@ -66,7 +66,7 @@ export default function Toast({
       {/* Col 3: close button — top aligned */}
       <button
         onClick={dismiss}
-        className="row-span-2 -mt-[7px] -mr-[7px] self-start shrink-0 rounded-md p-1 text-content-tertiary opacity-0 transition-all hover:text-content-primary group-hover:opacity-100"
+        className="row-span-2 mt-[-7px] mr-[-7px] self-start shrink-0 rounded-md p-1 text-content-tertiary opacity-0 transition-all hover:text-content-primary group-hover:opacity-100"
         aria-label="Close notification"
       >
         <X size={12} />

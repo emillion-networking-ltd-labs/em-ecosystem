@@ -70,13 +70,13 @@ export default function Slider({
           )}
         </div>
       )}
-      <div className="relative flex items-center h-[16px]">
+      <div className="relative flex items-center h-4">
         {/* Track background */}
-        <div className="absolute w-full h-[8px] rounded-full bg-surface-primary border-2 border-border-components" />
+        <div className="absolute w-full h-2 rounded-full bg-surface-primary border-2 border-border-components" />
 
         {/* Progress fill */}
         <div
-          className="absolute h-[8px] rounded-full bg-surface-inverse border-2 border-border-components"
+          className="absolute h-2 rounded-full bg-surface-inverse border-2 border-border-components"
           style={{ width: `${percentage}%` }}
         />
 
@@ -95,17 +95,17 @@ export default function Slider({
           aria-valuemax={max}
           aria-valuenow={value}
           aria-label={label}
-          className={`absolute w-full h-[16px] appearance-none bg-transparent cursor-pointer
+          className={`absolute w-full h-4 appearance-none bg-transparent cursor-pointer
             [&::-webkit-slider-thumb]:appearance-none
-            [&::-webkit-slider-thumb]:w-[16px]
-            [&::-webkit-slider-thumb]:h-[16px]
+            [&::-webkit-slider-thumb]:w-4
+            [&::-webkit-slider-thumb]:h-4
             [&::-webkit-slider-thumb]:rounded-full
             [&::-webkit-slider-thumb]:bg-white
             [&::-webkit-slider-thumb]:border-2
             [&::-webkit-slider-thumb]:border-solid
             [&::-webkit-slider-thumb]:border-[rgba(0,0,0,0.08)]
-            [&::-moz-range-thumb]:w-[16px]
-            [&::-moz-range-thumb]:h-[16px]
+            [&::-moz-range-thumb]:w-4
+            [&::-moz-range-thumb]:h-4
             [&::-moz-range-thumb]:rounded-full
             [&::-moz-range-thumb]:bg-white
             [&::-moz-range-thumb]:border-2

@@ -37,7 +37,7 @@ export const componentRegistry: ComponentEntry[] = [
   {
     name: "Spinner",
     category: "atom",
-    description: "Loading spinner — circular, infinity, ring — 3 sizes",
+    description: "Loading spinner — circular, infinity, ring-3 — 3 sizes",
     files: ["Spinner.tsx", "InfinitySpinner.tsx", "RingSpinner.tsx"],
     count: 3,
   },

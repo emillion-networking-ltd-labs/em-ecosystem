@@ -164,10 +164,10 @@ export default function RecentActivityFeed() {
         {loading &&
           Array.from({ length: 5 }).map((_, i) => (
             <div key={i} className="flex items-center gap-3 rounded-xl p-2">
-              <div className="h-10 w-10 animate-pulse rounded-md bg-black/[0.08] dark:bg-white/[0.08]" />
+              <div className="h-10 w-10 animate-pulse rounded-md bg-black/8 dark:bg-white/8" />
               <div className="flex-1 space-y-1">
-                <div className="h-4 w-3/4 animate-pulse rounded bg-black/[0.08] dark:bg-white/[0.08]" />
-                <div className="h-3 w-1/3 animate-pulse rounded bg-black/[0.08] dark:bg-white/[0.08]" />
+                <div className="h-4 w-3/4 animate-pulse rounded bg-black/8 dark:bg-white/8" />
+                <div className="h-3 w-1/3 animate-pulse rounded bg-black/8 dark:bg-white/8" />
               </div>
             </div>
           ))}

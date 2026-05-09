@@ -255,7 +255,7 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
             <Button
               variant={v}
               fullWidth={false}
-              className="!rounded-full !px-0 w-9 h-9 !min-w-0"
+              className="rounded-full! px-0! w-9 h-9 min-w-0!"
             >
               15
             </Button>
@@ -573,7 +573,7 @@ const linkSpecs = {
 function InputGrid({ mode }: { mode: "light" | "dark" }) {
   return (
     <div
-      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
@@ -606,7 +606,7 @@ function DateInputShowcase() {
       {(["light", "dark"] as const).map((mode) => (
         <div
           key={`dateinput-${mode}`}
-          className={`flex-1 min-w-[200px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+          className={`flex-1 min-w-[200px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
         >
           <p className="text-caption text-content-tertiary font-mono mb-3">
             {mode}
@@ -658,13 +658,17 @@ function InputShowcase() {
               </span>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Input placeholder="md · no outline" variant="filled" />
+              <Input placeholder="md · no outline-solid" variant="filled" />
               <span className="text-caption text-content-tertiary">
                 md · 48px (no outline)
               </span>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Input size="sm" placeholder="sm · no outline" variant="filled" />
+              <Input
+                size="sm"
+                placeholder="sm · no outline-solid"
+                variant="filled"
+              />
               <span className="text-caption text-content-tertiary">
                 sm · 40px (no outline)
               </span>
@@ -712,14 +716,14 @@ function BadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
   const sizes = ["lg", "md", "sm"] as const;
   return (
     <div
-      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {sizes.map((size) => (
-          <div key={size} className="card-flat !p-4">
+          <div key={size} className="card-flat p-4!">
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {size} · {size === "sm" ? "12" : size === "md" ? "14" : "16"}px
               {size === "md" ? " (default)" : ""}
@@ -766,7 +770,7 @@ function IconBadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
   };
   return (
     <div
-      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
@@ -775,7 +779,7 @@ function IconBadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
         {sizes.map((size) => {
           const iconSize = size === "sm" ? 16 : size === "md" ? 24 : 32;
           return (
-            <div key={size} className="card-flat !p-4">
+            <div key={size} className="card-flat p-4!">
               <p className="text-caption text-content-tertiary font-mono mb-3">
                 {size} · {size === "sm" ? "32" : size === "md" ? "40" : "56"}px
                 {size === "sm" ? " (default)" : ""}
@@ -844,14 +848,14 @@ const spinnerTypes = [
 function SpinnerGrid({ mode }: { mode: "light" | "dark" }) {
   return (
     <div
-      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {spinnerTypes.map(({ label, Component }) => (
-          <div key={label} className="card-flat !p-4">
+          <div key={label} className="card-flat p-4!">
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {label}
             </p>
@@ -912,14 +916,14 @@ function AvatarGrid({ mode }: { mode: "light" | "dark" }) {
   const names = ["Jane Doe", "Alice Brown", "Bob Wilson"];
   return (
     <div
-      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {(["image", "initials", "icon fallback"] as const).map((type) => (
-          <div key={type} className="card-flat !p-4">
+          <div key={type} className="card-flat p-4!">
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {type}
             </p>
@@ -988,7 +992,7 @@ function ToggleCard({ mode }: { mode: "light" | "dark" }) {
   });
   return (
     <div
-      className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
@@ -1089,7 +1093,7 @@ function CheckboxCard({ mode }: { mode: "light" | "dark" }) {
   });
   return (
     <div
-      className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
@@ -1189,7 +1193,7 @@ function TooltipCard({ mode }: { mode: "light" | "dark" }) {
   const positions = ["top", "bottom", "left", "right"] as const;
   return (
     <div
-      className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
@@ -1231,7 +1235,7 @@ function DividerShowcase() {
   return (
     <ShowcaseSection title="Divider">
       <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat p-4! light bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
@@ -1260,7 +1264,7 @@ function DividerShowcase() {
             </div>
           </div>
         </div>
-        <div className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat p-4! dark bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
@@ -1306,7 +1310,7 @@ function SliderCard({ mode }: { mode: "light" | "dark" }) {
   const [v2, setV2] = useState(70);
   return (
     <div
-      className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
@@ -1357,7 +1361,7 @@ function BeforeAfterSliderCard({
 }) {
   return (
     <div
-      className={`flex-1 min-w-[240px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[240px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode} · {orientation}
@@ -1440,7 +1444,7 @@ function TabsNavCard({ mode }: { mode: "light" | "dark" }) {
   ];
   return (
     <div
-      className={`flex-1 card-flat !p-4 overflow-hidden ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 card-flat p-4! overflow-hidden ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode} · nav
@@ -1514,7 +1518,7 @@ function ScrollDotsWrapper({
         style={{
           cursor: overflows ? (dragging ? "grabbing" : "grab") : undefined,
         }}
-        className={`overflow-x-auto scrollbar-hide touch-pan-x select-none ${dragging ? "[&_*]:pointer-events-none" : ""}`}
+        className={`overflow-x-auto scrollbar-hide touch-pan-x select-none ${dragging ? "**:pointer-events-none" : ""}`}
         onMouseDown={onMouseDown}
       >
         {children}
@@ -1562,7 +1566,7 @@ function NavHorizontalColumn() {
   ];
   return (
     <div className="flex-1 min-w-[280px] flex flex-col gap-4">
-      <div className="card-flat !p-4 overflow-hidden light bg-surface-primary">
+      <div className="card-flat p-4! overflow-hidden light bg-surface-primary">
         <p className="text-caption text-content-tertiary font-mono mb-3">
           light · nav-horizontal
         </p>
@@ -1579,7 +1583,7 @@ function NavHorizontalColumn() {
           />
         </ScrollDotsWrapper>
       </div>
-      <div className="card-flat !p-4 overflow-hidden dark bg-surface-primary">
+      <div className="card-flat p-4! overflow-hidden dark bg-surface-primary">
         <p className="text-caption text-content-tertiary font-mono mb-3">
           dark · nav-horizontal
         </p>
@@ -1625,7 +1629,7 @@ function TabsShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={`seg-${mode}`}
-            className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`card-flat p-4! flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
@@ -1779,7 +1783,7 @@ function SelectCard({
   if (bare) return content;
   return (
     <div
-      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode} · select
@@ -1867,7 +1871,7 @@ function EmailSelectorCard({
   if (bare) return content;
   return (
     <div
-      className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode} · email
@@ -1881,7 +1885,7 @@ function SelectShowcase() {
   return (
     <ShowcaseSection title="Select / Dropdown">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="card-flat !p-4 light bg-surface-primary space-y-6">
+        <div className="card-flat p-4! light bg-surface-primary space-y-6">
           <p className="text-caption text-content-tertiary font-mono">light</p>
           <div>
             <p className="text-caption text-content-tertiary font-mono mb-2">
@@ -1902,7 +1906,7 @@ function SelectShowcase() {
             <EmailSelectorCard mode="light" bare />
           </div>
         </div>
-        <div className="card-flat !p-4 dark bg-surface-primary space-y-6">
+        <div className="card-flat p-4! dark bg-surface-primary space-y-6">
           <p className="text-caption text-content-tertiary font-mono">dark</p>
           <div>
             <p className="text-caption text-content-tertiary font-mono mb-2">
@@ -1954,7 +1958,7 @@ function CalendarShowcase() {
   return (
     <ShowcaseSection title="Calendar">
       <div className="flex flex-wrap gap-4">
-        <div className="card-flat !p-4 flex-1 light bg-surface-primary">
+        <div className="card-flat p-4! flex-1 light bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
@@ -1962,7 +1966,7 @@ function CalendarShowcase() {
             <Calendar value={dateLight} onChange={setDateLight} />
           </div>
         </div>
-        <div className="card-flat !p-4 flex-1 dark bg-surface-primary">
+        <div className="card-flat p-4! flex-1 dark bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
@@ -1994,7 +1998,7 @@ function NavigationShowcase() {
         Breadcrumbs
       </p>
       <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat p-4! light bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
@@ -2006,7 +2010,7 @@ function NavigationShowcase() {
             ]}
           />
         </div>
-        <div className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat p-4! dark bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
@@ -2024,7 +2028,7 @@ function NavigationShowcase() {
         Pagination
       </p>
       <div className="flex flex-wrap gap-4">
-        <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat p-4! light bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
@@ -2034,7 +2038,7 @@ function NavigationShowcase() {
             onPageChange={setPageLight}
           />
         </div>
-        <div className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat p-4! dark bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
@@ -2144,7 +2148,7 @@ function ToastDemo() {
                     onClick={() =>
                       setVisible((v) => ({ ...v, [variant]: false }))
                     }
-                    className="row-span-2 -mt-[7px] -mr-[7px] self-start shrink-0 rounded-md p-1 text-content-tertiary opacity-0 transition-all hover:text-content-primary group-hover:opacity-100"
+                    className="row-span-2 mt-[-7px] mr-[-7px] self-start shrink-0 rounded-md p-1 text-content-tertiary opacity-0 transition-all hover:text-content-primary group-hover:opacity-100"
                     aria-label="Close"
                   >
                     <X size={12} />
@@ -2167,7 +2171,7 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
 
   return (
     <div
-      className="w-[280px] rounded-3xl border border-border-strong bg-surface-secondary shadow-[0_8px_32px_rgba(0,0,0,0.04)] overflow-hidden cursor-pointer"
+      className="w-[280px] rounded-3xl border border-border-strong bg-surface-secondary shadow-card overflow-hidden cursor-pointer"
       onMouseEnter={() => setAnimKey((k) => k + 1)}
     >
       <div className="flex flex-col gap-2 border-b border-border-strong bg-surface-primary p-6 min-h-[200px] justify-center">
@@ -2257,7 +2261,7 @@ function FeedbackShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`flex-1 min-w-[300px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-tertiary font-mono mb-4">
               {mode}
@@ -2324,7 +2328,7 @@ function FeedbackShowcase() {
               "Framer Motion: enter (opacity+y), exit (opacity+x), auto-dismiss 5s",
           },
           "Full Page Card": {
-            card: "rounded-3xl border border-border-strong bg-surface-secondary shadow-[0_8px_32px_rgba(0,0,0,0.04)]",
+            card: "rounded-3xl border border-border-strong bg-surface-secondary shadow-card",
             content: "bg-surface-primary p-6 border-b border-border-strong",
             footer: "h-14 p-2 (auth-card narrow footer)",
             "error icon":
@@ -2333,7 +2337,7 @@ function FeedbackShowcase() {
               "CircleCheck 48px text-[#166534] strokeWidth-1.5 icon-success animation",
             text: "text-body text-content-tertiary text-center",
             button:
-              "h-10 w-full rounded-md border border-border-components bg-transparent text-h3 font-normal — outline style",
+              "h-10 w-full rounded-md border border-border-components bg-transparent text-h3 font-normal — outline-solid style",
           },
         }}
       />
@@ -2344,7 +2348,7 @@ function FeedbackShowcase() {
 function AccordionCard({ mode }: { mode: "light" | "dark" }) {
   return (
     <div
-      className={`flex-1 min-w-[280px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+      className={`flex-1 min-w-[280px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
     >
       <p className="text-caption text-content-tertiary font-mono mb-3">
         {mode}
@@ -2403,13 +2407,13 @@ function CopyFieldShowcase() {
   return (
     <ShowcaseSection title="CopyField">
       <div className="flex flex-wrap gap-4">
-        <div className="card-flat !p-4 flex-1 min-w-[280px] light bg-surface-primary">
+        <div className="card-flat p-4! flex-1 min-w-[280px] light bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <CopyField value="JBSWY3DPEHPK3PXP" />
         </div>
-        <div className="card-flat !p-4 flex-1 min-w-[280px] dark bg-surface-primary">
+        <div className="card-flat p-4! flex-1 min-w-[280px] dark bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
@@ -2456,7 +2460,7 @@ function DigitInputShowcase() {
   return (
     <ShowcaseSection title="Digit Input">
       <div className="flex flex-wrap gap-4">
-        <div className="card-flat !p-4 flex-1 min-w-[300px] light bg-surface-primary">
+        <div className="card-flat p-4! flex-1 min-w-[300px] light bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
@@ -2466,7 +2470,7 @@ function DigitInputShowcase() {
             idPrefix="demo-digit"
           />
         </div>
-        <div className="card-flat !p-4 flex-1 min-w-[300px] dark bg-surface-primary">
+        <div className="card-flat p-4! flex-1 min-w-[300px] dark bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
@@ -2482,7 +2486,7 @@ function DigitInputShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`flex-1 min-w-[300px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode} — error state
@@ -2560,13 +2564,13 @@ function QrCodeCardShowcase() {
   return (
     <ShowcaseSection title="QR Code Card">
       <div className="flex flex-wrap gap-4">
-        <div className="card-flat !p-4 flex-1 min-w-[300px] light bg-surface-primary">
+        <div className="card-flat p-4! flex-1 min-w-[300px] light bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <QrCodeCard />
         </div>
-        <div className="card-flat !p-4 flex-1 min-w-[300px] dark bg-surface-primary">
+        <div className="card-flat p-4! flex-1 min-w-[300px] dark bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
@@ -2887,7 +2891,7 @@ function ChartsShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
@@ -3025,7 +3029,7 @@ function CardShowcase() {
     <ShowcaseSection title="Card">
       <div className="flex flex-wrap gap-4">
         {/* Light */}
-        <div className="flex-1 min-w-[280px] card-flat !p-4 light bg-surface-primary">
+        <div className="flex-1 min-w-[280px] card-flat p-4! light bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
@@ -3075,7 +3079,7 @@ function CardShowcase() {
 
         {/* Dark */}
         <div
-          className="flex-1 min-w-[280px] card-flat !p-4 dark bg-surface-primary"
+          className="flex-1 min-w-[280px] card-flat p-4! dark bg-surface-primary"
           style={{ color: "rgb(var(--content-primary))" }}
         >
           <p className="text-caption text-content-tertiary font-mono mb-3">
@@ -3183,13 +3187,13 @@ function RecoveryCodesGridShowcase() {
   return (
     <ShowcaseSection title="Recovery Codes Grid">
       <div className="flex flex-wrap gap-4">
-        <div className="card-flat !p-4 flex-1 min-w-[300px] light bg-surface-primary">
+        <div className="card-flat p-4! flex-1 min-w-[300px] light bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             light
           </p>
           <RecoveryCodesGrid codes={demoCodes} />
         </div>
-        <div className="card-flat !p-4 flex-1 min-w-[300px] dark bg-surface-primary">
+        <div className="card-flat p-4! flex-1 min-w-[300px] dark bg-surface-primary">
           <p className="text-caption text-content-tertiary font-mono mb-3">
             dark
           </p>
@@ -3244,7 +3248,7 @@ function CommandPaletteShowcase() {
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           {/* Trigger demo */}
-          <div className="card-flat !p-4">
+          <div className="card-flat p-4!">
             <p className="text-caption text-content-tertiary font-mono mb-3">
               SearchTrigger component
             </p>
@@ -3252,7 +3256,7 @@ function CommandPaletteShowcase() {
           </div>
 
           {/* Info */}
-          <div className="card-flat !p-4">
+          <div className="card-flat p-4!">
             <p className="text-caption text-content-tertiary font-mono mb-3">
               Keyboard shortcut
             </p>
@@ -3385,7 +3389,7 @@ function MotionPatternsShowcase() {
         />
 
         {/* Key rule */}
-        <div className="card-flat !p-4">
+        <div className="card-flat p-4!">
           <p className="text-body font-semibold text-content-primary">
             Key rule
           </p>
@@ -3400,7 +3404,7 @@ function MotionPatternsShowcase() {
 
         {/* Patterns used */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="card-flat !p-4">
+          <div className="card-flat p-4!">
             <p className="text-caption font-semibold text-content-primary mb-2">
               AnimatePresence pattern
             </p>
@@ -3418,7 +3422,7 @@ function MotionPatternsShowcase() {
 </AnimatePresence>`}
             </pre>
           </div>
-          <div className="card-flat !p-4">
+          <div className="card-flat p-4!">
             <p className="text-caption font-semibold text-content-primary mb-2">
               Accordion pattern (CSS only)
             </p>
@@ -3476,7 +3480,7 @@ function FormFieldShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`card-flat p-4! flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
@@ -3521,7 +3525,7 @@ function EmptyStateShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`card-flat !p-4 flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`card-flat p-4! flex-1 min-w-[280px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
@@ -3586,7 +3590,7 @@ function ModalShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`flex-1 min-w-[300px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-tertiary font-mono mb-4">
               {mode}
@@ -3688,7 +3692,7 @@ function ImageCropperShowcase() {
   return (
     <ShowcaseSection title="Image Cropper">
       {/* Interactive demo */}
-      <div className="card-flat !p-4 space-y-4">
+      <div className="card-flat p-4! space-y-4">
         <p className="text-caption text-content-tertiary font-mono">
           interactive demo — select an image, crop it, see the result
         </p>
@@ -3866,7 +3870,7 @@ function SidebarShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`card-flat !p-4 flex-1 min-w-[390px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`card-flat p-4! flex-1 min-w-[390px] ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
@@ -3958,7 +3962,7 @@ function DataTableShowcase() {
         {(["light", "dark"] as const).map((mode) => (
           <div
             key={mode}
-            className={`flex-1 min-w-[300px] card-flat !p-4 ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
+            className={`flex-1 min-w-[300px] card-flat p-4! ${mode === "dark" ? "dark bg-surface-primary" : "light bg-surface-primary"}`}
           >
             <p className="text-caption text-content-tertiary font-mono mb-3">
               {mode}
@@ -4051,7 +4055,7 @@ function StickyCardShowcase() {
         </div>
       </div>
 
-      <div className="card-flat !p-3 bg-surface-secondary/40 border border-dashed border-border-strong">
+      <div className="card-flat p-3! bg-surface-secondary/40 border border-dashed border-border-strong">
         <p className="text-caption text-content-tertiary">
           <strong className="text-content-primary">Note:</strong> the demo above
           uses CSS <code>position: sticky</code> scoped to its own scroll

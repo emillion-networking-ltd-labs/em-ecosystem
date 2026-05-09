@@ -60,7 +60,7 @@ export default function RightPanel() {
           {notifications.map((item, i) => (
             <div key={i} className="flex items-center gap-2 rounded-xl p-2">
               <div
-                className={`flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg ${
+                className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${
                   item.color === "purple"
                     ? "bg-notification-purple"
                     : "bg-notification-blue"
@@ -92,7 +92,7 @@ export default function RightPanel() {
 
           {activities.map((item, i) => (
             <div key={i} className="relative flex items-center gap-2 p-2">
-              <div className="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-surface-subtle">
+              <div className="relative z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
                 <span className="text-caption font-semibold text-content-primary">
                   {item.name
                     .split(" ")
@@ -125,7 +125,7 @@ export default function RightPanel() {
               key={contact.name}
               className="flex items-center gap-2 rounded-xl p-2"
             >
-              <div className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full bg-surface-subtle">
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-surface-subtle">
                 <span className="text-caption font-semibold text-content-primary">
                   {contact.initials}
                 </span>

@@ -123,10 +123,10 @@ export default function BeforeAfterSlider({
     : "clip-path 300ms ease-out, top 300ms ease-out, left 300ms ease-out";
 
   const aspectClass = {
-    "4/5": "aspect-[4/5]",
+    "4/5": "aspect-4/5",
     "1/1": "aspect-square",
     "16/9": "aspect-video",
-    "3/4": "aspect-[3/4]",
+    "3/4": "aspect-3/4",
   }[aspectRatio];
 
   const cursorClass =

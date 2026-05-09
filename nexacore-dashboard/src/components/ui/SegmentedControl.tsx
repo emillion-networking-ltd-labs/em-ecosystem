@@ -6,11 +6,11 @@ export type SegmentedVariant = "primary" | "secondary" | "outline";
 
 const activeClasses: Record<SegmentedVariant, string> = {
   primary:
-    "bg-surface-inverse text-content-inverse border border-border-components shadow-sm",
+    "bg-surface-inverse text-content-inverse border border-border-components shadow-xs",
   secondary:
-    "bg-surface-tertiary text-content-primary border border-border-components shadow-sm",
+    "bg-surface-tertiary text-content-primary border border-border-components shadow-xs",
   outline:
-    "bg-surface-primary text-content-primary border border-border-components shadow-sm",
+    "bg-surface-primary text-content-primary border border-border-components shadow-xs",
 };
 
 export const sizeClasses = {
@@ -34,11 +34,11 @@ export const segmentedControlSpecs = {
   },
   variants: {
     "primary (default)":
-      "bg-surface-inverse text-content-inverse border border-border-components shadow-sm",
+      "bg-surface-inverse text-content-inverse border border-border-components shadow-xs",
     secondary:
-      "bg-surface-tertiary text-content-primary border border-border-components shadow-sm",
+      "bg-surface-tertiary text-content-primary border border-border-components shadow-xs",
     outline:
-      "bg-surface-primary text-content-primary border border-border-components shadow-sm",
+      "bg-surface-primary text-content-primary border border-border-components shadow-xs",
   },
 };
 

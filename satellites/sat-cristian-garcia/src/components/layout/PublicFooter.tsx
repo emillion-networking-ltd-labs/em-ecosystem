@@ -11,35 +11,63 @@ export default function PublicFooter() {
               <span className="font-black">Cristian</span>{" "}
               <span className="font-light">Garcia</span>
             </p>
-            <p className="mt-3 text-caption text-content-tertiary">Disciplina. Consistencia. Resultados.</p>
+            <p className="mt-3 text-caption text-content-tertiary">
+              Disciplina. Consistencia. Resultados.
+            </p>
           </div>
           <div>
-            <p className="mb-3 text-caption font-semibold uppercase tracking-wider text-content-secondary">Navegacion</p>
+            <p className="mb-3 text-caption font-semibold uppercase tracking-wider text-content-secondary">
+              Navegacion
+            </p>
             <div className="flex flex-col gap-2">
               {footerLinks.nav.map((l) => (
-                <Link key={l.href} href={l.href} className="text-body text-content-tertiary transition-colors hover:text-accent">{l.label}</Link>
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="text-body text-content-tertiary transition-colors hover:text-accent"
+                >
+                  {l.label}
+                </Link>
               ))}
             </div>
           </div>
           <div>
-            <p className="mb-3 text-caption font-semibold uppercase tracking-wider text-content-secondary">Legal</p>
+            <p className="mb-3 text-caption font-semibold uppercase tracking-wider text-content-secondary">
+              Legal
+            </p>
             <div className="flex flex-col gap-2">
               {footerLinks.legal.map((l) => (
-                <Link key={l.href} href={l.href} className="text-body text-content-tertiary transition-colors hover:text-accent">{l.label}</Link>
+                <Link
+                  key={l.href}
+                  href={l.href}
+                  className="text-body text-content-tertiary transition-colors hover:text-accent"
+                >
+                  {l.label}
+                </Link>
               ))}
             </div>
           </div>
           <div>
-            <p className="mb-3 text-caption font-semibold uppercase tracking-wider text-content-secondary">Contacto</p>
+            <p className="mb-3 text-caption font-semibold uppercase tracking-wider text-content-secondary">
+              Contacto
+            </p>
             <div className="flex flex-col gap-2 text-body text-content-tertiary">
               <span>{siteConfig.location}</span>
-              <a href={`mailto:${siteConfig.email}`} className="transition-colors hover:text-accent">{siteConfig.email}</a>
+              <a
+                href={`mailto:${siteConfig.email}`}
+                className="transition-colors hover:text-accent"
+              >
+                {siteConfig.email}
+              </a>
               <span>{siteConfig.instagram}</span>
             </div>
           </div>
         </div>
         <div className="mt-12 border-t border-border-default pt-6 text-center">
-          <p className="text-caption text-content-disabled">&copy; {new Date().getFullYear()} {siteConfig.name}. Powered by EM Ecosystem.</p>
+          <p className="text-caption text-content-disabled">
+            &copy; {new Date().getFullYear()} {siteConfig.name}. Powered by EM
+            Ecosystem.
+          </p>
         </div>
       </div>
     </footer>

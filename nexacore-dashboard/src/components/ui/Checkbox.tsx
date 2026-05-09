@@ -15,9 +15,9 @@ interface CheckboxProps {
 }
 
 const boxSizes = {
-  sm: "w-4 h-4 rounded-[4px]",
-  md: "w-5 h-5 rounded-[5px]",
-  lg: "w-6 h-6 rounded-[6px]",
+  sm: "w-4 h-4 rounded-xs",
+  md: "w-5 h-5 rounded-sm",
+  lg: "w-6 h-6 rounded-md",
 };
 
 const iconSizes = {

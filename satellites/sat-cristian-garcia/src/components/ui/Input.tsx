@@ -26,14 +26,14 @@ const sizeClasses = {
 
 export const inputSpecs = {
   container:
-    "flex items-center gap-2 rounded-lg border border-border-components bg-transparent outline outline-2 outline-offset-2 transition-colors",
+    "flex items-center gap-2 rounded-lg border border-border-components bg-transparent outline-solid outline-2 outline-offset-2 transition-colors",
   sizes: {
     sm: "h-10 px-3 text-body (40px — compact contexts)",
     "md (default)": "h-12 px-4 text-body (48px — forms, auth)",
   },
   label: "text-body font-semibold leading-[22px]",
   input:
-    "min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary outline-none placeholder:text-content-placeholder",
+    "min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary outline-hidden placeholder:text-content-placeholder",
   states: {
     default: "outline-transparent",
     hover: "hover:outline-content-primary/75",
@@ -78,7 +78,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const isErrorState = !!(error || hasError);
   const isFilled = variant === "filled";
   const outlineClass = isFilled
-    ? "outline-none"
+    ? "outline-hidden"
     : isErrorState
       ? "outline-error/75"
       : "outline-transparent hover:outline-content-primary/75 focus-within:outline-content-primary/75";
@@ -96,7 +96,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       <div
         className={`
           flex items-center gap-2 rounded-lg border border-border-components
-          ${isFilled ? "bg-surface-primary" : "bg-transparent outline outline-2 outline-offset-2"}
+          ${isFilled ? "bg-surface-primary" : "bg-transparent outline-solid outline-2 outline-offset-2"}
           transition-colors
           ${sizeClasses[size]}
           ${outlineClass}
@@ -114,7 +114,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
           ref={inputRef}
-          className="min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary outline-none placeholder:text-content-placeholder"
+          className="min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary outline-hidden placeholder:text-content-placeholder"
           {...props}
         />
         {isPassword && !loading && (

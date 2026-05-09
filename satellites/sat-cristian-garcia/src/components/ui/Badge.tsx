@@ -23,8 +23,7 @@ export const variantClasses = {
   error: "bg-error-bg text-error",
   info: "bg-info-bg text-info",
   kbd: "bg-surface-tertiary text-content-primary font-mono",
-  overlay:
-    "bg-[#1c1c1c] text-white border border-white/15 backdrop-blur-sm",
+  overlay: "bg-[#1c1c1c] text-white border border-white/15 backdrop-blur-xs",
 };
 
 export const sizeClasses = {

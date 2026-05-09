@@ -11,7 +11,13 @@ import { aboutContent } from "@/lib/data";
 
 type TimelineItem = (typeof aboutContent.timeline)[number];
 
-function TimelineEntry({ item, isLast }: { item: TimelineItem; isLast: boolean }) {
+function TimelineEntry({
+  item,
+  isLast,
+}: {
+  item: TimelineItem;
+  isLast: boolean;
+}) {
   // Per-item fade: timeline is a tall vertical column (~1200px total for 5
   // entries), longer than one viewport. Section-level stagger would fire all
   // entries at once when the parent crosses the trigger line, animating items
@@ -31,9 +37,15 @@ function TimelineEntry({ item, isLast }: { item: TimelineItem; isLast: boolean }
         aria-hidden
         className="absolute left-1.5 top-1 h-3 w-3 rounded-full bg-accent ring-4 ring-surface-secondary"
       />
-      <p className="text-caption font-semibold uppercase tracking-widest text-accent">{item.eyebrow}</p>
-      <h3 className="mt-1 text-h2 font-bold text-content-primary">{item.title}</h3>
-      <p className="mt-2 max-w-prose text-body leading-relaxed text-content-secondary">{item.description}</p>
+      <p className="text-caption font-semibold uppercase tracking-widest text-accent">
+        {item.eyebrow}
+      </p>
+      <h3 className="mt-1 text-h2 font-bold text-content-primary">
+        {item.title}
+      </h3>
+      <p className="mt-2 max-w-prose text-body leading-relaxed text-content-secondary">
+        {item.description}
+      </p>
     </div>
   );
 }
@@ -71,10 +83,18 @@ export default function SobreMiPage() {
             <div className="mx-auto flex max-w-[860px] flex-col items-stretch lg:flex-row">
               <div
                 ref={storyImageFade.ref}
-                className={`w-full overflow-hidden rounded-lg rounded-b-none lg:max-w-[256px] lg:flex-shrink-0 lg:rounded-bl-lg lg:rounded-r-none ${storyImageFade.className}`}
+                className={`w-full overflow-hidden rounded-lg rounded-b-none lg:max-w-[256px] lg:shrink-0 lg:rounded-bl-lg lg:rounded-r-none ${storyImageFade.className}`}
                 style={storyImageFade.style}
               >
-                <Image src="/images/about-portrait.png" alt="Cristian García — retrato" width={940} height={1672} className="h-auto w-full" sizes="(max-width:1024px) 100vw, 256px" priority />
+                <Image
+                  src="/images/about-portrait.png"
+                  alt="Cristian García — retrato"
+                  width={940}
+                  height={1672}
+                  className="h-auto w-full"
+                  sizes="(max-width:1024px) 100vw, 256px"
+                  priority
+                />
               </div>
               <div className="flex flex-1">
                 <div className="card-flat flex h-full w-full flex-col justify-center rounded-t-none text-center lg:rounded-l-none lg:rounded-tr-xl lg:text-left">
@@ -84,7 +104,14 @@ export default function SobreMiPage() {
                     style={storySubtitleFade.style}
                   >
                     {aboutContent.subtitle.split(" · ").map((item) => (
-                      <Badge key={item} variant="default" size="sm" className="!text-accent uppercase">{item}</Badge>
+                      <Badge
+                        key={item}
+                        variant="default"
+                        size="sm"
+                        className="text-accent! uppercase"
+                      >
+                        {item}
+                      </Badge>
                     ))}
                   </div>
                   <div
@@ -92,7 +119,9 @@ export default function SobreMiPage() {
                     className={`mt-3 space-y-4 text-body leading-relaxed text-content-secondary ${storyParagraphsFade.className}`}
                     style={storyParagraphsFade.style}
                   >
-                    {aboutContent.paragraphs.map((p, i) => <p key={i}>{p}</p>)}
+                    {aboutContent.paragraphs.map((p, i) => (
+                      <p key={i}>{p}</p>
+                    ))}
                   </div>
                   <div
                     ref={storyCtaFade.ref}
@@ -113,7 +142,11 @@ export default function SobreMiPage() {
         </section>
 
         {/* === Filosofía (pull-quote) === */}
-        <section ref={philosophyParallax.ref} style={philosophyParallax.style} className="bg-surface-primary py-20">
+        <section
+          ref={philosophyParallax.ref}
+          style={philosophyParallax.style}
+          className="bg-surface-primary py-20"
+        >
           <div className="mx-auto max-w-4xl px-6">
             <div className="border-l border-accent pl-6 md:pl-10 dark:border-border-strong">
               <p className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
@@ -138,11 +171,19 @@ export default function SobreMiPage() {
         </section>
 
         {/* === Trayectoria (timeline) === */}
-        <section ref={timelineParallax.ref} style={timelineParallax.style} className="bg-surface-secondary py-20">
+        <section
+          ref={timelineParallax.ref}
+          style={timelineParallax.style}
+          className="bg-surface-secondary py-20"
+        >
           <div className="mx-auto max-w-4xl px-6">
             <div className="mb-12 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Trayectoria »»</span>
-              <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">20+ años de carrera</h2>
+              <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+                Trayectoria »»
+              </span>
+              <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">
+                20+ años de carrera
+              </h2>
             </div>
             <div className="space-y-10">
               {aboutContent.timeline.map((item, i) => (
@@ -157,18 +198,35 @@ export default function SobreMiPage() {
         </section>
 
         {/* === Credenciales === */}
-        <section ref={credentialsParallax.ref} style={credentialsParallax.style} className="bg-surface-primary py-20">
+        <section
+          ref={credentialsParallax.ref}
+          style={credentialsParallax.style}
+          className="bg-surface-primary py-20"
+        >
           <div className="mx-auto max-w-4xl px-6 text-center">
             <div className="mb-8 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-              <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Credenciales »»</span>
-              <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">Lo que respalda el método</h2>
+              <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+                Credenciales »»
+              </span>
+              <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">
+                Lo que respalda el método
+              </h2>
             </div>
             <div
               ref={credentialsListFade.ref}
               className={`flex flex-wrap items-center justify-center gap-2 ${credentialsListFade.className}`}
               style={credentialsListFade.style}
             >
-              {aboutContent.credentials.map((c) => <Badge key={c} variant="default" size="md" className="!text-accent">{c}</Badge>)}
+              {aboutContent.credentials.map((c) => (
+                <Badge
+                  key={c}
+                  variant="default"
+                  size="md"
+                  className="text-accent!"
+                >
+                  {c}
+                </Badge>
+              ))}
             </div>
           </div>
         </section>

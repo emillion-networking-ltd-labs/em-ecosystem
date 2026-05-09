@@ -1,6 +1,6 @@
 "use client";
 
-import { designTokens } from "../../../tailwind.config";
+import { designTokens } from "@/lib/design-tokens";
 import { Inbox, AlertTriangle, Settings } from "lucide-react";
 
 /* ===== Token Data (from globals.css + tailwind.config.ts) ===== */
@@ -82,12 +82,12 @@ const colorGroups: ColorGroup[] = [
         cssVar: "--border-components",
       },
       {
-        name: "outline primary/75",
+        name: "outline-solid primary/75",
         value: "rgba(28,28,28,0.75)",
         cssVar: "--content-primary",
       },
       {
-        name: "outline error/75",
+        name: "outline-solid error/75",
         value: "rgba(138,17,17,0.75)",
         cssVar: "--color-error",
       },

@@ -16,9 +16,15 @@ function ServiceCard({ service }: { service: Service }) {
       href={`/servicios#${service.id}`}
       className="card-flat block transition-all hover:border-border-components"
     >
-      <Badge variant="default" size="sm" className="!text-accent">{service.id.toUpperCase()}</Badge>
-      <h3 className="mt-3 text-h2 font-semibold text-content-primary">{service.title}</h3>
-      <p className="mt-2 text-body text-content-secondary leading-relaxed">{service.shortDesc}</p>
+      <Badge variant="default" size="sm" className="text-accent!">
+        {service.id.toUpperCase()}
+      </Badge>
+      <h3 className="mt-3 text-h2 font-semibold text-content-primary">
+        {service.title}
+      </h3>
+      <p className="mt-2 text-body text-content-secondary leading-relaxed">
+        {service.shortDesc}
+      </p>
     </Link>
   );
 }
@@ -40,7 +46,10 @@ export default function ServicesPreview() {
       if (window.matchMedia("(max-width: 1023px)").matches) {
         const rect = el.getBoundingClientRect();
         const trigger = window.innerHeight;
-        const progress = Math.min(Math.max((trigger - rect.top) / trigger, 0), 1);
+        const progress = Math.min(
+          Math.max((trigger - rect.top) / trigger, 0),
+          1,
+        );
         setOffset(progress * 40);
       } else {
         const progress = Math.min(window.scrollY / 400, 1);
@@ -64,10 +73,17 @@ export default function ServicesPreview() {
     >
       <div className="mx-auto max-w-7xl px-6">
         <div className="mb-6 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-          <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Servicios »»</span>
-          <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">Lo que ofrezco</h2>
+          <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+            Servicios »»
+          </span>
+          <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">
+            Lo que ofrezco
+          </h2>
         </div>
-        <div ref={grid.ref} className={`grid grid-cols-1 gap-6 md:grid-cols-3 ${grid.className}`}>
+        <div
+          ref={grid.ref}
+          className={`grid grid-cols-1 gap-6 md:grid-cols-3 ${grid.className}`}
+        >
           {services.slice(0, 3).map((s) => (
             <ServiceCard key={s.id} service={s} />
           ))}
@@ -76,7 +92,9 @@ export default function ServicesPreview() {
       <div className="mt-6 flex items-center">
         <div className="flex-1 border-t border-dashed border-accent dark:border-border-strong" />
         <div className="px-6">
-          <Button variant="link" as="a" href="/servicios">VER TODOS LOS SERVICIOS</Button>
+          <Button variant="link" as="a" href="/servicios">
+            VER TODOS LOS SERVICIOS
+          </Button>
         </div>
         <div className="flex-1 border-t border-dashed border-accent dark:border-border-strong" />
       </div>

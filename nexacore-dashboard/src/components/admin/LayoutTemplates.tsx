@@ -242,7 +242,7 @@ function SettingsPageTemplate() {
                 </p>
               </div>
               <div className="w-8 h-4 rounded-full bg-surface-tertiary border border-border-strong relative">
-                <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-surface-primary rounded-full shadow" />
+                <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-surface-primary rounded-full shadow-sm" />
               </div>
             </div>
           </div>
@@ -272,7 +272,7 @@ function SettingsPageTemplate() {
                 MFA enforcement
               </p>
               <div className="w-8 h-4 rounded-full bg-surface-tertiary border border-border-strong relative">
-                <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-surface-primary rounded-full shadow" />
+                <div className="absolute left-0.5 top-0.5 w-3 h-3 bg-surface-primary rounded-full shadow-sm" />
               </div>
             </div>
           </div>

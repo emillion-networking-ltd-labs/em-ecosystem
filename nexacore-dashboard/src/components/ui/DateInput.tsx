@@ -24,7 +24,7 @@ const sizeClasses = {
 
 export const dateInputSpecs = {
   container:
-    "rounded-lg border border-border-components bg-transparent outline outline-2 outline-offset-2 transition-colors",
+    "rounded-lg border border-border-components bg-transparent outline-solid outline-2 outline-offset-2 transition-colors",
   sizes: {
     sm: "h-10 px-3 text-body (40px)",
     "md (default)": "h-12 px-4 text-body (48px)",

@@ -65,7 +65,7 @@ export default function QuickActionsCard() {
           <Link
             key={action.href + action.label}
             href={action.href}
-            className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+            className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-black/4 dark:hover:bg-white/4"
           >
             <IconBadge size="md">
               <action.icon size={24} />

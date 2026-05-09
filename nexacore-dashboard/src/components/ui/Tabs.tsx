@@ -37,7 +37,7 @@ const sizeClasses = {
 export const variantStyles = {
   subtle: {
     container:
-      "bg-surface-primary border border-border-components rounded-[5px] shadow-[6px_6px_50px_rgba(0,0,0,0.05)]",
+      "bg-surface-primary border border-border-components rounded-sm shadow-[6px_6px_50px_rgba(0,0,0,0.05)]",
     active:
       "bg-surface-secondary border border-border-components font-semibold text-content-primary",
     inactive: "font-semibold text-content-primary hover:bg-surface-subtle",
@@ -66,7 +66,7 @@ export const tabsSpecs = {
     "nav-horizontal": "Same as nav but horizontal layout (top nav bar)",
   },
   container: {
-    subtle: "border border-border-components rounded-[5px]",
+    subtle: "border border-border-components rounded-sm",
     nav: "flex-col gap-2 (vertical, 8px — matches NavBar icon spacing)",
     "nav-horizontal": "gap-2 (horizontal, 8px — matches NavBar icon spacing)",
   },

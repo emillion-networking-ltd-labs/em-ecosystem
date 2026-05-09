@@ -86,7 +86,11 @@ export function useFadeInOnView<T extends HTMLElement>({
   }, [threshold, rootMargin]);
 
   const animationName =
-    from === "left" ? "fade-from-left" : from === "right" ? "fade-from-right" : "fade-up";
+    from === "left"
+      ? "fade-from-left"
+      : from === "right"
+        ? "fade-from-right"
+        : "fade-up";
 
   // Always start at opacity 0. When inView becomes true, apply the animation
   // which goes from opacity 0 to 1 over `duration` ms after `delay` ms.

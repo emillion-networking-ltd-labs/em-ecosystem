@@ -23,13 +23,21 @@ function HeroStatCard({
       ref={ref}
       className={`${
         variant === "desktop"
-          ? "card-flat flex flex-col items-center justify-center !bg-black/25 !border-white/10 backdrop-blur-sm !px-5 !py-6 min-w-[120px]"
+          ? "card-flat flex flex-col items-center justify-center bg-black/25! border-white/10! backdrop-blur-xs px-5! py-6! min-w-[120px]"
           : "card-flat text-center py-8"
       } ${className}`}
       style={style}
     >
-      <p className={`text-h1 font-black ${variant === "desktop" ? "!text-[#D4A843]" : "text-accent"}`}>{stat.value}</p>
-      <p className={`mt-2 ${variant === "desktop" ? "text-caption text-center !text-white/60" : "text-body text-content-secondary"}`}>{stat.label}</p>
+      <p
+        className={`text-h1 font-black ${variant === "desktop" ? "text-[#D4A843]!" : "text-accent"}`}
+      >
+        {stat.value}
+      </p>
+      <p
+        className={`mt-2 ${variant === "desktop" ? "text-caption text-center text-white/60!" : "text-body text-content-secondary"}`}
+      >
+        {stat.label}
+      </p>
     </div>
   );
 }
@@ -96,7 +104,7 @@ export default function HeroSection() {
           >
             <source src="/videos/hero-montage.mp4" type="video/mp4" />
           </video>
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/50 to-transparent" />
+          <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
         </div>
 
         {/* Content */}
@@ -105,10 +113,17 @@ export default function HeroSection() {
             {/* Left: title + CTA */}
             <div>
               <h1 className="text-display text-white max-w-2xl">
-                Aquí<br />cambiarás tu<br />vida.
+                Aquí
+                <br />
+                cambiarás tu
+                <br />
+                vida.
               </h1>
               <div className="mt-10 flex">
-                <a href="/contacto" className="inline-flex items-center justify-center px-5 md:px-8 py-3 text-body md:text-h3 font-normal uppercase tracking-wider rounded-md h-12 text-white border border-white/30 hover:bg-white/10 transition-all">
+                <a
+                  href="/contacto"
+                  className="inline-flex items-center justify-center px-5 md:px-8 py-3 text-body md:text-h3 font-normal uppercase tracking-wider rounded-md h-12 text-white border border-white/30 hover:bg-white/10 transition-all"
+                >
                   EMPIEZA TU TRANSFORMACIÓN
                 </a>
               </div>
@@ -117,7 +132,12 @@ export default function HeroSection() {
             {/* Desktop: stats inside hero */}
             <div className="hidden lg:grid grid-cols-2 xl:grid-cols-4 gap-3 relative z-20">
               {socialProofStats.map((s, i) => (
-                <HeroStatCard key={s.label} stat={s} index={i} variant="desktop" />
+                <HeroStatCard
+                  key={s.label}
+                  stat={s}
+                  index={i}
+                  variant="desktop"
+                />
               ))}
             </div>
           </div>

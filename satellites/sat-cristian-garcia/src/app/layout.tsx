@@ -43,7 +43,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
   openGraph: {
     title: "Cristian García Espadas | Aquí cambiarás tu vida",
-    description: "Entrenamiento personalizado y nutrición científica. +500 clientes transformados.",
+    description:
+      "Entrenamiento personalizado y nutrición científica. +500 clientes transformados.",
     images: ["/images/hero-spread-bw.jpeg"],
     type: "website",
     locale: "es_ES",

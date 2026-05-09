@@ -23,10 +23,7 @@ export function useScrollParallax<T extends HTMLElement>(maxOffset = 40) {
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const trigger = window.innerHeight;
-      const progress = Math.min(
-        Math.max((trigger - rect.top) / trigger, 0),
-        1,
-      );
+      const progress = Math.min(Math.max((trigger - rect.top) / trigger, 0), 1);
       setOffset(progress * maxOffset);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });

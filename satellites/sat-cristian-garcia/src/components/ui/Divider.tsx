@@ -36,7 +36,9 @@ export default function Divider({
       );
     }
     return (
-      <div className={`mx-1 w-px self-stretch bg-accent dark:bg-border-strong ${className}`} />
+      <div
+        className={`mx-1 w-px self-stretch bg-accent dark:bg-border-strong ${className}`}
+      />
     );
   }
 
@@ -50,5 +52,9 @@ export default function Divider({
     );
   }
 
-  return <div className={`h-px w-full bg-accent dark:bg-border-strong ${className}`} />;
+  return (
+    <div
+      className={`h-px w-full bg-accent dark:bg-border-strong ${className}`}
+    />
+  );
 }

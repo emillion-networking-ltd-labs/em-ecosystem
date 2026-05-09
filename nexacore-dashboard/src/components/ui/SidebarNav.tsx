@@ -130,7 +130,7 @@ function SidebarFlyout({
 
   const flyoutEl = visible ? (
     <div
-      className="fixed z-[9999] rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card min-w-[180px]"
+      className="fixed z-9999 rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card min-w-[180px]"
       style={style}
       onMouseEnter={startEnter}
       onMouseLeave={startLeave}
@@ -197,7 +197,7 @@ function NavSectionComponent({
   return (
     <div className={className}>
       {label && (
-        <p className="mb-2 px-2 text-body font-normal leading-[20px] text-content-tertiary">
+        <p className="mb-2 px-2 text-body font-normal leading-5 text-content-tertiary">
           {label}
         </p>
       )}

@@ -37,8 +37,10 @@ export default function ContactForm() {
 
   const validate = () => {
     const errs: Record<string, string> = {};
-    if (!name.trim() || name.trim().length < 2) errs.name = "El nombre es obligatorio";
-    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Email no válido";
+    if (!name.trim() || name.trim().length < 2)
+      errs.name = "El nombre es obligatorio";
+    if (!email.trim() || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      errs.email = "Email no válido";
     if (!consent) errs.consent = "Debes aceptar la política de privacidad";
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -53,8 +55,12 @@ export default function ContactForm() {
     return (
       <div className="card-flat py-10 text-center">
         <p className="text-3xl text-accent">&#10003;</p>
-        <h3 className="mt-3 text-h2 font-semibold text-content-primary">Solicitud enviada</h3>
-        <p className="mt-2 text-body text-content-secondary">Te contactaré personalmente en menos de 24 horas.</p>
+        <h3 className="mt-3 text-h2 font-semibold text-content-primary">
+          Solicitud enviada
+        </h3>
+        <p className="mt-2 text-body text-content-secondary">
+          Te contactaré personalmente en menos de 24 horas.
+        </p>
       </div>
     );
   }
@@ -100,7 +106,7 @@ export default function ContactForm() {
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
           placeholder="Quiero perder grasa, ganar músculo..."
-          className="w-full resize-none rounded-md border border-border-components bg-transparent px-4 py-3 text-body text-content-primary outline-none transition-colors placeholder:text-content-placeholder focus:outline-2 focus:outline-content-primary/75"
+          className="w-full resize-none rounded-md border border-border-components bg-transparent px-4 py-3 text-body text-content-primary outline-hidden transition-colors placeholder:text-content-placeholder focus:outline-2 focus:outline-content-primary/75"
         />
       </FormField>
 
@@ -120,10 +126,14 @@ export default function ContactForm() {
           />
           <span className="text-caption leading-relaxed text-content-secondary">
             He leído y acepto la{" "}
-            <Link href="/legal/privacidad" className="text-accent underline decoration-dotted underline-offset-2 hover:text-content-primary">
+            <Link
+              href="/legal/privacidad"
+              className="text-accent underline decoration-dotted underline-offset-2 hover:text-content-primary"
+            >
               política de privacidad
             </Link>{" "}
-            y autorizo el tratamiento de mis datos para responder a esta consulta.
+            y autorizo el tratamiento de mis datos para responder a esta
+            consulta.
           </span>
         </label>
         {errors.consent && (
