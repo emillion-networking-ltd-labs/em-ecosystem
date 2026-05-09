@@ -61,75 +61,77 @@ export default function TotalUsersChart({
         </div>
       }
     >
-      <div className="h-[250px]">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart
-            data={chartData}
-            margin={{ top: 5, right: 5, bottom: 0, left: -10 }}
-          >
-            <CartesianGrid
-              stroke={colors.grid}
-              strokeDasharray="3 3"
-              vertical={false}
-            />
-            <XAxis
-              dataKey="month"
-              tick={{ fontSize: 12, fill: colors.ticks }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <YAxis
-              tickFormatter={formatYAxis}
-              tick={{ fontSize: 12, fill: colors.ticks }}
-              axisLine={false}
-              tickLine={false}
-            />
-            <RechartsTooltip
-              content={({ active, payload, label }) => {
-                if (!active || !payload?.length) return null;
-                return (
-                  <div className="rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
-                    <p className="text-caption font-semibold text-content-primary mb-1 capitalize">
-                      {String(label).toLowerCase()}
-                    </p>
-                    {payload.map((item, i) => (
-                      <div key={i} className="flex items-center gap-1.5">
-                        <span
-                          className="h-2 w-2 shrink-0 rounded-sm"
-                          style={{ background: item.color }}
-                        />
-                        <span className="text-caption font-normal text-content-primary">
-                          {item.name}: {Number(item.value).toLocaleString()}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                );
-              }}
-              cursor={{ stroke: "var(--border-strong)", strokeWidth: 1 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="thisYear"
-              name="This year"
-              stroke={colors.line}
-              strokeWidth={2}
-              dot={false}
-              activeDot={{ r: 4, fill: colors.line, strokeWidth: 0 }}
-            />
-            <Line
-              type="monotone"
-              dataKey="lastYear"
-              name="Last year"
-              stroke="#a0bce8"
-              strokeWidth={2}
-              strokeDasharray="5 5"
-              dot={false}
-              activeDot={{ r: 4, fill: "#a0bce8", strokeWidth: 0 }}
-            />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      {/* React 19 + Recharts 3 ResponsiveContainer regression: with
+          `height="100%"` the container resolves to -1 on first render
+          (parent measurement happens after RC mount). Pass numeric height
+          directly and drop the wrapper div. */}
+      <ResponsiveContainer width="100%" height={250}>
+        <LineChart
+          data={chartData}
+          margin={{ top: 5, right: 5, bottom: 0, left: -10 }}
+        >
+          <CartesianGrid
+            stroke={colors.grid}
+            strokeDasharray="3 3"
+            vertical={false}
+          />
+          <XAxis
+            dataKey="month"
+            tick={{ fontSize: 12, fill: colors.ticks }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <YAxis
+            tickFormatter={formatYAxis}
+            tick={{ fontSize: 12, fill: colors.ticks }}
+            axisLine={false}
+            tickLine={false}
+          />
+          <RechartsTooltip
+            content={({ active, payload, label }) => {
+              if (!active || !payload?.length) return null;
+              return (
+                <div className="rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
+                  <p className="text-caption font-semibold text-content-primary mb-1 capitalize">
+                    {String(label).toLowerCase()}
+                  </p>
+                  {payload.map((item, i) => (
+                    <div key={i} className="flex items-center gap-1.5">
+                      <span
+                        className="h-2 w-2 shrink-0 rounded-sm"
+                        style={{ background: item.color }}
+                      />
+                      <span className="text-caption font-normal text-content-primary">
+                        {item.name}: {Number(item.value).toLocaleString()}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              );
+            }}
+            cursor={{ stroke: "var(--border-strong)", strokeWidth: 1 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="thisYear"
+            name="This year"
+            stroke={colors.line}
+            strokeWidth={2}
+            dot={false}
+            activeDot={{ r: 4, fill: colors.line, strokeWidth: 0 }}
+          />
+          <Line
+            type="monotone"
+            dataKey="lastYear"
+            name="Last year"
+            stroke="#a0bce8"
+            strokeWidth={2}
+            strokeDasharray="5 5"
+            dot={false}
+            activeDot={{ r: 4, fill: "#a0bce8", strokeWidth: 0 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
     </ChartCard>
   );
 }

@@ -1,8 +1,20 @@
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // Hide the Next.js dev-tools floating "N" indicator in the bottom-left corner
   // during `next dev`. Cosmetic only; does not affect production builds.
   devIndicators: false,
+
+  // Pin Turbopack workspace root to this package so the multiple-lockfile
+  // warning doesn't fire (the OneDrive-synced parent has its own lockfile
+  // that Next sometimes picks up).
+  turbopack: {
+    root: __dirname,
+  },
 
   images: {
     remotePatterns: [
