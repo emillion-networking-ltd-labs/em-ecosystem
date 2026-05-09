@@ -67,9 +67,9 @@ test.describe("Visual regression — public routes (dark theme)", () => {
 
   for (const route of PUBLIC_ROUTES) {
     test(`${route.name} dark mode renders consistently`, async ({ page }) => {
-      await page.goto(route.path);
+      await page.goto(route.path, { waitUntil: "domcontentloaded" });
       await page.evaluate(() => document.fonts.ready);
-      await page.waitForLoadState("networkidle");
+      await page.waitForTimeout(500);
 
       await expect(page).toHaveScreenshot(`${route.name}-dark.png`, {
         fullPage: true,
