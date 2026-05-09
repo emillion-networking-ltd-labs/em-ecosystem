@@ -4,7 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import Button from "@/components/ui/Button";
 import { useFadeInOnView } from "@/lib/useFadeInOnView";
 
-export default function CTASection({ className = "bg-surface-primary" }: { className?: string } = {}) {
+export default function CTASection({
+  className = "bg-surface-primary",
+}: { className?: string } = {}) {
   const ref = useRef<HTMLElement>(null);
   const [offset, setOffset] = useState(0);
   const titleFade = useFadeInOnView<HTMLHeadingElement>();
@@ -18,10 +20,7 @@ export default function CTASection({ className = "bg-surface-primary" }: { class
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const trigger = window.innerHeight;
-      const progress = Math.min(
-        Math.max((trigger - rect.top) / trigger, 0),
-        1,
-      );
+      const progress = Math.min(Math.max((trigger - rect.top) / trigger, 0), 1);
       setOffset(progress * 40);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -51,15 +50,20 @@ export default function CTASection({ className = "bg-surface-primary" }: { class
           className={`mx-auto mt-6 max-w-xl text-base leading-relaxed text-content-secondary ${descFade.className}`}
           style={descFade.style}
         >
-          No mañana. No el lunes. Hoy decides que tu historia va a ser diferente.
+          No mañana. No el lunes. Hoy decides que tu historia va a ser
+          diferente.
         </p>
         <div
           ref={buttonsFade.ref}
           className={`mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center ${buttonsFade.className}`}
           style={buttonsFade.style}
         >
-          <Button variant="primary" size="lg" href="/contacto">EMPIEZA AHORA</Button>
-          <Button variant="outline" size="lg" href="/precios#precios">VER PRECIOS</Button>
+          <Button variant="primary" size="lg" href="/contacto">
+            EMPIEZA AHORA
+          </Button>
+          <Button variant="outline" size="lg" href="/precios#precios">
+            VER PRECIOS
+          </Button>
         </div>
         <p
           ref={captionFade.ref}

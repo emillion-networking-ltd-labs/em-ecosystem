@@ -10,11 +10,30 @@ import { useFadeInOnView } from "@/lib/useFadeInOnView";
 import { useScrollParallax } from "@/lib/useScrollParallax";
 
 const faq = [
-  { title: "¿Puedo cambiar de plan?", children: "Sí. Puedes subir o bajar de plan en cualquier momento. Los cambios aplican en el siguiente período." },
-  { title: "¿Cómo funciona el primer mes?", children: "Incluye evaluación inicial completa: análisis, mediciones, fotos y videollamada para definir objetivos." },
-  { title: "¿Necesito ir a un gimnasio?", children: "Recomiendo gimnasio, pero puedo adaptar el programa para casa con equipo básico." },
-  { title: "¿Cuánto tiempo hasta ver resultados?", children: "Primeros cambios entre semana 4-8. Resultados significativos a partir del mes 3." },
-  { title: "¿Hay permanencia?", children: "No. Puedes cancelar cuando quieras con 7 días de preaviso." },
+  {
+    title: "¿Puedo cambiar de plan?",
+    children:
+      "Sí. Puedes subir o bajar de plan en cualquier momento. Los cambios aplican en el siguiente período.",
+  },
+  {
+    title: "¿Cómo funciona el primer mes?",
+    children:
+      "Incluye evaluación inicial completa: análisis, mediciones, fotos y videollamada para definir objetivos.",
+  },
+  {
+    title: "¿Necesito ir a un gimnasio?",
+    children:
+      "Recomiendo gimnasio, pero puedo adaptar el programa para casa con equipo básico.",
+  },
+  {
+    title: "¿Cuánto tiempo hasta ver resultados?",
+    children:
+      "Primeros cambios entre semana 4-8. Resultados significativos a partir del mes 3.",
+  },
+  {
+    title: "¿Hay permanencia?",
+    children: "No. Puedes cancelar cuando quieras con 7 días de preaviso.",
+  },
 ];
 
 const freeTrialFeatures = [
@@ -38,21 +57,31 @@ export default function PreciosPage() {
         <section className="bg-surface-primary py-20">
           {/* Free Trial intro */}
           <div className="mx-auto max-w-3xl px-6 text-center">
-            <p className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Prueba »»</p>
-            <h1 className="mt-2 text-display text-content-primary">Empieza gratis.</h1>
+            <p className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+              Prueba »»
+            </p>
+            <h1 className="mt-2 text-display text-content-primary">
+              Empieza gratis.
+            </h1>
             <p className="mx-auto mt-3 max-w-xl text-base text-content-secondary">
-              7 días de muestra para que conozcas mi método antes de elegir un plan. Sin tarjeta, sin compromiso.
+              7 días de muestra para que conozcas mi método antes de elegir un
+              plan. Sin tarjeta, sin compromiso.
             </p>
             <ul className="mx-auto mt-8 max-w-md space-y-2 text-left">
               {freeTrialFeatures.map((feature) => (
-                <li key={feature} className="flex items-start gap-2 text-body text-content-secondary">
+                <li
+                  key={feature}
+                  className="flex items-start gap-2 text-body text-content-secondary"
+                >
                   <span className="mt-0.5 text-accent">&#10003;</span>
                   {feature}
                 </li>
               ))}
             </ul>
             <div className="mt-8">
-              <Button variant="primary" size="lg" href="/contacto">EMPEZAR GRATIS</Button>
+              <Button variant="primary" size="lg" href="/contacto">
+                EMPEZAR GRATIS
+              </Button>
             </div>
           </div>
 
@@ -73,10 +102,18 @@ export default function PreciosPage() {
         >
           <div className="mx-auto max-w-3xl px-6">
             <div className="mb-10 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-              <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">FAQ »»</span>
-              <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">Preguntas frecuentes</h2>
+              <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+                FAQ »»
+              </span>
+              <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">
+                Preguntas frecuentes
+              </h2>
             </div>
-            <div ref={accordionFade.ref} className={accordionFade.className} style={accordionFade.style}>
+            <div
+              ref={accordionFade.ref}
+              className={accordionFade.className}
+              style={accordionFade.style}
+            >
               <Accordion items={faq} />
             </div>
           </div>

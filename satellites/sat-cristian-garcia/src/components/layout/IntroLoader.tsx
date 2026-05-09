@@ -40,7 +40,9 @@ export default function IntroLoader() {
   const [exiting, setExiting] = useState(false);
 
   useEffect(() => {
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     const alreadySeen = sessionStorage.getItem("intro_seen");
 
     // Skip path: never lock scroll, unmount immediately.

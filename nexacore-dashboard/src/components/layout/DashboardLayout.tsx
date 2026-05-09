@@ -62,7 +62,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
       {/* Overlay — closes any open panel */}
       {hasOverlay && (
         <div
-          className="fixed inset-0 z-[25] bg-[var(--overlay)]"
+          className="fixed inset-0 z-25 bg-(--overlay)"
           onClick={() => {
             setSidebarExpanded(false);
             setRightPanelOpen(false);

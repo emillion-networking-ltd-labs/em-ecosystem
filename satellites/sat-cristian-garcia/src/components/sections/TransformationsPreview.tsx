@@ -71,10 +71,7 @@ export default function TransformationsPreview({
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const trigger = window.innerHeight;
-      const progress = Math.min(
-        Math.max((trigger - rect.top) / trigger, 0),
-        1,
-      );
+      const progress = Math.min(Math.max((trigger - rect.top) / trigger, 0), 1);
       setOffset(progress * 40);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -139,7 +136,7 @@ export default function TransformationsPreview({
         <span
           className={`h-3 w-3 rounded-full transition-all ${
             idx === activeIndex
-              ? "bg-content-primary outline outline-2 outline-offset-2 outline-content-primary/75"
+              ? "bg-content-primary outline-solid outline-2 outline-offset-2 outline-content-primary/75"
               : "bg-border-components group-hover:bg-content-tertiary"
           }`}
         />
@@ -208,11 +205,7 @@ export default function TransformationsPreview({
             >
               <div className="flex items-center gap-0.5">
                 {[0, 1, 2, 3, 4].map((i) => (
-                  <Star
-                    key={i}
-                    size={18}
-                    className="fill-accent text-accent"
-                  />
+                  <Star key={i} size={18} className="fill-accent text-accent" />
                 ))}
               </div>
               <span className="text-body font-semibold text-content-primary">
@@ -242,7 +235,7 @@ export default function TransformationsPreview({
                 <Badge
                   variant="default"
                   size="sm"
-                  className="!text-accent uppercase gap-1.5"
+                  className="text-accent! uppercase gap-1.5"
                 >
                   <Clock size={14} />
                   {current.duration}
@@ -250,7 +243,7 @@ export default function TransformationsPreview({
                 <Badge
                   variant="default"
                   size="sm"
-                  className="!text-accent uppercase gap-1.5"
+                  className="text-accent! uppercase gap-1.5"
                 >
                   <Dumbbell size={14} />
                   {current.result}
@@ -267,7 +260,8 @@ export default function TransformationsPreview({
               Los resultados pueden variar. Cada plan se adapta a la situación
               individual del cliente — edad, composición corporal de partida,
               experiencia previa y compromiso personal.
-              {!hideTestimonialsLink && " Para resultados típicos, consulta nuestra página completa de testimonios."}
+              {!hideTestimonialsLink &&
+                " Para resultados típicos, consulta nuestra página completa de testimonios."}
             </p>
           </div>
 
@@ -277,7 +271,7 @@ export default function TransformationsPreview({
           <div className="order-1 md:order-2 md:col-span-2 slide-media">
             <div
               ref={sliderFade.ref}
-              className={`card-flat !p-0 overflow-hidden w-full md:w-3/4 md:mx-auto ${sliderFade.className}`}
+              className={`card-flat p-0! overflow-hidden w-full md:w-3/4 md:mx-auto ${sliderFade.className}`}
               style={sliderFade.style}
             >
               <BeforeAfterSlider

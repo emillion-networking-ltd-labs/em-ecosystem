@@ -304,7 +304,7 @@ export default function ProfileForm() {
           <div className="-mt-10">
             <div className="group/avatar relative inline-flex h-20 w-20 items-center justify-center rounded-full bg-surface-tertiary ring-1 ring-border-strong">
               <Avatar src={user.avatarUrl} name={fullName} size="lg" />
-              <div className="absolute -right-[38px] top-[2px] flex flex-col gap-[12px] opacity-0 -translate-x-2 transition-all duration-200 group-hover/avatar:opacity-100 group-hover/avatar:translate-x-0 [&>*:nth-child(2)]:transition-all [&>*:nth-child(2)]:duration-200 [&>*:nth-child(2)]:delay-75">
+              <div className="absolute right-[-38px] top-0.5 flex flex-col gap-3 opacity-0 -translate-x-2 transition-all duration-200 group-hover/avatar:opacity-100 group-hover/avatar:translate-x-0 [&>*:nth-child(2)]:transition-all [&>*:nth-child(2)]:duration-200 [&>*:nth-child(2)]:delay-75">
                 {user.avatarUrl ? (
                   <>
                     <IconButton

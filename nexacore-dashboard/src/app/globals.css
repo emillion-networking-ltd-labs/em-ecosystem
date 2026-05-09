@@ -1,159 +1,336 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss';
 
-/* ===== Design Tokens — Light Mode (Default) ===== */
-:root {
-  /* Surface colors */
-  --surface-primary: #ffffff;
-  --surface-secondary: #fbfbfb;
-  --surface-tertiary: #f5f7f9;
-  --surface-subtle: rgba(28, 28, 28, 0.05);
-  --surface-inverse: #1c1c1c;
+@custom-variant dark (&:is(.dark *));
 
-  /* Content colors (RGB channels for Tailwind opacity modifier support) */
-  --content-primary: 28 28 28;
-  --content-secondary: rgba(28, 28, 28, 0.65);
-  --content-tertiary: rgba(28, 28, 28, 0.55);
-  --content-disabled: #73787d;
-  --content-placeholder: rgba(28, 28, 28, 0.3);
-  --content-inverse: #ffffff;
+@theme {
+  --font-sans:
+    -apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial,
+    sans-serif;
 
-  /* Border colors */
-  --border-default: rgba(0, 0, 0, 0.05);
-  --border-strong: rgba(0, 0, 0, 0.08);
-  --border-components: rgba(0, 0, 0, 0.15);
-  --border-subtle: rgba(0, 0, 0, 0.03);
+  --color-accent: #1b5e20;
+  --color-accent-light: #2e7d32;
+  --color-accent-dark: #1b5e20;
 
-  /* Overlay */
-  --overlay: rgba(0, 0, 0, 0.2);
+  --color-surface-primary: var(--surface-primary);
+  --color-surface-secondary: var(--surface-secondary);
+  --color-surface-tertiary: var(--surface-tertiary);
+  --color-surface-subtle: var(--surface-subtle);
+  --color-surface-inverse: var(--surface-inverse);
 
-  /* Semantic feedback colors */
-  --color-error: 138 17 17;
-  --color-error-bg: #fef2f2;
-  --color-error-border: #f5c6c6;
-  --color-warning: #92400e;
-  --color-warning-bg: #fffbeb;
-  --color-warning-border: #fde68a;
-  --color-info: #1e40af;
-  --color-info-bg: #eff6ff;
-  --color-info-border: #bfdbfe;
-  --color-success: #166534;
-  --color-success-bg: #f0fdf4;
-  --color-success-border: #bbf7d0;
+  --color-content-primary: rgb(var(--content-primary));
+  --color-content-secondary: var(--content-secondary);
+  --color-content-tertiary: var(--content-tertiary);
+  --color-content-disabled: var(--content-disabled);
+  --color-content-placeholder: var(--content-placeholder);
+  --color-content-inverse: var(--content-inverse);
 
-  /* Interactive */
-  --hover-bg: rgba(251, 251, 251, 0.75);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-border-components: var(--border-components);
+  --color-border-subtle: var(--border-subtle);
 
-  /* Accent */
-  --accent: #1b5e20;
-  --accent-light: #2e7d32;
+  --color-hover: var(--hover-bg);
 
-  /* Input states */
-  --input-border-focus: #1c1c1c;
-  --input-bg-disabled: #f5f5f5;
+  --color-error: rgb(var(--color-error));
+  --color-error-bg: var(--color-error-bg);
+  --color-error-border: var(--color-error-border);
 
-  /* Dashboard-specific accent colors (from Figma extraction) */
-  --metric-purple: #edeefc;
-  --metric-blue: #e6f1fd;
-  --notification-purple: #edeefc;
-  --notification-blue: #e6f1fd;
+  --color-warning: var(--color-warning);
+  --color-warning-bg: var(--color-warning-bg);
+  --color-warning-border: var(--color-warning-border);
+
+  --color-info: var(--color-info);
+  --color-info-bg: var(--color-info-bg);
+  --color-info-border: var(--color-info-border);
+
+  --color-success: var(--color-success);
+  --color-success-bg: var(--color-success-bg);
+  --color-success-border: var(--color-success-border);
+
+  --color-metric-purple: var(--metric-purple);
+  --color-metric-blue: var(--metric-blue);
+
+  --color-notification-purple: var(--notification-purple);
+  --color-notification-blue: var(--notification-blue);
+
+  --text-h1: 24px;
+  --text-h1--line-height: 36px;
+  --text-h1--letter-spacing: -0.01em;
+  --text-h2: 20px;
+  --text-h2--line-height: 28px;
+  --text-h2--letter-spacing: -0.01em;
+  --text-h3: 16px;
+  --text-h3--line-height: 24px;
+  --text-h3--letter-spacing: 0;
+  --text-body: 14px;
+  --text-body--line-height: 21px;
+  --text-body--letter-spacing: 0.01em;
+  --text-caption: 12px;
+  --text-caption--line-height: 18px;
+  --text-caption--letter-spacing: 0.02em;
+
+  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.04);
+  --shadow-avatar: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
+
+  --radius-xs: 4px;
+  --radius-sm: 5px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+  --radius-full: 100px;
+  --radius-circle: 50%;
+
+  --spacing-1: 4px;
+  --spacing-2: 8px;
+  --spacing-3: 12px;
+  --spacing-4: 16px;
+  --spacing-5: 20px;
+  --spacing-6: 24px;
+  --spacing-8: 32px;
+  --spacing-9: 36px;
+  --spacing-0_5: 2px;
+  --spacing-1_5: 6px;
+  --spacing-2_5: 10px;
 }
 
-/* ===== Design Tokens — Dark Mode ===== */
-.dark {
-  --surface-primary: #1a1a1a;
-  --surface-secondary: #242424;
-  --surface-tertiary: #2d2d2d;
-  --surface-subtle: rgba(255, 255, 255, 0.06);
-  --surface-inverse: #f5f5f5;
+/*
+  The default border color has changed to `currentcolor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
 
-  --content-primary: 245 245 245;
-  --content-secondary: rgba(245, 245, 245, 0.75);
-  --content-tertiary: rgba(245, 245, 245, 0.55);
-  --content-disabled: #6b7280;
-  --content-placeholder: rgba(245, 245, 245, 0.3);
-  --content-inverse: #1a1a1a;
-
-  --border-default: rgba(255, 255, 255, 0.08);
-  --border-strong: rgba(255, 255, 255, 0.12);
-  --border-components: rgba(255, 255, 255, 0.2);
-  --border-subtle: rgba(255, 255, 255, 0.04);
-
-  /* Overlay */
-  --overlay: rgba(0, 0, 0, 0.2);
-
-  /* Semantic feedback colors */
-  --color-error: 239 68 68;
-  --color-error-bg: #451a1a;
-  --color-error-border: #7f1d1d;
-  --color-warning: #f59e0b;
-  --color-warning-bg: #451a03;
-  --color-warning-border: #78350f;
-  --color-info: #60a5fa;
-  --color-info-bg: #172554;
-  --color-info-border: #1e3a5f;
-  --color-success: #22c55e;
-  --color-success-bg: #14261c;
-  --color-success-border: #166534;
-
-  --hover-bg: rgba(255, 255, 255, 0.06);
-
-  --accent: #2e7d32;
-  --accent-light: #43a047;
-
-  --input-border-focus: #f5f5f5;
-  --input-bg-disabled: #2d2d2d;
-
-  /* Dashboard-specific accent colors (dark variants) */
-  --metric-purple: #2a2a3d;
-  --metric-blue: #1e2d3d;
-  --notification-purple: #2a2a3d;
-  --notification-blue: #1e2d3d;
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentcolor);
+  }
 }
 
-/* Force light mode on elements inside dark page (Design System showcase) */
-.light {
-  --surface-primary: #ffffff;
-  --surface-secondary: #fbfbfb;
-  --surface-tertiary: #f5f7f9;
-  --surface-subtle: rgba(28, 28, 28, 0.05);
-  --surface-inverse: #1c1c1c;
-  --content-primary: 28 28 28;
-  --content-secondary: rgba(28, 28, 28, 0.65);
-  --content-tertiary: rgba(28, 28, 28, 0.55);
-  --content-disabled: #73787d;
-  --content-placeholder: rgba(28, 28, 28, 0.3);
-  --content-inverse: #ffffff;
-  --border-default: rgba(0, 0, 0, 0.05);
-  --border-strong: rgba(0, 0, 0, 0.08);
-  --border-components: rgba(0, 0, 0, 0.15);
-  --border-subtle: rgba(0, 0, 0, 0.03);
-  --overlay: rgba(0, 0, 0, 0.2);
-  --color-error: 138 17 17;
-  --color-error-bg: #fef2f2;
-  --color-error-border: #f5c6c6;
-  --color-warning: #92400e;
-  --color-warning-bg: #fffbeb;
-  --color-warning-border: #fde68a;
-  --color-info: #1e40af;
-  --color-info-bg: #eff6ff;
-  --color-info-border: #bfdbfe;
-  --color-success: #166534;
-  --color-success-bg: #f0fdf4;
-  --color-success-border: #bbf7d0;
-  --hover-bg: rgba(251, 251, 251, 0.75);
-  --input-border-focus: #1c1c1c;
-  --input-bg-disabled: #f5f5f5;
-  color: rgb(var(--content-primary));
+/* ===== Component Layer ===== */
+@utility card-container {
+  /* Card container pattern (from ui-design-system.md) */
+  background: var(--surface-primary);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  border-radius: 24px;
+  padding: 24px;
+}
+@utility card {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  padding: 24px;
+}
+@utility card-flat {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 24px;
+}
+@utility card-container-flat {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: 24px;
+  padding: 24px;
+}
+@utility auth-card {
+  /* Auth card — Figma: Login Card / Register Card (Option A: Industry Standard)
+     Outer card = #fbfbfb (surface-secondary), single border on outer only.
+     Container (inner white area) has NO border — avoids the visual "2px" double-border. */
+  position: relative;
+  z-index: 1;
+  background: var(--surface-secondary);
+  border: 1px solid var(--border-strong);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 750px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+@utility text-balance {
+  text-wrap: balance;
+}
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+@utility animate-dropdown-down {
+  /* Dropdown/popover enter animations */
+  animation: dropdown-down 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: auto;
+}
+@utility animate-dropdown-up {
+  animation: dropdown-up 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: auto;
 }
 
-/* Ensure .dark class propagates color for currentColor inheritance (SVGs, borders) */
-.dark {
-  color: rgb(var(--content-primary));
-}
+@layer utilities {
+  /* ===== Design Tokens — Light Mode (Default) ===== */
+  :root {
+    /* Surface colors */
+    --surface-primary: #ffffff;
+    --surface-secondary: #fbfbfb;
+    --surface-tertiary: #f5f7f9;
+    --surface-subtle: rgba(28, 28, 28, 0.05);
+    --surface-inverse: #1c1c1c;
 
-/* ===== Base Styles ===== */
+    /* Content colors (RGB channels for Tailwind opacity modifier support) */
+    --content-primary: 28 28 28;
+    --content-secondary: rgba(28, 28, 28, 0.65);
+    --content-tertiary: rgba(28, 28, 28, 0.55);
+    --content-disabled: #73787d;
+    --content-placeholder: rgba(28, 28, 28, 0.3);
+    --content-inverse: #ffffff;
+
+    /* Border colors */
+    --border-default: rgba(0, 0, 0, 0.05);
+    --border-strong: rgba(0, 0, 0, 0.08);
+    --border-components: rgba(0, 0, 0, 0.15);
+    --border-subtle: rgba(0, 0, 0, 0.03);
+
+    /* Overlay */
+    --overlay: rgba(0, 0, 0, 0.2);
+
+    /* Semantic feedback colors */
+    --color-error: 138 17 17;
+    --color-error-bg: #fef2f2;
+    --color-error-border: #f5c6c6;
+    --color-warning: #92400e;
+    --color-warning-bg: #fffbeb;
+    --color-warning-border: #fde68a;
+    --color-info: #1e40af;
+    --color-info-bg: #eff6ff;
+    --color-info-border: #bfdbfe;
+    --color-success: #166534;
+    --color-success-bg: #f0fdf4;
+    --color-success-border: #bbf7d0;
+
+    /* Interactive */
+    --hover-bg: rgba(251, 251, 251, 0.75);
+
+    /* Accent */
+    --accent: #1b5e20;
+    --accent-light: #2e7d32;
+
+    /* Input states */
+    --input-border-focus: #1c1c1c;
+    --input-bg-disabled: #f5f5f5;
+
+    /* Dashboard-specific accent colors (from Figma extraction) */
+    --metric-purple: #edeefc;
+    --metric-blue: #e6f1fd;
+    --notification-purple: #edeefc;
+    --notification-blue: #e6f1fd;
+  }
+
+  /* ===== Design Tokens — Dark Mode ===== */
+  .dark {
+    --surface-primary: #1a1a1a;
+    --surface-secondary: #242424;
+    --surface-tertiary: #2d2d2d;
+    --surface-subtle: rgba(255, 255, 255, 0.06);
+    --surface-inverse: #f5f5f5;
+
+    --content-primary: 245 245 245;
+    --content-secondary: rgba(245, 245, 245, 0.75);
+    --content-tertiary: rgba(245, 245, 245, 0.55);
+    --content-disabled: #6b7280;
+    --content-placeholder: rgba(245, 245, 245, 0.3);
+    --content-inverse: #1a1a1a;
+
+    --border-default: rgba(255, 255, 255, 0.08);
+    --border-strong: rgba(255, 255, 255, 0.12);
+    --border-components: rgba(255, 255, 255, 0.2);
+    --border-subtle: rgba(255, 255, 255, 0.04);
+
+    /* Overlay */
+    --overlay: rgba(0, 0, 0, 0.2);
+
+    /* Semantic feedback colors */
+    --color-error: 239 68 68;
+    --color-error-bg: #451a1a;
+    --color-error-border: #7f1d1d;
+    --color-warning: #f59e0b;
+    --color-warning-bg: #451a03;
+    --color-warning-border: #78350f;
+    --color-info: #60a5fa;
+    --color-info-bg: #172554;
+    --color-info-border: #1e3a5f;
+    --color-success: #22c55e;
+    --color-success-bg: #14261c;
+    --color-success-border: #166534;
+
+    --hover-bg: rgba(255, 255, 255, 0.06);
+
+    --accent: #2e7d32;
+    --accent-light: #43a047;
+
+    --input-border-focus: #f5f5f5;
+    --input-bg-disabled: #2d2d2d;
+
+    /* Dashboard-specific accent colors (dark variants) */
+    --metric-purple: #2a2a3d;
+    --metric-blue: #1e2d3d;
+    --notification-purple: #2a2a3d;
+    --notification-blue: #1e2d3d;
+  }
+
+  /* Force light mode on elements inside dark page (Design System showcase) */
+  .light {
+    --surface-primary: #ffffff;
+    --surface-secondary: #fbfbfb;
+    --surface-tertiary: #f5f7f9;
+    --surface-subtle: rgba(28, 28, 28, 0.05);
+    --surface-inverse: #1c1c1c;
+    --content-primary: 28 28 28;
+    --content-secondary: rgba(28, 28, 28, 0.65);
+    --content-tertiary: rgba(28, 28, 28, 0.55);
+    --content-disabled: #73787d;
+    --content-placeholder: rgba(28, 28, 28, 0.3);
+    --content-inverse: #ffffff;
+    --border-default: rgba(0, 0, 0, 0.05);
+    --border-strong: rgba(0, 0, 0, 0.08);
+    --border-components: rgba(0, 0, 0, 0.15);
+    --border-subtle: rgba(0, 0, 0, 0.03);
+    --overlay: rgba(0, 0, 0, 0.2);
+    --color-error: 138 17 17;
+    --color-error-bg: #fef2f2;
+    --color-error-border: #f5c6c6;
+    --color-warning: #92400e;
+    --color-warning-bg: #fffbeb;
+    --color-warning-border: #fde68a;
+    --color-info: #1e40af;
+    --color-info-bg: #eff6ff;
+    --color-info-border: #bfdbfe;
+    --color-success: #166534;
+    --color-success-bg: #f0fdf4;
+    --color-success-border: #bbf7d0;
+    --hover-bg: rgba(251, 251, 251, 0.75);
+    --input-border-focus: #1c1c1c;
+    --input-bg-disabled: #f5f5f5;
+    color: rgb(var(--content-primary));
+  }
+
+  /* Ensure .dark class propagates color for currentColor inheritance (SVGs, borders) */
+  .dark {
+    color: rgb(var(--content-primary));
+  }
+
+  /* ===== Base Styles ===== */
+}
 @layer base {
   *,
   *::before,
@@ -195,316 +372,244 @@
   }
 }
 
-/* ===== Component Layer ===== */
-@layer components {
-  /* Card container pattern (from ui-design-system.md) */
-  .card-container {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-strong);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-    border-radius: 24px;
-    padding: 24px;
+@layer utilities {
+  /* ===== Page transition — fade on key change (pagination, tab content) ===== */
+  @keyframes pageFadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  .animate-page-transition {
+    animation: pageFadeIn 0.15s ease;
   }
 
-  .card {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-strong);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-    border-radius: 12px;
-    padding: 24px;
+  /* ===== Auth Page Transitions ===== */
+
+  @keyframes auth-card-enter {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
-  .card-flat {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-strong);
-    border-radius: 12px;
-    padding: 24px;
+  .auth-card-enter {
+    animation: auth-card-enter 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  .card-container-flat {
-    background: var(--surface-primary);
-    border: 1px solid var(--border-strong);
-    border-radius: 24px;
-    padding: 24px;
+  .auth-card-enter-delayed {
+    animation: auth-card-enter 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 120ms;
   }
 
-  /* Auth card — Figma: Login Card / Register Card (Option A: Industry Standard)
-     Outer card = #fbfbfb (surface-secondary), single border on outer only.
-     Container (inner white area) has NO border — avoids the visual "2px" double-border. */
-  .auth-card {
-    position: relative;
-    z-index: 1;
-    background: var(--surface-secondary);
-    border: 1px solid var(--border-strong);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
-    border-radius: 24px;
-    width: 100%;
-    max-width: 750px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  /* Step transitions — vertical slide for multi-step forms (email → password) */
+  .auth-step-forward {
+    animation: auth-card-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
-}
 
-/* ===== Page transition — fade on key change (pagination, tab content) ===== */
-@keyframes pageFadeIn {
-  from {
-    opacity: 0;
+  .auth-step-back {
+    animation: auth-card-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
-  to {
-    opacity: 1;
-  }
-}
-.animate-page-transition {
-  animation: pageFadeIn 0.15s ease;
-}
 
-/* ===== Auth Page Transitions ===== */
+  /* ===== Status Icon Animations ===== */
+  /* Success — scale-up with elastic bounce (appears with confidence) */
+  @keyframes icon-success {
+    0% {
+      opacity: 0;
+      transform: scale(0.3);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.08);
+    }
+    70% {
+      transform: scale(0.96);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
 
-@keyframes auth-card-enter {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
+  /* Error — fade-in then horizontal shake (communicates rejection) */
+  @keyframes icon-error {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    40% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      transform: translateX(-6px);
+    }
+    60% {
+      transform: translateX(5px);
+    }
+    70% {
+      transform: translateX(-4px);
+    }
+    80% {
+      transform: translateX(3px);
+    }
+    90% {
+      transform: translateX(-1px);
+    }
+    100% {
+      transform: translateX(0);
+    }
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
 
-.auth-card-enter {
-  animation: auth-card-enter 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+  .icon-success {
+    animation: icon-success 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 
-.auth-card-enter-delayed {
-  animation: auth-card-enter 400ms cubic-bezier(0.16, 1, 0.3, 1) both;
-  animation-delay: 120ms;
-}
+  .icon-error {
+    animation: icon-error 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
 
-/* Step transitions — vertical slide for multi-step forms (email → password) */
-.auth-step-forward {
-  animation: auth-card-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.auth-step-back {
-  animation: auth-card-enter 300ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* ===== Status Icon Animations ===== */
-/* Success — scale-up with elastic bounce (appears with confidence) */
-@keyframes icon-success {
-  0% {
-    opacity: 0;
-    transform: scale(0.3);
-  }
-  50% {
-    opacity: 1;
-    transform: scale(1.08);
-  }
-  70% {
-    transform: scale(0.96);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-/* Error — fade-in then horizontal shake (communicates rejection) */
-@keyframes icon-error {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  40% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    transform: translateX(-6px);
-  }
-  60% {
-    transform: translateX(5px);
-  }
-  70% {
-    transform: translateX(-4px);
-  }
-  80% {
-    transform: translateX(3px);
-  }
-  90% {
-    transform: translateX(-1px);
-  }
-  100% {
-    transform: translateX(0);
-  }
-}
-
-.icon-success {
-  animation: icon-success 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.icon-error {
-  animation: icon-error 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-/* ===== Autofill override ===== */
-/* Browser autofill applies its own bg only to the <input> element, not the container div.
+  /* ===== Autofill override ===== */
+  /* Browser autofill applies its own bg only to the <input> element, not the container div.
    This makes the colored area appear narrower than the visible input box.
    Override using box-shadow inset trick (cannot override -webkit-autofill bg directly). */
-input:-webkit-autofill,
-input:-webkit-autofill:hover,
-input:-webkit-autofill:focus {
-  -webkit-box-shadow: 0 0 0 1000px var(--surface-primary) inset;
-  -webkit-text-fill-color: rgb(var(--content-primary));
-  caret-color: rgb(var(--content-primary));
-  transition: background-color 5000s ease-in-out 0s;
-}
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus {
+    -webkit-box-shadow: 0 0 0 1000px var(--surface-primary) inset;
+    -webkit-text-fill-color: rgb(var(--content-primary));
+    caret-color: rgb(var(--content-primary));
+    transition: background-color 5000s ease-in-out 0s;
+  }
 
-/* ===== Infinity button spinner ===== */
-/* Replicates DaisyUI loading-infinity — pure CSS @keyframes, no external dependency.
+  /* ===== Infinity button spinner ===== */
+  /* Replicates DaisyUI loading-infinity — pure CSS @keyframes, no external dependency.
    Values extracted directly from DaisyUI v5 source SVG data URI:
      strokeDasharray: 205.271 51.318  (dash ≈80% of path, gap ≈20%)
      dashoffset animation: 0 → 256.589  (= 205.271 + 51.318, one full cycle)
      duration: 2s linear infinite  (matches DaisyUI SMIL <animate dur="2s">) */
-@keyframes infinity-spin {
-  0% {
-    stroke-dashoffset: 0;
+  @keyframes infinity-spin {
+    0% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: 256.589;
+    }
   }
-  100% {
-    stroke-dashoffset: 256.589;
+
+  .infinity-spinner {
+    animation: infinity-spin 2s linear infinite;
   }
-}
 
-.infinity-spinner {
-  animation: infinity-spin 2s linear infinite;
-}
-
-/* ===== Countdown digit boxes ===== */
-/* Replicates DaisyUI countdown — individual digit boxes with slide-in animation.
+  /* ===== Countdown digit boxes ===== */
+  /* Replicates DaisyUI countdown — individual digit boxes with slide-in animation.
    Each digit sits in a fixed-size box with overflow hidden.
    When React remounts the inner span (via key={value}), the slide animation fires.
    Colors use --color-error tokens (designed for rate-limit / lockout banners). */
-.countdown-slide {
-  animation: countdown-slide 0.3s ease-out;
-}
-
-@keyframes countdown-slide {
-  from {
-    transform: translateY(-100%);
-    opacity: 0;
+  .countdown-slide {
+    animation: countdown-slide 0.3s ease-out;
   }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
 
-/* ===== Global Error Boundary ===== */
-/* Styles for global-error.tsx — extracted from inline styles so CSP
+  @keyframes countdown-slide {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  /* ===== Global Error Boundary ===== */
+  /* Styles for global-error.tsx — extracted from inline styles so CSP
    style-src can use nonce instead of unsafe-inline. These classes are
    available even when JS chunks fail to load (loaded via <link>). */
-.global-error-body {
-  margin: 0;
-  min-height: 100vh;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-family:
-    var(--font-geist-sans),
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    sans-serif;
-  background-color: #ffffff;
-  color: #1c1c1c;
-}
-
-.global-error-container {
-  max-width: 400px;
-  width: 100%;
-  padding: 0 16px;
-  text-align: center;
-}
-
-.global-error-icon {
-  margin: 0 auto 16px;
-}
-
-.global-error-title {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 0 0 8px;
-  color: #1c1c1c;
-}
-
-.global-error-message {
-  font-size: 14px;
-  color: rgba(28, 28, 28, 0.5);
-  margin: 0 0 24px;
-  line-height: 1.5;
-}
-
-.global-error-digest {
-  font-size: 12px;
-  color: rgba(28, 28, 28, 0.4);
-  margin: 0 0 24px;
-}
-
-.global-error-actions {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-}
-
-.global-error-btn-primary {
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  background-color: #1c1c1c;
-  color: #ffffff;
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 6px;
-  cursor: pointer;
-}
-
-.global-error-btn-secondary {
-  padding: 10px 24px;
-  font-size: 14px;
-  font-weight: 500;
-  background-color: #f2f2f2;
-  color: rgba(28, 28, 28, 0.5);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  border-radius: 6px;
-  text-decoration: none;
-  display: inline-flex;
-  align-items: center;
-}
-
-/* ===== Utility Layer ===== */
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+  .global-error-body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family:
+      var(--font-geist-sans),
+      -apple-system,
+      BlinkMacSystemFont,
+      'Segoe UI',
+      Roboto,
+      sans-serif;
+    background-color: #ffffff;
+    color: #1c1c1c;
   }
 
-  .scrollbar-hide {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-  .scrollbar-hide::-webkit-scrollbar {
-    display: none;
+  .global-error-container {
+    max-width: 400px;
+    width: 100%;
+    padding: 0 16px;
+    text-align: center;
   }
 
-  /* Dropdown/popover enter animations */
-  .animate-dropdown-down {
-    animation: dropdown-down 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    will-change: auto;
+  .global-error-icon {
+    margin: 0 auto 16px;
   }
-  .animate-dropdown-up {
-    animation: dropdown-up 150ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
-    will-change: auto;
+
+  .global-error-title {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 8px;
+    color: #1c1c1c;
   }
+
+  .global-error-message {
+    font-size: 14px;
+    color: rgba(28, 28, 28, 0.5);
+    margin: 0 0 24px;
+    line-height: 1.5;
+  }
+
+  .global-error-digest {
+    font-size: 12px;
+    color: rgba(28, 28, 28, 0.4);
+    margin: 0 0 24px;
+  }
+
+  .global-error-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+  }
+
+  .global-error-btn-primary {
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: #1c1c1c;
+    color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+
+  .global-error-btn-secondary {
+    padding: 10px 24px;
+    font-size: 14px;
+    font-weight: 500;
+    background-color: #f2f2f2;
+    color: rgba(28, 28, 28, 0.5);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 6px;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  /* ===== Utility Layer ===== */
 }
 
 @keyframes dropdown-down {

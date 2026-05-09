@@ -27,7 +27,7 @@ import type { SafeUser, PaginatedResponse } from "@/lib/types";
 
 export const commandPaletteSpecs = {
   dialog: {
-    overlay: "bg-[var(--overlay)] fixed inset-0",
+    overlay: "bg-(--overlay) fixed inset-0",
     container:
       "max-w-[550px] rounded-xl border-border-strong bg-surface-primary shadow-card",
     position:
@@ -189,7 +189,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
   return (
     <div className="fixed inset-0 z-50">
       {/* Overlay */}
-      <div className="fixed inset-0 bg-[var(--overlay)]" onClick={onClose} />
+      <div className="fixed inset-0 bg-(--overlay)" onClick={onClose} />
 
       {/* Dialog — mobile: below header (68px), desktop: 20vh from top */}
       <div className="fixed inset-0 flex items-start justify-center px-4 pt-[68px] lg:px-0 lg:pt-[20vh]">
@@ -204,7 +204,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
               value={search}
               onValueChange={setSearch}
               placeholder="Type a command or search..."
-              className="min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary placeholder:text-content-placeholder outline-none"
+              className="min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary placeholder:text-content-placeholder outline-hidden"
             />
             <IconButton size="sm" onClick={onClose} aria-label="Close search">
               <X size={16} />
@@ -220,7 +220,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
             {/* Pages */}
             <Command.Group
               heading="Pages"
-              className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-caption [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-content-tertiary"
+              className="**:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-caption **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-wider **:[[cmdk-group-heading]]:text-content-tertiary"
             >
               {filteredPages.map((page) => (
                 <Command.Item
@@ -242,7 +242,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
             {canSearchUsers && users.length > 0 && (
               <Command.Group
                 heading="Users"
-                className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-caption [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-content-tertiary"
+                className="**:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-caption **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-wider **:[[cmdk-group-heading]]:text-content-tertiary"
               >
                 {users.map((user) => (
                   <Command.Item
@@ -283,7 +283,7 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
             {/* Actions */}
             <Command.Group
               heading="Actions"
-              className="[&_[cmdk-group-heading]]:px-3 [&_[cmdk-group-heading]]:py-2 [&_[cmdk-group-heading]]:text-caption [&_[cmdk-group-heading]]:font-semibold [&_[cmdk-group-heading]]:uppercase [&_[cmdk-group-heading]]:tracking-wider [&_[cmdk-group-heading]]:text-content-tertiary"
+              className="**:[[cmdk-group-heading]]:px-3 **:[[cmdk-group-heading]]:py-2 **:[[cmdk-group-heading]]:text-caption **:[[cmdk-group-heading]]:font-semibold **:[[cmdk-group-heading]]:uppercase **:[[cmdk-group-heading]]:tracking-wider **:[[cmdk-group-heading]]:text-content-tertiary"
             >
               <Command.Item
                 value="Toggle dark mode"

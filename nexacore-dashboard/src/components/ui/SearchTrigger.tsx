@@ -6,7 +6,7 @@ import Badge from "./Badge";
 export const searchTriggerSpecs = {
   container: {
     style:
-      "Button outline sm tokens — rounded-md border-border-components h-8 px-4 py-1.5",
+      "Button outline-solid sm tokens — rounded-md border-border-components h-8 px-4 py-1.5",
     text: "text-caption text-content-primary",
     hover: "hover:bg-surface-subtle",
   },

@@ -16,7 +16,13 @@ type PortfolioImage = (typeof portfolioImages)[number];
 type PalmaresEntry = (typeof portfolioPalmares)[number];
 type MediaEntry = (typeof portfolioMedia)[number];
 
-function PalmaresCard({ entry, index }: { entry: PalmaresEntry; index: number }) {
+function PalmaresCard({
+  entry,
+  index,
+}: {
+  entry: PalmaresEntry;
+  index: number;
+}) {
   // Per-card IntersectionObserver. On mobile the 3 entries stack vertically
   // (~400px each) — total > 1 viewport. Section-level stagger would fire all
   // 3 at once when the first comes into view. Same fix as /sobre-mi timeline.
@@ -26,16 +32,34 @@ function PalmaresCard({ entry, index }: { entry: PalmaresEntry; index: number })
   return (
     <div ref={ref} style={style} className={`card-flat ${className}`}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:gap-6">
-        <p className="text-h1 font-black text-accent leading-none">{entry.year}</p>
+        <p className="text-h1 font-black text-accent leading-none">
+          {entry.year}
+        </p>
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <Badge variant="default" size="sm" className="!text-accent uppercase">{entry.scope}</Badge>
-            <Badge variant="default" size="sm" className="!text-accent uppercase">{entry.category}</Badge>
+            <Badge
+              variant="default"
+              size="sm"
+              className="text-accent! uppercase"
+            >
+              {entry.scope}
+            </Badge>
+            <Badge
+              variant="default"
+              size="sm"
+              className="text-accent! uppercase"
+            >
+              {entry.category}
+            </Badge>
           </div>
-          <h3 className="mt-3 text-h2 font-semibold text-content-primary">{entry.title}</h3>
+          <h3 className="mt-3 text-h2 font-semibold text-content-primary">
+            {entry.title}
+          </h3>
           <p className="mt-2 text-h3 font-medium text-accent">{entry.result}</p>
           {entry.note && (
-            <p className="mt-2 text-body leading-relaxed text-content-secondary">{entry.note}</p>
+            <p className="mt-2 text-body leading-relaxed text-content-secondary">
+              {entry.note}
+            </p>
           )}
         </div>
       </div>
@@ -60,7 +84,7 @@ function PortfolioCard({
       ref={ref as unknown as React.Ref<HTMLButtonElement>}
       onClick={onClick}
       aria-label={`Ver imagen completa: ${image.alt}`}
-      className={`group relative aspect-[3/4] cursor-zoom-in overflow-hidden rounded-lg ${className}`}
+      className={`group relative aspect-3/4 cursor-zoom-in overflow-hidden rounded-lg ${className}`}
       style={style}
     >
       <Image
@@ -70,8 +94,10 @@ function PortfolioCard({
         className="object-cover transition-transform duration-500 group-hover:scale-105"
         sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
       />
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-        <p className="text-caption font-semibold uppercase tracking-wider text-white">{image.alt}</p>
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <p className="text-caption font-semibold uppercase tracking-wider text-white">
+          {image.alt}
+        </p>
       </div>
     </button>
   );
@@ -173,7 +199,7 @@ function Lightbox({
       // bg-surface-tertiary, text-content-primary y hover:bg-surface-subtle del
       // patrón "boxed" del dashboard se renderizan con valores apropiados para
       // un overlay oscuro, sin importar el tema del usuario.
-      className="dark fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm"
+      className="dark fixed inset-0 z-100 flex items-center justify-center bg-black/95 backdrop-blur-xs"
       onClick={handleBackdropClick}
     >
       {/* IconButton boxed sm — componente del design system (importado, no inline).
@@ -263,8 +289,12 @@ function Lightbox({
 
       {/* Caption + counter */}
       <div className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col items-center gap-1 px-4 text-center sm:bottom-6">
-        <p className="text-caption font-semibold uppercase tracking-wider text-white">{image.alt}</p>
-        <p className="text-caption text-white/60">{index + 1} / {total}</p>
+        <p className="text-caption font-semibold uppercase tracking-wider text-white">
+          {image.alt}
+        </p>
+        <p className="text-caption text-white/60">
+          {index + 1} / {total}
+        </p>
       </div>
     </div>
   );
@@ -286,16 +316,27 @@ function MediaCard({ entry, index }: { entry: MediaEntry; index: number }) {
         className={`card-flat block transition-all ${isExternal ? "hover:border-border-components" : ""}`}
       >
         <div className="flex flex-wrap items-center gap-3">
-          <p className="text-caption font-semibold uppercase tracking-widest text-accent">{entry.publication}</p>
-          <span className="text-caption text-content-tertiary">{entry.year}</span>
+          <p className="text-caption font-semibold uppercase tracking-widest text-accent">
+            {entry.publication}
+          </p>
+          <span className="text-caption text-content-tertiary">
+            {entry.year}
+          </span>
         </div>
         <div className="mt-3 flex items-start justify-between gap-4">
-          <h3 className="text-h2 font-semibold text-content-primary">{entry.title}</h3>
+          <h3 className="text-h2 font-semibold text-content-primary">
+            {entry.title}
+          </h3>
           {isExternal && (
-            <ExternalLink size={18} className="mt-1 shrink-0 text-content-tertiary transition-colors group-hover:text-accent" />
+            <ExternalLink
+              size={18}
+              className="mt-1 shrink-0 text-content-tertiary transition-colors group-hover:text-accent"
+            />
           )}
         </div>
-        <p className="mt-3 text-body leading-relaxed text-content-secondary">{entry.excerpt}</p>
+        <p className="mt-3 text-body leading-relaxed text-content-secondary">
+          {entry.excerpt}
+        </p>
       </Wrapper>
     </div>
   );
@@ -323,18 +364,33 @@ export default function PortfolioPage() {
         <section className="bg-surface-primary py-20">
           <div className="mx-auto max-w-7xl px-6">
             <div className="mb-12 text-center">
-              <p className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Portfolio »»</p>
-              <h1 className="mt-2 text-display text-content-primary">En tarima.</h1>
-              <p className="mx-auto mt-3 max-w-xl text-base text-content-secondary">Campeón de Andalucía. Campeón de España Sub 23. Top 15 Míster Universo.</p>
+              <p className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+                Portfolio »»
+              </p>
+              <h1 className="mt-2 text-display text-content-primary">
+                En tarima.
+              </h1>
+              <p className="mx-auto mt-3 max-w-xl text-base text-content-secondary">
+                Campeón de Andalucía. Campeón de España Sub 23. Top 15 Míster
+                Universo.
+              </p>
             </div>
             <div className="mx-auto max-w-4xl">
               <div className="mb-8 flex flex-wrap items-center gap-x-3 gap-y-1">
-                <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Palmarés »»</span>
-                <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">Competiciones</h2>
+                <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+                  Palmarés »»
+                </span>
+                <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">
+                  Competiciones
+                </h2>
               </div>
               <div className="space-y-6">
                 {portfolioPalmares.map((entry, i) => (
-                  <PalmaresCard key={`${entry.year}-${entry.title}`} entry={entry} index={i} />
+                  <PalmaresCard
+                    key={`${entry.year}-${entry.title}`}
+                    entry={entry}
+                    index={i}
+                  />
                 ))}
               </div>
             </div>
@@ -342,11 +398,19 @@ export default function PortfolioPage() {
         </section>
 
         {/* === Galería === */}
-        <section ref={galleryParallax.ref} style={galleryParallax.style} className="bg-surface-secondary py-20">
+        <section
+          ref={galleryParallax.ref}
+          style={galleryParallax.style}
+          className="bg-surface-secondary py-20"
+        >
           <div className="mx-auto max-w-7xl px-6">
             <div className="mb-12 flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-              <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Galería »»</span>
-              <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">Momentos en escena</h2>
+              <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+                Galería »»
+              </span>
+              <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">
+                Momentos en escena
+              </h2>
             </div>
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
               {portfolioImages.map((img, i) => (
@@ -362,15 +426,27 @@ export default function PortfolioPage() {
         </section>
 
         {/* === Prensa === */}
-        <section ref={mediaParallax.ref} style={mediaParallax.style} className="bg-surface-primary py-20">
+        <section
+          ref={mediaParallax.ref}
+          style={mediaParallax.style}
+          className="bg-surface-primary py-20"
+        >
           <div className="mx-auto max-w-4xl px-6">
             <div className="mb-12 flex flex-wrap items-center gap-x-3 gap-y-1">
-              <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Prensa »»</span>
-              <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">En los medios</h2>
+              <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+                Prensa »»
+              </span>
+              <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">
+                En los medios
+              </h2>
             </div>
             <div className="grid gap-4">
               {portfolioMedia.map((entry, i) => (
-                <MediaCard key={`${entry.publication}-${entry.year}`} entry={entry} index={i} />
+                <MediaCard
+                  key={`${entry.publication}-${entry.year}`}
+                  entry={entry}
+                  index={i}
+                />
               ))}
             </div>
           </div>

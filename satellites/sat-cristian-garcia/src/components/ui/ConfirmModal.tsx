@@ -22,7 +22,7 @@ export const confirmModalSpecs = {
   },
   layout: {
     radius: "rounded-xl (card inner)",
-    overlay: "bg-[var(--overlay)] — click does NOT close (Escape + X only)",
+    overlay: "bg-(--overlay) — click does NOT close (Escape + X only)",
     topSection:
       "bg-surface-primary p-6 sm:p-6 p-4 border-b border-border-strong",
     bottomSection: "bg-surface-secondary px-6 py-3",
@@ -183,7 +183,7 @@ export default function ConfirmModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--overlay)]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-(--overlay)">
       <div
         ref={panelRef}
         role="dialog"

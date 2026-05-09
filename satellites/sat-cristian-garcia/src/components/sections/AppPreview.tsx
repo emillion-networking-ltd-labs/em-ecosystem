@@ -41,10 +41,7 @@ export default function AppPreview() {
       if (!el) return;
       const rect = el.getBoundingClientRect();
       const trigger = window.innerHeight;
-      const progress = Math.min(
-        Math.max((trigger - rect.top) / trigger, 0),
-        1,
-      );
+      const progress = Math.min(Math.max((trigger - rect.top) / trigger, 0), 1);
       setOffset(progress * 40);
     };
     window.addEventListener("scroll", handleScroll, { passive: true });
@@ -59,103 +56,107 @@ export default function AppPreview() {
         className="relative overflow-hidden"
         style={{ transform: `translateY(${offset}px)` }}
       >
-      {/* Full-bleed background image */}
-      <Image
-        src="/images/app-tapiz.png"
-        alt={`${APP_NAME} — preview de la aplicación móvil`}
-        fill
-        priority={false}
-        sizes="100vw"
-        className="object-cover object-center"
-      />
+        {/* Full-bleed background image */}
+        <Image
+          src="/images/app-tapiz.png"
+          alt={`${APP_NAME} — preview de la aplicación móvil`}
+          fill
+          priority={false}
+          sizes="100vw"
+          className="object-cover object-center"
+        />
 
-      {/* Left-side gradient overlay: dark on the left fading to transparent on the right
+        {/* Left-side gradient overlay: dark on the left fading to transparent on the right
           so the CRISFIT icon in the tapiz remains visible */}
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-gradient-to-r from-black/85 via-black/60 to-black/20"
-      />
-
-      {/* Content overlaid */}
-      <div className="relative mx-auto max-w-7xl px-6 py-12">
-        {/* Centered eyebrow + descriptive title — same pattern as Services / Portfolio / Transformations */}
         <div
-          ref={headerFade.ref}
-          className={`mb-10 flex flex-wrap items-center justify-center gap-3 ${headerFade.className}`}
-          style={headerFade.style}
-        >
-          <span className="text-[18px] leading-7 font-semibold tracking-wide text-accent md:text-h1">
-            App móvil »»
-          </span>
-          <h2 className="text-[18px] leading-7 font-bold text-white md:text-h1">
-            Lleva el plan contigo
-          </h2>
-        </div>
+          aria-hidden
+          className="absolute inset-0 bg-linear-to-r from-black/85 via-black/60 to-black/20"
+        />
 
-        {/* CRISFIT (left edge of section) + Próximamente badge (right edge of section)
+        {/* Content overlaid */}
+        <div className="relative mx-auto max-w-7xl px-6 py-12">
+          {/* Centered eyebrow + descriptive title — same pattern as Services / Portfolio / Transformations */}
+          <div
+            ref={headerFade.ref}
+            className={`mb-10 flex flex-wrap items-center justify-center gap-3 ${headerFade.className}`}
+            style={headerFade.style}
+          >
+            <span className="text-[18px] leading-7 font-semibold tracking-wide text-accent md:text-h1">
+              App móvil »»
+            </span>
+            <h2 className="text-[18px] leading-7 font-bold text-white md:text-h1">
+              Lleva el plan contigo
+            </h2>
+          </div>
+
+          {/* CRISFIT (left edge of section) + Próximamente badge (right edge of section)
             on the same line, spanning the full max-w-7xl width */}
-        <div
-          ref={crisfitFade.ref}
-          className={`flex items-center justify-between gap-3 ${crisfitFade.className}`}
-          style={crisfitFade.style}
-        >
-          <p className="text-h2 font-black uppercase tracking-tight text-accent md:text-h1">
-            {APP_NAME}
-          </p>
-          <Badge
-            variant="default"
-            size="sm"
-            className="!text-accent uppercase gap-1.5"
+          <div
+            ref={crisfitFade.ref}
+            className={`flex items-center justify-between gap-3 ${crisfitFade.className}`}
+            style={crisfitFade.style}
           >
-            <Hourglass size={14} />
-            Próximamente
-          </Badge>
-        </div>
+            <p className="text-h2 font-black uppercase tracking-tight text-accent md:text-h1">
+              {APP_NAME}
+            </p>
+            <Badge
+              variant="default"
+              size="sm"
+              className="text-accent! uppercase gap-1.5"
+            >
+              <Hourglass size={14} />
+              Próximamente
+            </Badge>
+          </div>
 
-        {/* Left-aligned tagline (constrained to max-w-xl so it wraps naturally) */}
-        <div className="max-w-xl">
-          <p
-            ref={taglineFade.ref}
-            className={`mt-4 text-h3 leading-relaxed text-white/80 md:text-h2 ${taglineFade.className}`}
-            style={taglineFade.style}
-          >
-            Tu plan completo de entrenamiento
-            <br />
-            y nutrición en tu bolsillo.
-          </p>
-        </div>
+          {/* Left-aligned tagline (constrained to max-w-xl so it wraps naturally) */}
+          <div className="max-w-xl">
+            <p
+              ref={taglineFade.ref}
+              className={`mt-4 text-h3 leading-relaxed text-white/80 md:text-h2 ${taglineFade.className}`}
+              style={taglineFade.style}
+            >
+              Tu plan completo de entrenamiento
+              <br />y nutrición en tu bolsillo.
+            </p>
+          </div>
 
-        {/* Action row — spans full max-w-7xl so the CTA can sit at the right
+          {/* Action row — spans full max-w-7xl so the CTA can sit at the right
             edge of the section, aligned horizontally with the Google Play
             mockup on the left. flex-wrap keeps it graceful on narrow screens. */}
-        <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
-          {/* Google Play button mockup (disabled — coming soon) */}
-          <div
-            ref={playStoreFade.ref}
-            aria-disabled
-            className={`flex h-12 cursor-not-allowed items-center gap-3 rounded-md border border-white/20 bg-black/40 px-5 backdrop-blur-sm opacity-90 ${playStoreFade.className}`}
-            style={playStoreFade.style}
-          >
-            <span className="text-white">
-              <GooglePlayIcon size={22} />
-            </span>
-            <span className="text-body font-semibold text-white">
-              Google Play
-            </span>
-          </div>
+          <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
+            {/* Google Play button mockup (disabled — coming soon) */}
+            <div
+              ref={playStoreFade.ref}
+              aria-disabled
+              className={`flex h-12 cursor-not-allowed items-center gap-3 rounded-md border border-white/20 bg-black/40 px-5 backdrop-blur-xs opacity-90 ${playStoreFade.className}`}
+              style={playStoreFade.style}
+            >
+              <span className="text-white">
+                <GooglePlayIcon size={22} />
+              </span>
+              <span className="text-body font-semibold text-white">
+                Google Play
+              </span>
+            </div>
 
-          {/* CTA — primary/lg Button to match CTASection's "EMPIEZA AHORA" */}
-          <div
-            ref={ctaFade.ref}
-            className={ctaFade.className}
-            style={ctaFade.style}
-          >
-            <Button variant="primary" size="lg" href="/contacto" fullWidth={false}>
-              ÚNETE A LA LISTA DE ESPERA
-            </Button>
+            {/* CTA — primary/lg Button to match CTASection's "EMPIEZA AHORA" */}
+            <div
+              ref={ctaFade.ref}
+              className={ctaFade.className}
+              style={ctaFade.style}
+            >
+              <Button
+                variant="primary"
+                size="lg"
+                href="/contacto"
+                fullWidth={false}
+              >
+                ÚNETE A LA LISTA DE ESPERA
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
       </section>
     </div>
   );

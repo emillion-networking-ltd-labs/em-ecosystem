@@ -91,12 +91,12 @@ export default function UserRoleChart() {
     <ChartCard title="Users by Role">
       {loading && (
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
-          <div className="h-[120px] w-[120px] animate-pulse rounded-full bg-black/[0.08] dark:bg-white/[0.08]" />
+          <div className="h-[120px] w-[120px] animate-pulse rounded-full bg-black/8 dark:bg-white/8" />
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-4 w-24 animate-pulse rounded bg-black/[0.08] dark:bg-white/[0.08]"
+                className="h-4 w-24 animate-pulse rounded bg-black/8 dark:bg-white/8"
               />
             ))}
           </div>
@@ -111,7 +111,7 @@ export default function UserRoleChart() {
 
       {!loading && !error && pieData.length > 0 && (
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
-          <div className="h-[120px] w-[120px] flex-shrink-0">
+          <div className="h-[120px] w-[120px] shrink-0">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -160,7 +160,7 @@ export default function UserRoleChart() {
               return (
                 <div key={role} className="flex items-center gap-2">
                   <span
-                    className={`h-2 w-2 flex-shrink-0 rounded-full ${roleBgClasses[role]}`}
+                    className={`h-2 w-2 shrink-0 rounded-full ${roleBgClasses[role]}`}
                   />
                   <span className="text-caption text-content-primary">
                     {role}

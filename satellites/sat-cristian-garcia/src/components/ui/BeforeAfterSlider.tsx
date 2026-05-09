@@ -125,10 +125,10 @@ export default function BeforeAfterSlider({
     : "clip-path 300ms ease-out, top 300ms ease-out, left 300ms ease-out";
 
   const aspectClass = {
-    "4/5": "aspect-[4/5]",
+    "4/5": "aspect-4/5",
     "1/1": "aspect-square",
     "16/9": "aspect-video",
-    "3/4": "aspect-[3/4]",
+    "3/4": "aspect-3/4",
   }[aspectRatio];
 
   const cursorClass =
@@ -172,7 +172,7 @@ export default function BeforeAfterSlider({
       />
 
       {/* Before — clipped by position. translateZ(0) forces GPU compositing layer
-          on initial render so text inside backdrop-blur badges renders sharp from
+          on initial render so text inside backdrop-blur-sm badges renders sharp from
           the start (without it, text appears blurry until first interaction). */}
       <div
         className="pointer-events-none absolute inset-0"

@@ -164,13 +164,17 @@ export default function Select({
 
   // fullWidth: container/trigger/dropdown adoptan ancho del padre (form input).
   // Default (false): inline-block, contenido auto-width (filter/menu behavior).
-  const containerClass = fullWidth ? "relative block w-full" : "relative inline-block";
+  const containerClass = fullWidth
+    ? "relative block w-full"
+    : "relative inline-block";
   const triggerLayoutClass = fullWidth
     ? "w-full justify-between rounded-lg border border-border-components px-4"
     : "justify-center rounded-md px-6";
   const dropdownAnchorClass = fullWidth
     ? "left-0 right-0"
-    : popoverPos.horizontal === "right" ? "right-0" : "left-0";
+    : popoverPos.horizontal === "right"
+      ? "right-0"
+      : "left-0";
 
   return (
     <div ref={containerRef} className={`${containerClass} ${className}`}>

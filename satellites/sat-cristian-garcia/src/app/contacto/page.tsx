@@ -15,7 +15,13 @@ type ContactMethod = {
   external?: boolean;
 };
 
-function ContactMethodCard({ method, index }: { method: ContactMethod; index: number }) {
+function ContactMethodCard({
+  method,
+  index,
+}: {
+  method: ContactMethod;
+  index: number;
+}) {
   const Icon = method.icon;
   const isClickable = !!method.href;
   // Per-item IntersectionObserver: each card animates only when *it* enters
@@ -32,8 +38,12 @@ function ContactMethodCard({ method, index }: { method: ContactMethod; index: nu
         <Icon size={18} className="text-accent" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-caption font-semibold uppercase tracking-widest text-accent">{method.label}</p>
-        <p className="mt-1 break-words text-body text-content-primary">{method.value}</p>
+        <p className="text-caption font-semibold uppercase tracking-widest text-accent">
+          {method.label}
+        </p>
+        <p className="mt-1 wrap-break-word text-body text-content-primary">
+          {method.value}
+        </p>
       </div>
     </div>
   );
@@ -110,8 +120,12 @@ export default function ContactoPage() {
           <div className="mx-auto max-w-7xl px-6">
             {/* Header — pattern del proyecto, estático */}
             <div className="mb-12 text-center">
-              <p className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Contacto »»</p>
-              <h1 className="mt-2 text-display text-content-primary">Hablemos.</h1>
+              <p className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+                Contacto »»
+              </p>
+              <h1 className="mt-2 text-display text-content-primary">
+                Hablemos.
+              </h1>
               <p className="mx-auto mt-3 max-w-xl text-base text-content-secondary">
                 Reserva una llamada gratuita de 15 minutos. Sin compromiso.
               </p>
@@ -124,7 +138,9 @@ export default function ContactoPage() {
               className="mx-auto mb-10 flex max-w-md items-center justify-center gap-2 rounded-md border border-border-strong bg-surface-secondary px-4 py-2.5"
             >
               <Clock size={16} className="text-accent" />
-              <p className="text-caption text-content-secondary">{siteConfig.responseTime}</p>
+              <p className="text-caption text-content-secondary">
+                {siteConfig.responseTime}
+              </p>
             </div>
 
             {/* 2-col layout: info de contacto + formulario */}
@@ -132,15 +148,24 @@ export default function ContactoPage() {
               {/* Left: Métodos alternativos */}
               <div className="lg:col-span-2">
                 <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Directo »»</span>
-                  <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">Métodos alternativos</h2>
+                  <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+                    Directo »»
+                  </span>
+                  <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">
+                    Métodos alternativos
+                  </h2>
                 </div>
                 <p className="mb-6 text-body leading-relaxed text-content-secondary">
-                  Si prefieres saltarte el formulario, podemos hablar directamente por cualquiera de estos canales.
+                  Si prefieres saltarte el formulario, podemos hablar
+                  directamente por cualquiera de estos canales.
                 </p>
                 <div className="space-y-3">
                   {contactMethods.map((method, i) => (
-                    <ContactMethodCard key={method.label} method={method} index={i} />
+                    <ContactMethodCard
+                      key={method.label}
+                      method={method}
+                      index={i}
+                    />
                   ))}
                 </div>
               </div>
@@ -148,8 +173,12 @@ export default function ContactoPage() {
               {/* Right: Formulario — último en la secuencia (delay 500) */}
               <div className="lg:col-span-3">
                 <div className="mb-6 flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">Formulario »»</span>
-                  <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">Cuéntame tu objetivo</h2>
+                  <span className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
+                    Formulario »»
+                  </span>
+                  <h2 className="text-[18px] leading-7 md:text-h1 font-bold text-content-primary">
+                    Cuéntame tu objetivo
+                  </h2>
                 </div>
                 <div ref={formFade.ref} style={formFade.style}>
                   <ContactForm />
