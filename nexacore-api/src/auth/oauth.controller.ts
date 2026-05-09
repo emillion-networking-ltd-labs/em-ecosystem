@@ -24,8 +24,8 @@ import { ConfigService } from '@nestjs/config';
 import { AuthService, CookieConfig } from './auth.service';
 import { setCookieFromConfig } from '../common/utils/cookie.util';
 import {
-  AUTH_RATE_LIMITS,
   OAUTH_CODE_COOKIE_MAX_AGE_MS,
+  THROTTLE_CONFIGS,
 } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
@@ -36,6 +36,20 @@ import { OAuthLinkCodeStore } from './stores/oauth-link-code.store';
 import { SafeUser } from '../users/entities/user.entity';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
+
+/**
+ * Shape of the request after a Google/GitHub Passport guard has run.
+ * `req.user` is populated by the guard's `validate()` and used by the
+ * shared `handleOAuthCallback` helper.
+ */
+interface OAuthCallbackRequest {
+  user: {
+    accessToken: string;
+    user: SafeUser;
+    cookie: CookieConfig;
+    oauthAction?: 'login' | 'created' | 'linked';
+  };
+}
 
 @ApiTags('OAuth')
 @UseInterceptors(NoCacheInterceptor)
@@ -48,12 +62,7 @@ export class OAuthController {
   ) {}
 
   @Get('google')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.oauth)
   @UseGuards(GoogleAuthGuard)
   @ApiOperation({ summary: 'Initiate Google OAuth login' })
   @ApiResponse({
@@ -75,32 +84,14 @@ export class OAuthController {
     description: 'Redirects to frontend with ephemeral code in httpOnly cookie',
   })
   async googleAuthCallback(
-    @Request()
-    req: {
-      user: {
-        accessToken: string;
-        user: SafeUser;
-        cookie: CookieConfig;
-        oauthAction?: 'login' | 'created' | 'linked';
-      };
-    },
+    @Request() req: OAuthCallbackRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const code = await this.authService.generateOAuthCode(req.user);
-    const frontendUrl = this.getValidatedFrontendUrl();
-    this.setOAuthCodeCookie(res, code);
-    return {
-      url: `${frontendUrl}/auth/callback`,
-    };
+    return this.handleOAuthCallback(req, res);
   }
 
   @Get('github')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.oauth)
   @UseGuards(GitHubAuthGuard)
   @ApiOperation({ summary: 'Initiate GitHub OAuth login' })
   @ApiResponse({
@@ -122,32 +113,14 @@ export class OAuthController {
     description: 'Redirects to frontend with ephemeral code in httpOnly cookie',
   })
   async githubAuthCallback(
-    @Request()
-    req: {
-      user: {
-        accessToken: string;
-        user: SafeUser;
-        cookie: CookieConfig;
-        oauthAction?: 'login' | 'created' | 'linked';
-      };
-    },
+    @Request() req: OAuthCallbackRequest,
     @Res({ passthrough: true }) res: Response,
   ) {
-    const code = await this.authService.generateOAuthCode(req.user);
-    const frontendUrl = this.getValidatedFrontendUrl();
-    this.setOAuthCodeCookie(res, code);
-    return {
-      url: `${frontendUrl}/auth/callback`,
-    };
+    return this.handleOAuthCallback(req, res);
   }
 
   @Post('oauth/exchange')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.oauth)
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Exchange ephemeral OAuth code for tokens' })
   @ApiResponse({ status: 200, description: 'Tokens returned successfully' })
@@ -183,12 +156,7 @@ export class OAuthController {
 
   @Post('link/code')
   @UseGuards(JwtAuthGuard)
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.oauth)
   @HttpCode(HttpStatus.CREATED)
   @ApiBearerAuth()
   @ApiOperation({
@@ -203,12 +171,7 @@ export class OAuthController {
   }
 
   @Get('link/google')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.oauth)
   @UseGuards(OAuthLinkGuard, GoogleAuthGuard)
   @UseFilters(OAuthCallbackFilter)
   @ApiBearerAuth()
@@ -227,12 +190,7 @@ export class OAuthController {
   }
 
   @Get('link/github')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.oauth.ttl,
-      limit: AUTH_RATE_LIMITS.oauth.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.oauth)
   @UseGuards(OAuthLinkGuard, GitHubAuthGuard)
   @UseFilters(OAuthCallbackFilter)
   @ApiBearerAuth()
@@ -248,6 +206,25 @@ export class OAuthController {
   githubLinkAuth() {
     // OAuthLinkGuard validates link code and sets req.oauthAction='link' + req.user.id
     // GitHubAuthGuard then generates state with action=link and userId, redirects to GitHub
+  }
+
+  /**
+   * Shared OAuth callback flow for Google + GitHub.
+   *
+   * SCRUM-356: previously duplicated 20 lines between googleAuthCallback
+   * and githubAuthCallback. The two providers behave identically once
+   * their respective Passport guards have populated `req.user`.
+   */
+  private async handleOAuthCallback(
+    req: OAuthCallbackRequest,
+    res: Response,
+  ): Promise<{ url: string }> {
+    const code = await this.authService.generateOAuthCode(req.user);
+    const frontendUrl = this.getValidatedFrontendUrl();
+    this.setOAuthCodeCookie(res, code);
+    return {
+      url: `${frontendUrl}/auth/callback`,
+    };
   }
 
   private setOAuthCodeCookie(res: Response, code: string): void {

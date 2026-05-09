@@ -29,8 +29,8 @@ import { RefreshTokenPayload } from './interfaces/refresh-token-payload.interfac
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { NoCacheInterceptor } from '../common/interceptors/no-cache.interceptor';
 import {
-  AUTH_RATE_LIMITS,
   REFRESH_TOKEN_COOKIE_NAME,
+  THROTTLE_CONFIGS,
 } from './constants/auth.constants';
 import { extractRequestMeta } from '../common/utils/request-meta';
 import type { AuthenticatedRequest } from '../common/interfaces/authenticated-request.interface';
@@ -77,12 +77,7 @@ export class SessionController {
   @Delete('sessions/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.trust_device.ttl,
-      limit: AUTH_RATE_LIMITS.trust_device.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.trustDevice)
   @ApiOperation({ summary: 'Revoke a specific session' })
   @ApiResponse({ status: 200, description: 'Session revoked' })
   @ApiResponse({ status: 400, description: 'Password required' })
@@ -107,12 +102,7 @@ export class SessionController {
   @HttpCode(HttpStatus.CREATED)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.trust_device.ttl,
-      limit: AUTH_RATE_LIMITS.trust_device.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.trustDevice)
   @ApiOperation({
     summary: 'Mark current device as trusted (skips MFA on future logins)',
   })
@@ -154,12 +144,7 @@ export class SessionController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.trust_device.ttl,
-      limit: AUTH_RATE_LIMITS.trust_device.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.trustDevice)
   @ApiOperation({ summary: 'Revoke all trusted devices' })
   @ApiResponse({ status: 200, description: 'All trusted devices revoked' })
   @ApiResponse({ status: 400, description: 'Password required' })
@@ -179,12 +164,7 @@ export class SessionController {
   @Delete('trusted-devices/:id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.trust_device.ttl,
-      limit: AUTH_RATE_LIMITS.trust_device.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.trustDevice)
   @ApiOperation({ summary: 'Revoke trust for a specific device' })
   @ApiResponse({ status: 200, description: 'Device trust revoked' })
   @ApiResponse({ status: 400, description: 'Password required' })

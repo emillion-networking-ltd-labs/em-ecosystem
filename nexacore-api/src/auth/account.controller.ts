@@ -22,7 +22,7 @@ import { ValidateResetTokenDto } from './dto/validate-reset-token.dto';
 import { VerifyEmailDto } from './dto/verify-email.dto';
 import { VerifyEmailChangeDto } from './dto/verify-email-change.dto';
 import { ResendVerificationPublicDto } from './dto/resend-verification-public.dto';
-import { AUTH_RATE_LIMITS } from './constants/auth.constants';
+import { AUTH_RATE_LIMITS, THROTTLE_CONFIGS } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { SkipCsrf } from '../common/decorators/skip-csrf.decorator';
 import { TurnstileGuard } from '../security/turnstile.guard';
@@ -90,12 +90,7 @@ export class AccountController {
   @UseGuards(TurnstileGuard)
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.sensitive_action.ttl,
-      limit: AUTH_RATE_LIMITS.sensitive_action.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.sensitiveAction)
   @ApiOperation({
     summary: 'Resend email verification (public, no auth required)',
   })
@@ -118,12 +113,7 @@ export class AccountController {
   @UseGuards(TurnstileGuard)
   @HttpCode(HttpStatus.OK)
   @SkipCsrf()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.sensitive_action.ttl,
-      limit: AUTH_RATE_LIMITS.sensitive_action.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.sensitiveAction)
   @ApiOperation({ summary: 'Request password reset email' })
   @ApiResponse({
     status: 200,

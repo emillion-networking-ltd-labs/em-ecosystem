@@ -310,9 +310,12 @@ export class LoginService {
     requestMeta: { ipAddress: string; userAgent?: string | null },
     ctx?: RequestContext,
   ): Promise<AuthResult> {
-    const { accessToken, refreshToken, sessionId } =
-      await this.tokenService.generateTokens(user, requestMeta);
+    const tokens = await this.tokenService.generateTokens(user, requestMeta);
 
+    // SCRUM-356: audit log lands BETWEEN token creation and the shared
+    // post-success flow (travel/notify/return). This is why we pass
+    // pre-generated tokens to issueAuthSession instead of letting it
+    // generate them itself.
     this.loginSecurityService.logAudit(
       AuditAction.LOGIN_SUCCESS,
       ctx,
@@ -323,29 +326,7 @@ export class LoginService {
       },
     );
 
-    const travelResult = await this.loginSecurityService.checkImpossibleTravel(
-      user,
-      requestMeta,
-    );
-    if (travelResult?.isAnomalous && travelResult.actionTaken === 'blocked') {
-      this.loginSecurityService.handleTravelBlock(
-        travelResult,
-        user.id,
-        requestMeta,
-      );
-    }
-
-    this.loginSecurityService
-      .notifyIfNewDevice(user, sessionId, requestMeta)
-      .catch(() => {});
-    this.loginSecurityService.checkSuspiciousLoginSuccess(user, requestMeta);
-
-    return {
-      status: 'success' as const,
-      accessToken,
-      user: toSafeUser(user),
-      cookie: this.tokenService.buildRefreshCookie(refreshToken),
-    };
+    return this.tokenService.issueAuthSession(user, requestMeta, tokens);
   }
 
   private handleMfaSetupRequired(

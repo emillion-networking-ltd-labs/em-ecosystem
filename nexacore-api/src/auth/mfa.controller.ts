@@ -23,8 +23,8 @@ import { MfaService } from './mfa.service';
 import { TokenService } from './token.service';
 import { TrustedDeviceService } from './trusted-device.service';
 import {
-  AUTH_RATE_LIMITS,
   DEVICE_FINGERPRINT_HEADER,
+  THROTTLE_CONFIGS,
 } from './constants/auth.constants';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtOrMfaSetupGuard } from './guards/jwt-or-mfa-setup.guard';
@@ -51,12 +51,7 @@ export class MfaController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtOrMfaSetupGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.mfa.ttl,
-      limit: AUTH_RATE_LIMITS.mfa.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.mfa)
   @ApiOperation({ summary: 'Generate TOTP secret and QR code for MFA setup' })
   @ApiResponse({ status: 200, description: 'MFA setup data returned' })
   @ApiResponse({ status: 409, description: 'MFA is already enabled' })
@@ -68,12 +63,7 @@ export class MfaController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtOrMfaSetupGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.mfa.ttl,
-      limit: AUTH_RATE_LIMITS.mfa.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.mfa)
   @ApiOperation({ summary: 'Verify TOTP code and enable MFA' })
   @ApiResponse({ status: 200, description: 'MFA enabled successfully' })
   @ApiResponse({ status: 400, description: 'Invalid verification code' })
@@ -88,12 +78,7 @@ export class MfaController {
 
   @Post('verify-login')
   @HttpCode(HttpStatus.OK)
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.mfa.ttl,
-      limit: AUTH_RATE_LIMITS.mfa.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.mfa)
   @ApiOperation({ summary: 'Verify TOTP/recovery code during login' })
   @ApiResponse({ status: 200, description: 'MFA verified, tokens issued' })
   @ApiResponse({ status: 401, description: 'Invalid MFA code or token' })
@@ -131,12 +116,7 @@ export class MfaController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.mfa.ttl,
-      limit: AUTH_RATE_LIMITS.mfa.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.mfa)
   @ApiOperation({ summary: 'Disable MFA (requires password confirmation)' })
   @ApiResponse({ status: 200, description: 'MFA disabled successfully' })
   @ApiResponse({ status: 400, description: 'MFA is not enabled' })
@@ -154,12 +134,7 @@ export class MfaController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.mfa.ttl,
-      limit: AUTH_RATE_LIMITS.mfa.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.mfa)
   @ApiOperation({ summary: 'Regenerate recovery codes (requires password)' })
   @ApiResponse({ status: 200, description: 'New recovery codes generated' })
   async regenerateCodes(
@@ -174,12 +149,7 @@ export class MfaController {
   }
 
   @Get('status')
-  @Throttle({
-    global: {
-      ttl: AUTH_RATE_LIMITS.mfa.ttl,
-      limit: AUTH_RATE_LIMITS.mfa.limit,
-    },
-  })
+  @Throttle(THROTTLE_CONFIGS.mfa)
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get MFA status and remaining recovery codes' })
