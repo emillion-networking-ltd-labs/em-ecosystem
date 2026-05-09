@@ -98,6 +98,7 @@ export default function ContactForm() {
           placeholder="Selecciona un servicio"
           size="md"
           fullWidth
+          ariaLabel="Servicio de interés"
         />
       </FormField>
       <FormField label="Tu objetivo">
