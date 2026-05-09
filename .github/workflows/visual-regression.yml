@@ -201,8 +201,20 @@ jobs:
           BASELINE_REF="${{ inputs.baseline_ref }}"
           echo "Capturing satellite baseline from $BASELINE_REF"
           git stash -u || true
+          # Restore satellite source AND its package.json/lock at the baseline
+          # ref so the dependency snapshot matches the source snapshot
+          # (Tailwind 3 source needs Tailwind 3 deps to render correctly).
           git checkout "$BASELINE_REF" -- satellites/sat-cristian-garcia
-          (cd satellites/sat-cristian-garcia && npm ci && npx playwright install chromium --with-deps)
+          # The baseline ref didn't have @playwright/test or playwright.config.ts
+          # or the visual spec — they were added in the SCRUM-379 PR. Restore
+          # the playwright config + spec from current HEAD; install playwright
+          # ad-hoc on top of the baseline-ref's deps so we can run the test.
+          git checkout HEAD -- \
+            satellites/sat-cristian-garcia/playwright.config.ts \
+            satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts
+          (cd satellites/sat-cristian-garcia && npm ci)
+          (cd satellites/sat-cristian-garcia && npm install --no-save @playwright/test wait-on)
+          (cd satellites/sat-cristian-garcia && npx playwright install chromium --with-deps)
           (cd satellites/sat-cristian-garcia && npm run dev &)
           (cd satellites/sat-cristian-garcia && npx wait-on http://localhost:3002 -t 90000)
           (cd satellites/sat-cristian-garcia && npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
