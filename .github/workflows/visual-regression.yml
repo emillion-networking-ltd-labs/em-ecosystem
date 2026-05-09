@@ -117,9 +117,16 @@ jobs:
           (cd nexacore-dashboard && npx wait-on http://localhost:3001 -t 90000)
           (cd nexacore-dashboard && NEXT_PUBLIC_VRT_BYPASS_AUTH=1 npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
           (pgrep -f "next dev -p 3001" | xargs -r kill -9) || true
-          # Restore source back to current HEAD; freshly captured snapshots
-          # are new untracked files and survive the checkout.
+          # Preserve freshly captured snapshots across the post-capture restore.
+          # If the snapshots dir is already committed (re-baseline scenario),
+          # `git checkout HEAD -- nexacore-dashboard` would wipe the new content.
+          # Cache to /tmp, restore source, then put snapshots back.
+          rm -rf /tmp/dash-snapshots && mkdir -p /tmp/dash-snapshots
+          cp -a nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots/. /tmp/dash-snapshots/ 2>/dev/null || true
           git checkout HEAD -- nexacore-dashboard
+          rm -rf nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots
+          mkdir -p nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots
+          cp -a /tmp/dash-snapshots/. nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots/ 2>/dev/null || true
           ls nexacore-dashboard/tests/e2e/visual.spec.ts-snapshots/ || (echo "No snapshots produced!" && exit 1)
         timeout-minutes: 30
 
@@ -237,7 +244,16 @@ jobs:
           (cd satellites/sat-cristian-garcia && npx wait-on http://localhost:3002 -t 90000)
           (cd satellites/sat-cristian-garcia && npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
           (pgrep -f "next dev -p 3002" | xargs -r kill -9) || true
+          # Preserve freshly captured snapshots across the post-capture restore.
+          # The snapshots dir is committed in HEAD (initial baseline), so a plain
+          # `git checkout HEAD -- satellites/...` would wipe the new content.
+          # Cache to /tmp, restore source, then put snapshots back.
+          rm -rf /tmp/sat-snapshots && mkdir -p /tmp/sat-snapshots
+          cp -a satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots/. /tmp/sat-snapshots/
           git checkout HEAD -- satellites/sat-cristian-garcia
+          rm -rf satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots
+          mkdir -p satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots
+          cp -a /tmp/sat-snapshots/. satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots/
           ls satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots/ || (echo "No snapshots produced!" && exit 1)
         timeout-minutes: 30
 
