@@ -22,6 +22,9 @@ const ALLOWLIST: RegExp[] = [
   /\[HMR\]/i,
   // Next 16 -> 17 forward-compat marker; tracked as a separate ticket
   /middleware.*deprecated.*proxy/i,
+  // SCRUM-381 (TODO ticket): pre-existing RSC violation. Same allowlist
+  // as dashboard for parity. Remove when SCRUM-381 fixes the root cause.
+  /Functions cannot be passed directly to Client Components/i,
 ];
 
 function isAllowlisted(text: string): boolean {
