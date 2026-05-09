@@ -111,6 +111,15 @@
   ::file-selector-button {
     border-color: var(--color-gray-200, currentcolor);
   }
+
+  /* Tailwind v4 dropped the implicit `cursor: pointer` on <button>. Restore
+     it at the base layer so every interactive element looks clickable. The
+     `cursor-not-allowed` and `cursor-default` utilities still override
+     because they're in the utilities layer, which has higher specificity. */
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]) {
+    cursor: pointer;
+  }
 }
 
 /* ===== Component Layer ===== */
