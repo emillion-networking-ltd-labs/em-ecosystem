@@ -108,7 +108,14 @@ jobs:
           # so the baseline_ref's source can be rendered post-auth via the
           # bypass. AuthContext from HEAD honors NEXT_PUBLIC_VRT_BYPASS_AUTH;
           # the baseline_ref's AuthContext doesn't.
+          # SCRUM-386: also restore layout.tsx from HEAD — fda0b94 added
+          # `suppressHydrationWarning` on the theme-init script to silence
+          # the benign Next 16 nonce hydration warning. Without that fix in
+          # the captured tree, the no-console-errors fixture (also from
+          # HEAD) rejects the warning and capture fails. Pre-fda0b94
+          # rescue refs (e.g. v-baseline-2026-05-06-auth-green) need this.
           git checkout HEAD -- \
+            nexacore-dashboard/src/app/layout.tsx \
             nexacore-dashboard/src/context/AuthContext.tsx \
             nexacore-dashboard/tests/e2e/visual.spec.ts \
             nexacore-dashboard/tests/e2e/fixtures/
