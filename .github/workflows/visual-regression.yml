@@ -41,9 +41,9 @@ on:
         type: boolean
         default: false
       baseline_ref:
-        description: "Git ref to capture baseline from (default: ee309e6 = pre-Tailwind-4)"
+        description: "Git ref to capture baseline from (default: v-baseline-2026-05-06-auth-green = SCRUM-384 rescue baseline, pre-cascade)"
         required: false
-        default: "ee309e6"
+        default: "v-baseline-2026-05-06-auth-green"
       package:
         description: "Which package to capture baseline for"
         required: true
