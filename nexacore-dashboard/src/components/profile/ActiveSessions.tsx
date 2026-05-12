@@ -17,9 +17,11 @@ import type { SessionResponse } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 import ConfirmModal from "@/components/ui/ConfirmModal";
+import EmptyState from "@/components/ui/EmptyState";
 import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
 import RateLimitBanner from "@/components/ui/RateLimitBanner";
+import Spinner from "@/components/ui/Spinner";
 
 function parseUserAgent(ua: string | null): {
   label: string;
@@ -280,7 +282,7 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
 
       {loading ? (
         <div className="flex items-center justify-center py-8">
-          <div className="h-5 w-5 animate-spin rounded-full border-2 border-content-disabled border-t-content-primary" />
+          <Spinner size="lg" />
         </div>
       ) : loadError ? (
         <p
@@ -291,9 +293,11 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
           Failed to load sessions.
         </p>
       ) : sessions.length === 0 ? (
-        <p className="py-4 text-center text-body text-content-tertiary">
-          No active sessions found.
-        </p>
+        <EmptyState
+          icon={<Smartphone size={48} />}
+          title="No active sessions"
+          description="Sign in on another device to see it here."
+        />
       ) : (
         <>
           <div className="space-y-3">

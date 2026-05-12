@@ -19,10 +19,12 @@ import { useToast } from "@/context/ToastContext";
 import { PROFILE_TOAST, AUTH_TOAST } from "@/lib/toast-messages";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
 import IconButton from "@/components/ui/IconButton";
 import Input from "@/components/ui/Input";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import RateLimitBanner from "@/components/ui/RateLimitBanner";
+import Spinner from "@/components/ui/Spinner";
 import type { PasskeyResponse } from "@/lib/types";
 
 function formatRelativeTime(dateStr: string | null): string {
@@ -306,7 +308,7 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
       {/* Loading */}
       {isLoadingList && passkeys.length === 0 && (
         <div className="flex items-center justify-center py-8">
-          <div className="h-6 w-6 animate-spin rounded-full border-2 border-content-secondary border-t-transparent" />
+          <Spinner size="lg" />
         </div>
       )}
 
@@ -314,56 +316,80 @@ export default function PasskeyManager({ bare }: { bare?: boolean }) {
       {isSupported && (
         <>
           {!isLoadingList && passkeys.length === 0 && (
-            <p className="mb-4 text-body text-content-secondary">
-              No passkeys registered. Add a passkey for faster, more secure
-              sign-in using biometrics or your device.
-            </p>
+            <EmptyState
+              icon={<Key size={48} />}
+              title="No passkeys registered"
+              description="Add a passkey for faster, more secure sign-in using biometrics or your device."
+              action={
+                <Button
+                  variant="primary"
+                  size="md"
+                  fullWidth={false}
+                  onClick={() => {
+                    clearError();
+                    setRegName("");
+                    setRegPassword("");
+                    setRegFieldError("");
+                    setRegisterOpen(true);
+                  }}
+                  disabled={rateLimitInfo.isRateLimited}
+                >
+                  <Plus size={16} />
+                  Add Passkey
+                </Button>
+              }
+            />
           )}
 
-          <div className="mb-4 flex flex-col gap-3">
-            <AnimatePresence initial={false}>
-              {passkeys.map((pk) => (
-                <PasskeyItem
-                  key={pk.id}
-                  passkey={pk}
-                  isNew={allowAnimations.current}
-                  isRateLimited={rateLimitInfo.isRateLimited}
-                  onRename={(p) => {
-                    clearError();
-                    setRenameValue(p.name || "");
-                    setRenamingPasskey(p);
-                  }}
-                  onDelete={(p) => {
-                    clearError();
-                    setDeletePassword("");
-                    setDeletingPasskey(p);
-                  }}
-                />
-              ))}
-            </AnimatePresence>
-          </div>
+          {passkeys.length > 0 && (
+            <>
+              <div className="mb-4 flex flex-col gap-3">
+                <AnimatePresence initial={false}>
+                  {passkeys.map((pk) => (
+                    <PasskeyItem
+                      key={pk.id}
+                      passkey={pk}
+                      isNew={allowAnimations.current}
+                      isRateLimited={rateLimitInfo.isRateLimited}
+                      onRename={(p) => {
+                        clearError();
+                        setRenameValue(p.name || "");
+                        setRenamingPasskey(p);
+                      }}
+                      onDelete={(p) => {
+                        clearError();
+                        setDeletePassword("");
+                        setDeletingPasskey(p);
+                      }}
+                    />
+                  ))}
+                </AnimatePresence>
+              </div>
 
-          <Button
-            variant="primary"
-            size="md"
-            onClick={() => {
-              clearError();
-              setRegName("");
-              setRegPassword("");
-              setRegFieldError("");
-              setRegisterOpen(true);
-            }}
-            disabled={passkeys.length >= 10 || rateLimitInfo.isRateLimited}
-            className="sm:w-auto"
-          >
-            <Plus size={16} />
-            Add Passkey
-          </Button>
+              <Button
+                variant="primary"
+                size="md"
+                onClick={() => {
+                  clearError();
+                  setRegName("");
+                  setRegPassword("");
+                  setRegFieldError("");
+                  setRegisterOpen(true);
+                }}
+                disabled={passkeys.length >= 10 || rateLimitInfo.isRateLimited}
+                className="sm:w-auto"
+              >
+                <Plus size={16} />
+                Add Passkey
+              </Button>
 
-          {passkeys.length >= 10 && (
-            <p className="mt-2 text-caption text-content-secondary">
-              Maximum of 10 passkeys reached. Remove one before adding another.
-            </p>
+              {passkeys.length >= 10 && (
+                <p className="mt-2 text-caption text-content-secondary">
+                  Maximum of 10 passkeys reached. Remove one before adding
+                  another.
+                </p>
+              )}
+            </>
           )}
 
           {rateLimitInfo.isRateLimited && rateLimitInfo.retryAfter && (

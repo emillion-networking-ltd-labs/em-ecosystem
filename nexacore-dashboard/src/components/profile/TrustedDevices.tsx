@@ -2,13 +2,21 @@
 
 import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Shield, Laptop, Smartphone, Trash2, Plus } from "lucide-react";
+import {
+  Shield,
+  ShieldCheck,
+  Laptop,
+  Smartphone,
+  Trash2,
+  Plus,
+} from "lucide-react";
 import { useTrustedDevices } from "@/hooks/useTrustedDevices";
 import { useToast } from "@/context/ToastContext";
 import { useNow } from "@/hooks/useNow";
 import { PROFILE_TOAST, AUTH_TOAST } from "@/lib/toast-messages";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
 import IconButton from "@/components/ui/IconButton";
 import ConfirmModal from "@/components/ui/ConfirmModal";
 import Input from "@/components/ui/Input";
@@ -217,16 +225,33 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
       {/* Loading state */}
       {isLoading && devices.length === 0 && (
         <div className="flex items-center justify-center py-8">
-          <Spinner size="md" />
+          <Spinner size="lg" />
         </div>
       )}
 
       {/* Empty state */}
       {!isLoading && devices.length === 0 && (
-        <p className="mb-4 text-body text-content-secondary">
-          No trusted devices. When you log in with MFA and trust a device, it
-          will appear here.
-        </p>
+        <EmptyState
+          icon={<ShieldCheck size={48} />}
+          title="No trusted devices"
+          description="When you log in with MFA and trust this device, it appears here."
+          action={
+            <Button
+              variant="primary"
+              size="md"
+              fullWidth={false}
+              disabled={rateLimitInfo.isRateLimited}
+              onClick={() => {
+                setTrustPassword("");
+                setTrustFieldError("");
+                setTrustModalOpen(true);
+              }}
+            >
+              <Plus size={16} />
+              Trust This Device
+            </Button>
+          }
+        />
       )}
 
       {/* Device list */}
@@ -287,23 +312,23 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
         </AnimatePresence>
       </div>
 
-      {/* Action buttons */}
-      <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <Button
-          variant="primary"
-          size="md"
-          disabled={rateLimitInfo.isRateLimited}
-          onClick={() => {
-            setTrustPassword("");
-            setTrustFieldError("");
-            setTrustModalOpen(true);
-          }}
-          className="sm:w-auto"
-        >
-          <Plus size={16} />
-          Trust This Device
-        </Button>
-        {devices.length > 0 && (
+      {/* Action buttons — only when devices exist (empty state renders its own Trust action) */}
+      {devices.length > 0 && (
+        <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          <Button
+            variant="primary"
+            size="md"
+            disabled={rateLimitInfo.isRateLimited}
+            onClick={() => {
+              setTrustPassword("");
+              setTrustFieldError("");
+              setTrustModalOpen(true);
+            }}
+            className="sm:w-auto"
+          >
+            <Plus size={16} />
+            Trust This Device
+          </Button>
           <Button
             variant="danger"
             size="md"
@@ -317,8 +342,8 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
           >
             Revoke All
           </Button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Rate limit banner — below buttons */}
       {rateLimitInfo.isRateLimited && rateLimitInfo.retryAfter && (
