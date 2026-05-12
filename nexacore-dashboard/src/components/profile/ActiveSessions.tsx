@@ -112,21 +112,24 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
   const [revokeAllPassword, setRevokeAllPassword] = useState("");
   const [revokeAllFieldError, setRevokeAllFieldError] = useState("");
 
-  const fetchSessions = useCallback(async () => {
+  const fetchSessions = useCallback(async (signal?: AbortSignal) => {
     try {
       setLoadError(false);
-      const data = await apiClient.get<SessionResponse[]>("/auth/sessions");
-      setSessions(data);
-    } catch {
-      setLoadError(true);
+      const data = await apiClient.get<SessionResponse[]>("/auth/sessions", {
+        signal,
+      });
+      if (!signal?.aborted) setSessions(data);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      if (!signal?.aborted) setLoadError(true);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchSessions();
+    fetchSessions(controller.signal);
     return () => controller.abort();
   }, [fetchSessions]);
 
@@ -138,14 +141,16 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
   // Pattern matches the GitHub/Google Active Sessions UX (refresh on entry,
   // not real-time push). See OWASP Session Management Cheat Sheet §3.5.
   useEffect(() => {
+    const controller = new AbortController();
     const handleRefresh = () => {
       if (document.visibilityState === "visible") {
-        void fetchSessions();
+        void fetchSessions(controller.signal);
       }
     };
     window.addEventListener("focus", handleRefresh);
     document.addEventListener("visibilitychange", handleRefresh);
     return () => {
+      controller.abort();
       window.removeEventListener("focus", handleRefresh);
       document.removeEventListener("visibilitychange", handleRefresh);
     };

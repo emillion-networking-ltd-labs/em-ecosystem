@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { getFingerprint } from "@/lib/fingerprint";
 import {
   trustDevice,
@@ -17,6 +17,17 @@ export function useTrustedDevices() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // SCRUM-322: prevent stale-state updates if the consumer unmounts mid-fetch.
+  // mountedRef equivalent to AbortController for helpers that don't yet expose
+  // a signal parameter (listTrustedDevices etc.).
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const clearError = useCallback(() => setError(null), []);
 
   const fetchDevices = useCallback(async () => {
@@ -24,8 +35,10 @@ export function useTrustedDevices() {
     setError(null);
     try {
       const data = await listTrustedDevices();
+      if (!mountedRef.current) return;
       setDevices(data);
     } catch (err) {
+      if (!mountedRef.current) return;
       setError(
         extractMessageByStatus(
           err,
@@ -37,7 +50,7 @@ export function useTrustedDevices() {
         ),
       );
     } finally {
-      setIsLoading(false);
+      if (mountedRef.current) setIsLoading(false);
     }
   }, []);
 

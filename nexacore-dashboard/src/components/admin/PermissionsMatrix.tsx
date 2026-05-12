@@ -40,15 +40,21 @@ export default function PermissionsMatrix() {
   const [saving, setSaving] = useState<UserRole | null>(null);
   const [loadError, setLoadError] = useState(false);
 
-  const fetchData = useCallback(async () => {
+  const fetchData = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
     setLoadError(false);
     try {
       const [allPerms, userPerms, adminPerms] = await Promise.all([
-        apiClient.get<Permission[]>("/permissions"),
-        apiClient.get<RolePermissionsResponse>("/permissions/roles/USER"),
-        apiClient.get<RolePermissionsResponse>("/permissions/roles/ADMIN"),
+        apiClient.get<Permission[]>("/permissions", { signal }),
+        apiClient.get<RolePermissionsResponse>("/permissions/roles/USER", {
+          signal,
+        }),
+        apiClient.get<RolePermissionsResponse>("/permissions/roles/ADMIN", {
+          signal,
+        }),
       ]);
+
+      if (signal?.aborted) return;
 
       setPermissions(allPerms);
 
@@ -61,16 +67,17 @@ export default function PermissionsMatrix() {
         USER: new Set(origMap.USER),
         ADMIN: new Set(origMap.ADMIN),
       });
-    } catch {
-      setLoadError(true);
+    } catch (err: unknown) {
+      if (err instanceof Error && err.name === "AbortError") return;
+      if (!signal?.aborted) setLoadError(true);
     } finally {
-      setLoading(false);
+      if (!signal?.aborted) setLoading(false);
     }
   }, []);
 
   useEffect(() => {
     const controller = new AbortController();
-    fetchData();
+    fetchData(controller.signal);
     return () => controller.abort();
   }, [fetchData]);
 
