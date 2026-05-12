@@ -3570,6 +3570,23 @@ function EmptyStateShowcase() {
                   />
                 </div>
               </div>
+              <div>
+                <p className="text-caption text-content-tertiary font-mono mb-2">
+                  error variant
+                </p>
+                <div className="rounded-lg border border-border-strong">
+                  <EmptyState
+                    variant="error"
+                    title="Couldn't load users"
+                    description="Network error — please try again."
+                    action={
+                      <Button variant="primary" size="sm" fullWidth={false}>
+                        Retry
+                      </Button>
+                    }
+                  />
+                </div>
+              </div>
             </div>
           </div>
         ))}
