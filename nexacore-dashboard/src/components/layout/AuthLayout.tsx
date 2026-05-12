@@ -62,7 +62,7 @@ export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
                 src="/em-icon.png"
                 alt="EM NexaCore"
                 width={60}
-                height={24}
+                height={25}
                 priority
                 className="dark:invert"
               />

@@ -37,11 +37,6 @@ const ALLOWLIST: RegExp[] = [
   // Same family — browser-level network error for the failed backend
   // requests that don't reach AuthContext's catch block.
   /Failed to load resource: net::ERR_CONNECTION_REFUSED/i,
-  // Pre-existing Next/Image aspect-ratio warning on /em-icon.png.
-  // Reverted SCRUM-279's `style` workaround because it broke VRT diff.
-  // Real fix (set the image's intrinsic aspect or use a wrapper) tracked
-  // under SCRUM-381.
-  /Image with src ".*em-icon.*" has either width or height modified/i,
   // Generic resource load failures from missing CI backend (any 4xx/5xx).
   /Failed to load resource: the server responded with a status of \d+/i,
   // React 19 added a runtime warning about <script> tags inside React
