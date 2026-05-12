@@ -1,0 +1,83 @@
+# ============================================================================
+# Structural Design-Token Probe — SCRUM-396 (workflow-standards.mdc §13.7.4)
+# ============================================================================
+# Catches the three TW3 -> TW4 regression patterns at CI time, independently
+# of pixel VRT. Asserts via Playwright + getComputedStyle that:
+#
+#   - .dark / .light wrappers re-resolve --color-* utility variables (Rule A)
+#   - --color-error is a valid color literal, not channels or self-ref invalid
+#     (Rule B)
+#   - Cascade overrides with `!` suffix win against size-variant base utilities
+#     (Rule C)
+#
+# Why this exists:
+#   SCRUM-396 surfaced 3 structural regressions left by the SCRUM-373 TW3->TW4
+#   migration that pixel VRT failed to catch (the post-migration baseline froze
+#   the regressions as "correct" since both pre- and post-migration captures
+#   rendered the same bug). Pixel VRT is necessary but not sufficient for
+#   design-system correctness. This workflow is the structural gate.
+#
+# Triggered:
+#   - On PRs touching CSS / @theme / design tokens / Tailwind config / spec
+#   - Manually via workflow_dispatch
+#
+# Cost:
+#   ~3 minutes (no Next.js build — uses dev server + injected DOM probes).
+# ============================================================================
+
+name: Structural Design-Token Probe
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "nexacore-dashboard/src/app/globals.css"
+      - "nexacore-dashboard/src/lib/design-tokens.ts"
+      - "nexacore-dashboard/src/components/ui/Button.tsx"
+      - "nexacore-dashboard/src/components/admin/ComponentShowcase.tsx"
+      - "nexacore-dashboard/src/components/admin/TokenInspector.tsx"
+      - "nexacore-dashboard/tests/e2e/structural-tokens.spec.ts"
+      - "nexacore-dashboard/package.json"
+      - ".github/workflows/structural-probe.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  structural-probe:
+    name: Dashboard structural probe
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout PR / branch
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: nexacore-dashboard/package-lock.json
+
+      - name: Install dependencies
+        working-directory: nexacore-dashboard
+        run: npm ci
+
+      - name: Install Playwright + Chromium
+        working-directory: nexacore-dashboard
+        run: npx playwright install chromium --with-deps
+
+      - name: Run structural probe against /login (public route)
+        working-directory: nexacore-dashboard
+        run: |
+          set -e
+          npm run dev &
+          DEV_PID=$!
+          npx wait-on http://localhost:3001 -t 90000
+          EXIT=0
+          npx playwright test structural-tokens.spec.ts --workers=1 --reporter=list || EXIT=$?
+          kill $DEV_PID || true
+          exit $EXIT
