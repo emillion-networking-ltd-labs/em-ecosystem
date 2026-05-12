@@ -1,3 +1,8 @@
+import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+
 /** @type {import('next').NextConfig} */
 
 // Security baseline applied to every route. Sources:
@@ -26,11 +31,16 @@ const nextConfig = {
     return [{ source: "/(.*)", headers: securityHeaders }];
   },
 
-  // Next 16 defaults to Turbopack. Empty config opts in explicitly and
-  // silences the Turbopack-vs-webpack-config detection warning. The
-  // `webpack:` block below remains as a fallback for `next build --webpack`
+  // Next 16 defaults to Turbopack. Pin `root` to this package so Turbopack
+  // doesn't walk up the directory tree and pick the monorepo-root lockfile
+  // as workspace root (dashboard uses the same pattern). Silences the
+  // multiple-lockfiles warning when the monorepo root has its own
+  // `package-lock.json` (husky + lint-staged + jscpd devDeps).
+  // The `webpack:` block below remains as a fallback for `next build --webpack`
   // and the OneDrive dev-polling workaround if Turbopack regresses on it.
-  turbopack: {},
+  turbopack: {
+    root: __dirname,
+  },
 
   webpack: (config, { dev }) => {
     // Polling-based file watching: native FS events are unreliable inside
