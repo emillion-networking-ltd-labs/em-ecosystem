@@ -39,6 +39,17 @@ export function usePasskey() {
   const [isConditionalAvailable, setIsConditionalAvailable] = useState(false);
   const conditionalAbortRef = useRef<AbortController | null>(null);
 
+  // SCRUM-322: mountedRef guard for fetchPasskeys to avoid stale-state updates
+  // on unmount. Pattern equivalent to AbortController for the apiListPasskeys
+  // helper that does not yet expose a signal parameter.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const isSupported =
     typeof window !== "undefined" && !!window.PublicKeyCredential;
 
@@ -48,11 +59,13 @@ export function usePasskey() {
     setIsLoadingList(true);
     try {
       const data = await apiListPasskeys();
+      if (!mountedRef.current) return;
       setPasskeys(data);
     } catch (err) {
+      if (!mountedRef.current) return;
       setError(extractMessage(err, "Failed to load passkeys."));
     } finally {
-      setIsLoadingList(false);
+      if (mountedRef.current) setIsLoadingList(false);
     }
   }, []);
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { getSecurityActivity } from "@/lib/security-activity-api";
 import type { SecurityEvent } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
@@ -85,16 +85,30 @@ export default function SecurityActivity() {
   const [isFetching, setIsFetching] = useState(false);
   const [loadError, setLoadError] = useState(false);
 
+  // SCRUM-322: mountedRef guard prevents stale-state updates on unmount.
+  // Pattern equivalent to AbortController for this component because the
+  // `getSecurityActivity` helper does not yet expose a signal parameter.
+  const mountedRef = useRef(true);
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
   const fetchEvents = useCallback(
     async (page: number) => {
       setIsFetching(true);
       try {
         const res = await getSecurityActivity(page, pageSize);
+        if (!mountedRef.current) return;
         setEvents(res.data);
         setEventsMeta(res.meta);
       } catch {
+        if (!mountedRef.current) return;
         setLoadError(true);
       } finally {
+        if (!mountedRef.current) return;
         setIsFetching(false);
         setInitialLoading(false);
       }
@@ -103,9 +117,7 @@ export default function SecurityActivity() {
   );
 
   useEffect(() => {
-    const controller = new AbortController();
     fetchEvents(eventsPage);
-    return () => controller.abort();
   }, [fetchEvents, eventsPage]);
 
   const formatDate = (iso: string) =>
