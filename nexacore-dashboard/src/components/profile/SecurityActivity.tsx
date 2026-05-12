@@ -1,11 +1,15 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
+import { Activity } from "lucide-react";
 import { getSecurityActivity } from "@/lib/security-activity-api";
 import type { SecurityEvent } from "@/lib/types";
 import Badge from "@/components/ui/Badge";
+import Button from "@/components/ui/Button";
+import EmptyState from "@/components/ui/EmptyState";
 import Pagination from "@/components/ui/Pagination";
 import Select from "@/components/ui/Select";
+import Spinner from "@/components/ui/Spinner";
 
 const PAGE_SIZE_OPTIONS = [
   { value: "10", label: "10 rows" },
@@ -137,21 +141,31 @@ export default function SecurityActivity() {
       {/* Recent Security Events */}
       <div>
         {initialLoading ? (
-          <div
-            role="status"
-            aria-label="Loading events"
-            className="flex items-center justify-center py-8"
-          >
-            <div className="h-6 w-6 animate-spin rounded-full border-2 border-content-secondary border-t-transparent" />
+          <div className="flex items-center justify-center py-8">
+            <Spinner size="lg" />
           </div>
         ) : loadError ? (
-          <p className="py-4 text-center text-body text-error">
-            Failed to load security events.
-          </p>
+          <EmptyState
+            variant="error"
+            title="Couldn't load security events"
+            description="Please try again."
+            action={
+              <Button
+                variant="primary"
+                size="md"
+                fullWidth={false}
+                onClick={() => fetchEvents(eventsPage)}
+              >
+                Retry
+              </Button>
+            }
+          />
         ) : events.length === 0 ? (
-          <p className="py-4 text-center text-body text-content-tertiary">
-            No security events.
-          </p>
+          <EmptyState
+            icon={<Activity size={48} />}
+            title="No security events"
+            description="Your recent sign-ins and security events will appear here."
+          />
         ) : (
           <>
             <div

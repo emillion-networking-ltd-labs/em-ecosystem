@@ -41,9 +41,9 @@ describe('SecurityActivity', () => {
   it('shows loading indicator during fetch', () => {
     mockGetSecurityActivity.mockReturnValue(new Promise(() => {})); // never resolves
     render(<SecurityActivity />);
-    // Component uses an icon-only spinner with role=status + aria-label
+    // SCRUM-403: now uses <Spinner size="lg"> which has role=status + aria-label="Loading"
     expect(
-      screen.getByRole('status', { name: /loading events/i }),
+      screen.getByRole('status', { name: /loading/i }),
     ).toBeInTheDocument();
   });
 
@@ -75,7 +75,7 @@ describe('SecurityActivity', () => {
     render(<SecurityActivity />);
 
     await waitFor(() => {
-      expect(screen.getByText('No security events.')).toBeInTheDocument();
+      expect(screen.getByText('No security events')).toBeInTheDocument();
     });
   });
 
@@ -140,11 +140,11 @@ describe('SecurityActivity', () => {
 
     render(<SecurityActivity />);
 
-    // Component distinguishes error from empty: error shows
-    // "Failed to load security events.", empty shows "No security events."
+    // SCRUM-403: error uses <EmptyState variant="error"> with
+    // "Couldn't load security events" title; empty shows "No security events".
     await waitFor(() => {
       expect(
-        screen.getByText('Failed to load security events.'),
+        screen.getByText("Couldn't load security events"),
       ).toBeInTheDocument();
     });
   });
