@@ -320,25 +320,50 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // VRT runs), short-circuit the auth flow with a deterministic mock
     // user. Lets Playwright snapshot post-auth pages without a backend.
     // Never enabled in production builds.
+    //
+    // SCRUM-381 Issue 2 — scoped to post-auth routes only. Public auth
+    // routes (/login, /register, etc.) must stay in guest state so
+    // GuestRoute doesn't immediately redirect to /dashboard and hide
+    // the actual UI being captured.
     if (process.env.NEXT_PUBLIC_VRT_BYPASS_AUTH === "1") {
-      dispatch({
-        type: "AUTH_SUCCESS",
-        payload: {
-          user: {
-            id: "00000000-0000-0000-0000-000000000000",
-            email: "vrt@example.com",
-            firstName: "VRT",
-            lastName: "User",
-            role: "SUPERADMIN",
-            avatarUrl: null,
-            mfaEnabled: false,
-            hasPassword: true,
-            oauthProviders: [],
-            emailVerified: true,
-          } as unknown as SafeUser,
-          accessToken: "vrt-mock-token",
-        },
-      });
+      const PUBLIC_AUTH_PATHS = [
+        "/login",
+        "/register",
+        "/forgot-password",
+        "/reset-password",
+        "/password-reset/",
+        "/activation/",
+        "/auth/callback",
+      ];
+      const path =
+        typeof window !== "undefined" ? window.location.pathname : "";
+      const isPublicAuth = PUBLIC_AUTH_PATHS.some(
+        (p) => path === p || path.startsWith(p),
+      );
+
+      if (isPublicAuth) {
+        // Stay in guest state so GuestRoute renders the page normally.
+        dispatch({ type: "AUTH_STOP" });
+      } else {
+        dispatch({
+          type: "AUTH_SUCCESS",
+          payload: {
+            user: {
+              id: "00000000-0000-0000-0000-000000000000",
+              email: "vrt@example.com",
+              firstName: "VRT",
+              lastName: "User",
+              role: "SUPERADMIN",
+              avatarUrl: null,
+              mfaEnabled: false,
+              hasPassword: true,
+              oauthProviders: [],
+              emailVerified: true,
+            } as unknown as SafeUser,
+            accessToken: "vrt-mock-token",
+          },
+        });
+      }
       return;
     }
 
