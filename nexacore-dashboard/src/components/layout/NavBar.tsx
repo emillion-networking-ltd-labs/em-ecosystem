@@ -83,7 +83,7 @@ export default function NavBar({
               src="/em-icon.png"
               alt="EM NexaCore"
               width={60}
-              height={24}
+              height={25}
               className="shrink-0 dark:invert"
             />
           </Link>
