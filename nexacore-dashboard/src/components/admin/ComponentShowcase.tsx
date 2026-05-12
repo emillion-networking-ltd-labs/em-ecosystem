@@ -255,7 +255,7 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
             <Button
               variant={v}
               fullWidth={false}
-              className="rounded-full! px-0! w-9 h-9 min-w-0!"
+              className="rounded-full! px-0! w-9! h-9! min-w-0!"
             >
               15
             </Button>

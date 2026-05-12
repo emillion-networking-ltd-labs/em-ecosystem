@@ -2,6 +2,25 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* ============================================================================
+   Tailwind 4 @theme — TW3 migration notes (SCRUM-373 → SCRUM-396)
+
+   RULE: NEVER use `var(--X)` indirection here. Declare literal values.
+
+   Why: @theme variables are emitted at `:root` scope. A declaration like
+        `--color-X: var(--Y)` resolves at `:root` ONCE (using `:root.--Y`)
+        and inherits as a frozen computed value to every descendant.
+        Overrides of `--Y` inside `.dark` / `.light` then have NO effect
+        on `--color-X` — and utilities (`bg-X`, `text-X`) consume `--color-X`,
+        not `--Y`. Result: dark mode breaks silently.
+
+   Pattern: declare literal light-mode values here; redeclare `--color-*`
+            directly inside `.dark` and `.light` blocks below so the cascade
+            re-resolves them for descendants. The legacy `--surface-*` /
+            `--content-*` raw vars are kept for `@utility` rules and inline
+            `var(--surface-primary)` usages — they aren't TW utilities.
+   ============================================================================ */
+
 @theme {
   --font-sans:
     -apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial,
@@ -31,7 +50,10 @@
 
   --color-hover: var(--hover-bg);
 
-  --color-error: rgb(var(--color-error));
+  /* Direct color literal — was `rgb(var(--color-error))` which was self-referential
+     (the name collides with the channels variable in :root) and resolved to invalid.
+     Light/dark overrides live in .light/.dark blocks. */
+  --color-error: rgb(138 17 17);
   --color-error-bg: var(--color-error-bg);
   --color-error-border: var(--color-error-border);
 
@@ -196,7 +218,8 @@
     --surface-subtle: rgba(28, 28, 28, 0.05);
     --surface-inverse: #1c1c1c;
 
-    /* Content colors (RGB channels for Tailwind opacity modifier support) */
+    /* Content colors (RGB channels for legacy `rgb(var(--content-primary))`
+       usages — utility classes go through `--color-*` overrides below). */
     --content-primary: 28 28 28;
     --content-secondary: rgba(28, 28, 28, 0.65);
     --content-tertiary: rgba(28, 28, 28, 0.55);
@@ -213,8 +236,10 @@
     /* Overlay */
     --overlay: rgba(0, 0, 0, 0.2);
 
-    /* Semantic feedback colors */
-    --color-error: 138 17 17;
+    /* Semantic feedback colors — proper rgb() form (TW3 used channels `138 17 17`
+       for the `rgb(var() / <alpha-value>)` config pattern; TW4 utilities consume
+       --color-error directly, so it must be a valid color value). */
+    --color-error: rgb(138 17 17);
     --color-error-bg: #fef2f2;
     --color-error-border: #f5c6c6;
     --color-warning: #92400e;
@@ -295,6 +320,47 @@
     --metric-blue: #1e2d3d;
     --notification-purple: #2a2a3d;
     --notification-blue: #1e2d3d;
+
+    /* Tailwind 4 utility-variable overrides.
+       @theme declares `--color-X: var(--X)` at :root, which gets statically
+       resolved at :root's cascade and inherited as a FROZEN value to all
+       descendants. Overriding the raw `--X` inside `.dark` does NOT propagate
+       to `--color-X` (utilities consume `--color-X`). We must re-declare
+       `--color-X` directly here so the cascade re-resolves it for descendants. */
+    --color-surface-primary: #1a1a1a;
+    --color-surface-secondary: #242424;
+    --color-surface-tertiary: #2d2d2d;
+    --color-surface-subtle: rgba(255, 255, 255, 0.06);
+    --color-surface-inverse: #f5f5f5;
+    --color-content-primary: rgb(245 245 245);
+    --color-content-secondary: rgba(245, 245, 245, 0.75);
+    --color-content-tertiary: rgba(245, 245, 245, 0.55);
+    --color-content-disabled: #6b7280;
+    --color-content-placeholder: rgba(245, 245, 245, 0.3);
+    --color-content-inverse: #1a1a1a;
+    --color-border-default: rgba(255, 255, 255, 0.08);
+    --color-border-strong: rgba(255, 255, 255, 0.12);
+    --color-border-components: rgba(255, 255, 255, 0.2);
+    --color-border-subtle: rgba(255, 255, 255, 0.04);
+    --color-hover: rgba(255, 255, 255, 0.06);
+    /* `--color-error: 239 68 68` (channels) is declared above; override here with
+       a proper rgb() color so the `text-error` / `bg-error` utilities resolve. */
+    --color-error: rgb(239 68 68);
+    --color-error-bg: #451a1a;
+    --color-error-border: #7f1d1d;
+    --color-warning: #f59e0b;
+    --color-warning-bg: #451a03;
+    --color-warning-border: #78350f;
+    --color-info: #60a5fa;
+    --color-info-bg: #172554;
+    --color-info-border: #1e3a5f;
+    --color-success: #22c55e;
+    --color-success-bg: #14261c;
+    --color-success-border: #166534;
+    --color-metric-purple: #2a2a3d;
+    --color-metric-blue: #1e2d3d;
+    --color-notification-purple: #2a2a3d;
+    --color-notification-blue: #1e2d3d;
   }
 
   /* Force light mode on elements inside dark page (Design System showcase) */
@@ -331,6 +397,43 @@
     --input-border-focus: #1c1c1c;
     --input-bg-disabled: #f5f5f5;
     color: rgb(var(--content-primary));
+
+    /* Tailwind 4 utility-variable overrides — see .dark for rationale.
+       Needed when a .light wrapper is nested inside .dark (or vice-versa),
+       e.g. ComponentShowcase rendering light variants on the dark page. */
+    --color-surface-primary: #ffffff;
+    --color-surface-secondary: #fbfbfb;
+    --color-surface-tertiary: #f5f7f9;
+    --color-surface-subtle: rgba(28, 28, 28, 0.05);
+    --color-surface-inverse: #1c1c1c;
+    --color-content-primary: rgb(28 28 28);
+    --color-content-secondary: rgba(28, 28, 28, 0.65);
+    --color-content-tertiary: rgba(28, 28, 28, 0.55);
+    --color-content-disabled: #73787d;
+    --color-content-placeholder: rgba(28, 28, 28, 0.3);
+    --color-content-inverse: #ffffff;
+    --color-border-default: rgba(0, 0, 0, 0.05);
+    --color-border-strong: rgba(0, 0, 0, 0.08);
+    --color-border-components: rgba(0, 0, 0, 0.15);
+    --color-border-subtle: rgba(0, 0, 0, 0.03);
+    --color-hover: rgba(251, 251, 251, 0.75);
+    /* Override channels form declared above with proper rgb() color. */
+    --color-error: rgb(138 17 17);
+    --color-error-bg: #fef2f2;
+    --color-error-border: #f5c6c6;
+    --color-warning: #92400e;
+    --color-warning-bg: #fffbeb;
+    --color-warning-border: #fde68a;
+    --color-info: #1e40af;
+    --color-info-bg: #eff6ff;
+    --color-info-border: #bfdbfe;
+    --color-success: #166534;
+    --color-success-bg: #f0fdf4;
+    --color-success-border: #bbf7d0;
+    --color-metric-purple: #edeefc;
+    --color-metric-blue: #e6f1fd;
+    --color-notification-purple: #edeefc;
+    --color-notification-blue: #e6f1fd;
   }
 
   /* Ensure .dark class propagates color for currentColor inheritance (SVGs, borders) */
