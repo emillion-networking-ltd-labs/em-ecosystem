@@ -64,7 +64,7 @@ export default function PublicFooter() {
           </div>
         </div>
         <div className="mt-12 border-t border-border-default pt-6 text-center">
-          <p className="text-caption text-content-disabled">
+          <p className="text-caption text-content-tertiary">
             &copy; {new Date().getFullYear()} {siteConfig.name}. Powered by EM
             Ecosystem.
           </p>

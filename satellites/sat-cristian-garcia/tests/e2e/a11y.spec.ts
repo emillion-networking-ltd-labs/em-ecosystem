@@ -33,9 +33,14 @@ test.describe("a11y — satellite routes", () => {
 
       const results = await new AxeBuilder({ page })
         .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-        // SCRUM-381 TODO: see dashboard a11y.spec.ts for rationale —
-        // color-contrast disabled temporarily.
-        .disableRules(["color-contrast"])
+        // SCRUM-402: color-contrast rule re-enabled after PublicFooter.tsx
+        // copyright text token was bumped (disabled -> tertiary, 3.6:1 -> 5.0:1).
+        // Exclude .intro-loader: the splash animation is aria-hidden="true"
+        // (decorative branding), but axe's color-contrast rule does not
+        // respect aria-hidden and flags intermediate animation keyframes as
+        // serious violations. This exclusion aligns the test with the
+        // already-declared a11y semantics. See SCRUM-402 record §7.
+        .exclude(".intro-loader")
         .analyze();
 
       const blocking = results.violations.filter((v) =>
