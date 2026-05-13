@@ -67,7 +67,7 @@ export default function CTASection({
         </div>
         <p
           ref={captionFade.ref}
-          className={`mt-6 text-caption text-content-disabled ${captionFade.className}`}
+          className={`mt-6 text-caption text-content-tertiary ${captionFade.className}`}
           style={captionFade.style}
         >
           +500 personas ya lo hicieron.

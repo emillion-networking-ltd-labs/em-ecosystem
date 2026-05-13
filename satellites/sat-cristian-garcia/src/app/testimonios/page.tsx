@@ -153,7 +153,7 @@ export default function TestimoniosPage() {
                   <ExternalLink size={16} />
                 </a>
               ) : (
-                <p className="text-caption text-content-disabled">
+                <p className="text-caption text-content-tertiary">
                   Link al perfil disponible una vez vinculado el Google Business
                   Profile.
                 </p>

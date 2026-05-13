@@ -41,12 +41,8 @@ async function runAxe(page: Parameters<typeof AxeBuilder>[0]["page"]) {
   return (
     new AxeBuilder({ page })
       .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-      // SCRUM-381 TODO: temporarily disable color-contrast until the team
-      // does a focused contrast pass. Tailwind 4's new color resolution
-      // surfaced multiple existing violations on auth forms (text-content-
-      // tertiary on white, etc.). Real fix needs designer-approved
-      // contrast bumps, out of scope for SCRUM-380's gate-rollout.
-      .disableRules(["color-contrast"])
+      // SCRUM-402: color-contrast rule re-enabled after dashboard auth forms
+      // passed live axe scan with 0 violations on all 5 ROUTES_PUBLIC.
       .analyze()
   );
 }
