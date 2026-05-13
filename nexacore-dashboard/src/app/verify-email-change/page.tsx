@@ -5,6 +5,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { CheckCircle2, AlertTriangle, Loader2 } from "lucide-react";
 import AuthLayout from "@/components/layout/AuthLayout";
 import Button from "@/components/ui/Button";
+import Spinner from "@/components/ui/Spinner";
 import { apiClient } from "@/lib/api";
 
 function VerifyEmailChangeContent() {
@@ -87,7 +88,7 @@ export default function VerifyEmailChangePage() {
     <Suspense
       fallback={
         <div className="flex min-h-screen items-center justify-center">
-          <p className="text-body text-content-secondary">Loading...</p>
+          <Spinner size="lg" />
         </div>
       }
     >
