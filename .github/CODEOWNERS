@@ -1,0 +1,34 @@
+# ============================================================
+# AUTH domain ownership
+# Generado a partir del inventario de dominios 2026-05-14
+# Regla: GitHub aplica la ÚLTIMA coincidencia ganadora.
+# Owner exclusivo: @emillionnetworking
+# ============================================================
+
+# --- Módulo auth/ completo ---
+# Cubre: auth.module, auth/account/mfa/oauth/passkey/session controllers,
+# services (login, login-security, token, token-deny-list, mfa, passkey,
+# oauth-auth, password-reset, password-breach, email-verification,
+# trusted-device), guards (jwt, jwt-or-mfa-setup, mfa-setup, base/google/
+# github-oauth, oauth-link, oauth-callback.filter, roles, permissions),
+# strategies (jwt, google, github, oauth-validate, pkce), stores (oauth-code,
+# oauth-link-code, oauth-state), dto/, constants/, interfaces/, utils/, tests/.
+/nexacore-api/src/auth/                                                  @emillionnetworking
+
+# --- Config AUTH ---
+/nexacore-api/src/config/auth.config.ts                                  @emillionnetworking
+/nexacore-api/src/config/oauth.config.ts                                 @emillionnetworking
+
+# --- Interfaces AUTH transversales (viven en common/) ---
+/nexacore-api/src/common/interfaces/authenticated-request.interface.ts   @emillionnetworking
+/nexacore-api/src/common/interfaces/jwt-payload.interface.ts             @emillionnetworking
+/nexacore-api/src/common/interfaces/oauth-profile.interface.ts           @emillionnetworking
+
+# --- Utilidad AUTH (cookies de sesión/refresh) ---
+/nexacore-api/src/common/utils/cookie.util.ts                            @emillionnetworking
+
+# --- Tipos Express extendidos por AUTH ---
+/nexacore-api/src/types/express.d.ts                                     @emillionnetworking
+
+# --- Enum OAuth provider (vive en users/, semántica auth) ---
+/nexacore-api/src/users/enums/provider.enum.ts                           @emillionnetworking
