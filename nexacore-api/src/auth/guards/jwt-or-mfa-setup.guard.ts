@@ -6,6 +6,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { MfaSetupGuard } from './mfa-setup.guard';
+import { ErrorMessages } from '../../common/constants/error-messages';
 
 /**
  * Composite guard: accepts either a standard JWT (already authenticated users)
@@ -28,13 +29,11 @@ export class JwtOrMfaSetupGuard implements CanActivate {
       // JWT failed — try MFA setup token
     }
 
-    // Try MFA setup token
+    // Try MFA setup token. EM-07: single generic error regardless of failure cause.
     try {
       return await this.mfaSetupGuard.canActivate(context);
     } catch {
-      throw new UnauthorizedException(
-        'Valid access token or MFA setup token required',
-      );
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
   }
 }

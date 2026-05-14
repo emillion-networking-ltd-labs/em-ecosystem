@@ -73,36 +73,37 @@ describe('SecurityConfig', () => {
       expect(secret).toBe('a'.repeat(32));
     });
 
-    it('should throw in production when CSRF_SECRET is not set', () => {
+    it('should throw when CSRF_SECRET is not set (V2.10.1: no dev fallback)', () => {
       delete process.env.CSRF_SECRET;
       process.env.NODE_ENV = 'production';
 
       const config = loadConfig();
 
       expect(() => config.csrf.getSecret()).toThrow(
-        'CSRF_SECRET must be set and at least 32 characters in production',
+        'CSRF_SECRET must be set and at least 32 characters (no dev fallback)',
       );
     });
 
-    it('should throw in production when CSRF_SECRET is too short', () => {
+    it('should throw when CSRF_SECRET is too short (V2.10.1: no dev fallback)', () => {
       process.env.CSRF_SECRET = 'short';
       process.env.NODE_ENV = 'production';
 
       const config = loadConfig();
 
       expect(() => config.csrf.getSecret()).toThrow(
-        'CSRF_SECRET must be set and at least 32 characters in production',
+        'CSRF_SECRET must be set and at least 32 characters (no dev fallback)',
       );
     });
 
-    it('should return dev default when CSRF_SECRET is not set in non-production', () => {
+    it('should throw in non-production too (V2.10.1: no dev fallback anywhere)', () => {
       delete process.env.CSRF_SECRET;
       process.env.NODE_ENV = 'development';
 
       const config = loadConfig();
-      const secret = config.csrf.getSecret();
 
-      expect(secret).toBe('dev-csrf-secret-change-in-production-min32chars');
+      expect(() => config.csrf.getSecret()).toThrow(
+        'CSRF_SECRET must be set and at least 32 characters (no dev fallback)',
+      );
     });
   });
 

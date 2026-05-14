@@ -15,3 +15,14 @@ export function validatePassword(password: string): string | null {
     return `Password must not exceed ${PASSWORD_MAX_LENGTH} characters`;
   return null;
 }
+
+/**
+ * Single source of truth for email validation across the dashboard.
+ * Must match backend behavior (`class-validator` `@IsEmail()` defaults).
+ * FE-25: previously 4 components had inline regex variants (some required 2+ char TLDs).
+ */
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function isValidEmail(email: string): boolean {
+  return EMAIL_REGEX.test(email);
+}

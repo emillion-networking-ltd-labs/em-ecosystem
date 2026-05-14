@@ -1,5 +1,5 @@
 import { apiClient } from "./api";
-import type { MessageResponse, LinkedProvider } from "./types";
+import type { MessageResponse } from "./types";
 
 export function unlinkOAuth(
   provider: string,
@@ -9,10 +9,6 @@ export function unlinkOAuth(
     `/users/me/oauth/${provider.toLowerCase()}`,
     { password },
   );
-}
-
-export function getLinkedProviders(): Promise<LinkedProvider[]> {
-  return apiClient.get<LinkedProvider[]>("/users/me/oauth");
 }
 
 export function generateLinkCode(): Promise<{ code: string }> {

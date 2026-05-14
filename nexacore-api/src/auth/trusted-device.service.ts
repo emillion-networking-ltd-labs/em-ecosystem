@@ -145,7 +145,16 @@ export class TrustedDeviceService {
     return true;
   }
 
-  async listTrustedDevices(userId: string) {
+  async listTrustedDevices(userId: string): Promise<
+    Array<{
+      id: string;
+      deviceName: string | null;
+      ipAddress: string | null;
+      lastVerifiedAt: Date;
+      expiresAt: Date;
+      createdAt: Date;
+    }>
+  > {
     const devices = await this.prisma.trustedDevice.findMany({
       where: {
         userId,

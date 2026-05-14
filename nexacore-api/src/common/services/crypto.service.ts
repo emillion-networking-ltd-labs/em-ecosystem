@@ -9,8 +9,12 @@ export class CryptoService {
   private readonly key: Buffer;
 
   constructor() {
-    const envKey =
-      process.env.MFA_ENCRYPTION_KEY || 'dev-mfa-key-change-in-production-32ch';
+    const envKey = process.env.MFA_ENCRYPTION_KEY;
+    if (!envKey) {
+      throw new Error(
+        'MFA_ENCRYPTION_KEY environment variable is required (no dev fallback)',
+      );
+    }
     const keyBuffer = Buffer.alloc(32, 0);
     Buffer.from(envKey, 'utf-8').copy(keyBuffer, 0, 0, 32);
     this.key = keyBuffer;

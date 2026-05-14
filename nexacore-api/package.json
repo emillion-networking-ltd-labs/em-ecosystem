@@ -142,6 +142,7 @@
         "statements": 90
       }
     },
+    "restoreMocks": true,
     "testEnvironment": "node",
     "workerIdleMemoryLimit": "512MB",
     "maxWorkers": "50%"

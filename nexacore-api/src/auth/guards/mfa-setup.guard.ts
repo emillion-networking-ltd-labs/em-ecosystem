@@ -8,6 +8,7 @@ import type { Request } from 'express';
 import { TokenService } from '../token.service';
 import { UsersService } from '../../users/users.service';
 import { toSafeUser } from '../../users/entities/user.entity';
+import { ErrorMessages } from '../../common/constants/error-messages';
 
 /**
  * Guard that accepts an MFA setup token (issued during login when ADMIN/SUPERADMIN
@@ -15,6 +16,9 @@ import { toSafeUser } from '../../users/entities/user.entity';
  * users managing MFA from account settings.
  *
  * MFA setup tokens are scoped: they only authorize /auth/mfa/setup and /auth/mfa/verify-setup.
+ *
+ * EM-07: all failure paths emit a single generic message — attacker cannot
+ * discriminate "missing header" vs "user not found" vs "expired token".
  */
 @Injectable()
 export class MfaSetupGuard implements CanActivate {
@@ -28,7 +32,7 @@ export class MfaSetupGuard implements CanActivate {
     const authHeader: string | undefined = request.headers?.authorization;
 
     if (!authHeader?.startsWith('Bearer ')) {
-      throw new UnauthorizedException('Missing authorization token');
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
     const token = authHeader.slice(7);
@@ -38,13 +42,15 @@ export class MfaSetupGuard implements CanActivate {
       const { sub } = this.tokenService.verifyMfaSetupToken(token);
       const user = await this.usersService.findById(sub);
       if (!user) {
-        throw new UnauthorizedException('User not found');
+        throw new UnauthorizedException(
+          ErrorMessages.auth.AUTHENTICATION_FAILED,
+        );
       }
       request.user = toSafeUser(user);
       return true;
     } catch {
-      // Not a valid setup token — will be caught by JwtAuthGuard in the OR guard
-      throw new UnauthorizedException('Invalid or expired setup token');
+      // Not a valid setup token — single generic error regardless of failure cause
+      throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
   }
 }

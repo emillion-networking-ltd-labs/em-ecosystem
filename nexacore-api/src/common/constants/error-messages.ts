@@ -33,6 +33,11 @@ export const ErrorMessages = {
     INVALID_PASSWORD: 'Invalid password',
     PASSWORD_REQUIRED: 'Current password is required',
     OPERATION_NOT_PERMITTED: 'Operation not permitted',
+    EMAIL_CHANGE_NOT_AVAILABLE: 'Email change not available for OAuth accounts',
+    EMAIL_UNCHANGED: 'New email must be different from current email',
+    PASSWORD_CONFIRMATION_REQUIRED:
+      'Password confirmation required for local accounts',
+    AVATAR_REQUIRED: 'Avatar file is required',
   },
   permission: {
     ACCESS_DENIED: 'Access denied',

@@ -15,10 +15,7 @@ import { useRateLimit } from "@/hooks/useRateLimit";
 import { useToast } from "@/hooks/useToast";
 import { RateLimitError } from "@/lib/types";
 import TurnstileWidget from "@/components/ui/TurnstileWidget";
-import { validatePassword } from "@/lib/validation";
-
-const isValidEmail = (email: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+import { validatePassword, isValidEmail } from "@/lib/validation";
 
 export default function RegisterForm() {
   const [formData, setFormData] = useState({ email: "", password: "" });

@@ -551,7 +551,7 @@ describe('UsersService', () => {
         ...googleProfile,
         firstName: 'John',
         lastName: 'Doe',
-        avatarUrl: 'https://example.com/avatar.jpg',
+        avatarUrl: 'https://lh3.googleusercontent.com/avatar.jpg',
       });
 
       // Profile update should NOT include avatarUrl (handled separately)
@@ -565,7 +565,7 @@ describe('UsersService', () => {
       });
       // Avatar downloaded and stored locally
       expect(global.fetch).toHaveBeenCalledWith(
-        'https://example.com/avatar.jpg',
+        'https://lh3.googleusercontent.com/avatar.jpg',
         expect.objectContaining({ signal: expect.anything() }),
       );
       expect(result.user.avatarUrl).toBe('/uploads/avatars/test.jpg');
@@ -609,7 +609,7 @@ describe('UsersService', () => {
 
       const result = await usersService.findOrCreateByOAuth({
         ...googleProfile,
-        avatarUrl: 'https://example.com/avatar.jpg',
+        avatarUrl: 'https://lh3.googleusercontent.com/avatar.jpg',
       });
 
       // Login should succeed with null avatar
