@@ -12,7 +12,7 @@
 npx lint-staged
 
 # Run gitleaks on staged changes (if installed)
-if command -v gitleaks &> /dev/null; then
+if command -v gitleaks >/dev/null 2>&1; then
   gitleaks protect --staged --config .gitleaks.toml --verbose
   if [ $? -ne 0 ]; then
     echo ""
