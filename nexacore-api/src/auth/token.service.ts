@@ -278,7 +278,7 @@ export class TokenService {
       { secret: this.mfaSetupSecret },
     );
     if (payload.type !== MFA_SETUP_TOKEN_TYPE) {
-      throw new UnauthorizedException('Invalid setup token');
+      throw new UnauthorizedException(ErrorMessages.mfa.INVALID_TOKEN);
     }
     return { sub: payload.sub };
   }

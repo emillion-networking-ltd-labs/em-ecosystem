@@ -19,14 +19,11 @@ import { useRateLimit } from "@/hooks/useRateLimit";
 import { useToast } from "@/context/ToastContext";
 import { usePasskey } from "@/hooks/usePasskey";
 import { RateLimitError } from "@/lib/types";
-import { validatePassword } from "@/lib/validation";
+import { validatePassword, isValidEmail } from "@/lib/validation";
 import type { RateLimitInfo } from "@/lib/types";
 import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
 type LoginStep = "email" | "password";
-
-const isValidEmail = (email: string) =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
 
 export default function LoginForm() {
   const [step, setStep] = useState<LoginStep>("email");

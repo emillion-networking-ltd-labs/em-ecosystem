@@ -1,8 +1,7 @@
 import { registerAs } from '@nestjs/config';
 
 export const authConfig = registerAs('auth', () => ({
-  jwtSecret:
-    process.env.JWT_SECRET || 'default-dev-secret-change-in-production',
+  jwtSecret: process.env.JWT_SECRET,
   jwtAccessExpiration: process.env.JWT_ACCESS_EXPIRATION || '15m',
   jwtRefreshExpiration: process.env.JWT_REFRESH_EXPIRATION || '12h',
   sessionIdleTimeoutHours: parseFloat(

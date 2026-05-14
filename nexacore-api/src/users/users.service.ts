@@ -46,6 +46,13 @@ import type { FileStorageService } from '../storage/file-storage.interface';
 const BCRYPT_ROUNDS = 12;
 const EMAIL_CHANGE_TOKEN_EXPIRY_HOURS = 24;
 
+// SS-01/SS-02: hostnames allowed as source for OAuth-provider avatar downloads.
+// Defense-in-depth against SSRF via attacker-controlled OAuth profile.avatarUrl.
+const AVATAR_URL_ALLOWLIST = [
+  'lh3.googleusercontent.com',
+  'avatars.githubusercontent.com',
+];
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -737,9 +744,7 @@ export class UsersService {
       dto.newPassword,
     );
     if (isBreached) {
-      throw new BadRequestException(
-        'This password has appeared in a data breach. Please choose a different password.',
-      );
+      throw new BadRequestException(ErrorMessages.auth.PASSWORD_BREACHED);
     }
 
     const newHash = await bcrypt.hash(dto.newPassword, BCRYPT_ROUNDS);
@@ -776,6 +781,11 @@ export class UsersService {
     actingUser: { id: string; role: Role },
     ctx?: RequestContext,
   ): Promise<SafeUser> {
+    // V4.3.1: Admins cannot modify their own account via admin endpoints
+    if (actingUser.id === targetId) {
+      throw new ForbiddenException(ErrorMessages.permission.ACCESS_DENIED);
+    }
+
     const target = await this.findById(targetId);
     if (!target) {
       throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
@@ -948,6 +958,11 @@ export class UsersService {
     userId: string,
   ): Promise<string | null> {
     try {
+      // SS-01/SS-02: allowlist OAuth-provider avatar CDNs; reject non-HTTPS
+      const parsed = new URL(externalUrl);
+      if (parsed.protocol !== 'https:') return null;
+      if (!AVATAR_URL_ALLOWLIST.includes(parsed.hostname)) return null;
+
       const response = await fetch(externalUrl, {
         signal: AbortSignal.timeout(5000),
       });
@@ -1028,7 +1043,7 @@ export class UsersService {
 
     if (!user.passwordHash) {
       throw new BadRequestException(
-        'Email change not available for OAuth accounts',
+        ErrorMessages.user.EMAIL_CHANGE_NOT_AVAILABLE,
       );
     }
 
@@ -1043,9 +1058,7 @@ export class UsersService {
     const normalizedNewEmail = dto.newEmail.toLowerCase();
 
     if (normalizedNewEmail === user.email.toLowerCase()) {
-      throw new BadRequestException(
-        'New email must be different from current email',
-      );
+      throw new BadRequestException(ErrorMessages.user.EMAIL_UNCHANGED);
     }
 
     const existingUser = await this.findByEmail(normalizedNewEmail);
@@ -1126,7 +1139,7 @@ export class UsersService {
     if (user.passwordHash) {
       if (!dto.password) {
         throw new BadRequestException(
-          'Password confirmation required for local accounts',
+          ErrorMessages.user.PASSWORD_CONFIRMATION_REQUIRED,
         );
       }
       const isPasswordValid = await bcrypt.compare(

@@ -10,8 +10,7 @@ import Button from "@/components/ui/Button";
 import { Info } from "lucide-react";
 import { extractMessageByStatus } from "@/lib/error-utils";
 import { HTTP_STATUS } from "@/lib/error-constants";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+import { isValidEmail as checkEmailValid } from "@/lib/validation";
 
 export default function ChangeEmailForm() {
   const { user } = useAuth();
@@ -27,7 +26,7 @@ export default function ChangeEmailForm() {
     .map((p) => (p === "GOOGLE" ? "Google" : p === "GITHUB" ? "GitHub" : p))
     .join(" and ");
 
-  const isValidEmail = EMAIL_REGEX.test(newEmail);
+  const isValidEmail = checkEmailValid(newEmail);
   const isSameEmail = newEmail.toLowerCase() === user.email.toLowerCase();
   const isValidPassword = password.length >= 8;
   const canSubmit =

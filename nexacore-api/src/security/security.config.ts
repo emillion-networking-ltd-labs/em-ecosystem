@@ -43,12 +43,9 @@ export const SecurityConfig = {
     getSecret(): string {
       const secret = process.env.CSRF_SECRET;
       if (!secret || secret.length < 32) {
-        if (process.env.NODE_ENV === 'production') {
-          throw new Error(
-            'CSRF_SECRET must be set and at least 32 characters in production',
-          );
-        }
-        return 'dev-csrf-secret-change-in-production-min32chars';
+        throw new Error(
+          'CSRF_SECRET must be set and at least 32 characters (no dev fallback)',
+        );
       }
       return secret;
     },

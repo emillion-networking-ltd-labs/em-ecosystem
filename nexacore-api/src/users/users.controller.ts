@@ -87,7 +87,8 @@ export class UsersController {
     @Body() body: { cropData?: string },
   ) {
     const avatar = files.avatar?.[0];
-    if (!avatar) throw new BadRequestException('Avatar file is required');
+    if (!avatar)
+      throw new BadRequestException(ErrorMessages.user.AVATAR_REQUIRED);
     const original = files.original?.[0];
     const cropData = body.cropData
       ? (JSON.parse(body.cropData) as Record<string, number>)

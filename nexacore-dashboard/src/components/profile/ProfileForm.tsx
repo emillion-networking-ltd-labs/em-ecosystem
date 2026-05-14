@@ -28,10 +28,12 @@ import { apiClient } from "@/lib/api";
 import { requestEmailChange } from "@/lib/email-change-api";
 import { extractMessageByStatus } from "@/lib/error-utils";
 import { HTTP_STATUS } from "@/lib/error-constants";
-import { validatePassword, PASSWORD_MIN_LENGTH } from "@/lib/validation";
+import {
+  validatePassword,
+  PASSWORD_MIN_LENGTH,
+  isValidEmail as checkEmailValid,
+} from "@/lib/validation";
 import type { SafeUser } from "@/lib/types";
-
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function ProfileForm() {
   const { user, refreshSession, logout } = useAuth();
@@ -182,7 +184,7 @@ export default function ProfileForm() {
     setEmailOpen(true);
   };
 
-  const isValidEmail = EMAIL_REGEX.test(newEmail);
+  const isValidEmail = checkEmailValid(newEmail);
   const isSameEmail = newEmail.toLowerCase() === user.email.toLowerCase();
   const handleSaveEmail = async () => {
     if (!newEmail.trim()) {
