@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerModule } from '@nestjs/throttler';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -22,6 +22,8 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { RedisModule } from './common/services/redis.module';
 import { GeolocationModule } from './geolocation/geolocation.module';
 import { StorageModule } from './storage';
+import { OnlineMlScorerModule } from './common/services/online-ml-scorer.module';
+import { OnlineMlScorerInterceptor } from './common/interceptors/online-ml-scorer.interceptor';
 
 @Module({
   imports: [
@@ -48,6 +50,7 @@ import { StorageModule } from './storage';
     MailModule,
     PermissionsModule,
     StorageModule,
+    OnlineMlScorerModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
@@ -59,6 +62,10 @@ import { StorageModule } from './storage';
     {
       provide: APP_GUARD,
       useClass: CustomThrottlerGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: OnlineMlScorerInterceptor,
     },
   ],
 })
