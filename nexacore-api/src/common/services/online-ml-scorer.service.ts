@@ -29,11 +29,12 @@
 
 import { Injectable, Logger } from '@nestjs/common';
 import { Request } from 'express';
-import { readFileSync, appendFileSync, existsSync } from 'fs';
+import { readFileSync, existsSync } from 'fs';
+import { appendFile } from 'fs/promises';
 import { createHash } from 'crypto';
 import * as yaml from 'js-yaml';
-
-const AUTH_SKIP = ['/auth/', '/oauth/', '/sessions/', '/mfa/', '/passkey/'];
+import Ajv, { ValidateFunction } from 'ajv';
+import { AUTH_SKIP_PATHS } from '../constants/auth-skip-paths.constants';
 
 interface FlagsFile {
   enforcement_mode?: 'shadow' | 'active';
@@ -61,6 +62,36 @@ export class OnlineMlScorerService {
   >();
   private static readonly MAX_ENTRIES = 10_000;
 
+  // T-6: opt-in runtime schema validation. Default OFF = bit-identical legacy behavior.
+  private readonly validateEnabled =
+    (process.env.SHADOW_LOG_VALIDATE ?? 'false').toLowerCase() === 'true';
+  private validateFn: ValidateFunction | null = null;
+
+  constructor() {
+    if (this.validateEnabled) {
+      const schemaPath = process.env.SHADOW_LOG_SCHEMA_PATH;
+      if (!schemaPath) {
+        this.logger.error(
+          'SHADOW_LOG_VALIDATE=true but SHADOW_LOG_SCHEMA_PATH not set; validation disabled',
+        );
+        return;
+      }
+      try {
+        // schemaPath is operator-controlled config (env var), not user input.
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
+        const schema = yaml.load(readFileSync(schemaPath, 'utf-8')) as object;
+        this.validateFn = new Ajv({ allErrors: true, strict: false }).compile(
+          schema,
+        );
+      } catch (e) {
+        this.logger.error(
+          `SHADOW_LOG_VALIDATE on but schema compile failed: ${(e as Error).message}`,
+        );
+        this.validateFn = null;
+      }
+    }
+  }
+
   /**
    * Score a request. Call from a per-request interceptor or middleware.
    * Pure shadow — return value is only for logging / informational use.
@@ -74,7 +105,7 @@ export class OnlineMlScorerService {
     score: number;
     would_have_action: string;
   } {
-    if (AUTH_SKIP.some((p) => req.path.startsWith(p))) {
+    if (AUTH_SKIP_PATHS.some((p) => req.path.startsWith(p))) {
       return { score: 0, would_have_action: 'skipped_auth_path' };
     }
 
@@ -129,7 +160,7 @@ export class OnlineMlScorerService {
       would_have_action: wouldHaveAction,
       target: {
         kind: userId ? 'user' : correlationId ? 'session' : 'ip',
-        value: entityKey.split(':', 2)[1],
+        value: entityKey.substring(entityKey.indexOf(':') + 1),
         id_form: userId || correlationId ? 'sha256_12' : 'ip_24',
       },
       metadata: {
@@ -180,17 +211,23 @@ export class OnlineMlScorerService {
   }
 
   private shadowLog(entry: Record<string, unknown>): void {
-    try {
-      const path =
-        this.flags.shadow_log_path ??
-        process.env.SHADOW_LOG_PATH ??
-        '/var/log/shadow-decisions.jsonl';
-      // path is operator-controlled config (YAML or env var), not user input.
-      // eslint-disable-next-line security/detect-non-literal-fs-filename
-      appendFileSync(path, JSON.stringify(entry) + '\n');
-    } catch {
-      // Fail-open on logging error — never block the request path.
+    // T-6: opt-in Ajv validation. Default OFF = no-op.
+    if (this.validateFn && !this.validateFn(entry)) {
+      this.logger.error(
+        `shadow log entry invalid: ${JSON.stringify(this.validateFn.errors)}`,
+      );
+      return; // fail-open: drop invalid entry, do not write
     }
+    const logPath =
+      this.flags.shadow_log_path ??
+      process.env.SHADOW_LOG_PATH ??
+      '/var/log/shadow-decisions.jsonl';
+    // T-1: fire-and-forget async write. Fail-open: error logged, never propagated.
+    // logPath is operator-controlled config (YAML or env var), not user input.
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
+    void appendFile(logPath, JSON.stringify(entry) + '\n').catch((err) => {
+      this.logger.error(`shadow log write failed: ${(err as Error).message}`);
+    });
   }
 
   private reloadFlagsIfStale(): void {
