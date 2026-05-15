@@ -1,0 +1,62 @@
+# Online enforcement flags — Phase 8 / SCRUM-460
+# Per online-enforcement-standards.mdc §0.1.
+#
+# 3-LAYER FLAG GATING:
+#   Layer 1: env var ONLINE_ENFORCEMENT_MODE (defaults to "shadow")
+#   Layer 2: enforcement_mode field below
+#   Layer 3: per-cap enabled flag
+#
+# ALL THREE LAYERS must align (master=active AND <cap>.enabled=true)
+# for any cap to actually enforce. AUTH-path skip-list is hardcoded
+# BY CODE in every template — non-overridable by ANY flag.
+#
+# ALL FLAGS BELOW ARE OFF BY DEFAULT.
+#
+# This is the COMMITTED example. Operator copies to
+# `online-enforcement-flags.yml` (gitignored) and edits per environment.
+
+version: 1
+
+# Master switch. SHADOW is the only safe default in Phase 8.
+# Flipping to "active" requires §15-compliant ticket if AUTH-adjacent,
+# Phase 12-15 audit of impact, 24h shadow monitoring, rollback plan.
+enforcement_mode: shadow     # values: shadow | active
+
+# Per-cap toggles. All OFF by default.
+o_arl:
+  enabled: false
+  # When enabled in active mode: requests with hostile-class source
+  # get 429; suspicious-class get 50% lower rate limit.
+behavioral:
+  enabled: false
+  # When enabled: hostile-class requests get 403; suspicious get
+  # header strip / degrade (shadow-logged in Phase 8).
+threat_response:
+  enabled: false
+  # When enabled: polls response-recommendations.jsonl and applies
+  # via existing primitives. AUTH-path actions ALWAYS refused.
+quarantine:
+  enabled: false
+  # When enabled: blocks 503 when request matches active quarantine
+  # entry. AUTH-path entries refused at load AND at request time.
+ml_inference:
+  enabled: false
+  # When enabled: scores incoming requests per Phase 5 §6.
+  # Flipping to "use score for blocking" requires SEPARATE
+  # §15-compliant security review.
+loop:
+  enabled: false
+  # When enabled: orchestrator coordinates Caps 1-5 + exposes
+  # /admin/shadow-decisions/preview (uses existing AUTH guards).
+
+# Shadow log destination. Append-only JSONL. One line per decision.
+# Aligned with em-ecosystem layout. The consolidation systemd wrappers
+# read this same path via SHADOW_LOG_PATH env var (see Block 3).
+shadow_log_path: /home/em-admin/projects/em-ecosystem/logs/shadow-decisions.jsonl
+
+# Operator notes:
+# - To validate flip-readiness for a cap: install template in shadow,
+#   monitor for 24h, run shadow-decisions-aggregator.py to review.
+# - If decisions match expectations, file §15-compliant ticket (if
+#   AUTH-adjacent), flip layer 2 + 3, monitor real traffic for 1h.
+# - If anomalous: revert by flipping the cap back to enabled=false.
