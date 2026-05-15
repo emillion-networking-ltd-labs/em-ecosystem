@@ -10,7 +10,6 @@ jest.mock('fs', () => ({
   appendFileSync: (...args: unknown[]) => mockAppendFileSync(...args),
 }));
 
-// eslint-disable-next-line import/first
 import { OnlineMlScorerService } from '../online-ml-scorer.service';
 
 const fakeReq = (path: string, ip = '10.0.0.42'): Request =>

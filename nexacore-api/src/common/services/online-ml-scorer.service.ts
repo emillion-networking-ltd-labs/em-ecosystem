@@ -185,6 +185,8 @@ export class OnlineMlScorerService {
         this.flags.shadow_log_path ??
         process.env.SHADOW_LOG_PATH ??
         '/var/log/shadow-decisions.jsonl';
+      // path is operator-controlled config (YAML or env var), not user input.
+      // eslint-disable-next-line security/detect-non-literal-fs-filename
       appendFileSync(path, JSON.stringify(entry) + '\n');
     } catch {
       // Fail-open on logging error — never block the request path.
@@ -194,9 +196,12 @@ export class OnlineMlScorerService {
   private reloadFlagsIfStale(): void {
     const now = Date.now();
     if (now - this.lastFlagsLoad <= 30_000) return;
+    // flagsPath is operator-controlled config (env var with hardcoded fallback), not user input.
+    // eslint-disable-next-line security/detect-non-literal-fs-filename
     if (!existsSync(this.flagsPath)) return;
     try {
       this.flags = yaml.load(
+        // eslint-disable-next-line security/detect-non-literal-fs-filename
         readFileSync(this.flagsPath, 'utf-8'),
       ) as FlagsFile;
     } catch (e) {
