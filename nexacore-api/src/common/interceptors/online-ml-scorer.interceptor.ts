@@ -28,8 +28,7 @@ import {
 import { Observable, tap } from 'rxjs';
 import { Request, Response } from 'express';
 import { OnlineMlScorerService } from '../services/online-ml-scorer.service';
-
-const AUTH_SKIP = ['/auth/', '/oauth/', '/sessions/', '/mfa/', '/passkey/'];
+import { AUTH_SKIP_PATHS } from '../constants/auth-skip-paths.constants';
 
 @Injectable()
 export class OnlineMlScorerInterceptor implements NestInterceptor {
@@ -40,7 +39,7 @@ export class OnlineMlScorerInterceptor implements NestInterceptor {
   intercept(ctx: ExecutionContext, next: CallHandler): Observable<unknown> {
     const req = ctx.switchToHttp().getRequest<Request>();
     const res = ctx.switchToHttp().getResponse<Response>();
-    if (AUTH_SKIP.some((p) => req.path.startsWith(p))) {
+    if (AUTH_SKIP_PATHS.some((p) => req.path.startsWith(p))) {
       return next.handle();
     }
     const started = Date.now();
