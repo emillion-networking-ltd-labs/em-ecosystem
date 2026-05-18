@@ -83,3 +83,11 @@ attachments/
 # Ad-hoc / temporary Python scripts used for local automation (Jira, etc.).
 # Permanent automation lives in integrations/ instead.
 tmp-*.py
+
+# ────────────────────────────────────────────
+# Phase 8 Shadow Decisions (SCRUM-460)
+# ────────────────────────────────────────────
+# Shadow log dir (append-only JSONL, rotation manual).
+logs/
+# Effective flags file (per-environment). The .example.yml IS committed.
+nexacore-api/online-enforcement-flags.yml
