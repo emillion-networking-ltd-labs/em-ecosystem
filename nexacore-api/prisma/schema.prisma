@@ -64,6 +64,11 @@ enum AuditAction {
   TENANT_INVITATION_EXPIRE_REJECTED
   TENANT_INVITATION_REVOKED
   TENANT_MEMBERSHIP_CREATED
+  SESSION_V2_CREATED
+  SESSION_V2_REFRESH_REJECTED
+  SESSION_V2_REVOKED
+  SESSION_V2_ROTATED
+  SESSION_V2_TENANT_BULK_REVOKED
 }
 
 enum EmailVerificationTokenType {
@@ -72,12 +77,12 @@ enum EmailVerificationTokenType {
 }
 
 model User {
-  id             String    @id @default(uuid())
-  email          String    @unique
+  id                String    @id @default(uuid())
+  email             String    @unique
   /// @sensitive — User password bcrypt hash
-  passwordHash   String?
-  firstName      String?
-  lastName       String?
+  passwordHash      String?
+  firstName         String?
+  lastName          String?
   avatarUrl         String?
   avatarOriginalUrl String?
   avatarCropData    Json?
@@ -87,30 +92,31 @@ model User {
   /// migration that introduced this column. User.role kept transitional until
   /// Phase 1 (JWT v2) — SCRUM-489 / AUTH v2 Phase 0.3.
   isPlatformAdmin   Boolean   @default(false)
-  emailVerified  Boolean   @default(false)
-  pendingEmail   String?
-  isActive       Boolean   @default(true)
-  failedAttempts Int       @default(0)
-  lockedUntil    DateTime?
-  lockoutCount     Int       @default(0)
-  mfaEnabled       Boolean   @default(false)
+  emailVerified     Boolean   @default(false)
+  pendingEmail      String?
+  isActive          Boolean   @default(true)
+  failedAttempts    Int       @default(0)
+  lockedUntil       DateTime?
+  lockoutCount      Int       @default(0)
+  mfaEnabled        Boolean   @default(false)
   /// @sensitive — TOTP secret, AES-256-GCM encrypted
-  mfaSecret        String?
+  mfaSecret         String?
   /// @sensitive — Hashed MFA recovery codes
-  mfaRecoveryCodes String[]  @default([])
-  createdAt        DateTime  @default(now())
-  updatedAt        DateTime  @updatedAt
-  deletedAt        DateTime?
+  mfaRecoveryCodes  String[]  @default([])
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+  deletedAt         DateTime?
 
-  sessions                 Session[]
-  auditLogs                AuditLog[]                @relation("AuditLogUser")
-  auditLogsTarget          AuditLog[]                @relation("AuditLogTarget")
-  emailVerificationTokens  EmailVerificationToken[]  @relation("UserEmailVerificationTokens")
-  passwordResetTokens      PasswordResetToken[]      @relation("UserPasswordResetTokens")
-  trustedDevices           TrustedDevice[]
-  webAuthnCredentials      WebAuthnCredential[]
-  oauthAccounts            OAuthAccount[]
-  memberships              TenantMembership[]
+  sessions                Session[]
+  sessionsV2              SessionV2[]              @relation("SessionV2User")
+  auditLogs               AuditLog[]               @relation("AuditLogUser")
+  auditLogsTarget         AuditLog[]               @relation("AuditLogTarget")
+  emailVerificationTokens EmailVerificationToken[] @relation("UserEmailVerificationTokens")
+  passwordResetTokens     PasswordResetToken[]     @relation("UserPasswordResetTokens")
+  trustedDevices          TrustedDevice[]
+  webAuthnCredentials     WebAuthnCredential[]
+  oauthAccounts           OAuthAccount[]
+  memberships             TenantMembership[]
 
   @@map("users")
 }
@@ -142,18 +148,44 @@ model Session {
   @@map("sessions")
 }
 
-model AuditLog {
-  id            String      @id @default(uuid())
-  action        AuditAction
-  userId        String?
-  targetUserId  String?
-  ipAddress     String?
-  userAgent     String?
-  metadata      Json?
-  createdAt     DateTime    @default(now())
+/// Phase 1.2 / SCRUM-493 — v2 opaque-refresh session. Strangler-pattern:
+/// lives alongside v1 `Session`, zero production consumers in Phase 1.2.
+/// Sunsetting at Phase 6 = single `DROP TABLE`.
+model SessionV2 {
+  id               String   @id @default(uuid())
+  userId           String
+  user             User     @relation("SessionV2User", fields: [userId], references: [id], onDelete: Cascade)
+  tenantId         String
+  /// @sensitive — SHA-256 hex of opaque refresh token. Deterministic hashing
+  /// required because the @unique constraint cannot enforce uniqueness on
+  /// bcrypt salted hashes. Plaintext returned ONCE on mint; never logged.
+  refreshTokenHash String   @unique
+  isRevoked        Boolean  @default(false)
+  ipAddress        String?
+  userAgent        String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  lastUsedAt       DateTime @default(now())
+  expiresAt        DateTime
 
-  user          User?       @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
-  targetUser    User?       @relation("AuditLogTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
+  @@index([userId])
+  @@index([userId, tenantId])
+  @@index([userId, tenantId, isRevoked])
+  @@map("sessions_v2")
+}
+
+model AuditLog {
+  id           String      @id @default(uuid())
+  action       AuditAction
+  userId       String?
+  targetUserId String?
+  ipAddress    String?
+  userAgent    String?
+  metadata     Json?
+  createdAt    DateTime    @default(now())
+
+  user       User? @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
+  targetUser User? @relation("AuditLogTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
 
   @@index([action])
   @@index([userId])
@@ -165,16 +197,16 @@ model AuditLog {
 }
 
 model EmailVerificationToken {
-  id        String    @id @default(uuid())
+  id        String                     @id @default(uuid())
   /// @sensitive — SHA-256 hash of verification token
-  tokenHash String    @unique
+  tokenHash String                     @unique
   userId    String
   type      EmailVerificationTokenType @default(REGISTRATION)
-  user      User      @relation("UserEmailVerificationTokens", fields: [userId], references: [id], onDelete: Cascade)
+  user      User                       @relation("UserEmailVerificationTokens", fields: [userId], references: [id], onDelete: Cascade)
   expiresAt DateTime
   usedAt    DateTime?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime                   @default(now())
+  updatedAt DateTime                   @updatedAt
 
   @@index([userId])
   @@map("email_verification_tokens")
@@ -217,7 +249,7 @@ model WebAuthnCredential {
   id           String    @id @default(uuid())
   userId       String
   credentialId String    @unique
-  publicKey    Bytes  /// @sensitive
+  publicKey    Bytes /// @sensitive
   signCount    Int       @default(0)
   transports   String[]  @default([])
   backedUp     Boolean   @default(false)
@@ -250,13 +282,13 @@ model OAuthAccount {
 }
 
 model Permission {
-  id          String           @id @default(uuid())
-  key         String           @unique
+  id          String   @id @default(uuid())
+  key         String   @unique
   description String
   resource    String
   action      String
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
   rolePermissions RolePermission[]
 
