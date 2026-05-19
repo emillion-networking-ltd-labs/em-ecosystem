@@ -10,6 +10,14 @@ export interface User {
   avatarOriginalUrl: string | null;
   avatarCropData: Record<string, number> | null;
   role: Role;
+  /**
+   * Cross-tenant capability flag (SCRUM-489 / AUTH v2 Phase 0.3).
+   * Replaces the conflated Role.SUPERADMIN concept. Carries the
+   * "this user can bypass tenant boundaries" semantics. User.role
+   * is kept transitional for tenant-scoped Role-enum machinery
+   * until Phase 1 (JWT v2) retires it.
+   */
+  isPlatformAdmin: boolean;
   emailVerified: boolean;
   pendingEmail: string | null;
   isActive: boolean;
@@ -53,6 +61,7 @@ export function toSafeUser(
     avatarOriginalUrl: user.avatarOriginalUrl,
     avatarCropData: user.avatarCropData,
     role: user.role,
+    isPlatformAdmin: user.isPlatformAdmin,
     emailVerified: user.emailVerified,
     isActive: user.isActive,
     mfaEnabled: user.mfaEnabled,

@@ -22,7 +22,7 @@ export class RolesGuard implements CanActivate {
 
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<{
-      user?: { id: string; role: Role };
+      user?: { id: string; role: Role; isPlatformAdmin: boolean };
       ip?: string;
       headers?: Record<string, string>;
       route?: { path?: string };
@@ -35,8 +35,13 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    // SUPERADMIN bypasses all role checks — log when roles are actually required
-    if (user?.role === Role.SUPERADMIN) {
+    // Platform-admin bypasses ALL tenant-scoped role checks.
+    // Capability is gated by User.isPlatformAdmin (SCRUM-489 / AUTH v2 Phase 0.3),
+    // NOT by the legacy Role.SUPERADMIN enum value — which now exists only for
+    // tenant-scoped Role-enum machinery (permissions catalog + MFA policy).
+    // The AuditAction.SUPERADMIN_BYPASS enum value is preserved for log-history
+    // compatibility; the semantic meaning is unchanged (still "privileged bypass").
+    if (user?.isPlatformAdmin === true) {
       if (requiredRoles && requiredRoles.length > 0) {
         this.auditService
           .log({

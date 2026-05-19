@@ -778,7 +778,7 @@ export class UsersService {
   async adminUpdateUser(
     targetId: string,
     dto: AdminUpdateUserDto,
-    actingUser: { id: string; role: Role },
+    actingUser: { id: string; role: Role; isPlatformAdmin: boolean },
     ctx?: RequestContext,
   ): Promise<SafeUser> {
     // V4.3.1: Admins cannot modify their own account via admin endpoints
@@ -791,22 +791,23 @@ export class UsersService {
       throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
     }
 
-    // Cannot modify SUPERADMIN users
-    if (target.role === Role.SUPERADMIN) {
+    // Capability gate (SCRUM-489 / Phase 0.3): platform admins are untouchable.
+    // Gated by isPlatformAdmin, NOT by legacy Role.SUPERADMIN.
+    if (target.isPlatformAdmin === true) {
       throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
-    // SUPERADMIN role cannot be assigned — only 1 root SUPERADMIN exists (seed)
+    // Role-enum-value gate (KEEPS Role.SUPERADMIN check): forbids assigning the
+    // legacy SUPERADMIN role via API. Guards the enum-value pathway, not capability —
+    // platform-admin status is acquired via isPlatformAdmin (set during seed /
+    // migration backfill), never through this user-update flow.
     if (dto.role === Role.SUPERADMIN) {
       throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
-    // Only SUPERADMIN can assign ADMIN role
-    if (
-      dto.role &&
-      dto.role === Role.ADMIN &&
-      actingUser.role !== Role.SUPERADMIN
-    ) {
+    // Capability gate (SCRUM-489 / Phase 0.3): only platform admins can elevate
+    // others to ADMIN. Gated by capability, not legacy role.
+    if (dto.role && dto.role === Role.ADMIN && !actingUser.isPlatformAdmin) {
       throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
@@ -871,7 +872,8 @@ export class UsersService {
       throw new NotFoundException(ErrorMessages.user.NOT_FOUND);
     }
 
-    if (target.role === Role.SUPERADMIN) {
+    // Capability gate (SCRUM-489 / Phase 0.3): platform admins cannot be deleted.
+    if (target.isPlatformAdmin === true) {
       throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 
@@ -1131,7 +1133,8 @@ export class UsersService {
       throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
 
-    if (user.role === Role.SUPERADMIN) {
+    // Capability gate (SCRUM-489 / Phase 0.3): platform admins cannot self-delete.
+    if (user.isPlatformAdmin === true) {
       throw new ForbiddenException(ErrorMessages.user.OPERATION_NOT_PERMITTED);
     }
 

@@ -76,6 +76,11 @@ model User {
   avatarOriginalUrl String?
   avatarCropData    Json?
   role              Role      @default(USER)
+  /// Cross-tenant capability flag. Replaces the conflated Role.SUPERADMIN concept.
+  /// Backfill: pre-existing SUPERADMIN users got isPlatformAdmin=true in the
+  /// migration that introduced this column. User.role kept transitional until
+  /// Phase 1 (JWT v2) — SCRUM-489 / AUTH v2 Phase 0.3.
+  isPlatformAdmin   Boolean   @default(false)
   emailVerified  Boolean   @default(false)
   pendingEmail   String?
   isActive       Boolean   @default(true)
