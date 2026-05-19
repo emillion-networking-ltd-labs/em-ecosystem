@@ -57,6 +57,7 @@ enum AuditAction {
   OAUTH_LINKED
   OAUTH_REGISTER
   OAUTH_AUTO_VERIFIED
+  TENANT_FILTER_BYPASS
 }
 
 enum EmailVerificationTokenType {

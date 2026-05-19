@@ -24,6 +24,7 @@ import { GeolocationModule } from './geolocation/geolocation.module';
 import { StorageModule } from './storage';
 import { OnlineMlScorerModule } from './common/services/online-ml-scorer.module';
 import { OnlineMlScorerInterceptor } from './common/interceptors/online-ml-scorer.interceptor';
+import { TenantContextInterceptor } from './common/interceptors/tenant-context.interceptor';
 import { TenantsModule } from './tenants/tenants.module';
 
 @Module({
@@ -68,6 +69,10 @@ import { TenantsModule } from './tenants/tenants.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: OnlineMlScorerInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: TenantContextInterceptor,
     },
   ],
 })
