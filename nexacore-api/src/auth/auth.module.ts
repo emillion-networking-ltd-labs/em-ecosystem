@@ -11,6 +11,7 @@ import { AccountController } from './account.controller';
 import { SessionController } from './session.controller';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
+import { TokenServiceV2 } from './token.service.v2';
 import { LoginService } from './login.service';
 import { OAuthAuthService } from './oauth-auth.service';
 import { EmailVerificationService } from './email-verification.service';
@@ -84,6 +85,7 @@ import { JWT_ISSUER, JWT_AUDIENCE } from './constants/auth.constants';
   providers: [
     AuthService,
     TokenService,
+    TokenServiceV2,
     LoginService,
     OAuthAuthService,
     EmailVerificationService,
