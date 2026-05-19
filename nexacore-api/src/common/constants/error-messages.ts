@@ -83,4 +83,10 @@ export const ErrorMessages = {
     CROSS_TENANT: 'Cross-tenant access denied',
     BYPASS_WITHOUT_REASON: 'Tenant filter bypass requires a reason',
   },
+  invitations: {
+    NOT_FOUND: 'Invitation not found',
+    EXPIRED: 'Invitation has expired',
+    EMAIL_MISMATCH: 'Invitation email does not match your account',
+    ALREADY_ACCEPTED: 'Invitation has already been accepted',
+  },
 } as const;
