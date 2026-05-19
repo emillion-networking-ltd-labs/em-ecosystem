@@ -24,6 +24,7 @@ import { GeolocationModule } from './geolocation/geolocation.module';
 import { StorageModule } from './storage';
 import { OnlineMlScorerModule } from './common/services/online-ml-scorer.module';
 import { OnlineMlScorerInterceptor } from './common/interceptors/online-ml-scorer.interceptor';
+import { TenantsModule } from './tenants/tenants.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { OnlineMlScorerInterceptor } from './common/interceptors/online-ml-score
     PermissionsModule,
     StorageModule,
     OnlineMlScorerModule,
+    TenantsModule,
     ServeStaticModule.forRoot({
       rootPath: join(process.cwd(), 'uploads'),
       serveRoot: '/uploads',
