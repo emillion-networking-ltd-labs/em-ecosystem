@@ -12,6 +12,7 @@ describe('PermissionsGuard', () => {
   function createMockContext(user?: {
     id: string;
     role: Role;
+    isPlatformAdmin?: boolean;
   }): ExecutionContext {
     return {
       switchToHttp: () => ({
@@ -60,7 +61,11 @@ describe('PermissionsGuard', () => {
 
   it('should allow SUPERADMIN regardless of required permissions', async () => {
     reflector.getAllAndOverride.mockReturnValue(['users:read', 'users:delete']);
-    const context = createMockContext({ id: 'admin-1', role: Role.SUPERADMIN });
+    const context = createMockContext({
+      id: 'admin-1',
+      role: Role.SUPERADMIN,
+      isPlatformAdmin: true,
+    });
 
     expect(await guard.canActivate(context)).toBe(true);
     expect(permissionsService.roleHasAllPermissions).not.toHaveBeenCalled();

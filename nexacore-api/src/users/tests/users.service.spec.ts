@@ -90,6 +90,7 @@ describe('UsersService', () => {
     lastName: null,
     avatarUrl: null,
     role: Role.USER,
+    isPlatformAdmin: false,
     emailVerified: false,
     pendingEmail: null,
     isActive: true,
@@ -1103,8 +1104,16 @@ describe('UsersService', () => {
   // ─── adminUpdateUser ───────────────────────────────────────────
 
   describe('adminUpdateUser', () => {
-    const actingAdmin = { id: 'admin-1', role: Role.ADMIN };
-    const actingSuperadmin = { id: 'superadmin-1', role: Role.SUPERADMIN };
+    const actingAdmin = {
+      id: 'admin-1',
+      role: Role.ADMIN,
+      isPlatformAdmin: false,
+    };
+    const actingSuperadmin = {
+      id: 'superadmin-1',
+      role: Role.SUPERADMIN,
+      isPlatformAdmin: true,
+    };
 
     it('should throw NotFoundException when target user not found', async () => {
       prisma.user.findUnique.mockResolvedValue(null);
@@ -1118,10 +1127,11 @@ describe('UsersService', () => {
       ).rejects.toThrow(NotFoundException);
     });
 
-    it('should throw ForbiddenException when trying to modify SUPERADMIN', async () => {
+    it('should throw ForbiddenException when target is a platform admin (capability gate)', async () => {
       prisma.user.findUnique.mockResolvedValue({
         ...mockUser,
         role: Role.SUPERADMIN,
+        isPlatformAdmin: true,
       });
 
       await expect(
@@ -1131,6 +1141,31 @@ describe('UsersService', () => {
           actingSuperadmin,
         ),
       ).rejects.toThrow(ForbiddenException);
+    });
+
+    it('should NOT throw when target has legacy role=SUPERADMIN but isPlatformAdmin=false (post-Phase-1 boundary)', async () => {
+      // After Phase 1, capability and legacy role decouple. This test guards the
+      // forward boundary: a user with the legacy SUPERADMIN role but no platform
+      // capability can be modified (capability gates, not legacy role).
+      prisma.user.findUnique.mockResolvedValue({
+        ...mockUser,
+        role: Role.SUPERADMIN,
+        isPlatformAdmin: false,
+      });
+      prisma.user.update.mockResolvedValue({
+        ...mockUser,
+        role: Role.SUPERADMIN,
+        isPlatformAdmin: false,
+        isActive: false,
+      });
+
+      const result = await usersService.adminUpdateUser(
+        'uuid-123',
+        { isActive: false },
+        actingSuperadmin,
+      );
+
+      expect(result).toBeDefined();
     });
 
     it('should throw ForbiddenException when non-SUPERADMIN assigns ADMIN role', async () => {
@@ -1320,10 +1355,11 @@ describe('UsersService', () => {
       );
     });
 
-    it('should throw ForbiddenException when target is SUPERADMIN', async () => {
+    it('should throw ForbiddenException when target is a platform admin (capability gate)', async () => {
       prisma.user.findUnique.mockResolvedValue({
         ...mockUser,
         role: Role.SUPERADMIN,
+        isPlatformAdmin: true,
       });
 
       await expect(usersService.softDelete('uuid-123')).rejects.toThrow(
@@ -1645,10 +1681,11 @@ describe('UsersService', () => {
       ).rejects.toThrow(UnauthorizedException);
     });
 
-    it('should throw ForbiddenException for SUPERADMIN accounts', async () => {
+    it('should throw ForbiddenException for platform-admin accounts (capability gate)', async () => {
       prisma.user.findUnique.mockResolvedValue({
         ...mockUser,
         role: 'SUPERADMIN',
+        isPlatformAdmin: true,
       });
 
       await expect(

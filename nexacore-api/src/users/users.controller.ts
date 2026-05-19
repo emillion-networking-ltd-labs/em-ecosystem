@@ -261,7 +261,7 @@ export class UsersController {
     @Body() dto: AdminUpdateUserDto,
     @Request()
     req: {
-      user: { id: string; role: Role };
+      user: { id: string; role: Role; isPlatformAdmin: boolean };
       ip?: string;
       headers?: Record<string, string>;
     },

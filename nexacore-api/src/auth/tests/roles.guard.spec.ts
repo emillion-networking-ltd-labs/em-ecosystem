@@ -24,7 +24,11 @@ describe('RolesGuard', () => {
     guard = new RolesGuard(reflector, auditService as unknown as AuditService);
   });
 
-  const createMockContext = (user?: { id?: string; role: Role }) => ({
+  const createMockContext = (user?: {
+    id?: string;
+    role: Role;
+    isPlatformAdmin?: boolean;
+  }) => ({
     getHandler: jest.fn(),
     getClass: jest.fn(),
     switchToHttp: jest.fn().mockReturnValue({
@@ -87,7 +91,11 @@ describe('RolesGuard', () => {
 
     it('should allow SUPERADMIN to bypass role checks and log SUPERADMIN_BYPASS', () => {
       reflector.getAllAndOverride.mockReturnValue([Role.ADMIN]);
-      const context = createMockContext({ id: 'sa-1', role: Role.SUPERADMIN });
+      const context = createMockContext({
+        id: 'sa-1',
+        role: Role.SUPERADMIN,
+        isPlatformAdmin: true,
+      });
 
       const result = guard.canActivate(context as never);
 
@@ -106,7 +114,11 @@ describe('RolesGuard', () => {
 
     it('should allow SUPERADMIN without logging when no roles are required', () => {
       reflector.getAllAndOverride.mockReturnValue(undefined);
-      const context = createMockContext({ id: 'sa-1', role: Role.SUPERADMIN });
+      const context = createMockContext({
+        id: 'sa-1',
+        role: Role.SUPERADMIN,
+        isPlatformAdmin: true,
+      });
 
       const result = guard.canActivate(context as never);
 
@@ -121,7 +133,7 @@ describe('RolesGuard', () => {
         getClass: jest.fn(),
         switchToHttp: jest.fn().mockReturnValue({
           getRequest: jest.fn().mockReturnValue({
-            user: { id: 'sa-1', role: Role.SUPERADMIN },
+            user: { id: 'sa-1', role: Role.SUPERADMIN, isPlatformAdmin: true },
             headers: {},
             method: 'POST',
             route: { path: '/admin' },
@@ -146,7 +158,7 @@ describe('RolesGuard', () => {
         getClass: jest.fn(),
         switchToHttp: jest.fn().mockReturnValue({
           getRequest: jest.fn().mockReturnValue({
-            user: { id: 'sa-1', role: Role.SUPERADMIN },
+            user: { id: 'sa-1', role: Role.SUPERADMIN, isPlatformAdmin: true },
           }),
         }),
       };

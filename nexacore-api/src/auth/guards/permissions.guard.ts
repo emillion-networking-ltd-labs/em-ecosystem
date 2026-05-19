@@ -29,17 +29,21 @@ export class PermissionsGuard implements CanActivate {
       return true;
     }
 
-    const request = context
-      .switchToHttp()
-      .getRequest<{ user?: { id: string; role: Role } }>();
+    const request = context.switchToHttp().getRequest<{
+      user?: { id: string; role: Role; isPlatformAdmin: boolean };
+    }>();
     const user = request.user;
 
     if (!user) {
       throw new ForbiddenException(ErrorMessages.permission.ACCESS_DENIED);
     }
 
-    // SUPERADMIN bypasses all permission checks (RolesGuard already logs bypass)
-    if (user.role === Role.SUPERADMIN) {
+    // Platform-admin bypasses all permission checks (SCRUM-489 / AUTH v2 Phase 0.3).
+    // Capability gated by User.isPlatformAdmin, not legacy Role.SUPERADMIN. The
+    // RolesGuard SUPERADMIN_BYPASS audit log fires upstream when roles are required;
+    // permissions-only bypass intentionally does not emit a separate audit row
+    // (the bypass decision is the same).
+    if (user.isPlatformAdmin === true) {
       return true;
     }
 
