@@ -78,4 +78,9 @@ export const ErrorMessages = {
     SLUG_TAKEN: 'Tenant slug already in use',
     NOT_FOUND: 'Tenant not found',
   },
+  tenantContext: {
+    MISSING: 'Tenant context required for this operation',
+    CROSS_TENANT: 'Cross-tenant access denied',
+    BYPASS_WITHOUT_REASON: 'Tenant filter bypass requires a reason',
+  },
 } as const;

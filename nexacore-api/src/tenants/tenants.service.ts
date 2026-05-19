@@ -3,8 +3,9 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Prisma, Tenant } from '@prisma/client';
+import { Prisma, Tenant, TenantMembership } from '@prisma/client';
 import { ErrorMessages } from '../common/constants/error-messages';
+import { TenantContext } from '../common/context/tenant-context';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
@@ -102,5 +103,31 @@ export class TenantsService {
       }
       throw err;
     }
+  }
+
+  /**
+   * Resolve the user's first ACTIVE TenantMembership.
+   *
+   * SCRUM-488 (Phase 0.2). Used by the TenantContextInterceptor to bootstrap
+   * the per-request tenant context. Deterministic ordering: oldest joinedAt
+   * wins; tiebreak on id ASC.
+   *
+   * This method queries a tenant-scoped model BEFORE any tenant context can
+   * exist (it is the bootstrap), so it runs inside an explicit bypass scope
+   * with reason `tenant-context-resolution`. This reason is treated as
+   * audit-exempt — it is the documented bypass that is the prerequisite of
+   * the audit machinery itself, not a privilege-elevation event.
+   *
+   * @returns The oldest active membership for the user, or null if none.
+   */
+  async findFirstActiveMembership(
+    userId: string,
+  ): Promise<TenantMembership | null> {
+    return TenantContext.runWithBypass('tenant-context-resolution', () =>
+      this.prisma.tenantMembership.findFirst({
+        where: { userId, status: 'active' },
+        orderBy: [{ joinedAt: 'asc' }, { id: 'asc' }],
+      }),
+    );
   }
 }

@@ -22,6 +22,7 @@ describe('TenantsService', () => {
       update: jest.Mock;
     };
     tenantSettings: { create: jest.Mock };
+    tenantMembership: { findFirst: jest.Mock };
     $transaction: jest.Mock;
   };
 
@@ -47,6 +48,9 @@ describe('TenantsService', () => {
       },
       tenantSettings: {
         create: jest.fn(),
+      },
+      tenantMembership: {
+        findFirst: jest.fn(),
       },
       // $transaction is invoked with a callback; the callback receives the
       // mocked tx client (which we make === prisma so the test asserts on
@@ -216,6 +220,36 @@ describe('TenantsService', () => {
         name: 'ConflictException',
         message: ErrorMessages.tenants.SLUG_TAKEN,
       });
+    });
+  });
+
+  describe('findFirstActiveMembership (SCRUM-488)', () => {
+    it('returns the first active membership ordered by joinedAt ASC, id ASC', async () => {
+      const oldest = {
+        id: 'm-1',
+        tenantId: 't-1',
+        userId: 'u-1',
+        role: 'OWNER',
+        status: 'active',
+        joinedAt: new Date('2026-01-01T00:00:00Z'),
+      };
+      prisma.tenantMembership.findFirst.mockResolvedValue(oldest);
+
+      const result = await service.findFirstActiveMembership('u-1');
+
+      expect(result).toEqual(oldest);
+      expect(prisma.tenantMembership.findFirst).toHaveBeenCalledWith({
+        where: { userId: 'u-1', status: 'active' },
+        orderBy: [{ joinedAt: 'asc' }, { id: 'asc' }],
+      });
+    });
+
+    it('returns null when the user has no active memberships', async () => {
+      prisma.tenantMembership.findFirst.mockResolvedValue(null);
+
+      const result = await service.findFirstActiveMembership('u-orphan');
+
+      expect(result).toBeNull();
     });
   });
 });
