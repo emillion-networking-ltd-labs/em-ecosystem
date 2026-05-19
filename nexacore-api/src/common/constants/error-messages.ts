@@ -74,4 +74,8 @@ export const ErrorMessages = {
   validation: {
     FAILED: 'Validation failed',
   },
+  tenants: {
+    SLUG_TAKEN: 'Tenant slug already in use',
+    NOT_FOUND: 'Tenant not found',
+  },
 } as const;
