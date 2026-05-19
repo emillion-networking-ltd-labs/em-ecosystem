@@ -58,6 +58,12 @@ enum AuditAction {
   OAUTH_REGISTER
   OAUTH_AUTO_VERIFIED
   TENANT_FILTER_BYPASS
+  TENANT_INVITATION_ACCEPTED
+  TENANT_INVITATION_CREATED
+  TENANT_INVITATION_EMAIL_MISMATCH_REJECTED
+  TENANT_INVITATION_EXPIRE_REJECTED
+  TENANT_INVITATION_REVOKED
+  TENANT_MEMBERSHIP_CREATED
 }
 
 enum EmailVerificationTokenType {
@@ -354,7 +360,9 @@ model TenantInvitation {
   tenant     Tenant     @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   email      String
   role       TenantRole @default(MEMBER)
-  /// @sensitive — invitation token bcrypt hash
+  /// @sensitive — invitation token SHA-256 hash (hex). Deterministic hashing
+  /// required because the @unique constraint cannot enforce uniqueness on
+  /// bcrypt output (per-call salt makes hashes non-deterministic).
   tokenHash  String     @unique
   invitedBy  String
   expiresAt  DateTime
