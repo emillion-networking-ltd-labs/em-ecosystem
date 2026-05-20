@@ -6,6 +6,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
 import { AuthController } from './auth.controller';
+import { AuthV2Controller } from './auth-v2.controller';
 import { OAuthController } from './oauth.controller';
 import { AccountController } from './account.controller';
 import { SessionController } from './session.controller';
@@ -21,6 +22,7 @@ import { MfaService } from './mfa.service';
 import { PasskeyController } from './passkey.controller';
 import { PasskeyService } from './passkey.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { JwtV2Strategy } from './strategies/jwt-v2.strategy';
 import { GoogleStrategy } from './strategies/google.strategy';
 import { GitHubStrategy } from './strategies/github.strategy';
 import { OAuthStateStore } from './stores/oauth-state.store';
@@ -76,6 +78,7 @@ import { JWT_ISSUER, JWT_AUDIENCE } from './constants/auth.constants';
   ],
   controllers: [
     AuthController,
+    AuthV2Controller,
     OAuthController,
     AccountController,
     SessionController,
@@ -93,6 +96,7 @@ import { JWT_ISSUER, JWT_AUDIENCE } from './constants/auth.constants';
     MfaService,
     PasskeyService,
     JwtStrategy,
+    JwtV2Strategy,
     GoogleStrategy,
     GitHubStrategy,
     OAuthStateStore,

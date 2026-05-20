@@ -151,6 +151,9 @@ export const DEVICE_FINGERPRINT_HEADER = 'x-device-fingerprint';
 /** Cookie name for refresh tokens. */
 export const REFRESH_TOKEN_COOKIE_NAME = 'refresh_token';
 
+/** SCRUM-494 / Phase 1.3 — distinct cookie name to coexist with v1 during the strangler-pattern overlap. */
+export const REFRESH_TOKEN_COOKIE_NAME_V2 = 'refresh_token_v2';
+
 /** OAuth code cookie max age in milliseconds (30 seconds). */
 export const OAUTH_CODE_COOKIE_MAX_AGE_MS = 30_000;
 

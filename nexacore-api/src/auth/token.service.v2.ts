@@ -31,6 +31,7 @@ import { JwtService } from '@nestjs/jwt';
 import { TenantRole } from '@prisma/client';
 import { ErrorMessages } from '../common/constants/error-messages';
 import { JwtPayloadV2 } from './interfaces/jwt-payload-v2.interface';
+import { isValidV2Payload } from './utils/jwt-payload-v2.guard';
 
 export interface MintAccessTokenInput {
   userId: string;
@@ -80,23 +81,9 @@ export class TokenServiceV2 {
     } catch {
       throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
-    if (!this.isValidV2Payload(decoded)) {
+    if (!isValidV2Payload(decoded)) {
       throw new UnauthorizedException(ErrorMessages.auth.AUTHENTICATION_FAILED);
     }
     return decoded;
-  }
-
-  private isValidV2Payload(p: unknown): p is JwtPayloadV2 {
-    if (!p || typeof p !== 'object') return false;
-    const o = p as Record<string, unknown>;
-    return (
-      typeof o.sub === 'string' &&
-      typeof o.jti === 'string' &&
-      typeof o.sessionId === 'string' &&
-      typeof o.iat === 'number' &&
-      typeof o.tenantId === 'string' &&
-      typeof o.tenantRole === 'string' &&
-      typeof o.isPlatformAdmin === 'boolean'
-    );
   }
 }
