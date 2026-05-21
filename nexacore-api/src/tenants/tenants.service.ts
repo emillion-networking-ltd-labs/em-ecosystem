@@ -45,6 +45,19 @@ export class TenantsService {
   }
 
   /**
+   * Lookup a Tenant by its subdomain identity (SCRUM-495 / Phase 2.1 D-008).
+   *
+   * The `subdomain` column is `@unique` and was backfilled from `slug` in the
+   * 20260521*_phase_2_1_organization_and_subdomain migration. Consumed by
+   * `SubdomainTenantResolverMiddleware` to bind `TenantContext` at the request
+   * boundary. Returns `null` on miss — the middleware translates that into a
+   * generic 404 (hides existence of valid subdomains).
+   */
+  async findBySubdomain(subdomain: string): Promise<Tenant | null> {
+    return this.prisma.tenant.findUnique({ where: { subdomain } });
+  }
+
+  /**
    * Atomically create a Tenant + its 1:1 TenantSettings record.
    *
    * Wraps both inserts in a single Prisma transaction so partial creation
@@ -60,12 +73,26 @@ export class TenantsService {
         const tenant = await tx.tenant.create({
           data: {
             slug: dto.slug,
+            // SCRUM-495 / Phase 2.1: subdomain defaults to slug if caller
+            // doesn't override. Migration backfilled existing rows the same way.
+            subdomain: dto.subdomain ?? dto.slug,
             name: dto.name,
             status: dto.status ?? 'active',
           },
         });
         await tx.tenantSettings.create({
           data: { tenantId: tenant.id },
+        });
+        // SCRUM-495 / Phase 2.1: every tenant gets a `default` Organization on
+        // create so Phase 2.2 (AuthIntent) + Phase 2.3 (Dashboard) can assume
+        // one always exists. Mirrors the bootstrap-migration invariant.
+        await tx.organization.create({
+          data: {
+            tenantId: tenant.id,
+            name: 'Default',
+            slug: 'default',
+            isDefault: true,
+          },
         });
         return tenant;
       });
