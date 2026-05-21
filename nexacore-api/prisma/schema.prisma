@@ -69,6 +69,10 @@ enum AuditAction {
   SESSION_V2_REVOKED
   SESSION_V2_ROTATED
   SESSION_V2_TENANT_BULK_REVOKED
+  ORGANIZATION_CREATED
+  ORGANIZATION_MEMBER_ADDED
+  ORGANIZATION_MEMBER_REMOVED
+  SUBDOMAIN_RESOLUTION_FAILED
 }
 
 enum EmailVerificationTokenType {
@@ -117,6 +121,7 @@ model User {
   webAuthnCredentials     WebAuthnCredential[]
   oauthAccounts           OAuthAccount[]
   memberships             TenantMembership[]
+  organizationMemberships OrganizationMembership[] @relation("OrganizationMembershipUser")
 
   @@map("users")
 }
@@ -175,14 +180,15 @@ model SessionV2 {
 }
 
 model AuditLog {
-  id           String      @id @default(uuid())
-  action       AuditAction
-  userId       String?
-  targetUserId String?
-  ipAddress    String?
-  userAgent    String?
-  metadata     Json?
-  createdAt    DateTime    @default(now())
+  id             String      @id @default(uuid())
+  action         AuditAction
+  userId         String?
+  targetUserId   String?
+  ipAddress      String?
+  userAgent      String?
+  metadata       Json?
+  organizationId String?
+  createdAt      DateTime    @default(now())
 
   user       User? @relation("AuditLogUser", fields: [userId], references: [id], onDelete: SetNull)
   targetUser User? @relation("AuditLogTarget", fields: [targetUserId], references: [id], onDelete: SetNull)
@@ -317,15 +323,21 @@ model RolePermission {
 model Tenant {
   id        String       @id @default(uuid())
   slug      String       @unique
+  /// Phase 2.1 / SCRUM-495 — D-008: subdomain-based tenant identity for the
+  /// SubdomainTenantResolverMiddleware. Backfilled from `slug` in the
+  /// 20260520*_phase_2_1_organization_and_subdomain migration. NOT NULL +
+  /// @unique enforces 1:1 with the subdomain segment.
+  subdomain String       @unique
   name      String
   status    TenantStatus @default(active)
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
   deletedAt DateTime?
 
-  settings    TenantSettings?
-  memberships TenantMembership[]
-  invitations TenantInvitation[]
+  settings      TenantSettings?
+  memberships   TenantMembership[]
+  invitations   TenantInvitation[]
+  organizations Organization[]
 
   @@index([status])
   @@map("tenants")
@@ -405,4 +417,53 @@ model TenantInvitation {
   @@index([tenantId])
   @@index([email])
   @@map("tenant_invitations")
+}
+
+/// Phase 2.1 / SCRUM-495 — D-007: Organization (sub-grouping inside a tenant).
+/// Distinct from Tenant (billing/contract identity); same tenant can have many
+/// organizations. Every tenant gets a `default` organization on create.
+model Organization {
+  id          String   @id @default(uuid())
+  tenantId    String
+  tenant      Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  name        String
+  /// Unique WITHIN tenant only (not globally) — multiple tenants can have
+  /// org with slug 'default' or 'engineering' etc.
+  slug        String
+  description String?
+  isDefault   Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  members OrganizationMembership[]
+
+  @@unique([tenantId, slug])
+  @@index([tenantId])
+  @@map("organizations")
+}
+
+/// Phase 2.1 / SCRUM-495 — D-007: per-user membership in an Organization.
+/// Separate relation from TenantMembership: a user can be a tenant member
+/// without belonging to any organization (cross-cutting access via
+/// `isPlatformAdmin` or tenant-OWNER role).
+model OrganizationMembership {
+  id             String           @id @default(uuid())
+  organizationId String
+  organization   Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId         String
+  user           User             @relation("OrganizationMembershipUser", fields: [userId], references: [id], onDelete: Cascade)
+  role           OrganizationRole @default(MEMBER)
+  joinedAt       DateTime         @default(now())
+
+  @@unique([organizationId, userId])
+  @@index([userId])
+  @@index([organizationId])
+  @@map("organization_memberships")
+}
+
+enum OrganizationRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
 }

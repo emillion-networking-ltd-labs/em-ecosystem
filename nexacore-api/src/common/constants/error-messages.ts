@@ -78,6 +78,12 @@ export const ErrorMessages = {
     SLUG_TAKEN: 'Tenant slug already in use',
     NOT_FOUND: 'Tenant not found',
   },
+  organizations: {
+    NOT_FOUND: 'Organization not found',
+    SLUG_TAKEN: 'Organization slug already in use within this tenant',
+    DEFAULT_PROTECTED: 'Cannot delete or modify the default organization',
+    MEMBER_EXISTS: 'User is already a member of this organization',
+  },
   tenantContext: {
     MISSING: 'Tenant context required for this operation',
     CROSS_TENANT: 'Cross-tenant access denied',

@@ -56,4 +56,24 @@ export class CreateTenantDto {
   @IsOptional()
   @IsEnum(['active', 'trial', 'suspended', 'deleted'] as const)
   status?: TenantStatus;
+
+  @ApiProperty({
+    description:
+      'Subdomain identity for the tenant (SCRUM-495 / Phase 2.1 D-008). ' +
+      'Defaults to `slug` if omitted. Used by SubdomainTenantResolverMiddleware ' +
+      'to bind TenantContext at the request boundary.',
+    required: false,
+    example: 'acme-corp',
+    minLength: 1,
+    maxLength: 50,
+  })
+  @IsOptional()
+  @IsString()
+  @Matches(/^[a-z][a-z0-9-]*$/, {
+    message:
+      'subdomain must start with a lowercase letter and contain only lowercase ' +
+      'alphanumeric characters and dashes',
+  })
+  @MaxLength(50)
+  subdomain?: string;
 }

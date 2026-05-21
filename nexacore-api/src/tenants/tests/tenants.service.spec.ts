@@ -23,12 +23,14 @@ describe('TenantsService', () => {
     };
     tenantSettings: { create: jest.Mock };
     tenantMembership: { findFirst: jest.Mock };
+    organization: { create: jest.Mock };
     $transaction: jest.Mock;
   };
 
   const makeTenant = (overrides: Partial<Tenant> = {}): Tenant => ({
     id: 't-1',
     slug: 'acme',
+    subdomain: 'acme',
     name: 'Acme Corp',
     status: 'active',
     createdAt: new Date('2026-05-19T00:00:00Z'),
@@ -51,6 +53,11 @@ describe('TenantsService', () => {
       },
       tenantMembership: {
         findFirst: jest.fn(),
+      },
+      // SCRUM-495 / Phase 2.1: TenantsService.create now also inserts the
+      // default-org row inside the same $transaction. Mock organization.create.
+      organization: {
+        create: jest.fn().mockResolvedValue({ id: 'default-org-id' }),
       },
       // $transaction is invoked with a callback; the callback receives the
       // mocked tx client (which we make === prisma so the test asserts on
@@ -121,10 +128,25 @@ describe('TenantsService', () => {
       expect(result).toEqual(tenant);
       expect(prisma.$transaction).toHaveBeenCalledTimes(1);
       expect(prisma.tenant.create).toHaveBeenCalledWith({
-        data: { slug: 'acme', name: 'Acme Corp', status: 'active' },
+        data: {
+          slug: 'acme',
+          subdomain: 'acme',
+          name: 'Acme Corp',
+          status: 'active',
+        },
       });
       expect(prisma.tenantSettings.create).toHaveBeenCalledWith({
         data: { tenantId: tenant.id },
+      });
+      // SCRUM-495 / Phase 2.1: create() also creates the default-org row
+      // inside the same $transaction (mirrors the bootstrap-migration invariant).
+      expect(prisma.organization.create).toHaveBeenCalledWith({
+        data: {
+          tenantId: tenant.id,
+          name: 'Default',
+          slug: 'default',
+          isDefault: true,
+        },
       });
     });
 
