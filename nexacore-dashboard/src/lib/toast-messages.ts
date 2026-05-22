@@ -84,6 +84,12 @@ export const AUTH_TOAST = {
     title: "Password updated",
     description: "Your password has been reset. Sign in now.",
   } as ToastMsg,
+  // SCRUM-499 / AUTH v2 Phase 2.3
+  AUTH_INTENT_EXPIRED: {
+    variant: "warning",
+    title: "Login session expired",
+    description: "Please start again.",
+  } as ToastMsg,
 };
 
 // ─── Profile ──────────────────────────────────────

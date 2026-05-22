@@ -25,7 +25,11 @@ import type {
   LoginResponse,
   MessageResponse,
   RateLimitKind,
+  AuthIntentStatus,
+  AuthIntentResponse,
 } from "@/lib/types";
+import { AUTH_TOAST } from "@/lib/toast-messages";
+import { createAuthIntent, advanceAuthIntent } from "@/lib/auth-intent-api";
 import { ERROR_CODE } from "@/lib/error-constants";
 import { extractErrorMessage } from "@/lib/error-utils";
 
@@ -41,6 +45,11 @@ type AuthState = {
   mfaToken: string | null;
   mfaSetupRequired: boolean;
   mfaSetupToken: string | null;
+  // SCRUM-499 / AUTH v2 Phase 2.3 — AuthIntent v2 flow state (independent of v1 mfa* fields)
+  authIntentId: string | null;
+  authIntentStatus: AuthIntentStatus | null;
+  authIntentExpiresAt: Date | null;
+  authIntentAvailableTenantIds: string[] | null;
 };
 
 type AuthAction =
@@ -51,7 +60,20 @@ type AuthAction =
   | { type: "MFA_REQUIRED"; payload: { mfaToken: string } }
   | { type: "MFA_SETUP_REQUIRED"; payload: { setupToken: string } }
   | { type: "LOGOUT" }
-  | { type: "CLEAR_ERROR" };
+  | { type: "CLEAR_ERROR" }
+  // SCRUM-499 / AUTH v2 Phase 2.3
+  | {
+      type: "AUTH_INTENT_MFA_REQUIRED";
+      payload: { intentId: string; expiresAt: Date };
+    }
+  | {
+      type: "AUTH_INTENT_TENANT_PICK_REQUIRED";
+      payload: {
+        intentId: string;
+        availableTenantIds: string[];
+        expiresAt: Date;
+      };
+    };
 
 function authReducer(state: AuthState, action: AuthAction): AuthState {
   switch (action.type) {
@@ -68,6 +90,10 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         mfaToken: null,
         mfaSetupRequired: false,
         mfaSetupToken: null,
+        authIntentId: null,
+        authIntentStatus: null,
+        authIntentExpiresAt: null,
+        authIntentAvailableTenantIds: null,
       };
     case "AUTH_ERROR":
       return {
@@ -79,6 +105,10 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         mfaToken: null,
         mfaSetupRequired: false,
         mfaSetupToken: null,
+        authIntentId: null,
+        authIntentStatus: null,
+        authIntentExpiresAt: null,
+        authIntentAvailableTenantIds: null,
       };
     case "AUTH_STOP":
       return {
@@ -89,6 +119,10 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         mfaToken: null,
         mfaSetupRequired: false,
         mfaSetupToken: null,
+        authIntentId: null,
+        authIntentStatus: null,
+        authIntentExpiresAt: null,
+        authIntentAvailableTenantIds: null,
       };
     case "MFA_REQUIRED":
       return {
@@ -117,9 +151,42 @@ function authReducer(state: AuthState, action: AuthAction): AuthState {
         mfaToken: null,
         mfaSetupRequired: false,
         mfaSetupToken: null,
+        authIntentId: null,
+        authIntentStatus: null,
+        authIntentExpiresAt: null,
+        authIntentAvailableTenantIds: null,
       };
     case "CLEAR_ERROR":
       return { ...state, error: null };
+    // SCRUM-499 / AUTH v2 Phase 2.3
+    case "AUTH_INTENT_MFA_REQUIRED":
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        mfaRequired: false,
+        mfaToken: null,
+        mfaSetupRequired: false,
+        mfaSetupToken: null,
+        authIntentId: action.payload.intentId,
+        authIntentStatus: "requires_mfa",
+        authIntentExpiresAt: action.payload.expiresAt,
+        authIntentAvailableTenantIds: null,
+      };
+    case "AUTH_INTENT_TENANT_PICK_REQUIRED":
+      return {
+        ...state,
+        isLoading: false,
+        error: null,
+        mfaRequired: false,
+        mfaToken: null,
+        mfaSetupRequired: false,
+        mfaSetupToken: null,
+        authIntentId: action.payload.intentId,
+        authIntentStatus: "requires_tenant_pick",
+        authIntentExpiresAt: action.payload.expiresAt,
+        authIntentAvailableTenantIds: action.payload.availableTenantIds,
+      };
     default:
       return state;
   }
@@ -167,6 +234,11 @@ type AuthContextType = AuthState & {
     turnstileToken?: string,
   ) => Promise<boolean>;
   clearError: () => void;
+  // SCRUM-499 / AUTH v2 Phase 2.3 — AuthIntent v2 flow methods
+  loginV2: (email: string, password: string) => Promise<void>;
+  advanceMfaV2: (code?: string, recoveryCode?: string) => Promise<void>;
+  advanceTenantPickV2: (tenantId: string) => Promise<void>;
+  cancelAuthIntentV2: () => void;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -217,6 +289,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     mfaToken: null,
     mfaSetupRequired: false,
     mfaSetupToken: null,
+    authIntentId: null,
+    authIntentStatus: null,
+    authIntentExpiresAt: null,
+    authIntentAvailableTenantIds: null,
   });
 
   const refreshSession = useCallback(async () => {
@@ -666,6 +742,172 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "LOGOUT" });
   }, []);
 
+  /* ===== SCRUM-499 / AUTH v2 Phase 2.3 — AuthIntent v2 flow methods ===== */
+
+  // Ref mirror of state so the v2 advance methods can read the current
+  // authIntentId without including it in their useCallback dep arrays
+  // (those callbacks are passed to components and shouldn't churn identity).
+  const stateRef = useRef(state);
+  useEffect(() => {
+    stateRef.current = state;
+  }, [state]);
+
+  // Detect HTTP 410 Gone error shape (terminal-state replay OR expired-at-advance).
+  // Backend throws GoneException(AUTHENTICATION_FAILED) on these — ApiClient
+  // surfaces it as `{ error: { statusCode: 410, message: 'Authentication failed' } }`.
+  const isGoneError = (err: unknown): boolean => {
+    const errObj = err as { error?: { statusCode?: number } };
+    return errObj?.error?.statusCode === 410;
+  };
+
+  const handleAuthIntentResult = useCallback(
+    async (result: AuthIntentResponse) => {
+      switch (result.status) {
+        case "requires_mfa": {
+          dispatch({
+            type: "AUTH_INTENT_MFA_REQUIRED",
+            payload: {
+              intentId: result.id,
+              expiresAt: new Date(result.expiresAt),
+            },
+          });
+          return;
+        }
+        case "requires_tenant_pick": {
+          dispatch({
+            type: "AUTH_INTENT_TENANT_PICK_REQUIRED",
+            payload: {
+              intentId: result.id,
+              availableTenantIds: result.availableTenantIds ?? [],
+              expiresAt: new Date(result.expiresAt),
+            },
+          });
+          return;
+        }
+        case "succeeded": {
+          if (!result.accessToken) {
+            throw new Error("Authentication failed");
+          }
+          apiClient.setAccessToken(result.accessToken);
+          const user = await apiClient.get<SafeUser>("/auth/me");
+          dispatch({
+            type: "AUTH_SUCCESS",
+            payload: { user, accessToken: result.accessToken },
+          });
+          return;
+        }
+        case "failed":
+        case "expired":
+        case "requires_passkey":
+        case "requires_setup":
+        default:
+          // Phase 3+ reserves passkey/setup; Phase 2.3 treats them as failures.
+          throw new Error("Authentication failed");
+      }
+    },
+    [],
+  );
+
+  const loginV2 = useCallback(
+    async (email: string, password: string) => {
+      dispatch({ type: "AUTH_START" });
+      try {
+        const intent = await createAuthIntent();
+        const result = await advanceAuthIntent(intent.id, {
+          kind: "credentials",
+          email,
+          password,
+        });
+        await handleAuthIntentResult(result);
+      } catch (err: unknown) {
+        apiClient.clearAccessToken();
+        const errObj = err as ApiError;
+        if (errObj?.error?.retryAfter) {
+          dispatch({ type: "AUTH_STOP" });
+          const kind = detectRateLimitKind(errObj);
+          throw new RateLimitError(
+            errObj.error.retryAfter,
+            errObj.error.message ?? "Too many requests.",
+            kind,
+          );
+        }
+        dispatch({ type: "AUTH_ERROR", payload: extractErrorMessage(err) });
+        throw err;
+      }
+    },
+    [handleAuthIntentResult],
+  );
+
+  const advanceMfaV2 = useCallback(
+    async (code?: string, recoveryCode?: string) => {
+      const intentId = stateRef.current.authIntentId;
+      if (!intentId) {
+        throw new Error("Authentication failed");
+      }
+      dispatch({ type: "AUTH_START" });
+      try {
+        const result = await advanceAuthIntent(intentId, {
+          kind: "mfa",
+          code,
+          recoveryCode,
+        });
+        await handleAuthIntentResult(result);
+      } catch (err: unknown) {
+        if (isGoneError(err)) {
+          addToast(AUTH_TOAST.AUTH_INTENT_EXPIRED);
+          dispatch({ type: "AUTH_STOP" });
+          router.replace("/login");
+          return;
+        }
+        const errObj = err as ApiError;
+        if (errObj?.error?.retryAfter) {
+          dispatch({ type: "AUTH_STOP" });
+          const kind = detectRateLimitKind(errObj);
+          throw new RateLimitError(
+            errObj.error.retryAfter,
+            errObj.error.message ?? "Too many requests.",
+            kind,
+          );
+        }
+        dispatch({ type: "AUTH_ERROR", payload: extractErrorMessage(err) });
+        throw err;
+      }
+    },
+    [handleAuthIntentResult, addToast, router],
+  );
+
+  const advanceTenantPickV2 = useCallback(
+    async (tenantId: string) => {
+      const intentId = stateRef.current.authIntentId;
+      if (!intentId) {
+        throw new Error("Authentication failed");
+      }
+      dispatch({ type: "AUTH_START" });
+      try {
+        const result = await advanceAuthIntent(intentId, {
+          kind: "tenant_pick",
+          tenantId,
+        });
+        await handleAuthIntentResult(result);
+      } catch (err: unknown) {
+        if (isGoneError(err)) {
+          addToast(AUTH_TOAST.AUTH_INTENT_EXPIRED);
+          dispatch({ type: "AUTH_STOP" });
+          router.replace("/login");
+          return;
+        }
+        dispatch({ type: "AUTH_ERROR", payload: extractErrorMessage(err) });
+        throw err;
+      }
+    },
+    [handleAuthIntentResult, addToast, router],
+  );
+
+  const cancelAuthIntentV2 = useCallback(() => {
+    dispatch({ type: "AUTH_STOP" });
+    // No backend call — intent expires naturally (plan decision A).
+  }, []);
+
   const forgotPassword = useCallback(
     async (email: string, turnstileToken?: string): Promise<boolean> => {
       dispatch({ type: "AUTH_START" });
@@ -844,6 +1086,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         validateResetToken,
         resendVerificationPublic,
         clearError,
+        loginV2,
+        advanceMfaV2,
+        advanceTenantPickV2,
+        cancelAuthIntentV2,
       }}
     >
       {children}

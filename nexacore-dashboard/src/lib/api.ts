@@ -15,12 +15,24 @@ const CSRF_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 // 401 from these endpoints means "credentials invalid" or "no session yet" —
 // NOT "session expired". They must NOT trigger silentRefresh, otherwise the
 // genuine error body is swallowed and replaced with SessionExpiredError.
+//
+// Match semantics: exact endpoint OR endpoint starts with `entry + "/"`.
+// This lets `/auth/v2/intents` cover both the create endpoint AND the
+// `/auth/v2/intents/:id/advance` variant (SCRUM-499 / Phase 2.3).
 const SKIP_REFRESH_ON_401 = new Set([
   "/auth/login",
   "/auth/register",
   "/auth/refresh",
   "/auth/forgot-password",
+  "/auth/v2/intents", // SCRUM-499 / Phase 2.3 — also matches `/auth/v2/intents/:id/advance` via prefix
 ]);
+
+function shouldSkipRefresh(endpoint: string): boolean {
+  for (const skip of SKIP_REFRESH_ON_401) {
+    if (endpoint === skip || endpoint.startsWith(skip + "/")) return true;
+  }
+  return false;
+}
 
 class ApiClient {
   private accessToken: string | null = null;
@@ -131,7 +143,7 @@ class ApiClient {
 
     // Handle 401 with silent refresh (skip for unauthenticated auth endpoints —
     // their 401 means "invalid credentials", not "expired session")
-    if (response.status === 401 && !SKIP_REFRESH_ON_401.has(endpoint)) {
+    if (response.status === 401 && !shouldSkipRefresh(endpoint)) {
       const newToken = await this.silentRefresh();
       if (newToken) {
         headers.Authorization = `Bearer ${newToken}`;
