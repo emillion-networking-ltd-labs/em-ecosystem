@@ -7,12 +7,14 @@ import { PassportModule } from '@nestjs/passport';
 import type { StringValue } from 'ms';
 import { AuthController } from './auth.controller';
 import { AuthV2Controller } from './auth-v2.controller';
+import { AuthIntentController } from './auth-intent.controller';
 import { OAuthController } from './oauth.controller';
 import { AccountController } from './account.controller';
 import { SessionController } from './session.controller';
 import { AuthService } from './auth.service';
 import { TokenService } from './token.service';
 import { TokenServiceV2 } from './token.service.v2';
+import { AuthIntentService } from './auth-intent.service';
 import { LoginService } from './login.service';
 import { OAuthAuthService } from './oauth-auth.service';
 import { EmailVerificationService } from './email-verification.service';
@@ -79,6 +81,7 @@ import { JWT_ISSUER, JWT_AUDIENCE } from './constants/auth.constants';
   controllers: [
     AuthController,
     AuthV2Controller,
+    AuthIntentController,
     OAuthController,
     AccountController,
     SessionController,
@@ -89,6 +92,7 @@ import { JWT_ISSUER, JWT_AUDIENCE } from './constants/auth.constants';
     AuthService,
     TokenService,
     TokenServiceV2,
+    AuthIntentService,
     LoginService,
     OAuthAuthService,
     EmailVerificationService,

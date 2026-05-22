@@ -12,6 +12,18 @@ export const appConfig = registerAs('app', () => ({
    * `TenantContext.runWithBypass('platform-admin-route')` instead.
    */
   platformAdminSubdomain: process.env.PLATFORM_ADMIN_SUBDOMAIN || 'admin',
+  /**
+   * SCRUM-497 / Phase 2.2 (D-004): feature flag for the AuthIntent state machine.
+   * When false, AuthIntentController endpoints return 404 (mimics "endpoint does
+   * not exist"); when true, the v2 login orchestration is reachable. Default
+   * false in production, true in CI/test env per plan decision D6.
+   */
+  authIntentV2Enabled: process.env.AUTH_INTENT_V2_ENABLED === 'true',
+  /**
+   * SCRUM-497 / Phase 2.2: TTL for AuthIntent rows in milliseconds.
+   * 15 min default per plan decision D2; configurable via env for testing.
+   */
+  authIntentTtlMs: parseInt(process.env.AUTH_INTENT_TTL_MS || '900000', 10),
 }));
 
 export type AppConfig = ReturnType<typeof appConfig>;
