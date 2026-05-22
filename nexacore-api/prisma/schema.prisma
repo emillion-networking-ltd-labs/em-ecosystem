@@ -73,6 +73,11 @@ enum AuditAction {
   ORGANIZATION_MEMBER_ADDED
   ORGANIZATION_MEMBER_REMOVED
   SUBDOMAIN_RESOLUTION_FAILED
+  AUTH_INTENT_CREATED
+  AUTH_INTENT_ADVANCED
+  AUTH_INTENT_SUCCEEDED
+  AUTH_INTENT_FAILED
+  AUTH_INTENT_EXPIRED
 }
 
 enum EmailVerificationTokenType {
@@ -122,6 +127,7 @@ model User {
   oauthAccounts           OAuthAccount[]
   memberships             TenantMembership[]
   organizationMemberships OrganizationMembership[] @relation("OrganizationMembershipUser")
+  authIntents             AuthIntent[]             @relation("AuthIntentUser")
 
   @@map("users")
 }
@@ -338,6 +344,7 @@ model Tenant {
   memberships   TenantMembership[]
   invitations   TenantInvitation[]
   organizations Organization[]
+  authIntents   AuthIntent[]       @relation("AuthIntentTenant")
 
   @@index([status])
   @@map("tenants")
@@ -435,7 +442,8 @@ model Organization {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  members OrganizationMembership[]
+  members     OrganizationMembership[]
+  authIntents AuthIntent[]             @relation("AuthIntentOrganization")
 
   @@unique([tenantId, slug])
   @@index([tenantId])
@@ -466,4 +474,47 @@ enum OrganizationRole {
   ADMIN
   MEMBER
   VIEWER
+}
+
+/// Phase 2.2 / SCRUM-497 — D-004: server-side state machine for v2 login orchestration.
+/// Replaces the procedural `executeLogin` from v1 `LoginService` (strangler — v1 untouched).
+/// See ai-specs/changes/auth/programs/AUTH-v2.md §4 Phase 2 + §5 D-004.
+enum AuthIntentStatus {
+  requires_credentials
+  requires_tenant_pick
+  requires_mfa
+  requires_passkey
+  requires_setup
+  succeeded
+  failed
+  expired
+}
+
+/// AuthIntent — server-side state machine for v2 login orchestration.
+/// SCRUM-497 / AUTH v2 + Tenancy v1 Phase 2.2. See program doc §4 Phase 2 + §5 D-004.
+///
+/// Lifecycle: `requires_credentials` → (`requires_mfa` →)? (`requires_tenant_pick` →)? `succeeded`
+/// Terminal: `succeeded`, `failed`, `expired`. Replay on terminal → 410 Gone.
+/// TTL: configurable via `app.authIntentTtlMs` (default 15 min). Lazy expiry-flip in `advance()`.
+model AuthIntent {
+  id             String           @id @default(uuid())
+  status         AuthIntentStatus @default(requires_credentials)
+  userId         String?
+  user           User?            @relation("AuthIntentUser", fields: [userId], references: [id], onDelete: SetNull)
+  tenantId       String?
+  tenant         Tenant?          @relation("AuthIntentTenant", fields: [tenantId], references: [id], onDelete: SetNull)
+  organizationId String?
+  organization   Organization?    @relation("AuthIntentOrganization", fields: [organizationId], references: [id], onDelete: SetNull)
+  context        Json             @default("{}")
+  ipAddress      String?
+  userAgent      String?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+  expiresAt      DateTime
+  fulfilledAt    DateTime?
+
+  @@index([userId])
+  @@index([tenantId])
+  @@index([status, expiresAt])
+  @@map("auth_intents")
 }
