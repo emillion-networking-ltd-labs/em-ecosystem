@@ -262,3 +262,47 @@ export type DeleteAccountDto = {
 export type UnlinkOAuthDto = {
   password?: string;
 };
+
+/**
+ * SCRUM-499 / AUTH v2 Phase 2.3: AuthIntent v2 login flow types.
+ * Mirrors backend Prisma enum AuthIntentStatus + AuthIntentResponseDto.
+ *
+ * Backend source:
+ *   - nexacore-api/src/auth/dto/auth-intent-response.dto.ts
+ *   - nexacore-api/src/auth/dto/advance-auth-intent.dto.ts
+ *   - nexacore-api/prisma/schema.prisma (enum AuthIntentStatus)
+ */
+export type AuthIntentStatus =
+  | "requires_credentials"
+  | "requires_tenant_pick"
+  | "requires_mfa"
+  | "requires_passkey" // Phase 3 reserves
+  | "requires_setup" // Phase 3+ reserves
+  | "succeeded"
+  | "failed"
+  | "expired";
+
+export type AdvanceAuthIntentInput =
+  | { kind: "credentials"; email: string; password: string }
+  | { kind: "mfa"; code?: string; recoveryCode?: string }
+  | { kind: "tenant_pick"; tenantId: string }
+  | { kind: "passkey"; assertion: Record<string, unknown> };
+
+export interface AuthIntentResponse {
+  id: string;
+  status: AuthIntentStatus;
+  nextStep: "credentials" | "mfa" | "tenant_pick" | "passkey" | null;
+  /** ISO 8601 from backend */
+  expiresAt: string;
+  /** Present only when status === 'succeeded'. */
+  accessToken?: string;
+  /** Present only when status === 'succeeded'. */
+  user?: {
+    id: string;
+    tenantId: string;
+    tenantRole: string;
+    isPlatformAdmin: boolean;
+  };
+  /** Present when status === 'requires_tenant_pick'. */
+  availableTenantIds?: string[];
+}
