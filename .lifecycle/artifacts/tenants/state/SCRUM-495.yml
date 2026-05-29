@@ -1,0 +1,42 @@
+ticket: SCRUM-495
+module: tenants
+sprint: Sprint 15
+state: documented
+steps:
+  enrich-us:
+    done: true
+    timestamp: '2026-05-20T23:15:39Z'
+  plan:
+    done: true
+    timestamp: '2026-05-20T23:26:04Z'
+    path: ai-specs/changes/tenants/plans/Sprint 15/SCRUM-495_backend.md
+    schema_validated: true
+  develop:
+    done: true
+    timestamp: '2026-05-21T15:48:48Z'
+    branch: feature/SCRUM-495-tenants-backend
+    last_commit: e33fe6b
+  verify:
+    done: true
+    timestamp: '2026-05-21T16:12:32Z'
+    verdict: PASS
+    schema_validated: true
+    path: ai-specs/changes/tenants/plans/Sprint 15/SCRUM-495_verify.md
+    deviations_count: 3
+  commit:
+    done: true
+    timestamp: '2026-05-21T20:52:38Z'
+    pr: 334
+    merge_commit: ee3f1ca
+    branch_deleted: true
+  update-docs:
+    done: true
+    timestamp: '2026-05-21T21:33:22Z'
+    record_path: ai-specs/changes/tenants/records/Sprint 15/SCRUM-495_backend.md
+    record_schema_validated: true
+    ai_specs_commit: 99a51a8
+    specs_updated:
+      - integration-state.md
+      - api-spec.yml
+      - data-model.md
+      - AUTH-v2.md

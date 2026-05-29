@@ -1,0 +1,41 @@
+ticket: SCRUM-493
+module: auth
+sprint: Sprint 15
+state: documented
+steps:
+  enrich-us:
+    done: true
+    timestamp: '2026-05-19T20:15:51Z'
+  plan:
+    done: true
+    timestamp: '2026-05-19T20:26:17Z'
+    path: ai-specs/changes/auth/plans/Sprint 15/SCRUM-493_backend.md
+    schema_validated: true
+  develop:
+    done: true
+    timestamp: '2026-05-19T20:38:15Z'
+    branch: feature/SCRUM-493-backend
+    last_commit: 6d80f66
+  verify:
+    done: true
+    timestamp: '2026-05-19T20:43:22Z'
+    verdict: PASS
+    schema_validated: true
+    path: ai-specs/changes/auth/plans/Sprint 15/SCRUM-493_verify.md
+    deviations_count: 3
+  commit:
+    done: true
+    timestamp: '2026-05-19T22:14:04Z'
+    pr: 332
+    merge_commit: 18fd537
+    branch_deleted: true
+  update-docs:
+    done: true
+    timestamp: '2026-05-19T22:19:53Z'
+    record_path: ai-specs/changes/auth/records/Sprint 15/SCRUM-493_backend.md
+    record_schema_validated: true
+    ai_specs_commit: a88bef8
+    specs_updated:
+    - integration-state.md
+    - AUTH-v2.md
+    - data-model.md
