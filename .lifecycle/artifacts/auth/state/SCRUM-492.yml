@@ -1,0 +1,40 @@
+ticket: SCRUM-492
+module: auth
+sprint: Sprint 15
+state: documented
+steps:
+  enrich-us:
+    done: true
+    timestamp: '2026-05-19T15:44:47Z'
+  plan:
+    done: true
+    timestamp: '2026-05-19T15:51:33Z'
+    path: ai-specs/changes/auth/plans/Sprint 15/SCRUM-492_backend.md
+    schema_validated: true
+  develop:
+    done: true
+    timestamp: '2026-05-19T18:56:14Z'
+    branch: feature/SCRUM-492-auth-backend
+    last_commit: 622baa4ec6e0f4ff596751c62cc7018ce056998f
+  verify:
+    done: true
+    timestamp: '2026-05-19T18:59:38Z'
+    verdict: PASS
+    schema_validated: true
+    path: ai-specs/changes/auth/plans/Sprint 15/SCRUM-492_verify.md
+    deviations_count: 0
+  commit:
+    done: true
+    timestamp: '2026-05-19T19:14:01Z'
+    pr: 330
+    merge_commit: 309c38f
+    branch_deleted: true
+  update-docs:
+    done: true
+    timestamp: '2026-05-19T19:25:26Z'
+    record_path: ai-specs/changes/auth/records/Sprint 15/SCRUM-492_backend.md
+    record_schema_validated: true
+    ai_specs_commit: 7c6081b
+    specs_updated:
+    - integration-state.md
+    - AUTH-v2.md
