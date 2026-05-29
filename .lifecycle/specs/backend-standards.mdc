@@ -1,0 +1,2222 @@
+---
+description: Backend development standards, best practices, and conventions for the EM NexaCore NestJS/TypeScript backend application including modular architecture, SOLID principles, API design, and testing practices
+globs: ["nexacore-api/src/**/*.ts", "nexacore-api/prisma/**/*.{prisma,ts}", "nexacore-api/nest-cli.json", "nexacore-api/tsconfig.json", "nexacore-api/package.json"]
+alwaysApply: true
+---
+
+# EM NexaCore — Backend Standards and Best Practices
+
+> **Legacy note:** This document was originally written for a different project (LTI/LIDR — an ATS recruiting platform). It has been adapted to reflect the EM NexaCore stack and the EM Ecosystem's Core + Satellite Apps architecture (NestJS 11, Prisma, PostgreSQL). The best practices, patterns, and conventions remain valid and applicable.
+
+## Table of Contents
+
+- [Overview](#overview)
+- [Technology Stack](#technology-stack)
+  - [Core Technologies](#core-technologies)
+  - [Database & ORM](#database--orm)
+  - [Testing Framework](#testing-framework)
+  - [Development Tools](#development-tools)
+- [Architecture Overview](#architecture-overview)
+  - [Modular Architecture](#modular-architecture)
+  - [Module Structure](#module-structure)
+  - [Project Structure](#project-structure)
+- [Domain Modeling Principles](#domain-modeling-principles)
+  - [Entities and Interfaces](#entities-and-interfaces)
+  - [Value Objects and Enums](#value-objects-and-enums)
+  - [Services and Business Logic](#services-and-business-logic)
+  - [Data Access with PrismaService](#data-access-with-prismaservice)
+  - [Additional Recommendations](#additional-recommendations)
+- [SOLID and DRY Principles](#solid-and-dry-principles)
+  - [Single Responsibility Principle (SRP)](#single-responsibility-principle-srp)
+  - [Open/Closed Principle (OCP)](#openclosed-principle-ocp)
+  - [Liskov Substitution Principle (LSP)](#liskov-substitution-principle-lsp)
+  - [Interface Segregation Principle (ISP)](#interface-segregation-principle-isp)
+  - [Dependency Inversion Principle (DIP)](#dependency-inversion-principle-dip)
+  - [DRY (Don't Repeat Yourself)](#dry-dont-repeat-yourself)
+- [Coding Standards](#coding-standards)
+  - [Language and Naming Conventions](#language-and-naming-conventions)
+  - [TypeScript Usage](#typescript-usage)
+  - [Error Handling](#error-handling)
+  - [Validation Patterns](#validation-patterns)
+  - [Logging Standards](#logging-standards)
+- [API Design Standards](#api-design-standards)
+  - [REST Endpoints](#rest-endpoints)
+  - [Request/Response Patterns](#requestresponse-patterns)
+  - [Error Response Format](#error-response-format)
+  - [CORS Configuration](#cors-configuration)
+- [Database Patterns](#database-patterns)
+  - [Prisma Schema](#prisma-schema)
+  - [Migrations](#migrations)
+  - [PrismaService Pattern](#prismaservice-pattern)
+- [Testing Standards](#testing-standards)
+  - [Test File Structure](#test-file-structure)
+  - [Test Organization Pattern](#test-organization-pattern)
+  - [Test Case Naming Convention](#test-case-naming-convention)
+  - [Test Structure (AAA Pattern)](#test-structure-aaa-pattern)
+  - [Mocking Standards](#mocking-standards)
+  - [Test Coverage Requirements](#test-coverage-requirements)
+  - [Controller Testing Specifics](#controller-testing-specifics)
+  - [Service Testing Specifics](#service-testing-specifics)
+  - [Guard Testing](#guard-testing)
+  - [Common Anti-Patterns to Avoid](#common-anti-patterns-to-avoid)
+- [Performance Best Practices](#performance-best-practices)
+  - [Database Query Optimization](#database-query-optimization)
+  - [Async/Await Patterns](#asyncawait-patterns)
+  - [Error Handling Performance](#error-handling-performance)
+- [Security Best Practices](#security-best-practices)
+  - [Input Validation](#input-validation)
+  - [Environment Variables](#environment-variables)
+  - [Dependency Injection](#dependency-injection)
+  - [SUPERADMIN Role Policy](#superadmin-role-policy)
+- [Development Workflow](#development-workflow)
+  - [Git Workflow](#git-workflow)
+  - [Development Scripts](#development-scripts)
+  - [Code Quality](#code-quality)
+- [Deployment](#deployment)
+- [EM Ecosystem Architecture — Core + Satellite Apps](#em-ecosystem-architecture--core--satellite-apps)
+  - [Architecture Overview](#ecosystem-architecture-overview)
+  - [EM NexaCore (Core App)](#em-nexacore-core-app)
+  - [Satellite Apps](#satellite-apps)
+  - [Building Internal NexaCore Modules](#building-internal-nexacore-modules)
+  - [Building Satellite Apps](#building-satellite-apps)
+  - [Integration Patterns](#integration-patterns)
+  - [Shared Resources](#shared-resources)
+  - [Module Registry and App Registry](#module-registry-and-app-registry)
+
+---
+
+## Overview
+
+This document outlines the best practices, conventions, and standards used in the EM NexaCore backend application. The backend follows a modular NestJS architecture with clear separation of concerns to ensure code consistency, maintainability, and scalability.
+
+## Technology Stack
+
+### Core Technologies
+- **NestJS 11**: Progressive Node.js framework with decorators and dependency injection
+- **TypeScript 5.7**: Type-safe development with strict null checks and decorator metadata
+- **Prisma 7**: Modern ORM for type-safe database access
+- **Passport.js**: Authentication middleware (JWT + OAuth strategies)
+
+### Authentication & Validation
+- **@nestjs/jwt**: JWT token signing and verification
+- **@nestjs/passport**: Passport integration for NestJS
+- **class-validator**: Declarative DTO validation with decorators
+- **class-transformer**: DTO transformation and type coercion
+- **bcrypt**: Password hashing (12 rounds)
+
+### Database & ORM
+- **PostgreSQL**: Relational database
+- **Prisma Client**: Type-safe database client (auto-generated)
+- **Prisma Migrate**: Database migration tool
+
+### Testing Framework
+- **Jest**: Testing framework with TypeScript support (ts-jest)
+- **@nestjs/testing**: TestingModule for dependency injection in tests
+- **Coverage Thresholds**: branches 85%, functions 90%, lines 90%, statements 90%
+- **Test Location**: `tests/` directories within each module
+
+### Development Tools
+- **ESLint**: Code linting with `@typescript-eslint`
+- **Prettier**: Code formatting
+- **NestJS CLI**: Code generation and build tooling
+
+## Architecture Overview
+
+### Modular Architecture
+
+NestJS uses a modular architecture where the application is composed of cohesive feature modules. Each module encapsulates a domain boundary with its own controllers, services, DTOs, guards, and strategies.
+
+**Benefits:**
+- **Clear Boundaries**: Each module encapsulates its own domain logic, promoting separation of concerns.
+- **Dependency Injection**: NestJS's built-in DI container manages service lifecycles and dependencies automatically.
+- **Testability**: Modules can be tested in isolation with mocked dependencies via TestingModule.
+- **Scalability**: New features are added as new modules without modifying existing ones.
+
+### Module Structure
+
+Each feature module follows a consistent internal structure:
+
+**Module** (`*.module.ts`)
+- Declares imports, controllers, providers, and exports
+- Manages module-level dependency injection
+
+**Controller** (`*.controller.ts`)
+- Handles HTTP requests/responses via decorators (`@Get`, `@Post`, `@Put`, `@Delete`)
+- Delegates business logic to services
+- Applies guards for authentication and authorization
+
+**Service** (`*.service.ts`)
+- Contains business logic and data orchestration
+- Injected via constructor (`@Injectable()`)
+- Communicates with PrismaService for database access
+
+**DTOs** (`dto/*.dto.ts`)
+- Define request validation schemas using class-validator decorators
+- Enforced automatically by NestJS's `ValidationPipe`
+
+**Guards** (`guards/*.guard.ts`)
+- Protect routes with authentication (`JwtAuthGuard`) and authorization (`RolesGuard`)
+- Composable via `@UseGuards()` decorator
+
+**Strategies** (`strategies/*.strategy.ts`)
+- Implement Passport strategies for JWT and OAuth providers
+
+### Project Structure
+
+```
+nexacore-api/
+├── src/
+│   ├── main.ts                          # Bootstrap: NestFactory, ValidationPipe, CORS, Filters
+│   ├── app.module.ts                    # Root module: imports all feature modules
+│   │
+│   ├── auth/                            # Authentication feature module
+│   │   ├── auth.module.ts               # Module definition (imports, providers, exports)
+│   │   ├── auth.controller.ts           # @Controller('auth') — route handlers
+│   │   ├── auth.service.ts              # @Injectable() — business logic
+│   │   ├── dto/                         # Request validation DTOs
+│   │   │   ├── register.dto.ts
+│   │   │   ├── login.dto.ts
+│   │   │   └── refresh-token.dto.ts
+│   │   ├── guards/                      # Route protection
+│   │   │   ├── jwt-auth.guard.ts
+│   │   │   ├── roles.guard.ts
+│   │   │   ├── google-auth.guard.ts
+│   │   │   └── github-auth.guard.ts
+│   │   ├── strategies/                  # Passport strategies
+│   │   │   ├── jwt.strategy.ts
+│   │   │   ├── google.strategy.ts
+│   │   │   └── github.strategy.ts
+│   │   └── tests/                       # Unit tests
+│   │       ├── auth.service.spec.ts
+│   │       ├── auth.controller.spec.ts
+│   │       └── roles.guard.spec.ts
+│   │
+│   ├── users/                           # User management module
+│   │   ├── users.module.ts
+│   │   ├── users.service.ts
+│   │   ├── entities/
+│   │   │   └── user.entity.ts           # User interface + SafeUser + toSafeUser()
+│   │   ├── enums/
+│   │   │   ├── role.enum.ts
+│   │   │   └── provider.enum.ts
+│   │   └── tests/
+│   │       └── users.service.spec.ts
+│   │
+│   ├── projects/                        # Project management module
+│   │   ├── projects.module.ts
+│   │   ├── projects.controller.ts
+│   │   ├── projects.service.ts
+│   │   ├── dto/
+│   │   │   ├── create-project.dto.ts
+│   │   │   └── update-project.dto.ts
+│   │   ├── entities/
+│   │   │   ├── project.entity.ts
+│   │   │   └── project-member.entity.ts
+│   │   ├── guards/
+│   │   │   └── project-member.guard.ts
+│   │   └── tests/
+│   │       └── projects.service.spec.ts
+│   │
+│   ├── teams/                           # Team management module
+│   │   ├── teams.module.ts
+│   │   ├── teams.controller.ts
+│   │   ├── teams.service.ts
+│   │   ├── dto/
+│   │   ├── entities/
+│   │   └── tests/
+│   │
+│   ├── notifications/                   # Notification module
+│   │   ├── notifications.module.ts
+│   │   ├── notifications.controller.ts
+│   │   ├── notifications.service.ts
+│   │   ├── dto/
+│   │   ├── entities/
+│   │   └── tests/
+│   │
+│   ├── billing/                         # Billing module (Stripe integration)
+│   │   ├── billing.module.ts
+│   │   ├── billing.controller.ts
+│   │   ├── billing.service.ts
+│   │   ├── dto/
+│   │   ├── entities/
+│   │   └── tests/
+│   │
+│   ├── settings/                        # Settings module (user/project/system)
+│   │   ├── settings.module.ts
+│   │   ├── settings.controller.ts
+│   │   ├── settings.service.ts
+│   │   ├── dto/
+│   │   ├── entities/
+│   │   └── tests/
+│   │
+│   ├── modules/                         # Platform modules registry (Core modules)
+│   │   ├── modules.module.ts
+│   │   ├── modules.controller.ts
+│   │   ├── modules.service.ts
+│   │   ├── entities/
+│   │   └── tests/
+│   │
+│   ├── apps/                            # Satellite applications registry
+│   │   ├── apps.module.ts
+│   │   ├── apps.controller.ts
+│   │   ├── apps.service.ts
+│   │   ├── dto/
+│   │   ├── entities/
+│   │   └── tests/
+│   │
+│   ├── permissions/                     # RBAC permissions module
+│   │   ├── permissions.module.ts
+│   │   ├── permissions.controller.ts
+│   │   ├── permissions.service.ts
+│   │   ├── entities/
+│   │   └── tests/
+│   │
+│   ├── prisma/                          # Database integration (global)
+│   │   ├── prisma.module.ts             # @Global() module
+│   │   └── prisma.service.ts            # Extends PrismaClient
+│   │
+│   └── common/                          # Shared utilities
+│       ├── decorators/
+│       │   ├── roles.decorator.ts
+│       │   └── permissions.decorator.ts
+│       ├── filters/
+│       │   └── http-exception.filter.ts
+│       ├── guards/
+│       │   └── permissions.guard.ts
+│       ├── interfaces/
+│       │   ├── jwt-payload.interface.ts
+│       │   ├── oauth-profile.interface.ts
+│       │   └── paginated-result.interface.ts
+│       └── dto/
+│           └── pagination-query.dto.ts
+│
+├── prisma/
+│   ├── schema.prisma                    # Database schema (single source of truth)
+│   └── migrations/                      # Database migrations
+│
+├── test/                                # E2E tests
+│   ├── app.e2e-spec.ts
+│   └── jest-e2e.json                    # Jest E2E configuration
+│
+├── nest-cli.json                        # NestJS CLI configuration (sourceRoot: "src")
+├── tsconfig.json                        # TypeScript configuration (baseUrl: "./")
+├── tsconfig.build.json                  # Build-specific TS config (extends tsconfig.json)
+├── eslint.config.mjs                    # ESLint flat config with typescript-eslint
+├── .prettierrc                          # Prettier formatting rules
+├── prisma.config.ts                     # Prisma 7 configuration (schema path, migrations)
+├── .env.example                         # Environment variable template
+├── package.json                         # @em-ecosystem/nexacore-api — dependencies, scripts, Jest config
+└── package-lock.json                    # Dependency lock file
+```
+
+### Repository Root Structure
+
+The EM Ecosystem monorepo contains backend, dashboard, and website as independent projects within a single git repository:
+
+```
+em-ecosystem-code/                       # Git repository root
+├── .gitignore                           # Shared gitignore (node_modules, dist, .next, .env, etc.)
+├── README.md                            # Repository overview and setup instructions
+│
+├── nexacore-api/                        # Backend — NestJS 11 API
+│   ├── package.json                     # @em-ecosystem/nexacore-api
+│   ├── src/                             # NestJS source code (modules, controllers, services)
+│   ├── prisma/                          # Prisma schema and migrations
+│   └── test/                            # E2E tests
+│
+├── nexacore-dashboard/                  # Dashboard — Next.js 14 (App Router)
+│   ├── package.json                     # @em-ecosystem/nexacore-dashboard
+│   ├── src/                             # Next.js source code (app, components, lib)
+│   └── public/                          # Static assets
+│
+└── nexacore-website/                    # Public website (planned — not yet implemented)
+    ├── package.json                     # @em-ecosystem/nexacore-website
+    └── src/
+```
+
+**Key conventions:**
+- Each project (`nexacore-api/`, `nexacore-dashboard/`, `nexacore-website/`) has its own `package.json`, `node_modules/`, and `tsconfig.json`
+- Dependencies are managed independently — run `npm install` inside each project directory
+- All commands (`npm test`, `npm run build`, `npx prisma generate`) must be executed from inside the respective project directory
+- The `.gitignore` at repository root applies to all projects
+- No root-level `package.json` — this is not an npm workspace; each project is independent
+
+**Package naming convention:**
+- npm scope: `@em-ecosystem/`
+- Backend API: `@em-ecosystem/nexacore-api`
+- Dashboard frontend: `@em-ecosystem/nexacore-dashboard`
+- Public website: `@em-ecosystem/nexacore-website`
+- Future shared UI library: `@em-ecosystem/ui`
+- Satellite apps follow: `@em-ecosystem/{satellite-name}-api` / `@em-ecosystem/{satellite-name}-dashboard`
+
+## Domain Modeling Principles
+
+### Entities and Interfaces
+
+Entities represent core domain objects with a persistent identity. In NestJS with Prisma, entities are defined as TypeScript interfaces that mirror the Prisma schema, with helper types for safe API exposure.
+
+**Pattern:**
+```typescript
+// src/users/entities/user.entity.ts
+export interface User {
+  id: string;
+  email: string;
+  passwordHash: string | null;
+  role: Role;
+  provider: Provider;
+  providerId: string | null;
+  emailVerified: boolean;
+  failedAttempts: number;
+  lockedUntil: Date | null;
+  refreshToken: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// SafeUser excludes sensitive fields from API responses
+export type SafeUser = Omit<User, 'passwordHash' | 'refreshToken'>;
+
+export function toSafeUser(user: User): SafeUser {
+  const { passwordHash, refreshToken, ...safeUser } = user;
+  return safeUser;
+}
+```
+
+**Multi-entity example:**
+```typescript
+// src/projects/entities/project.entity.ts
+export interface Project {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  status: ProjectStatus;
+  ownerId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// ProjectWithMembers — includes related data for detail views
+export type ProjectWithMembers = Project & {
+  members: (ProjectMember & { user: SafeUserSummary })[];
+};
+```
+
+**Best Practice**: Entities should define their shape via interfaces. Use Omit/Pick types to create safe projections. Use intersection types (`&`) for common query result patterns that include related data. Never expose sensitive fields (passwords, tokens) in API responses. The complete entity catalog is documented in `data-model.md`.
+
+### Value Objects and Enums
+
+Value Objects represent domain concepts without identity. In NestJS, these are typically modeled as TypeScript enums or union types.
+
+```typescript
+// src/users/enums/role.enum.ts
+export enum Role {
+  USER = 'USER',
+  ADMIN = 'ADMIN',
+  SUPERADMIN = 'SUPERADMIN',
+}
+
+// src/users/enums/provider.enum.ts
+export enum Provider {
+  LOCAL = 'LOCAL',
+  GOOGLE = 'GOOGLE',
+  GITHUB = 'GITHUB',
+}
+```
+
+```typescript
+// src/projects/enums/project-status.enum.ts
+export enum ProjectStatus {
+  ACTIVE = 'ACTIVE',
+  ARCHIVED = 'ARCHIVED',
+  SUSPENDED = 'SUSPENDED',
+}
+
+// src/projects/enums/member-role.enum.ts
+export enum MemberRole {
+  OWNER = 'OWNER',
+  ADMIN = 'ADMIN',
+  MEMBER = 'MEMBER',
+  VIEWER = 'VIEWER',
+}
+```
+
+**Best Practice**: Use enums for finite sets of domain values. Enums are validated at both TypeScript compile time and Prisma schema level. The complete enum catalog (12 enums) is documented in `data-model.md`.
+
+### Services and Business Logic
+
+Services contain business logic and are the primary actors in the application layer. They are injected via NestJS's dependency injection system.
+
+**Pattern:**
+```typescript
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
+
+  async register(dto: RegisterDto): Promise<{ accessToken: string; refreshToken: string; user: SafeUser }> {
+    const existingUser = await this.usersService.findByEmail(dto.email);
+    if (existingUser) {
+      throw new ConflictException('Email already registered');
+    }
+
+    const passwordHash = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+    const user = await this.usersService.create({ email: dto.email, passwordHash });
+    const tokens = await this.generateTokens(user);
+
+    return { ...tokens, user: toSafeUser(user) };
+  }
+}
+```
+
+**Multi-entity service example with transactions:**
+```typescript
+@Injectable()
+export class ProjectsService {
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationsService: NotificationsService,
+  ) {}
+
+  async create(dto: CreateProjectDto, userId: string): Promise<Project> {
+    const slug = this.generateSlug(dto.name);
+
+    return this.prisma.$transaction(async (tx) => {
+      const project = await tx.project.create({
+        data: { name: dto.name, slug, description: dto.description, ownerId: userId },
+      });
+
+      // Automatically add creator as OWNER member
+      await tx.projectMember.create({
+        data: { projectId: project.id, userId, role: MemberRole.OWNER },
+      });
+
+      // Create default FREE subscription
+      await tx.subscription.create({
+        data: { projectId: project.id, plan: BillingPlan.FREE },
+      });
+
+      return project as Project;
+    });
+  }
+}
+```
+
+**Best Practice**: Services should depend on other services via constructor injection, never on concrete implementations directly. Business rules (duplicate checking, password hashing, token generation) live in services, not controllers. Use Prisma `$transaction()` for multi-entity atomic operations.
+
+### Data Access with PrismaService
+
+Instead of the repository pattern with interfaces, EM NexaCore uses PrismaService as a global injectable that extends PrismaClient. Data access methods live in dedicated services (e.g., UsersService) that inject PrismaService.
+
+**PrismaService Pattern:**
+```typescript
+// src/prisma/prisma.service.ts
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  async onModuleInit(): Promise<void> {
+    await this.$connect();
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.$disconnect();
+  }
+}
+
+// src/prisma/prisma.module.ts
+@Global()
+@Module({
+  providers: [PrismaService],
+  exports: [PrismaService],
+})
+export class PrismaModule {}
+```
+
+**Data Access Service Pattern:**
+```typescript
+@Injectable()
+export class UsersService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } }) as Promise<User | null>;
+  }
+
+  async create(data: { email: string; passwordHash: string }): Promise<User> {
+    try {
+      return await this.prisma.user.create({ data: { ...data, provider: Provider.LOCAL } }) as User;
+    } catch (error: unknown) {
+      if (error instanceof Error && 'code' in error && (error as { code: string }).code === 'P2002') {
+        throw new ConflictException('Email already registered');
+      }
+      throw new InternalServerErrorException('Failed to create user');
+    }
+  }
+}
+```
+
+**Multi-Entity Operations**: For operations that span multiple tables (e.g., creating a Project with its owner membership and default subscription), use Prisma's `$transaction()` to ensure atomicity. See the ProjectsService.create example above.
+
+**Best Practice**: PrismaService is `@Global()` so it's available everywhere without re-importing. Handle Prisma error codes (P2002 = unique constraint, P2025 = not found) and translate them to appropriate HTTP exceptions.
+
+### Additional Recommendations
+
+**Use of Factories**
+
+Factories are useful to encapsulate the logic of creating complex objects, ensuring that all created objects comply with domain rules from the moment of creation.
+
+**Recommendation**: Implement factory functions or static creation methods for entities that require specific initialization logic or validation.
+
+**Domain Events Integration**
+
+Domain events are an important part of domain modeling and can be used to handle side effects of domain operations in a decoupled manner.
+
+**Recommendation**: Consider implementing a domain event system using NestJS's built-in event emitter (`@nestjs/event-emitter`) that allows services to publish events that other system components can handle without tight coupling.
+
+## SOLID and DRY Principles
+
+### SOLID Principles
+
+SOLID principles are five object-oriented design principles that help create more understandable, flexible, and maintainable systems.
+
+#### Single Responsibility Principle (SRP)
+
+Each class should have a single responsibility or reason to change.
+
+**Before:**
+```typescript
+// A controller that handles validation, business logic, AND response formatting
+@Controller('auth')
+export class AuthController {
+  async register(@Body() body: any) {
+    if (!body.email.includes('@')) throw new Error('Invalid email');
+    const hash = await bcrypt.hash(body.password, 12);
+    const user = await this.prisma.user.create({ data: { email: body.email, passwordHash: hash } });
+    return user;
+  }
+}
+```
+
+**After:**
+```typescript
+// Controller only handles HTTP concerns
+@Controller('auth')
+export class AuthController {
+  constructor(private readonly authService: AuthService) {}
+
+  @Post('register')
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() registerDto: RegisterDto) {
+    return this.authService.register(registerDto);
+  }
+}
+
+// Service handles business logic
+@Injectable()
+export class AuthService {
+  async register(dto: RegisterDto) {
+    // validation is handled by ValidationPipe + DTO
+    // business logic lives here
+  }
+}
+
+// DTO handles validation
+export class RegisterDto {
+  @IsEmail({}, { message: 'Invalid email format' })
+  email: string;
+}
+```
+
+**Explanation**: The controller only handles HTTP concerns, the service handles business logic, and the DTO handles validation — each class has a single responsibility.
+
+**Best Practice**: In NestJS, SRP is enforced naturally by the module → controller → service → DTO pattern. Validation belongs in DTOs, business logic in services, HTTP handling in controllers.
+
+#### Open/Closed Principle (OCP)
+
+Software entities should be open for extension but closed for modification.
+
+**Before:**
+```typescript
+// Adding new auth methods requires modifying the service
+@Injectable()
+export class AuthService {
+  async login(provider: string, credentials: any) {
+    if (provider === 'local') { /* local login */ }
+    else if (provider === 'google') { /* google login */ }
+    else if (provider === 'github') { /* github login */ }
+    // Adding a new provider means modifying this method
+  }
+}
+```
+
+**After:**
+```typescript
+// Each strategy handles its own authentication — extend by adding new strategies
+@Injectable()
+export class JwtStrategy extends PassportStrategy(Strategy) { /* JWT validation */ }
+
+@Injectable()
+export class GoogleStrategy extends PassportStrategy(Strategy, 'google') { /* Google OAuth */ }
+
+@Injectable()
+export class GitHubStrategy extends PassportStrategy(Strategy, 'github') { /* GitHub OAuth */ }
+
+// To add a new provider, create a new strategy class — no existing code modified
+```
+
+**Explanation**: The Passport strategy pattern allows adding new authentication methods (e.g., Microsoft, Apple) by creating new strategy classes without modifying existing ones.
+
+**Best Practice**: Use NestJS's module system and Passport strategies to extend functionality without modifying existing code. Guards and interceptors also follow OCP naturally.
+
+#### Liskov Substitution Principle (LSP)
+
+Objects of a derived class should be replaceable with objects of the base class without altering the program's functionality.
+
+**Before:**
+```typescript
+// Guard that cannot completely fulfill the base contract
+class TemporaryAuthGuard extends AuthGuard('jwt') {
+  canActivate() {
+    throw new Error("Not implemented for temporary users");
+  }
+}
+```
+
+**After:**
+```typescript
+// Guard that provides an appropriate implementation respecting the contract
+@Injectable()
+export class JwtAuthGuard extends AuthGuard('jwt') {
+  // Inherits canActivate() and provides proper JWT validation
+}
+
+@Injectable()
+export class RolesGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    // Provides a proper implementation of the CanActivate contract
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (!requiredRoles) return true;
+    const user = context.switchToHttp().getRequest().user;
+    return requiredRoles.includes(user.role);
+  }
+}
+```
+
+**Explanation**: Both guards implement the `CanActivate` interface correctly, allowing them to be used interchangeably with `@UseGuards()`.
+
+**Best Practice**: Continue using composition and interface implementation. NestJS guards, interceptors, and pipes all follow LSP through well-defined interfaces (CanActivate, NestInterceptor, PipeTransform).
+
+#### Interface Segregation Principle (ISP)
+
+Many specific interfaces are better than a single general interface.
+
+**Before:**
+```typescript
+// A large interface that small clients don't fully use
+interface UserOperations {
+  create(): Promise<User>;
+  findByEmail(): Promise<User>;
+  updateRefreshToken(): Promise<void>;
+  incrementFailedAttempts(): Promise<User>;
+  lockAccount(): Promise<void>;
+  resetFailedAttempts(): Promise<void>;
+  findOrCreateByOAuth(): Promise<User>;
+  sendEmail(): Promise<void>;
+  generateReport(): Promise<void>;
+}
+```
+
+**After:**
+```typescript
+// Segregated interfaces for different concerns
+interface UserFinder {
+  findByEmail(email: string): Promise<User | null>;
+  findById(id: string): Promise<User | null>;
+}
+
+interface UserCreator {
+  create(data: { email: string; passwordHash: string }): Promise<User>;
+}
+
+interface AccountSecurity {
+  incrementFailedAttempts(userId: string): Promise<User>;
+  lockAccount(userId: string): Promise<void>;
+  resetFailedAttempts(userId: string): Promise<void>;
+}
+
+// UsersService implements only what it needs
+@Injectable()
+export class UsersService implements UserFinder, UserCreator, AccountSecurity {
+  // implementation
+}
+```
+
+**Explanation**: Interfaces are segregated into smaller operations, allowing classes to implement only the interfaces they need.
+
+**Best Practice**: Define granular interfaces for service classes. In NestJS, this is especially useful for testing — you can mock only the interface subset a test requires.
+
+#### Dependency Inversion Principle (DIP)
+
+High-level modules should not depend on low-level modules; both should depend on abstractions.
+
+**Before:**
+```typescript
+// Direct dependency on a concrete implementation
+@Injectable()
+export class AuthService {
+  private prisma = new PrismaClient();
+
+  async findUser(email: string) {
+    return this.prisma.user.findUnique({ where: { email } });
+  }
+}
+```
+
+**After:**
+```typescript
+// Depends on injected abstractions
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly usersService: UsersService,  // injected, not instantiated
+    private readonly jwtService: JwtService,       // injected, not instantiated
+  ) {}
+
+  async findUser(email: string) {
+    return this.usersService.findByEmail(email);
+  }
+}
+```
+
+**Explanation**: `AuthService` depends on injected services, not concrete implementations. NestJS's DI container manages the lifecycle and wiring.
+
+**Best Practice**: Always use constructor injection in NestJS. Never instantiate dependencies directly (`new Service()`). This enables easy mocking in tests and flexible module composition.
+
+### DRY (Don't Repeat Yourself)
+
+The DRY principle focuses on reducing duplication in code. Each piece of knowledge should have a single, unambiguous, and authoritative representation within a system.
+
+**Before:**
+```typescript
+// Repeated validation logic in multiple endpoints
+@Post('register')
+async register(@Body() body: any) {
+  if (!body.email || !body.email.includes('@')) throw new BadRequestException('Invalid email');
+  if (!body.password || body.password.length < 8) throw new BadRequestException('Password too short');
+  // register logic
+}
+
+@Post('login')
+async login(@Body() body: any) {
+  if (!body.email || !body.email.includes('@')) throw new BadRequestException('Invalid email');
+  if (!body.password) throw new BadRequestException('Password required');
+  // login logic
+}
+```
+
+**After:**
+```typescript
+// Validation centralized in DTOs via class-validator decorators
+export class RegisterDto {
+  @IsEmail({}, { message: 'Invalid email format' })
+  email: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  password: string;
+}
+
+// Controller uses DTO — validation happens automatically via global ValidationPipe
+@Post('register')
+async register(@Body() registerDto: RegisterDto) {
+  return this.authService.register(registerDto);
+}
+```
+
+**Explanation**: Validation is centralized in DTO classes with decorators. The global `ValidationPipe` applies validation automatically, eliminating duplicated validation logic across endpoints.
+
+**Best Practice**: Use NestJS's declarative patterns (DTOs, guards, decorators) to centralize cross-cutting concerns. Shared logic should live in common modules (e.g., `common/decorators/`, `common/filters/`).
+
+### Code Reuse & Duplication
+
+> Added as part of SCRUM-357 (audit-2026-05-06 DU-04 recurrence prevention). Reference: CISQ ASCMM-MNT-19, ISO 25010 Reusability, `/audit` Phase 10c.
+
+#### Rule of Three (mandatory)
+
+When you find yourself copying a block of **≥10 lines** from another file for the **third time**, STOP and extract a helper. The first copy is fine. The second copy is a heuristic warning. The third copy is a refactor requirement.
+
+#### Pre-extraction checklist (before duplicating ≥10 lines)
+
+1. Search the existing codebase: does a helper already do this?
+   - `src/common/utils/` for cross-cutting helpers
+   - Module-internal `services/` for domain logic
+2. If a helper exists, use it and update its signature if needed.
+3. If no helper exists and this is the SECOND occurrence, leave a `// TODO(refactor): potential extraction with <other-file>` comment.
+4. If this is the THIRD occurrence, extract before completing the ticket.
+
+#### Post-refactor rule (when splitting a service into smaller ones)
+
+After splitting a class/service into multiple files (e.g., facade pattern, SRP refactor), run:
+
+```bash
+npx jscpd <module>/ --min-lines 5 --min-tokens 50
+```
+
+to catch duplication introduced by the split. Resolve before commit.
+
+#### Automated enforcement
+
+A `jscpd` check runs in the repo-root pre-commit hook on staged `.ts` files. New cross-file clones above the threshold (≥10 lines / ≥50 tokens for production code) fail the commit with an actionable message. Override is possible with `--no-verify` but requires a justification in the commit body.
+
+## Coding Standards
+
+### Language and Naming Conventions
+
+**All code, comments, and documentation must be written in English.** This is a mandatory requirement for all technical artifacts in the project.
+
+- **Variable Naming**: Use camelCase for variables and functions (e.g., `userId`, `findUserById`)
+- **Class Naming**: Use PascalCase for classes, interfaces, and DTOs (e.g., `User`, `AuthService`, `RegisterDto`)
+- **Constants Naming**: Use UPPER_SNAKE_CASE for constants (e.g., `BCRYPT_ROUNDS`, `MAX_FAILED_ATTEMPTS`)
+- **Enum Naming**: Use PascalCase for enum names and UPPER_CASE for values (e.g., `Role.ADMIN`)
+- **File Naming**: Use kebab-case for NestJS files (e.g., `auth.service.ts`, `jwt-auth.guard.ts`, `register.dto.ts`)
+
+**Examples:**
+
+```typescript
+// Good: All in English, NestJS naming conventions
+@Injectable()
+export class UsersService {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async findByEmail(email: string): Promise<User | null> {
+    return this.prisma.user.findUnique({ where: { email } }) as Promise<User | null>;
+  }
+}
+
+// Avoid: Non-English comments or names
+@Injectable()
+export class ServicioUsuarios {
+  async buscarPorEmail(correo: string): Promise<Usuario | null> {
+    // Buscar usuario por email en la base de datos
+  }
+}
+```
+
+**Error Messages and Logs:**
+
+All user-facing error messages MUST use the centralized `ErrorMessages` constants from `src/common/constants/error-messages.ts`. Never use inline string literals for error messages thrown to clients.
+
+```typescript
+import { ErrorMessages } from '../common/constants/error-messages';
+
+// Good: Use ErrorMessages constants (English, generic, no information disclosure)
+throw new UnauthorizedException(ErrorMessages.auth.INVALID_CREDENTIALS);
+throw new BadRequestException(ErrorMessages.mfa.OPERATION_NOT_AVAILABLE);
+
+// Avoid: Inline strings that leak internal state
+throw new ConflictException('Email already registered');     // reveals email existence
+throw new ForbiddenException('Account is deactivated');      // reveals account state
+throw new ForbiddenException('Insufficient permissions. Required: users:write'); // reveals permission names
+```
+
+**Error message rules (OWASP ASVS, CWE-200/203/209):**
+- Public endpoints: maximum genericness — never reveal user existence, account state, or feature enrollment
+- Authenticated endpoints: may reference the resource type but not internal state
+- Never expose: email existence, MFA enrollment status, permission keys, lockout escalation levels, SUPERADMIN role name, token reuse detection, CSRF validation stages
+- Use `Retry-After` HTTP header (not response body) for rate limit/lockout timing
+- Audit logs should still capture specific reasons internally (fire-and-forget)
+
+### TypeScript Usage
+
+- **Strict Mode**: Always enable strict mode in `tsconfig.json`
+- **Type Definitions**: Use explicit types for function parameters and return values
+- **Interfaces**: Define interfaces for complex data structures
+- **Avoid `any`**: Use `unknown` or specific types instead of `any` when possible
+- **Decorator Metadata**: Enable `emitDecoratorMetadata` and `experimentalDecorators` for NestJS
+
+```typescript
+// Good: Explicit types with NestJS patterns
+async findById(id: string): Promise<User | null> {
+  return this.prisma.user.findUnique({ where: { id } }) as Promise<User | null>;
+}
+
+// Avoid: Using any
+async processData(data: any): Promise<any> {
+  // implementation
+}
+```
+
+### Error Handling
+
+- **Use NestJS HttpException subclasses**: Use built-in exceptions for standard HTTP errors
+- **Global Exception Filter**: Use a global filter for consistent error response formatting
+- **Descriptive Messages**: Provide descriptive error messages for debugging
+
+**Available HttpException subclasses:**
+```typescript
+throw new BadRequestException('Validation failed');          // 400
+throw new UnauthorizedException('Invalid credentials');      // 401
+throw new ForbiddenException('Access denied');               // 403
+throw new NotFoundException('User not found');               // 404
+throw new ConflictException('Email already registered');     // 409
+throw new InternalServerErrorException('Failed to create user'); // 500
+```
+
+**In services:**
+```typescript
+async login(dto: LoginDto) {
+  const user = await this.usersService.findByEmail(dto.email);
+  if (!user) {
+    throw new UnauthorizedException('Invalid credentials');
+  }
+
+  if (user.lockedUntil && user.lockedUntil > new Date()) {
+    throw new ForbiddenException('Account locked. Try again later.');
+  }
+
+  // Business logic continues...
+}
+```
+
+**Best Practice**: All user-facing errors must use `ErrorMessages` constants. See `src/common/constants/error-messages.ts` for the complete registry. Never use inline strings that could leak internal state.
+
+### Validation Patterns
+
+- **Use DTOs with class-validator**: Define validation rules declaratively on DTO properties
+- **Global ValidationPipe**: Apply validation globally in `main.ts`
+- **Custom Messages**: Provide user-friendly validation error messages
+
+**DTO Validation:**
+```typescript
+import { IsEmail, IsString, MinLength, Matches } from 'class-validator';
+
+export class RegisterDto {
+  @IsEmail({}, { message: 'Invalid email format' })
+  email: string;
+
+  @IsString()
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  @Matches(/(?=.*[a-z])/, { message: 'Password must contain at least one lowercase letter' })
+  @Matches(/(?=.*[A-Z])/, { message: 'Password must contain at least one uppercase letter' })
+  @Matches(/(?=.*\d)/, { message: 'Password must contain at least one number' })
+  @Matches(/(?=.*[@$!%*?&])/, { message: 'Password must contain at least one special character' })
+  password: string;
+}
+```
+
+**Global ValidationPipe Configuration:**
+```typescript
+// main.ts
+app.useGlobalPipes(
+  new ValidationPipe({
+    whitelist: true,              // Strip unknown properties
+    forbidNonWhitelisted: true,   // Reject unknown properties
+    transform: true,              // Auto-transform types
+  }),
+);
+```
+
+### Logging Standards
+
+- **Use NestJS Logger**: Use the built-in `Logger` class from `@nestjs/common`
+- **Log Levels**: Use appropriate log levels (log, error, warn, debug, verbose)
+- **Structured Logging**: Include relevant context in log messages
+
+```typescript
+import { Logger } from '@nestjs/common';
+
+@Injectable()
+export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
+  async register(dto: RegisterDto) {
+    this.logger.log(`User registration attempt: ${dto.email}`);
+    // ... business logic
+    this.logger.log(`User registered successfully: ${user.id}`);
+  }
+}
+```
+
+## API Design Standards
+
+### REST Endpoints
+
+- **RESTful Naming**: Use RESTful conventions for endpoint naming
+- **HTTP Methods**: Use appropriate HTTP methods (GET, POST, PUT, DELETE, PATCH)
+- **Resource-Based URLs**: URLs should represent resources, not actions
+- **NestJS Decorators**: Use `@Controller()`, `@Get()`, `@Post()`, `@Put()`, `@Delete()` decorators
+
+```typescript
+@Controller('auth')
+export class AuthController {
+  @Post('register')      // POST /auth/register
+  @HttpCode(HttpStatus.CREATED)
+  async register(@Body() dto: RegisterDto) { }
+
+  @Post('login')          // POST /auth/login
+  @HttpCode(HttpStatus.OK)
+  async login(@Body() dto: LoginDto) { }
+
+  @Get('me')              // GET /auth/me
+  @UseGuards(JwtAuthGuard)
+  getMe(@Request() req: { user: SafeUser }) { }
+
+  @Get('admin')           // GET /auth/admin
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  getAdminDashboard() { }
+}
+
+// Resource controller with project-scoped operations
+@Controller('projects')
+export class ProjectsController {
+  constructor(private readonly projectsService: ProjectsService) {}
+
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  @UseGuards(JwtAuthGuard)
+  async create(@Body() dto: CreateProjectDto, @Request() req: { user: SafeUser }) {
+    return this.projectsService.create(dto, req.user.id);
+  }
+
+  @Get()
+  @UseGuards(JwtAuthGuard)
+  async findAll(@Request() req: { user: SafeUser }, @Query() query: PaginationQueryDto) {
+    return this.projectsService.findByUser(req.user.id, query);
+  }
+
+  @Get(':id')
+  @UseGuards(JwtAuthGuard, ProjectMemberGuard)
+  async findOne(@Param('id') id: string) {
+    return this.projectsService.findById(id);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, ProjectMemberGuard)
+  @Roles(MemberRole.OWNER)
+  async archive(@Param('id') id: string) {
+    return this.projectsService.archive(id);
+  }
+}
+```
+
+### Request/Response Patterns
+
+- **JSON Format**: Use JSON for request and response bodies
+- **Consistent Structure**: Maintain consistent response structure across all endpoints
+- **Status Codes**: Use appropriate HTTP status codes with `@HttpCode()` decorator
+
+```typescript
+// Success response (auth endpoints)
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIs...",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIs...",
+  "user": {
+    "id": "uuid",
+    "email": "user@example.com",
+    "role": "USER",
+    "provider": "LOCAL"
+  }
+}
+
+// Simple success
+{
+  "message": "Logged out successfully"
+}
+```
+
+### Error Response Format
+
+- **Consistent Format**: All errors follow the same response structure via `HttpExceptionFilter`
+- **Error Codes**: Meaningful error codes mapped from HTTP status codes
+- **HTTP Status Codes**: Map errors to appropriate HTTP status codes
+
+```typescript
+// Error response format (from HttpExceptionFilter)
+{
+  "success": false,
+  "error": {
+    "message": "Email already registered",
+    "code": "CONFLICT",
+    "statusCode": 409
+  }
+}
+
+// Validation error (400)
+{
+  "success": false,
+  "error": {
+    "message": "Validation failed",
+    "code": "VALIDATION_ERROR",
+    "statusCode": 400,
+    "details": [
+      "Password must be at least 8 characters",
+      "Password must contain at least one uppercase letter"
+    ]
+  }
+}
+```
+
+**Error Code Mapping:**
+| HTTP Status | Code | Usage |
+|---|---|---|
+| 400 | VALIDATION_ERROR | Input validation failures |
+| 401 | UNAUTHORIZED | Missing or invalid auth token |
+| 403 | FORBIDDEN | Insufficient permissions or account locked |
+| 404 | NOT_FOUND | Resource not found |
+| 409 | CONFLICT | Duplicate resource (e.g., email) |
+| 500 | INTERNAL_SERVER_ERROR | Unexpected server errors |
+
+### CORS Configuration
+
+- **Enable CORS**: Configure CORS via NestJS's `enableCors()` method in `main.ts`
+- **Secure Configuration**: Only allow specific origins in production
+- **Environment-Based**: Use environment variable for frontend URL
+
+```typescript
+// main.ts
+app.enableCors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:3001',
+});
+```
+
+## Database Patterns
+
+### Prisma Schema
+
+- **Single Source of Truth**: `prisma/schema.prisma` is the single source of truth for database structure
+- **Consistent Naming**: Use PascalCase for models, camelCase for fields
+- **Defaults**: Define sensible defaults for fields (e.g., `@default(uuid())`, `@default(now())`)
+- **Enums**: Define enums in the schema and import them in TypeScript
+
+```prisma
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+enum Provider {
+  LOCAL
+  GOOGLE
+  GITHUB
+}
+
+model User {
+  id             String    @id @default(uuid())
+  email          String    @unique
+  passwordHash   String?
+  firstName      String?
+  lastName       String?
+  avatar         String?
+  role           Role      @default(USER)
+  provider       Provider  @default(LOCAL)
+  providerId     String?
+  emailVerified  Boolean   @default(false)
+  failedAttempts Int       @default(0)
+  lockedUntil    DateTime?
+  isActive       Boolean   @default(true)
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+
+  refreshTokens      RefreshToken[]
+  ownedProjects      Project[]        @relation("ProjectOwner")
+  projectMemberships ProjectMember[]
+  // ... additional relations documented in data-model.md
+
+  @@map("users")
+}
+```
+
+> **Note:** The complete Prisma schema with all 15 models and 12 enums is documented in `data-model.md`. The schema above shows the User model as a representative example.
+
+### Migrations
+
+- **Descriptive Names**: Use descriptive migration names (`npx prisma migrate dev --name add_user_lockout`)
+- **Review Before Applying**: Always review generated SQL before applying
+- **Never Edit**: Never manually edit migration files after they've been applied
+- **Seed Data**: Use `prisma/seed.ts` for development seed data
+
+### PrismaService Pattern
+
+PrismaService extends PrismaClient and integrates with NestJS lifecycle hooks for proper connection management.
+
+```typescript
+@Injectable()
+export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
+  async onModuleInit(): Promise<void> {
+    await this.$connect();
+  }
+
+  async onModuleDestroy(): Promise<void> {
+    await this.$disconnect();
+  }
+}
+```
+
+**Module Registration:**
+```typescript
+@Global()
+@Module({
+  providers: [PrismaService],
+  exports: [PrismaService],
+})
+export class PrismaModule {}
+```
+
+**Best Practice**: The `@Global()` decorator makes PrismaService available to all modules without explicit imports. Use `OnModuleInit` and `OnModuleDestroy` lifecycle hooks for connection management.
+
+## Testing Standards
+
+The project has strict requirements for code quality and maintainability. These are the unit testing standards and best practices that must be applied.
+
+### Test File Structure
+- Use descriptive test file names: `[componentName].spec.ts`
+- Place test files in `tests/` directories within each module
+- Use Jest as the testing framework with TypeScript support (ts-jest)
+- Maintain coverage thresholds: branches 85%, functions 90%, lines 90%, statements 90%
+
+### Test Organization Pattern
+Template:
+```typescript
+describe('[ComponentName] - [methodName]', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('should_[expected_behavior]_when_[condition]', () => {
+    it('should [specific test case]', async () => {
+      // Arrange
+      // Act
+      // Assert
+    });
+  });
+});
+```
+
+Real example using NestJS TestingModule:
+```typescript
+describe('AuthService', () => {
+  let authService: AuthService;
+  let usersService: jest.Mocked<UsersService>;
+  let jwtService: jest.Mocked<JwtService>;
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+
+    const module: TestingModule = await Test.createTestingModule({
+      providers: [
+        AuthService,
+        {
+          provide: UsersService,
+          useValue: {
+            findByEmail: jest.fn(),
+            findById: jest.fn(),
+            create: jest.fn(),
+            updateRefreshToken: jest.fn(),
+          },
+        },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+            verify: jest.fn(),
+          },
+        },
+      ],
+    }).compile();
+
+    authService = module.get<AuthService>(AuthService);
+    usersService = module.get(UsersService);
+    jwtService = module.get(JwtService);
+  });
+
+  describe('register', () => {
+    it('should register a new user successfully', async () => {
+      // Arrange
+      const dto: RegisterDto = { email: 'test@example.com', password: 'Test1234!' };
+      usersService.findByEmail.mockResolvedValue(null);
+      usersService.create.mockResolvedValue(mockUser);
+      jwtService.sign.mockReturnValue('mock-token');
+
+      // Act
+      const result = await authService.register(dto);
+
+      // Assert
+      expect(result.user.email).toBe(dto.email);
+      expect(usersService.findByEmail).toHaveBeenCalledWith(dto.email);
+    });
+
+    it('should throw ConflictException when email exists', async () => {
+      usersService.findByEmail.mockResolvedValue(mockUser);
+
+      await expect(authService.register(mockDto)).rejects.toThrow(ConflictException);
+    });
+  });
+});
+```
+
+**Service testing with Prisma transactions:**
+```typescript
+describe('ProjectsService - create', () => {
+  it('should create project with owner membership and subscription', async () => {
+    // Arrange
+    const dto: CreateProjectDto = { name: 'My Project' };
+    const userId = 'user-uuid';
+    prisma.$transaction.mockImplementation((cb) => cb(prisma));
+    prisma.project.create.mockResolvedValue(mockProject);
+    prisma.projectMember.create.mockResolvedValue(mockMember);
+    prisma.subscription.create.mockResolvedValue(mockSubscription);
+
+    // Act
+    const result = await service.create(dto, userId);
+
+    // Assert
+    expect(result.name).toBe(dto.name);
+    expect(prisma.projectMember.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ role: MemberRole.OWNER }) }),
+    );
+    expect(prisma.subscription.create).toHaveBeenCalledWith(
+      expect.objectContaining({ data: expect.objectContaining({ plan: BillingPlan.FREE }) }),
+    );
+  });
+});
+```
+
+### Test Case Naming Convention
+- Use descriptive, behavior-driven naming: `should_[expected_behavior]_when_[condition]`
+- Group related test cases under descriptive `describe` blocks
+- Use snake_case for describe blocks and camelCase for individual tests
+
+### Test Structure (AAA Pattern)
+Always follow the Arrange-Act-Assert pattern:
+```typescript
+it('should return user profile when valid JWT provided', async () => {
+  // Arrange - Set up test data and mocks
+  const userId = 'test-uuid';
+  const mockUser = { id: userId, email: 'test@example.com', role: Role.USER };
+  usersService.findById.mockResolvedValue(mockUser);
+
+  // Act - Execute the function under test
+  const result = await authService.validateUser(userId);
+
+  // Assert - Verify the expected behavior
+  expect(result).toEqual(mockUser);
+  expect(usersService.findById).toHaveBeenCalledWith(userId);
+});
+```
+
+Assertion pattern:
+- Use specific matchers: `toHaveBeenCalledWith()`, `toHaveBeenCalledTimes()`
+- Verify both successful operations and error conditions
+- Check that mocks were called with correct parameters
+- Assert on return values and side effects
+
+### Mocking Standards
+
+- Mock all external dependencies using NestJS `TestingModule`
+- Mock service layers in controller tests
+- Mock PrismaService in service tests
+- Use `jest.Mocked<T>` for type-safe mock declarations
+- Clear all mocks in `beforeEach()` to ensure test isolation
+
+```typescript
+// Type-safe mock declaration
+let usersService: jest.Mocked<UsersService>;
+
+// Mock provider in TestingModule
+{
+  provide: UsersService,
+  useValue: {
+    findByEmail: jest.fn(),
+    create: jest.fn(),
+  },
+}
+
+// Get typed mock from module
+usersService = module.get(UsersService);
+```
+
+### Test Coverage Requirements
+
+- **Comprehensive test coverage**: Include these test categories for each function:
+1. **Happy Path Tests**: Valid inputs producing expected outputs
+2. **Error Handling Tests**: Invalid inputs, missing data, database errors
+3. **Edge Cases**: Boundary values, null/undefined inputs, empty data
+4. **Validation Tests**: Input validation, business rule enforcement
+5. **Integration Points**: External service calls, database operations
+
+- **Thresholds**: branches 85%, functions 90%, lines 90%, statements 90%
+- **Coverage Reports**: Generate coverage reports with `npm run test:cov`
+- **Excluded**: `main.ts`, `*.module.ts`, `prisma/` directory
+
+### ESLint test-file relaxations (canonical pattern, established by SCRUM-359)
+
+E2E and unit-test files in `nexacore-api` operate on Jest mocks, supertest responses, and dynamic fixtures where the strict `recommendedTypeChecked` ruleset (in particular the `@typescript-eslint/no-unsafe-*` family) generates noise without value. Production code in `src/` keeps the full ruleset; tests get a scoped relaxation in `eslint.config.mjs`:
+
+```js
+{
+  // SCRUM-359: test directories are not production code. E2E tests intentionally
+  // operate on loosely-typed Jest mocks and supertest responses, so the unsafe-*
+  // family is noise here. Production code under src/ remains at full strictness.
+  files: [
+    '**/tests/**/*.ts',
+    '**/*.spec.ts',
+    'test/**/*.ts',
+    'test/**/*.e2e-spec.ts',
+  ],
+  rules: {
+    '@typescript-eslint/unbound-method': 'off',
+    '@typescript-eslint/no-unsafe-argument': 'off',
+    '@typescript-eslint/no-unsafe-assignment': 'off',
+    '@typescript-eslint/no-unsafe-call': 'off',
+    '@typescript-eslint/no-unsafe-member-access': 'off',
+    '@typescript-eslint/no-unsafe-return': 'off',
+    '@typescript-eslint/require-await': 'off',
+    '@typescript-eslint/no-misused-promises': 'off',
+    '@typescript-eslint/no-require-imports': 'off',  // Jest dynamic re-import pattern
+    'security/detect-non-literal-require': 'off',
+    'security/detect-non-literal-regexp': 'off',
+    'security/detect-possible-timing-attacks': 'off',
+  },
+},
+```
+
+**Rules**:
+
+- The override **must** include the `test/` glob (covers `test/auth-e2e/`) AND the `**/tests/**` glob (covers `src/**/tests/`). Missing either causes ~340 false-positive errors in `test/auth-e2e/` (root cause of the SCRUM-359 incident).
+- New unit tests in production directories use `*.spec.ts` extension; new E2E tests use `*.e2e-spec.ts`. Both naming patterns are covered by the override.
+- Do NOT relax these rules globally in `src/`. The Express boundary friction that often motivates relaxation has a canonical fix instead — see "Express type augmentation" below.
+
+### Express type augmentation (canonical pattern, established by SCRUM-359)
+
+NestJS guards, filters, and the throttler access `request.user`, `request.cookies`, `request.headers`, and a custom `request.oauthAction` field at the Express boundary. Without proper typing, every access generates `@typescript-eslint/no-unsafe-*` errors, tempting developers to either cast with `as any` (loses type-safety) or relax the rule globally (defeats the purpose). The canonical fix is **module augmentation** in `nexacore-api/src/types/express.d.ts`:
+
+```ts
+import type { OAuthAction } from '../auth/stores/oauth-state.store';
+
+declare global {
+  namespace Express {
+    interface User {
+      id: string;
+      // ... other minimal properties needed for pre-auth code paths
+    }
+    interface Request {
+      oauthAction?: OAuthAction;
+      // ... other custom properties set by guards before auth completes
+    }
+  }
+}
+
+export {};
+```
+
+**Usage pattern** in guards/filters/throttlers:
+
+```ts
+import type { Request } from 'express';
+
+async canActivate(context: ExecutionContext): Promise<boolean> {
+  const request = context.switchToHttp().getRequest<Request>(); // ← typed
+  const userId = request.user?.id; // ← properly typed; no unsafe-* error
+  // ...
+}
+```
+
+For authenticated controllers, prefer the existing `AuthenticatedRequest` interface (`common/interfaces/authenticated-request.interface.ts`) which narrows `user` to the full `SafeUser` shape. The minimal `Express.User { id }` augmentation is intentionally permissive to allow pre-auth code (e.g., `OAuthLinkGuard`) to set `request.user = { id }` before the full user object is loaded.
+
+This pattern is documented in `@types/passport`, used by Auth0 / Microsoft TS-Node-Starter / NestJS official samples, and was applied to 6 boundary files during SCRUM-359 (commit `4c47b53`) to eliminate 23 unsafe-* errors without rule relaxation.
+
+### Controller Testing Specifics
+- Mock the service layer completely via TestingModule
+- Test HTTP decorators and status codes
+- Verify guard composition (`@UseGuards`)
+- Test request parameter extraction (`@Body`, `@Param`, `@Request`)
+
+```typescript
+describe('AuthController', () => {
+  let controller: AuthController;
+  let authService: jest.Mocked<AuthService>;
+
+  beforeEach(async () => {
+    const module: TestingModule = await Test.createTestingModule({
+      controllers: [AuthController],
+      providers: [{
+        provide: AuthService,
+        useValue: {
+          register: jest.fn(),
+          login: jest.fn(),
+          logout: jest.fn(),
+        },
+      }],
+    }).compile();
+
+    controller = module.get<AuthController>(AuthController);
+    authService = module.get(AuthService);
+  });
+});
+```
+
+### Service Testing Specifics
+- Mock PrismaService and all injected services
+- Test business logic in isolation
+- Verify data transformation and validation
+- Test error handling and edge cases
+- Use `jest.Mocked<T>` for type-safe mocks
+
+### Guard Testing
+
+```typescript
+describe('RolesGuard', () => {
+  let guard: RolesGuard;
+  let reflector: jest.Mocked<Reflector>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    reflector = { getAllAndOverride: jest.fn() } as unknown as jest.Mocked<Reflector>;
+    guard = new RolesGuard(reflector);
+  });
+
+  const createMockContext = (user?: { role: Role }) => ({
+    getHandler: jest.fn(),
+    getClass: jest.fn(),
+    switchToHttp: jest.fn().mockReturnValue({
+      getRequest: jest.fn().mockReturnValue({ user }),
+    }),
+  });
+
+  it('should return true when no roles are required', () => {
+    reflector.getAllAndOverride.mockReturnValue(undefined);
+    expect(guard.canActivate(createMockContext({ role: Role.USER }) as never)).toBe(true);
+  });
+
+  it('should throw ForbiddenException when user lacks required role', () => {
+    reflector.getAllAndOverride.mockReturnValue([Role.ADMIN]);
+    expect(() => guard.canActivate(createMockContext({ role: Role.USER }) as never)).toThrow(ForbiddenException);
+  });
+});
+```
+
+### Database Testing
+- Mock PrismaService and all database operations
+- Test both successful and failed database operations
+- Verify correct Prisma queries and parameters
+- Test Prisma error code handling (P2002, etc.)
+
+### Async Testing
+- Always use `async/await` for asynchronous operations
+- Use `rejects.toThrow()` for testing async error scenarios
+- Properly handle promise rejections in tests
+- Test timeout scenarios where applicable
+
+### Test Data Management
+- Use factory functions for creating test data
+- Keep test data consistent and realistic
+- Avoid hardcoded values in multiple places
+- Use meaningful test data that reflects real-world scenarios
+
+### Integration with Development Workflow
+- Run tests before every commit
+- Ensure all tests pass before merging
+- Use test-driven development when appropriate
+- Update tests when modifying existing functionality
+
+### Common Anti-Patterns to Avoid
+- Don't test implementation details, test behavior
+- Don't create overly complex test setups
+- Don't ignore failing tests or skip error scenarios
+- Don't use real database connections in unit tests
+- Don't create tests that depend on external services
+- Don't write tests that are too tightly coupled to implementation
+
+## Performance Best Practices
+
+### Database Query Optimization
+
+- **Select Specific Fields**: Only select fields that are needed
+- **Use Indexes**: Ensure proper database indexes for frequently queried fields
+- **Avoid N+1 Queries**: Use Prisma's `include` to fetch related data efficiently
+
+```typescript
+// Good: Fetch project with members and their user info
+const project = await this.prisma.project.findUnique({
+  where: { id },
+  include: {
+    members: {
+      include: {
+        user: { select: { id: true, email: true, firstName: true, lastName: true, avatar: true } },
+      },
+    },
+  },
+});
+
+// Good: Select only needed fields
+const user = await this.prisma.user.findUnique({
+  where: { id },
+  select: { id: true, email: true, role: true },
+});
+
+// Avoid: Fetching all fields when only a few are needed
+const user = await this.prisma.user.findUnique({ where: { id } });
+```
+
+### Async/Await Patterns
+
+- **Always Use Async/Await**: Use async/await instead of promise chains
+- **Error Handling**: Properly handle errors in async operations
+- **Parallel Operations**: Use `Promise.all()` for parallel operations when appropriate
+
+```typescript
+// Good: Parallel operations for project dashboard
+const [project, members, subscription, enabledModules] = await Promise.all([
+  this.projectsService.findById(projectId),
+  this.projectsService.getMembers(projectId),
+  this.billingService.getSubscription(projectId),
+  this.modulesService.getEnabledModules(projectId),
+]);
+```
+
+### Error Handling Performance
+
+- **Early Returns**: Return early to avoid unnecessary processing
+- **Error Propagation**: Let NestJS exception filters handle error responses
+- **Avoid Over-Wrapping**: Don't wrap errors unnecessarily
+
+## Security Best Practices
+
+### Re-authentication on Sensitive Actions (MANDATORY) [SCRUM-327]
+
+**Rule**: Any new `POST` / `DELETE` / `PATCH` endpoint that operates on auth-related resources (passkeys, trusted devices, OAuth links, MFA settings, session lifecycle, password policies) MUST require password re-authentication, OR document explicitly why it does not.
+
+**Why**: A session hijacker who steals a valid access token must NOT be able to silently pivot security state (e.g. add their device as trusted, register a backdoor passkey, disable MFA) without proving they hold the legitimate user's credential. This is OWASP ASVS V2.8 ("Re-authentication for high-risk transactions"), NIST SP 800-63B §5.2, and the GitHub/Google/Stripe sudo-mode convention.
+
+**Pattern (the canonical convention used across the codebase)**:
+
+```typescript
+// 1. DTO requires `password` field (not `currentPassword` — single name everywhere)
+export class SensitiveActionDto {
+  @ApiProperty({ description: 'Current account password for re-authentication' })
+  @IsString()
+  @IsNotEmpty()
+  password!: string;
+}
+
+// 2. Service inline-verifies (no shared helper — codebase convention is inline bcrypt.compare)
+async sensitiveAction(userId: string, password: string, ...): Promise<void> {
+  const user = await this.usersService.findById(userId);
+  if (!user) throw new UnauthorizedException(ErrorMessages.mfa.AUTHENTICATION_REQUIRED);
+  if (!user.passwordHash) throw new BadRequestException(ErrorMessages.mfa.PASSWORD_REQUIRED_NO_PASSWORD);
+  const ok = await bcrypt.compare(password, user.passwordHash);
+  if (!ok) throw new UnauthorizedException(ErrorMessages.user.INVALID_PASSWORD);
+  // ...proceed with the sensitive operation...
+}
+```
+
+**Endpoints currently enforcing this pattern** (audit baseline 2026-05-04 post-SCRUM-327):
+
+| Endpoint | Method | Source | Re-auth since |
+|----------|--------|--------|---------------|
+| `/auth/mfa` | DELETE (disable) | `mfa.service.disableMfa` | pre-SCRUM-327 (origin convention) |
+| `/auth/mfa/recovery-codes` | POST (regenerate) | `mfa.service.regenerateRecoveryCodes` | pre-SCRUM-327 |
+| `/auth/trusted-devices` | POST (trust) | `trusted-device.service.trustDeviceWithReauth` | SCRUM-327 |
+| `/auth/trusted-devices` | DELETE (revoke all) | `trusted-device.service.revokeAllDevicesWithReauth` | SCRUM-327 |
+| `/auth/trusted-devices/:id` | DELETE (revoke one) | `trusted-device.service.revokeDeviceWithReauth` | SCRUM-327 |
+| `/auth/passkeys/register/options` | POST | `passkey.service.generateRegOptions` | SCRUM-327 |
+| `/auth/passkeys/:id` | DELETE | `passkey.service.deletePasskey` | SCRUM-327 (was partial pre-WARN) |
+| `/account/oauth/{provider}` | DELETE (unlink last) | `account.controller` | pre-SCRUM-327 |
+
+**OAuth-only users (no `passwordHash`)**: throw `BadRequestException(ErrorMessages.mfa.PASSWORD_REQUIRED_NO_PASSWORD)`. The user must set a password (via `/account/password/set`) before performing the action. **Do NOT** silently bypass — the gap is intentional and a follow-up ticket should enforce a "MFA-or-password" invariant for accounts holding passkeys/trusted-devices (out of scope of SCRUM-327).
+
+**Exclusions (don't require re-auth — document in the controller/method comment)**:
+- `GET` requests (read-only).
+- Passkey rename (label-only, GitHub convention).
+- Internal service calls between trusted services (e.g. `mfa.service.disableMfa` calls `trustedDeviceService.revokeAllDevices` after the user already proved password — no second prompt).
+- Login-time `trustDevice` fire-and-forget in `mfa.controller.verifyLogin` (the user just authenticated).
+
+**Frontend pairing (mandatory)**: any sensitive action MUST surface a `ConfirmModal` with `<Input type="password">` and inline `error` for invalid-password (not toast — the user is focused on the field). Hooks return a `"invalid-password"` discriminator on 401 so the modal stays open with field-level feedback. See `useTrustedDevices.ts` and `usePasskey.ts` for reference.
+
+**Code review checklist (PR template)**:
+- [ ] If the endpoint mutates auth state, does it require `password` in the DTO?
+- [ ] Does the service throw `BadRequestException(PASSWORD_REQUIRED_NO_PASSWORD)` for OAuth-only?
+- [ ] Does the service throw `UnauthorizedException(INVALID_PASSWORD)` on mismatch?
+- [ ] Does the controller surface `400` and `401` in `@ApiResponse` decorators?
+- [ ] Is the frontend modal wired with inline-error pattern?
+
+### Input Validation
+
+- **Validate All Inputs**: Use class-validator DTOs for all user inputs
+- **Sanitize Data**: Use `whitelist: true` and `forbidNonWhitelisted: true` in ValidationPipe
+- **Type Checking**: Use TypeScript and class-transformer for type coercion
+
+### Environment Variables
+
+- **Never Commit Secrets**: Never commit `.env` files or secrets to version control
+- **Use Environment Variables**: Use environment variables for all configuration
+- **Validate Environment**: Validate required environment variables at startup
+
+```typescript
+// Validate required environment variables
+const requiredEnvVars = ['DATABASE_URL', 'JWT_SECRET'];
+requiredEnvVars.forEach(varName => {
+  if (!process.env[varName]) {
+    throw new Error(`Missing required environment variable: ${varName}`);
+  }
+});
+```
+
+### Dependency Injection
+
+- **Use NestJS DI**: Always inject dependencies via constructor injection
+- **Avoid Global State**: Never use global variables for shared state
+- **Testability**: Constructor injection enables easy mocking in tests
+
+```typescript
+// Good: NestJS constructor injection
+@Injectable()
+export class AuthService {
+  constructor(
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
+  ) {}
+}
+
+// Avoid: Direct instantiation
+@Injectable()
+export class AuthService {
+  private usersService = new UsersService(new PrismaService());
+}
+```
+
+### SUPERADMIN Role Policy
+
+The `SUPERADMIN` role is the **root role** of the EM Ecosystem. It represents the highest level of authority across the entire platform — both within EM NexaCore and across all satellite applications.
+
+#### Access Scope
+
+- **Full access to all Core modules**: Auth, Users, Projects, Teams, Notifications, Billing, Settings, Modules, Apps, Permissions — no restrictions.
+- **Full access to all Satellite Apps**: SUPERADMIN has unrestricted access to every registered satellite application and its resources.
+
+#### Automatic Guard Bypass
+
+SUPERADMIN automatically bypasses authorization guards. All generated guards **must** include a SUPERADMIN check before evaluating other conditions:
+
+- **`RolesGuard`**: Returns `true` immediately when the requesting user has `Role.SUPERADMIN`.
+- **`PermissionsGuard`**: Returns `true` immediately when the requesting user has `Role.SUPERADMIN`.
+
+```typescript
+// Guard implementation pattern — SUPERADMIN bypass
+@Injectable()
+export class RolesGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    // SUPERADMIN bypasses all role checks
+    if (user?.role === Role.SUPERADMIN) {
+      return true;
+    }
+
+    const requiredRoles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (!requiredRoles) return true;
+    return requiredRoles.includes(user?.role);
+  }
+}
+```
+
+```typescript
+// PermissionsGuard — same bypass pattern
+@Injectable()
+export class PermissionsGuard implements CanActivate {
+  canActivate(context: ExecutionContext): boolean {
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    // SUPERADMIN bypasses all permission checks
+    if (user?.role === Role.SUPERADMIN) {
+      return true;
+    }
+
+    const requiredPermissions = this.reflector.getAllAndOverride<string[]>(PERMISSIONS_KEY, [
+      context.getHandler(),
+      context.getClass(),
+    ]);
+    if (!requiredPermissions) return true;
+    return requiredPermissions.every(perm => user?.permissions?.includes(perm));
+  }
+}
+```
+
+#### Management Capabilities
+
+SUPERADMIN can manage all platform resources without explicit permission assignments:
+
+| Resource              | Operations                                      |
+|-----------------------|-------------------------------------------------|
+| Users                 | Create, read, update, delete, assign roles      |
+| Roles                 | Create, read, update, delete, assign to users   |
+| Permissions           | Create, read, update, delete, assign to roles   |
+| Internal Modules      | Register, enable, disable, configure             |
+| Satellite Apps        | Register, approve, revoke, configure             |
+| Global Settings       | Read and update system-level settings            |
+| Global Billing        | Manage subscriptions, invoices, plans            |
+
+#### Implicit Permission Rule
+
+SUPERADMIN **always has all permissions**, even if they are not explicitly assigned in the `permissions` table. Services and guards must treat `Role.SUPERADMIN` as having every permission in the system — both existing and future permissions.
+
+```typescript
+// Service-level permission check pattern
+function hasPermission(user: SafeUser, permission: string): boolean {
+  if (user.role === Role.SUPERADMIN) return true;
+  return user.permissions.includes(permission);
+}
+```
+
+#### Agent and Code Generation Rules
+
+All AI agents **must** follow these rules when generating code related to roles, guards, or permissions:
+
+1. **Guard generation**: Every generated `RolesGuard` and `PermissionsGuard` must include the SUPERADMIN bypass as the first condition in `canActivate()`.
+2. **Test generation**: Every guard and protected endpoint test suite must include specific SUPERADMIN test cases:
+   - `'should allow SUPERADMIN to access regardless of required roles'`
+   - `'should allow SUPERADMIN to access regardless of required permissions'`
+3. **Endpoint documentation**: When documenting protected endpoints (OpenAPI, JSDoc, or markdown), always note that SUPERADMIN has unrestricted access.
+4. **Module generation**: When generating new NexaCore modules, the generated guards must respect the SUPERADMIN bypass.
+5. **Satellite App generation**: When generating satellite apps, the `NexaCoreAuthModule` must propagate the SUPERADMIN role from the JWT claims and enforce the same bypass logic.
+6. **Permission generation**: When defining new permissions for a module or app, never require explicit assignment for SUPERADMIN — the bypass is implicit.
+7. **OpenAPI generation**: Protected endpoints must include a note in their description: `SUPERADMIN: full access (bypasses all guards)`.
+
+```typescript
+// Required SUPERADMIN test cases for every guard
+it('should allow SUPERADMIN to access regardless of required roles', () => {
+  reflector.getAllAndOverride.mockReturnValue([Role.ADMIN]);
+  const context = createMockContext({ role: Role.SUPERADMIN });
+  expect(guard.canActivate(context as never)).toBe(true);
+});
+
+it('should allow SUPERADMIN to access regardless of required permissions', () => {
+  reflector.getAllAndOverride.mockReturnValue(['projects:delete']);
+  const context = createMockContext({ role: Role.SUPERADMIN, permissions: [] });
+  expect(guard.canActivate(context as never)).toBe(true);
+});
+```
+
+## Development Workflow
+
+### Git Workflow
+
+#### Branch Strategy
+
+- **Base Branch**: `main` is the single source of truth. All feature branches are created from `main` and merged back into `main`.
+- **Branch Naming**: `feature/[ticket-id]-backend` (e.g., `feature/SCRUM-12-backend`). The `-backend` suffix is mandatory to separate concerns when backend and frontend work happens in parallel for the same ticket.
+- **Branch Scope**: One ticket = one branch. Keep branches small and focused on a single feature or fix. Do not mix unrelated changes.
+
+#### Branch Lifecycle
+
+```
+main ─────────────────────────────────────────────── main
+  │                                                    ▲
+  └── feature/SCRUM-12-backend ── commits ── PR ── merge
+```
+
+1. **Create**: Branch from latest `main` → `git checkout -b feature/SCRUM-12-backend`
+2. **Develop**: Implement changes following the ticket plan
+3. **Commit**: Descriptive commit messages in English (see Commit Standards below)
+4. **Push**: Push branch to remote → `git push -u origin feature/SCRUM-12-backend`
+5. **PR**: Create Pull Request via `gh pr create` linking the ticket ID
+6. **Review**: Minimum 1 approval required before merging
+7. **Merge**: Squash merge into `main` (clean linear history)
+8. **Cleanup**: Branch is auto-deleted after merge (configure in GitHub repo settings)
+
+#### Commit Standards
+
+- **Language**: English only (per `base-standards.mdc`)
+- **Format**: Imperative mood, short subject line (max 72 chars), optional body with details
+- **Ticket Reference**: Include ticket ID in subject or body (e.g., `SCRUM-12: Add billing module endpoints`)
+- **Scope**: Stage only files related to the ticket. Never commit `.env`, secrets, or build artifacts
+- **Tool**: Use `gh` CLI for all GitHub operations (PRs, reviews, checks)
+
+#### Pull Request Standards
+
+- **Title**: `[SCRUM-XX] Short description` (e.g., `[SCRUM-12] Add billing module CRUD endpoints`)
+- **Description**: Summary of changes, link to Jira ticket, testing notes
+- **Review**: Minimum 1 approval required. Reviewer checks: tests pass, lint clean, types valid, follows standards
+- **Merge Strategy**: Squash merge — all commits in the branch are squashed into a single commit on `main`
+- **Auto-delete**: Enable "Automatically delete head branches" in GitHub repo settings
+
+#### Multi-Branch Coordination (Backend + Frontend)
+
+When a ticket requires both backend and frontend changes:
+
+1. **Backend first**: Create `feature/SCRUM-12-backend`, implement, PR, merge to `main`
+2. **Frontend second**: Create `feature/SCRUM-12-frontend` from updated `main`, implement, PR, merge to `main`
+3. **Reason**: Frontend depends on API endpoints, so backend must land first
+4. **Exception**: If backend and frontend are fully independent, they can be developed in parallel
+
+#### Conflict Resolution
+
+- **Before PR**: Rebase your branch on latest `main` → `git pull --rebase origin main`
+- **During PR**: If conflicts appear, pull latest `main`, resolve locally, push
+- **Never force-push to `main`**. Force-push to feature branches only if necessary
+
+#### Post-Merge Verification
+
+- After merge, verify that `main` branch CI passes (lint, tests, build)
+- If CI fails on `main`, fix immediately with a hotfix branch (`hotfix/SCRUM-XX-fix`)
+
+### Development Scripts
+
+```bash
+npm run start:dev         # Development server with hot reload (nest start --watch)
+npm run build             # Build for production (nest build)
+npm test                  # Run unit tests (jest)
+npm run test:watch        # Run tests in watch mode
+npm run test:cov          # Run tests with coverage report
+npm run lint              # Lint code (eslint)
+npm run format            # Format code (prettier)
+npx prisma generate       # Generate Prisma client
+npx prisma migrate dev    # Create and apply migration
+npx prisma studio         # Open Prisma Studio (database GUI)
+```
+
+### Code Quality
+
+- **ESLint Validation**: Run ESLint before commits
+- **Prettier Formatting**: Use Prettier for consistent code formatting
+- **TypeScript Compilation**: Ensure TypeScript compiles without errors
+- **All Tests Passing**: Ensure all tests pass before deployment
+- **Code Review**: Review code for adherence to standards
+
+## Deployment
+
+Deployment strategy is TBD. The application currently runs as a standard NestJS HTTP server:
+
+```bash
+# Production
+npm run build
+npm run start:prod    # node dist/main
+```
+
+The bootstrap configuration in `main.ts` handles all global setup (CORS, ValidationPipe, ExceptionFilter), making the application ready for any deployment target (container, VM, serverless).
+
+## EM Ecosystem Architecture — Core + Satellite Apps
+
+### Architecture Overview
+
+The **EM Ecosystem** by EMillion Networking LTD follows a **Core + Satellite Apps** architecture:
+
+- **EM NexaCore** is the Core App — a NestJS monolith providing authentication, user management, RBAC, project/team management, billing, notifications, settings, and module/app registries.
+- **Satellite Apps** are independent NestJS applications that extend the ecosystem in specific domains.
+- Communication between Core and Satellites is **exclusively via REST API** — no shared database, no message bus, no gRPC.
+
+```
+EM Ecosystem Architecture
+
+┌─────────────────────────────────────────────────────────┐
+│                   EM NexaCore (Core)                     │
+│  ┌──────┐ ┌───────┐ ┌────────┐ ┌─────────┐ ┌────────┐ │
+│  │ Auth │ │ Users │ │Projects│ │ Billing │ │ Teams  │ │
+│  └──────┘ └───────┘ └────────┘ └─────────┘ └────────┘ │
+│  ┌────────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ │
+│  │Permissions │ │Settings  │ │ Modules  │ │  Apps    │ │
+│  └────────────┘ └──────────┘ └──────────┘ └──────────┘ │
+│                REST API (~63 endpoints)                   │
+└──────────────────────────┬──────────────────────────────┘
+                           │ REST (HTTP/JSON)
+           ┌───────────────┼───────────────┐
+           ▼               ▼               ▼
+     ┌───────────┐  ┌───────────┐  ┌───────────┐
+     │ Billing   │  │ Analytics │  │ CRM       │
+     │ Service   │  │ Service   │  │ Service   │
+     │ (NestJS)  │  │ (NestJS)  │  │ (NestJS)  │
+     │ Own DB    │  │ Own DB    │  │ Own DB    │
+     └───────────┘  └───────────┘  └───────────┘
+```
+
+### EM NexaCore (Core App)
+
+NexaCore contains these internal modules, all sharing the same `PrismaService` and database:
+
+| Module | Entities | Key Endpoints |
+|--------|----------|---------------|
+| **Auth** | User, RefreshToken | `/auth/register`, `/auth/login`, `/auth/refresh`, `/auth/logout`, `/auth/me`, `/auth/google`, `/auth/github` |
+| **Users** | User | `/users`, `/users/{id}`, `/users/me`, `/users/me/password` |
+| **Permissions** | Permission, RolePermission | `/permissions`, `/permissions/roles/{role}` |
+| **Projects** | Project, ProjectMember | `/projects`, `/projects/{id}`, `/projects/{id}/members` |
+| **Teams** | Team, TeamMember | `/projects/{projectId}/teams`, `.../teams/{teamId}`, `.../members` |
+| **Notifications** | Notification | `/notifications`, `/notifications/{id}/read`, `/notifications/read-all` |
+| **Billing** | Subscription, Invoice | `/projects/{projectId}/billing/subscription`, `.../subscribe`, `.../invoices`, `/billing/webhook` |
+| **Settings** | Setting | `/settings/me`, `/settings/me/{key}`, `/projects/{projectId}/settings` |
+| **Modules** | PlatformModule, ProjectModule | `/modules`, `/projects/{projectId}/modules/{moduleId}` |
+| **Apps** | App | `/projects/{projectId}/apps`, `/projects/{projectId}/apps/{appId}` |
+
+NexaCore's Prisma schema contains **15 entities** and **12 enums** (see `data-model.md` for the complete reference). All modules communicate internally via NestJS dependency injection.
+
+### Satellite Apps
+
+Satellite Apps are independent NestJS applications that extend the EM Ecosystem:
+
+**Planned satellites:** Billing Service, Notifications Service, Analytics Service, Project Hub, Team Manager, CRM interno, Dashboard administrativo, App móvil, App de partners, App de clientes.
+
+Each satellite:
+- Has its own Git repository, `package.json`, `nest-cli.json`, `tsconfig.json`
+- Has its own `prisma/schema.prisma` with domain-specific models
+- Has its own PostgreSQL database
+- Follows the same NestJS modular architecture and coding standards from this document
+- Authenticates users via NexaCore's auth API
+- References NexaCore entities by UUID only (stores `userId`, `projectId` as strings — never duplicates the full entity)
+
+### Building Internal NexaCore Modules
+
+Step-by-step guide for adding a new module inside the NexaCore monolith:
+
+1. **Define entities in `data-model.md`** — add model(s) with fields, validation rules, business invariants, relationships, and domain events
+2. **Update `prisma/schema.prisma`** — add the model following existing patterns (`@@map` for table names, `@default(uuid())`, `@default(now())`, cascade rules)
+3. **Run migration** — `npx prisma migrate dev --name add_{module_name}`
+4. **Create module directory** — `nexacore-api/src/{module-name}/` with: `{module}.module.ts`, `{module}.controller.ts`, `{module}.service.ts`, `dto/`, `entities/`, `guards/` (optional), `tests/`
+5. **Create entity interfaces** — TypeScript interfaces mirroring Prisma models, with Safe types using `Omit`/`Pick`
+6. **Create DTOs** — class-validator decorators with custom error messages
+7. **Create service** — `@Injectable()` with `PrismaService` injection, business logic, HttpExceptions, Prisma error handling (P2002, P2025)
+8. **Create controller** — `@Controller('{prefix}')` with route decorators, `@UseGuards()`, `@HttpCode()`
+9. **Create module** — `@Module()` with controllers, providers, exports; register in `app.module.ts`
+10. **Write unit tests** — TestingModule with `jest.Mocked<>`, AAA pattern, 85% branch / 90% line coverage
+11. **Update `api-spec.yml`** — add paths, schemas, tags
+12. **Update `data-model.md`** — if entities were added or modified
+
+**Cross-module patterns:**
+- Inject other services via constructor (e.g., `NotificationsService` for event notifications)
+- Use `PrismaService.$transaction()` for multi-entity atomic operations
+- Register in PlatformModule table if the module is toggle-able per project
+- Example: The `projects` module creates Project + ProjectMember(OWNER) + Subscription(FREE) + default ProjectModules in a single `$transaction()`
+
+```
+nexacore-api/src/analytics/
+├── analytics.module.ts
+├── analytics.controller.ts
+├── analytics.service.ts
+├── dto/
+│   ├── create-report.dto.ts
+│   └── query-analytics.dto.ts
+├── entities/
+│   └── report.entity.ts
+└── tests/
+    ├── analytics.service.spec.ts
+    └── analytics.controller.spec.ts
+```
+
+### Building Satellite Apps
+
+Step-by-step guide for building an independent satellite NestJS application:
+
+1. **Scaffold NestJS project** — `npx @nestjs/cli new {satellite-name}` with the same stack (NestJS 11, TypeScript 5.7, Prisma 7, PostgreSQL)
+2. **Configure own Prisma schema** — domain-specific models only. Reference NexaCore entities by UUID `String` fields, not by importing NexaCore's schema.
+3. **Implement `NexaCoreAuthModule`** — for token validation:
+
+```typescript
+// nexacore-auth/nexacore-auth.module.ts
+@Module({
+  providers: [NexaCoreAuthService, NexaCoreJwtStrategy],
+  exports: [NexaCoreAuthService],
+})
+export class NexaCoreAuthModule {}
+```
+
+The `NexaCoreJwtStrategy` validates tokens against NexaCore's `GET /auth/me` endpoint (or shares the same `JWT_SECRET` for local validation).
+
+4. **Implement `NexaCoreClientModule`** — for consuming NexaCore data:
+
+```typescript
+@Injectable()
+export class NexaCoreClientService {
+  constructor(private readonly httpService: HttpService) {}
+
+  async getUser(userId: string, token: string): Promise<SafeUser> {
+    const { data } = await this.httpService.axiosRef.get(
+      `${this.nexaCoreUrl}/users/${userId}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    return data;
+  }
+
+  async getProject(projectId: string, token: string): Promise<ProjectResponse> {
+    const { data } = await this.httpService.axiosRef.get(
+      `${this.nexaCoreUrl}/projects/${projectId}`,
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
+    return data;
+  }
+}
+```
+
+5. **Build domain modules** — follow the same NestJS patterns from this document (Module > DTO > Service > Controller > Guard)
+6. **Environment configuration** — `NEXACORE_API_URL`, `DATABASE_URL` (satellite's own DB), `JWT_SECRET` (if shared)
+7. **Register in NexaCore** — create App entry via `POST /projects/{projectId}/apps`
+
+### Integration Patterns
+
+**Authentication flow:**
+Satellite receives JWT from client → validates against NexaCore (shared `JWT_SECRET` or `GET /auth/me`) → extracts user info (SafeUser: id, email, role) → proceeds with request.
+
+**Data fetching:**
+Satellite calls NexaCore REST API with Bearer token. Stores only UUID references, never the full entity.
+
+**Error handling — map NexaCore HTTP errors to satellite HttpExceptions:**
+
+| NexaCore Response | Satellite Action |
+|-------------------|------------------|
+| 401 Unauthorized | `throw new UnauthorizedException('NexaCore authentication failed')` |
+| 403 Forbidden | `throw new ForbiddenException('Insufficient permissions in NexaCore')` |
+| 404 Not Found | `throw new NotFoundException('Resource not found in NexaCore')` |
+| 5xx Server Error | `throw new InternalServerErrorException('NexaCore service unavailable')` — consider retry/circuit breaker |
+
+**Rules:**
+- Satellites **NEVER** connect to NexaCore's PostgreSQL directly — all data access is via REST API
+- Satellites have their own `schema.prisma` — they reference NexaCore UUIDs as plain `String` fields with no foreign key constraints
+
+### Shared Resources
+
+| Resource | How Satellites Access It |
+|----------|------------------------|
+| **Auth tokens** | JWT issued by NexaCore. Claims: `sub` (userId), `email`, `role` (Role enum) |
+| **Permissions** | `GET /permissions/roles/{role}` — returns Permission entities in `resource:action` format (e.g., `projects:create`, `billing:manage`) |
+| **Settings** | `GET /settings/me` for user preferences, `GET /projects/{projectId}/settings` for project config |
+| **Notifications** | Satellites call NexaCore notification endpoints to create notifications for users |
+| **User identity** | SafeUser type: id, email, firstName, lastName, avatar, role, provider, emailVerified, isActive |
+
+### Module Registry and App Registry
+
+**PlatformModule table** — tracks available feature modules:
+- Fields: `name`, `slug`, `description`, `status` (ACTIVE/INACTIVE/DEPRECATED), `isDefault`
+- Managed via `GET /modules` (list all), `POST /projects/{projectId}/modules/{moduleId}` (enable), `DELETE /projects/{projectId}/modules/{moduleId}` (disable)
+
+**App table** — tracks applications (including satellites) within a project:
+- Fields: `name`, `slug`, `description`, `status` (DRAFT/PUBLISHED/ARCHIVED), `projectId`, `createdById`, `config` (JSON)
+- Register a satellite via `POST /projects/{projectId}/apps`:
+
+```json
+{
+  "name": "Analytics Service",
+  "slug": "analytics-service",
+  "description": "Usage tracking and analytics dashboards",
+  "config": "{\"url\":\"https://analytics.emillion.io\",\"version\":\"1.0.0\",\"capabilities\":[\"usage-tracking\",\"dashboards\",\"reports\"]}"
+}
+```
+
+---
+
+This document serves as the foundation for maintaining code quality and consistency across the EM NexaCore backend application. All team members should follow these practices to ensure a maintainable, scalable, and testable codebase.
