@@ -1,0 +1,10 @@
+# Emkeel config (non-secret). Real credentials go in .env / GitHub Secrets.
+[jira]
+base_url = "https://emillionnetworking-ltd-labs.atlassian.net"
+project_key = "SCRUM"
+
+[github]
+repo = "emillionnetworking-ltd-labs/em-ecosystem"
+
+[emkeel]
+source = "emkeel~=0.1.0"
