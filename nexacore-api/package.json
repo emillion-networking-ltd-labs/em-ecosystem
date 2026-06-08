@@ -29,7 +29,7 @@
     "audit:deps": "npm audit --audit-level=high && npm audit --omit=dev --audit-level=moderate"
   },
   "dependencies": {
-    "@nestjs-modules/mailer": "^2.3.4",
+    "@nestjs-modules/mailer": "^2.3.6",
     "@nestjs/common": "^11.1.19",
     "@nestjs/config": "^4.0.4",
     "@nestjs/core": "^11.1.19",
