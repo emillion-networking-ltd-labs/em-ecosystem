@@ -66,6 +66,11 @@ uploads/
 
 coverage/
 
+# ────────────────────────────────────────────
+# Tooling reports (jscpd HTML/JSON output) — generated, never committed (ECO-4)
+# ────────────────────────────────────────────
+nexacore-api/report/
+
 /generated/prisma
 
 # Prisma config build artifacts
