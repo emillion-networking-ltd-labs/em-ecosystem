@@ -3,7 +3,7 @@
 /**
  * SessionsServiceV2 — internal scaffolding for AUTH v2 + Tenancy v1 Phase 1.2.
  *
- * SCRUM-493. See ai-specs/changes/auth/programs/AUTH-v2.md §4 Phase 1 + §2.4.
+ * SCRUM-493. See AUTH-v2 program §4 Phase 1 + §2.4.
  *
  * Strangler-pattern: v2 opaque-refresh session lifecycle. v1 SessionsService
  * untouched in production. Zero consumers exist for this class until Phase 1.3.

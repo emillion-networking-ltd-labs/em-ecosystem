@@ -1,5 +1,5 @@
 # ============================================================================
-# Pre-Upgrade Baseline — SCRUM-380 / workflow-standards.mdc §13 Phase 1
+# Pre-Upgrade Baseline — SCRUM-380
 # ============================================================================
 # Run BEFORE starting a major framework migration ticket. Captures the
 # current visual + a11y + console-clean state and commits it under

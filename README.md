@@ -168,8 +168,8 @@ npm run lint              # Lint code
 
 ## Development Standards
 
-All development follows the standards defined in the `ai-specs/` framework:
-- Backend: `ai-specs/specs/backend-standards.mdc`
-- Frontend: `ai-specs/specs/frontend-standards.mdc`
-- Data Model: `ai-specs/specs/data-model.md`
-- API Spec: `ai-specs/specs/api-spec.yml`
+All development follows the standards defined in `docs/`:
+- Backend: `docs/backend-standards.mdc`
+- Frontend: `docs/frontend-standards.mdc`
+- Data Model: `docs/data-model.md`
+- API Spec: `docs/api-spec.yml`

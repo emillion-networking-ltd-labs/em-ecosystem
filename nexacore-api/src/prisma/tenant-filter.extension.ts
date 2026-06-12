@@ -2,7 +2,7 @@
  * Tenant-filter Prisma Client Extension.
  *
  * SCRUM-488 / AUTH v2 + Tenancy v1 — Phase 0.2.
- * See ai-specs/changes/auth/programs/AUTH-v2.md §2.4.
+ * See AUTH-v2 program §2.4.
  *
  * Every query targeting a registered scoped model (see {@link SCOPED_MODELS})
  * is filtered by `tenantId = active` from the request-scoped TenantContext.

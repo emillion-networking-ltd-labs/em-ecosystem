@@ -8,7 +8,7 @@
 # 10-15-minute CI cycle.
 #
 # Standards:
-#   - workflow-standards.mdc §12 Tier 2 (CI gate at developer push time)
+#   - CI gate at developer push time (Tier 2)
 #   - SOC 2 CC8.2, ISO 25010 Modifiability
 #
 # Mapping pre-push step → CI workflow job:

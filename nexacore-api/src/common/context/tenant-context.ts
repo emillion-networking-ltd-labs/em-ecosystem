@@ -2,7 +2,7 @@
  * TenantContext — request-scoped tenant identity propagation.
  *
  * SCRUM-488 / AUTH v2 + Tenancy v1 — Phase 0.2.
- * See ai-specs/changes/auth/programs/AUTH-v2.md §2.4.
+ * See AUTH-v2 program §2.4.
  *
  * Implemented on top of Node's native AsyncLocalStorage so context propagates
  * across all async boundaries (Promises, RxJS, timers, microtasks) without

@@ -1,5 +1,5 @@
 ---
-schema: ai-specs/schemas/freeze-status.schema.yml
+schema: freeze-status.schema.yml
 last_updated: 2026-05-13
 
 modules:
@@ -93,11 +93,11 @@ Active modules accumulate here as charters land. Wave 3 lands the two pilots (`a
 
 ## How CI uses this file
 
-The repo `em-ecosystem-code` includes a GitHub Actions workflow that runs on every PR (template at `ai-specs/tools/freeze-gate-workflow-template.yml`). The workflow:
+The repo `em-ecosystem-code` includes a GitHub Actions workflow that runs on every PR (template `freeze-gate-workflow-template.yml`). The workflow:
 
 1. Computes the list of changed paths in the PR vs `main`.
 2. Maps each changed path to a module (by inspecting `nexacore-api/src/<module>/*` and similar conventions).
-3. Reads THIS file via `ai-specs/tools/check-freeze.py`.
+3. Reads THIS file via `check-freeze.py`.
 4. For each affected module:
    - `active` → pass.
    - `stable` or `frozen` → require label `unfreeze-<module>` on the PR. If missing, fail.
@@ -107,8 +107,8 @@ The CI workflow YAML is provided as a template by the framework; the consuming r
 
 ## References
 
-- [`ai-specs/schemas/freeze-status.schema.yml`](../schemas/freeze-status.schema.yml) — schema this file conforms to.
-- [`ai-specs/schemas/stable-baseline.schema.yml`](../schemas/stable-baseline.schema.yml) — companion schema (per-module).
-- [`ai-specs/tools/check-freeze.py`](../tools/check-freeze.py) — the gate script.
-- [`ai-specs/tools/freeze-gate-workflow-template.yml`](../tools/freeze-gate-workflow-template.yml) — CI workflow template.
+- `freeze-status.schema.yml` — schema this file conforms to.
+- `stable-baseline.schema.yml` — companion schema (per-module).
+- `check-freeze.py` — the gate script.
+- `freeze-gate-workflow-template.yml` — CI workflow template.
 - Each `specs/modules/<module>/module-charter.md` — per-module identity.

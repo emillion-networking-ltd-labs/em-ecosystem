@@ -1,5 +1,5 @@
 -- SCRUM-497 / AUTH v2 + Tenancy v1 Phase 2.2 — AuthIntent state machine
--- See ai-specs/changes/auth/plans/Sprint 15/SCRUM-497_backend.md
+-- See the SCRUM-497 plan
 --
 -- Additive only:
 --   1. 5 new AuditAction enum values for AuthIntent lifecycle audit

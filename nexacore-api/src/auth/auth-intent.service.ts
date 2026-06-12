@@ -4,7 +4,7 @@
  * AuthIntentService — server-side state machine for v2 login orchestration.
  *
  * SCRUM-497 / AUTH v2 + Tenancy v1 Phase 2.2 (D-004).
- * See ai-specs/changes/auth/programs/AUTH-v2.md §4 Phase 2 + §5 D-004.
+ * See AUTH-v2 program §4 Phase 2 + §5 D-004.
  *
  * Replaces the procedural `executeLogin` in v1 `LoginService` (strangler —
  * v1 stays bit-identical in production). v2 endpoints behind a feature flag

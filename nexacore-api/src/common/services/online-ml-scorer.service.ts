@@ -21,7 +21,7 @@
  *
  * ── SOURCE & MODIFICATIONS ────────────────────────────────────────────────
  *
- * Mirror of ai-specs/templates/online-ml-scorer-nestjs.ts (SCRUM-460).
+ * Mirror of the online-ml-scorer NestJS template (SCRUM-460).
  * Single deliberate divergence: shadowLog() honors SHADOW_LOG_PATH env var
  * as intermediate fallback to align with consolidation systemd wrappers
  * (OQ-1 of Phase 8 Cap 5 install design).

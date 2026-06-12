@@ -16,7 +16,7 @@ export { TenantRole } from '@prisma/client';
  * DTO for POST /tenants/:tenantId/invitations.
  *
  * SCRUM-491 / AUTH v2 + Tenancy v1 — Phase 0.4.
- * See ai-specs/changes/tenants/plans/Sprint 15/SCRUM-491_backend.md §5.7.
+ * See the SCRUM-491 plan §5.7.
  */
 export class CreateInvitationDto {
   @ApiProperty({

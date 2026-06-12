@@ -171,7 +171,7 @@ jobs:
   # updated >7 days ago. With delete_branch_on_merge=true these should not
   # exist; this job is defence-in-depth for cases where the setting was
   # disabled or branches were created outside the PR flow.
-  # Standards: workflow-standards.mdc §2 Required Repository Configuration C
+  # Standards: Required Repository Configuration C
   # ==========================================================================
   branch-audit:
     name: 'Branch Hygiene Audit'
@@ -236,7 +236,7 @@ jobs:
           set -euo pipefail
           today=$(date -u +%Y-%m-%d)
           title="[branch-audit] $(cat stale-branches.md | wc -l | tr -d ' ') stale merged branches detected ($today)"
-          body="## Stale merged branches\n\nThe weekly branch-audit found branches that are reachable from \`main\` but whose tip has not been updated in over 7 days. With \`delete_branch_on_merge=true\` enabled at the repo level, these should not exist.\n\n$(cat stale-branches.md)\n\n## How to fix\n\nFor each branch above:\n\n\`\`\`bash\ngh api -X DELETE repos/\${GITHUB_REPOSITORY}/git/refs/heads/<branch-name>\n\`\`\`\n\nIf many appear simultaneously, also re-verify the repo setting:\n\n\`\`\`bash\ngh api repos/\${GITHUB_REPOSITORY} --jq .delete_branch_on_merge\n\`\`\`\n\nMust return \`true\`. If \`false\`, re-apply per workflow-standards.mdc §2 (Required Repository Configuration A).\n\n## References\n\n- workflow-standards.mdc §2 Required Repository Configuration\n- workflow-standards.mdc §2 Case Study: SCRUM-359 Incident\n"
+          body="## Stale merged branches\n\nThe weekly branch-audit found branches that are reachable from \`main\` but whose tip has not been updated in over 7 days. With \`delete_branch_on_merge=true\` enabled at the repo level, these should not exist.\n\n$(cat stale-branches.md)\n\n## How to fix\n\nFor each branch above:\n\n\`\`\`bash\ngh api -X DELETE repos/\${GITHUB_REPOSITORY}/git/refs/heads/<branch-name>\n\`\`\`\n\nIf many appear simultaneously, also re-verify the repo setting:\n\n\`\`\`bash\ngh api repos/\${GITHUB_REPOSITORY} --jq .delete_branch_on_merge\n\`\`\`\n\nMust return \`true\`. If \`false\`, re-apply Required Repository Configuration A.\n\n## References\n\n- Required Repository Configuration (§2)\n- Case Study: SCRUM-359 Incident (§2)\n"
 
           # Look for an existing open issue with this title pattern (last 30 days)
           existing=$(gh issue list --state open --search "in:title [branch-audit]" --json number,title --jq '.[0].number // empty')
@@ -275,4 +275,4 @@ jobs:
           echo "| Supply Chain | ${{ needs.supply-chain.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Branch Hygiene | ${{ needs.branch-audit.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Standards: OWASP A06:2021, NIST SA-11, SOC 2 CC7.1, workflow-standards.mdc §2.C" >> $GITHUB_STEP_SUMMARY
+          echo "Standards: OWASP A06:2021, NIST SA-11, SOC 2 CC7.1" >> $GITHUB_STEP_SUMMARY

@@ -122,7 +122,7 @@ Render a controls panel that generates form inputs from the schema. Feed control
 ```
 Figma (Tokens Studio plugin)
   → Export JSON (DTCG format)
-    → Git repo (ai-specs/specs/tokens/*.json)
+    → Git repo (design-token JSON)
       → Style Dictionary v4 + @tokens-studio/sd-transforms
         → CSS custom properties file
           → Imported by Tailwind via @theme
@@ -406,5 +406,5 @@ interface ThemeConfig {
 
 ---
 
-**Document location**: `ai-specs/ai-specs/specs/design-system-viewer.md`
-**Related**: `ai-specs/specs/product-roadmap.md` (Phase A), `ai-specs/specs/ui-design-system.md` (current tokens)
+**Document location**: `docs/design-system-viewer.md`
+**Related**: `docs/product-roadmap.md` (Phase A), `docs/ui-design-system.md` (current tokens)

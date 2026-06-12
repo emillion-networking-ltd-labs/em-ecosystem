@@ -2,7 +2,7 @@
  * InvitationsService — lifecycle for TenantInvitation rows.
  *
  * SCRUM-491 / AUTH v2 + Tenancy v1 — Phase 0.4.
- * See ai-specs/changes/tenants/plans/Sprint 15/SCRUM-491_backend.md §5.2-5.4.
+ * See the SCRUM-491 plan §5.2-5.4.
  *
  * Responsibilities:
  *   - createInvitation (idempotent under concurrency via partial unique index)

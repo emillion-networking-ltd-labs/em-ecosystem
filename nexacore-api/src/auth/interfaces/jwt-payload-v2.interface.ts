@@ -6,7 +6,7 @@ import { TenantRole } from '@prisma/client';
  * v2 JWT payload — multi-tenant aware.
  *
  * SCRUM-492 / AUTH v2 + Tenancy v1 — Phase 1.1.
- * See ai-specs/changes/auth/programs/AUTH-v2.md §2.3.
+ * See AUTH-v2 program §2.3.
  *
  * Differences from v1 (JwtPayload in src/common/interfaces/jwt-payload.interface.ts):
  *   - REMOVED: email, role

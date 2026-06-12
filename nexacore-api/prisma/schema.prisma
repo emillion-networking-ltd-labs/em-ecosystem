@@ -323,7 +323,7 @@ model RolePermission {
 
 // ============================================================================
 // SCRUM-487 / AUTH v2 + Tenancy v1 program — Phase 0.1
-// Multi-tenant primitives. See ai-specs/changes/auth/programs/AUTH-v2.md §2.
+// Multi-tenant primitives. See AUTH-v2 program §2.
 // ============================================================================
 
 model Tenant {
@@ -478,7 +478,7 @@ enum OrganizationRole {
 
 /// Phase 2.2 / SCRUM-497 — D-004: server-side state machine for v2 login orchestration.
 /// Replaces the procedural `executeLogin` from v1 `LoginService` (strangler — v1 untouched).
-/// See ai-specs/changes/auth/programs/AUTH-v2.md §4 Phase 2 + §5 D-004.
+/// See AUTH-v2 program §4 Phase 2 + §5 D-004.
 enum AuthIntentStatus {
   requires_credentials
   requires_tenant_pick

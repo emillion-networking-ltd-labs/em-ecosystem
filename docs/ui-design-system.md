@@ -3607,7 +3607,7 @@ All 16x16 lucide icons follow these color rules:
 
 ### Loading, Empty & Error State Patterns (SCRUM-352)
 
-**Source**: `ai-specs/changes/dashboard/audit/loading-empty-states-2026-05-12/audit-table.md` (Phase A audit).
+**Source**: `loading-empty-states-2026-05-12/audit-table.md` (Phase A audit).
 **Binding**: all dashboard code must comply. Sub-tickets B1-B6 (SCRUM-403 to SCRUM-408) cover existing violations.
 
 #### Empty states
