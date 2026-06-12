@@ -44,7 +44,7 @@ if [ -n "$STAGED_TS" ]; then
     echo ""
     echo "$JSCPD_OUT"
     echo ""
-    echo "Per backend-standards.mdc 'Code Reuse & Duplication' (Rule of Three):"
+    echo "Per docs/backend-standards.mdc 'Code Reuse & Duplication' (Rule of Three):"
     echo "  - 1st copy: OK"
     echo "  - 2nd copy: leave a TODO(refactor) comment"
     echo "  - 3rd copy: extract a helper before completing the ticket"
