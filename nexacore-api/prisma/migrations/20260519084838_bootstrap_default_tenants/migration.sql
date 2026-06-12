@@ -1,7 +1,7 @@
 -- SCRUM-487 / AUTH v2 + Tenancy v1 program — Phase 0.1 bootstrap
 -- Maps every existing User to a default Tenant as OWNER.
 -- Idempotent via LEFT JOIN guards — safe to re-run.
--- See ai-specs/changes/auth/programs/AUTH-v2.md §2 + tenants/plans/Sprint 15/SCRUM-487_backend.md §6 Step 3.
+-- See AUTH-v2 program §2 + the SCRUM-487 plan §6 Step 3.
 
 -- Ensure pgcrypto is available for gen_random_uuid() (idempotent).
 CREATE EXTENSION IF NOT EXISTS pgcrypto;

@@ -4,8 +4,8 @@
  * TokenServiceV2 — internal scaffolding for AUTH v2 + Tenancy v1.
  *
  * SCRUM-492 / AUTH v2 + Tenancy v1 — Phase 1.1.
- * See ai-specs/changes/auth/programs/AUTH-v2.md §4 (Phase 1) and the plan
- * at ai-specs/changes/auth/plans/Sprint 15/SCRUM-492_backend.md §5.
+ * See AUTH-v2 program §4 (Phase 1) and the SCRUM-492
+ * plan §5.
  *
  * Strangler-pattern foundation. Exposes a tenant-aware mint + verify pair
  * for the v2 access token shape (JwtPayloadV2). NO refresh tokens, NO

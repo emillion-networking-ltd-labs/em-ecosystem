@@ -3,7 +3,7 @@ import { test, expect } from "@playwright/test";
 /**
  * Behavioral E2E tests for auth flows — Phase 9b checks FE-27..FE-32.
  *
- * Spec source: `ai-specs/specs/audit-standards.mdc` Phase 9b table.
+ * Spec source: `audit-standards` Phase 9b table.
  * Ticket: SCRUM-350 (this file is the scaffold; bodies pending follow-up).
  * Audit context: SCRUM-342 surfaced 4 user-facing bugs that slipped through
  *   the static Phase 9 audit. These tests are the runtime verification layer.

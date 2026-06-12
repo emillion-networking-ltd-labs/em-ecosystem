@@ -2,7 +2,7 @@
  * TenantsController — HTTP surface for Phase 0.4.
  *
  * SCRUM-491 / AUTH v2 + Tenancy v1 — Phase 0.4.
- * See ai-specs/changes/tenants/plans/Sprint 15/SCRUM-491_backend.md §5.1.
+ * See the SCRUM-491 plan §5.1.
  *
  * Routes:
  *   POST   /tenants/:tenantId/invitations             createInvitation

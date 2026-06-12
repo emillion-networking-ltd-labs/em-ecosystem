@@ -253,7 +253,7 @@ Every visual element must follow what is documented in the Design System showcas
 
 1. **Export a consolidated spec object** alongside the component (e.g., `myComponentSpecs`) — or split exports (`baseClass` + `variantClasses` + `sizeClasses`) when the component has many variants. The spec must use design tokens (semantic color/spacing/radius/shadow tokens), not raw hex/rgba/pixel values. If the component genuinely has no spec to export (rare — only for compound JSX-only components), document that explicitly in the §section using the "JSX-only" disclosure pattern.
 
-2. **Add a corresponding §section in `ai-specs/specs/ui-design-system.md`** following the established template:
+2. **Add a corresponding §section in `docs/ui-design-system.md`** following the established template:
    - `### §N ComponentName` heading + 1-line description
    - **Properties** table (props + types + defaults + description)
    - Bold-headed sub-sections for behavior, variants, states, accessibility (use sub-headings sparingly — only when the component genuinely has multiple modes or primitives)
@@ -276,7 +276,7 @@ Every visual element must follow what is documented in the Design System showcas
 - Embedding spec values directly in JSX without an exported spec object (makes future doc reconciliation impossible without re-reading JSX).
 - Adding a `ui/*.tsx` component without a `componentRegistry` entry — component is invisible from `/admin/design-system` catalog and cannot be linked or discovered. (This was the exact 17% drift category SCRUM-348 fixed: AlertBox, IconButton, SegmentedControl, EmailSelector, StickyCard, ThemeToggle, TurnstileWidget, plus the broken Sidebar.tsx → SidebarNav.tsx file reference.)
 
-**Reference**: see `ai-specs/specs/ui-design-system.md` §1-§50 for established section templates, and the SCRUM-329 audit deliverable at `ai-specs/changes/dashboard/audit/ui-design-system-2026-05-02/audit-table.md` for examples of every drift category this rule prevents.
+**Reference**: see `docs/ui-design-system.md` §1-§50 for established section templates, and the SCRUM-329 audit deliverable (ui-design-system-2026-05-02 audit-table) for examples of every drift category this rule prevents.
 
 ### Component Conventions
 

@@ -2,7 +2,7 @@
  * MembershipsService — TenantMembership read + authorization helpers.
  *
  * SCRUM-491 / AUTH v2 + Tenancy v1 — Phase 0.4.
- * See ai-specs/changes/tenants/plans/Sprint 15/SCRUM-491_backend.md §5.6.
+ * See the SCRUM-491 plan §5.6.
  *
  * Responsibilities:
  *   - requireMembership: throws 404 (hides tenant existence) when caller is not an active member.

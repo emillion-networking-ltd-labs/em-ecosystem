@@ -1,5 +1,5 @@
 {
-  "_comment": "jscpd config — SCRUM-357. Thresholds match audit-standards.mdc Phase 10c (production code: >=10 lines / >=50 tokens). Pre-commit hook narrows to staged files via --pattern.",
+  "_comment": "jscpd config — SCRUM-357. Thresholds match the audit Phase 10c thresholds (production code: >=10 lines / >=50 tokens). Pre-commit hook narrows to staged files via --pattern.",
   "minLines": 10,
   "minTokens": 50,
   "threshold": 100,

@@ -15,7 +15,7 @@ export { TenantStatus } from '@prisma/client';
  * DTO for creating a new Tenant.
  *
  * SCRUM-487 / AUTH v2 + Tenancy v1 — Phase 0.1.
- * See ai-specs/changes/auth/programs/AUTH-v2.md §2.
+ * See AUTH-v2 program §2.
  */
 export class CreateTenantDto {
   @ApiProperty({

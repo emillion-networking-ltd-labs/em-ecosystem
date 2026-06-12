@@ -270,7 +270,7 @@ real users or the client to review.
 Use [`templates/satellite-S2-hardening-plan.md`](templates/satellite-S2-hardening-plan.md)
 verbatim — the deliverables are the same for every satellite. Copy the template,
 swap the satellite name and content-specific descriptions, file the plan at
-`ai-specs/changes/sat-{client}/plans/SAT{NN} S2/SAT{NN}-X_frontend.md`.
+`changes/sat-{client}/plans/SAT{NN} S2/SAT{NN}-X_frontend.md`.
 
 ### 2.2 Hardening checklist (the same 6 items every time)
 

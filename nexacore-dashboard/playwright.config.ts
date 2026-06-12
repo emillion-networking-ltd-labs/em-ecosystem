@@ -4,7 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
  * Playwright configuration for nexacore-dashboard E2E tests.
  *
  * SCRUM-350 / Phase 9b — see audit-standards.mdc for the check definitions
- * (FE-27..FE-32) and ai-specs/changes/auth/plans/Sprint 12/SCRUM-350_frontend.md
+ * (FE-27..FE-32) and the SCRUM-350 plan
  * for the rollout plan.
  *
  * Local usage:

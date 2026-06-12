@@ -20,7 +20,7 @@ import { TenantsService } from './tenants.service';
  *   pipeline; skip-paths for localhost/health/metrics live inside the
  *   middleware body.
  *
- * See ai-specs/changes/auth/programs/AUTH-v2.md §2 + §5 D-007/D-008.
+ * See AUTH-v2 program §2 + §5 D-007/D-008.
  *
  * @Global because TenantsService + MembershipsService + OrganizationsService
  * are consumed by downstream phases (AUTH v2 Phase 2 AuthIntent, permissions

@@ -14,7 +14,7 @@ import { UpdateTenantDto } from './dto/update-tenant.dto';
  * TenantsService — CRUD for the Tenant primitive.
  *
  * SCRUM-487 / AUTH v2 + Tenancy v1 — Phase 0.1.
- * See ai-specs/changes/auth/programs/AUTH-v2.md §2.
+ * See AUTH-v2 program §2.
  *
  * This service is exported by a {@link Global} module so any future module
  * (auth v2, business entities, satellite integrations) can inject it

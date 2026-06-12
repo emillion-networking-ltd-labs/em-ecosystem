@@ -2,7 +2,7 @@
  * Tenant context error classes.
  *
  * SCRUM-488 / AUTH v2 + Tenancy v1 — Phase 0.2.
- * See ai-specs/changes/auth/programs/AUTH-v2.md §2.4.
+ * See AUTH-v2 program §2.4.
  *
  * These errors signal coding-time invariant violations of the tenant-filter
  * middleware. They are bare {@link Error} subclasses (NOT NestJS

@@ -194,7 +194,7 @@ EM NexaCore is a multi-tenant project management platform with:
 | **Code folder** | `satellites/sat-{client-kebab}/` (under `em-ecosystem-code/`) | `satellites/sat-cristian-garcia/` |
 | **Ticket prefix** | `SAT{NN}-{N}` (auto by Jira) | `SAT01-1`, `SAT01-2` |
 | **Sprint naming** | `SAT{NN} Sprint {N} - {Goal}` | `SAT01 Sprint 1 - Landing Page` |
-| **ai-specs changes** | `ai-specs/changes/sat-{client}/` | `ai-specs/changes/sat-cristian-garcia/` |
+| **framework changes** | `changes/sat-{client}/` | `changes/sat-cristian-garcia/` |
 
 **Rules:**
 - Each satellite client gets its own Jira project — never mix with `SCRUM` (core).
@@ -356,6 +356,6 @@ These endpoints are implemented and tested but have no UI page yet:
 
 ---
 
-**Document location**: `ai-specs/ai-specs/specs/product-roadmap.md`
+**Document location**: `docs/product-roadmap.md`
 **Maintained by**: Development team
 **Review cadence**: At sprint boundaries or when strategic priorities change

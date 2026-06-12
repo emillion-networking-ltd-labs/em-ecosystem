@@ -1,5 +1,5 @@
 # ============================================================================
-# Structural Design-Token Probe — SCRUM-396 (workflow-standards.mdc §13.7.4)
+# Structural Design-Token Probe — SCRUM-396
 # ============================================================================
 # Catches the three TW3 -> TW4 regression patterns at CI time, independently
 # of pixel VRT. Asserts via Playwright + getComputedStyle that:
