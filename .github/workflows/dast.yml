@@ -75,7 +75,7 @@ jobs:
 
   # ==========================================================================
   # API Scan (OpenAPI spec-driven)
-  # Scans all endpoints defined in api-spec.yml
+  # Scans all endpoints defined in docs/api-spec.yml
   # ==========================================================================
   zap-api:
     name: 'ZAP API Scan'
