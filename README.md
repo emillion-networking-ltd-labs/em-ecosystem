@@ -170,6 +170,4 @@ npm run lint              # Lint code
 
 All development follows the standards defined in `docs/`:
 - Backend: `docs/backend-standards.mdc`
-- Frontend: `docs/frontend-standards.mdc`
-- Data Model: `docs/data-model.md`
 - API Spec: `docs/api-spec.yml`

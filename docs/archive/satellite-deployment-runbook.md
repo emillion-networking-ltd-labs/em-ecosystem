@@ -1,3 +1,5 @@
+> Archivado 2026-06-14 — referencia histórica, NO activa. No es norma vigente.
+
 # Satellite Deployment Runbook
 
 > **Operational document.** Step-by-step procedure for taking a new satellite app
