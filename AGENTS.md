@@ -8,6 +8,8 @@ Rules that matter live in CI + branch protection, not here (this file is best-ef
 3. Every bug fix starts with a failing test (permanent regression guard).
 4. Open a PR. Merge requires: CI green + your approval + a linked ticket.
 
+Project coding conventions (not tooling-enforced) live in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## Strategy (the north star — don't drift)
 - A development strategy for an area lives in `emkeel-governance/strategy/<area>.md` (goal,
   architecture, parameters, non-goals). Created once, human-approved, committed.

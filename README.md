@@ -168,5 +168,4 @@ npm run lint              # Lint code
 
 ## Development Standards
 
-All development follows the standards defined in `docs/`:
-- Backend: `docs/backend-standards.mdc`
+Project coding conventions: see [`CONTRIBUTING.md`](CONTRIBUTING.md). Architectural decisions live in `emkeel-governance/adr/`; tooling (ESLint, jscpd, gitleaks, prettier, jest) enforces the rest.
