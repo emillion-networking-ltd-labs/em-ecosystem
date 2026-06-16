@@ -1,3 +1,5 @@
+> Archivado 2026-06-14 — referencia histórica, NO activa. No es norma vigente.
+
 # UI Design System - Component Reference
 
 > Source: Figma UI Kit (`IY3cgfCMyHNuPhL0Ba8mM9`)
