@@ -47,3 +47,14 @@ jobs:
       - name: "Gate - strategy quality (every strategy doc is sourced + complete)"
         if: github.event_name == 'pull_request'
         run: python -m emkeel.gates.check_strategy_quality
+      - name: "Gate - strategy change (north star only on a strategy/ lane)"
+        if: github.event_name == 'pull_request'
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref }}
+          EMKEEL_BASE_REF: ${{ github.base_ref }}
+        run: python -m emkeel.gates.check_strategy_change
+      - name: "Gate - strategy alignment (feature acknowledges the north star)"
+        if: github.event_name == 'pull_request'
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref }}
+        run: python -m emkeel.gates.check_strategy_alignment
