@@ -5,7 +5,7 @@
 - **Ticket:** [ECO-19](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-19)
 - **Strategy:** none (es una decisión de gobierno, no un feature)
 - **Decisor:** Operador (human gate)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa en el producto NexaCore la doctrina decidida en KEEL-D (separación autoridad/referencia del framework Emkeel).
+- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Decisión propia de em-ecosystem (NexaCore): fija la frontera autoridad/referencia entre `emkeel-governance/` (lo que exigen y versionan los gates de CI de este repo) y `docs/` (que ningún gate referencia).
 
 ## Contexto
 
@@ -42,5 +42,5 @@ Sin una regla explícita, un agente (o una persona) puede tratar un doc de `docs
 
 ## Notas
 
-- Disposición acordada por el operador (KEEL-D) y ejecutada bajo ECO-19. La promoción del runbook se traza en ECO-20.
+- Disposición acordada por el operador y ejecutada bajo ECO-19. La promoción del runbook se traza en ECO-20.
 - `docs/` no está gateado: su limpieza es un acto deliberado por ticket (como este), no un gate automático.
