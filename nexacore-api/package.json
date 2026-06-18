@@ -54,7 +54,7 @@
     "joi": "^18.0.2",
     "js-yaml": "^4.2.0",
     "maxmind": "^5.0.5",
-    "nodemailer": "^8.0.11",
+    "nodemailer": "^9.0.1",
     "otplib": "^13.4.0",
     "passport": "^0.7.0",
     "passport-github2": "^0.1.12",
@@ -113,12 +113,13 @@
     "liquidjs": ">=10.26.0",
     "picomatch": ">=4.0.4",
     "path-to-regexp": ">=8.4.0",
-    "nodemailer": "^8.0.11",
+    "nodemailer": "^9.0.1",
     "form-data": ">=4.0.6",
     "uuid": ">=11.1.1",
     "js-yaml": "$js-yaml",
     "mailparser": ">=3.9.10",
     "multer": "^2.2.0",
+    "@babel/core": ">=7.29.7",
     "qs": ">=6.15.2"
   },
   "prisma": {
