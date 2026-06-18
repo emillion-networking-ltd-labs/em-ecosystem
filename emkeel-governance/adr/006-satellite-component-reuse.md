@@ -9,9 +9,9 @@
 
 ## Contexto
 
-Los satélites (sitios de cliente bajo `satellites/`) reutilizan el sistema de componentes de NexaCore. Hoy ese reuse es por **copia manual** — *"Copy UI Core components from `nexacore-dashboard/src/components/ui/` to the new satellite's `src/components/ui/`"* (`docs/archive/satellite-deployment-runbook.md:140-142`) — y tiene tres problemas medidos, no asumidos:
+Los satélites (sitios de cliente bajo `satellites/`) reutilizan el sistema de componentes de NexaCore. Hoy ese reuse es por **copia manual** — *"Copy UI Core components from `nexacore-dashboard/src/components/ui/` to the new satellite's `src/components/ui/`"* (`docs/satellite-deployment-runbook.md:140-142`) — y tiene tres problemas medidos, no asumidos:
 
-- **No existe mecanismo de distribución.** El `em-ui` CLI previsto (SCRUM-331) **nunca se implementó** (solo referenciado en `docs/archive/satellite-deployment-runbook.md:140-142,27,444`). No hay monorepo workspace ni paquete compartido: el `package.json` raíz no declara `workspaces`.
+- **No existe mecanismo de distribución.** El `em-ui` CLI previsto (SCRUM-331) **nunca se implementó** (solo referenciado en `docs/satellite-deployment-runbook.md:140-142,27,444`). No hay monorepo workspace ni paquete compartido: el `package.json` raíz no declara `workspaces`.
 - **La copia manual deriva.** El UI Core del dashboard tiene **48 componentes** (`nexacore-dashboard/src/components/ui/`); SAT01 copió **17** (`satellites/sat-cristian-garcia/src/components/ui/`) y al menos `Button` **divergió**: la copia del satélite **perdió** los atributos de accesibilidad `role="status"` / `aria-label="Loading"` presentes en el original (`nexacore-dashboard/src/components/ui/Button.tsx:87`). Sin single-source, los componentes copiados divergen y arrastran regresiones silenciosas.
 - **`/admin/design-system` es la fuente de verdad declarada** del UI Core (`CONTRIBUTING.md:73-75`), pero nada conecta esa fuente con las copias de los satélites.
 
@@ -42,4 +42,4 @@ Esto es el **scope real de SCRUM-331**, ahora validado como el candidato correct
 
 ## Notas
 
-- Decisión tomada por el operador en el human gate de la ceremonia `/strategy` (ECO-20) y trazada en la estrategia [`satellites`](../strategy/satellites.md). El "cómo" procedimental sigue en el runbook (`docs/archive/satellite-deployment-runbook.md`), que se mantiene como referencia (no se promueve a `emkeel-governance/`, consistente con ADR-005).
+- Decisión tomada por el operador en el human gate de la ceremonia `/strategy` (ECO-20) y trazada en la estrategia [`satellites`](../strategy/satellites.md). El "cómo" procedimental sigue en el runbook (`docs/satellite-deployment-runbook.md`), que se mantiene como referencia (no se promueve a `emkeel-governance/`, consistente con ADR-005).
