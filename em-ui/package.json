@@ -1,0 +1,12 @@
+{
+  "name": "@em-ecosystem/em-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Registry + CLI interno del design system NexaCore (reuse gobernado; fuente única: design-system/). ECO-23 / estrategia satellites.",
+  "type": "module",
+  "bin": { "em-ui": "cli.mjs" },
+  "engines": { "node": ">=22.0.0" },
+  "scripts": {
+    "list": "node cli.mjs list"
+  }
+}

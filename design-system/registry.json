@@ -1,0 +1,348 @@
+{
+  "name": "em-ui",
+  "$comment": "Registry interno del design system NexaCore (ECO-23). Fuente unica: design-system/. em-ui lee de aqui, NUNCA de nexacore-dashboard/.",
+  "source": "design-system",
+  "tokens": "tokens/tokens.css",
+  "aliasAssumed": "@/ -> <consumer>/src (igual que dashboard y satelites; sin reescritura de imports)",
+  "items": [
+    {
+      "name": "Accordion",
+      "type": "registry:ui",
+      "file": "components/Accordion.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "AlertBox",
+      "type": "registry:ui",
+      "file": "components/AlertBox.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Avatar",
+      "type": "registry:ui",
+      "file": "components/Avatar.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Badge",
+      "type": "registry:ui",
+      "file": "components/Badge.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "BeforeAfterSlider",
+      "type": "registry:ui",
+      "file": "components/BeforeAfterSlider.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Breadcrumbs",
+      "type": "registry:ui",
+      "file": "components/Breadcrumbs.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Button",
+      "type": "registry:ui",
+      "file": "components/Button.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Calendar",
+      "type": "registry:ui",
+      "file": "components/Calendar.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Checkbox",
+      "type": "registry:ui",
+      "file": "components/Checkbox.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "ConfirmModal",
+      "type": "registry:ui",
+      "file": "components/ConfirmModal.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "CopyField",
+      "type": "registry:ui",
+      "file": "components/CopyField.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "CountdownTimer",
+      "type": "registry:ui",
+      "file": "components/CountdownTimer.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "DataTable",
+      "type": "registry:ui",
+      "file": "components/DataTable.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "DateInput",
+      "type": "registry:ui",
+      "file": "components/DateInput.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Divider",
+      "type": "registry:ui",
+      "file": "components/Divider.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "EmailSelector",
+      "type": "registry:ui",
+      "file": "components/EmailSelector.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "EmptyState",
+      "type": "registry:ui",
+      "file": "components/EmptyState.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "ErrorAlert",
+      "type": "registry:ui",
+      "file": "components/ErrorAlert.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "FormField",
+      "type": "registry:ui",
+      "file": "components/FormField.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "IconBadge",
+      "type": "registry:ui",
+      "file": "components/IconBadge.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "IconButton",
+      "type": "registry:ui",
+      "file": "components/IconButton.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "IdleWarningModal",
+      "type": "registry:ui",
+      "file": "components/IdleWarningModal.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "ImageCropper",
+      "type": "registry:ui",
+      "file": "components/ImageCropper.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/crop-image.ts"
+      ]
+    },
+    {
+      "name": "InfinitySpinner",
+      "type": "registry:ui",
+      "file": "components/InfinitySpinner.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "InlineError",
+      "type": "registry:ui",
+      "file": "components/InlineError.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Input",
+      "type": "registry:ui",
+      "file": "components/Input.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "LanguageSelector",
+      "type": "registry:ui",
+      "file": "components/LanguageSelector.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "MfaDigitInput",
+      "type": "registry:ui",
+      "file": "components/MfaDigitInput.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Pagination",
+      "type": "registry:ui",
+      "file": "components/Pagination.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "QrCodeCard",
+      "type": "registry:ui",
+      "file": "components/QrCodeCard.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "RateLimitBanner",
+      "type": "registry:ui",
+      "file": "components/RateLimitBanner.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/types.ts"
+      ]
+    },
+    {
+      "name": "RecoveryCodesGrid",
+      "type": "registry:ui",
+      "file": "components/RecoveryCodesGrid.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "RingSpinner",
+      "type": "registry:ui",
+      "file": "components/RingSpinner.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "SearchTrigger",
+      "type": "registry:ui",
+      "file": "components/SearchTrigger.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "SegmentedControl",
+      "type": "registry:ui",
+      "file": "components/SegmentedControl.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Select",
+      "type": "registry:ui",
+      "file": "components/Select.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "SidebarNav",
+      "type": "registry:ui",
+      "file": "components/SidebarNav.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Slider",
+      "type": "registry:ui",
+      "file": "components/Slider.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Spinner",
+      "type": "registry:ui",
+      "file": "components/Spinner.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "StickyCard",
+      "type": "registry:ui",
+      "file": "components/StickyCard.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Tabs",
+      "type": "registry:ui",
+      "file": "components/Tabs.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "ThemeToggle",
+      "type": "registry:ui",
+      "file": "components/ThemeToggle.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "hooks/useTheme.ts"
+      ]
+    },
+    {
+      "name": "Toast",
+      "type": "registry:ui",
+      "file": "components/Toast.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "ToastContainer",
+      "type": "registry:ui",
+      "file": "components/ToastContainer.tsx",
+      "registryDependencies": [
+        "Toast"
+      ],
+      "internalDependencies": []
+    },
+    {
+      "name": "Toggle",
+      "type": "registry:ui",
+      "file": "components/Toggle.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "Tooltip",
+      "type": "registry:ui",
+      "file": "components/Tooltip.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "TurnstileWidget",
+      "type": "registry:ui",
+      "file": "components/TurnstileWidget.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "hooks/useTheme.ts"
+      ]
+    }
+  ]
+}

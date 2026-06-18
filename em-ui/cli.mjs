@@ -1,0 +1,110 @@
+#!/usr/bin/env node
+// em-ui — registry + CLI interno del design system NexaCore (ECO-23, estrategia satellites / ADR-006 + ADR-007).
+// Copia GOBERNADA con reconciliación. Fuente ÚNICA: design-system/ (jamás la app dashboard).
+import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync } from "node:fs";
+import { dirname, join, resolve, basename } from "node:path";
+import { fileURLToPath } from "node:url";
+
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
+const DS = join(ROOT, "design-system");
+const REGISTRY = JSON.parse(readFileSync(join(DS, "registry.json"), "utf8"));
+
+// Hard invariant: la fuente es design-system/, jamás el dashboard.
+if (REGISTRY.source !== "design-system") {
+  console.error("em-ui: fuente inesperada; debe ser design-system/"); process.exit(2);
+}
+const byName = Object.fromEntries(REGISTRY.items.map((i) => [i.name, i]));
+
+function die(msg) { console.error(`em-ui: ${msg}`); process.exit(1); }
+function arg(flag, def) { const i = process.argv.indexOf(flag); return i > -1 ? process.argv[i + 1] : def; }
+
+// Resuelve el cierre transitivo de un componente: él + sus registryDependencies (ui) + internalDependencies (hooks/lib).
+function resolveClosure(name, seen = new Set()) {
+  if (seen.has(name)) return seen;
+  const item = byName[name];
+  if (!item) die(`componente desconocido: ${name} (¿app-coupled/excluido, o typo?)`);
+  seen.add(name);
+  for (const dep of item.registryDependencies) resolveClosure(dep, seen);
+  return seen;
+}
+
+// Mapea un fichero de la fuente a su ruta en el consumidor. Consumidor usa alias @/ -> src,
+// igual que dashboard y satélites => sin reescritura de imports.
+function destPathFor(srcRel, destSrc) {
+  if (srcRel.startsWith("components/")) return join(destSrc, "components/ui", basename(srcRel));
+  if (srcRel.startsWith("hooks/")) return join(destSrc, "hooks", basename(srcRel));
+  if (srcRel.startsWith("lib/")) return join(destSrc, "lib", basename(srcRel));
+  die(`ruta de fuente no mapeable: ${srcRel}`);
+}
+
+function copyInto(name, destSrc, { overwrite }) {
+  const closure = [...resolveClosure(name)];
+  const written = [];
+  for (const cname of closure) {
+    const item = byName[cname];
+    const files = [item.file, ...item.internalDependencies];
+    for (const f of files) {
+      const from = join(DS, f);
+      const to = destPathFor(f, destSrc);
+      if (existsSync(to) && !overwrite) { written.push(`= ${to} (ya existe, sin tocar)`); continue; }
+      mkdirSync(dirname(to), { recursive: true });
+      copyFileSync(from, to);
+      written.push(`${overwrite ? "↻" : "+"} ${to}`);
+    }
+  }
+  return written;
+}
+
+const cmd = process.argv[2];
+
+if (cmd === "list") {
+  for (const i of REGISTRY.items) {
+    const deps = [...i.registryDependencies, ...i.internalDependencies];
+    console.log(`${i.name}${deps.length ? "  ← " + deps.join(", ") : ""}`);
+  }
+} else if (cmd === "add" || cmd === "update") {
+  const name = process.argv[3];
+  const destSrc = resolve(arg("--dest") || die("falta --dest <consumer-src-dir>"));
+  if (!name) die(`uso: em-ui ${cmd} <Componente> --dest <src>`);
+  const written = copyInto(name, destSrc, { overwrite: cmd === "update" });
+  console.log(`em-ui ${cmd} ${name} (cierre: ${[...resolveClosure(name)].join(", ")})`);
+  written.forEach((w) => console.log("  " + w));
+} else if (cmd === "diff") {
+  const name = process.argv[3];
+  const target = arg("--target") || die("falta --target <fichero-del-consumidor>");
+  const item = byName[name] || die(`componente desconocido: ${name}`);
+  const sourceFile = join(DS, item.file);
+  const a = readFileSync(sourceFile, "utf8").split("\n");
+  if (!existsSync(target)) die(`target no existe: ${target}`);
+  const b = readFileSync(target, "utf8").split("\n");
+  // diff de líneas simple (LCS-light por igualdad posicional + reporte de añadidas/quitadas)
+  const setA = new Set(a), setB = new Set(b);
+  const onlySource = a.filter((l) => l.trim() && !setB.has(l));
+  const onlyTarget = b.filter((l) => l.trim() && !setA.has(l));
+  if (!onlySource.length && !onlyTarget.length) {
+    console.log(`em-ui diff ${name}: SIN DRIFT (idéntico a la fuente).`); process.exit(0);
+  }
+  console.log(`em-ui diff ${name}: DRIFT detectado (fuente=${item.file} vs ${target})`);
+  console.log(`  — en la FUENTE pero no en el consumidor (posible regresión si falta):`);
+  onlySource.forEach((l) => console.log(`    - ${l.trim()}`));
+  console.log(`  + en el CONSUMIDOR pero no en la fuente (divergencia per-cliente o drift):`);
+  onlyTarget.forEach((l) => console.log(`    + ${l.trim()}`));
+  process.exit(3);
+} else if (cmd === "init") {
+  const destSrc = resolve(arg("--dest") || die("falta --dest <consumer-src-dir>"));
+  const to = join(destSrc, "styles", "em-ui-tokens.css");
+  mkdirSync(dirname(to), { recursive: true });
+  copyFileSync(join(DS, REGISTRY.tokens), to);
+  console.log(`em-ui init: capa de tokens instalada → ${to}`);
+  console.log(`  Impórtala desde tu CSS global del consumidor: @import "../styles/em-ui-tokens.css";`);
+  console.log(`  (sin esto, los componentes referencian tokens inexistentes y renderizan rotos).`);
+} else {
+  console.log(`em-ui — registry + CLI del design system (fuente: design-system/)
+uso:
+  em-ui list                              lista componentes y sus deps
+  em-ui add <C> --dest <src>              copia C (+deps) al consumidor (no sobrescribe)
+  em-ui update <C> --dest <src>           re-pull de C (+deps), reconciliando (sobrescribe)
+  em-ui diff <C> --target <fichero>       muestra drift del consumidor vs la fuente
+  em-ui init --dest <src>                 instala la capa de tokens en el consumidor`);
+  if (cmd && cmd !== "help" && cmd !== "--help") process.exit(1);
+}
