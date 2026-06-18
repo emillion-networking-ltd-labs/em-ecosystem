@@ -1,6 +1,6 @@
 # Strategy: satellites
 
-Status: DRAFT
+Status: APPROVED   <!-- operador, human gate, 2026-06-18 -->
 Strategy: satellites   <!-- feature specs reference this with a `Strategy: satellites` line -->
 
 ## Goal
@@ -47,7 +47,9 @@ Decidir el NORTE de un **sistema de facilitación gobernado** (tipo Lovable, per
 
 ## Recommendation
 <!-- which option + why — this is judgment; the human approves it at the gate -->
-**Recomendación (sujeta al human gate — el operador decide): Opción 2 (Registry + CLI interno estilo shadcn) como mecanismo de reuse**, sobre el que se construye el sistema de facilitación `/satellite`.
+**APROBADA por el operador (human gate, 2026-06-18): Opción 2 (Registry + CLI interno estilo shadcn, `em-ui`) como mecanismo de reuse**, sobre el que se construye el sistema de facilitación `/satellite`.
+
+> **Matiz clave de la 2 (decidido a propósito): es COPIA GOBERNADA con reconciliación, NO "cero copia".** Se elige precisamente porque los satélites **necesitan divergir per-cliente** (colores/marca, a veces un componente) y un paquete inmutable (workspace/npm) lo impediría. Single-source = dashboard UI Core; *ownership* por satélite; el **re-pull gobernado + el gate de a11y** hacen el drift **detectable y reconciliable** (la regresión real del `Button` — `nexacore-dashboard/src/components/ui/Button.tsx:87` — es la prueba de por qué hace falta).
 
 **Por qué la 2 y no las demás:**
 - La **1 (copia manual)** es el estado actual y ya falló: `Button` perdió a11y (`nexacore-dashboard/src/components/ui/Button.tsx:87` vs la copia del satélite). No es norte, es la deuda a cerrar.
@@ -85,12 +87,17 @@ El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún 
 
 ## Decisions
 <!-- optional: link the chosen decision as an ADR, e.g. emkeel-governance/adr/006-<slug>.md -->
-**PENDIENTE DE HUMAN GATE.** Al aprobar el operador: fijar `Status: APPROVED`, registrar como `emkeel-governance/adr/006-<slug>.md`, y abrir **ECOs de seguimiento por fase**: (1) registry+CLI `em-ui` con single-source dashboard + reconciliación del drift de SAT01 (cierra el scope de SCRUM-331); (2) skill `/satellite` (5 modos de onboarding + generación reusando componentes + adaptación a forma satélite hasta S2); (3) automatización Jira+GitHub+Vercel + cierre de los 2 huecos de CI (`.github/workflows/security.yml`, `.github/workflows/visual-regression.yml`). Los specs de features de satélite llevarán la línea `Strategy: satellites` (lo exige `check_strategy_link`).
+**APROBADA (human gate, 2026-06-18).** Decisión arquitectónica registrada en [`emkeel-governance/adr/006-satellite-component-reuse.md`](../adr/006-satellite-component-reuse.md). Los specs de features de satélite llevarán la línea `Strategy: satellites` (lo exige `check_strategy_link`).
 
-**Preguntas para el operador (gate):**
-1. ¿Mecanismo de reuse = Opción 2 (registry+CLI estilo shadcn) — confirmas descartar el workspace (3) por el refactor + rigidez per-cliente?
-2. ¿La automatización del setup (Jira+GitHub+Vercel) entra ya en Fase 3 o se difiere a un ECO posterior tras validar Fases 1-2?
-3. ¿Se promueve el runbook a `emkeel-governance/` (norte ejecutable) o se mantiene de referencia y la estrategia es el norte?
+### Decisiones del operador (eran preguntas; resueltas en el gate)
+- **D1 — Mecanismo de reuse = Opción 2 (registry + CLI interno estilo shadcn, `em-ui`).** Es **copia GOBERNADA con reconciliación, NO "cero copia"**: single-source = dashboard UI Core; *ownership* por satélite (permite divergencia per-cliente); re-pull gobernado + gate de a11y hacen el drift detectable y reconciliable. **Descartadas** la 3 (workspace: exige refactor del repo + rigidez per-cliente) y la 4 (npm: misma rigidez + release overhead).
+- **D2 — Automatización (Jira proyecto+sprint+tickets, GitHub, Vercel) = Fase 3, DENTRO del norte** (no se difiere fuera de alcance). Se construye tras validar reuse (Fase 1) y generación (Fase 2), porque automatizar sobre una base aún no validada escala riesgo.
+- **D3 — El runbook se MANTIENE de referencia en `docs/archive/`** (NO se promueve a `emkeel-governance/`). La estrategia es el norte; el runbook es el "cómo" procedimental/histórico (consistente con ADR-005).
+
+### ECOs de seguimiento propuestos (títulos/scope; los números Jira los crea el operador)
+1. **ECO-Fase1 — Mecanismo de reuse `em-ui`:** registry + CLI interno con single-source = dashboard UI Core; backfill de los 48 componentes + **reconciliación del drift de SAT01** (empezando por el `Button`). Cierra el scope de **SCRUM-331**. *(pieza base; sin dependencias)*
+2. **ECO-Fase2 — Skill `/satellite`:** 5 modos de onboarding + generación que *pull-ea* del registry + adaptación a forma satélite hasta **S2 PASS**. *(depende de Fase 1)*
+3. **ECO-Fase3 — Automatización + gobernanza:** orquestación Jira+GitHub+Vercel end-to-end + cierre de los 2 huecos de CI (satélites en la matrix de `.github/workflows/security.yml` + VRT auto-discovered en `.github/workflows/visual-regression.yml`). *(depende de Fase 2)*
 
 ## Sources (verificadas con tool — cada una abierta)
 - SAT01 (Next.js en monorepo, COMMITEADO): `satellites/sat-cristian-garcia/package.json`; rutas `satellites/sat-cristian-garcia/src/app/page.tsx`; cabeceras `satellites/sat-cristian-garcia/next.config.mjs:15-26`; observabilidad `satellites/sat-cristian-garcia/src/app/layout.tsx:68-69`; 17 componentes copiados en `satellites/sat-cristian-garcia/src/components/ui/`.
