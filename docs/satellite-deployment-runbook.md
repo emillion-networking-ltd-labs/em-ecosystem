@@ -1,4 +1,4 @@
-> Archivado 2026-06-14 — referencia histórica, NO activa. No es norma vigente.
+> Documento operativo de referencia (procedimiento SAT01). El norte gobernado es la estrategia `satellites`; esto es el "cómo".
 
 # Satellite Deployment Runbook
 

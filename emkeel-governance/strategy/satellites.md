@@ -11,18 +11,18 @@ Decidir el NORTE de un **sistema de facilitación gobernado** (tipo Lovable, per
 
 **Qué es HOY un satélite (A1 — SAT01, nuestro primer satélite ya creado):**
 - `satellites/sat-cristian-garcia/` es una **app Next.js 16 + TypeScript + Tailwind + App Router** (`satellites/sat-cristian-garcia/package.json`), multi-ruta (7 rutas: `satellites/sat-cristian-garcia/src/app/page.tsx` + `sobre-mi/`, `servicios/`, `portfolio/`, `testimonios/`, `precios/`, `contacto/`), con hardening S2 (6 cabeceras `satellites/sat-cristian-garcia/next.config.mjs:15-26`, observabilidad `satellites/sat-cristian-garcia/src/app/layout.tsx:68-69`).
-- Es un **EJEMPLO ya creado, no una herramienta**: nació reutilizando por **COPIA MANUAL** el UI Core del dashboard — *"Copy UI Core components from `nexacore-dashboard/src/components/ui/` to the new satellite's `src/components/ui/`"* (`docs/archive/satellite-deployment-runbook.md:140-142`).
+- Es un **EJEMPLO ya creado, no una herramienta**: nació reutilizando por **COPIA MANUAL** el UI Core del dashboard — *"Copy UI Core components from `nexacore-dashboard/src/components/ui/` to the new satellite's `src/components/ui/`"* (`docs/satellite-deployment-runbook.md:140-142`).
 
 **El acelerador real es NUESTRO sistema de componentes (A2):**
 - El **UI Core vive en el dashboard** y `/admin/design-system` es la **fuente de verdad** — *"Usar componentes `ui/` y tokens semánticos … `/admin/design-system` es la fuente de verdad"* (`CONTRIBUTING.md:73-75`).
 - Catálogo real: **48 componentes** en `nexacore-dashboard/src/components/ui/` (p.ej. `Button.tsx`, `Input.tsx`, `Select.tsx`, `Tabs.tsx`, `FormField.tsx`…).
 
 **El problema base a resolver: NO existe mecanismo de reuse, y la copia manual DERIVA (A3 — medido, no asumido):**
-- **No hay `em-ui` CLI:** SCRUM-331 (el CLI de distribución de UI Core a satélites) está solo *referenciado* en el runbook como futuro — *"Once SCRUM-331's `em-ui` CLI ships, replace manual copy"* (`docs/archive/satellite-deployment-runbook.md:140-142`; ver también `:27` y `:444`) — **nunca se implementó**.
+- **No hay `em-ui` CLI:** SCRUM-331 (el CLI de distribución de UI Core a satélites) está solo *referenciado* en el runbook como futuro — *"Once SCRUM-331's `em-ui` CLI ships, replace manual copy"* (`docs/satellite-deployment-runbook.md:140-142`; ver también `:27` y `:444`) — **nunca se implementó**.
 - **No hay monorepo workspace / paquete compartido:** el `package.json` raíz no declara `workspaces` (`package.json:1`) y no existe `packages/`.
 - **La copia manual ya divergió:** SAT01 copió **17 de los 48** componentes (`satellites/sat-cristian-garcia/src/components/ui/`), y al menos `Button` **derivó** del original: el SAT01 reescribió la resolución de `as`/`href` y **perdió los atributos de accesibilidad** `role="status"` / `aria-label="Loading"` que sí tiene el dashboard (`nexacore-dashboard/src/components/ui/Button.tsx:87`). ⇒ La copia manual es un generador de drift: sin single-source, los 17 divergen y arrastran regresiones (a11y) que los gates del satélite deberían cazar.
 
-**"Lanzado" significa S2 PASS (A4 — definido por el runbook):** S1 deja el sitio *"technically deployed"*; el umbral es **S2** — *"production-grade … MANDATORY before inviting real users"* (`docs/archive/satellite-deployment-runbook.md:262-268`), Lighthouse Perf≥90/SEO≥95/BP≥95/A11y≥90 (`docs/archive/satellite-deployment-runbook.md:337`). El objetivo del operador: un satélite nuevo **~90% alineado** al cliente y a nuestra estandarización al lanzar, como SAT01.
+**"Lanzado" significa S2 PASS (A4 — definido por el runbook):** S1 deja el sitio *"technically deployed"*; el umbral es **S2** — *"production-grade … MANDATORY before inviting real users"* (`docs/satellite-deployment-runbook.md:262-268`), Lighthouse Perf≥90/SEO≥95/BP≥95/A11y≥90 (`docs/satellite-deployment-runbook.md:337`). El objetivo del operador: un satélite nuevo **~90% alineado** al cliente y a nuestra estandarización al lanzar, como SAT01.
 
 **Gobernanza — y sus 2 HUECOS reales (A5):**
 - Required checks de `main`: `gates` y `Security Gate (All Checks)` (branch protection, GitHub API).
@@ -40,7 +40,7 @@ Decidir el NORTE de un **sistema de facilitación gobernado** (tipo Lovable, per
 
 | # | Option (mecanismo de reuse) | Source | Pros | Cons | Risk |
 |---|--------|--------|------|------|------|
-| 1 | **Status quo — copia manual** del UI Core a cada satélite | docs/archive/satellite-deployment-runbook.md:140 | Cero infra; arranque inmediato; cada satélite es dueño de su copia | **Genera drift** (Button ya perdió a11y, `Button.tsx:87`); 17/48 copiados; sin single-source; irreproducible | **Alto**: divergencia y regresiones silenciosas; incumple "recurrente gobernado" |
+| 1 | **Status quo — copia manual** del UI Core a cada satélite | docs/satellite-deployment-runbook.md:140 | Cero infra; arranque inmediato; cada satélite es dueño de su copia | **Genera drift** (Button ya perdió a11y, `Button.tsx:87`); 17/48 copiados; sin single-source; irreproducible | **Alto**: divergencia y regresiones silenciosas; incumple "recurrente gobernado" |
 | 2 | **Registry + CLI interno (estilo shadcn)** — `em-ui` sobre el UI Core del dashboard como única fuente; el satélite *pull-ea* componentes+tokens (ownership) vía CLI; **es SCRUM-331 bien hecho** | nexacore-dashboard/src/components/ui/Button.tsx:1 | Single-source = dashboard; ownership por satélite (permite tweaks per-cliente) **sin** refactor a monorepo; `registry:base` instala design system entero; re-pull gobernado **resuelve el drift** (https://ui.shadcn.com/docs/registry/getting-started) | Hay que **construir** el registry+CLI (es el scope real de SCRUM-331); el re-pull no es automático (disciplina + gate) | Medio: coste de construir la pieza base, acotado y reutilizable |
 | 3 | **Paquete compartido en monorepo (pnpm/Turborepo)** — `@em/ui` importado por dashboard y satélites | nexacore-dashboard/package.json:1 | Single-source más fuerte (import, **cero copia**, sin drift posible); caché de build (https://turborepo.dev/docs) | Exige **convertir el repo a workspaces** (hoy el `package.json` raíz no declara `workspaces`); un paquete inmutable **pelea con la divergencia per-cliente** que un satélite necesita | Medio-alto: refactor grande del repo + rigidez para personalizar por cliente |
 | 4 | **Paquete npm publicado** — `@em/ui` versionado y publicado, consumido como dep | satellites/sat-cristian-garcia/package.json:1 | Versionado estándar (semver); desacopla del repo | Overhead de publish/release; **misma rigidez** que (3) frente a tweaks per-cliente; el satélite añade otra dep externa | Medio: fricción operativa sin resolver la personalización |
@@ -64,7 +64,7 @@ Decidir el NORTE de un **sistema de facilitación gobernado** (tipo Lovable, per
    - **(d) Perfil de Instagram** → extraer fotos/bio/datos como contenido real.
    - **(e) Páginas de inspiración** → referencia de diseño.
    Colores del cliente/marca/IG **solo si se piden o se extraen** (regla: no inventar datos).
-2. **Generación que reutiliza componentes** (vía el registry, no greenfield) y **adapta a la forma satélite** (Next.js multi-ruta en monorepo, como SAT01) hasta **S2 PASS** (`docs/archive/satellite-deployment-runbook.md:262-268`).
+2. **Generación que reutiliza componentes** (vía el registry, no greenfield) y **adapta a la forma satélite** (Next.js multi-ruta en monorepo, como SAT01) hasta **S2 PASS** (`docs/satellite-deployment-runbook.md:262-268`).
 3. **Automatización end-to-end** — el skill crea **proyecto Jira + sprint inicial + sus tickets** de creación, **repo/carpeta en GitHub**, y **deploy en Vercel** (nuestro target en monorepo, no Netlify) — el patrón "intake→genera→repo→deploy" que Lovable/v0 ya prueban (emergent.sh/learn/v0-vs-lovable-vs-bolt), pegado a nuestro flujo (Jira ECO/SAT, GitHub, Vercel).
 4. **Gobernanza** — la salida pasa los gates; se cierran los 2 huecos: satélites en la matrix de `.github/workflows/security.yml:64-65` y VRT/a11y **auto-discovered** en vez de hardcoded a `sat-cristian-garcia` (`.github/workflows/visual-regression.yml:31-35`). El gate de a11y habría cazado la regresión del `Button`.
 
@@ -79,11 +79,11 @@ El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún 
 - **Fase 3 — Automatización + gobernanza:** orquestar Jira+GitHub+Vercel end-to-end y **cerrar los 2 huecos de CI** (satélites bajo Security Pipeline + VRT auto-discovered). La gobernanza se cablea aquí para que la automatización no escale drift.
 
 ## Non-goals
-- NO es el cómo-paso-a-paso (scaffold, curl a Vercel, gotchas): eso es el **runbook** (`docs/archive/satellite-deployment-runbook.md`), que esta estrategia referencia, no reemplaza.
+- NO es el cómo-paso-a-paso (scaffold, curl a Vercel, gotchas): eso es el **runbook** (`docs/satellite-deployment-runbook.md`), que esta estrategia referencia, no reemplaza.
 - NO construye el registry/CLI ni el skill `/satellite` aquí: fija el norte; el cómo es el/los ECO de seguimiento por fase.
 - NO decide el diseño/branding de un satélite concreto (es per-cliente).
 - NO convierte el repo a monorepo-workspaces (la Opción 2 lo evita por diseño).
-- NO promete backend/integración con la API NexaCore (un satélite es marketing estático salvo que un ticket lo pida — `docs/archive/satellite-deployment-runbook.md:28`).
+- NO promete backend/integración con la API NexaCore (un satélite es marketing estático salvo que un ticket lo pida — `docs/satellite-deployment-runbook.md:28`).
 
 ## Decisions
 <!-- optional: link the chosen decision as an ADR, e.g. emkeel-governance/adr/006-<slug>.md -->
@@ -92,7 +92,7 @@ El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún 
 ### Decisiones del operador (eran preguntas; resueltas en el gate)
 - **D1 — Mecanismo de reuse = Opción 2 (registry + CLI interno estilo shadcn, `em-ui`).** Es **copia GOBERNADA con reconciliación, NO "cero copia"**: single-source = dashboard UI Core; *ownership* por satélite (permite divergencia per-cliente); re-pull gobernado + gate de a11y hacen el drift detectable y reconciliable. **Descartadas** la 3 (workspace: exige refactor del repo + rigidez per-cliente) y la 4 (npm: misma rigidez + release overhead).
 - **D2 — Automatización (Jira proyecto+sprint+tickets, GitHub, Vercel) = Fase 3, DENTRO del norte** (no se difiere fuera de alcance). Se construye tras validar reuse (Fase 1) y generación (Fase 2), porque automatizar sobre una base aún no validada escala riesgo.
-- **D3 — El runbook se MANTIENE de referencia en `docs/archive/`** (NO se promueve a `emkeel-governance/`). La estrategia es el norte; el runbook es el "cómo" procedimental/histórico (consistente con ADR-005).
+- **D3 — El runbook es el "cómo" procedimental y vive en `docs/`** (NO en `emkeel-governance/`): se **promovió de `docs/archive/` a `docs/satellite-deployment-runbook.md`** como referencia operativa activa y `docs/archive/` se eliminó — completando lo que ADR-005 ya anticipó. La estrategia sigue siendo el norte; el runbook no es gobernanza.
 
 ### ECOs de seguimiento propuestos (títulos/scope; los números Jira los crea el operador)
 1. **ECO-Fase1 — Mecanismo de reuse `em-ui`:** registry + CLI interno con single-source = dashboard UI Core; backfill de los 48 componentes + **reconciliación del drift de SAT01** (empezando por el `Button`). Cierra el scope de **SCRUM-331**. *(pieza base; sin dependencias)*
@@ -102,6 +102,6 @@ El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún 
 ## Sources (verificadas con tool — cada una abierta)
 - SAT01 (Next.js en monorepo, COMMITEADO): `satellites/sat-cristian-garcia/package.json`; rutas `satellites/sat-cristian-garcia/src/app/page.tsx`; cabeceras `satellites/sat-cristian-garcia/next.config.mjs:15-26`; observabilidad `satellites/sat-cristian-garcia/src/app/layout.tsx:68-69`; 17 componentes copiados en `satellites/sat-cristian-garcia/src/components/ui/`.
 - UI Core / fuente de verdad (COMMITEADO): `nexacore-dashboard/src/components/ui/` (48 comp.); `nexacore-dashboard/src/components/ui/Button.tsx:1,87` (a11y `role="status"`/`aria-label="Loading"` perdida en la copia del satélite); `CONTRIBUTING.md:73-75` (`/admin/design-system` fuente de verdad).
-- Estado del reuse (COMMITEADO): `package.json:1` (sin `workspaces`); runbook copia manual + em-ui/SCRUM-331 `docs/archive/satellite-deployment-runbook.md:140-142,27,444`; "lanzado"/S2 `:262-268,337`; out-of-scope backend `:28`.
+- Estado del reuse (COMMITEADO): `package.json:1` (sin `workspaces`); runbook copia manual + em-ui/SCRUM-331 `docs/satellite-deployment-runbook.md:140-142,27,444`; "lanzado"/S2 `:262-268,337`; out-of-scope backend `:28`.
 - Gates / huecos (COMMITEADO): `.github/workflows/security.yml:64-65` (matrix api+dashboard); `.github/workflows/visual-regression.yml:31-35` (paths SAT01), `:203` (job satélite). Required checks de `main`: `gates`, `Security Gate (All Checks)`.
 - Mercado: shadcn/ui registry+CLI (copy-based, `registry.json` HTTP, `registry:base` = design system en un install) — https://ui.shadcn.com/docs/registry/getting-started y https://ui.shadcn.com/docs/cli ; Turborepo/pnpm workspaces (`packages/`+`apps/`, caché) — https://turborepo.dev/docs/crafting-your-repository/structuring-a-repository ; prompt-to-deployed (Lovable two-way GitHub sync + Netlify; v0 one-click Vercel; bolt export) — https://emergent.sh/learn/v0-vs-lovable-vs-bolt .

@@ -27,7 +27,7 @@ Sin una regla explícita, un agente (o una persona) puede tratar un doc de `docs
    | Documento | Disposición | Grounding / razón |
    |---|---|---|
    | `docs/archive/ui-design-system.md` | **BORRAR** (en este ticket) | Superseded — la fuente viva es `/admin/design-system`, declarada fuente de verdad en `CONTRIBUTING.md:73-75`. El snapshot Figma (extraído 2026-02-19) es un congelado redundante. |
-   | `docs/archive/satellite-deployment-runbook.md` | **SE QUEDA** — pendiente de promoción | Documento operativo vigente (procedimiento SAT01). Se promoverá a una **estrategia gobernada** `strategy/satellites.md` en **ECO-20** (ceremonia `/strategy`). No se toca aquí. |
+   | `docs/archive/satellite-deployment-runbook.md` (ubicación en ECO-19) | **SE QUEDA** — pendiente de promoción | Documento operativo vigente (procedimiento SAT01). Se promoverá a una **estrategia gobernada** `strategy/satellites.md` en **ECO-20** (ceremonia `/strategy`). No se toca aquí. *(ECO-20: hecho — estrategia creada y runbook promovido a `docs/satellite-deployment-runbook.md`; `docs/archive/` eliminado.)* |
    | `docs/auth-v2-program.md` | **SE QUEDA** — referencia histórica | El "por qué" del programa original de 7 fases (D-001…D-010). Su autoridad ya es **redundante** con `strategy/auth.md` (APPROVED) + `ADR-002`; el propio doc declara que ante conflicto mandan esos dos. Se retiene como contexto histórico. |
 
 4. **Forward-ref (ECO-20):** el runbook de satélites **no es referencia muerta**: es norte latente. Su promoción a `emkeel-governance/strategy/satellites.md` se hará en **ECO-20** vía la ceremonia `/strategy` (investigación grounded + human gate), no en este ticket.
@@ -35,7 +35,7 @@ Sin una regla explícita, un agente (o una persona) puede tratar un doc de `docs
 ## Consecuencias
 
 - **Se elimina** `docs/archive/ui-design-system.md`. La guía de diseño vinculante para cualquier trabajo de UI es `/admin/design-system` (vía `CONTRIBUTING.md`); no queda un segundo "source of truth" estático que pueda divergir.
-- **`docs/archive/` queda con un solo fichero** (el runbook), explícitamente marcado como pendiente de promoción a `strategy/` en ECO-20. Cuando se promueva, `docs/archive/` podrá vaciarse y eliminarse.
+- **`docs/archive/` quedó con un solo fichero** (el runbook), marcado como pendiente de promoción en ECO-20. *(ECO-20: cumplido — el runbook se promovió a `docs/satellite-deployment-runbook.md` como referencia operativa activa y `docs/archive/` se vació y eliminó, tal como se anticipó aquí.)*
 - **`docs/auth-v2-program.md` permanece** como referencia histórica no vinculante; cualquier decisión AUTH se gobierna por `strategy/auth.md` + `ADR-002`, nunca por este doc.
 - **Frontera declarada para agentes:** a partir de esta ADR, "leer la doctrina" significa leer `emkeel-governance/`. `docs/` informa pero no obliga. Esto cierra la vía de drift por la que una referencia histórica se confunde con norma vigente.
 - Esta ADR es **solo gobernanza**: no toca código de producto (`nexacore-api/`, `nexacore-dashboard/`) ni el runbook ni el auth-v2-program. Registra la doctrina y ejecuta una única retirada (el design-system archivado).
