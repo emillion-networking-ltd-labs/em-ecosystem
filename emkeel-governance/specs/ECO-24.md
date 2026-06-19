@@ -13,13 +13,13 @@ Fase 2a de la estrategia [`satellites`](../strategy/satellites.md) (APPROVED). C
 ## Decisiones que resuelve
 
 ### D-A — Mecanismo de entrega del skill
-`/satellite` se entrega como **skill conversacional** (en `.claude/skills/satellite/`) que orquesta el onboarding + invoca **scripts de soporte** (Node, sin red salvo los modos d/e) para las tareas mecánicas (scrape IG, fetch de URL, normalización del brief). El skill **pregunta**, los scripts **obtienen/validan**; el skill nunca decide datos del negocio por su cuenta.
+`/satellite` se entrega como **skill conversacional** (en `.claude/skills/satellite/`) que orquesta el onboarding + invoca **scripts de soporte** (Node, sin red salvo los modos d/e) para las tareas mecánicas (fetch de URL, scrape IG best-effort, normalización del brief). El skill **pregunta**, los scripts **obtienen/validan**; el skill nunca decide datos del negocio por su cuenta.
 
 ### D-B — Los 5 modos de intake y cómo obtienen datos (regla dura: NO inventar)
 - **(a) Cliente SIN diseño/marca:** se parte del **UI Core + estructura SAT01** como referencia; el skill **pregunta** datos reales (negocio, servicios/precios, contacto) y **propone** paletas/tipografías para que el cliente **elija** (propuesta ≠ invención: el cliente confirma).
 - **(b) Cliente CON diseño/marca:** el cliente aporta sus **tokens** (colores/tipografía/logo); se mapean a la capa de tokens (`em-ui init`) — se **aplican**, no se inventan.
 - **(c) Mejorar un sitio existente (clone-and-improve):** el skill **fetchea la URL** del cliente (script) y extrae **su** contenido/estructura/colores reales; reconstruye el plan con nuestros componentes. Lo que no se pueda extraer se **pregunta**.
-- **(d) Perfil de Instagram:** script de scrape (Playwright/Firecrawl/WebFetch en cascada, con fallback a pedir los datos) extrae fotos/bio/handle/stats **reales**; si el scrape falla, se piden a mano. Nunca se fabrican seguidores/bio.
+- **(d) Perfil de Instagram:** la **vía primaria y fiable** es que el cliente aporte su **handle** y **confirme/pegue su propio contenido** (fotos/bio/stats) — es su cuenta, control y exactitud máximos. El **scrape es best-effort** (Playwright/Firecrawl/WebFetch): si funciona, **mejora/pre-rellena** lo que el cliente luego confirma; si falla o no está disponible, **no pasa nada** — se piden los datos. **ToS:** solo datos **públicos** de la **cuenta propia** del cliente, **sin** saltar auth-walls ni scrapear cuentas de terceros. Nunca se fabrican seguidores/bio (los no confirmados quedan `missing`/`proposed`).
 - **(e) Páginas de inspiración:** URLs que el cliente aporta como **referencia de diseño** (no se copian datos; solo guían estética).
 - **REGLA DURA (transversal):** colores/marca/contenido/IG entran al brief **solo** si el cliente los aporta o se **extraen** de una fuente real suya. Todo campo no resuelto queda marcado `missing` en el brief (no se rellena con invención).
 

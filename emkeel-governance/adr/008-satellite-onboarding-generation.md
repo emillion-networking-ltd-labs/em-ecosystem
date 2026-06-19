@@ -1,10 +1,10 @@
 # ADR-008 — Skill `/satellite`: brief-driven (onboarding) + generación por reuse (no greenfield)
 
-- **Estado:** Propuesta
+- **Estado:** Aceptada
 - **Fecha:** 2026-06-19
 - **Tickets:** [ECO-24](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-24) (F2a onboarding), [ECO-25](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-25) (F2b generación)
 - **Strategy:** satellites
-- **Decisor:** Operador (human gate) — **pendiente de aprobación**
+- **Decisor:** Operador (human gate, 2026-06-19)
 - **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa la Fase 2 del norte (`strategy/satellites.md` §Recommendation, punto sistema `/satellite`) sobre la base de [ADR-006](006-satellite-component-reuse.md)/[ADR-007](007-design-system-source-location.md) (reuse via em-ui desde `design-system/`).
 
 ## Contexto
@@ -14,7 +14,7 @@ La Fase 2 construye el sistema de facilitación `/satellite`: onboarding (5 modo
 
 1. **Arquitectura brief-driven con costura limpia.** El skill se parte en dos entregables con un **contrato explícito**: onboarding (ECO-24) produce un **`brief.json`** (schema versionado, con **procedencia por campo**); generación (ECO-25) **consume** ese brief. El brief es la costura — misma filosofía genérico/binding de ADR-006. Permite revisar/entregar cada mitad por separado.
 
-2. **Onboarding = preguntar/extraer, nunca inventar.** Los 5 modos obtienen datos así: (a) sin-diseño → preguntar + **proponer** paletas (cliente elige); (b) con-marca → **aplicar** sus tokens; (c) mejorar-sitio → **fetch** de su URL (extraer); (d) Instagram → **scrape** real con fallback a preguntar; (e) inspiración → URLs solo como referencia estética. Cada campo del brief lleva procedencia `provided|extracted|proposed|missing`; **no existe `invented`**. Un dato sin fuente real queda `missing`/`proposed`, jamás `provided`.
+2. **Onboarding = preguntar/extraer, nunca inventar.** Los 5 modos obtienen datos así: (a) sin-diseño → preguntar + **proponer** paletas (cliente elige); (b) con-marca → **aplicar** sus tokens; (c) mejorar-sitio → **fetch** de su URL (extraer); (d) Instagram → cliente aporta handle + **confirma/pega su contenido** (vía primaria); **scrape best-effort** de datos públicos de su cuenta como mejora; (e) inspiración → URLs solo como referencia estética. Cada campo del brief lleva procedencia `provided|extracted|proposed|missing`; **no existe `invented`**. Un dato sin fuente real queda `missing`/`proposed`, jamás `provided`.
 
 3. **Generación = reuse, no greenfield.** El motor: scaffold de **forma satélite** desde la estructura **SAT01** (S2-ready) + **`em-ui add`/`init`** desde `design-system/` como **única** vía de UI (invariante de ADR-006/007: jamás copia manual, jamás dashboard) + relleno desde el brief (los `missing` → placeholders visibles).
 
@@ -32,5 +32,6 @@ La Fase 2 construye el sistema de facilitación `/satellite`: onboarding (5 modo
 - F3 (deploy + automatización Jira/GitHub/Vercel + Lighthouse remoto + cierre de los 2 huecos de CI) se construye encima, fuera de F2.
 
 ## Notas
-- Decisión a confirmar por el operador en el human gate de la planificación de F2 (ECO-24/ECO-25). El "cómo" detallado de cada mitad vive en sus specs (`specs/ECO-24.md`, `specs/ECO-25.md`).
+- Decisión aprobada por el operador en el human gate de la planificación de F2 (2026-06-19). El "cómo" detallado de cada mitad vive en sus specs (`specs/ECO-24.md`, `specs/ECO-25.md`).
+- Refinamiento del gate: en el modo (d) Instagram, la vía **primaria y fiable** es que el cliente aporte su handle y **confirme/pegue su propio contenido** (es su cuenta); el scrape es **best-effort** (mejora si funciona), solo datos **públicos** de la **cuenta propia**, sin saltar auth-walls (ToS).
 </content>

@@ -37,7 +37,7 @@ F2b entrega un satélite **S2-READY** + **validación local**, NO el lanzamiento
 3. **Contenido real / no inventar:** el satélite generado refleja los datos `provided`/`extracted` del brief; los `missing` salen como **placeholders visibles**, no como datos fabricados.
 4. **S2-ready:** el satélite trae los 6 deliverables de hardening S2; **`next build` verde**; **Lighthouse local** cumple Perf≥90/SEO≥95/BP≥95/A11y≥90 (o se reporta el gap).
 5. **Frontera F3 respetada:** no hay deploy ni provisión remota; el spec documenta que el "lanzado" remoto es F3.
-6. **Gates verdes:** `gates` (incl. `check_strategy_link` con `Strategy: satellites`, `check_ticket_link` ECO-25), Security Pipeline / Security Gate, build + tests de lo afectado. Si el satélite demo se commitea, queda bajo los gates (o se genera en CI/efímero — se acota en implementación).
+6. **Gates verdes:** `gates` (incl. `check_strategy_link` con `Strategy: satellites`, `check_ticket_link` ECO-25), Security Pipeline / Security Gate, build + tests de lo afectado. El **satélite demo de prueba es EFÍMERO** (se genera en test/CI, se asserta y se descarta); **NO se commitea ningún `satellites/sat-demo/`** al repo.
 
 ## Out of scope
 - Onboarding y brief (ECO-24, F2a — dependencia).
