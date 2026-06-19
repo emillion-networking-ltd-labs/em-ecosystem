@@ -1,0 +1,189 @@
+#!/usr/bin/env node
+// Motor de generación del skill /satellite (ECO-25, F2b). brief.json -> satélite S2-ready.
+// Pipeline determinista, NO greenfield: scaffold forma-SAT01 + reuse de UI SOLO via `em-ui add`
+// (cierre transitivo) + `em-ui init` (tokens) + relleno desde el brief. Los `missing` -> placeholders
+// visibles, NUNCA datos fabricados. NO despliega (eso es F3).
+import { mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { execFileSync } from "node:child_process";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath } from "node:url";
+import { validateBrief } from "./lib/brief.mjs";
+
+const HERE = dirname(fileURLToPath(import.meta.url));
+const REPO_ROOT = resolve(HERE, "../../../..");        // scripts -> satellite -> skills -> .claude -> root
+const EM_UI = join(REPO_ROOT, "em-ui", "cli.mjs");
+
+// Componentes UI por defecto de un sitio marketing (existen en el registry). Reuse, no greenfield.
+export const DEFAULT_COMPONENTS = ["Button", "Badge", "Divider"];
+
+function slugify(s) { return String(s || "demo").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "demo"; }
+function val(field, label) {
+  // Relleno desde el brief con la regla "no inventar": value real, o PLACEHOLDER VISIBLE si missing/ausente.
+  if (field && (field.provenance === "provided" || field.provenance === "extracted" || field.provenance === "proposed") && field.value != null && field.value !== "") return field.value;
+  return `[FALTA: ${label}]`;
+}
+function emui(args, destSrc) {
+  return execFileSync("node", [EM_UI, ...args, "--dest", destSrc], { cwd: REPO_ROOT, encoding: "utf8" });
+}
+
+export function generateSatellite(brief, destDir, { components = DEFAULT_COMPONENTS } = {}) {
+  const { ok, problems } = validateBrief(brief);
+  if (!ok) throw new Error(`brief inválido: ${problems.join("; ")}`);
+
+  const name = brief.identity?.name?.value || "Demo";
+  const slug = slugify(name);
+  const dest = resolve(destDir);
+  const src = join(dest, "src");
+  const app = join(src, "app");
+  mkdirSync(app, { recursive: true });
+
+  const routes = (brief.targetRoutes && brief.targetRoutes.length ? brief.targetRoutes : ["/", "/servicios", "/contacto"]);
+  const trace = { slug, dest, components: [], emui: [], placeholders: [] };
+
+  // --- a. Scaffold forma-satélite (config) ---
+  writeFileSync(join(dest, "package.json"), JSON.stringify({
+    name: `@em-ecosystem/sat-${slug}`, version: "0.1.0", private: true,
+    scripts: { dev: "next dev -p 3100", build: "next build", start: "next start -p 3100", lint: "eslint \"src/**/*.{ts,tsx}\"" },
+    dependencies: { "@vercel/analytics": "^2.0.1", "@vercel/speed-insights": "^2.0.0", "lucide-react": "^1.14.0", next: "^16.2.6", react: "^19.2.6", "react-dom": "^19.2.6" },
+    devDependencies: { "@tailwindcss/postcss": "^4.3.0", "@types/node": "^22.19.18", "@types/react": "^19.2.14", "@types/react-dom": "^19.2.3", eslint: "^9.39.4", "eslint-config-next": "^16.2.6", postcss: "^8.5.10", tailwindcss: "^4.3.0", typescript: "^6.0.3" },
+    overrides: { next: { postcss: ">=8.5.10" } },
+  }, null, 2) + "\n");
+
+  writeFileSync(join(dest, "next.config.mjs"), NEXT_CONFIG);
+  writeFileSync(join(dest, "tsconfig.json"), TSCONFIG);
+  writeFileSync(join(dest, "postcss.config.mjs"), POSTCSS);
+  writeFileSync(join(dest, "next-env.d.ts"), `/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n`);
+  writeFileSync(join(dest, ".gitignore"), "/node_modules\n/.next\n/out\n");
+
+  // --- b. Reuse de UI SOLO via em-ui (tokens + componentes) ---
+  trace.emui.push(emui(["init"], src).trim());
+  for (const c of components) { trace.emui.push(emui(["add", c], src).trim()); trace.components.push(c); }
+
+  // --- c. globals.css importa la capa de tokens de em-ui ---
+  writeFileSync(join(app, "globals.css"), `@import "../styles/em-ui-tokens.css";\n\nbody { font-family: var(--font-sans); }\n`);
+
+  // --- layout con observabilidad (S2) ---
+  const siteName = val(brief.identity?.name, "nombre del negocio");
+  writeFileSync(join(app, "layout.tsx"), LAYOUT(siteName));
+
+  // --- páginas marketing (relleno desde brief; missing -> placeholder visible) ---
+  const f = brief.fields || {};
+  const services = (f.services && ["provided", "extracted", "proposed"].includes(f.services.provenance) && Array.isArray(f.services.value)) ? f.services.value : null;
+  if (!services) trace.placeholders.push("services");
+  const contactEmail = val(f.contactEmail, "email de contacto"); if (contactEmail.startsWith("[FALTA")) trace.placeholders.push("contactEmail");
+  const contactPhone = val(f.contactPhone, "teléfono"); if (contactPhone.startsWith("[FALTA")) trace.placeholders.push("contactPhone");
+  const sector = val(brief.identity?.sector, "sector");
+
+  for (const route of routes) {
+    const seg = route === "/" ? "" : route.replace(/^\//, "");
+    const dir = seg ? join(app, seg) : app;
+    mkdirSync(dir, { recursive: true });
+    writeFileSync(join(dir, "page.tsx"), PAGE({ route, siteName, sector, services, contactEmail, contactPhone }));
+  }
+
+  writeFileSync(join(app, "robots.ts"), ROBOTS);
+  writeFileSync(join(app, "sitemap.ts"), SITEMAP(routes));
+
+  return trace;
+}
+
+// ---- plantillas (derivadas de la forma SAT01) ----
+const NEXT_CONFIG = `import { fileURLToPath } from "node:url";
+import { dirname } from "node:path";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+// Baseline de seguridad S2 (6 cabeceras) aplicado a toda ruta.
+const securityHeaders = [
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" },
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), interest-cohort=()" },
+  { key: "X-DNS-Prefetch-Control", value: "on" },
+];
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  async headers() { return [{ source: "/(.*)", headers: securityHeaders }]; },
+  turbopack: { root: __dirname },
+};
+export default nextConfig;
+`;
+const TSCONFIG = JSON.stringify({
+  compilerOptions: { lib: ["dom", "dom.iterable", "esnext"], allowJs: true, skipLibCheck: true, strict: true, noEmit: true, esModuleInterop: true, module: "esnext", moduleResolution: "bundler", resolveJsonModule: true, isolatedModules: true, jsx: "react-jsx", incremental: true, plugins: [{ name: "next" }], paths: { "@/*": ["./src/*"] }, target: "ES2017" },
+  include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"], exclude: ["node_modules"],
+}, null, 2) + "\n";
+const POSTCSS = `/** @type {import('postcss-load-config').Config} */\nconst config = { plugins: { '@tailwindcss/postcss': {} } };\nexport default config;\n`;
+const LAYOUT = (siteName) => `import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+import "./globals.css";
+
+// metadataBase env-driven (S2): cae al default de Vercel hasta que F3 cablee el dominio.
+export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.vercel.app"),
+  title: ${JSON.stringify(siteName)},
+  description: ${JSON.stringify(`${siteName} — sitio oficial`)},
+};
+
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="es">
+      <body>
+        {children}
+        <SpeedInsights />
+        <Analytics />
+      </body>
+    </html>
+  );
+}
+`;
+const PAGE = ({ route, siteName, sector, services, contactEmail, contactPhone }) => {
+  const isHome = route === "/";
+  const servicesBlock = services
+    ? `<ul>{${JSON.stringify(services)}.map((s) => (<li key={s} className="text-content-secondary">{s}</li>))}</ul>`
+    : `<p className="text-content-tertiary">[FALTA: servicios]</p>`;
+  return `import Badge from "@/components/ui/Badge";
+import Divider from "@/components/ui/Divider";
+
+export const metadata = { title: ${JSON.stringify(`${siteName} — ${route === "/" ? "Inicio" : route.replace("/", "")}`)}, alternates: { canonical: ${JSON.stringify(route)} } };
+
+export default function Page() {
+  return (
+    <main className="bg-surface-primary text-content-primary">
+      <section>
+        <Badge>{${JSON.stringify(sector)}}</Badge>
+        <h1 className="text-content-primary">{${JSON.stringify(siteName)}}</h1>
+      </section>
+      <Divider />
+      ${isHome ? `<section>
+        <h2>Servicios</h2>
+        ${servicesBlock}
+      </section>
+      <section>
+        <h2>Contacto</h2>
+        <p className="text-content-secondary">Email: {${JSON.stringify(contactEmail)}}</p>
+        <p className="text-content-secondary">Tel: {${JSON.stringify(contactPhone)}}</p>
+      </section>` : `<section><p className="text-content-secondary">Ruta ${route}</p></section>`}
+    </main>
+  );
+}
+`;
+};
+const ROBOTS = `import type { MetadataRoute } from "next";
+export default function robots(): MetadataRoute.Robots {
+  return { rules: { userAgent: "*", allow: "/" }, sitemap: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.vercel.app") + "/sitemap.xml" };
+}
+`;
+const SITEMAP = (routes) => `import type { MetadataRoute } from "next";
+export default function sitemap(): MetadataRoute.Sitemap {
+  const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.vercel.app";
+  return ${JSON.stringify(routes)}.map((r) => ({ url: base + (r === "/" ? "" : r), priority: r === "/" ? 1 : 0.7 }));
+}
+`;
+
+if (import.meta.url === `file://${process.argv[1]}`) {
+  const briefPath = process.argv[2], dest = process.argv[3];
+  if (!briefPath || !dest) { console.error("uso: generate-satellite.mjs <brief.json> <destDir>"); process.exit(2); }
+  const brief = JSON.parse((await import("node:fs")).readFileSync(briefPath, "utf8"));
+  const trace = generateSatellite(brief, dest);
+  console.log(JSON.stringify(trace, null, 2));
+}
