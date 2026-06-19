@@ -1,0 +1,11 @@
+{
+  "name": "@em-ecosystem/satellite-onboarding",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Skill /satellite — onboarding (F2a/ECO-24): 5 modos de intake → brief estructurado. Sin deps externas.",
+  "engines": { "node": ">=22.0.0" },
+  "scripts": {
+    "test": "node --test"
+  }
+}
