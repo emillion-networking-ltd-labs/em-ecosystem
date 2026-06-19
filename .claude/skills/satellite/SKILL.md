@@ -64,11 +64,28 @@ remoto = F3**, no aquí.
 
 > El satélite demo de validación es **efímero** (se genera en test/CI y se descarta); no se commitea.
 
+## Paso 6 — Provisión + lanzamiento (F3b, ECO-28) — DRY-RUN POR DEFECTO
+`scripts/provision-satellite.mjs <satellite-dir>` PREPARA la provisión end-to-end y, **por defecto, NO ejecuta
+nada externo** (ADR-009 Q4). Imprime las acciones que se ejecutarían + un checklist:
+- **(a) Jira (Q2):** proyecto **NUEVO e independiente** por satélite + tickets S1/S2/S3.
+- **(b) Vercel (Q1/Q3):** proyecto → `rootDirectory satellites/sat-<x>/`, Ignored Build Step + bypass del primer
+  deploy (runbook §1.5), `nodeVersion 22.x`; target **nuestro team empresarial por defecto**, o **cuenta-cliente
+  pluggable** con `--vercel-client-token` (token en **runtime, nunca almacenado**).
+- **(c) Checklist** de provisión.
+
+**Frontera humana:** las acciones reales (crear proyecto Jira, deploy Vercel) solo con **`--apply --confirm`**
+(operación **humana**, secrets desde el entorno; **nunca en CI**). `--apply` sin `--confirm` se niega.
+
+**"Lanzado" = Lighthouse REMOTO:** tras el deploy (humano), `scripts/lighthouse-remote.mjs <url>` valida los
+umbrales S2 sobre la URL desplegada. Sin URL/chromium → **reporta gap** (no falsea). Deploy = operación humana.
+
 ## Scripts
 - `scripts/validate-brief.mjs <brief.json>` — valida estructura + regla "no inventar".
 - `scripts/fetch-url.mjs <url> [c-improve-site|e-inspiration]` — modo (c)/(e), best-effort, degrada a preguntar.
 - `scripts/instagram-intake.mjs <handle>` — modo (d), cliente-primario + scrape best-effort + fallback.
 - `scripts/generate-satellite.mjs <brief.json> <destDir>` — F2b: brief → satélite S2-ready (scaffold + em-ui).
 - `scripts/lighthouse-local.mjs <url>` — gate S2 local; reporta gap si no hay chromium (no falsea).
-- `npm test` (en esta carpeta) — corre los tests (node:test): no-inventar (AC#3), IG degrada (AC#4), schema.
+- `scripts/provision-satellite.mjs <dir> [--apply --confirm] [--vercel-client-token X]` — F3b: prepara Jira+Vercel (dry-run por defecto).
+- `scripts/lighthouse-remote.mjs <url-desplegada>` — F3b: gate S2 remoto = "lanzado"; gap honesto sin URL.
+- `npm test` (en esta carpeta) — corre los tests (node:test): no-inventar, IG degrada, schema, generación, provisión dry-run/--apply.
 </content>
