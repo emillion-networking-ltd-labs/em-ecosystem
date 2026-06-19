@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "intakeMode": "a-no-design",
+  "identity": {
+    "name": { "value": "Peluquería Lúmen", "provenance": "provided" },
+    "sector": { "value": "peluquería", "provenance": "provided" },
+    "language": { "value": "es", "provenance": "provided" }
+  },
+  "fields": {
+    "contactPhone": { "value": "+34 600 000 000", "provenance": "provided" },
+    "services": { "value": ["Corte 18€", "Color 45€"], "provenance": "provided" },
+    "brandColors": { "value": ["#1b5e20", "#f5f5f5"], "provenance": "proposed" },
+    "slogan": { "value": "Tu estilo, nuestra pasión", "provenance": "proposed" },
+    "logo": { "provenance": "missing" }
+  },
+  "targetRoutes": ["/", "/servicios", "/precios", "/contacto"]
+}

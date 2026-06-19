@@ -1,0 +1,17 @@
+{
+  "schemaVersion": "1.0.0",
+  "intakeMode": "d-instagram",
+  "identity": {
+    "name": { "value": "Laura Coach", "provenance": "provided" },
+    "sector": { "value": "coaching", "provenance": "provided" },
+    "language": { "value": "es", "provenance": "provided" }
+  },
+  "fields": {
+    "instagramHandle": { "value": "lauracoach", "provenance": "provided" },
+    "ig_bio": { "value": "Acompaño a emprendedoras", "provenance": "provided" },
+    "ig_photos": { "value": ["assets/ig/post-1.jpg", "assets/ig/post-2.jpg"], "provenance": "provided" },
+    "ig_followers": { "value": "12000", "provenance": "proposed" },
+    "ig_name": { "provenance": "missing" }
+  },
+  "targetRoutes": ["/", "/sobre-mi", "/servicios", "/contacto"]
+}

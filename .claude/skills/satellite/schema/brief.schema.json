@@ -1,0 +1,58 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://em-ecosystem/satellite/brief.schema.json",
+  "title": "Satellite onboarding brief (ECO-24, F2a)",
+  "description": "Contrato entre /satellite onboarding (F2a) y la generacion (F2b/ECO-25). Cada campo de negocio lleva PROCEDENCIA: provided|extracted|proposed|missing. NO existe 'invented'. La generacion consume este brief; los 'missing'/'proposed' se rinden como placeholders/pendientes, nunca como datos fabricados.",
+  "type": "object",
+  "required": ["schemaVersion", "intakeMode", "identity", "fields"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": { "const": "1.0.0" },
+    "intakeMode": {
+      "type": "string",
+      "enum": ["a-no-design", "b-with-brand", "c-improve-site", "d-instagram", "e-inspiration"],
+      "description": "Modo de intake usado en el onboarding."
+    },
+    "identity": {
+      "type": "object",
+      "required": ["name", "sector", "language"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "$ref": "#/$defs/field" },
+        "sector": { "$ref": "#/$defs/field" },
+        "language": { "$ref": "#/$defs/field" }
+      }
+    },
+    "fields": {
+      "type": "object",
+      "description": "Campos de negocio/marca/contenido, cada uno con procedencia. Claves libres (contact, services, brandTokens, assets, instagram, routes...).",
+      "additionalProperties": { "$ref": "#/$defs/field" }
+    },
+    "targetRoutes": {
+      "type": "array",
+      "description": "Rutas/secciones objetivo, derivadas de la estructura SAT01 (no inventadas).",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "field": {
+      "type": "object",
+      "required": ["provenance"],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "description": "El dato. null/ausente cuando provenance=missing."
+        },
+        "provenance": {
+          "type": "string",
+          "enum": ["provided", "extracted", "proposed", "missing"],
+          "description": "provided=lo dio el cliente; extracted=de una fuente real suya (requiere source); proposed=sugerencia pendiente de confirmar; missing=sin dato. 'invented' NO es valido."
+        },
+        "source": {
+          "type": "string",
+          "description": "Origen real cuando provenance=extracted (URL/handle). Obligatorio para 'extracted'."
+        }
+      }
+    }
+  }
+}
