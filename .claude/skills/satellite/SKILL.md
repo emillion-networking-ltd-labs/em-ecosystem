@@ -45,14 +45,30 @@ si intentas inventar (missing con valor, extracted sin source). Valida:
 node scripts/validate-brief.mjs <ruta-brief.json>   # exit 0 = válido
 ```
 
-## Paso 4 — Entregar el brief
-El `brief.json` validado es el **entregable** de F2a. La **generación del satélite la hace F2b** (ECO-25)
-consumiendo este brief vía `em-ui add`/`init` desde `design-system/`. Aquí **paras**: no scaffoldes ni
-despliegues.
+## Paso 4 — Entregar el brief (fin de F2a)
+El `brief.json` validado es el **entregable** del onboarding.
+
+## Paso 5 — Generación (F2b, ECO-25): brief → satélite S2-ready
+`scripts/generate-satellite.mjs <brief.json> <destDir>` ejecuta un pipeline determinista (NO greenfield):
+1. **Scaffold forma-satélite** desde la estructura SAT01 (package.json, next.config.mjs con las 6 cabeceras
+   S2, tsconfig, layout con observabilidad, robots/sitemap, rutas marketing del brief).
+2. **Reuse de UI SOLO vía `em-ui`**: `em-ui init` (capa de tokens) + `em-ui add <C>` (cierre transitivo)
+   desde `design-system/`. Jamás copia manual, jamás dashboard.
+3. **Relleno desde el brief**: datos `provided`/`extracted`/`proposed` reales; los `missing` → **placeholders
+   visibles** (`[FALTA: …]`), nunca inventados.
+
+**Validación local "hasta S2-ready"**: `next build` verde + Lighthouse local
+(`scripts/lighthouse-local.mjs <url>`, Perf≥90/SEO≥95/BP≥95/A11y≥90). Si un umbral no se alcanza —o no hay
+chromium para correr Lighthouse— se **reporta el gap** (no se falsea el PASS). **Deploy/provisión/Lighthouse
+remoto = F3**, no aquí.
+
+> El satélite demo de validación es **efímero** (se genera en test/CI y se descarta); no se commitea.
 
 ## Scripts
 - `scripts/validate-brief.mjs <brief.json>` — valida estructura + regla "no inventar".
 - `scripts/fetch-url.mjs <url> [c-improve-site|e-inspiration]` — modo (c)/(e), best-effort, degrada a preguntar.
 - `scripts/instagram-intake.mjs <handle>` — modo (d), cliente-primario + scrape best-effort + fallback.
+- `scripts/generate-satellite.mjs <brief.json> <destDir>` — F2b: brief → satélite S2-ready (scaffold + em-ui).
+- `scripts/lighthouse-local.mjs <url>` — gate S2 local; reporta gap si no hay chromium (no falsea).
 - `npm test` (en esta carpeta) — corre los tests (node:test): no-inventar (AC#3), IG degrada (AC#4), schema.
 </content>
