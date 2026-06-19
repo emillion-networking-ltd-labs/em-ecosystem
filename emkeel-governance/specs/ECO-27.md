@@ -13,12 +13,12 @@ Fase 3a de la estrategia [`satellites`](../strategy/satellites.md) (APPROVED). C
 Un **job `discover`** glob-ea `satellites/sat-*/package.json` y emite la lista como **matrix dinámica** (`fromJSON`) que alimenta los jobs por-satélite (audit, SAST, VRT/a11y). Así un satélite nuevo entra a los gates **sin editar workflows**. Debe degradar limpio si no hay satélites (matrix vacía → job skip, no fallo).
 
 ## Scope
-- **(a) Security Pipeline auto-discover:** añadir a `.github/workflows/security.yml` un `discover` job + extender la matrix de dependency-audit/SAST a los satélites descubiertos (sin quitar api/dashboard).
+- **(a) Security Pipeline auto-discover:** añadir a `.github/workflows/security.yml` un `discover-satellites` job + hacer **dinámica la matrix de `dependency-audit`** (el Hueco 1, `security.yml:64-65`) para incluir los satélites descubiertos (sin quitar api/dashboard). *(El secret-scan ya cubre todo el checkout. SAST por-satélite —eslint— queda como follow-up: no es el hueco citado y arriesga aflorar deuda de lint ajena a este ticket.)*
 - **(b) VRT/a11y auto-discover:** en `.github/workflows/visual-regression.yml`, sustituir los paths/job hardcoded a `sat-cristian-garcia` por descubrimiento dinámico (paths `satellites/sat-*/**` + matrix por satélite). SAT01 sigue cubierto, ahora por la vía genérica.
 - **(c)** No tocar F1 (`design-system/`, `em-ui/`) ni F2 (`.claude/skills/satellite/`); no automatización externa.
 
 ## Acceptance Criteria
-1. **Un satélite NUEVO queda auditado** por el Security Pipeline (dependency-audit + SAST) **sin** editar el workflow (verificable: la matrix se deriva de `satellites/sat-*`).
+1. **Un satélite NUEVO queda auditado** por el Security Pipeline (`dependency-audit`) **sin** editar el workflow (verificable: la matrix se deriva de `satellites/sat-*`).
 2. **Un satélite NUEVO queda gateado** por VRT/a11y sin editar el workflow; **SAT01 sigue cubierto** por la vía genérica.
 3. **Sin satélites, el CI no rompe** (matrix vacía → skip limpio); api/dashboard siguen auditados igual que hoy.
 4. **No se tocó F1/F2** ni se ejecutó ninguna acción externa.

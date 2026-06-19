@@ -28,11 +28,12 @@ on:
       - "nexacore-dashboard/playwright.config.ts"
       - "nexacore-dashboard/tests/e2e/**"
       - "nexacore-dashboard/package.json"
-      - "satellites/sat-cristian-garcia/src/**"
-      - "satellites/sat-cristian-garcia/public/**"
-      - "satellites/sat-cristian-garcia/playwright.config.ts"
-      - "satellites/sat-cristian-garcia/tests/e2e/**"
-      - "satellites/sat-cristian-garcia/package.json"
+      # ECO-27 (F3a): glob — cualquier satélite nuevo dispara el VRT sin editar el workflow.
+      - "satellites/sat-*/src/**"
+      - "satellites/sat-*/public/**"
+      - "satellites/sat-*/playwright.config.ts"
+      - "satellites/sat-*/tests/e2e/**"
+      - "satellites/sat-*/package.json"
       - ".github/workflows/visual-regression.yml"
   workflow_dispatch:
     inputs:
@@ -197,11 +198,35 @@ jobs:
           retention-days: 14
 
   # ==========================================================================
-  # Satellite — same flow against satellite/sat-cristian-garcia
+  # ECO-27 (F3a): descubre satélites por glob → el job VRT itera por matrix.
+  # satellites vacío → el job satélite hace skip limpio (if).
+  # ==========================================================================
+  discover-satellites-vrt:
+    name: Discover satellites (VRT)
+    runs-on: ubuntu-latest
+    outputs:
+      satellites: ${{ steps.find.outputs.satellites }}
+    steps:
+      - uses: actions/checkout@v6
+      - id: find
+        run: |
+          sats=$(ls -d satellites/sat-*/ 2>/dev/null | sed 's#/$##' || true)
+          sat_json=$(printf '%s\n' $sats | sed '/^$/d' | jq -R . | jq -cs .)
+          echo "satellites=$sat_json" >> "$GITHUB_OUTPUT"
+          echo "satellites: $sat_json"
+
+  # ==========================================================================
+  # Satellite — VRT/a11y auto-discovered (matrix por satélite). SAT01 incluido.
   # ==========================================================================
   visual-regression-satellite:
     name: Satellite visual regression
     runs-on: ubuntu-latest
+    needs: [discover-satellites-vrt]
+    if: needs.discover-satellites-vrt.outputs.satellites != '[]'
+    strategy:
+      fail-fast: false
+      matrix:
+        satellite: ${{ fromJSON(needs.discover-satellites-vrt.outputs.satellites) }}
 
     steps:
       - name: Checkout PR / branch
@@ -214,14 +239,24 @@ jobs:
         with:
           node-version: "22"
           cache: "npm"
-          cache-dependency-path: satellites/sat-cristian-garcia/package-lock.json
+          cache-dependency-path: ${{ matrix.satellite }}/package-lock.json
+
+      - name: Resolve dev port
+        id: port
+        working-directory: ${{ matrix.satellite }}
+        run: |
+          # El puerto sale del script `dev` del propio satélite (-p N); fallback 3000.
+          PORT=$(node -e "const s=require('./package.json').scripts.dev||''; const m=s.match(/-p\s+(\d+)/); console.log(m?m[1]:3000)")
+          echo "port=$PORT" >> "$GITHUB_OUTPUT"
+          echo "url=http://localhost:$PORT" >> "$GITHUB_OUTPUT"
+          echo "satellite ${{ matrix.satellite }} -> port $PORT"
 
       - name: Install dependencies
-        working-directory: satellites/sat-cristian-garcia
+        working-directory: ${{ matrix.satellite }}
         run: npm ci
 
       - name: Install Playwright + Chromium
-        working-directory: satellites/sat-cristian-garcia
+        working-directory: ${{ matrix.satellite }}
         run: npx playwright install chromium --with-deps
 
       - name: Capture baseline from ${{ inputs.baseline_ref }}
@@ -236,37 +271,37 @@ jobs:
           # Restore satellite source AND its package.json/lock at the baseline
           # ref so the dependency snapshot matches the source snapshot
           # (Tailwind 3 source needs Tailwind 3 deps to render correctly).
-          git checkout "$BASELINE_REF" -- satellites/sat-cristian-garcia
+          git checkout "$BASELINE_REF" -- ${{ matrix.satellite }}
           # The baseline ref didn't have @playwright/test or playwright.config.ts
           # or the visual spec — they were added in the SCRUM-379 PR. Restore
           # the playwright config + spec from current HEAD; install playwright
           # ad-hoc on top of the baseline-ref's deps so we can run the test.
           git checkout HEAD -- \
-            satellites/sat-cristian-garcia/playwright.config.ts \
-            satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts
-          (cd satellites/sat-cristian-garcia && npm ci)
-          (cd satellites/sat-cristian-garcia && npm install --no-save @playwright/test wait-on)
-          (cd satellites/sat-cristian-garcia && npx playwright install chromium --with-deps)
-          (cd satellites/sat-cristian-garcia && npm run dev &)
-          (cd satellites/sat-cristian-garcia && npx wait-on http://localhost:3002 -t 90000)
-          (cd satellites/sat-cristian-garcia && npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
-          (pgrep -f "next dev -p 3002" | xargs -r kill -9) || true
+            ${{ matrix.satellite }}/playwright.config.ts \
+            ${{ matrix.satellite }}/tests/e2e/visual.spec.ts
+          (cd ${{ matrix.satellite }} && npm ci)
+          (cd ${{ matrix.satellite }} && npm install --no-save @playwright/test wait-on)
+          (cd ${{ matrix.satellite }} && npx playwright install chromium --with-deps)
+          (cd ${{ matrix.satellite }} && npm run dev &)
+          (cd ${{ matrix.satellite }} && npx wait-on ${{ steps.port.outputs.url }} -t 90000)
+          (cd ${{ matrix.satellite }} && npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
+          (pgrep -f "next dev -p ${{ steps.port.outputs.port }}" | xargs -r kill -9) || true
           # Preserve freshly captured snapshots across the post-capture restore.
           # The snapshots dir is committed in HEAD (initial baseline), so a plain
           # `git checkout HEAD -- satellites/...` would wipe the new content.
           # Cache to /tmp, restore source, then put snapshots back.
           rm -rf /tmp/sat-snapshots && mkdir -p /tmp/sat-snapshots
-          cp -a satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots/. /tmp/sat-snapshots/
-          git checkout HEAD -- satellites/sat-cristian-garcia
-          rm -rf satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots
-          mkdir -p satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots
-          cp -a /tmp/sat-snapshots/. satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots/
-          ls satellites/sat-cristian-garcia/tests/e2e/visual.spec.ts-snapshots/ || (echo "No snapshots produced!" && exit 1)
+          cp -a ${{ matrix.satellite }}/tests/e2e/visual.spec.ts-snapshots/. /tmp/sat-snapshots/
+          git checkout HEAD -- ${{ matrix.satellite }}
+          rm -rf ${{ matrix.satellite }}/tests/e2e/visual.spec.ts-snapshots
+          mkdir -p ${{ matrix.satellite }}/tests/e2e/visual.spec.ts-snapshots
+          cp -a /tmp/sat-snapshots/. ${{ matrix.satellite }}/tests/e2e/visual.spec.ts-snapshots/
+          ls ${{ matrix.satellite }}/tests/e2e/visual.spec.ts-snapshots/ || (echo "No snapshots produced!" && exit 1)
         timeout-minutes: 30
 
       - name: Commit + push baseline (satellite)
         if: github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'satellite' || inputs.package == 'both')
-        working-directory: satellites/sat-cristian-garcia
+        working-directory: ${{ matrix.satellite }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -280,14 +315,14 @@ jobs:
 
       - name: Run VRT + a11y against committed baseline (PR)
         if: github.event_name == 'pull_request'
-        working-directory: satellites/sat-cristian-garcia
+        working-directory: ${{ matrix.satellite }}
         env:
           VRT: "1"
         run: |
           set -e
           npm run dev &
           DEV_PID=$!
-          npx wait-on http://localhost:3002 -t 90000
+          npx wait-on ${{ steps.port.outputs.url }} -t 90000
           EXIT=0
           npx playwright test visual.spec.ts --workers=1 --reporter=list || EXIT=$?
           npx playwright test a11y.spec.ts --workers=1 --reporter=list || EXIT=$?
@@ -300,7 +335,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: playwright-diff-report-satellite-${{ github.event.pull_request.number }}
-          path: satellites/sat-cristian-garcia/playwright-report/
+          path: ${{ matrix.satellite }}/playwright-report/
           retention-days: 14
 
       - name: Upload satellite diff images
@@ -308,5 +343,5 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: playwright-test-results-satellite-${{ github.event.pull_request.number }}
-          path: satellites/sat-cristian-garcia/test-results/
+          path: ${{ matrix.satellite }}/test-results/
           retention-days: 14
