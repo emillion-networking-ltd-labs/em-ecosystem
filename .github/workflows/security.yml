@@ -51,9 +51,31 @@ jobs:
   # Layer 2: Dependency Audit
   # Standard: OWASP A06:2021 (Vulnerable Components), NIST SA-11
   # ==========================================================================
+  # ECO-27 (F3a): descubre satélites por glob para que entren a los gates SIN editar el workflow.
+  # audit-packages = api + dashboard + satellites/sat-* (siempre no vacía); satellites puede ser
+  # vacía → los jobs por-satélite hacen skip limpio.
+  discover-satellites:
+    name: 'Discover satellites'
+    runs-on: ubuntu-latest
+    outputs:
+      audit-packages: ${{ steps.find.outputs.audit-packages }}
+      satellites: ${{ steps.find.outputs.satellites }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - id: find
+        run: |
+          sats=$(ls -d satellites/sat-*/ 2>/dev/null | sed 's#/$##' || true)
+          sat_json=$(printf '%s\n' $sats | sed '/^$/d' | jq -R . | jq -cs .)
+          audit_json=$(printf '%s\n' nexacore-api nexacore-dashboard $sats | sed '/^$/d' | jq -R . | jq -cs .)
+          echo "satellites=$sat_json" >> "$GITHUB_OUTPUT"
+          echo "audit-packages=$audit_json" >> "$GITHUB_OUTPUT"
+          echo "satellites: $sat_json"; echo "audit-packages: $audit_json"
+
   dependency-audit:
     name: 'Layer 2: Dependency Audit'
     runs-on: ubuntu-latest
+    needs: [discover-satellites]
     strategy:
       # SCRUM-370: ensure both api and dashboard always run independently.
       # Default fail-fast: true cancels siblings on first failure, costing
@@ -61,8 +83,9 @@ jobs:
       # dashboard). With fail-fast: false, every CI run reports both
       # outcomes — essential for incremental triage.
       fail-fast: false
+      # ECO-27: matrix dinámica = api + dashboard + satélites descubiertos (auto-discover).
       matrix:
-        package: [nexacore-api, nexacore-dashboard]
+        package: ${{ fromJSON(needs.discover-satellites.outputs.audit-packages) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
