@@ -50,7 +50,7 @@ export const linkSizeClasses = {
 };
 
 export default function Button({
-  as,
+  as: Component = "button",
   variant = "primary",
   size = "md",
   loading = false,
@@ -61,10 +61,6 @@ export default function Button({
   href,
   ...props
 }: ButtonProps) {
-  // If `as` is not specified, default to "a" when href is provided so the
-  // button actually navigates. Otherwise default to "button" for click handlers.
-  // (`<button href="...">` is invalid HTML — browsers ignore the href.)
-  const Component = as ?? (href ? "a" : "button");
   const isLink = variant === "link" || variant === "link-underline";
   const sizes = isLink ? linkSizeClasses[size] : sizeClasses[size];
   const display = isLink ? "inline-flex" : fullWidth ? "flex" : "inline-flex";

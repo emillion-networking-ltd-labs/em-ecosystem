@@ -21,7 +21,7 @@ A la vez, un satélite **necesita divergir per-cliente** (colores/marca, ocasion
 
 El mecanismo de reuse de los satélites es un **registry + CLI interno estilo shadcn/ui** (`em-ui`), con estas propiedades:
 
-1. **Single-source = el UI Core del dashboard** (`nexacore-dashboard/src/components/ui/`), consistente con `/admin/design-system` como fuente de verdad (`CONTRIBUTING.md:73-75`).
+1. **Single-source = el UI Core** (origen: `nexacore-dashboard/src/components/ui/`), consistente con `/admin/design-system` como fuente de verdad (`CONTRIBUTING.md:73-75`). *(Refinado por [ADR-007](007-design-system-source-location.md): la fuente canónica se extrae a `design-system/` dedicado; em-ui lee de ahí, no del dashboard, que pasa a consumidor legacy.)*
 2. **Copia GOBERNADA con reconciliación, NO "cero copia".** El satélite *pull-ea* componentes + tokens del registry y los **posee** (puede personalizarlos per-cliente). El modelo shadcn lo soporta: copia el código fuente al proyecto consumidor vía un `registry.json` servido por HTTP e instalado por CLI, y `registry:base` distribuye el design system entero (componentes + tokens + config) en un solo install (https://ui.shadcn.com/docs/registry/getting-started, https://ui.shadcn.com/docs/cli).
 3. **El drift se vuelve detectable y reconciliable**, no invisible: el re-pull gobernado + el gate de a11y/visual cazan divergencias como la del `Button`.
 

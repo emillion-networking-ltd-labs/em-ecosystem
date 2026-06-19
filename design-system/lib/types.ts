@@ -1,0 +1,308 @@
+export type UserRole = "SUPERADMIN" | "ADMIN" | "USER";
+
+export type SafeUser = {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  avatarUrl: string | null;
+  avatarOriginalUrl: string | null;
+  avatarCropData: {
+    areaPercent: { x: number; y: number; width: number; height: number };
+    areaPixels: { x: number; y: number; width: number; height: number };
+  } | null;
+  role: UserRole;
+  emailVerified: boolean;
+  isActive: boolean;
+  mfaEnabled: boolean;
+  hasPassword: boolean;
+  oauthProviders: string[];
+  permissions?: string[];
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type LinkedProvider = {
+  provider: string;
+  providerId: string;
+  email: string;
+  linkedAt: string;
+};
+
+export type AuthResponse = {
+  user: SafeUser;
+  accessToken: string;
+  oauthAction?: "created" | "linked" | "auto-verified";
+};
+
+export type LoginResponse =
+  | (AuthResponse & { status: "success" })
+  | { status: "mfa_required"; mfaToken: string }
+  | { status: "mfa_setup_required"; setupToken: string; message: string };
+
+export type MfaSetupResponse = {
+  secret: string;
+  qrCodeDataUrl: string;
+  recoveryCodes: string[];
+};
+
+export type MfaStatusResponse = {
+  mfaEnabled: boolean;
+  recoveryCodesRemaining: number;
+};
+
+export type SessionResponse = {
+  id: string;
+  deviceInfo: string | null;
+  ipAddress: string;
+  userAgent: string | null;
+  locationCity: string | null;
+  locationCountry: string | null;
+  createdAt: string;
+  lastUsedAt: string;
+  expiresAt: string;
+  isCurrent: boolean;
+};
+
+export type ErrorResponse = {
+  success: false;
+  error: {
+    message: string;
+    code: string;
+    statusCode: number;
+    details?: string[];
+    retryAfter?: number;
+    lockoutLevel?: number;
+  };
+};
+
+export type RateLimitKind = "throttle" | "lockout";
+
+export type RateLimitInfo = {
+  isRateLimited: boolean;
+  retryAfter: number | null;
+  message: string | null;
+  kind: RateLimitKind | null;
+};
+
+export class RateLimitError extends Error {
+  retryAfter: number;
+  kind: RateLimitKind;
+
+  constructor(
+    retryAfter: number,
+    message: string,
+    kind: RateLimitKind = "throttle",
+  ) {
+    super(message);
+    this.name = "RateLimitError";
+    this.retryAfter = retryAfter;
+    this.kind = kind;
+    Object.setPrototypeOf(this, RateLimitError.prototype);
+  }
+}
+
+export type PaginatedResponse<T> = {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+};
+
+export type UpdateProfileDto = {
+  firstName?: string;
+  lastName?: string;
+  avatarUrl?: string;
+};
+
+export type ChangePasswordDto = {
+  currentPassword: string;
+  newPassword: string;
+};
+
+export type ForgotPasswordDto = {
+  email: string;
+};
+
+export type ResetPasswordDto = {
+  token: string;
+  newPassword: string;
+};
+
+export type MessageResponse = {
+  message: string;
+};
+
+export type AdminUpdateUserDto = {
+  role?: UserRole;
+  isActive?: boolean;
+};
+
+export type AuditAction =
+  | "LOGIN_SUCCESS"
+  | "LOGIN_FAILURE"
+  | "LOGOUT"
+  | "REGISTER"
+  | "TOKEN_REFRESH"
+  | "OAUTH_LOGIN"
+  | "OAUTH_LINKED"
+  | "OAUTH_REGISTER"
+  | "OAUTH_UNLINKED"
+  | "ACCOUNT_LOCKED"
+  | "ACCOUNT_UNLOCKED"
+  | "PASSWORD_CHANGE"
+  | "PROFILE_UPDATE"
+  | "USER_ROLE_CHANGE"
+  | "USER_DEACTIVATED"
+  | "USER_ACTIVATED"
+  | "USER_DELETED"
+  | "SUPERADMIN_BYPASS";
+
+export type AuditLogUser = {
+  id: string;
+  email: string;
+  firstName: string | null;
+  lastName: string | null;
+  role: UserRole;
+};
+
+// Permission types (SCRUM-30)
+export type Permission = {
+  id: string;
+  key: string;
+  description: string;
+  resource: string;
+  action: string;
+};
+
+export type RolePermissionsResponse = {
+  role: UserRole;
+  permissions: Permission[];
+};
+
+export type SetRolePermissionsDto = {
+  permissionKeys: string[];
+};
+
+export type AuditLog = {
+  id: string;
+  action: AuditAction;
+  userId: string | null;
+  targetUserId: string | null;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+  user: AuditLogUser | null;
+  targetUser: AuditLogUser | null;
+};
+
+export type SecurityEvent = {
+  id: string;
+  action: string;
+  ipAddress: string | null;
+  userAgent: string | null;
+  metadata: Record<string, unknown> | null;
+  createdAt: string;
+};
+
+export type ChangeEmailDto = {
+  newEmail: string;
+  password: string;
+};
+
+export type PasskeyResponse = {
+  id: string;
+  name: string | null;
+  deviceType: string;
+  backedUp: boolean;
+  transports: string[];
+  lastUsedAt: string | null;
+  createdAt: string;
+};
+
+export type PasskeyLoginOptionsResponse = {
+  options: Record<string, unknown>;
+  challengeId: string;
+};
+
+export type PasskeyRegisterResult = {
+  id: string;
+  name: string;
+};
+
+export type TrustedDeviceResponse = {
+  id: string;
+  deviceName: string;
+  ipAddress: string;
+  lastVerifiedAt: string;
+  expiresAt: string;
+  createdAt: string;
+};
+
+export type TrustDeviceResult = {
+  id: string;
+  deviceName: string;
+  expiresAt: string;
+  alreadyTrusted: boolean;
+};
+
+export type RevokeAllDevicesResponse = {
+  message: string;
+  count: number;
+};
+
+export type DeleteAccountDto = {
+  password?: string;
+};
+
+export type UnlinkOAuthDto = {
+  password?: string;
+};
+
+/**
+ * SCRUM-499 / AUTH v2 Phase 2.3: AuthIntent v2 login flow types.
+ * Mirrors backend Prisma enum AuthIntentStatus + AuthIntentResponseDto.
+ *
+ * Backend source:
+ *   - nexacore-api/src/auth/dto/auth-intent-response.dto.ts
+ *   - nexacore-api/src/auth/dto/advance-auth-intent.dto.ts
+ *   - nexacore-api/prisma/schema.prisma (enum AuthIntentStatus)
+ */
+export type AuthIntentStatus =
+  | "requires_credentials"
+  | "requires_tenant_pick"
+  | "requires_mfa"
+  | "requires_passkey" // Phase 3 reserves
+  | "requires_setup" // Phase 3+ reserves
+  | "succeeded"
+  | "failed"
+  | "expired";
+
+export type AdvanceAuthIntentInput =
+  | { kind: "credentials"; email: string; password: string }
+  | { kind: "mfa"; code?: string; recoveryCode?: string }
+  | { kind: "tenant_pick"; tenantId: string }
+  | { kind: "passkey"; assertion: Record<string, unknown> };
+
+export interface AuthIntentResponse {
+  id: string;
+  status: AuthIntentStatus;
+  nextStep: "credentials" | "mfa" | "tenant_pick" | "passkey" | null;
+  /** ISO 8601 from backend */
+  expiresAt: string;
+  /** Present only when status === 'succeeded'. */
+  accessToken?: string;
+  /** Present only when status === 'succeeded'. */
+  user?: {
+    id: string;
+    tenantId: string;
+    tenantRole: string;
+    isPlatformAdmin: boolean;
+  };
+  /** Present when status === 'requires_tenant_pick'. */
+  availableTenantIds?: string[];
+}
