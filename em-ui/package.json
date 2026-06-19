@@ -7,6 +7,8 @@
   "bin": { "em-ui": "cli.mjs" },
   "engines": { "node": ">=22.0.0" },
   "scripts": {
-    "list": "node cli.mjs list"
+    "list": "node cli.mjs list",
+    "build-registry": "node build-registry.mjs",
+    "test": "node --test"
   }
 }
