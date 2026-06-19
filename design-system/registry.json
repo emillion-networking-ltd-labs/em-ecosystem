@@ -1,6 +1,6 @@
 {
   "name": "em-ui",
-  "$comment": "Registry interno del design system NexaCore (ECO-23). Fuente unica: design-system/. em-ui lee de aqui, NUNCA de nexacore-dashboard/.",
+  "$comment": "Registry interno del design system NexaCore (ECO-23; grafo completo ECO-26). Fuente unica: design-system/. em-ui lee de aqui, NUNCA de nexacore-dashboard/. Generado por em-ui/build-registry.mjs.",
   "source": "design-system",
   "tokens": "tokens/tokens.css",
   "aliasAssumed": "@/ -> <consumer>/src (igual que dashboard y satelites; sin reescritura de imports)",
@@ -51,7 +51,9 @@
       "name": "Button",
       "type": "registry:ui",
       "file": "components/Button.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "InfinitySpinner"
+      ],
       "internalDependencies": []
     },
     {
@@ -72,14 +74,19 @@
       "name": "ConfirmModal",
       "type": "registry:ui",
       "file": "components/ConfirmModal.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Button",
+        "IconButton"
+      ],
       "internalDependencies": []
     },
     {
       "name": "CopyField",
       "type": "registry:ui",
       "file": "components/CopyField.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Tooltip"
+      ],
       "internalDependencies": []
     },
     {
@@ -100,7 +107,9 @@
       "name": "DateInput",
       "type": "registry:ui",
       "file": "components/DateInput.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Calendar"
+      ],
       "internalDependencies": []
     },
     {
@@ -114,7 +123,10 @@
       "name": "EmailSelector",
       "type": "registry:ui",
       "file": "components/EmailSelector.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Avatar",
+        "Button"
+      ],
       "internalDependencies": []
     },
     {
@@ -128,14 +140,18 @@
       "name": "ErrorAlert",
       "type": "registry:ui",
       "file": "components/ErrorAlert.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "IconButton"
+      ],
       "internalDependencies": []
     },
     {
       "name": "FormField",
       "type": "registry:ui",
       "file": "components/FormField.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "InlineError"
+      ],
       "internalDependencies": []
     },
     {
@@ -149,21 +165,29 @@
       "name": "IconButton",
       "type": "registry:ui",
       "file": "components/IconButton.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Tooltip"
+      ],
       "internalDependencies": []
     },
     {
       "name": "IdleWarningModal",
       "type": "registry:ui",
       "file": "components/IdleWarningModal.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Button",
+        "CountdownTimer"
+      ],
       "internalDependencies": []
     },
     {
       "name": "ImageCropper",
       "type": "registry:ui",
       "file": "components/ImageCropper.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "ConfirmModal",
+        "Slider"
+      ],
       "internalDependencies": [
         "lib/crop-image.ts"
       ]
@@ -186,14 +210,20 @@
       "name": "Input",
       "type": "registry:ui",
       "file": "components/Input.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "IconButton",
+        "Spinner"
+      ],
       "internalDependencies": []
     },
     {
       "name": "LanguageSelector",
       "type": "registry:ui",
       "file": "components/LanguageSelector.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Avatar",
+        "Input"
+      ],
       "internalDependencies": []
     },
     {
@@ -214,14 +244,18 @@
       "name": "QrCodeCard",
       "type": "registry:ui",
       "file": "components/QrCodeCard.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "CopyField"
+      ],
       "internalDependencies": []
     },
     {
       "name": "RateLimitBanner",
       "type": "registry:ui",
       "file": "components/RateLimitBanner.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "CountdownTimer"
+      ],
       "internalDependencies": [
         "lib/types.ts"
       ]
@@ -230,7 +264,9 @@
       "name": "RecoveryCodesGrid",
       "type": "registry:ui",
       "file": "components/RecoveryCodesGrid.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Button"
+      ],
       "internalDependencies": []
     },
     {
@@ -244,7 +280,9 @@
       "name": "SearchTrigger",
       "type": "registry:ui",
       "file": "components/SearchTrigger.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Badge"
+      ],
       "internalDependencies": []
     },
     {
@@ -265,7 +303,11 @@
       "name": "SidebarNav",
       "type": "registry:ui",
       "file": "components/SidebarNav.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "IconButton",
+        "Tabs",
+        "Tooltip"
+      ],
       "internalDependencies": []
     },
     {
@@ -286,7 +328,9 @@
       "name": "StickyCard",
       "type": "registry:ui",
       "file": "components/StickyCard.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "IconButton"
+      ],
       "internalDependencies": []
     },
     {
@@ -300,7 +344,10 @@
       "name": "ThemeToggle",
       "type": "registry:ui",
       "file": "components/ThemeToggle.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "IconButton",
+        "Tooltip"
+      ],
       "internalDependencies": [
         "hooks/useTheme.ts"
       ]
