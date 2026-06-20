@@ -1,0 +1,71 @@
+# Satellite Lighthouse S2 (ECO-37) — mide los scores S2 de un satélite GENERADO por /satellite.
+# Cierra el residual de F2b/F3b: lighthouse-local.mjs estaba cableado pero nunca corrió (sin chromium).
+# Flujo: genera un satélite DEMO EFÍMERO (brief de ejemplo → generate-satellite.mjs) → next build →
+# next start (puerto 3100) → lighthouse-local.mjs con chromium del runner. Umbral S2:
+# Perf>=90 / SEO>=95 / Best-Practices>=95 / A11y>=90 (docs/satellite-deployment-runbook.md).
+# El demo es efímero (mktemp): NO se commitea ningún satellites/sat-demo/ (ECO-25 AC#6).
+# Solo INVOCA F2 (generate-satellite + lighthouse-local); no toca design-system//em-ui/.
+name: Satellite Lighthouse S2
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".claude/skills/satellite/**"
+      - "design-system/**"
+      - "em-ui/**"
+      - ".github/workflows/satellite-lighthouse.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  lighthouse-s2:
+    name: Lighthouse S2 (generated satellite)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: Generate ephemeral demo satellite (F2 generator)
+        run: |
+          set -e
+          DEST="$(mktemp -d)/sat-lh-demo"
+          node .claude/skills/satellite/scripts/generate-satellite.mjs \
+            .claude/skills/satellite/schema/brief.example.a-no-design.json "$DEST"
+          echo "DEST=$DEST" >> "$GITHUB_ENV"
+          echo "Generated demo at $DEST (efímero — no se commitea)"
+
+      - name: Install demo deps + build
+        run: |
+          set -e
+          cd "$DEST"
+          npm install --no-audit --no-fund
+          npm run build
+
+      - name: Serve demo + run Lighthouse S2 (local, with chromium)
+        run: |
+          set -e
+          # Chromium del runner (ubuntu-latest trae google-chrome-stable).
+          export CHROME_PATH="$(which google-chrome-stable || which google-chrome || which chromium-browser || true)"
+          echo "CHROME_PATH=$CHROME_PATH"
+          ( cd "$DEST" && npm run start >/tmp/sat-serve.log 2>&1 & )
+          npx --yes wait-on http://localhost:3100 -t 120000
+          # lighthouse-local.mjs: exit 0 = S2 PASS; 1 = algún umbral no alcanzado (GAP real);
+          # 3 = sin chromium. NO falsea scores.
+          node "$GITHUB_WORKSPACE/.claude/skills/satellite/scripts/lighthouse-local.mjs" http://localhost:3100
+
+      - name: Upload Lighthouse report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: lighthouse-s2-report
+          path: /tmp/lh-satellite.json
+          retention-days: 14
+          if-no-files-found: ignore
