@@ -1,4 +1,4 @@
-// Lib compartida del onboarding /satellite (ECO-24, F2a).
+// Lib compartida del onboarding /launch-satellite (ECO-24, F2a).
 // Procedencia por campo + invariante DURA "no inventar". Sin deps externas.
 
 export const SCHEMA_VERSION = "1.0.0";

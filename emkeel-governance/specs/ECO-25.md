@@ -1,9 +1,9 @@
-# ECO-25 — Satélites F2b: `/satellite` generación (brief → satélite S2-ready)
+# ECO-25 — Satélites F2b: `/launch-satellite` generación (brief → satélite S2-ready)
 
 Strategy: satellites
 
 ## Resumen
-Fase 2b de la estrategia [`satellites`](../strategy/satellites.md) (APPROVED). Construye el **motor de generación** del skill `/satellite`: consume el **brief estructurado** de F2a (ECO-24) y produce un satélite `satellites/sat-<x>/` en **forma satélite** (Next.js multi-ruta en monorepo, como SAT01), **reutilizando componentes vía `em-ui add`** desde `design-system/` — nunca copia manual ni del dashboard. **Depende de ECO-24.** NO despliega (F3).
+Fase 2b de la estrategia [`satellites`](../strategy/satellites.md) (APPROVED). Construye el **motor de generación** del skill `/launch-satellite`: consume el **brief estructurado** de F2a (ECO-24) y produce un satélite `satellites/sat-<x>/` en **forma satélite** (Next.js multi-ruta en monorepo, como SAT01), **reutilizando componentes vía `em-ui add`** desde `design-system/` — nunca copia manual ni del dashboard. **Depende de ECO-24.** NO despliega (F3).
 
 ## Contexto / base
 - F1 (ECO-23, MERGED): `design-system/` + `em-ui/cli.mjs` (`add`/`init`/…) + `registry.json`.
@@ -26,7 +26,7 @@ F2b entrega un satélite **S2-READY** + **validación local**, NO el lanzamiento
 - **Diferido a F3:** provisión Vercel, deploy, dominio, y **Lighthouse remoto** sobre la URL desplegada (el "lanzado" formal). El spec lo acota explícitamente.
 
 ## Scope
-- Motor de generación (scripts) invocado por el skill `/satellite`: scaffold + `em-ui add`/`init` + relleno desde brief.
+- Motor de generación (scripts) invocado por el skill `/launch-satellite`: scaffold + `em-ui add`/`init` + relleno desde brief.
 - Plantilla de forma-satélite derivada de SAT01 (S2-ready).
 - Validación local (build + Lighthouse local) como criterio de "S2-ready".
 - **NO** despliega, **NO** toca `design-system/`/`em-ui/`, **NO** automatiza Jira/GitHub/Vercel (F3).
@@ -45,5 +45,5 @@ F2b entrega un satélite **S2-READY** + **validación local**, NO el lanzamiento
 - Cambios en `design-system/`/`em-ui/` (F1).
 
 ## Alignment
-Implementa el punto **2 (generación que reutiliza componentes, no greenfield, hasta S2)** del sistema `/satellite` del norte (`strategy/satellites.md` §Recommendation). Garantiza el invariante de reuse de ADR-006/ADR-007: **`em-ui add` desde `design-system/` como única vía**, drift reconciliable, jamás dashboard. Acota "hasta S2" para no invadir F3. Enfoque registrado en [ADR-008](../adr/008-satellite-onboarding-generation.md).
+Implementa el punto **2 (generación que reutiliza componentes, no greenfield, hasta S2)** del sistema `/launch-satellite` del norte (`strategy/satellites.md` §Recommendation). Garantiza el invariante de reuse de ADR-006/ADR-007: **`em-ui add` desde `design-system/` como única vía**, drift reconciliable, jamás dashboard. Acota "hasta S2" para no invadir F3. Enfoque registrado en [ADR-008](../adr/008-satellite-onboarding-generation.md).
 </content>

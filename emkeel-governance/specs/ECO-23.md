@@ -3,7 +3,7 @@
 Strategy: satellites
 
 ## Resumen
-Fase 1 de la estrategia [`satellites`](../strategy/satellites.md) (APPROVED) y de [ADR-006](../adr/006-satellite-component-reuse.md): construir **em-ui**, el mecanismo de reuse del design system — un **registry + CLI interno** con **copia gobernada y reconciliación** sobre una **fuente única**. Esta fase NO construye el skill `/satellite` (Fase 2) ni la automatización (Fase 3); entrega la **pieza base** sin la cual la generación de satélites propagaría drift.
+Fase 1 de la estrategia [`satellites`](../strategy/satellites.md) (APPROVED) y de [ADR-006](../adr/006-satellite-component-reuse.md): construir **em-ui**, el mecanismo de reuse del design system — un **registry + CLI interno** con **copia gobernada y reconciliación** sobre una **fuente única**. Esta fase NO construye el skill `/launch-satellite` (Fase 2) ni la automatización (Fase 3); entrega la **pieza base** sin la cual la generación de satélites propagaría drift.
 
 ## Contexto / problema (medido)
 - El UI Core vive hoy en `nexacore-dashboard/src/components/ui/` (**48 componentes**) y `/admin/design-system` es la fuente de verdad declarada (`CONTRIBUTING.md:73-75`).
@@ -35,7 +35,7 @@ El design system canónico se **extrae a `design-system/`** dentro de em-ecosyst
 - **(e) Dashboard intacto:** cero cambios en `nexacore-dashboard/`. Su copia queda como legacy hasta el ECO de repuntado.
 
 ## Out of scope
-- El skill `/satellite` (Fase 2) y la automatización Jira/GitHub/Vercel (Fase 3).
+- El skill `/launch-satellite` (Fase 2) y la automatización Jira/GitHub/Vercel (Fase 3).
 - Repuntar el dashboard para consumir `design-system/` (ECO futuro).
 - Convertir el repo a monorepo-workspaces (ADR-006 lo descarta por diseño).
 - Cierre de los 2 huecos de CI (`security.yml` matrix, VRT auto-discovered) — Fase 3.

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Gate S2 REMOTO del skill /satellite (ECO-28, F3b): Lighthouse contra la URL DESPLEGADA = "lanzado".
+// Gate S2 REMOTO del skill /launch-satellite (ECO-28, F3b): Lighthouse contra la URL DESPLEGADA = "lanzado".
 // Umbrales runbook S2: Perf>=90, SEO>=95, Best-Practices>=95, A11y>=90.
 // Uso: node lighthouse-remote.mjs <url-desplegada>
 // NO falsea: si no hay URL (sin deploy real) o no hay chromium → sale con código 3 reportando el GAP.

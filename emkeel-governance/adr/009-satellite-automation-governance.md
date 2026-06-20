@@ -5,7 +5,7 @@
 - **Tickets:** [ECO-27](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-27) (F3a gobernanza), [ECO-28](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-28) (F3b automatización)
 - **Strategy:** satellites
 - **Decisor:** Operador (human gate, 2026-06-19)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa la Fase 3 del norte (`strategy/satellites.md` Fasificación F3) sobre F1 (em-ui) + F2 (skill `/satellite`), sin tocarlos.
+- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa la Fase 3 del norte (`strategy/satellites.md` Fasificación F3) sobre F1 (em-ui) + F2 (skill `/launch-satellite`), sin tocarlos.
 
 ## Contexto
 F3 automatiza "intake→genera→repo→deploy" y cierra el "lanzado" formal (Lighthouse remoto). Dos riesgos a gobernar: (1) que satélites nuevos **escapen a los gates** (huecos de CI actuales); (2) que la automatización ejecute **acciones outward-facing/irreversibles** (crear repos, deploys, proyectos Jira) a ciegas.

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Modos (c) mejorar-sitio y (e) inspiración del onboarding /satellite (ECO-24).
+// Modos (c) mejorar-sitio y (e) inspiración del onboarding /launch-satellite (ECO-24).
 // (c) fetchea la URL del cliente y EXTRAE su contenido/colores reales (provenance=extracted, source=url).
 // (e) la URL es solo REFERENCIA estética: NO se extraen datos al brief (no se copia contenido ajeno).
 // Best-effort: sin red o ante fallo, se DEGRADA a preguntar. fetcher inyectable para tests offline.

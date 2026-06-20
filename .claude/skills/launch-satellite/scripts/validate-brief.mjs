@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Valida un brief.json del onboarding /satellite contra el schema versionado + la regla "no inventar".
+// Valida un brief.json del onboarding /launch-satellite contra el schema versionado + la regla "no inventar".
 // Uso: node validate-brief.mjs <ruta-brief.json>   (exit 0 = valido; 1 = problemas; 2 = error de uso)
 import { readFileSync } from "node:fs";
 import { validateBrief } from "./lib/brief.mjs";

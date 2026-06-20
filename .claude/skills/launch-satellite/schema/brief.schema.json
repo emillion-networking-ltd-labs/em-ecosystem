@@ -1,8 +1,8 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://em-ecosystem/satellite/brief.schema.json",
+  "$id": "https://em-ecosystem/launch-satellite/brief.schema.json",
   "title": "Satellite onboarding brief (ECO-24, F2a)",
-  "description": "Contrato entre /satellite onboarding (F2a) y la generacion (F2b/ECO-25). Cada campo de negocio lleva PROCEDENCIA: provided|extracted|proposed|missing. NO existe 'invented'. La generacion consume este brief; los 'missing'/'proposed' se rinden como placeholders/pendientes, nunca como datos fabricados.",
+  "description": "Contrato entre /launch-satellite onboarding (F2a) y la generacion (F2b/ECO-25). Cada campo de negocio lleva PROCEDENCIA: provided|extracted|proposed|missing. NO existe 'invented'. La generacion consume este brief; los 'missing'/'proposed' se rinden como placeholders/pendientes, nunca como datos fabricados.",
   "type": "object",
   "required": ["schemaVersion", "intakeMode", "identity", "fields"],
   "additionalProperties": false,

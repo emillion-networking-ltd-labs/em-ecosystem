@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Gate S2 LOCAL del skill /satellite (ECO-25): Lighthouse contra el build servido en local.
+// Gate S2 LOCAL del skill /launch-satellite (ECO-25): Lighthouse contra el build servido en local.
 // Umbrales (runbook S2): Perf>=90, SEO>=95, Best-Practices>=95, A11y>=90.
 // Uso: node lighthouse-local.mjs <url>   (p.ej. http://localhost:3100, con el satélite ya servido)
 // Requiere chromium (CHROME_PATH o uno en PATH) + `npx lighthouse`. NO falsea: si no hay chromium,

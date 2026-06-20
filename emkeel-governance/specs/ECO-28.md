@@ -6,7 +6,7 @@ Strategy: satellites
 Fase 3b de la estrategia [`satellites`](../strategy/satellites.md) (APPROVED). Orquesta el patrón **intake→genera→repo→deploy** end-to-end y cierra el **"lanzado" formal** (Lighthouse **remoto** sobre la URL desplegada = S2 PASS, el residual que F2b dejó como local). **Depende de ECO-27** (los satélites deben estar gateados antes de automatizar su creación). Construye sobre F1/F2 sin tocarlos.
 
 ## Contexto / base
-- F1 (em-ui) + F2 (skill `/satellite`: onboarding→brief, generación→satélite S2-ready local) en main.
+- F1 (em-ui) + F2 (skill `/launch-satellite`: onboarding→brief, generación→satélite S2-ready local) en main.
 - SAT01 vive como **carpeta en el monorepo** (`satellites/sat-cristian-garcia/`), desplegada a Vercel; el runbook (`docs/satellite-deployment-runbook.md`) documenta el "cómo" (Vercel API, Ignored Build Step, dominio).
 - ECO-27 (F3a): los satélites quedan auto-gateados en CI.
 

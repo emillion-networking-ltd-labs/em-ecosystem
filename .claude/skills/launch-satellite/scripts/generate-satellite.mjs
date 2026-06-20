@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Motor de generación del skill /satellite (ECO-25, F2b). brief.json -> satélite S2-ready.
+// Motor de generación del skill /launch-satellite (ECO-25, F2b). brief.json -> satélite S2-ready.
 // Pipeline determinista, NO greenfield: scaffold forma-SAT01 + reuse de UI SOLO via `em-ui add`
 // (cierre transitivo) + `em-ui init` (tokens) + relleno desde el brief. Los `missing` -> placeholders
 // visibles, NUNCA datos fabricados. NO despliega (eso es F3).

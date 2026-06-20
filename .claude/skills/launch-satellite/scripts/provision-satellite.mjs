@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Orquestador de provisión /satellite (ECO-28, F3b). Dado un satélite generado (F2), PREPARA:
+// Orquestador de provisión /launch-satellite (ECO-28, F3b). Dado un satélite generado (F2), PREPARA:
 // (a) proyecto Jira nuevo + tickets (Q2); (b) proyecto + deploy Vercel (Q1/Q3); (c) checklist.
 // DRY-RUN POR DEFECTO (ADR-009 Q4): nada outward-facing se ejecuta sin --apply + confirmación humana.
 // El --apply real lo dispara el HUMANO (no en CI). Lighthouse remoto = "lanzado" (script aparte).

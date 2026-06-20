@@ -37,7 +37,7 @@ Esto es el **scope real de SCRUM-331**, ahora validado como el candidato correct
 
 - Se construye `em-ui` (registry + CLI) con single-source en el dashboard; se hace **backfill** de los 48 componentes y se **reconcilia el drift de SAT01** (empezando por el `Button`). *(ECO de seguimiento, Fase 1 de la estrategia.)*
 - Los satélites dejan de copiar a mano: *pull-ean* del registry, conservan ownership para personalizar, y el drift queda bajo gate.
-- **Dependencia de fase:** el resto del sistema de facilitación `/satellite` (onboarding + generación, y luego automatización Jira+GitHub+Vercel + cierre de los 2 huecos de CI — `.github/workflows/security.yml:64-65`, `.github/workflows/visual-regression.yml:31-35`) se construye **encima** de este mecanismo; sin la pieza base, la generación propagaría drift.
+- **Dependencia de fase:** el resto del sistema de facilitación `/launch-satellite` (onboarding + generación, y luego automatización Jira+GitHub+Vercel + cierre de los 2 huecos de CI — `.github/workflows/security.yml:64-65`, `.github/workflows/visual-regression.yml:31-35`) se construye **encima** de este mecanismo; sin la pieza base, la generación propagaría drift.
 - No se convierte el repo a monorepo-workspaces (la decisión lo evita por diseño).
 
 ## Notas

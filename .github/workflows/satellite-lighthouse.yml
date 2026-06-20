@@ -1,4 +1,4 @@
-# Satellite Lighthouse S2 (ECO-37) — mide los scores S2 de un satélite GENERADO por /satellite.
+# Satellite Lighthouse S2 (ECO-37) — mide los scores S2 de un satélite GENERADO por /launch-satellite.
 # Cierra el residual de F2b/F3b: lighthouse-local.mjs estaba cableado pero nunca corrió (sin chromium).
 # Flujo: genera un satélite DEMO EFÍMERO (brief de ejemplo → generate-satellite.mjs) → next build →
 # next start (puerto 3100) → lighthouse-local.mjs con chromium del runner. Umbral S2:
@@ -11,7 +11,7 @@ on:
   pull_request:
     branches: [main]
     paths:
-      - ".claude/skills/satellite/**"
+      - ".claude/skills/launch-satellite/**"
       - "design-system/**"
       - "em-ui/**"
       - ".github/workflows/satellite-lighthouse.yml"
@@ -37,8 +37,8 @@ jobs:
         run: |
           set -e
           DEST="$(mktemp -d)/sat-lh-demo"
-          node .claude/skills/satellite/scripts/generate-satellite.mjs \
-            .claude/skills/satellite/schema/brief.example.a-no-design.json "$DEST"
+          node .claude/skills/launch-satellite/scripts/generate-satellite.mjs \
+            .claude/skills/launch-satellite/schema/brief.example.a-no-design.json "$DEST"
           echo "DEST=$DEST" >> "$GITHUB_ENV"
           echo "Generated demo at $DEST (efímero — no se commitea)"
 
@@ -59,7 +59,7 @@ jobs:
           npx --yes wait-on http://localhost:3100 -t 120000
           # lighthouse-local.mjs: exit 0 = S2 PASS; 1 = algún umbral no alcanzado (GAP real);
           # 3 = sin chromium. NO falsea scores.
-          node "$GITHUB_WORKSPACE/.claude/skills/satellite/scripts/lighthouse-local.mjs" http://localhost:3100
+          node "$GITHUB_WORKSPACE/.claude/skills/launch-satellite/scripts/lighthouse-local.mjs" http://localhost:3100
 
       - name: Upload Lighthouse report
         if: always()
