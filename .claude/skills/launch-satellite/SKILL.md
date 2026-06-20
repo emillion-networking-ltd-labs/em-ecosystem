@@ -27,8 +27,18 @@ Pregunta al operador/cliente cuál encaja (puede combinarse, p.ej. b+d):
   2-3 paletas/tipografías para que **elija** (propuesta = `proposed`, no invención).
 - **(b) Con diseño/marca** → el cliente aporta sus **tokens** (colores/tipografía/logo) → `provided`;
   se mapearán a la capa de tokens (`em-ui init`) en F2b.
-- **(c) Mejorar un sitio existente** → pide su URL y ejecuta `scripts/fetch-url.mjs <url> c-improve-site`
-  para **extraer** título/descripción/colores reales (`extracted`, source=url). Lo no extraído se pregunta.
+- **(c) Mejorar un sitio existente** → **PREGUNTA SIEMPRE primero: "¿URL viva o material local? Si local,
+  ¿qué ruta?"** (nunca auto-elijas la fuente).
+  - **URL viva** → `scripts/fetch-url.mjs <url> c-improve-site` **extrae** título/descripción/colores reales
+    (`extracted`, source=url). Lo no extraído se pregunta.
+  - **Material local** (un backup, un export, una carpeta de assets — sea WordPress o cualquier otra cosa) →
+    pide la **RUTA** (default `.satellite-intake/<cliente>/`, **parámetro** — el material es movible sin tocar
+    código). El skill **apunta a ese directorio y TÚ lo lees con tus herramientas normales** (`ls`, `Read`),
+    guiado por la **prosa del operador** sobre qué hay ahí. No hay parser por tipo de fuente: exploras el
+    contenido **conversacionalmente** y aplicas la **regla dura "no inventar"** — lo que **está** en los
+    ficheros entra como `extracted` (source = la ruta del fichero); lo que **no está** (p.ej. el texto de
+    páginas de un backup solo-ficheros, que vive en la BD ausente) queda `missing` y **se pregunta**. Nunca
+    fabricas lo que no encuentras.
 - **(d) Instagram** → **vía primaria:** el cliente aporta su **handle** y **confirma/pega** su contenido
   (bio, fotos, stats) → `provided`. El **scrape es best-effort** (`scripts/instagram-intake.mjs`, solo
   datos **públicos** de su **cuenta propia**, sin saltar auth-walls): si funciona, pre-rellena como
@@ -84,7 +94,7 @@ umbrales S2 sobre la URL desplegada. Sin URL/chromium → **reporta gap** (no fa
 
 ## Scripts
 - `scripts/validate-brief.mjs <brief.json>` — valida estructura + regla "no inventar".
-- `scripts/fetch-url.mjs <url> [c-improve-site|e-inspiration]` — modo (c)/(e), best-effort, degrada a preguntar.
+- `scripts/fetch-url.mjs <url> [c-improve-site|e-inspiration]` — modo (c) URL / (e), best-effort, degrada a preguntar.
 - `scripts/instagram-intake.mjs <handle>` — modo (d), cliente-primario + scrape best-effort + fallback.
 - `scripts/generate-satellite.mjs <brief.json> <destDir>` — F2b: brief → satélite S2-ready (scaffold + em-ui).
 - `scripts/lighthouse-local.mjs <url>` — gate S2 local; reporta gap si no hay chromium (no falsea).

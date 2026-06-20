@@ -1,0 +1,5 @@
+# Intake LOCAL de material de cliente (backups WordPress, assets, etc.).
+# NUNCA se commitea — es material de entrada, no fuente del satélite.
+# Autocontenido: ignora todo lo que se coloque aquí, salvo este propio .gitignore.
+*
+!.gitignore
