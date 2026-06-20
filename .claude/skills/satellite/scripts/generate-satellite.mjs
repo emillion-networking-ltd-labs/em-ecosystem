@@ -62,9 +62,11 @@ export function generateSatellite(brief, destDir, { components = DEFAULT_COMPONE
   // --- c. globals.css importa la capa de tokens de em-ui ---
   writeFileSync(join(app, "globals.css"), `@import "../styles/em-ui-tokens.css";\n\nbody { font-family: var(--font-sans); }\n`);
 
-  // --- layout con observabilidad (S2) ---
+  // --- layout + observabilidad DIFERIDA (S2: no bloquea el main-thread) ---
   const siteName = val(brief.identity?.name, "nombre del negocio");
   writeFileSync(join(app, "layout.tsx"), LAYOUT(siteName));
+  mkdirSync(join(src, "components"), { recursive: true });
+  writeFileSync(join(src, "components", "DeferredAnalytics.tsx"), DEFERRED_ANALYTICS);
 
   // --- páginas marketing (relleno desde brief; missing -> placeholder visible) ---
   const f = brief.fields || {};
@@ -113,8 +115,7 @@ const TSCONFIG = JSON.stringify({
 }, null, 2) + "\n";
 const POSTCSS = `/** @type {import('postcss-load-config').Config} */\nconst config = { plugins: { '@tailwindcss/postcss': {} } };\nexport default config;\n`;
 const LAYOUT = (siteName) => `import type { Metadata } from "next";
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import DeferredAnalytics from "@/components/DeferredAnalytics";
 import "./globals.css";
 
 // metadataBase env-driven (S2): cae al default de Vercel hasta que F3 cablee el dominio.
@@ -129,10 +130,41 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="es">
       <body>
         {children}
-        <SpeedInsights />
-        <Analytics />
+        {/* Observabilidad diferida: no bloquea el main-thread (S2 Performance). */}
+        <DeferredAnalytics />
       </body>
     </html>
+  );
+}
+`;
+
+// ECO-39: monta @vercel/analytics + speed-insights ON-IDLE (fuera del hilo crítico de hydration)
+// para no inflar el Total Blocking Time. Son scripts INVISIBLES → el render visible no cambia (VRT verde).
+const DEFERRED_ANALYTICS = `"use client";
+import { useEffect, useState } from "react";
+import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
+
+export default function DeferredAnalytics() {
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    const w = window as Window & {
+      requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number;
+      cancelIdleCallback?: (id: number) => void;
+    };
+    if (typeof w.requestIdleCallback === "function") {
+      const id = w.requestIdleCallback(() => setReady(true), { timeout: 4000 });
+      return () => w.cancelIdleCallback?.(id);
+    }
+    const t = setTimeout(() => setReady(true), 2500);
+    return () => clearTimeout(t);
+  }, []);
+  if (!ready) return null;
+  return (
+    <>
+      <SpeedInsights />
+      <Analytics />
+    </>
   );
 }
 `;
