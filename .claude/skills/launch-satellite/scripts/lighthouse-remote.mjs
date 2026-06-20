@@ -1,12 +1,11 @@
 #!/usr/bin/env node
-// Gate S2 REMOTO del skill /launch-satellite (ECO-28, F3b): Lighthouse contra la URL DESPLEGADA = "lanzado".
-// Umbrales runbook S2: Perf>=90, SEO>=95, Best-Practices>=95, A11y>=90.
-// Uso: node lighthouse-remote.mjs <url-desplegada>
+// Gate S2 REMOTO del skill /launch-satellite (ECO-28, F3b; hardening ECO-41): Lighthouse contra la URL
+// DESPLEGADA = "lanzado", comparando la MEDIANA de N corridas a los umbrales S2 (Perf>=90, SEO>=95,
+// Best-Practices>=95, A11y>=90) — misma absorción de varianza que el gate local.
+// Uso: node lighthouse-remote.mjs <url-desplegada>   (LH_RUNS=N cambia N, default 5).
 // NO falsea: si no hay URL (sin deploy real) o no hay chromium → sale con código 3 reportando el GAP.
-import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { RUNS, hasChromeInPath, measureMedians, reportMedians } from "./lib/lighthouse.mjs";
 
-const THRESHOLDS = { performance: 90, seo: 95, "best-practices": 95, accessibility: 90 };
 const url = process.argv[2];
 
 if (!url || !/^https?:\/\//i.test(url)) {
@@ -19,28 +18,15 @@ if (!hasChromeInPath() && !process.env.CHROME_PATH) {
   process.exit(3);
 }
 
-const out = "/tmp/lh-remote.json";
+let result;
 try {
-  execFileSync("npx", ["--yes", "lighthouse@12", url,
-    "--only-categories=performance,seo,best-practices,accessibility",
-    "--chrome-flags=--headless --no-sandbox", "--output=json", `--output-path=${out}`, "--quiet"],
-    { stdio: "inherit" });
-} catch (e) { console.error(`lighthouse-remote: no se pudo ejecutar: ${e.message}`); process.exit(3); }
-
-const cats = JSON.parse(readFileSync(out, "utf8")).categories;
-let failed = false;
-for (const [cat, min] of Object.entries(THRESHOLDS)) {
-  const score = Math.round((cats[cat]?.score ?? 0) * 100);
-  const ok = score >= min;
-  console.log(`  ${ok ? "✓" : "✗"} ${cat}: ${score} (mín ${min})`);
-  if (!ok) failed = true;
+  result = measureMedians(url);
+} catch (e) {
+  console.error(`lighthouse-remote: no se pudo ejecutar: ${e.message}`); process.exit(3);
 }
-if (failed) { console.error("lighthouse-remote: S2 remoto NO alcanzado — reportar gap (no falsear)."); process.exit(1); }
+
+console.log(`lighthouse-remote: mediana de ${RUNS} corrida(s) vs umbrales S2 (${url}):`);
+if (!reportMedians(result)) {
+  console.error("lighthouse-remote: S2 remoto NO alcanzado (mediana) — reportar gap (no falsear)."); process.exit(1);
+}
 console.log(`lighthouse-remote: S2 remoto PASS — LANZADO (${url}).`);
-
-function hasChromeInPath() {
-  for (const b of ["chromium", "chromium-browser", "google-chrome", "google-chrome-stable"]) {
-    try { execFileSync("which", [b], { stdio: "ignore" }); return true; } catch {}
-  }
-  return false;
-}
