@@ -37,6 +37,9 @@ next-env.d.ts
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+# ECO-36: preserved visual-run output (CI artifact, never committed)
+/visual-test-results/
+/visual-report/
 
 # Playwright Windows-local VRT snapshots (SCRUM-396) — CI baselines are
 # chromium-linux; the win32 copies that `npx playwright test` writes on

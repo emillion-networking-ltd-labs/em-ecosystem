@@ -91,11 +91,16 @@ jobs:
         if: github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'dashboard' || inputs.package == 'both')
         env:
           VRT: "1"
-          # SCRUM-380: enable AuthContext bypass so post-auth routes render
-          # with a deterministic mock SafeUser. The bypass code lives in HEAD
-          # (not in the baseline_ref), so we restore AuthContext + spec +
-          # fixtures from HEAD before running.
-          NEXT_PUBLIC_VRT_BYPASS_AUTH: "1"
+          # ECO-36: NEXT_PUBLIC_VRT_BYPASS_AUTH is intentionally NOT set here.
+          # The bypass makes the PUBLIC auth pages (/login, /register, …) detect an
+          # authenticated state and REDIRECT to /dashboard (or render blank mid-redirect),
+          # so capturing WITH the bypass produced baselines that did NOT match the
+          # PR-comparison run (which runs WITHOUT the bypass) → permanent VRT red.
+          # Without the bypass: public routes render their real forms (correct baseline),
+          # and the post-auth route tests auto-skip (test.skip when the env var is missing),
+          # so --update-snapshots only refreshes the public-route snapshots and leaves the
+          # post-auth baselines untouched. Re-scoping the bypass to post-auth capture is a
+          # follow-up (SCRUM-381).
         run: |
           set -e
           BASELINE_REF="${{ inputs.baseline_ref }}"
@@ -121,9 +126,11 @@ jobs:
             nexacore-dashboard/tests/e2e/visual.spec.ts \
             nexacore-dashboard/tests/e2e/fixtures/
           (cd nexacore-dashboard && npm ci && npx playwright install chromium --with-deps)
-          (cd nexacore-dashboard && NEXT_PUBLIC_VRT_BYPASS_AUTH=1 npm run dev &)
+          # ECO-36: dev + capture run WITHOUT the bypass so public auth pages render their
+          # real forms (matching the PR-comparison run). Post-auth route tests auto-skip.
+          (cd nexacore-dashboard && npm run dev &)
           (cd nexacore-dashboard && npx wait-on http://localhost:3001 -t 90000)
-          (cd nexacore-dashboard && NEXT_PUBLIC_VRT_BYPASS_AUTH=1 npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
+          (cd nexacore-dashboard && npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
           (pgrep -f "next dev -p 3001" | xargs -r kill -9) || true
           # Preserve freshly captured snapshots across the post-capture restore.
           # If the snapshots dir is already committed (re-baseline scenario),
@@ -176,12 +183,34 @@ jobs:
           # against the committed baseline fails immediately.
           EXIT=0
           npx playwright test visual.spec.ts --workers=1 --reporter=list || EXIT=$?
+          # ECO-36: a11y.spec wipes test-results/ at start, sobreescribiendo los diffs
+          # del visual run → se perdían. Preservamos el output del visual a un dir propio
+          # ANTES de correr a11y, para que el artefacto del diff VISUAL sea recuperable.
+          rm -rf visual-test-results visual-report
+          cp -a test-results visual-test-results 2>/dev/null || true
+          cp -a playwright-report visual-report 2>/dev/null || true
           npx playwright test a11y.spec.ts --workers=1 --reporter=list || EXIT=$?
           kill $DEV_PID || true
           exit ${EXIT}
         timeout-minutes: 30
 
-      - name: Upload diff report (on failure)
+      - name: Upload VISUAL diff images (on failure)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-visual-diff-${{ github.event.pull_request.number }}
+          path: nexacore-dashboard/visual-test-results/
+          retention-days: 14
+
+      - name: Upload VISUAL diff report (on failure)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-visual-report-${{ github.event.pull_request.number }}
+          path: nexacore-dashboard/visual-report/
+          retention-days: 14
+
+      - name: Upload a11y diff report (on failure)
         if: failure() && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v7
         with:
@@ -189,7 +218,7 @@ jobs:
           path: nexacore-dashboard/playwright-report/
           retention-days: 14
 
-      - name: Upload diff images (on failure)
+      - name: Upload a11y diff images (on failure)
         if: failure() && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v7
         with:
