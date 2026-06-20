@@ -47,7 +47,7 @@ Decidir el NORTE de un **sistema de facilitación gobernado** (tipo Lovable, per
 
 ## Recommendation
 <!-- which option + why — this is judgment; the human approves it at the gate -->
-**APROBADA por el operador (human gate, 2026-06-18): Opción 2 (Registry + CLI interno estilo shadcn, `em-ui`) como mecanismo de reuse**, sobre el que se construye el sistema de facilitación `/satellite`.
+**APROBADA por el operador (human gate, 2026-06-18): Opción 2 (Registry + CLI interno estilo shadcn, `em-ui`) como mecanismo de reuse**, sobre el que se construye el sistema de facilitación `/launch-satellite`.
 
 > **Matiz clave de la 2 (decidido a propósito): es COPIA GOBERNADA con reconciliación, NO "cero copia".** Se elige precisamente porque los satélites **necesitan divergir per-cliente** (colores/marca, a veces un componente) y un paquete inmutable (workspace/npm) lo impediría. Single-source = dashboard UI Core; *ownership* por satélite; el **re-pull gobernado + el gate de a11y** hacen el drift **detectable y reconciliable** (la regresión real del `Button` — `nexacore-dashboard/src/components/ui/Button.tsx:87` — es la prueba de por qué hace falta).
 
@@ -56,7 +56,7 @@ Decidir el NORTE de un **sistema de facilitación gobernado** (tipo Lovable, per
 - La **3 (workspace)** da el single-source más fuerte pero exige convertir el repo a workspaces (hoy inexistentes, `package.json:1`) y un paquete importado **resiste la divergencia per-cliente** que un satélite necesita (cada cliente cambia colores/marca, a veces un componente). La **4 (npm)** hereda esa rigidez y añade release overhead.
 - La **2** es el punto óptimo para nuestro caso: **single-source = dashboard UI Core** (lo que `CONTRIBUTING.md:73-75` ya declara fuente de verdad), pero **copiando con ownership** (el satélite puede personalizar) y con un **re-pull gobernado** que hace el drift *detectable y reconciliable* en vez de invisible — justo lo que el modelo shadcn resuelve (https://ui.shadcn.com/docs/registry/getting-started), y **sin** refactor a monorepo. Es **SCRUM-331 ejecutado de verdad**, validado aquí como el candidato correcto (no como respuesta dada).
 
-**El sistema de facilitación `/satellite` (norte, apoyado en la Opción 2):**
+**El sistema de facilitación `/launch-satellite` (norte, apoyado en la Opción 2):**
 1. **Onboarding guiado** — antes de generar, elegir modo de entrada (la IA NUNCA fabrica diseño desde cero; parte del UI Core + estructura SAT01):
    - **(a) Cliente SIN diseño/marca** → UI Core + estructura de SAT01 como referencia; pregunta datos reales (negocio, servicios/precios, contacto) y propone paletas/tipografías.
    - **(b) Cliente CON diseño/marca** → introducir/aplicar sus tokens (colores, tipografía, logo) sobre el UI Core.
@@ -69,18 +69,18 @@ Decidir el NORTE de un **sistema de facilitación gobernado** (tipo Lovable, per
 4. **Gobernanza** — la salida pasa los gates; se cierran los 2 huecos: satélites en la matrix de `.github/workflows/security.yml:64-65` y VRT/a11y **auto-discovered** en vez de hardcoded a `sat-cristian-garcia` (`.github/workflows/visual-regression.yml:31-35`). El gate de a11y habría cazado la regresión del `Button`.
 
 **Cómo cubre el CASO DE PRUEBA (validación del norte):**
-- *Modo (a), cliente nuevo sin diseño:* onboarding pregunta datos reales (o IG) → `/satellite` *pull-ea* UI Core+tokens del registry y scaffolda la estructura SAT01 → genera `satellites/sat-<x>/` Next.js reusando componentes → crea Jira (proyecto+sprint+tickets) + GitHub + deploy Vercel → S2 + gates → "lanzado" ~90% alineado. ✔ cubierto por reuse(2)+onboarding(1)+generación(2)+automatización(3)+gobernanza(4).
+- *Modo (a), cliente nuevo sin diseño:* onboarding pregunta datos reales (o IG) → `/launch-satellite` *pull-ea* UI Core+tokens del registry y scaffolda la estructura SAT01 → genera `satellites/sat-<x>/` Next.js reusando componentes → crea Jira (proyecto+sprint+tickets) + GitHub + deploy Vercel → S2 + gates → "lanzado" ~90% alineado. ✔ cubierto por reuse(2)+onboarding(1)+generación(2)+automatización(3)+gobernanza(4).
 - *Modo (c), cliente CON web:* onboarding toma su sitio → re-construye con nuestros componentes cambiando **solo colores/tokens** (ownership de la copia del registry) → misma adaptación a forma satélite + gates. ✔ cubierto; la 2 lo permite porque la copia es personalizable (la 3/4 lo dificultarían).
 
 ## Fasificación
 El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún no es reutilizable.**
 - **Fase 1 — Mecanismo de reuse (pieza base):** construir el registry + CLI interno (`em-ui`, scope real de SCRUM-331) con **single-source = dashboard UI Core**; backfill de los 48 y **reconciliar el drift de SAT01** (empezando por el `Button`). Sin esto, todo lo demás propaga drift.
-- **Fase 2 — Onboarding + generación (`/satellite`):** los 5 modos de intake → brief estructurado → generación que *pull-ea* del registry y adapta a forma satélite hasta S2.
+- **Fase 2 — Onboarding + generación (`/launch-satellite`):** los 5 modos de intake → brief estructurado → generación que *pull-ea* del registry y adapta a forma satélite hasta S2.
 - **Fase 3 — Automatización + gobernanza:** orquestar Jira+GitHub+Vercel end-to-end y **cerrar los 2 huecos de CI** (satélites bajo Security Pipeline + VRT auto-discovered). La gobernanza se cablea aquí para que la automatización no escale drift.
 
 ## Non-goals
 - NO es el cómo-paso-a-paso (scaffold, curl a Vercel, gotchas): eso es el **runbook** (`docs/satellite-deployment-runbook.md`), que esta estrategia referencia, no reemplaza.
-- NO construye el registry/CLI ni el skill `/satellite` aquí: fija el norte; el cómo es el/los ECO de seguimiento por fase.
+- NO construye el registry/CLI ni el skill `/launch-satellite` aquí: fija el norte; el cómo es el/los ECO de seguimiento por fase.
 - NO decide el diseño/branding de un satélite concreto (es per-cliente).
 - NO convierte el repo a monorepo-workspaces (la Opción 2 lo evita por diseño).
 - NO promete backend/integración con la API NexaCore (un satélite es marketing estático salvo que un ticket lo pida — `docs/satellite-deployment-runbook.md:28`).
@@ -96,7 +96,7 @@ El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún 
 
 ### ECOs de seguimiento propuestos (títulos/scope; los números Jira los crea el operador)
 1. **ECO-Fase1 — Mecanismo de reuse `em-ui`:** registry + CLI interno con single-source = dashboard UI Core; backfill de los 48 componentes + **reconciliación del drift de SAT01** (empezando por el `Button`). Cierra el scope de **SCRUM-331**. *(pieza base; sin dependencias)*
-2. **ECO-Fase2 — Skill `/satellite`:** 5 modos de onboarding + generación que *pull-ea* del registry + adaptación a forma satélite hasta **S2 PASS**. *(depende de Fase 1)*
+2. **ECO-Fase2 — Skill `/launch-satellite`:** 5 modos de onboarding + generación que *pull-ea* del registry + adaptación a forma satélite hasta **S2 PASS**. *(depende de Fase 1)*
 3. **ECO-Fase3 — Automatización + gobernanza:** orquestación Jira+GitHub+Vercel end-to-end + cierre de los 2 huecos de CI (satélites en la matrix de `.github/workflows/security.yml` + VRT auto-discovered en `.github/workflows/visual-regression.yml`). *(depende de Fase 2)*
 
 ## Sources (verificadas con tool — cada una abierta)
