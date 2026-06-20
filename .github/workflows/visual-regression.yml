@@ -176,12 +176,34 @@ jobs:
           # against the committed baseline fails immediately.
           EXIT=0
           npx playwright test visual.spec.ts --workers=1 --reporter=list || EXIT=$?
+          # ECO-36: a11y.spec wipes test-results/ at start, sobreescribiendo los diffs
+          # del visual run → se perdían. Preservamos el output del visual a un dir propio
+          # ANTES de correr a11y, para que el artefacto del diff VISUAL sea recuperable.
+          rm -rf visual-test-results visual-report
+          cp -a test-results visual-test-results 2>/dev/null || true
+          cp -a playwright-report visual-report 2>/dev/null || true
           npx playwright test a11y.spec.ts --workers=1 --reporter=list || EXIT=$?
           kill $DEV_PID || true
           exit ${EXIT}
         timeout-minutes: 30
 
-      - name: Upload diff report (on failure)
+      - name: Upload VISUAL diff images (on failure)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-visual-diff-${{ github.event.pull_request.number }}
+          path: nexacore-dashboard/visual-test-results/
+          retention-days: 14
+
+      - name: Upload VISUAL diff report (on failure)
+        if: failure() && github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-visual-report-${{ github.event.pull_request.number }}
+          path: nexacore-dashboard/visual-report/
+          retention-days: 14
+
+      - name: Upload a11y diff report (on failure)
         if: failure() && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v7
         with:
@@ -189,7 +211,7 @@ jobs:
           path: nexacore-dashboard/playwright-report/
           retention-days: 14
 
-      - name: Upload diff images (on failure)
+      - name: Upload a11y diff images (on failure)
         if: failure() && github.event_name == 'pull_request'
         uses: actions/upload-artifact@v7
         with:
