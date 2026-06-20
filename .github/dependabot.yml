@@ -1,37 +1,58 @@
+# Dependabot — actualización de dependencias de RUTINA (mantenimiento al día sin ruido).
+# ECO-33: minor+patch agrupados en 1 PR/ecosistema, mensual, majors fuera del flujo automático.
+# Las alertas de SEGURIDAD van APARTE (Dependabot security updates / vulnerability-alerts, repo-wide,
+# ON) y NO se ven afectadas por esta config — siguen abriendo PRs por vuln al instante.
 version: 2
 updates:
   - package-ecosystem: "npm"
     directory: "/nexacore-api"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 10
+      interval: "monthly"
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "backend"
     commit-message:
       prefix: "deps(api):"
+    # Majors fuera del flujo automático → revisión humana (no auto-merge).
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    # minor+patch de todo el ecosistema en UNA sola PR.
+    groups:
+      api-minor-patch:
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: "npm"
     directory: "/nexacore-dashboard"
     schedule:
-      interval: "weekly"
-      day: "monday"
-    open-pull-requests-limit: 10
+      interval: "monthly"
+    open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "frontend"
     commit-message:
       prefix: "deps(dashboard):"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      dashboard-minor-patch:
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
-      day: "monday"
+      interval: "monthly"
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
       - "ci"
     commit-message:
       prefix: "deps(ci):"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      actions-minor-patch:
+        update-types: ["minor", "patch"]
