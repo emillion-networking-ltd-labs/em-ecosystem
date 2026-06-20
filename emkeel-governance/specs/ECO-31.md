@@ -38,7 +38,7 @@ Materializa el "ECO futuro" que nombró [ADR-007](../adr/007-design-system-sourc
 - NO convierte el repo a workspace/monorepo (ADR-006 lo descarta; el modelo es copy).
 - NO toca `CommandPalette` ni las deps app-coupled (auth/API).
 - NO cambia el diseño visual (cualquier cambio de render sería un bug; VRT lo caza).
-- NO toca F2/F3 (skill `/satellite`, automatización).
+- NO toca F2/F3 (skill `/launch-satellite`, automatización).
 
 ## Alignment
 Cierra la deuda **dual-source** que [ADR-007](../adr/007-design-system-source-location.md) nombró como "ECO futuro": el dashboard pasa de copia legacy hand-mantenida a **consumidor em-ui de `design-system/`** (single-source canónico), honrando el modelo **copy-gobernado-con-reconciliación** de ADR-006 (no import). Reconcilia el fix a11y de ECO-30 hacia el canon. Respeta la frontera app-owned (CommandPalette/auth/API). Es la pieza que faltaba para que `design-system/` sea la **única** fuente del UI Core (la estrategia `satellites` se apoya en ese single-source).

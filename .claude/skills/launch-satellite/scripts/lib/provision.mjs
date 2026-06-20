@@ -1,4 +1,4 @@
-// Lib compartida de provisión /satellite (ECO-28, F3b). Frontera AUTO/HUMANO (ADR-009 Q4):
+// Lib compartida de provisión /launch-satellite (ECO-28, F3b). Frontera AUTO/HUMANO (ADR-009 Q4):
 // dry-run POR DEFECTO; ninguna acción outward-facing se ejecuta sin --apply explícito + confirmación
 // humana. Boundary inyectable (real lee secrets de env; recording/mock para dry-run y tests).
 // Secrets SIEMPRE del entorno — JAMÁS en el repo.

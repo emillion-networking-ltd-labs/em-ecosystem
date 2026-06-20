@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Modo (d) Instagram del onboarding /satellite (ECO-24).
+// Modo (d) Instagram del onboarding /launch-satellite (ECO-24).
 // VÍA PRIMARIA Y FIABLE: el cliente aporta su handle y confirma/pega su contenido (es su cuenta).
 // El scrape es BEST-EFFORT (datos PÚBLICOS de la cuenta PROPIA, sin saltar auth-walls — ToS):
 // si funciona, pre-rellena lo que el cliente confirma; si falla/ausente, se DEGRADA a preguntar.

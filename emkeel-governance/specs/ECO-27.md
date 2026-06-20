@@ -15,7 +15,7 @@ Un **job `discover`** glob-ea `satellites/sat-*/package.json` y emite la lista c
 ## Scope
 - **(a) Security Pipeline auto-discover:** añadir a `.github/workflows/security.yml` un `discover-satellites` job + hacer **dinámica la matrix de `dependency-audit`** (el Hueco 1, `security.yml:64-65`) para incluir los satélites descubiertos (sin quitar api/dashboard). *(El secret-scan ya cubre todo el checkout. SAST por-satélite —eslint— queda como follow-up: no es el hueco citado y arriesga aflorar deuda de lint ajena a este ticket.)*
 - **(b) VRT/a11y auto-discover:** en `.github/workflows/visual-regression.yml`, sustituir los paths/job hardcoded a `sat-cristian-garcia` por descubrimiento dinámico (paths `satellites/sat-*/**` + matrix por satélite). SAT01 sigue cubierto, ahora por la vía genérica.
-- **(c)** No tocar F1 (`design-system/`, `em-ui/`) ni F2 (`.claude/skills/satellite/`); no automatización externa.
+- **(c)** No tocar F1 (`design-system/`, `em-ui/`) ni F2 (`.claude/skills/launch-satellite/`); no automatización externa.
 
 ## Acceptance Criteria
 1. **Un satélite NUEVO queda auditado** por el Security Pipeline (`dependency-audit`) **sin** editar el workflow (verificable: la matrix se deriva de `satellites/sat-*`).

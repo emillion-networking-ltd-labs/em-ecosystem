@@ -1,13 +1,16 @@
 ---
-name: satellite
-description: "Onboarding guiado para lanzar un satélite (sitio de cliente) de NexaCore. Conduce 5 modos de intake (sin diseño / con marca / mejorar sitio / Instagram / inspiración) hasta un brief.json estructurado que la generación (F2b) consume. Úsalo cuando el operador quiera arrancar un satélite nuevo, recoger los datos de un cliente, o preparar el brief de generación. NO genera el satélite (eso es F2b) ni despliega (F3)."
+name: launch-satellite
+description: "Lanza un satélite (sitio de cliente) de NexaCore de extremo a extremo: onboarding (5 modos de intake — sin diseño / con marca / mejorar sitio / Instagram / inspiración → brief.json estructurado), generación (brief → satélite S2-ready reutilizando el UI Core vía em-ui) y provisión/lanzamiento (Jira + Vercel, dry-run por defecto, Lighthouse remoto = lanzado). Úsalo cuando el operador quiera arrancar, generar o lanzar un satélite, recoger los datos de un cliente, o preparar su provisión. Las acciones externas (Jira/Vercel) solo se ejecutan con confirmación humana explícita (--apply --confirm)."
 ---
 
-# /satellite — onboarding (F2a, ECO-24)
+# /launch-satellite — lanzar un satélite end-to-end (onboarding F2a → generación F2b → provisión F3b)
 
-Conduces el **intake** de un satélite y produces un **`brief.json`** (contrato hacia la generación F2b).
-Materializa [ADR-008](../../../emkeel-governance/adr/008-satellite-onboarding-generation.md) y el spec
-[`ECO-24`](../../../emkeel-governance/specs/ECO-24.md). **NO** generas el satélite ni despliegas.
+Lanzas un satélite de extremo a extremo: **intake** → **`brief.json`** → **generación** (satélite S2-ready) →
+**provisión/lanzamiento** (dry-run-first). Materializa [ADR-008](../../../emkeel-governance/adr/008-satellite-onboarding-generation.md)
+([`ECO-24`](../../../emkeel-governance/specs/ECO-24.md) onboarding, [`ECO-25`](../../../emkeel-governance/specs/ECO-25.md)
+generación) y [ADR-009](../../../emkeel-governance/adr/009-satellite-automation-governance.md)
+([`ECO-28`](../../../emkeel-governance/specs/ECO-28.md) provisión). Las acciones externas (Jira/Vercel) requieren
+confirmación humana explícita (`--apply --confirm`) — nada outward-facing ocurre a ciegas.
 
 ## Reglas duras (innegociables)
 - **NO inventes datos del negocio.** Colores, marca, servicios, precios, bio, seguidores, fotos: solo
