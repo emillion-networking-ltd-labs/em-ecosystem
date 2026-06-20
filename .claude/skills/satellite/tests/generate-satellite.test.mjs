@@ -95,9 +95,13 @@ test("AC#4: S2-ready (6 cabeceras + robots + sitemap + metadata + metadataBase +
   assert.ok(existsSync(join(dir, "src/app/robots.ts")), "robots.ts");
   assert.ok(existsSync(join(dir, "src/app/sitemap.ts")), "sitemap.ts");
   const layout = readFileSync(join(dir, "src/app/layout.tsx"), "utf8");
-  assert.match(layout, /SpeedInsights/, "observabilidad SpeedInsights");
-  assert.match(layout, /Analytics/, "observabilidad Analytics");
   assert.match(layout, /metadataBase/, "metadataBase env-driven");
+  // ECO-39: observabilidad DIFERIDA (on-idle) → en DeferredAnalytics, no inline en el layout (S2 Performance).
+  assert.match(layout, /DeferredAnalytics/, "layout monta la observabilidad diferida");
+  const deferred = readFileSync(join(dir, "src/components/DeferredAnalytics.tsx"), "utf8");
+  assert.match(deferred, /SpeedInsights/, "observabilidad SpeedInsights (diferida)");
+  assert.match(deferred, /Analytics/, "observabilidad Analytics (diferida)");
+  assert.match(deferred, /requestIdleCallback|setTimeout/, "se monta on-idle, no bloquea el main-thread");
   const home = readFileSync(join(dir, "src/app/page.tsx"), "utf8");
   assert.match(home, /alternates:\s*\{\s*canonical/, "metadata por ruta (canonical)");
 });
