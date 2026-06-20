@@ -20,21 +20,12 @@
 name: Visual Regression
 
 on:
+  # ECO-38: SIN paths-filter → el workflow corre en CADA PR a main, así
+  # "Dashboard visual regression" SIEMPRE reporta (verde por skip si el dashboard
+  # no cambió) y puede re-requerirse sin bloquear PRs ajenas. El trabajo PESADO
+  # se gatea dentro de los jobs por detección de cambios (dorny/paths-filter).
   pull_request:
     branches: [main]
-    paths:
-      - "nexacore-dashboard/src/**"
-      - "nexacore-dashboard/public/**"
-      - "nexacore-dashboard/playwright.config.ts"
-      - "nexacore-dashboard/tests/e2e/**"
-      - "nexacore-dashboard/package.json"
-      # ECO-27 (F3a): glob — cualquier satélite nuevo dispara el VRT sin editar el workflow.
-      - "satellites/sat-*/src/**"
-      - "satellites/sat-*/public/**"
-      - "satellites/sat-*/playwright.config.ts"
-      - "satellites/sat-*/tests/e2e/**"
-      - "satellites/sat-*/package.json"
-      - ".github/workflows/visual-regression.yml"
   workflow_dispatch:
     inputs:
       capture_baseline:
@@ -71,7 +62,21 @@ jobs:
           # Need both refs so we can checkout the baseline-ref temporarily.
           fetch-depth: 0
 
+      # ECO-38: ¿el PR toca el dashboard (o este workflow)? Solo entonces corre la
+      # comparación pesada; si no, el job sale 0 y "Dashboard visual regression"
+      # reporta SUCCESS (skip) — así puede re-requerirse sin bloquear PRs ajenas.
+      - name: Detect dashboard changes
+        id: changes
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            dashboard:
+              - 'nexacore-dashboard/**'
+              - '.github/workflows/visual-regression.yml'
+
       - name: Setup Node.js
+        if: ${{ (github.event_name == 'pull_request' && steps.changes.outputs.dashboard == 'true') || (github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'dashboard' || inputs.package == 'both')) }}
         uses: actions/setup-node@v6
         with:
           node-version: "22"
@@ -79,10 +84,12 @@ jobs:
           cache-dependency-path: nexacore-dashboard/package-lock.json
 
       - name: Install dependencies
+        if: ${{ (github.event_name == 'pull_request' && steps.changes.outputs.dashboard == 'true') || (github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'dashboard' || inputs.package == 'both')) }}
         working-directory: nexacore-dashboard
         run: npm ci
 
       - name: Install Playwright + Chromium
+        if: ${{ (github.event_name == 'pull_request' && steps.changes.outputs.dashboard == 'true') || (github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'dashboard' || inputs.package == 'both')) }}
         working-directory: nexacore-dashboard
         run: npx playwright install chromium --with-deps
 
@@ -161,7 +168,7 @@ jobs:
 
       # ----- COMPARISON PATH (PR trigger) -----
       - name: Run VRT + a11y against committed baseline (PR)
-        if: github.event_name == 'pull_request'
+        if: ${{ github.event_name == 'pull_request' && steps.changes.outputs.dashboard == 'true' }}
         working-directory: nexacore-dashboard
         env:
           VRT: "1"
@@ -235,6 +242,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       satellites: ${{ steps.find.outputs.satellites }}
+      changed: ${{ steps.changes.outputs.satellites }}
     steps:
       - uses: actions/checkout@v6
       - id: find
@@ -243,6 +251,15 @@ jobs:
           sat_json=$(printf '%s\n' $sats | sed '/^$/d' | jq -R . | jq -cs .)
           echo "satellites=$sat_json" >> "$GITHUB_OUTPUT"
           echo "satellites: $sat_json"
+      # ECO-38: ¿el PR toca algún satélite (o este workflow)? Solo entonces corre la matrix.
+      - id: changes
+        if: github.event_name == 'pull_request'
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            satellites:
+              - 'satellites/sat-*/**'
+              - '.github/workflows/visual-regression.yml'
 
   # ==========================================================================
   # Satellite — VRT/a11y auto-discovered (matrix por satélite). SAT01 incluido.
@@ -251,7 +268,9 @@ jobs:
     name: Satellite visual regression
     runs-on: ubuntu-latest
     needs: [discover-satellites-vrt]
-    if: needs.discover-satellites-vrt.outputs.satellites != '[]'
+    # ECO-38: corre solo si hay satélites Y el PR los toca (o es captura por dispatch);
+    # así no se malgastan runs en PRs ajenas. (No es required.)
+    if: ${{ needs.discover-satellites-vrt.outputs.satellites != '[]' && (needs.discover-satellites-vrt.outputs.changed == 'true' || github.event_name == 'workflow_dispatch') }}
     strategy:
       fail-fast: false
       matrix:
