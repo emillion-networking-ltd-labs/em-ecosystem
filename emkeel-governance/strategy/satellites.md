@@ -87,6 +87,45 @@ El satélite es una **herramienta de facilitación** (tipo Lovable — `emkeel-g
 - *Modo (a), cliente nuevo sin diseño:* onboarding pregunta datos reales (o IG) → `/launch-satellite` *pull-ea* UI Core+tokens del registry y scaffolda la estructura SAT01 → genera `satellites/sat-<x>/` Next.js reusando componentes → crea Jira (proyecto+sprint+tickets) + GitHub + deploy Vercel → S2 + gates → "lanzado" ~90% alineado. ✔ cubierto por reuse(2)+onboarding(1)+generación(2)+automatización(3)+gobernanza(4).
 - *Modo (c), cliente CON web:* onboarding toma sus **hechos** → **remodela con valor** (default B; o A/C si el cliente lo pide) con nuestros componentes → adapta a forma satélite hasta S2 + gates, en un **loop iterativo** (propone→preview→refina→confirma). ✔ cubierto; la 2 lo permite porque la copia es personalizable y con *ownership* (la 3/4 lo dificultarían).
 
+## Enfoque de generación de DISEÑO (el *cómo* del diseño marcado y S2)
+
+**Estado: decisión ABIERTA — pendiente del gate del operador.** El norte ya fija el **intent** (remodel con
+valor, §«Modo (c) — remodelar con valor»/D4) pero no **cómo** se convierte un brief en una web **diseñada,
+marcada y S2**. El generador **de partida** produce un **esqueleto**: subpáginas no-home en **stub**, sin
+colores de marca (usa los tokens em-ui por defecto), sin copy rico, sin logo/fotos — mientras que el
+**vocabulario de secciones diseñadas existe solo hecho a mano** en SAT01
+(`satellites/sat-cristian-garcia/src/components/sections/HeroSection.tsx:1`). El intent está; el **output**
+aún no. Esta sección elige el enfoque de la **capa de diseño** que generaliza ese vocabulario.
+
+**Constraints (marco, no se re-litigan):** **transversal** a todos los modos (a–e) y fidelidades (A/B/C);
+**gobernado por construcción** (S2 `docs/satellite-deployment-runbook.md:337`, a11y, VRT); **reproducible
+desde el brief** (el loop §D4 + el brief persistido §D5 exigen regenerar desde el brief); **reuse del UI Core
+vía em-ui** (no greenfield), respetando el split verdad/diseño.
+
+### Opciones
+| # | Enfoque | Source | Pros | Cons | Riesgo |
+|---|---|---|---|---|---|
+| 1 | **Biblioteca de secciones determinista** — un vocabulario de secciones parametrizadas (hero, servicios, about, testimonial, contacto, CTA) que el generador **compone** desde el brief | `satellites/sat-cristian-garcia/src/components/sections/HeroSection.tsx:1` (la biblioteca ya existe **hecha a mano** en SAT01: Hero/Services/Pricing/Contact/CTA/SocialProof/Testimonials/Portfolio…) | **reproducible** (mismo brief→mismo sitio), **S2/a11y por construcción** (secciones pre-gobernadas, VRT-ables), reuse em-ui directo | output **acotado** al catálogo; cada vertical nueva = sección nueva | **bajo** (repro/gobernanza); riesgo = "plantillero" si el catálogo es pobre |
+| 2 | **Bespoke por IA en tiempo de generación** — la IA **diseña/maqueta** cada satélite a medida al generar | `emkeel-governance/strategy/satellites.md:7` (el feel Lovable/v0 ya en el norte) | máxima libertad/novedad de diseño | **NO reproducible** (regenerar da otra cosa → rompe el loop §D4 y §D5); S2/a11y **no garantizados** por construcción; difícil de gobernar | **alto**: choca con repro (§D5) y gobernanza |
+| 3 | **Híbrido** — biblioteca determinista (1) como **sustrato gobernado** + el agente **propone** composición/arreglo/redacción como `proposed`, **confirmable en el loop** | `.claude/skills/launch-satellite/schema/brief.schema.json:48` (el brief lleva `brandTokens`/`assets`/`services` con procedencia; encaja con el split y el loop de §D4) | **reproducible** (la composición elegida vive en el brief) **y** creativo (propuestas `proposed`); S2/a11y por construcción; encaja con §D4/§D5 | más complejo: hay que modelar "composición elegida" en el brief; creatividad acotada al catálogo + parámetros | **medio** (complejidad), bajo en repro/gobernanza |
+
+### Evaluación contra los constraints
+- **Reproducibilidad:** (1) y (3) la cumplen (la composición vive en el brief y se regenera); **(2) la rompe** — bespoke puro no es determinista → incompatible con §D5 (brief como fuente de regeneración).
+- **Gobernanza (S2/a11y por construcción):** (1) y (3) la dan (secciones pre-gobernadas, VRT-ables, `docs/satellite-deployment-runbook.md:337`); (2) exige validar a mano **cada** generación.
+- **Transversal / reuse:** las tres pueden ser transversales, pero (1)/(3) reusan el UI Core vía em-ui por diseño; (2) tiende a greenfield.
+
+### Sub-piezas (en cualquier opción gobernada)
+- **Biblioteca de secciones:** hero, servicios, about, testimonial, contacto, CTA — vocabulario modelado en `satellites/sat-cristian-garcia/src/components/sections/HeroSection.tsx:1`, compuesto sobre el UI Core (`design-system/registry.json:1`).
+- **Mapeo paleta-de-marca→tokens:** los `brandTokens` del brief (`.claude/skills/launch-satellite/schema/brief.schema.json:48`) se aplican a la capa de tokens em-ui (`em-ui init`) → el satélite hereda los colores del cliente (p.ej. `#0076a9`/`#21a94a` del piloto) en vez de los defaults.
+- **Estrategia de imágenes:** logo + selección de fotos del cliente (assets `extracted`/`provided`) colocadas en las secciones; los faltantes → placeholder visible (no inventar).
+
+### Recomendación (PENDIENTE del gate — el operador decide 1/2/3)
+**Candidato: Híbrido (3).** Es el único que satisface **a la vez** reproducibilidad (sustrato determinista +
+composición fijada en el brief) y gobernanza (S2/a11y por construcción) **sin renunciar** a la creatividad
+(propuestas `proposed` confirmables en el loop §D4). **(1)** es su **sustrato** (válido y más simple, pero el
+output queda acotado al catálogo); **(2)** es **descartable** por romper §D5. **No se pre-decide:** se presenta
+para que el operador elija en el gate; al aprobarse, la decisión se registra como **ADR**.
+
 ## Fasificación
 El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún no es reutilizable.**
 - **Fase 1 — Mecanismo de reuse (pieza base):** construir el registry + CLI interno (`em-ui`, scope real de SCRUM-331) con **single-source = dashboard UI Core**; backfill de los 48 y **reconciliar el drift de SAT01** (empezando por el `Button`). Sin esto, todo lo demás propaga drift.
