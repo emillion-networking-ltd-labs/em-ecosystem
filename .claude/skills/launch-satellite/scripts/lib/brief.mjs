@@ -6,6 +6,23 @@ export const PROVENANCE = Object.freeze(["provided", "extracted", "proposed", "m
 export const INTAKE_MODES = Object.freeze([
   "a-no-design", "b-with-brand", "c-improve-site", "d-instagram", "e-inspiration",
 ]);
+// Gate de FIDELIDAD del modo (c) (D4 del norte): la latitud creativa que el cliente elige.
+export const INTENTS = Object.freeze(["a-replica", "b-remodel", "c-reimagine"]);
+export const DEFAULT_INTENT = "b-remodel";   // "aporta valor… salvo que el cliente tenga otra idea"
+
+// La fidelidad elegida en el brief, o el default si ausente (no se auto-impone: ausente = default explícito).
+export function briefIntent(brief) {
+  return INTENTS.includes(brief?.intent?.value) ? brief.intent.value : DEFAULT_INTENT;
+}
+
+// Núcleo del LOOP (D4): confirmar una sugerencia. Solo un `proposed` con valor se confirma → `provided`.
+// No se puede "confirmar" un missing (sería inventar) ni un extracted (ya es un hecho real).
+export function confirmField(f) {
+  if (!f || f.provenance !== "proposed" || !hasValue(f.value)) {
+    throw new Error("solo se confirma un 'proposed' con valor (proposed→provided)");
+  }
+  return { value: f.value, provenance: "provided" };
+}
 
 function hasValue(v) {
   if (v == null) return false;
@@ -71,6 +88,14 @@ export function validateBrief(brief) {
     problems.push("falta fields");
   } else {
     for (const [k, f] of Object.entries(brief.fields)) problems.push(...fieldProblems(`fields.${k}`, f));
+  }
+  // intent es OPCIONAL (ausente => default b-remodel). Si está, value ∈ INTENTS y lo elige/confirma el cliente.
+  if (brief.intent !== undefined) {
+    if (typeof brief.intent !== "object" || brief.intent === null) problems.push("intent no es objeto");
+    else {
+      if (!INTENTS.includes(brief.intent.value)) problems.push(`intent.value inválido: ${brief.intent.value} (permitidos: ${INTENTS.join("|")})`);
+      if (!["provided", "proposed"].includes(brief.intent.provenance)) problems.push(`intent.provenance debe ser provided|proposed (lo elige el cliente), no "${brief.intent.provenance}"`);
+    }
   }
   return { ok: problems.length === 0, problems };
 }

@@ -39,6 +39,15 @@ Pregunta al operador/cliente cuál encaja (puede combinarse, p.ej. b+d):
     ficheros entra como `extracted` (source = la ruta del fichero); lo que **no está** (p.ej. el texto de
     páginas de un backup solo-ficheros, que vive en la BD ausente) queda `missing` y **se pregunta**. Nunca
     fabricas lo que no encuentras.
+  - **Tras el intake, PREGUNTA SIEMPRE la FIDELIDAD** (gate D4 del norte; **nunca la auto-elijas**) — *"¿cómo
+    lo quieres?"* → entra al brief como `intent` (`provided`):
+    - **(A) `a-replica`** → réplica fiel del sitio llevada a la tecnología satélite (Next.js + hardening S2), sin rediseño.
+    - **(B) `b-remodel` — DEFAULT** → remodel moderno con **nuestros componentes**: conserva sus **hechos**, diseño fresco sobre el UI Core. *("aporta valor… salvo que el cliente tenga otra idea")*.
+    - **(C) `c-reimagine`** → reimaginación libre: propuesta de diseño/estructura nueva a partir de los hechos.
+    **Split verdad/diseño (D4):** los **HECHOS** del cliente (nombre, servicios, contacto, copy real, assets)
+    son `extracted`/`provided` — **intactos, jamás fabricados** en los tres modos; la **CREATIVIDAD** (diseño,
+    redacción nueva, secciones sugeridas) va como `proposed` — **bienvenida, etiquetada, a confirmar**. En
+    **(A)** lo `proposed` **no se renderiza** hasta confirmarse (`[PENDIENTE: …]`); en **(B)/(C)** sí (es el preview).
 - **(d) Instagram** → **vía primaria:** el cliente aporta su **handle** y **confirma/pega** su contenido
   (bio, fotos, stats) → `provided`. El **scrape es best-effort** (`scripts/instagram-intake.mjs`, solo
   datos **públicos** de su **cuenta propia**, sin saltar auth-walls): si funciona, pre-rellena como
@@ -76,6 +85,12 @@ chromium para correr Lighthouse— se **reporta el gap** (no se falsea el PASS).
 remoto = F3**, no aquí.
 
 > El satélite demo de validación es **efímero** (se genera en test/CI y se descarta); no se commitea.
+
+**Loop iterativo (modo c, D4):** la generación lee `intent` y aplica la latitud — los **hechos** se rinden
+intactos; lo `proposed` se renderiza en remodel/reimagine (es el **preview**) y queda trazado en
+`trace.proposed`. El ciclo es: **propones** → preview (`next build` + Lighthouse local) → el operador/cliente
+**refina en prosa** → **regeneras** → al confirmar una sugerencia, `confirmField(field)` la pasa de `proposed`
+a `provided` (mecánica en `scripts/lib/brief.mjs`). Nada externo (Vercel/Jira) sin gate humano (Paso 6).
 
 ## Paso 6 — Provisión + lanzamiento (F3b, ECO-28) — DRY-RUN POR DEFECTO
 `scripts/provision-satellite.mjs <satellite-dir>` PREPARA la provisión end-to-end y, **por defecto, NO ejecuta
