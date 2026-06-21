@@ -7,7 +7,7 @@ import { mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { validateBrief } from "./lib/brief.mjs";
+import { validateBrief, briefIntent, DEFAULT_INTENT } from "./lib/brief.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../../../..");        // scripts -> satellite -> skills -> .claude -> root
@@ -17,9 +17,16 @@ const EM_UI = join(REPO_ROOT, "em-ui", "cli.mjs");
 export const DEFAULT_COMPONENTS = ["Button", "Badge", "Divider"];
 
 function slugify(s) { return String(s || "demo").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "demo"; }
-function val(field, label) {
-  // Relleno desde el brief con la regla "no inventar": value real, o PLACEHOLDER VISIBLE si missing/ausente.
-  if (field && (field.provenance === "provided" || field.provenance === "extracted" || field.provenance === "proposed") && field.value != null && field.value !== "") return field.value;
+export function val(field, label, intent = DEFAULT_INTENT) {
+  // Split verdad/diseño (D4) + latitud de fidelidad:
+  // - HECHO confirmado (provided/extracted) → se usa intacto, en los TRES modos.
+  // - proposed (creatividad/sugerencia a confirmar) → se usa en remodel/reimagine (es el preview a confirmar),
+  //   pero en réplica (a-replica) NO se renderiza (la réplica solo refleja hechos confirmados) → [PENDIENTE].
+  // - missing/ausente → placeholder visible. NUNCA se fabrica (no-inventar sobre los hechos).
+  const p = field?.provenance;
+  const has = field && field.value != null && field.value !== "";
+  if ((p === "provided" || p === "extracted") && has) return field.value;
+  if (p === "proposed" && has) return intent === "a-replica" ? `[PENDIENTE: ${label}]` : field.value;
   return `[FALTA: ${label}]`;
 }
 function emui(args, destSrc) {
@@ -38,7 +45,17 @@ export function generateSatellite(brief, destDir, { components = DEFAULT_COMPONE
   mkdirSync(app, { recursive: true });
 
   const routes = (brief.targetRoutes && brief.targetRoutes.length ? brief.targetRoutes : ["/", "/servicios", "/contacto"]);
-  const trace = { slug, dest, components: [], emui: [], placeholders: [] };
+  const intent = briefIntent(brief);   // gate de fidelidad (D4): a-replica | b-remodel (default) | c-reimagine
+  const trace = { slug, dest, intent, components: [], emui: [], placeholders: [], proposed: [] };
+
+  // Resuelve un campo aplicando el split D4 + la latitud del intent, y deja traza para el LOOP:
+  // un `proposed` rendido (B/C) entra en trace.proposed (lo que el cliente confirma → provided).
+  const fillField = (field, label, key) => {
+    const text = val(field, label, intent);
+    if (text.startsWith("[FALTA") || text.startsWith("[PENDIENTE")) trace.placeholders.push(key);
+    else if (field?.provenance === "proposed") trace.proposed.push(key);   // rendido como propuesta (preview a confirmar)
+    return text;
+  };
 
   // --- a. Scaffold forma-satélite (config) ---
   writeFileSync(join(dest, "package.json"), JSON.stringify({
@@ -63,18 +80,24 @@ export function generateSatellite(brief, destDir, { components = DEFAULT_COMPONE
   writeFileSync(join(app, "globals.css"), `@import "../styles/em-ui-tokens.css";\n\nbody { font-family: var(--font-sans); }\n`);
 
   // --- layout + observabilidad DIFERIDA (S2: no bloquea el main-thread) ---
-  const siteName = val(brief.identity?.name, "nombre del negocio");
+  const siteName = fillField(brief.identity?.name, "nombre del negocio", "identity.name");
   writeFileSync(join(app, "layout.tsx"), LAYOUT(siteName));
   mkdirSync(join(src, "components"), { recursive: true });
   writeFileSync(join(src, "components", "DeferredAnalytics.tsx"), DEFERRED_ANALYTICS);
 
   // --- páginas marketing (relleno desde brief; missing -> placeholder visible) ---
   const f = brief.fields || {};
-  const services = (f.services && ["provided", "extracted", "proposed"].includes(f.services.provenance) && Array.isArray(f.services.value)) ? f.services.value : null;
+  // servicios: hecho confirmado (provided/extracted) en los 3 modos; proposed solo en remodel/reimagine
+  // (en réplica una lista propuesta no se renderiza hasta confirmar). NUNCA se fabrica.
+  const svcProv = f.services?.provenance;
+  const svcUsable = Array.isArray(f.services?.value) && (
+    svcProv === "provided" || svcProv === "extracted" || (svcProv === "proposed" && intent !== "a-replica"));
+  const services = svcUsable ? f.services.value : null;
   if (!services) trace.placeholders.push("services");
-  const contactEmail = val(f.contactEmail, "email de contacto"); if (contactEmail.startsWith("[FALTA")) trace.placeholders.push("contactEmail");
-  const contactPhone = val(f.contactPhone, "teléfono"); if (contactPhone.startsWith("[FALTA")) trace.placeholders.push("contactPhone");
-  const sector = val(brief.identity?.sector, "sector");
+  else if (svcProv === "proposed") trace.proposed.push("services");
+  const contactEmail = fillField(f.contactEmail, "email de contacto", "contactEmail");
+  const contactPhone = fillField(f.contactPhone, "teléfono", "contactPhone");
+  const sector = fillField(brief.identity?.sector, "sector", "identity.sector");
 
   for (const route of routes) {
     const seg = route === "/" ? "" : route.replace(/^\//, "");

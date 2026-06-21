@@ -13,6 +13,16 @@
       "enum": ["a-no-design", "b-with-brand", "c-improve-site", "d-instagram", "e-inspiration"],
       "description": "Modo de intake usado en el onboarding."
     },
+    "intent": {
+      "type": "object",
+      "description": "Gate de FIDELIDAD del modo (c) (D4 del norte, strategy/satellites.md): a-replica (replica fiel) | b-remodel (remodel moderno con nuestros componentes, DEFAULT) | c-reimagine (reimaginacion libre). Lo ELIGE el cliente (provenance=provided); el agente puede sugerirlo (proposed) y el cliente confirma. AUSENTE => la generacion usa b-remodel. No rompe briefs previos (opcional).",
+      "required": ["value", "provenance"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "string", "enum": ["a-replica", "b-remodel", "c-reimagine"] },
+        "provenance": { "type": "string", "enum": ["provided", "proposed"] }
+      }
+    },
     "identity": {
       "type": "object",
       "required": ["name", "sector", "language"],
