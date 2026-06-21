@@ -15,6 +15,16 @@ export function briefIntent(brief) {
   return INTENTS.includes(brief?.intent?.value) ? brief.intent.value : DEFAULT_INTENT;
 }
 
+// Modo de color por defecto del satélite (ECO-48): nuestro estándar es dark/light + toggle.
+// NO se hardcodea dark: lo elige el cliente en el onboarding. Ausente => `system` (neutral: respeta
+// prefers-color-scheme del visitante, sin imponer dark ni light).
+export const COLOR_MODES = Object.freeze(["dark", "light", "system"]);
+export const DEFAULT_COLOR_MODE = "system";
+
+export function briefColorMode(brief) {
+  return COLOR_MODES.includes(brief?.colorMode?.value) ? brief.colorMode.value : DEFAULT_COLOR_MODE;
+}
+
 // Núcleo del LOOP (D4): confirmar una sugerencia. Solo un `proposed` con valor se confirma → `provided`.
 // No se puede "confirmar" un missing (sería inventar) ni un extracted (ya es un hecho real).
 export function confirmField(f) {
@@ -95,6 +105,14 @@ export function validateBrief(brief) {
     else {
       if (!INTENTS.includes(brief.intent.value)) problems.push(`intent.value inválido: ${brief.intent.value} (permitidos: ${INTENTS.join("|")})`);
       if (!["provided", "proposed"].includes(brief.intent.provenance)) problems.push(`intent.provenance debe ser provided|proposed (lo elige el cliente), no "${brief.intent.provenance}"`);
+    }
+  }
+  // colorMode es OPCIONAL (ausente => default system). Si está, value ∈ COLOR_MODES y lo elige el cliente.
+  if (brief.colorMode !== undefined) {
+    if (typeof brief.colorMode !== "object" || brief.colorMode === null) problems.push("colorMode no es objeto");
+    else {
+      if (!COLOR_MODES.includes(brief.colorMode.value)) problems.push(`colorMode.value inválido: ${brief.colorMode.value} (permitidos: ${COLOR_MODES.join("|")})`);
+      if (!["provided", "proposed"].includes(brief.colorMode.provenance)) problems.push(`colorMode.provenance debe ser provided|proposed, no "${brief.colorMode.provenance}"`);
     }
   }
   return { ok: problems.length === 0, problems };

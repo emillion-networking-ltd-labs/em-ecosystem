@@ -62,6 +62,13 @@ Pregunta al operador/cliente cuál encaja (puede combinarse, p.ej. b+d):
     son `extracted`/`provided` — **intactos, jamás fabricados** en los tres modos; la **CREATIVIDAD** (diseño,
     redacción nueva, secciones sugeridas) va como `proposed` — **bienvenida, etiquetada, a confirmar**. En
     **(A)** lo `proposed` **no se renderiza** hasta confirmarse (`[PENDIENTE: …]`); en **(B)/(C)** sí (es el preview).
+  - **Tras el intake, PREGUNTA SIEMPRE el modo de color por defecto** (**nunca lo auto-elijas; NO hardcodees
+    dark**) — *"¿modo de color por defecto?"* → entra al brief como `colorMode` (`provided`):
+    - **`dark`** → arranca en oscuro (salvo que el visitante haya elegido claro).
+    - **`light`** → arranca en claro (salvo que haya elegido oscuro).
+    - **`system`** → respeta la preferencia del sistema del visitante (`prefers-color-scheme`).
+    Nuestro estándar es **dark/light + toggle** (paridad con el UI Core/SAT01); la generación scaffolda esa
+    maquinaria (`ThemeProvider` + init-script anti-FOUC) con el **default que elija el cliente**. Ausente ⇒ `system`.
 - **(d) Instagram** → **vía primaria:** el cliente aporta su **handle** y **confirma/pega** su contenido
   (bio, fotos, stats) → `provided`. El **scrape es best-effort** (`scripts/instagram-intake.mjs`, solo
   datos **públicos** de su **cuenta propia**, sin saltar auth-walls): si funciona, pre-rellena como
