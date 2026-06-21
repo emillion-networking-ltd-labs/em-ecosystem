@@ -39,6 +39,20 @@ Pregunta al operador/cliente cuál encaja (puede combinarse, p.ej. b+d):
     ficheros entra como `extracted` (source = la ruta del fichero); lo que **no está** (p.ej. el texto de
     páginas de un backup solo-ficheros, que vive en la BD ausente) queda `missing` y **se pregunta**. Nunca
     fabricas lo que no encuentras.
+    - **GUARDRAIL 1 — un "no lo veo" NO es `missing` (busca en TODO el árbol).** Antes de declarar un asset
+      (imágenes, logo, fotos, PDFs…) `missing`, **busca en todo el árbol del intake desde la raíz**, no en un
+      solo subdir — p.ej. `find <ruta-intake> -type f \( -iname '*.jpg' -o -iname '*.png' -o -iname '*.webp'
+      -o -iname '*.svg' -o -iname '*.pdf' \)` (o `ls -R`). Un "no encontrado en la carpeta que miré primero"
+      es un **falso `missing`**: solo marca `missing` **tras buscar a fondo** y no hallarlo. *(Piloto Grupo
+      Atis: se declaró el media `missing` mirando un subdir cuando había **1834** imágenes en el árbol.)*
+    - **GUARDRAIL 2 — un dump de CMS MEZCLA ruido demo/plugin/sample con el contenido del cliente.** Al
+      extraer **copy** de un export/dump (WordPress u otro): quédate **SOLO** con bloques **inequívocamente
+      del cliente** (mencionan **su marca / sus servicios reales** del brief); **DESCARTA** texto de
+      **demo/plantilla/plugin/sample/lorem** (p.ej. "Astra Starter", "Hello world", textos de plugins).
+      **Cita VERBATIM** (no suavices ni reescribas al extraer — eso es F2b creatividad, va como `proposed`).
+      **Ante la duda, `proposed` NO `extracted`**: si no puedes afirmar que ese texto es del cliente, es una
+      sugerencia a confirmar, no un hecho extraído. *(Piloto Grupo Atis: la BD traía mucho demo/plugin
+      mezclado → riesgo de colar ruido como copy "extraído".)*
   - **Tras el intake, PREGUNTA SIEMPRE la FIDELIDAD** (gate D4 del norte; **nunca la auto-elijas**) — *"¿cómo
     lo quieres?"* → entra al brief como `intent` (`provided`):
     - **(A) `a-replica`** → réplica fiel del sitio llevada a la tecnología satélite (Next.js + hardening S2), sin rediseño.
