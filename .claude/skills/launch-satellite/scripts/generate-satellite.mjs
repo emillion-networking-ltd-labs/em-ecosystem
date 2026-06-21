@@ -109,6 +109,13 @@ export function generateSatellite(brief, destDir, { components = DEFAULT_COMPONE
   writeFileSync(join(app, "robots.ts"), ROBOTS);
   writeFileSync(join(app, "sitemap.ts"), SITEMAP(routes));
 
+  // --- d. Persistir el brief como PROCEDENCIA (D5 del norte): viaja commiteado con el satélite, en su
+  // RAÍZ (<dest>/brief.json, FUERA de public/ → Next no lo sirve). Se escribe TAL CUAL el brief consumido
+  // (cada campo con su provenance + source intactos, incluidas rutas a .satellite-intake/ = procedencia
+  // histórica). El material CRUDO del cliente sigue efímero; esto es solo la destilación sanitizada.
+  writeFileSync(join(dest, "brief.json"), JSON.stringify(brief, null, 2) + "\n");
+  trace.brief = "brief.json";
+
   return trace;
 }
 
