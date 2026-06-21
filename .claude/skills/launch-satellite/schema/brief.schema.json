@@ -23,6 +23,16 @@
         "provenance": { "type": "string", "enum": ["provided", "proposed"] }
       }
     },
+    "colorMode": {
+      "type": "object",
+      "description": "Modo de color por defecto del satelite (ECO-48): dark | light | system (prefers-color-scheme). Nuestro estandar es dark/light + toggle; el DEFAULT lo ELIGE el cliente en el onboarding (provided), NO se hardcodea dark. AUSENTE => la generacion usa 'system' (neutral). No rompe briefs previos (opcional).",
+      "required": ["value", "provenance"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "string", "enum": ["dark", "light", "system"] },
+        "provenance": { "type": "string", "enum": ["provided", "proposed"] }
+      }
+    },
     "identity": {
       "type": "object",
       "required": ["name", "sector", "language"],

@@ -7,7 +7,7 @@ import { mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { validateBrief, briefIntent, DEFAULT_INTENT } from "./lib/brief.mjs";
+import { validateBrief, briefIntent, briefColorMode, DEFAULT_INTENT } from "./lib/brief.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../../../..");        // scripts -> satellite -> skills -> .claude -> root
@@ -79,9 +79,17 @@ export function generateSatellite(brief, destDir, { components = DEFAULT_COMPONE
   // --- c. globals.css importa la capa de tokens de em-ui ---
   writeFileSync(join(app, "globals.css"), `@import "../styles/em-ui-tokens.css";\n\nbody { font-family: var(--font-sans); }\n`);
 
-  // --- layout + observabilidad DIFERIDA (S2: no bloquea el main-thread) ---
+  // --- maquinaria de TEMA dark/light (paridad SAT01, GENÉRICA): ThemeProvider + init-script anti-FOUC.
+  // El DEFAULT lo parametriza colorMode del brief (NO hardcodeado dark). useTheme nunca rompe (hay provider).
+  const colorMode = briefColorMode(brief);   // dark | light | system (default system)
+  trace.colorMode = colorMode;
+  mkdirSync(join(src, "context"), { recursive: true });
+  writeFileSync(join(src, "context", "ThemeContext.tsx"), THEME_CONTEXT(colorMode));
+  writeFileSync(join(app, "providers.tsx"), PROVIDERS);
+
+  // --- layout + observabilidad DIFERIDA (S2: no bloquea el main-thread) + tema (Providers + init-script) ---
   const siteName = fillField(brief.identity?.name, "nombre del negocio", "identity.name");
-  writeFileSync(join(app, "layout.tsx"), LAYOUT(siteName));
+  writeFileSync(join(app, "layout.tsx"), LAYOUT(siteName, themeInitScript(colorMode)));
   mkdirSync(join(src, "components"), { recursive: true });
   writeFileSync(join(src, "components", "DeferredAnalytics.tsx"), DEFERRED_ANALYTICS);
 
@@ -144,8 +152,9 @@ const TSCONFIG = JSON.stringify({
   include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"], exclude: ["node_modules"],
 }, null, 2) + "\n";
 const POSTCSS = `/** @type {import('postcss-load-config').Config} */\nconst config = { plugins: { '@tailwindcss/postcss': {} } };\nexport default config;\n`;
-const LAYOUT = (siteName) => `import type { Metadata } from "next";
+const LAYOUT = (siteName, initScript) => `import type { Metadata } from "next";
 import DeferredAnalytics from "@/components/DeferredAnalytics";
+import Providers from "./providers";
 import "./globals.css";
 
 // metadataBase env-driven (S2): cae al default de Vercel hasta que F3 cablee el dominio.
@@ -155,15 +164,105 @@ export const metadata: Metadata = {
   description: ${JSON.stringify(`${siteName} — sitio oficial`)},
 };
 
+// Anti-FOUC (ECO-48): fija la clase \`dark\` en <html> ANTES del primer paint según el colorMode
+// elegido (parametrizado) + la preferencia guardada del usuario. Síncrono → no hay flash de tema.
+const THEME_INIT_SCRIPT = ${JSON.stringify(initScript)};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="es">
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+      </head>
       <body>
-        {children}
+        {/* ThemeProvider (dark/light + toggle) envuelve la app → useTheme nunca rompe. */}
+        <Providers>{children}</Providers>
         {/* Observabilidad diferida: no bloquea el main-thread (S2 Performance). */}
         <DeferredAnalytics />
       </body>
     </html>
+  );
+}
+`;
+
+// --- maquinaria de TEMA (GENÉRICA, modelada en SAT01 proven): default parametrizado por colorMode ---
+// initScript anti-FOUC: añade `dark` a <html> antes del paint. dark → salvo 'light' guardado;
+// light → solo si 'dark' guardado; system → preferencia guardada o prefers-color-scheme.
+const themeInitScript = (mode) => {
+  const decide = mode === "light"
+    ? "t==='dark'"
+    : mode === "system"
+      ? "(t==='dark'||t==='light' ? t==='dark' : (window.matchMedia&&window.matchMedia('(prefers-color-scheme: dark)').matches))"
+      : "t!=='light'";   // dark (default de la marca cuando el cliente lo elige)
+  const onError = mode === "light" ? "" : "document.documentElement.classList.add('dark')";
+  return `(function(){try{var t=localStorage.getItem('theme');if(${decide}){document.documentElement.classList.add('dark')}}catch(e){${onError}}})()`;
+};
+
+const PROVIDERS = `"use client";
+
+import ThemeProvider from "@/context/ThemeContext";
+
+export default function Providers({ children }: { children: React.ReactNode }) {
+  return <ThemeProvider>{children}</ThemeProvider>;
+}
+`;
+
+// ThemeContext GENÉRICO: el default (dark/light/system) lo fija DEFAULT_MODE (parametrizado por el brief).
+const THEME_CONTEXT = (mode) => `"use client";
+
+import { createContext, useState, useEffect, useCallback } from "react";
+
+type Theme = "light" | "dark";
+type ColorMode = "dark" | "light" | "system";
+// Modo por defecto elegido en el onboarding (ECO-48): "dark" | "light" | "system". No hardcodeado.
+// Tipo ANCHO (no el literal) para que las comparaciones de las 3 ramas type-checkeen.
+const DEFAULT_MODE: ColorMode = ${JSON.stringify(mode)};
+
+type ThemeContextType = {
+  theme: Theme;
+  toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
+};
+
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+
+function systemTheme(): Theme {
+  if (typeof window !== "undefined" && window.matchMedia) {
+    return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+  }
+  return "dark";
+}
+
+function defaultTheme(): Theme {
+  if (DEFAULT_MODE === "light") return "light";
+  if (DEFAULT_MODE === "system") return systemTheme();
+  return "dark";
+}
+
+export default function ThemeProvider({ children }: { children: React.ReactNode }) {
+  // Estado inicial SSR-safe; el init-script ya fijó la clase antes del paint, el effect reconcilia.
+  const [theme, setThemeState] = useState<Theme>(DEFAULT_MODE === "light" ? "light" : "dark");
+  useEffect(() => {
+    const stored = localStorage.getItem("theme") as Theme | null;
+    const initial: Theme = stored === "light" || stored === "dark" ? stored : defaultTheme();
+    setThemeState(initial);
+    document.documentElement.classList.toggle("dark", initial === "dark");
+  }, []);
+
+  const setTheme = useCallback((newTheme: Theme) => {
+    setThemeState(newTheme);
+    localStorage.setItem("theme", newTheme);
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+  }, []);
+
+  const toggleTheme = useCallback(() => {
+    setTheme(theme === "light" ? "dark" : "light");
+  }, [theme, setTheme]);
+
+  return (
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
+      {children}
+    </ThemeContext.Provider>
   );
 }
 `;
