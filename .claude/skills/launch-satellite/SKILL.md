@@ -1,6 +1,6 @@
 ---
 name: launch-satellite
-description: "Lanza un satélite (sitio de cliente) de NexaCore de extremo a extremo: onboarding (5 modos de intake — sin diseño / con marca / mejorar sitio / Instagram / inspiración → brief.json estructurado), generación (brief → satélite S2-ready reutilizando el UI Core vía em-ui) y provisión/lanzamiento (Jira + Vercel, dry-run por defecto, Lighthouse remoto = lanzado). Úsalo cuando el operador quiera arrancar, generar o lanzar un satélite, recoger los datos de un cliente, o preparar su provisión. Las acciones externas (Jira/Vercel) solo se ejecutan con confirmación humana explícita (--apply --confirm)."
+description: "Lanza un satélite (sitio de cliente) de NexaCore de extremo a extremo: onboarding (5 modos de intake — sin diseño / con marca / mejorar sitio / Instagram / inspiración → brief.json estructurado), generación (brief → satélite S2-ready reutilizando el UI Core vía em-ui), preview local por defecto (levanta el satélite renderizado para verlo antes de provisionar) y provisión/lanzamiento (Jira + Vercel, dry-run por defecto, Lighthouse remoto = lanzado). Úsalo cuando el operador quiera arrancar, generar o lanzar un satélite, recoger los datos de un cliente, o preparar su provisión. Las acciones externas (Jira/Vercel) solo se ejecutan con confirmación humana explícita (--apply --confirm)."
 ---
 
 # /launch-satellite — lanzar un satélite end-to-end (onboarding F2a → generación F2b → provisión F3b)
@@ -124,9 +124,22 @@ remoto = F3**, no aquí.
 intactos; lo `proposed` se renderiza en remodel/reimagine (es el **preview**) y queda trazado en
 `trace.proposed`. El ciclo es: **propones** → preview (`next build` + Lighthouse local) → el operador/cliente
 **refina en prosa** → **regeneras** → al confirmar una sugerencia, `confirmField(field)` la pasa de `proposed`
-a `provided` (mecánica en `scripts/lib/brief.mjs`). Nada externo (Vercel/Jira) sin gate humano (Paso 6).
+a `provided` (mecánica en `scripts/lib/brief.mjs`). Nada externo (Vercel/Jira) sin gate humano (Pasos 6–7).
 
-## Paso 6 — Provisión + lanzamiento (F3b, ECO-28) — DRY-RUN POR DEFECTO
+## Paso 6 — Preview local (POR DEFECTO): ver el satélite antes de F3
+Tras generar (Paso 5) y **ANTES de cualquier acción externa / rama / provisión (Paso 7)**, **levanta el satélite
+en local** para juzgarlo con los ojos — un `trace` JSON no basta para evaluar el diseño. Es **por defecto**, no
+opt-in; **local y reversible** (no toca nada externo).
+
+`scripts/preview-satellite.mjs <satDir>`: instala deps si faltan, arranca `next dev` en **background** y te da la
+**URL** (`http://localhost:3100`; reubica si el puerto está ocupado) + cómo pararlo (`kill <pid>`, logs en
+`<satDir>/.preview.log`). Puerto configurable (`PREVIEW_PORT=N` o 2º argumento).
+
+**GATE VISUAL (humano):** el flujo **SE DETIENE** aquí esperando tu OK — *"se ve bien"* → sigue a F3; *"ajusta
+X"* → vuelve al loop (refina el brief en prosa → regenera → preview otra vez). Puedes **saltarte** el preview si
+quieres. Nada externo (Vercel/Jira) ocurre antes de pasar este gate.
+
+## Paso 7 — Provisión + lanzamiento (F3b, ECO-28) — DRY-RUN POR DEFECTO
 `scripts/provision-satellite.mjs <satellite-dir>` PREPARA la provisión end-to-end y, **por defecto, NO ejecuta
 nada externo** (ADR-009 Q4). Imprime las acciones que se ejecutarían + un checklist:
 - **(a) Jira (Q2):** proyecto **NUEVO e independiente** por satélite + tickets S1/S2/S3.
@@ -146,6 +159,7 @@ umbrales S2 sobre la URL desplegada. Sin URL/chromium → **reporta gap** (no fa
 - `scripts/fetch-url.mjs <url> [c-improve-site|e-inspiration]` — modo (c) URL / (e), best-effort, degrada a preguntar.
 - `scripts/instagram-intake.mjs <handle>` — modo (d), cliente-primario + scrape best-effort + fallback.
 - `scripts/generate-satellite.mjs <brief.json> <destDir>` — F2b: brief → satélite S2-ready (scaffold + em-ui).
+- `scripts/preview-satellite.mjs <satDir> [puerto]` — preview local POR DEFECTO (Paso 6): deps + `next dev` en background + URL; gate visual antes de F3.
 - `scripts/lighthouse-local.mjs <url>` — gate S2 local; reporta gap si no hay chromium (no falsea).
 - `scripts/provision-satellite.mjs <dir> [--apply --confirm] [--vercel-client-token X]` — F3b: prepara Jira+Vercel (dry-run por defecto).
 - `scripts/lighthouse-remote.mjs <url-desplegada>` — F3b: gate S2 remoto = "lanzado"; gap honesto sin URL.
