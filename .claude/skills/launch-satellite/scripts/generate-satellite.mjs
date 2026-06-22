@@ -7,7 +7,7 @@ import { mkdirSync, writeFileSync, existsSync } from "node:fs";
 import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { validateBrief, briefIntent, briefColorMode, DEFAULT_INTENT } from "./lib/brief.mjs";
+import { validateBrief, briefIntent, briefColorMode, briefSiteType, briefComposition, DEFAULT_INTENT } from "./lib/brief.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../../../..");        // scripts -> satellite -> skills -> .claude -> root
@@ -96,6 +96,27 @@ function buildJsonLd(seo) {
     if (seo.phone) ld.telephone = seo.phone;
   }
   return ld;
+}
+
+// Composición de la HOME (F6): lista ordenada de {section,variant?}. El generador omite las secciones sin
+// datos (guardrail §D4). DEFAULT = el orden de hoy (retrocompatible). compositionFor da la "recomendación"
+// por tipo de sitio (la cara de la válvula "que la IA recomiende"); el agente puede sobreescribir con una
+// composition explícita en el brief.
+const DEFAULT_HOME_COMPOSITION = [
+  { section: "Hero" }, { section: "Services" }, { section: "Portfolio" },
+  { section: "Testimonials" }, { section: "Pricing" }, { section: "FAQ" }, { section: "CTA" },
+];
+function compositionFor(siteType) {
+  switch (siteType) {
+    case "landing":   // one-page: todo en la home, cierre de marca
+      return [{ section: "Hero" }, { section: "Services" }, { section: "Testimonials" },
+        { section: "Pricing" }, { section: "FAQ" }, { section: "CTA", variant: "brand" }];
+    case "portfolio": // trabajo por delante
+      return [{ section: "Hero" }, { section: "Portfolio", variant: "featured" }, { section: "Testimonials" },
+        { section: "Services" }, { section: "Contact" }, { section: "CTA" }];
+    default:          // business-multipage / other → el orden por defecto
+      return DEFAULT_HOME_COMPOSITION;
+  }
 }
 
 export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS } = {}) {
@@ -199,8 +220,16 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   const servicesRoute = routes.find((r) => /servic/i.test(r)) || null;
   const portfolioRoute = routes.find((r) => /portfolio|proyecto|trabajo/i.test(r)) || null;
   const pricingRoute = routes.find((r) => /precio|pricing|tarifa|plan/i.test(r)) || null;
+  // F6: tipo de sitio + composición de la home. La IA PROPONE (composition en el brief) y el cliente confirma;
+  // si no hay composition explícita, se usa la recomendada por tipo (válvula "la IA recomienda") o el default.
+  // El generador la HONRA pero omite cualquier sección sin datos reales (guardrail §D4) — más abajo, en PAGE.
+  const siteType = briefSiteType(brief);
+  if (brief.siteType !== undefined) track("siteType", brief.siteType);
+  const composition = briefComposition(brief) || compositionFor(siteType);
+  trace.siteType = siteType;
+  trace.compositionSource = briefComposition(brief) ? "brief" : (siteType ? `type:${siteType}` : "default");
   const ctx = { siteName, sector, tagline, serviceItems, email, phone, address, testimonials, plans,
-    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute };
+    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute, composition };
 
   // --- SEO de fábrica (F5/P1): el layout lleva metadata + Open Graph + JSON-LD site-wide + landmarks. ---
   const logoFact = track("logo", f.logo || f.logoCandidate);
@@ -455,20 +484,35 @@ const navLabel = (route) => {
 // Solo importa las secciones que usa; lo ausente se omite (no se inventa). Labels de UI = chrome permitido.
 const PAGE = (route, ctx) => {
   const { siteName, sector, tagline, serviceItems, email, phone, address, testimonials, plans,
-    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute } = ctx;
+    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute, composition } = ctx;
   const j = (v) => JSON.stringify(v);
   const used = new Set();
   const blocks = [];
   const add = (name, jsx) => { used.add(name); blocks.push(jsx); };
 
   // Builders de bloque (eyebrow/título = labels de UI; el CONTENIDO sale de los hechos del brief).
-  const heroBlock = (soft) => `<Hero${soft ? ` variant="soft"` : ""}${sector ? ` eyebrow={${j(sector)}}` : ""} title={${j(soft ? navLabel(route) : siteName)}}${tagline && !soft ? ` subtitle={${j(tagline)}}` : ""} ctaText="Contacto" ctaHref={${j(contactRoute)}}${servicesRoute && !soft ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
-  const servicesBlock = (full) => `<Services eyebrow="Servicios" title={${j(full ? `Servicios de ${siteName}` : `Lo que ofrece ${siteName}`)}} services={${j(serviceItems)}}${!full && servicesRoute ? ` viewAllText="Ver todos los servicios" viewAllHref={${j(servicesRoute)}}` : ""} />`;
-  const portfolioBlock = (full) => `<Portfolio eyebrow="Portfolio" title={${j(full ? `Trabajos de ${siteName}` : "Trabajos destacados")}} items={${j(portfolioItems)}}${!full && portfolioRoute ? ` viewAllText="Ver portfolio" viewAllHref={${j(portfolioRoute)}}` : ""} variant="featured" />`;
-  const testimonialsBlock = (full) => `<Testimonials eyebrow="Testimonios" title={${j(full ? "Testimonios" : "Lo que dicen nuestros clientes")}} items={${j(testimonials)}} />`;
+  // `variant` (opcional) viene de la composición elegida (F6) y sobreescribe el default de la sección.
+  const va = (variant, def) => (variant ? ` variant=${j(variant)}` : def ? ` variant="${def}"` : "");
+  const heroBlock = (soft, variant) => `<Hero${va(variant, soft ? "soft" : "")}${sector ? ` eyebrow={${j(sector)}}` : ""} title={${j(soft ? navLabel(route) : siteName)}}${tagline && !soft ? ` subtitle={${j(tagline)}}` : ""} ctaText="Contacto" ctaHref={${j(contactRoute)}}${servicesRoute && !soft ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
+  const servicesBlock = (full, variant) => `<Services eyebrow="Servicios" title={${j(full ? `Servicios de ${siteName}` : `Lo que ofrece ${siteName}`)}} services={${j(serviceItems)}}${va(variant)}${!full && servicesRoute ? ` viewAllText="Ver todos los servicios" viewAllHref={${j(servicesRoute)}}` : ""} />`;
+  const portfolioBlock = (full, variant) => `<Portfolio eyebrow="Portfolio" title={${j(full ? `Trabajos de ${siteName}` : "Trabajos destacados")}} items={${j(portfolioItems)}}${!full && portfolioRoute ? ` viewAllText="Ver portfolio" viewAllHref={${j(portfolioRoute)}}` : ""}${va(variant, "featured")} />`;
+  const testimonialsBlock = (full, variant) => `<Testimonials eyebrow="Testimonios" title={${j(full ? "Testimonios" : "Lo que dicen nuestros clientes")}} items={${j(testimonials)}}${va(variant)} />`;
   const pricingBlock = () => `<Pricing eyebrow="Precios" title="Planes" plans={${j(plans)}} ctaHref={${j(contactRoute)}} />`;
-  const faqBlock = () => `<FAQ eyebrow="FAQ" title="Preguntas frecuentes" items={${j(faqs)}} />`;
-  const ctaBlock = (surface) => `<CTA${surface ? ` variant="surface"` : ""} title={${j(tagline || siteName)}} primaryCtaText="Contacto" primaryCtaHref={${j(contactRoute)}}${servicesRoute ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
+  const faqBlock = (variant) => `<FAQ eyebrow="FAQ" title="Preguntas frecuentes" items={${j(faqs)}}${va(variant)} />`;
+  const ctaBlock = (surface, variant) => `<CTA${va(variant, surface ? "surface" : "")} title={${j(tagline || siteName)}} primaryCtaText="Contacto" primaryCtaHref={${j(contactRoute)}}${servicesRoute ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
+  const contactHomeBlock = (variant) => { const a = [email && `email={${j(email)}}`, phone && `phone={${j(phone)}}`, address && `address={${j(address)}}`].filter(Boolean).join(" "); return `<Contact title="Contacto"${tagline ? ` description={${j(tagline)}}` : ""}${a ? " " + a : ""}${va(variant, "split")} />`; };
+
+  // Builders para la HOME por composición: (variant) => jsx | null. null = sin datos → se OMITE (§D4).
+  const homeBuilders = {
+    Hero: (v) => heroBlock(false, v),
+    Services: (v) => (serviceItems ? servicesBlock(false, v) : null),
+    Portfolio: (v) => (portfolioItems ? portfolioBlock(false, v) : null),
+    Testimonials: (v) => (testimonials ? testimonialsBlock(false, v) : null),
+    Pricing: (v) => (plans ? pricingBlock(v) : null),
+    FAQ: (v) => (faqs ? faqBlock(v) : null),
+    Contact: (v) => ((email || phone || address) ? contactHomeBlock(v) : null),
+    CTA: (v) => ctaBlock(false, v),
+  };
 
   const isContact = /contact/i.test(route);
   const isServices = servicesRoute && route === servicesRoute;
@@ -478,13 +522,13 @@ const PAGE = (route, ctx) => {
   const isFaq = /faq|pregunt/i.test(route);
 
   if (route === "/") {
-    add("Hero", heroBlock(false));
-    if (serviceItems) add("Services", servicesBlock(false));
-    if (portfolioItems) add("Portfolio", portfolioBlock(false));
-    if (testimonials) add("Testimonials", testimonialsBlock(false));
-    if (plans) add("Pricing", pricingBlock());
-    if (faqs) add("FAQ", faqBlock());
-    add("CTA", ctaBlock(false));
+    // HONRA la composición elegida (F6): orden + variante. OMITE las secciones sin datos (§D4).
+    for (const { section, variant } of composition) {
+      const build = homeBuilders[section];
+      if (!build) continue;
+      const jsx = build(variant);
+      if (jsx) add(section, jsx);
+    }
   } else if (isContact) {
     used.add("Contact");
     const attrs = [email && `email={${j(email)}}`, phone && `phone={${j(phone)}}`, address && `address={${j(address)}}`].filter(Boolean).join(" ");

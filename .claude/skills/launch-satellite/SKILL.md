@@ -69,6 +69,19 @@ Pregunta al operador/cliente cuál encaja (puede combinarse, p.ej. b+d):
     - **`system`** → respeta la preferencia del sistema del visitante (`prefers-color-scheme`).
     Nuestro estándar es **dark/light + toggle** (paridad con el UI Core/SAT01); la generación scaffolda esa
     maquinaria (`ThemeProvider` + init-script anti-FOUC) con el **default que elija el cliente**. Ausente ⇒ `system`.
+  - **Tras el intake, PREGUNTA SIEMPRE el TIPO DE SITIO** (pilar P2; **nunca lo auto-elijas**) — *"¿qué tipo de
+    sitio?"* → entra al brief como `siteType` (`provided`): **`landing`** (una página) · **`business-multipage`**
+    (negocio multipágina) · **`portfolio`** · **`other`**.
+  - **La IA PROPONE la composición** (pilar P2 — el "puzzle" de la opción 3 híbrida): según **tipo + negocio**,
+    propón qué **secciones** del catálogo (Hero/Services/Testimonials/Pricing/Portfolio/FAQ/Contact/CTA), en qué
+    **orden** y con qué **variante**; preséntala y el cliente **confirma/ajusta** → entra al brief como
+    `composition` (capa `proposed`→`provided`). **Regla dura §D4: solo propón una sección si HAY datos reales**
+    para ella (no propongas Testimonials sin testimonios, ni Pricing sin precios) — o propón **recoger** ese
+    dato; **jamás inventes contenido**. El generador honra la composición pero **OMITE** cualquier sección sin datos.
+  - **Válvula "que la IA recomiende / sorpréndeme"** (pilar P4): en los menús de **tipo** y **composición**, la
+    última opción es *"que la IA elija la mejor configuración para el negocio"* — propón la composición recomendada
+    (no una lista cerrada). Aplica SOLO a **diseño/estructura/secciones** (capa `proposed`), **NUNCA a los HECHOS**
+    (negocio/servicios/precios = siempre `extracted`/`provided`). Ausente ⇒ composición por tipo/default (retrocompatible).
 - **(d) Instagram** → **vía primaria:** el cliente aporta su **handle** y **confirma/pega** su contenido
   (bio, fotos, stats) → `provided`. El **scrape es best-effort** (`scripts/instagram-intake.mjs`, solo
   datos **públicos** de su **cuenta propia**, sin saltar auth-walls): si funciona, pre-rellena como

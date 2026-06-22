@@ -25,6 +25,19 @@ export function briefColorMode(brief) {
   return COLOR_MODES.includes(brief?.colorMode?.value) ? brief.colorMode.value : DEFAULT_COLOR_MODE;
 }
 
+// Tipo de sitio (ECO-57/F6, P2): rige la composición que la IA propone. Lo elige el cliente; ausente => null
+// (el generador cae a la composición por defecto, retrocompatible).
+export const SITE_TYPES = Object.freeze(["business-multipage", "landing", "portfolio", "other"]);
+export function briefSiteType(brief) {
+  return SITE_TYPES.includes(brief?.siteType?.value) ? brief.siteType.value : null;
+}
+// Composición de la home que la IA PROPONE y el cliente CONFIRMA (P2/P4). Lista ordenada de {section,variant}.
+// Ausente => null (el generador usa la composición por tipo/default). El generador OMITE una sección sin datos.
+export function briefComposition(brief) {
+  const v = brief?.composition?.value;
+  return Array.isArray(v) && v.length ? v.filter((s) => s && typeof s === "object" && s.section) : null;
+}
+
 // Núcleo del LOOP (D4): confirmar una sugerencia. Solo un `proposed` con valor se confirma → `provided`.
 // No se puede "confirmar" un missing (sería inventar) ni un extracted (ya es un hecho real).
 export function confirmField(f) {
@@ -113,6 +126,25 @@ export function validateBrief(brief) {
     else {
       if (!COLOR_MODES.includes(brief.colorMode.value)) problems.push(`colorMode.value inválido: ${brief.colorMode.value} (permitidos: ${COLOR_MODES.join("|")})`);
       if (!["provided", "proposed"].includes(brief.colorMode.provenance)) problems.push(`colorMode.provenance debe ser provided|proposed, no "${brief.colorMode.provenance}"`);
+    }
+  }
+  // siteType (F6) OPCIONAL: value ∈ SITE_TYPES; lo elige/confirma el cliente.
+  if (brief.siteType !== undefined) {
+    if (typeof brief.siteType !== "object" || brief.siteType === null) problems.push("siteType no es objeto");
+    else {
+      if (!SITE_TYPES.includes(brief.siteType.value)) problems.push(`siteType.value inválido: ${brief.siteType.value} (permitidos: ${SITE_TYPES.join("|")})`);
+      if (!["provided", "proposed"].includes(brief.siteType.provenance)) problems.push(`siteType.provenance debe ser provided|proposed, no "${brief.siteType.provenance}"`);
+    }
+  }
+  // composition (F6) OPCIONAL: value = lista de {section,variant}; provenance provided|proposed (creatividad §D4).
+  if (brief.composition !== undefined) {
+    if (typeof brief.composition !== "object" || brief.composition === null) problems.push("composition no es objeto");
+    else {
+      if (!Array.isArray(brief.composition.value)) problems.push("composition.value debe ser una lista de {section,variant}");
+      else for (const s of brief.composition.value) {
+        if (!s || typeof s !== "object" || !s.section) problems.push("composition: cada item necesita 'section'");
+      }
+      if (!["provided", "proposed"].includes(brief.composition.provenance)) problems.push(`composition.provenance debe ser provided|proposed, no "${brief.composition.provenance}"`);
     }
   }
   return { ok: problems.length === 0, problems };
