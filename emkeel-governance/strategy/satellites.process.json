@@ -1,6 +1,6 @@
 {
   "process": "strategy",
-  "state": "presented",
+  "state": "approved",
   "steps": {
     "scaffolded": {
       "done": true,
@@ -40,6 +40,11 @@
       "done": true,
       "timestamp": "2026-06-22T11:30:24Z",
       "presented_to": "operator"
+    },
+    "approved": {
+      "done": true,
+      "timestamp": "2026-06-22T11:50:07Z",
+      "approved_by": "operator"
     }
   }
 }
