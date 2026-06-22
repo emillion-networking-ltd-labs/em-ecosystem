@@ -414,6 +414,15 @@
       ]
     },
     {
+      "name": "FAQ",
+      "type": "registry:section",
+      "file": "sections/FAQ.tsx",
+      "registryDependencies": [
+        "Badge"
+      ],
+      "internalDependencies": []
+    },
+    {
       "name": "Hero",
       "type": "registry:section",
       "file": "sections/Hero.tsx",
@@ -423,9 +432,45 @@
       "internalDependencies": []
     },
     {
+      "name": "Portfolio",
+      "type": "registry:section",
+      "file": "sections/Portfolio.tsx",
+      "registryDependencies": [
+        "Badge",
+        "Button"
+      ],
+      "internalDependencies": [
+        "hooks/useReveal.ts"
+      ]
+    },
+    {
+      "name": "Pricing",
+      "type": "registry:section",
+      "file": "sections/Pricing.tsx",
+      "registryDependencies": [
+        "Badge",
+        "Button"
+      ],
+      "internalDependencies": [
+        "hooks/useReveal.ts"
+      ]
+    },
+    {
       "name": "Services",
       "type": "registry:section",
       "file": "sections/Services.tsx",
+      "registryDependencies": [
+        "Badge",
+        "Button"
+      ],
+      "internalDependencies": [
+        "hooks/useReveal.ts"
+      ]
+    },
+    {
+      "name": "Testimonials",
+      "type": "registry:section",
+      "file": "sections/Testimonials.tsx",
       "registryDependencies": [
         "Badge",
         "Button"
