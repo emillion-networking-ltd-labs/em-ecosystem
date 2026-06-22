@@ -48,15 +48,24 @@ test("AC#1: genera estructura forma-SAT01 (config + multi-ruta)", () => {
   assert.ok(pkg.dependencies.next, "es Next.js");
 });
 
-// AC#2: UI SOLO via em-ui add; em-ui diff sin drift; cero referencia a nexacore-dashboard.
-test("AC#2: UI proviene de em-ui (diff sin drift) y cero dashboard", () => {
-  for (const c of DEFAULT_COMPONENTS) {
+// AC#2: las SECCIONES (nivel 2) y sus átomos/hook vienen SOLO via em-ui add; diff sin drift; cero dashboard.
+test("AC#2: secciones+átomos provienen de em-ui (diff sin drift) y cero dashboard", () => {
+  // las 4 secciones nivel-2 llegaron a components/sections/ y son idénticas a la fuente
+  for (const s of ["Hero", "Services", "CTA", "Contact"]) {
+    const f = join(dir, "src/components/sections", `${s}.tsx`);
+    assert.ok(existsSync(f), `falta la sección ${s} (debió venir por em-ui add)`);
+    const out = execFileSync("node", [EM_UI, "diff", s, "--target", f], { cwd: REPO_ROOT, encoding: "utf8" });
+    assert.match(out, /SIN DRIFT/, `${s} debería ser idéntico a design-system`);
+  }
+  // los átomos del CIERRE transitivo (Button/Badge) también, en components/ui/
+  for (const c of ["Button", "Badge"]) {
     const f = join(dir, "src/components/ui", `${c}.tsx`);
-    assert.ok(existsSync(f), `falta ${c} (debió venir por em-ui add)`);
-    // em-ui diff contra la fuente: sin drift (idéntico al design-system).
+    assert.ok(existsSync(f), `falta el átomo ${c} (cierre de las secciones)`);
     const out = execFileSync("node", [EM_UI, "diff", c, "--target", f], { cwd: REPO_ROOT, encoding: "utf8" });
     assert.match(out, /SIN DRIFT/, `${c} debería ser idéntico a design-system`);
   }
+  // el hook de reveal (internalDependency de las secciones) también llegó
+  assert.ok(existsSync(join(dir, "src/hooks/useReveal.ts")), "falta el hook useReveal (internalDependency de las secciones)");
   // tokens instalados por em-ui init
   assert.ok(existsSync(join(dir, "src/styles/em-ui-tokens.css")), "em-ui init no instaló tokens");
   // cero ACOPLAMIENTO al dashboard en el CÓDIGO generado (.ts/.tsx): ningún import/lectura del dashboard.
@@ -74,16 +83,18 @@ test("AC#2: UI proviene de em-ui (diff sin drift) y cero dashboard", () => {
   }
 });
 
-// AC#3: los `missing` salen como placeholders VISIBLES, no datos fabricados.
-test("AC#3: missing -> placeholder visible, nunca inventado", () => {
-  assert.ok(trace.placeholders.includes("contactEmail"), "contactEmail debía quedar placeholder");
+// AC#3: lo ausente NO se inventa. En el producto diseñado, un `missing` se OMITE (no se rinde placeholder
+// feo ni se fabrica); queda trazado en trace.placeholders. Los hechos `provided` sí se renderizan.
+test("AC#3: lo ausente se omite (nunca inventado); los hechos provided se renderizan", () => {
+  assert.ok(trace.placeholders.includes("contactEmail"), "contactEmail (ausente) debía quedar en trace.placeholders");
   const contacto = readFileSync(join(dir, "src/app/contacto/page.tsx"), "utf8");
   const home = readFileSync(join(dir, "src/app/page.tsx"), "utf8");
-  assert.match(home, /\[FALTA: email de contacto\]/, "placeholder visible del email ausente");
-  // dato real provided sí aparece
-  assert.match(home, /\+34 600 000 000/, "el teléfono provided debe aparecer");
-  // no se fabricó un email plausible
+  // el teléfono provided aparece (sección Contact de /contacto)
+  assert.match(contacto, /\+34 600 000 000/, "el teléfono provided debe aparecer en /contacto");
+  // el email ausente NO se fabrica
   assert.doesNotMatch(home + contacto, /@(gmail|demo|example)\.[a-z]+/i, "no debe inventar un email");
+  // el producto diseñado OMITE lo ausente (no rinde [FALTA] al cliente)
+  assert.doesNotMatch(home + contacto, /\[FALTA/, "el diseño omite lo ausente; no rinde [FALTA] en el producto");
 });
 
 // AC#4: S2-ready -> los 6 deliverables de hardening presentes.

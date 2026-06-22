@@ -11,16 +11,24 @@ import { fileURLToPath } from "node:url";
 // build-registry vive en design-system/registry/ → la fuente (design-system/) es el directorio padre.
 const DS = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const COMP = join(DS, "components");
+const SECT = join(DS, "sections");   // nivel 2: secciones diseñadas que componen átomos (ECO-54)
 
 export function componentNames() {
   return readdirSync(COMP).filter((f) => f.endsWith(".tsx")).map((f) => f.slice(0, -4)).sort();
 }
 
-// Deps DIRECTAS de un componente, recomputadas de su fuente:
-//  - siblings UI: `@/components/ui/X` o relativo `./X` (X debe existir como componente).
-//  - internas: `@/hooks/X` y `@/lib/X` (si existen en design-system/).
-export function directDeps(name) {
-  const src = readFileSync(join(COMP, `${name}.tsx`), "utf8");
+// Nombres de las secciones (nivel 2), si el directorio existe.
+export function sectionNames() {
+  return existsSync(SECT)
+    ? readdirSync(SECT).filter((f) => f.endsWith(".tsx")).map((f) => f.slice(0, -4)).sort()
+    : [];
+}
+
+// Deps DIRECTAS de un fichero (componente o sección), recomputadas de su fuente:
+//  - átomos UI: `@/components/ui/X` o relativo `./X` (X debe existir como componente).
+//  - internas: `@/hooks/X` (.ts) y `@/lib/X` (si existen en design-system/).
+export function directDeps(name, dir = COMP) {
+  const src = readFileSync(join(dir, `${name}.tsx`), "utf8");
   const comps = new Set(componentNames());
 
   const ui = new Set();
@@ -43,9 +51,14 @@ export function directDeps(name) {
 
 export function buildRegistry() {
   const items = componentNames().map((name) => {
-    const { registryDependencies, internalDependencies } = directDeps(name);
+    const { registryDependencies, internalDependencies } = directDeps(name, COMP);
     return { name, type: "registry:ui", file: `components/${name}.tsx`, registryDependencies, internalDependencies };
   });
+  // Secciones (nivel 2): componen átomos. `em-ui add <Section>` jala la sección + su cierre de átomos/hooks.
+  for (const name of sectionNames()) {
+    const { registryDependencies, internalDependencies } = directDeps(name, SECT);
+    items.push({ name, type: "registry:section", file: `sections/${name}.tsx`, registryDependencies, internalDependencies });
+  }
   return {
     name: "em-ui",
     $comment: "Registry interno del design system NexaCore (ECO-23; grafo completo ECO-26). Fuente unica: design-system/. em-ui lee de aqui, NUNCA de nexacore-dashboard/. Generado por design-system/registry/build-registry.mjs.",

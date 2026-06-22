@@ -93,13 +93,12 @@ test("e2e: trace.intent refleja el gate; A no renderiza la propuesta, B sí", ()
   assert.equal(traceB.intent, "b-remodel");
   const pageA = readFileSync(join(dirA, "src/app/page.tsx"), "utf8");
   const pageB = readFileSync(join(dirB, "src/app/page.tsx"), "utf8");
-  // el HECHO (nombre, provided) está en ambos
+  // el HECHO (nombre, provided) está en ambos (es el title del Hero)
   assert.ok(pageA.includes("Grupo Atis") && pageB.includes("Grupo Atis"));
-  // la PROPUESTA (sector proposed) solo en B; en A queda [PENDIENTE]
-  assert.ok(pageB.includes("logística premium"), "B renderiza la propuesta (preview)");
-  assert.ok(!pageA.includes("logística premium"), "A NO renderiza la propuesta");
-  assert.ok(pageA.includes("[PENDIENTE"), "A marca la propuesta como pendiente");
-  // traza para el loop: B registra la propuesta a confirmar
-  assert.ok(traceB.proposed.includes("identity.sector"));
-  assert.ok(!traceA.proposed.includes("identity.sector"));
+  // la PROPUESTA (sector proposed, el eyebrow del Hero) se RENDERIZA solo en B; en A se OMITE (no se fabrica)
+  assert.ok(pageB.includes("logística premium"), "B renderiza la propuesta (preview, eyebrow del Hero)");
+  assert.ok(!pageA.includes("logística premium"), "A (réplica) NO renderiza la propuesta — la omite");
+  // traza para el loop: B registra la propuesta a confirmar; A la deja como pendiente (placeholder)
+  assert.ok(traceB.proposed.includes("identity.sector"), "B traza la propuesta a confirmar");
+  assert.ok(traceA.placeholders.includes("identity.sector"), "A deja la propuesta como pendiente (omitida)");
 });
