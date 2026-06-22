@@ -63,6 +63,11 @@ jobs:
           EMKEEL_BRANCH: ${{ github.head_ref }}
           EMKEEL_BASE_REF: ${{ github.base_ref }}
         run: python -m emkeel.gates.check_strategy_change
+      - name: "Gate - strategy process (non-skippable steps: <topic>.process.json >= checked + provenance)"
+        if: github.event_name == 'pull_request'
+        env:
+          EMKEEL_BASE_REF: ${{ github.base_ref }}
+        run: python -m emkeel.gates.check_strategy_process
       - name: "Gate - strategy alignment (feature acknowledges the north star)"
         if: github.event_name == 'pull_request'
         env:
