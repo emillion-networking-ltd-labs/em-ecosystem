@@ -1,0 +1,34 @@
+{
+  "process": "strategy",
+  "state": "checked",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-06-22T10:39:03Z",
+      "topic": "satellites"
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-06-22T10:39:03Z",
+      "sources": [
+        "docs/satellite-deployment-runbook.md:337",
+        "https://ui.shadcn.com/docs/registry/getting-started"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-06-22T10:39:03Z",
+      "options": "4 opciones de reuse: (1) copia manual [drift], (2) registry+CLI em-ui estilo shadcn [APROBADA], (3) monorepo workspaces, (4) npm publicado"
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-06-22T10:39:03Z",
+      "critique": "Monorepo(3)/npm(4) descartados por rigidez per-cliente + refactor del repo; status quo(1) genera drift medido (Button perdio a11y); registry+CLI(2) elegido por single-source con ownership sin refactor \u2014 coste de construir la base, acotado."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-06-22T10:39:03Z",
+      "check_passed": true
+    }
+  }
+}

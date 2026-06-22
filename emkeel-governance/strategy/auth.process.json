@@ -1,0 +1,35 @@
+{
+  "process": "strategy",
+  "state": "checked",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-06-22T10:39:19Z",
+      "topic": "auth"
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-06-22T10:39:19Z",
+      "sources": [
+        "https://pages.nist.gov/800-63-4/sp800-63b.html",
+        "https://fidoalliance.org/passkeys/",
+        "nexacore-api/src/config/app.config.ts:21"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-06-22T10:39:19Z",
+      "options": "4 opciones de fasificacion auth v2: (1) activar MVP 0-2 congelar 3-6, (2) MVP + Fase 3 passkey-first selectivo [recomendada], (3) completar las 7 fases antes de activar, (4) pivotar/comprar IdP para Fase 5"
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-06-22T10:39:19Z",
+      "critique": "Opcion(3) 7-fases = over-engineering (construir un OP/IdP a escala pyme sin demanda SSO, Fase 5 con 9 decisiones abiertas); (4) pivote desproporcionado salvo SOLO Fase 5 (build-vs-buy); passkeys sincronizables = AAL2 no AAL3 (NIST 2.3); recomendado MVP + passkey selectivo, congelar OIDC."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-06-22T10:39:20Z",
+      "check_passed": true
+    }
+  }
+}
