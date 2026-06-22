@@ -21,6 +21,6 @@ satélite. Esto cierra el dual-source que ADR-007 dejó como deuda (ECO-31).
   (idénticas a `design-system/`); el resto de `@/hooks` y `@/lib` (auth/api/permissions) es app-owned.
 
 ## Fuente
-`design-system/` (registry `design-system/registry.json`; CLI `em-ui/cli.mjs`). `/admin/design-system`
+`design-system/` (registry `design-system/registry.json`; CLI `design-system/registry/cli.mjs`). `/admin/design-system`
 sigue siendo la vista viva del UI Core.
 </content>

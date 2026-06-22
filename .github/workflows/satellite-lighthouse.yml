@@ -4,7 +4,7 @@
 # next start (puerto 3100) → lighthouse-local.mjs con chromium del runner. Umbral S2:
 # Perf>=90 / SEO>=95 / Best-Practices>=95 / A11y>=90 (docs/satellite-deployment-runbook.md).
 # El demo es efímero (mktemp): NO se commitea ningún satellites/sat-demo/ (ECO-25 AC#6).
-# Solo INVOCA F2 (generate-satellite + lighthouse-local); no toca design-system//em-ui/.
+# Solo INVOCA F2 (generate-satellite + lighthouse-local); no toca design-system/ (ni su registry em-ui).
 name: Satellite Lighthouse S2
 
 on:
@@ -13,7 +13,6 @@ on:
     paths:
       - ".claude/skills/launch-satellite/**"
       - "design-system/**"
-      - "em-ui/**"
       - ".github/workflows/satellite-lighthouse.yml"
   workflow_dispatch:
 

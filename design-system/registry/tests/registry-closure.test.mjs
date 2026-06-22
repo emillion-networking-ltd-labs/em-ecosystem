@@ -5,8 +5,9 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { buildRegistry, directDeps, closure, componentNames } from "../build-registry.mjs";
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
-const committed = JSON.parse(readFileSync(join(ROOT, "design-system", "registry.json"), "utf8"));
+// el test vive en design-system/registry/tests/ → ../.. es design-system/ (la fuente).
+const DS = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+const committed = JSON.parse(readFileSync(join(DS, "registry.json"), "utf8"));
 const itemOf = (reg, n) => reg.items.find((i) => i.name === n);
 
 // REGRESSION GUARD (ECO-26): el cierre de Button DEBE incluir InfinitySpinner.

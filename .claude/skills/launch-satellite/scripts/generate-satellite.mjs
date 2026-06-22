@@ -11,7 +11,7 @@ import { validateBrief, briefIntent, briefColorMode, DEFAULT_INTENT } from "./li
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../../../..");        // scripts -> satellite -> skills -> .claude -> root
-const EM_UI = join(REPO_ROOT, "em-ui", "cli.mjs");
+const EM_UI = join(REPO_ROOT, "design-system", "registry", "cli.mjs");
 
 // Componentes UI por defecto de un sitio marketing (existen en el registry). Reuse, no greenfield.
 export const DEFAULT_COMPONENTS = ["Button", "Badge", "Divider"];

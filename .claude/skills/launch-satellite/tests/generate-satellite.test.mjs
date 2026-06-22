@@ -11,7 +11,7 @@ import { SCHEMA_VERSION, field } from "../scripts/lib/brief.mjs";
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../../../..");
 const DS = join(REPO_ROOT, "design-system");
-const EM_UI = join(REPO_ROOT, "em-ui", "cli.mjs");
+const EM_UI = join(REPO_ROOT, "design-system", "registry", "cli.mjs");
 
 // Brief de prueba: contactPhone provided, contactEmail AUSENTE (=> placeholder), services provided.
 const brief = {
