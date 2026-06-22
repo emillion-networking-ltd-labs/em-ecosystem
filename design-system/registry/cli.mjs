@@ -32,6 +32,7 @@ function resolveClosure(name, seen = new Set()) {
 // igual que dashboard y satélites => sin reescritura de imports.
 function destPathFor(srcRel, destSrc) {
   if (srcRel.startsWith("components/")) return join(destSrc, "components/ui", basename(srcRel));
+  if (srcRel.startsWith("sections/")) return join(destSrc, "components/sections", basename(srcRel));
   if (srcRel.startsWith("hooks/")) return join(destSrc, "hooks", basename(srcRel));
   if (srcRel.startsWith("lib/")) return join(destSrc, "lib", basename(srcRel));
   die(`ruta de fuente no mapeable: ${srcRel}`);

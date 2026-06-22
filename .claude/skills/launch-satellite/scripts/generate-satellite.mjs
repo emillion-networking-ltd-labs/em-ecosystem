@@ -15,6 +15,9 @@ const EM_UI = join(REPO_ROOT, "design-system", "registry", "cli.mjs");
 
 // Componentes UI por defecto de un sitio marketing (existen en el registry). Reuse, no greenfield.
 export const DEFAULT_COMPONENTS = ["Button", "Badge", "Divider"];
+// Biblioteca de SECCIONES nivel-2 (ECO-54): el generador COMPONE la página desde ellas. `em-ui add <Section>`
+// jala cada sección + su cierre transitivo de átomos/hooks (misma vía que los componentes de nivel 1).
+export const DEFAULT_SECTIONS = ["Hero", "Services", "CTA", "Contact"];
 
 function slugify(s) { return String(s || "demo").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "demo"; }
 export function val(field, label, intent = DEFAULT_INTENT) {
@@ -33,7 +36,21 @@ function emui(args, destSrc) {
   return execFileSync("node", [EM_UI, ...args, "--dest", destSrc], { cwd: REPO_ROOT, encoding: "utf8" });
 }
 
-export function generateSatellite(brief, destDir, { components = DEFAULT_COMPONENTS } = {}) {
+// Color de marca del brief → hex para overridear el token `accent` (marca de primera clase, ECO-54).
+// Acepta f.brandColors (array, primer hex), f.brandTokens (value.primary|brand|accent o string) o f.brandColor.
+// Respeta el split D4: provided/extracted siempre; proposed solo fuera de réplica (a-replica). null si no hay hex.
+function brandAccent(brief, intent) {
+  const f = brief.fields || {};
+  const field = f.brandColors || f.brandTokens || f.brandColor;
+  if (!field) return null;
+  const p = field.provenance;
+  if (!(p === "provided" || p === "extracted" || (p === "proposed" && intent !== "a-replica"))) return null;
+  const v = field.value;
+  const hex = Array.isArray(v) ? v[0] : (v && typeof v === "object" ? (v.primary || v.brand || v.accent) : v);
+  return typeof hex === "string" && /^#[0-9a-fA-F]{6}$/.test(hex.trim()) ? hex.trim() : null;
+}
+
+export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS } = {}) {
   const { ok, problems } = validateBrief(brief);
   if (!ok) throw new Error(`brief inválido: ${problems.join("; ")}`);
 
@@ -46,7 +63,7 @@ export function generateSatellite(brief, destDir, { components = DEFAULT_COMPONE
 
   const routes = (brief.targetRoutes && brief.targetRoutes.length ? brief.targetRoutes : ["/", "/servicios", "/contacto"]);
   const intent = briefIntent(brief);   // gate de fidelidad (D4): a-replica | b-remodel (default) | c-reimagine
-  const trace = { slug, dest, intent, components: [], emui: [], placeholders: [], proposed: [] };
+  const trace = { slug, dest, intent, components: [], sections: [], emui: [], placeholders: [], proposed: [] };
 
   // Resuelve un campo aplicando el split D4 + la latitud del intent, y deja traza para el LOOP:
   // un `proposed` rendido (B/C) entra en trace.proposed (lo que el cliente confirma → provided).
@@ -72,12 +89,17 @@ export function generateSatellite(brief, destDir, { components = DEFAULT_COMPONE
   writeFileSync(join(dest, "next-env.d.ts"), `/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n`);
   writeFileSync(join(dest, ".gitignore"), "/node_modules\n/.next\n/out\n");
 
-  // --- b. Reuse de UI SOLO via em-ui (tokens + componentes) ---
+  // --- b. Reuse SOLO via em-ui: tokens + SECCIONES nivel-2 (cada `add` jala su cierre de átomos/hooks) ---
   trace.emui.push(emui(["init"], src).trim());
-  for (const c of components) { trace.emui.push(emui(["add", c], src).trim()); trace.components.push(c); }
+  for (const s of sections) { trace.emui.push(emui(["add", s], src).trim()); trace.sections.push(s); }
 
-  // --- c. globals.css importa la capa de tokens de em-ui ---
-  writeFileSync(join(app, "globals.css"), `@import "../styles/em-ui-tokens.css";\n\nbody { font-family: var(--font-sans); }\n`);
+  // --- c. globals.css: capa de tokens + (si el brief aporta marca) override del token de marca `accent` ---
+  const brand = brandAccent(brief, intent);
+  if (brand) trace.brand = brand;
+  writeFileSync(join(app, "globals.css"),
+    `@import "../styles/em-ui-tokens.css";\n` +
+    (brand ? `\n/* Marca del cliente (brandTokens del brief) → token de marca em-ui (accent). */\n:root { --color-accent: ${brand}; --color-accent-dark: ${brand}; }\n` : "") +
+    `\nbody { font-family: var(--font-sans); }\n`);
 
   // --- maquinaria de TEMA dark/light (paridad SAT01, GENÉRICA): ThemeProvider + init-script anti-FOUC.
   // El DEFAULT lo parametriza colorMode del brief (NO hardcodeado dark). useTheme nunca rompe (hay provider).
@@ -93,25 +115,42 @@ export function generateSatellite(brief, destDir, { components = DEFAULT_COMPONE
   mkdirSync(join(src, "components"), { recursive: true });
   writeFileSync(join(src, "components", "DeferredAnalytics.tsx"), DEFERRED_ANALYTICS);
 
-  // --- páginas marketing (relleno desde brief; missing -> placeholder visible) ---
+  // --- páginas: el generador COMPONE desde la biblioteca de secciones (ECO-54), rellenadas con HECHOS del
+  // brief. Guardrail §D4: solo provided/extracted (y proposed fuera de réplica); lo ausente se OMITE (no se
+  // inventa contenido, no se rinde placeholder feo). Los labels de UI (eyebrow/nav/CTA) son chrome, no contenido.
   const f = brief.fields || {};
-  // servicios: hecho confirmado (provided/extracted) en los 3 modos; proposed solo en remodel/reimagine
-  // (en réplica una lista propuesta no se renderiza hasta confirmar). NUNCA se fabrica.
-  const svcProv = f.services?.provenance;
-  const svcUsable = Array.isArray(f.services?.value) && (
-    svcProv === "provided" || svcProv === "extracted" || (svcProv === "proposed" && intent !== "a-replica"));
-  const services = svcUsable ? f.services.value : null;
-  if (!services) trace.placeholders.push("services");
-  else if (svcProv === "proposed") trace.proposed.push("services");
-  const contactEmail = fillField(f.contactEmail, "email de contacto", "contactEmail");
-  const contactPhone = fillField(f.contactPhone, "teléfono", "contactPhone");
-  const sector = fillField(brief.identity?.sector, "sector", "identity.sector");
+  const fact = (field) => {
+    const p = field?.provenance;
+    const has = field && field.value != null && field.value !== "" && !(Array.isArray(field.value) && !field.value.length);
+    if ((p === "provided" || p === "extracted") && has) return field.value;
+    if (p === "proposed" && has && intent !== "a-replica") return field.value;
+    return null;
+  };
+  const track = (key, field) => {
+    const v = fact(field);
+    if (v == null) trace.placeholders.push(key);
+    else if (field?.provenance === "proposed") trace.proposed.push(key);
+    return v;
+  };
+
+  const sector = track("identity.sector", brief.identity?.sector);
+  const tagline = track("tagline", f.slogan || f.tagline || f.subtitle);
+  const rawServices = track("services", f.services);
+  const serviceItems = Array.isArray(rawServices)
+    ? rawServices.map((s) => (typeof s === "string" ? { title: s } : { title: s.title || s.name || String(s), description: s.description || s.desc }))
+    : null;
+  const email = track("contactEmail", f.contactEmail);
+  const phone = track("contactPhone", f.contactPhone);
+  const address = track("address", f.address);
+  const contactRoute = routes.find((r) => /contact/i.test(r)) || "/contact";
+  const servicesRoute = routes.find((r) => /servic/i.test(r)) || null;
+  const ctx = { siteName, sector, tagline, serviceItems, email, phone, address, contactRoute, servicesRoute };
 
   for (const route of routes) {
     const seg = route === "/" ? "" : route.replace(/^\//, "");
     const dir = seg ? join(app, seg) : app;
     mkdirSync(dir, { recursive: true });
-    writeFileSync(join(dir, "page.tsx"), PAGE({ route, siteName, sector, services, contactEmail, contactPhone }));
+    writeFileSync(join(dir, "page.tsx"), PAGE(route, ctx));
   }
 
   writeFileSync(join(app, "robots.ts"), ROBOTS);
@@ -297,33 +336,56 @@ export default function DeferredAnalytics() {
   );
 }
 `;
-const PAGE = ({ route, siteName, sector, services, contactEmail, contactPhone }) => {
-  const isHome = route === "/";
-  const servicesBlock = services
-    ? `<ul>{${JSON.stringify(services)}.map((s) => (<li key={s} className="text-content-secondary">{s}</li>))}</ul>`
-    : `<p className="text-content-tertiary">[FALTA: servicios]</p>`;
-  return `import Badge from "@/components/ui/Badge";
-import Divider from "@/components/ui/Divider";
+const navLabel = (route) => {
+  if (route === "/") return "Inicio";
+  const seg = route.replace(/^\/+|\/+$/g, "");
+  return seg ? seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ") : "Inicio";
+};
 
-export const metadata = { title: ${JSON.stringify(`${siteName} — ${route === "/" ? "Inicio" : route.replace("/", "")}`)}, alternates: { canonical: ${JSON.stringify(route)} } };
+// Compone la página desde la biblioteca de SECCIONES (ECO-54), rellenada con HECHOS del brief (ctx).
+// Solo importa las secciones que usa; lo ausente se omite (no se inventa). Labels de UI = chrome permitido.
+const PAGE = (route, ctx) => {
+  const { siteName, sector, tagline, serviceItems, email, phone, address, contactRoute, servicesRoute } = ctx;
+  const j = (v) => JSON.stringify(v);
+  const isContact = /contact/i.test(route);
+  const isServices = servicesRoute && route === servicesRoute;
+  const used = new Set();
+  const blocks = [];
+
+  if (route === "/") {
+    used.add("Hero");
+    blocks.push(`<Hero${sector ? ` eyebrow={${j(sector)}}` : ""} title={${j(siteName)}}${tagline ? ` subtitle={${j(tagline)}}` : ""} ctaText="Contacto" ctaHref={${j(contactRoute)}}${servicesRoute ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`);
+    if (serviceItems && serviceItems.length) {
+      used.add("Services");
+      blocks.push(`<Services eyebrow="Servicios" title={${j(`Lo que ofrece ${siteName}`)}} services={${j(serviceItems)}}${servicesRoute ? ` viewAllText="Ver todos los servicios" viewAllHref={${j(servicesRoute)}}` : ""} />`);
+    }
+    used.add("CTA");
+    blocks.push(`<CTA title={${j(tagline || siteName)}} primaryCtaText="Contacto" primaryCtaHref={${j(contactRoute)}}${servicesRoute ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`);
+  } else if (isContact) {
+    used.add("Contact");
+    const attrs = [email && `email={${j(email)}}`, phone && `phone={${j(phone)}}`, address && `address={${j(address)}}`].filter(Boolean).join(" ");
+    blocks.push(`<Contact title="Contacto"${tagline ? ` description={${j(tagline)}}` : ""}${attrs ? " " + attrs : ""} variant="split" />`);
+  } else if (isServices && serviceItems && serviceItems.length) {
+    used.add("Services");
+    blocks.push(`<Services eyebrow="Servicios" title={${j(`Servicios de ${siteName}`)}} services={${j(serviceItems)}} />`);
+    used.add("CTA");
+    blocks.push(`<CTA title={${j(siteName)}} primaryCtaText="Contacto" primaryCtaHref={${j(contactRoute)}} />`);
+  } else {
+    used.add("Hero");
+    blocks.push(`<Hero variant="soft" title={${j(navLabel(route))}}${sector ? ` eyebrow={${j(sector)}}` : ""} ctaText="Contacto" ctaHref={${j(contactRoute)}} />`);
+    used.add("CTA");
+    blocks.push(`<CTA variant="surface" title={${j(siteName)}} primaryCtaText="Contacto" primaryCtaHref={${j(contactRoute)}} />`);
+  }
+
+  const imports = [...used].sort().map((s) => `import ${s} from "@/components/sections/${s}";`).join("\n");
+  return `${imports}
+
+export const metadata = { title: ${j(`${siteName} — ${navLabel(route)}`)}, alternates: { canonical: ${j(route)} } };
 
 export default function Page() {
   return (
     <main className="bg-surface-primary text-content-primary">
-      <section>
-        <Badge>{${JSON.stringify(sector)}}</Badge>
-        <h1 className="text-content-primary">{${JSON.stringify(siteName)}}</h1>
-      </section>
-      <Divider />
-      ${isHome ? `<section>
-        <h2>Servicios</h2>
-        ${servicesBlock}
-      </section>
-      <section>
-        <h2>Contacto</h2>
-        <p className="text-content-secondary">Email: {${JSON.stringify(contactEmail)}}</p>
-        <p className="text-content-secondary">Tel: {${JSON.stringify(contactPhone)}}</p>
-      </section>` : `<section><p className="text-content-secondary">Ruta ${route}</p></section>`}
+${blocks.map((b) => "      " + b).join("\n")}
     </main>
   );
 }

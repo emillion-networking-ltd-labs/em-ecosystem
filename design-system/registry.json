@@ -390,6 +390,49 @@
       "internalDependencies": [
         "hooks/useTheme.ts"
       ]
+    },
+    {
+      "name": "CTA",
+      "type": "registry:section",
+      "file": "sections/CTA.tsx",
+      "registryDependencies": [
+        "Button"
+      ],
+      "internalDependencies": [
+        "hooks/useReveal.ts"
+      ]
+    },
+    {
+      "name": "Contact",
+      "type": "registry:section",
+      "file": "sections/Contact.tsx",
+      "registryDependencies": [
+        "Button"
+      ],
+      "internalDependencies": [
+        "hooks/useReveal.ts"
+      ]
+    },
+    {
+      "name": "Hero",
+      "type": "registry:section",
+      "file": "sections/Hero.tsx",
+      "registryDependencies": [
+        "Button"
+      ],
+      "internalDependencies": []
+    },
+    {
+      "name": "Services",
+      "type": "registry:section",
+      "file": "sections/Services.tsx",
+      "registryDependencies": [
+        "Badge",
+        "Button"
+      ],
+      "internalDependencies": [
+        "hooks/useReveal.ts"
+      ]
     }
   ]
 }
