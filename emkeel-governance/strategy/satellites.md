@@ -1,7 +1,15 @@
 # Strategy: satellites
 
-Status: APPROVED   <!-- base aprobada 2026-06-18; refinamiento ECO-52 (diseño híbrido + producto SEO-ready) aprobado 2026-06-22; re-aim ECO-60 (SERVICIO con oficio + pilar de imágenes P5; image-gen = opción 1 hosted Flux pluggable, ADR-011) APROBADO en el gate humano 2026-06-22 -->
+Status: SUPERADO por [satellite-builders.md](satellite-builders.md) (ECO-62, 2026-06-22) · histórico APPROVED   <!-- base aprobada 2026-06-18; refinamiento ECO-52 (diseño híbrido + producto SEO-ready) aprobado 2026-06-22; re-aim ECO-60 (SERVICIO con oficio + pilar de imágenes P5; image-gen = opción 1 hosted Flux pluggable, ADR-011) APROBADO 2026-06-22; SUPERADO por satellite-builders (ECO-62) -->
 Strategy: satellites   <!-- feature specs reference this with a `Strategy: satellites` line -->
+
+> **⚠️ SUPERADO (ECO-62, 2026-06-22) por [`satellite-builders.md`](satellite-builders.md).** El norte se
+> re-encuadró alrededor de **BUILDERS de fuente → núcleo común** porque el enfoque *extract-then-compose* de
+> aquí sale **con PÉRDIDA** (el piloto Grupo Atis lo probó). **Este documento se preserva como HISTORIA** (no se
+> borra): su contenido válido —i18n (ECO-58), SEO de fábrica (ECO-56), guardrail HECHOS-vs-DISEÑO/§D4, imágenes
+> (ADR-011), biblioteca de secciones (F4/F5), em-ui (F1), preview— **se reutiliza** en el núcleo común del nuevo
+> norte; lo superado es el **modelo de generación** (resumen→componer), no esos cimientos. Los ECO ya entregados
+> (F1–F7a) y sus ADR siguen vigentes. Para trabajo nuevo, alinéate a `satellite-builders.md`.
 
 ## Goal
 Decidir el NORTE de un **SERVICIO de creación de satélites con OFICIO de agencia** (—no un builder genérico ni "un Lovable gobernado"—, con nuestro sistema de componentes, nuestros gates y el **código en nuestro control**; AIM re-apuntado en §«Re-aim ECO-60») para lanzar satélites (sitios de cliente) que sean un **PRODUCTO profesional, FIEL al cliente, SEO-ready y escalable** (no una simple web desplegada), de forma **recurrente, rápida y automatizada**: el **mecanismo de reuse** de nuestro UI Core (pieza base hoy inexistente), el **onboarding** multi-modo, la **generación** que reutiliza componentes (no greenfield), la **capa de diseño** (secciones gobernadas + SEO técnico de fábrica), la **automatización** end-to-end (Jira + GitHub + Vercel), la **gobernanza** (gates) y la **fasificación**. NO el cómo-paso-a-paso (eso es el runbook).
