@@ -157,7 +157,7 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   writeFileSync(join(dest, "tsconfig.json"), TSCONFIG);
   writeFileSync(join(dest, "postcss.config.mjs"), POSTCSS);
   writeFileSync(join(dest, "next-env.d.ts"), `/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n`);
-  writeFileSync(join(dest, ".gitignore"), "/node_modules\n/.next\n/out\n");
+  writeFileSync(join(dest, ".gitignore"), "/node_modules\n/.next\n/out\n/.preview.log\n");
 
   // --- b. Reuse SOLO via em-ui: capa de tokens. Las SECCIONES se añaden más abajo, SOLO las que el brief
   // tiene datos para componer (em-ui add dinámico) — cada `add` jala su cierre de átomos/hooks. ---
