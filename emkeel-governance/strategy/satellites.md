@@ -6,6 +6,8 @@ Strategy: satellites   <!-- feature specs reference this with a `Strategy: satel
 ## Goal
 Decidir el NORTE de un **sistema de facilitación gobernado** (tipo Lovable, pero con nuestro sistema de componentes y nuestros gates) para lanzar satélites (sitios de cliente) de forma **recurrente, rápida y automatizada**: el **mecanismo de reuse** de nuestro UI Core (pieza base hoy inexistente), el **onboarding** multi-modo, la **generación** que reutiliza componentes (no greenfield), la **automatización** end-to-end (Jira + GitHub + Vercel), la **gobernanza** (gates) y la **fasificación**. NO el cómo-paso-a-paso (eso es el runbook).
 
+> **Elevación del norte (refinamiento ECO-52, pendiente del gate):** de *"genera un sitio"* a **"genera un PRODUCTO profesional, optimizado para indexar/rankear y escalable"** — no una simple web desplegada. Lo concreta la §«Refinamiento ECO-52». Absorbe y **supera** la sección de enfoque de diseño abierta en el PR #435 (decisión 1/2/3).
+
 ## Context
 <!-- grounded facts ONLY — cite file:line (repo) o URL (mercado) for every claim -->
 
@@ -86,6 +88,80 @@ El satélite es una **herramienta de facilitación** (tipo Lovable — `emkeel-g
 **Cómo cubre el CASO DE PRUEBA (validación del norte):**
 - *Modo (a), cliente nuevo sin diseño:* onboarding pregunta datos reales (o IG) → `/launch-satellite` *pull-ea* UI Core+tokens del registry y scaffolda la estructura SAT01 → genera `satellites/sat-<x>/` Next.js reusando componentes → crea Jira (proyecto+sprint+tickets) + GitHub + deploy Vercel → S2 + gates → "lanzado" ~90% alineado. ✔ cubierto por reuse(2)+onboarding(1)+generación(2)+automatización(3)+gobernanza(4).
 - *Modo (c), cliente CON web:* onboarding toma sus **hechos** → **remodela con valor** (default B; o A/C si el cliente lo pide) con nuestros componentes → adapta a forma satélite hasta S2 + gates, en un **loop iterativo** (propone→preview→refina→confirma). ✔ cubierto; la 2 lo permite porque la copia es personalizable y con *ownership* (la 3/4 lo dificultarían).
+
+## Refinamiento ECO-52 — de "genera un sitio" a "genera un PRODUCTO profesional"
+
+**Estado: refinamiento del norte — PENDIENTE del gate del operador.** Supera la sección «enfoque de diseño»
+del PR #435 (su decisión 1/2/3 se absorbe aquí, enriquecida con investigación de mercado real). Cierra el
+**fallo del piloto** (el remodel de Grupo Atis salió *más feo* que el original). Reconcilia con §D4 (intent +
+split verdad/diseño), §D5 (brief persistido) y el reuse vía em-ui — **no los re-litiga**.
+
+### Hueco medido (de partida)
+El generador emite hoy `robots.ts` + `sitemap.ts` + `metadata` básica + 6 cabeceras
+(`.claude/skills/launch-satellite/scripts/generate-satellite.mjs:117`), pero **NO Open Graph, NI datos
+estructurados (Schema.org/JSON-LD), NI breadcrumbs**; el listón es un Lighthouse **lab** (`docs/satellite-deployment-runbook.md:337`).
+Y el output de diseño es un **esqueleto** (subpáginas en stub) frente al vocabulario de secciones que SAT01
+tiene **solo hecho a mano** (`satellites/sat-cristian-garcia/src/components/sections/HeroSection.tsx:1`).
+
+### El eje de decisión: enfoque de generación de DISEÑO (absorbe #435)
+| # | Enfoque | Source | Pros | Cons | Riesgo |
+|---|---|---|---|---|---|
+| 1 | **Biblioteca de secciones determinista** — vocabulario parametrizado (hero, features, pricing, testimonios, CTA, FAQ, contacto, footer) que el generador compone desde el brief | `satellites/sat-cristian-garcia/src/components/sections/HeroSection.tsx:1` | reproducible; S2/a11y por construcción; reuse em-ui; el vocabulario es el estándar del sector (Tailwind UI Marketing: 16 categorías de sección, https://tailwindcss.com/plus/ui-blocks/marketing) | output acotado al catálogo; cada vertical nueva = sección nueva | bajo (repro/gobernanza); riesgo "plantillero" si el catálogo es pobre |
+| 2 | **Bespoke por IA al generar** — la IA maqueta cada satélite a medida | https://docs.lovable.dev/prompting/prompting-one | máxima libertad de diseño | **NO reproducible** (rompe §D4/§D5); S2/a11y/SEO no garantizados por construcción; difícil de gobernar | **alto**: choca con repro y gobernanza |
+| 3 | **Híbrido** — biblioteca determinista como **sustrato gobernado** + el agente **propone** tipo/secciones/composición/redacción como `proposed`, confirmable en el loop | `.claude/skills/launch-satellite/schema/brief.schema.json:48` | reproducible **y** creativo; S2/a11y/SEO por construcción; **es lo que hace TODO builder con IA** (Lovable construye sección a sección hero→features→testimonios→CTA y *pregunta antes de generar*, https://docs.lovable.dev/prompting/prompting-one; v0 genera variaciones, https://vercel.com/blog/how-to-prompt-v0) | hay que modelar "tipo + composición elegida" en el brief; creatividad acotada al catálogo+parámetros | medio (complejidad), bajo en repro/gobernanza |
+
+**Reproducibilidad** (§D5) y **gobernanza por construcción** descartan (2); (1) es el sustrato de (3). La
+investigación confirma que el sector entero opera en (3): el AI propone una estructura de secciones nombrada
+y el usuario refina en un loop (Lovable, v0, Framer, Wix, bolt — todos prompt→preview→refinar).
+
+### Los 4 pilares del refinamiento (todos cuelgan de la opción 3 híbrida)
+
+**P1 — Producto profesional, SEO-ready, escalable (subir el listón por encima del S2 actual).** El satélite
+nace **listo para indexar y rankear**, no solo desplegado. Se eleva el gate de fábrica con SEO técnico
+**generado por construcción**:
+- **Meta por página** únicas y descriptivas (título + `meta description` por ruta) — Google Search Central
+  (https://developers.google.com/search/docs/appearance/snippet).
+- **Open Graph** (`og:title/type/image/url`) en el layout — protocolo OGP (https://ogp.me/).
+- **Datos estructurados JSON-LD** (Google recomienda JSON-LD): **Organization** + **LocalBusiness** (subtipo
+  más específico) + **BreadcrumbList** — Google structured-data (https://developers.google.com/search/docs/appearance/structured-data/local-business).
+- **HTML semántico + landmarks** (header/nav/main/footer, jerarquía de headings) — beneficio SEO+a11y (MDN,
+  https://developer.mozilla.org/en-US/docs/Learn_web_development/Core/Accessibility/HTML).
+- **Listón medible más alto que el lab actual, en dos planos:**
+  - *Gate de lanzamiento (lab, por construcción):* además del Lighthouse S2, exigir los **audits SEO nombrados**
+    de Lighthouse (meta-description, descriptive link text, `rel=canonical` válido, structured-data válido…) —
+    no solo el agregado ≥95 — más OG y JSON-LD presentes y válidos.
+  - *Objetivo post-lanzamiento (campo, monitorizado — NO gateable al lanzar por falta de tráfico):* **Core Web
+    Vitals "good" p75: LCP ≤ 2.5 s, INP ≤ 200 ms, CLS ≤ 0.1** (web.dev, https://web.dev/articles/vitals). El
+    lab no garantiza el campo, así que el campo es objetivo de seguimiento, no condición de "lanzado".
+
+**P2 — Onboarding: tipo de sitio + secciones que el agente SUGIERE.** Antes de generar, **preguntar el tipo**
+(multipágina de negocio / landing / portfolio / otros) — patrón estándar de los builders (taxonomía por tipo;
+Webflow clasifica plantillas en 26 categorías, https://webflow.com/templates/categories). Según **tipo +
+negocio**, la IA **propone** las secciones adecuadas del catálogo (no solo pregunta) y el usuario confirma/ajusta
+(estilo Lovable). Se acopla a los modos a/b/c/e ya existentes; el tipo y las secciones entran al brief como
+**`proposed`** (confirmables) — encaja con el loop §D4.
+
+**P3 — Subir el listón de calidad de diseño (el fallo del piloto).** Regla dura: **un remodel (c) SIEMPRE
+mejor que el original, nunca peor.** Diseño fresco, marca aplicada (los `brandTokens` del brief → tokens em-ui,
+`.claude/skills/launch-satellite/schema/brief.schema.json:48`), resultado claramente superior. Operacionalmente:
+la composición sale de la **biblioteca de secciones gobernada** (opción 3), no de un stub; se ata a un
+**criterio de "mejor que el original"** verificable en el loop (preview + el listón P1 + revisión humana en el gate de fidelidad).
+
+**P4 — Válvula de escape "que la IA recomiende / sorpréndeme" en cada menú.** En cada menú (tipo, secciones,
+diseño) la última opción es **"que la IA elija la mejor configuración según el negocio"** — no una lista cerrada
+(el patrón "generar variaciones / deja que la IA decida" de v0/Hostinger, https://vercel.com/blog/how-to-prompt-v0).
+Es la **cara abierta de la opción 3**. **Guardrail (heredado de §D4):** la válvula aplica a **diseño/estructura/
+secciones** (capa `proposed`, confirmable en el loop), **NUNCA a los HECHOS** (negocio/servicios/precios/contacto
+= siempre `extracted`/`provided`, jamás inventados — `.claude/skills/launch-satellite/schema/brief.schema.json:49`).
+
+### Recomendación (PENDIENTE del gate — el operador decide)
+**Híbrido (opción 3)** como enfoque de diseño, con los 4 pilares colgando de él: **(1)** sustrato de secciones
+gobernado (SEO/a11y/CWV por construcción) que **eleva el producto a profesional** (P1); **(2)** onboarding que
+pregunta el **tipo** y la IA **propone secciones** (P2); **(3)** regla "remodel siempre mejor" anclada al
+catálogo + el listón medible (P3); **(4)** válvula "la IA recomienda" en cada menú, acotada a la capa `proposed`
+y **nunca** a los hechos (P4). Es el único enfoque **reproducible y gobernado** que además **es el estándar del
+sector** para builders con IA. **No se pre-decide:** se presenta para que el operador elija 1/2/3 y apruebe la
+elevación del norte; al aprobar, se registra como **ADR** y se fasifica.
 
 ## Fasificación
 El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún no es reutilizable.**

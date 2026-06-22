@@ -1,34 +1,45 @@
 {
   "process": "strategy",
-  "state": "checked",
+  "state": "presented",
   "steps": {
     "scaffolded": {
       "done": true,
-      "timestamp": "2026-06-22T10:39:03Z",
+      "timestamp": "2026-06-22T11:21:20Z",
       "topic": "satellites"
     },
     "researched": {
       "done": true,
-      "timestamp": "2026-06-22T10:39:03Z",
+      "timestamp": "2026-06-22T11:27:01Z",
       "sources": [
+        "https://web.dev/articles/vitals",
+        "https://developers.google.com/search/docs/appearance/structured-data/local-business",
+        "https://ogp.me/",
+        "https://docs.lovable.dev/prompting/prompting-one",
+        "https://tailwindcss.com/plus/ui-blocks/marketing",
+        "https://webflow.com/templates/categories",
         "docs/satellite-deployment-runbook.md:337",
-        "https://ui.shadcn.com/docs/registry/getting-started"
+        ".claude/skills/launch-satellite/scripts/generate-satellite.mjs:117"
       ]
     },
     "proposed": {
       "done": true,
-      "timestamp": "2026-06-22T10:39:03Z",
-      "options": "4 opciones de reuse: (1) copia manual [drift], (2) registry+CLI em-ui estilo shadcn [APROBADA], (3) monorepo workspaces, (4) npm publicado"
+      "timestamp": "2026-06-22T11:30:08Z",
+      "options": "Enfoque de diseno: (1) biblioteca de secciones determinista, (2) bespoke por IA [descartable: rompe repro/gobernanza], (3) hibrido [recomendado]; + 4 pilares colgando de (3): P1 producto SEO-ready (OG+JSON-LD+CWV), P2 onboarding tipo-de-sitio + secciones sugeridas, P3 remodel siempre mejor que el original, P4 valvula 'la IA recomienda' acotada a proposed no a hechos"
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-06-22T10:39:03Z",
-      "critique": "Monorepo(3)/npm(4) descartados por rigidez per-cliente + refactor del repo; status quo(1) genera drift medido (Button perdio a11y); registry+CLI(2) elegido por single-source con ownership sin refactor \u2014 coste de construir la base, acotado."
+      "timestamp": "2026-06-22T11:30:08Z",
+      "critique": "Adversarial: (a) los CWV de CAMPO p75 no son gateables al lanzar (sin trafico/CrUX) -> reclasificados a objetivo post-lanzamiento, el gate de lanzamiento es lab (Lighthouse + audits SEO nombrados + OG/JSON-LD validos); (b) Lovable docs muestran build modular seccion-a-seccion con preguntas = es HIBRIDO, no bespoke puro -> refuerza opcion 3 y debilita 2; (c) 'remodel siempre mejor' necesita criterio verificable (preview + liston P1 + revision humana en el gate de fidelidad), no solo una afirmacion; (d) la valvula 'sorpresame' debe quedar acotada a la capa proposed (diseno/estructura) y NUNCA a los hechos (D4). Fuentes reabiertas y verificadas (web.dev, Google structured-data, ogp.me, Lovable, Tailwind UI, Webflow)."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-06-22T10:39:03Z",
+      "timestamp": "2026-06-22T11:30:08Z",
       "check_passed": true
+    },
+    "presented": {
+      "done": true,
+      "timestamp": "2026-06-22T11:30:24Z",
+      "presented_to": "operator"
     }
   }
 }
