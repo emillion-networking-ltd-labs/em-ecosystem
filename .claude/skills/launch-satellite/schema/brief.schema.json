@@ -33,6 +33,37 @@
         "provenance": { "type": "string", "enum": ["provided", "proposed"] }
       }
     },
+    "siteType": {
+      "type": "object",
+      "description": "Tipo de sitio (ECO-57/F6, pilar P2): business-multipage | landing | portfolio | other. Lo ELIGE el cliente en el onboarding (provided); el agente puede sugerirlo (proposed). AUSENTE => composicion por defecto (retrocompatible). No rompe briefs previos (opcional).",
+      "required": ["value", "provenance"],
+      "additionalProperties": false,
+      "properties": {
+        "value": { "type": "string", "enum": ["business-multipage", "landing", "portfolio", "other"] },
+        "provenance": { "type": "string", "enum": ["provided", "proposed"] }
+      }
+    },
+    "composition": {
+      "type": "object",
+      "description": "Composicion de la HOME que la IA PROPONE segun tipo+negocio y el cliente CONFIRMA (ECO-57/F6, pilares P2/P4). value = lista ordenada de secciones del catalogo con su variante. Capa proposed→provided (creatividad, §D4): NUNCA cambia los HECHOS. El generador la honra, pero OMITE una seccion si no hay datos reales para ella. AUSENTE => composicion por tipo/default. Opcional.",
+      "required": ["value", "provenance"],
+      "additionalProperties": false,
+      "properties": {
+        "value": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["section"],
+            "additionalProperties": false,
+            "properties": {
+              "section": { "type": "string", "enum": ["Hero", "Services", "Testimonials", "Pricing", "Portfolio", "FAQ", "CTA", "Contact"] },
+              "variant": { "type": "string" }
+            }
+          }
+        },
+        "provenance": { "type": "string", "enum": ["provided", "proposed"] }
+      }
+    },
     "identity": {
       "type": "object",
       "required": ["name", "sector", "language"],
