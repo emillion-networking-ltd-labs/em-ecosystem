@@ -84,6 +84,20 @@ function normFaqs(v) {
   return items.length ? items : null;
 }
 
+// JSON-LD site-wide (F5): de los HECHOS del cliente. LocalBusiness SOLO si hay dirección real (su rasgo
+// definitorio); si no, Organization. JAMÁS se inventa un negocio local (guardrail §D4). url/logo los
+// completa el layout a runtime con SITE_URL (no se hornean aquí porque dependen del env del deploy).
+function buildJsonLd(seo) {
+  const isLocal = !!seo.address;
+  const ld = { "@context": "https://schema.org", "@type": isLocal ? "LocalBusiness" : "Organization", name: seo.siteName };
+  if (seo.description) ld.description = seo.description;
+  if (isLocal) {
+    ld.address = { "@type": "PostalAddress", streetAddress: seo.address };
+    if (seo.phone) ld.telephone = seo.phone;
+  }
+  return ld;
+}
+
 export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS } = {}) {
   const { ok, problems } = validateBrief(brief);
   if (!ok) throw new Error(`brief inválido: ${problems.join("; ")}`);
@@ -143,9 +157,9 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   writeFileSync(join(src, "context", "ThemeContext.tsx"), THEME_CONTEXT(colorMode));
   writeFileSync(join(app, "providers.tsx"), PROVIDERS);
 
-  // --- layout + observabilidad DIFERIDA (S2: no bloquea el main-thread) + tema (Providers + init-script) ---
+  // --- nombre del negocio (hecho) — usado por el layout (SEO) y por las páginas. El layout se escribe MÁS
+  //     ABAJO, tras computar los hechos SEO (logo/dirección/teléfono) que alimentan OG + JSON-LD. ---
   const siteName = fillField(brief.identity?.name, "nombre del negocio", "identity.name");
-  writeFileSync(join(app, "layout.tsx"), LAYOUT(siteName, themeInitScript(colorMode)));
   mkdirSync(join(src, "components"), { recursive: true });
   writeFileSync(join(src, "components", "DeferredAnalytics.tsx"), DEFERRED_ANALYTICS);
 
@@ -187,6 +201,18 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   const pricingRoute = routes.find((r) => /precio|pricing|tarifa|plan/i.test(r)) || null;
   const ctx = { siteName, sector, tagline, serviceItems, email, phone, address, testimonials, plans,
     portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute };
+
+  // --- SEO de fábrica (F5/P1): el layout lleva metadata + Open Graph + JSON-LD site-wide + landmarks. ---
+  const logoFact = track("logo", f.logo || f.logoCandidate);
+  const seo = {
+    siteName, description: tagline || null, sector, email, phone, address,
+    logo: typeof logoFact === "string" ? logoFact : null,
+    nav: routes.map((r) => ({ href: r, label: navLabel(r) })),
+  };
+  const jsonld = buildJsonLd(seo);   // LocalBusiness SOLO si hay dirección real; si no, Organization (§D4)
+  trace.jsonldType = jsonld["@type"];
+  if (seo.logo) trace.logo = seo.logo;
+  writeFileSync(join(app, "layout.tsx"), LAYOUT(siteName, themeInitScript(colorMode), seo, jsonld));
 
   // em-ui add DINÁMICO: solo las secciones que el brief tiene datos para componer (la shell base siempre).
   const usedSections = new Set(["Hero", "CTA", "Contact"]);
@@ -242,31 +268,62 @@ const TSCONFIG = JSON.stringify({
   include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"], exclude: ["node_modules"],
 }, null, 2) + "\n";
 const POSTCSS = `/** @type {import('postcss-load-config').Config} */\nconst config = { plugins: { '@tailwindcss/postcss': {} } };\nexport default config;\n`;
-const LAYOUT = (siteName, initScript) => `import type { Metadata } from "next";
+const LAYOUT = (siteName, initScript, seo, jsonld) => {
+  const j = (v) => JSON.stringify(v);
+  const navLis = seo.nav
+    .map((n) => `            <li><Link href={${j(n.href)}} className="text-body text-content-secondary transition-colors hover:text-accent">{${j(n.label)}}</Link></li>`)
+    .join("\n");
+  const footerContact = [seo.phone, seo.email].filter(Boolean);
+  return `import type { Metadata } from "next";
+import Link from "next/link";
 import DeferredAnalytics from "@/components/DeferredAnalytics";
 import Providers from "./providers";
 import "./globals.css";
 
-// metadataBase env-driven (S2): cae al default de Vercel hasta que F3 cablee el dominio.
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.vercel.app";
+
+// SEO de fábrica (ECO-56/F5): metadata + Open Graph site-wide. metadataBase env-driven (F3 cablea el dominio).
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.vercel.app"),
-  title: ${JSON.stringify(siteName)},
-  description: ${JSON.stringify(`${siteName} — sitio oficial`)},
+  metadataBase: new URL(SITE_URL),
+  title: { default: ${j(siteName)}, template: ${j(`%s · ${siteName}`)} },${seo.description ? `\n  description: ${j(seo.description)},` : ""}
+  openGraph: {
+    type: "website",
+    siteName: ${j(siteName)},
+    title: ${j(siteName)},
+    url: SITE_URL,${seo.description ? `\n    description: ${j(seo.description)},` : ""}${seo.logo ? `\n    images: [${j(seo.logo)}],` : ""}
+  },
 };
 
-// Anti-FOUC (ECO-48): fija la clase \`dark\` en <html> ANTES del primer paint según el colorMode
-// elegido (parametrizado) + la preferencia guardada del usuario. Síncrono → no hay flash de tema.
-const THEME_INIT_SCRIPT = ${JSON.stringify(initScript)};
+// JSON-LD (Google recomienda JSON-LD): ${jsonld["@type"]} de los HECHOS del cliente (nunca inventado).
+const JSONLD = ${j(jsonld)};
+
+// Anti-FOUC (ECO-48): fija la clase \`dark\` en <html> ANTES del primer paint. Síncrono → sin flash.
+const THEME_INIT_SCRIPT = ${j(initScript)};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const ld = { ...JSONLD, url: SITE_URL${seo.logo ? `, logo: ${j(seo.logo)}.startsWith("http") ? ${j(seo.logo)} : SITE_URL + ${j(seo.logo)}` : ""} };
   return (
     <html lang="es">
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       </head>
       <body>
+        <header className="border-b border-border-default">
+          <nav aria-label="Principal" className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
+            <Link href="/" className="text-h3 font-bold text-content-primary">{${j(siteName)}}</Link>
+            <ul className="hidden gap-6 sm:flex">
+${navLis}
+            </ul>
+          </nav>
+        </header>
         {/* ThemeProvider (dark/light + toggle) envuelve la app → useTheme nunca rompe. */}
         <Providers>{children}</Providers>
+        <footer className="border-t border-border-default">
+          <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-10 text-caption text-content-tertiary">
+            <p>© {new Date().getFullYear()} {${j(siteName)}}</p>${footerContact.length ? `\n            <p>{${j(footerContact.join(" · "))}}</p>` : ""}
+          </div>
+        </footer>
         {/* Observabilidad diferida: no bloquea el main-thread (S2 Performance). */}
         <DeferredAnalytics />
       </body>
@@ -274,6 +331,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   );
 }
 `;
+};
 
 // --- maquinaria de TEMA (GENÉRICA, modelada en SAT01 proven): default parametrizado por colorMode ---
 // initScript anti-FOUC: añade `dark` a <html> antes del paint. dark → salvo 'light' guardado;
@@ -446,14 +504,30 @@ const PAGE = (route, ctx) => {
   }
 
   const imports = [...used].sort().map((s) => `import ${s} from "@/components/sections/${s}";`).join("\n");
+  // meta description: del brief (tagline) en home; en otras rutas, metadata derivada de hechos (nombre+sección),
+  // como el title — nunca prosa de negocio inventada. Open Graph por página. Title absoluto (no doble marca).
+  const title = `${siteName} — ${navLabel(route)}`;
+  const desc = route === "/" ? (tagline || `${siteName}${sector ? `, ${sector}` : ""}`) : `${navLabel(route)} · ${siteName}`;
+  const breadcrumb = route === "/" ? null : {
+    "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Inicio", item: "/" },
+      { "@type": "ListItem", position: 2, name: navLabel(route), item: route },
+    ],
+  };
+  const bcScript = breadcrumb ? `      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ${j(JSON.stringify(breadcrumb))} }} />\n` : "";
   return `${imports}
 
-export const metadata = { title: ${j(`${siteName} — ${navLabel(route)}`)}, alternates: { canonical: ${j(route)} } };
+export const metadata = {
+  title: { absolute: ${j(title)} },
+  description: ${j(desc)},
+  alternates: { canonical: ${j(route)} },
+  openGraph: { type: "website", title: ${j(title)}, description: ${j(desc)}, url: ${j(route)} },
+};
 
 export default function Page() {
   return (
     <main className="bg-surface-primary text-content-primary">
-${blocks.map((b) => "      " + b).join("\n")}
+${bcScript}${blocks.map((b) => "      " + b).join("\n")}
     </main>
   );
 }
