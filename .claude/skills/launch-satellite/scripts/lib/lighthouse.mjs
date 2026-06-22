@@ -32,11 +32,17 @@ const METRICS = {
   "cumulative-layout-shift": "CLS",
 };
 
-// Corre Lighthouse `runs` veces contra `url`; devuelve { samples, medians, metricSamples, metricMedians }.
+// Audits SEO NOMBRADOS que el gate de lanzamiento exige (F5): no basta el agregado ≥95 — estos deben pasar.
+// (structured-data es un audit MANUAL de Lighthouse → no se puede gatear ahí; OG + JSON-LD se validan del HTML
+// servido con validateSeoHtml.)
+export const SEO_AUDITS = ["meta-description", "link-text", "canonical", "document-title", "is-crawlable"];
+
+// Corre Lighthouse `runs` veces contra `url`; devuelve { samples, medians, metricSamples, metricMedians, seoAudits }.
 // Propaga el error de execFileSync si una corrida falla (el caller lo reporta como GAP → exit 3).
 export function measureMedians(url, { runs = RUNS, env = process.env } = {}) {
   const samples = { performance: [], seo: [], "best-practices": [], accessibility: [] };
   const metricSamples = Object.fromEntries(Object.keys(METRICS).map((k) => [k, []]));
+  let lastLhr = null;
   for (let i = 0; i < runs; i++) {
     const out = `/tmp/lh-run-${i}.json`;
     execFileSync("npx", ["--yes", "lighthouse@12", url,
@@ -44,6 +50,7 @@ export function measureMedians(url, { runs = RUNS, env = process.env } = {}) {
       "--chrome-flags=--headless --no-sandbox", "--output=json", `--output-path=${out}`, "--quiet"],
       { stdio: "inherit", env });
     const lhr = JSON.parse(readFileSync(out, "utf8"));
+    lastLhr = lhr;
     for (const cat of Object.keys(samples)) samples[cat].push(Math.round((lhr.categories[cat]?.score ?? 0) * 100));
     for (const id of Object.keys(METRICS)) metricSamples[id].push(lhr.audits?.[id]?.numericValue ?? NaN);
   }
@@ -51,7 +58,8 @@ export function measureMedians(url, { runs = RUNS, env = process.env } = {}) {
   for (const cat of Object.keys(samples)) medians[cat] = median(samples[cat]);
   const metricMedians = {};
   for (const id of Object.keys(metricSamples)) metricMedians[id] = median(metricSamples[id].filter((n) => !Number.isNaN(n)));
-  return { samples, medians, metricSamples, metricMedians };
+  const seoAudits = Object.fromEntries(SEO_AUDITS.map((id) => [id, lastLhr?.audits?.[id]?.score ?? null]));
+  return { samples, medians, metricSamples, metricMedians, seoAudits };
 }
 
 // Imprime la tabla mediana + muestras y devuelve true si TODA categoría cumple su umbral (sobre la MEDIANA).
@@ -71,4 +79,36 @@ export function reportMetrics({ metricMedians }) {
   const fmt = (id, v) => (id === "cumulative-layout-shift" ? v.toFixed(3) : Math.round(v));
   const line = Object.entries(METRICS).map(([id, label]) => `${label}=${fmt(id, metricMedians[id])}`).join("  ");
   console.log(`  métricas (mediana, diagnóstico): ${line}`);
+}
+
+// Gate F5: los audits SEO nombrados deben pasar. score 1 = pasa, 0 = falla, null = no aplica (no bloquea).
+export function reportSeoAudits({ seoAudits }) {
+  let ok = true;
+  for (const id of SEO_AUDITS) {
+    const score = seoAudits[id];
+    const pass = score == null || score >= 1;
+    if (!pass) ok = false;
+    console.log(`  ${pass ? "✓" : "✗"} audit SEO ${id}: ${score == null ? "n/a" : score}`);
+  }
+  return ok;
+}
+
+// Gate F5: valida en el HTML SERVIDO que Open Graph y JSON-LD están presentes y son válidos. Sin chromium:
+// usa fetch (Node 22). Devuelve { ok, problems }.
+export async function validateSeoHtml(url) {
+  const problems = [];
+  let html;
+  try { const r = await fetch(url); html = await r.text(); } catch (e) { return { ok: false, problems: [`no se pudo leer el HTML servido: ${e.message}`] }; }
+  for (const prop of ["og:title", "og:type", "og:url"]) {
+    if (!new RegExp(`<meta[^>]+property=["']${prop}["']`, "i").test(html)) problems.push(`Open Graph: falta ${prop}`);
+  }
+  const blocks = [...html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)].map((m) => m[1]);
+  if (!blocks.length) problems.push("JSON-LD: no hay ningún <script type=application/ld+json>");
+  let hasOrg = false;
+  for (const b of blocks) {
+    try { const t = JSON.parse(b)["@type"]; if (t === "Organization" || t === "LocalBusiness") hasOrg = true; }
+    catch { problems.push("JSON-LD inválido (no parsea)"); }
+  }
+  if (blocks.length && !hasOrg) problems.push("JSON-LD: falta @type Organization|LocalBusiness");
+  return { ok: problems.length === 0, problems };
 }
