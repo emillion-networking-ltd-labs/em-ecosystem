@@ -1,10 +1,10 @@
 # Strategy: satellites
 
-Status: APPROVED   <!-- operador, human gate 2026-06-18; refinamiento ECO-52 (diseño híbrido + producto SEO-ready) aprobado 2026-06-22 -->
+Status: APPROVED (base) · RE-AIM ECO-60 PENDIENTE (gate humano)   <!-- base aprobada 2026-06-18; refinamiento ECO-52 (diseño híbrido + producto SEO-ready) aprobado 2026-06-22; re-aim ECO-60 (SERVICIO con oficio + pilar de imágenes P5) PENDIENTE de aprobación en el gate humano -->
 Strategy: satellites   <!-- feature specs reference this with a `Strategy: satellites` line -->
 
 ## Goal
-Decidir el NORTE de un **sistema de facilitación gobernado** (tipo Lovable, pero con nuestro sistema de componentes y nuestros gates) para lanzar satélites (sitios de cliente) que sean un **PRODUCTO profesional, SEO-ready y escalable** (no una simple web desplegada), de forma **recurrente, rápida y automatizada**: el **mecanismo de reuse** de nuestro UI Core (pieza base hoy inexistente), el **onboarding** multi-modo, la **generación** que reutiliza componentes (no greenfield), la **capa de diseño** (secciones gobernadas + SEO técnico de fábrica), la **automatización** end-to-end (Jira + GitHub + Vercel), la **gobernanza** (gates) y la **fasificación**. NO el cómo-paso-a-paso (eso es el runbook).
+Decidir el NORTE de un **SERVICIO de creación de satélites con OFICIO de agencia** (—no un builder genérico ni "un Lovable gobernado"—, con nuestro sistema de componentes, nuestros gates y el **código en nuestro control**; AIM re-apuntado en §«Re-aim ECO-60») para lanzar satélites (sitios de cliente) que sean un **PRODUCTO profesional, FIEL al cliente, SEO-ready y escalable** (no una simple web desplegada), de forma **recurrente, rápida y automatizada**: el **mecanismo de reuse** de nuestro UI Core (pieza base hoy inexistente), el **onboarding** multi-modo, la **generación** que reutiliza componentes (no greenfield), la **capa de diseño** (secciones gobernadas + SEO técnico de fábrica), la **automatización** end-to-end (Jira + GitHub + Vercel), la **gobernanza** (gates) y la **fasificación**. NO el cómo-paso-a-paso (eso es el runbook).
 
 > **Elevación del norte (refinamiento ECO-52 — APROBADA, human gate 2026-06-22):** de *"genera un sitio"* a **"genera un PRODUCTO profesional, optimizado para indexar/rankear y escalable"**. Lo concreta la §«Refinamiento ECO-52» (enfoque de diseño **híbrido, opción 3**, ver [ADR-010](../adr/010-satellite-design-generation.md)). Absorbe y **supera** la sección de enfoque de diseño que abrió el PR #435 (cerrado como superado).
 
@@ -166,6 +166,82 @@ y **nunca** a los hechos (P4). Es el único enfoque **reproducible y gobernado**
 sector** para builders con IA. **Decisión arquitectónica registrada en [ADR-010](../adr/010-satellite-design-generation.md)**;
 los ECO de seguimiento van en §Fasificación (F4–F6).
 
+## Re-aim ECO-60 — de "Lovable gobernado" a SERVICIO con OFICIO + pilar de IMÁGENES
+
+**Estado: re-apunte del norte — PENDIENTE DE APROBACIÓN (gate humano, ECO-60).** NO destruye la base (código
+propio, biblioteca de secciones, no-inventar HECHOS, em-ui, F1–F6, ADR-010 — son correctos): **re-apunta el AIM**
+y **añade el pilar de imágenes/assets** (el gran hueco que hundió el piloto Grupo Atis). Reconcilia con §D4/§D5/§D6
+y ADR-010; **no los re-litiga**.
+
+### Por qué (fallo del piloto Grupo Atis, modo c)
+El remodel salió **peor que el original**: soso, sin imágenes, sin creatividad. Dos causas medidas:
+1. **Benchmark equivocado.** Nos comparamos con builders genéricos (Lovable/v0) en vez de con *"mejor que el
+   original del cliente, sensación bespoke"*. No es nuestra liga ni nuestro objetivo.
+2. **El guardrail "no inventar" se aplicó también al DISEÑO**, ahogándolo. El diseño **no es un hecho**.
+
+### Re-aim 1 — qué ES el norte (corrige la framing "tipo Lovable")
+NO es "ser un Lovable gobernado" ni competir con builders genéricos. Es un **SERVICIO** que produce sitios de
+cliente **FIELES, con OFICIO/creatividad de agencia, y con el CÓDIGO en nuestro control** (escalable, propiedad
+nuestra). **Benchmark = "mejor que el original del cliente + sensación bespoke" + satisfacción del cliente** — NO
+paridad con builders genéricos. Los builders se usan como **referencia de oficio**, no como rival ni techo
+(Framer posiciona el *design control* por encima de la mera generación, https://www.framer.com/compare/framer-vs-lovable).
+
+### Re-aim 2 — la línea HECHOS vs DISEÑO (resuelve "fiel Y creativo")
+El guardrail fue conservador con AMBOS → soso. **Separarlos explícitamente** (afina §D4, no lo cambia):
+- **HECHOS** (servicios, precios, contacto, testimonios, datos del negocio) → **nunca inventar**; se **bloquean**
+  (`extracted`/`provided`; lo `missing` se pregunta).
+- **DISEÑO** (layout, composición, **imágenes decorativas**, visuales, redacción de chrome) → **crear libremente**.
+  El diseño **NO es un hecho**; aquí la IA se suelta (capa `proposed`, confirmable en el loop §D4).
+
+### Pilar P5 — IMÁGENES / ASSETS (el hueco que hundió el piloto)
+Un sitio "profesional, bespoke" **necesita imágenes**; el generador hoy no las pone. P5 lo cubre respetando la
+línea hechos-vs-diseño:
+- **Assets REALES del cliente, EN PANTALLA.** El **logo** siempre visible (header/hero); las **fotos reales** se
+  **ingieren al satélite** (a `public/`), no se quedan en el backup. (El Guardrail 1 de intake ya obliga a
+  buscarlas en TODO el árbol — el piloto declaró el media `missing` con **1834** imágenes presentes.)
+- **Generación con IA = un SET ORIGINAL y COHERENTE por cliente** (mismo estilo/paleta/ambiente, alineado a
+  marca+rubro). Es **diseño → permitido**. La industria entera lo hace dentro del builder (Lovable genera
+  imágenes server-side sin claves, https://docs.lovable.dev/integrations/ai; v0/Vercel vía AI Gateway
+  multi-proveedor, https://vercel.com/docs/ai-gateway/capabilities/image-generation).
+- **La línea decorativo-vs-real (§D4 aplicada a imágenes — honestidad):**
+  - **Logo y assets reales → NUNCA generados** (intactos).
+  - **Generado = ilustrativo / decorativo / atmosférico.** NO fabricar un HECHO concreto: nada de una foto falsa
+    de "su flota / su equipo / su oficina" presentada como real — eso **erosiona la confianza** y es la práctica
+    que la industria marca como deshonesta (foto real para lo documental; divulgar / no tergiversar:
+    https://www.rocketspark.com/blog/post/380/the-ethics-of-using-ai-images-in-business-navigating-the-fine-line/,
+    https://www.boralagency.com/ethical-practices-with-ai-images-and-video-explained/).
+  - **Real para lo documental, generado para lo decorativo / lo que falta.**
+- **Ownership:** los assets generados se **hornean en el `public/` del satélite** → propiedad y código que
+  controlamos (encaja con la escalabilidad y con §D5).
+- **Firma de marca:** *"Powered by EM Ecosystem"* en el footer (como SAT01).
+
+### Cross-mode — P5 aplica a TODOS los modos (no solo c)
+La **capacidad** y la **línea hechos-vs-diseño** son las MISMAS; cambia el **balance real-vs-generado**:
+- **(a) Sin diseño/marca** → máxima generación: set original completo + proponer dirección de marca/paleta.
+- **(b) Con marca** → usar su marca/assets + generar para rellenar **EN SU estilo** (guiado por marca).
+- **(c) Mejorar existente** → extraer assets reales + contenido; usar lo real + generar decorativo para elevar
+  (remodel mejor que el original — P3).
+- **(d) Instagram** → fotos reales de IG + generar decorativo donde falte.
+- **(e) Inspiración** → estética de referencia (sin copiar datos) que **informa** la generación.
+
+### Eje de decisión ABIERTO — approach de GENERACIÓN de imágenes (a aprobar en el gate)
+> El **operador decide**; aquí van las opciones investigadas + recomendación. (Decisión presentada, **no tomada**.)
+
+| # | Approach de generación | Source | Pros | Cons | Riesgo |
+|---|---|---|---|---|---|
+| 1 | **API hosted vía gateway multi-proveedor** (Flux en fal / Vercel AI Gateway), horneado a `public/` | https://fal.ai/learn/tools/ai-image-generators | Calidad tope (Flux.1.1 Pro); barato (~$0.03/MP, $0.02–0.12/img); cero infra; proveedor **pluggable**; ownership del output (uso comercial) | coste+latencia por generación; dependencia externa; licencia varía por modelo; hay que orquestar prompts para coherencia | bajo-medio |
+| 2 | **Proveedor copyright-safe** (Adobe Firefly — entrenado solo en contenido licenciado → indemnización) | https://www.getaiperks.com/en/blogs/45-best-ai-image-generators-2026 | máxima seguridad legal para un producto-cliente comercial | más caro; estética menos "wow" que Flux/MJ; acceso API acotado | bajo legal / medio producto |
+| 3 | **Self-hosted open-weight** (Flux dev/schnell, SDXL) | https://huggingface.co/black-forest-labs/FLUX.1-schnell | control total; sin coste por imagen a escala; ownership; offline | GPU + ops; conveniencia menor; schnell < pro en calidad | medio-alto (infra) |
+| 4 | **Solo stock curado licenciado** (sin generación), filtrado por marca | https://www.boralagency.com/ethical-practices-with-ai-images-and-video-explained/ | fotos reales; coste cero de generación; honesto por defecto | genérico / **no bespoke** (justo lo que queremos superar); no brand-coherente | bajo / pero **no cumple el aim** |
+
+**Recomendación (PENDIENTE de tu aprobación — gate humano):** **Opción 1** (Flux hosted vía un **gateway
+multi-proveedor**, horneado a `public/`) como **default**, por la relación calidad/coste/ownership y porque el
+proveedor queda **pluggable**: permite escalar a **(2) Firefly** cuando un cliente exija indemnización de
+copyright, o a **(3) self-hosted** si el volumen lo justifica. **Siempre** se prefiere el **asset real** para lo
+documental; la generación cubre lo **decorativo / lo que falta**. **Optimización de imágenes pobres:**
+normalizar/redimensionar al hornear (`next/image` + formatos modernos) — el detalle, en el ECO de seguimiento.
+**Tú eliges el approach en el gate; no lo decido yo.**
+
 ## Fasificación
 El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún no es reutilizable.**
 - **Fase 1 — Mecanismo de reuse (pieza base):** construir el registry + CLI interno (`em-ui`, scope real de SCRUM-331) con **single-source = dashboard UI Core**; backfill de los 48 y **reconciliar el drift de SAT01** (empezando por el `Button`). Sin esto, todo lo demás propaga drift.
@@ -176,6 +252,9 @@ El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún 
 - **Fase 4 — Biblioteca de secciones gobernada (sustrato de la opción 3):** generalizar el vocabulario de secciones que SAT01 tiene a mano (`satellites/sat-cristian-garcia/src/components/sections/HeroSection.tsx:1`) a un catálogo parametrizado (hero/features/pricing/testimonios/CTA/FAQ/contacto/footer) que el generador compone desde el brief, S2/a11y por construcción. Cierra el esqueleto del piloto.
 - **Fase 5 — Producto SEO-ready (P1):** SEO técnico de fábrica — meta por página + Open Graph (https://ogp.me/) + JSON-LD Organization/LocalBusiness/BreadcrumbList (https://developers.google.com/search/docs/appearance/structured-data/local-business) + HTML semántico + audits SEO nombrados en el gate de lanzamiento; CWV de campo p75 como objetivo post-lanzamiento (https://web.dev/articles/vitals).
 - **Fase 6 — Onboarding tipo-de-sitio + secciones sugeridas + válvula IA (P2/P3/P4):** preguntar el **tipo** de sitio; la IA **propone** secciones del catálogo (capa `proposed`); regla "remodel siempre mejor que el original"; válvula "la IA recomienda" acotada a `proposed`, nunca a los hechos. *(depende de F4/F5)*
+
+**Pilar de imágenes/assets (re-aim ECO-60 — PENDIENTE de aprobación; depende del approach elegido en el gate).**
+- **Fase 7 — IMÁGENES / ASSETS (P5):** ingerir los assets REALES del cliente a `public/` (logo siempre on-screen + fotos reales); **generación IA de un set decorativo original y coherente** por cliente (approach a elegir en el gate, ver §«Eje de decisión ABIERTO»); línea decorativo-vs-real (logo/real nunca generados; generado = decorativo, jamás un hecho falso); optimización de imágenes pobres (`next/image` + formatos modernos); firma *"Powered by EM Ecosystem"* en el footer. *(depende de F4/F5; cross-mode a/b/c/d/e)*
 
 ## Non-goals
 - NO es el cómo-paso-a-paso (scaffold, curl a Vercel, gotchas): eso es el **runbook** (`docs/satellite-deployment-runbook.md`), que esta estrategia referencia, no reemplaza.
@@ -195,6 +274,7 @@ El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún 
 - **D4 — Ampliación del modo (c) (ECO-44, 2026-06-20):** el satélite **aporta valor**, no fotocopia. Formaliza tres piezas (ver §«Modo (c) — remodelar con valor»): **(i) gate de fidelidad** A réplica / **B remodel moderno [DEFAULT]** / C reimaginación, a elección del cliente; **(ii) split verdad/diseño** — los HECHOS son `extracted`/`provided` y nunca se fabrican, la CREATIVIDAD vive en `proposed` (a confirmar) → "no inventar" = no mentir sobre hechos, no "no crear"; **(iii) loop iterativo** propone→preview→refina→regenera→confirma. No es un norte nuevo (el feel Lovable y el modelo de procedencia ya estaban); afina el modo (c), antes limitado a "solo colores".
 
 - **D5 — Dónde vive el `brief.json` a largo plazo (ECO-44): PRESERVADO commiteado junto al satélite, NO efímero.** El brief se commitea con el satélite generado (p.ej. `satellites/sat-<x>/brief.json`, **fuera de `public/`** → Next no lo sirve), no se descarta tras generar. Razones: **(i)** el brief **es el registro de procedencia** — cada campo lleva `provided|extracted|proposed|missing` (`.claude/skills/launch-satellite/schema/brief.schema.json:5`) → preservarlo hace **auditable** qué hecho vino de dónde y qué fue creatividad `proposed` confirmada (coherente con el split verdad/diseño de D4); **(ii)** el **loop iterativo** (D4) regenera desde el brief (`.claude/skills/launch-satellite/scripts/generate-satellite.mjs:217` lo consume como input) → sin él persistido habría que **re-onboardear** para iterar; **(iii)** el satélite **ya vive commiteado** (SAT01 = `satellites/sat-cristian-garcia/`, 118 ficheros tracked) y el brief debe **viajar con él**, no con la gobernanza de NexaCore (`emkeel-governance/` es `export-ignore`, `AGENTS.md:27`). **Frontera:** el **material CRUDO** del cliente (backups, credenciales, assets sin procesar) **sigue efímero y nunca se commitea** (`.satellite-intake/.gitignore`); el `brief.json` es la **destilación sanitizada** (los mismos hechos que el sitio público ya renderiza, más su procedencia) → seguro y correcto de versionar. Así no hay que moverlo después.
+- **D7 — Re-aim del norte + pilar de imágenes (ECO-60, PENDIENTE de aprobación — gate humano).** Tras el fallo del piloto Grupo Atis (remodel *más feo* que el original), re-apunta el AIM y añade el pilar P5. **(i) Re-aim:** NO es "un Lovable gobernado" ni competir con builders genéricos — es un **SERVICIO con oficio de agencia**, sitios **fieles + bespoke**, **código en nuestro control**; benchmark = *"mejor que el original + sensación bespoke" + satisfacción del cliente*, NO paridad con builders (referencia de oficio, no rival — https://www.framer.com/compare/framer-vs-lovable). **(ii) Línea HECHOS vs DISEÑO afinada (no cambia §D4):** nunca inventar HECHOS (se bloquean); **el DISEÑO se crea libremente** (no es un hecho) — el guardrail era conservador con ambos → soso. **(iii) Pilar P5 imágenes/assets:** assets reales on-screen (logo + fotos reales ingeridas a `public/`) + **set decorativo generado por IA, coherente, por cliente** (diseño → permitido); **línea decorativo-vs-real** (logo/real NUNCA generados; generado = decorativo/atmosférico, jamás un hecho falso de equipo/flota/oficina — erosiona confianza, https://www.rocketspark.com/blog/post/380/the-ethics-of-using-ai-images-in-business-navigating-the-fine-line/); horneado a `public/` (ownership); firma *"Powered by EM Ecosystem"*. **(iv) Cross-mode** a/b/c/d/e (misma capacidad+línea, distinto balance real-vs-generado). **DECISIÓN ABIERTA presentada al gate (no tomada):** approach de generación de imágenes (1 hosted Flux vía gateway [recomendado] / 2 Firefly copyright-safe / 3 self-hosted / 4 solo stock) — ver §«Eje de decisión ABIERTO». Reconcilia con D4/D5/D6 + ADR-010, no los re-litiga; fasificada en **F7**.
 - **D6 — Enfoque de generación de DISEÑO + producto profesional (ECO-52, APROBADA human gate 2026-06-22): HÍBRIDO (opción 3).** Eleva el norte de "genera un sitio" a **"producto profesional, SEO-ready y escalable"**. Biblioteca de secciones determinista (S2/a11y/SEO por construcción, reproducible §D5) como **sustrato**, sobre el que el agente **propone** tipo/secciones/composición/redacción como `proposed`, confirmable en el loop §D4 — el estándar del sector (Lovable/v0/Tailwind UI/Webflow, ver §«Refinamiento ECO-52»). Cuatro pilares: **P1** SEO técnico de fábrica (OG + JSON-LD + audits SEO nombrados en el gate; CWV de campo p75 como objetivo post-lanzamiento, no gate); **P2** onboarding tipo-de-sitio + secciones sugeridas; **P3** "remodel siempre mejor que el original" (fallo del piloto); **P4** válvula "la IA recomienda" acotada a `proposed`, **nunca a los hechos**. Descartadas **(2)** bespoke (rompe §D5/gobernanza) y **(1)** como techo (sustrato válido pero acotado). Registrada en [ADR-010](../adr/010-satellite-design-generation.md); fasificada en F4–F6. Supera el PR #435 (cerrado).
 
 ### ECOs de seguimiento propuestos (títulos/scope; los números Jira los crea el operador)
@@ -211,3 +291,7 @@ El orden lo fija la dependencia: **no se puede generar reutilizando lo que aún 
 - Estado del reuse (COMMITEADO): `package.json:1` (sin `workspaces`); runbook copia manual + em-ui/SCRUM-331 `docs/satellite-deployment-runbook.md:140-142,27,444`; "lanzado"/S2 `:262-268,337`; out-of-scope backend `:28`.
 - Gates / huecos (COMMITEADO): `.github/workflows/security.yml:64-65` (matrix api+dashboard); `.github/workflows/visual-regression.yml:31-35` (paths SAT01), `:203` (job satélite). Required checks de `main`: `gates`, `Security Gate (All Checks)`.
 - Mercado: shadcn/ui registry+CLI (copy-based, `registry.json` HTTP, `registry:base` = design system en un install) — https://ui.shadcn.com/docs/registry/getting-started y https://ui.shadcn.com/docs/cli ; Turborepo/pnpm workspaces (`packages/`+`apps/`, caché) — https://turborepo.dev/docs/crafting-your-repository/structuring-a-repository ; prompt-to-deployed (Lovable two-way GitHub sync + Netlify; v0 one-click Vercel; bolt export) — https://emergent.sh/learn/v0-vs-lovable-vs-bolt .
+- Re-aim ECO-60 — imágenes/assets (research, cada una abierta):
+  - Manejo visual de builders (referencia de oficio): Lovable genera imágenes server-side sin claves — https://docs.lovable.dev/integrations/ai ; v0/Vercel imagen vía AI Gateway multi-proveedor — https://vercel.com/docs/ai-gateway/capabilities/image-generation ; Framer prioriza *design control* sobre la mera generación — https://www.framer.com/compare/framer-vs-lovable .
+  - Modelos/approaches de generación (calidad/coste/control/ownership): catálogo + Flux ~$0.03/MP — https://fal.ai/learn/tools/ai-image-generators ; comparativa de APIs (DALL-E/Imagen/Flux/Midjourney) — https://www.novakit.ai/blog/ai-image-generation-apis-2026-compared ; precios $0.02–0.12/img — https://tokenmix.ai/blog/ai-image-generation-api-comparison ; Firefly copyright-safe/indemnización — https://www.getaiperks.com/en/blogs/45-best-ai-image-generators-2026 ; open-weight self-hosted — https://huggingface.co/black-forest-labs/FLUX.1-schnell .
+  - Línea decorativo-vs-real (honestidad en la industria): fotos IA de equipo/oficina erosionan la confianza; real para documental, divulgar/no tergiversar — https://www.rocketspark.com/blog/post/380/the-ethics-of-using-ai-images-in-business-navigating-the-fine-line/ y https://www.boralagency.com/ethical-practices-with-ai-images-and-video-explained/ .
