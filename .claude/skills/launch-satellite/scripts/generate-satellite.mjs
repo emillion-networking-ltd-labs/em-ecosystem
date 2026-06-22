@@ -50,6 +50,40 @@ function brandAccent(brief, intent) {
   return typeof hex === "string" && /^#[0-9a-fA-F]{6}$/.test(hex.trim()) ? hex.trim() : null;
 }
 
+// Normalizadores Batch-2 (ECO-55): valor del brief → props de la sección. Filtran items inválidos y
+// devuelven null si no queda nada → la sección se OMITE. Nunca rellenan ni fabrican.
+const asArr = (v) => (Array.isArray(v) ? v : null);
+function normTestimonials(v) {
+  const a = asArr(v); if (!a) return null;
+  const items = a.filter((t) => t && typeof t === "object").map((t) => ({ name: t.name || t.author, quote: t.quote || t.text, result: t.result }))
+    .filter((t) => t.name && t.quote).map((t) => (t.result ? { name: t.name, quote: t.quote, result: t.result } : { name: t.name, quote: t.quote }));
+  return items.length ? items : null;
+}
+function normPlans(v) {
+  const a = asArr(v); if (!a) return null;
+  const items = a.filter((p) => p && typeof p === "object").map((p) => {
+    const o = { name: p.name || p.title, price: p.price != null ? String(p.price) : null, highlighted: !!p.highlighted };
+    if (p.period) o.period = p.period;
+    if (p.description || p.desc) o.description = p.description || p.desc;
+    if (Array.isArray(p.features)) { const fs = p.features.filter((x) => typeof x === "string"); if (fs.length) o.features = fs; }
+    if (p.cta) o.cta = p.cta;
+    return o;
+  }).filter((p) => p.name && p.price);
+  return items.length ? items : null;
+}
+function normPortfolio(v) {
+  const a = asArr(v); if (!a) return null;
+  const items = a.map((it) => (typeof it === "string" ? { title: it } : (it && typeof it === "object" ? { title: it.title || it.name, description: it.description || it.desc, imageSrc: it.imageSrc || it.image || it.src, href: it.href || it.url } : null)))
+    .filter((it) => it && it.title).map((it) => { const o = { title: it.title }; if (it.description) o.description = it.description; if (it.imageSrc) o.imageSrc = it.imageSrc; if (it.href) o.href = it.href; return o; });
+  return items.length ? items : null;
+}
+function normFaqs(v) {
+  const a = asArr(v); if (!a) return null;
+  const items = a.filter((q) => q && typeof q === "object").map((q) => ({ question: q.question || q.q, answer: q.answer || q.a }))
+    .filter((q) => q.question && q.answer).map((q) => ({ question: q.question, answer: q.answer }));
+  return items.length ? items : null;
+}
+
 export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS } = {}) {
   const { ok, problems } = validateBrief(brief);
   if (!ok) throw new Error(`brief inválido: ${problems.join("; ")}`);
@@ -89,9 +123,9 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   writeFileSync(join(dest, "next-env.d.ts"), `/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n`);
   writeFileSync(join(dest, ".gitignore"), "/node_modules\n/.next\n/out\n");
 
-  // --- b. Reuse SOLO via em-ui: tokens + SECCIONES nivel-2 (cada `add` jala su cierre de átomos/hooks) ---
+  // --- b. Reuse SOLO via em-ui: capa de tokens. Las SECCIONES se añaden más abajo, SOLO las que el brief
+  // tiene datos para componer (em-ui add dinámico) — cada `add` jala su cierre de átomos/hooks. ---
   trace.emui.push(emui(["init"], src).trim());
-  for (const s of sections) { trace.emui.push(emui(["add", s], src).trim()); trace.sections.push(s); }
 
   // --- c. globals.css: capa de tokens + (si el brief aporta marca) override del token de marca `accent` ---
   const brand = brandAccent(brief, intent);
@@ -142,9 +176,26 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   const email = track("contactEmail", f.contactEmail);
   const phone = track("contactPhone", f.contactPhone);
   const address = track("address", f.address);
+  // Batch-2 (ECO-55): solo HECHOS reales; ausentes → null → sección OMITIDA. JAMÁS inventar testimonios/precios.
+  const testimonials = normTestimonials(track("testimonials", f.testimonials));
+  const plans = normPlans(track("pricing", f.pricing || f.plans));
+  const portfolioItems = normPortfolio(track("portfolio", f.portfolio || f.projects));
+  const faqs = normFaqs(track("faqs", f.faqs || f.faq));
   const contactRoute = routes.find((r) => /contact/i.test(r)) || "/contact";
   const servicesRoute = routes.find((r) => /servic/i.test(r)) || null;
-  const ctx = { siteName, sector, tagline, serviceItems, email, phone, address, contactRoute, servicesRoute };
+  const portfolioRoute = routes.find((r) => /portfolio|proyecto|trabajo/i.test(r)) || null;
+  const pricingRoute = routes.find((r) => /precio|pricing|tarifa|plan/i.test(r)) || null;
+  const ctx = { siteName, sector, tagline, serviceItems, email, phone, address, testimonials, plans,
+    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute };
+
+  // em-ui add DINÁMICO: solo las secciones que el brief tiene datos para componer (la shell base siempre).
+  const usedSections = new Set(["Hero", "CTA", "Contact"]);
+  if (serviceItems) usedSections.add("Services");
+  if (testimonials) usedSections.add("Testimonials");
+  if (plans) usedSections.add("Pricing");
+  if (portfolioItems) usedSections.add("Portfolio");
+  if (faqs) usedSections.add("FAQ");
+  for (const s of [...usedSections].sort()) { trace.emui.push(emui(["add", s], src).trim()); trace.sections.push(s); }
 
   for (const route of routes) {
     const seg = route === "/" ? "" : route.replace(/^\//, "");
@@ -345,36 +396,53 @@ const navLabel = (route) => {
 // Compone la página desde la biblioteca de SECCIONES (ECO-54), rellenada con HECHOS del brief (ctx).
 // Solo importa las secciones que usa; lo ausente se omite (no se inventa). Labels de UI = chrome permitido.
 const PAGE = (route, ctx) => {
-  const { siteName, sector, tagline, serviceItems, email, phone, address, contactRoute, servicesRoute } = ctx;
+  const { siteName, sector, tagline, serviceItems, email, phone, address, testimonials, plans,
+    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute } = ctx;
   const j = (v) => JSON.stringify(v);
-  const isContact = /contact/i.test(route);
-  const isServices = servicesRoute && route === servicesRoute;
   const used = new Set();
   const blocks = [];
+  const add = (name, jsx) => { used.add(name); blocks.push(jsx); };
+
+  // Builders de bloque (eyebrow/título = labels de UI; el CONTENIDO sale de los hechos del brief).
+  const heroBlock = (soft) => `<Hero${soft ? ` variant="soft"` : ""}${sector ? ` eyebrow={${j(sector)}}` : ""} title={${j(soft ? navLabel(route) : siteName)}}${tagline && !soft ? ` subtitle={${j(tagline)}}` : ""} ctaText="Contacto" ctaHref={${j(contactRoute)}}${servicesRoute && !soft ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
+  const servicesBlock = (full) => `<Services eyebrow="Servicios" title={${j(full ? `Servicios de ${siteName}` : `Lo que ofrece ${siteName}`)}} services={${j(serviceItems)}}${!full && servicesRoute ? ` viewAllText="Ver todos los servicios" viewAllHref={${j(servicesRoute)}}` : ""} />`;
+  const portfolioBlock = (full) => `<Portfolio eyebrow="Portfolio" title={${j(full ? `Trabajos de ${siteName}` : "Trabajos destacados")}} items={${j(portfolioItems)}}${!full && portfolioRoute ? ` viewAllText="Ver portfolio" viewAllHref={${j(portfolioRoute)}}` : ""} variant="featured" />`;
+  const testimonialsBlock = (full) => `<Testimonials eyebrow="Testimonios" title={${j(full ? "Testimonios" : "Lo que dicen nuestros clientes")}} items={${j(testimonials)}} />`;
+  const pricingBlock = () => `<Pricing eyebrow="Precios" title="Planes" plans={${j(plans)}} ctaHref={${j(contactRoute)}} />`;
+  const faqBlock = () => `<FAQ eyebrow="FAQ" title="Preguntas frecuentes" items={${j(faqs)}} />`;
+  const ctaBlock = (surface) => `<CTA${surface ? ` variant="surface"` : ""} title={${j(tagline || siteName)}} primaryCtaText="Contacto" primaryCtaHref={${j(contactRoute)}}${servicesRoute ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
+
+  const isContact = /contact/i.test(route);
+  const isServices = servicesRoute && route === servicesRoute;
+  const isPricing = pricingRoute && route === pricingRoute;
+  const isPortfolio = portfolioRoute && route === portfolioRoute;
+  const isTestim = /testimon/i.test(route);
+  const isFaq = /faq|pregunt/i.test(route);
 
   if (route === "/") {
-    used.add("Hero");
-    blocks.push(`<Hero${sector ? ` eyebrow={${j(sector)}}` : ""} title={${j(siteName)}}${tagline ? ` subtitle={${j(tagline)}}` : ""} ctaText="Contacto" ctaHref={${j(contactRoute)}}${servicesRoute ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`);
-    if (serviceItems && serviceItems.length) {
-      used.add("Services");
-      blocks.push(`<Services eyebrow="Servicios" title={${j(`Lo que ofrece ${siteName}`)}} services={${j(serviceItems)}}${servicesRoute ? ` viewAllText="Ver todos los servicios" viewAllHref={${j(servicesRoute)}}` : ""} />`);
-    }
-    used.add("CTA");
-    blocks.push(`<CTA title={${j(tagline || siteName)}} primaryCtaText="Contacto" primaryCtaHref={${j(contactRoute)}}${servicesRoute ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`);
+    add("Hero", heroBlock(false));
+    if (serviceItems) add("Services", servicesBlock(false));
+    if (portfolioItems) add("Portfolio", portfolioBlock(false));
+    if (testimonials) add("Testimonials", testimonialsBlock(false));
+    if (plans) add("Pricing", pricingBlock());
+    if (faqs) add("FAQ", faqBlock());
+    add("CTA", ctaBlock(false));
   } else if (isContact) {
     used.add("Contact");
     const attrs = [email && `email={${j(email)}}`, phone && `phone={${j(phone)}}`, address && `address={${j(address)}}`].filter(Boolean).join(" ");
     blocks.push(`<Contact title="Contacto"${tagline ? ` description={${j(tagline)}}` : ""}${attrs ? " " + attrs : ""} variant="split" />`);
-  } else if (isServices && serviceItems && serviceItems.length) {
-    used.add("Services");
-    blocks.push(`<Services eyebrow="Servicios" title={${j(`Servicios de ${siteName}`)}} services={${j(serviceItems)}} />`);
-    used.add("CTA");
-    blocks.push(`<CTA title={${j(siteName)}} primaryCtaText="Contacto" primaryCtaHref={${j(contactRoute)}} />`);
+  } else if (isServices && serviceItems) {
+    add("Services", servicesBlock(true)); add("CTA", ctaBlock(true));
+  } else if (isPricing && plans) {
+    add("Pricing", pricingBlock()); add("CTA", ctaBlock(true));
+  } else if (isPortfolio && portfolioItems) {
+    add("Portfolio", portfolioBlock(true)); add("CTA", ctaBlock(true));
+  } else if (isTestim && testimonials) {
+    add("Testimonials", testimonialsBlock(true)); add("CTA", ctaBlock(true));
+  } else if (isFaq && faqs) {
+    add("FAQ", faqBlock()); add("CTA", ctaBlock(true));
   } else {
-    used.add("Hero");
-    blocks.push(`<Hero variant="soft" title={${j(navLabel(route))}}${sector ? ` eyebrow={${j(sector)}}` : ""} ctaText="Contacto" ctaHref={${j(contactRoute)}} />`);
-    used.add("CTA");
-    blocks.push(`<CTA variant="surface" title={${j(siteName)}} primaryCtaText="Contacto" primaryCtaHref={${j(contactRoute)}} />`);
+    add("Hero", heroBlock(true)); add("CTA", ctaBlock(true));
   }
 
   const imports = [...used].sort().map((s) => `import ${s} from "@/components/sections/${s}";`).join("\n");
