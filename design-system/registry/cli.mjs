@@ -5,8 +5,8 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync } from
 import { dirname, join, resolve, basename } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const DS = join(ROOT, "design-system");
+// em-ui vive en design-system/registry/ → la fuente (design-system/) es el directorio padre.
+const DS = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const REGISTRY = JSON.parse(readFileSync(join(DS, "registry.json"), "utf8"));
 
 // Hard invariant: la fuente es design-system/, jamás el dashboard.

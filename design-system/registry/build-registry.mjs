@@ -1,15 +1,15 @@
 #!/usr/bin/env node
 // Generador del registry de em-ui (ECO-26). Escanea design-system/components/ y produce el grafo
 // de dependencias COMPLETO: siblings UI via alias `@/components/ui/X` Y via ruta relativa `./X`,
-// + deps internas (`@/hooks/X` -> hooks/X.ts, `@/lib/X` -> lib/X.ts). em-ui/cli.mjs resuelve el
+// + deps internas (`@/hooks/X` -> hooks/X.ts, `@/lib/X` -> lib/X.ts). cli.mjs resuelve el
 // cierre transitivo a partir de registryDependencies, asi que aqui basta capturar las DIRECTAS bien.
 // No cambia componentes; solo (re)genera design-system/registry.json.
 import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const DS = join(ROOT, "design-system");
+// build-registry vive en design-system/registry/ → la fuente (design-system/) es el directorio padre.
+const DS = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const COMP = join(DS, "components");
 
 export function componentNames() {
@@ -48,7 +48,7 @@ export function buildRegistry() {
   });
   return {
     name: "em-ui",
-    $comment: "Registry interno del design system NexaCore (ECO-23; grafo completo ECO-26). Fuente unica: design-system/. em-ui lee de aqui, NUNCA de nexacore-dashboard/. Generado por em-ui/build-registry.mjs.",
+    $comment: "Registry interno del design system NexaCore (ECO-23; grafo completo ECO-26). Fuente unica: design-system/. em-ui lee de aqui, NUNCA de nexacore-dashboard/. Generado por design-system/registry/build-registry.mjs.",
     source: "design-system",
     tokens: "tokens/tokens.css",
     aliasAssumed: "@/ -> <consumer>/src (igual que dashboard y satelites; sin reescritura de imports)",
@@ -56,7 +56,7 @@ export function buildRegistry() {
   };
 }
 
-// Cierre transitivo (espejo de em-ui/cli.mjs) — para tests/verificacion.
+// Cierre transitivo (espejo de cli.mjs) — para tests/verificacion.
 export function closure(name, reg = buildRegistry(), seen = new Set()) {
   if (seen.has(name)) return seen;
   const it = reg.items.find((i) => i.name === name);

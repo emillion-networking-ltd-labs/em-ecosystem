@@ -22,11 +22,11 @@ reconciliación) y la estrategia [`satellites`](../emkeel-governance/strategy/sa
 
 ## Uso (em-ui)
 ```bash
-node em-ui/cli.mjs list                          # componentes + deps
-node em-ui/cli.mjs add Button --dest <src>       # copia Button (+deps) al consumidor (ownership)
-node em-ui/cli.mjs init --dest <src>             # instala la capa de tokens
-node em-ui/cli.mjs diff Button --target <fich>   # drift del consumidor vs la fuente
-node em-ui/cli.mjs update Button --dest <src>    # re-pull reconciliando (sobrescribe)
+node design-system/registry/cli.mjs list                          # componentes + deps
+node design-system/registry/cli.mjs add Button --dest <src>       # copia Button (+deps) al consumidor (ownership)
+node design-system/registry/cli.mjs init --dest <src>             # instala la capa de tokens
+node design-system/registry/cli.mjs diff Button --target <fich>   # drift del consumidor vs la fuente
+node design-system/registry/cli.mjs update Button --dest <src>    # re-pull reconciliando (sobrescribe)
 ```
 
 ## Reconciliación del drift de SAT01 (ECO-23, scope c)
