@@ -8,6 +8,7 @@ import { execFileSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateBrief, briefIntent, briefColorMode, briefSiteType, briefComposition, DEFAULT_INTENT } from "./lib/brief.mjs";
+import { chrome, FALLBACK_LANG } from "./lib/i18n.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(HERE, "../../../..");        // scripts -> satellite -> skills -> .claude -> root
@@ -181,6 +182,10 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   // --- nombre del negocio (hecho) — usado por el layout (SEO) y por las páginas. El layout se escribe MÁS
   //     ABAJO, tras computar los hechos SEO (logo/dirección/teléfono) que alimentan OG + JSON-LD. ---
   const siteName = fillField(brief.identity?.name, "nombre del negocio", "identity.name");
+  // i18n base (ECO-58): el idioma REAL del brief manda en <html lang> (SEO/a11y); el CHROME usa su catálogo
+  // o el fallback. NO traduce el contenido del cliente (§D4). Antes: lang="es" + labels hardcodeados en ES.
+  const language = brief.identity?.language?.value || FALLBACK_LANG;
+  const t = chrome(language);
   mkdirSync(join(src, "components"), { recursive: true });
   writeFileSync(join(src, "components", "DeferredAnalytics.tsx"), DEFERRED_ANALYTICS);
 
@@ -229,19 +234,20 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   trace.siteType = siteType;
   trace.compositionSource = briefComposition(brief) ? "brief" : (siteType ? `type:${siteType}` : "default");
   const ctx = { siteName, sector, tagline, serviceItems, email, phone, address, testimonials, plans,
-    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute, composition };
+    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute, composition, t };
 
   // --- SEO de fábrica (F5/P1): el layout lleva metadata + Open Graph + JSON-LD site-wide + landmarks. ---
   const logoFact = track("logo", f.logo || f.logoCandidate);
   const seo = {
     siteName, description: tagline || null, sector, email, phone, address,
     logo: typeof logoFact === "string" ? logoFact : null,
-    nav: routes.map((r) => ({ href: r, label: navLabel(r) })),
+    nav: routes.map((r) => ({ href: r, label: navLabel(r, t) })),
   };
   const jsonld = buildJsonLd(seo);   // LocalBusiness SOLO si hay dirección real; si no, Organization (§D4)
   trace.jsonldType = jsonld["@type"];
+  trace.language = language;
   if (seo.logo) trace.logo = seo.logo;
-  writeFileSync(join(app, "layout.tsx"), LAYOUT(siteName, themeInitScript(colorMode), seo, jsonld));
+  writeFileSync(join(app, "layout.tsx"), LAYOUT(siteName, themeInitScript(colorMode), seo, jsonld, language, t));
 
   // em-ui add DINÁMICO: solo las secciones que el brief tiene datos para componer (la shell base siempre).
   const usedSections = new Set(["Hero", "CTA", "Contact"]);
@@ -297,7 +303,7 @@ const TSCONFIG = JSON.stringify({
   include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"], exclude: ["node_modules"],
 }, null, 2) + "\n";
 const POSTCSS = `/** @type {import('postcss-load-config').Config} */\nconst config = { plugins: { '@tailwindcss/postcss': {} } };\nexport default config;\n`;
-const LAYOUT = (siteName, initScript, seo, jsonld) => {
+const LAYOUT = (siteName, initScript, seo, jsonld, language, t) => {
   const j = (v) => JSON.stringify(v);
   const navLis = seo.nav
     .map((n) => `            <li><Link href={${j(n.href)}} className="text-body text-content-secondary transition-colors hover:text-accent">{${j(n.label)}}</Link></li>`)
@@ -332,14 +338,14 @@ const THEME_INIT_SCRIPT = ${j(initScript)};
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const ld = { ...JSONLD, url: SITE_URL${seo.logo ? `, logo: ${j(seo.logo)}.startsWith("http") ? ${j(seo.logo)} : SITE_URL + ${j(seo.logo)}` : ""} };
   return (
-    <html lang="es">
+    <html lang="${language}">
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
       </head>
       <body>
         <header className="border-b border-border-default">
-          <nav aria-label="Principal" className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
+          <nav aria-label="${t.navAria}" className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
             <Link href="/" className="text-h3 font-bold text-content-primary">{${j(siteName)}}</Link>
             <ul className="hidden gap-6 sm:flex">
 ${navLis}
@@ -474,17 +480,19 @@ export default function DeferredAnalytics() {
   );
 }
 `;
-const navLabel = (route) => {
-  if (route === "/") return "Inicio";
+// El label "Inicio"/"Home" es CHROME (del catálogo i18n); el label de una ruta no-home se deriva de su SLUG
+// (que ya viene en el idioma del cliente vía targetRoutes), así que es language-neutral.
+const navLabel = (route, t) => {
+  if (route === "/") return t.navHome;
   const seg = route.replace(/^\/+|\/+$/g, "");
-  return seg ? seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ") : "Inicio";
+  return seg ? seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ") : t.navHome;
 };
 
 // Compone la página desde la biblioteca de SECCIONES (ECO-54), rellenada con HECHOS del brief (ctx).
 // Solo importa las secciones que usa; lo ausente se omite (no se inventa). Labels de UI = chrome permitido.
 const PAGE = (route, ctx) => {
   const { siteName, sector, tagline, serviceItems, email, phone, address, testimonials, plans,
-    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute, composition } = ctx;
+    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute, composition, t } = ctx;
   const j = (v) => JSON.stringify(v);
   const used = new Set();
   const blocks = [];
@@ -493,14 +501,14 @@ const PAGE = (route, ctx) => {
   // Builders de bloque (eyebrow/título = labels de UI; el CONTENIDO sale de los hechos del brief).
   // `variant` (opcional) viene de la composición elegida (F6) y sobreescribe el default de la sección.
   const va = (variant, def) => (variant ? ` variant=${j(variant)}` : def ? ` variant="${def}"` : "");
-  const heroBlock = (soft, variant) => `<Hero${va(variant, soft ? "soft" : "")}${sector ? ` eyebrow={${j(sector)}}` : ""} title={${j(soft ? navLabel(route) : siteName)}}${tagline && !soft ? ` subtitle={${j(tagline)}}` : ""} ctaText="Contacto" ctaHref={${j(contactRoute)}}${servicesRoute && !soft ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
-  const servicesBlock = (full, variant) => `<Services eyebrow="Servicios" title={${j(full ? `Servicios de ${siteName}` : `Lo que ofrece ${siteName}`)}} services={${j(serviceItems)}}${va(variant)}${!full && servicesRoute ? ` viewAllText="Ver todos los servicios" viewAllHref={${j(servicesRoute)}}` : ""} />`;
-  const portfolioBlock = (full, variant) => `<Portfolio eyebrow="Portfolio" title={${j(full ? `Trabajos de ${siteName}` : "Trabajos destacados")}} items={${j(portfolioItems)}}${!full && portfolioRoute ? ` viewAllText="Ver portfolio" viewAllHref={${j(portfolioRoute)}}` : ""}${va(variant, "featured")} />`;
-  const testimonialsBlock = (full, variant) => `<Testimonials eyebrow="Testimonios" title={${j(full ? "Testimonios" : "Lo que dicen nuestros clientes")}} items={${j(testimonials)}}${va(variant)} />`;
-  const pricingBlock = () => `<Pricing eyebrow="Precios" title="Planes" plans={${j(plans)}} ctaHref={${j(contactRoute)}} />`;
-  const faqBlock = (variant) => `<FAQ eyebrow="FAQ" title="Preguntas frecuentes" items={${j(faqs)}}${va(variant)} />`;
-  const ctaBlock = (surface, variant) => `<CTA${va(variant, surface ? "surface" : "")} title={${j(tagline || siteName)}} primaryCtaText="Contacto" primaryCtaHref={${j(contactRoute)}}${servicesRoute ? ` secondaryCtaText="Ver servicios" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
-  const contactHomeBlock = (variant) => { const a = [email && `email={${j(email)}}`, phone && `phone={${j(phone)}}`, address && `address={${j(address)}}`].filter(Boolean).join(" "); return `<Contact title="Contacto"${tagline ? ` description={${j(tagline)}}` : ""}${a ? " " + a : ""}${va(variant, "split")} />`; };
+  const heroBlock = (soft, variant) => `<Hero${va(variant, soft ? "soft" : "")}${sector ? ` eyebrow={${j(sector)}}` : ""} title={${j(soft ? navLabel(route, t) : siteName)}}${tagline && !soft ? ` subtitle={${j(tagline)}}` : ""} ctaText="${t.ctaContact}" ctaHref={${j(contactRoute)}}${servicesRoute && !soft ? ` secondaryCtaText="${t.ctaSeeServices}" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
+  const servicesBlock = (full, variant) => `<Services eyebrow="${t.servicesEyebrow}" title={${j(full ? t.servicesFullTitle(siteName) : t.servicesHomeTitle(siteName))}} services={${j(serviceItems)}}${va(variant)}${!full && servicesRoute ? ` viewAllText="${t.servicesViewAll}" viewAllHref={${j(servicesRoute)}}` : ""} />`;
+  const portfolioBlock = (full, variant) => `<Portfolio eyebrow="${t.portfolioEyebrow}" title={${j(full ? t.portfolioFullTitle(siteName) : t.portfolioHomeTitle)}} items={${j(portfolioItems)}}${!full && portfolioRoute ? ` viewAllText="${t.portfolioViewAll}" viewAllHref={${j(portfolioRoute)}}` : ""}${va(variant, "featured")} />`;
+  const testimonialsBlock = (full, variant) => `<Testimonials eyebrow="${t.testimonialsEyebrow}" title={${j(full ? t.testimonialsFullTitle : t.testimonialsHomeTitle)}} items={${j(testimonials)}}${va(variant)} />`;
+  const pricingBlock = () => `<Pricing eyebrow="${t.pricingEyebrow}" title="${t.pricingTitle}" plans={${j(plans)}} ctaHref={${j(contactRoute)}} />`;
+  const faqBlock = (variant) => `<FAQ eyebrow="${t.faqEyebrow}" title="${t.faqTitle}" items={${j(faqs)}}${va(variant)} />`;
+  const ctaBlock = (surface, variant) => `<CTA${va(variant, surface ? "surface" : "")} title={${j(tagline || siteName)}} primaryCtaText="${t.ctaContact}" primaryCtaHref={${j(contactRoute)}}${servicesRoute ? ` secondaryCtaText="${t.ctaSeeServices}" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
+  const contactHomeBlock = (variant) => { const a = [email && `email={${j(email)}}`, phone && `phone={${j(phone)}}`, address && `address={${j(address)}}`].filter(Boolean).join(" "); return `<Contact title="${t.contactTitle}"${tagline ? ` description={${j(tagline)}}` : ""}${a ? " " + a : ""}${va(variant, "split")} />`; };
 
   // Builders para la HOME por composición: (variant) => jsx | null. null = sin datos → se OMITE (§D4).
   const homeBuilders = {
@@ -532,7 +540,7 @@ const PAGE = (route, ctx) => {
   } else if (isContact) {
     used.add("Contact");
     const attrs = [email && `email={${j(email)}}`, phone && `phone={${j(phone)}}`, address && `address={${j(address)}}`].filter(Boolean).join(" ");
-    blocks.push(`<Contact title="Contacto"${tagline ? ` description={${j(tagline)}}` : ""}${attrs ? " " + attrs : ""} variant="split" />`);
+    blocks.push(`<Contact title="${t.contactTitle}"${tagline ? ` description={${j(tagline)}}` : ""}${attrs ? " " + attrs : ""} variant="split" />`);
   } else if (isServices && serviceItems) {
     add("Services", servicesBlock(true)); add("CTA", ctaBlock(true));
   } else if (isPricing && plans) {
@@ -550,12 +558,12 @@ const PAGE = (route, ctx) => {
   const imports = [...used].sort().map((s) => `import ${s} from "@/components/sections/${s}";`).join("\n");
   // meta description: del brief (tagline) en home; en otras rutas, metadata derivada de hechos (nombre+sección),
   // como el title — nunca prosa de negocio inventada. Open Graph por página. Title absoluto (no doble marca).
-  const title = `${siteName} — ${navLabel(route)}`;
-  const desc = route === "/" ? (tagline || `${siteName}${sector ? `, ${sector}` : ""}`) : `${navLabel(route)} · ${siteName}`;
+  const title = `${siteName} — ${navLabel(route, t)}`;
+  const desc = route === "/" ? (tagline || `${siteName}${sector ? `, ${sector}` : ""}`) : `${navLabel(route, t)} · ${siteName}`;
   const breadcrumb = route === "/" ? null : {
     "@context": "https://schema.org", "@type": "BreadcrumbList", itemListElement: [
-      { "@type": "ListItem", position: 1, name: "Inicio", item: "/" },
-      { "@type": "ListItem", position: 2, name: navLabel(route), item: route },
+      { "@type": "ListItem", position: 1, name: t.navHome, item: "/" },
+      { "@type": "ListItem", position: 2, name: navLabel(route, t), item: route },
     ],
   };
   const bcScript = breadcrumb ? `      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: ${j(JSON.stringify(breadcrumb))} }} />\n` : "";
