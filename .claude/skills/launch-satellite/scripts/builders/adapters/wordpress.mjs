@@ -104,6 +104,31 @@ function walkElementor(tree, pageId, blocks, mediaUrls, counters) {
 const mediaIdFromUrl = (u) => decodeURIComponent(String(u).split(/[?#]/)[0].split("/").pop() || "").toLowerCase();
 const slugify = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 
+// --- SEO global de AIOSEO (aioseo_options JSON): el FORMATO de title/description que el sitio aplica por página
+// cuando no hay custom. Devuelve {titleFmt, descFmt} o null. (Conocimiento de AIOSEO → vive aquí, en el adapter.)
+function parseAioseoGlobal(optionValue) {
+  const o = maybeJson(optionValue);
+  if (!o || typeof o !== "object") return null;
+  const sa = o.searchAppearance || {};
+  const page = (sa.postTypes && sa.postTypes.page) || {};
+  const glob = sa.global || {};
+  const titleFmt = page.title || glob.siteTitle || "#post_title #separator_sa #site_title";   // default real de AIOSEO
+  const descFmt = page.metaDescription || glob.metaDescription || null;
+  return (titleFmt || descFmt) ? { titleFmt, descFmt } : null;
+}
+// Resuelve los SMART TAGS comunes con DATOS REALES (no inventa): #post_title, #site_title, #tagline, #separator.
+function resolveSmartTags(tpl, page, site) {
+  if (typeof tpl !== "string" || !tpl) return null;
+  const out = tpl
+    .replace(/#post_title|#title|#archive_title/gi, page.title || "")
+    .replace(/#site_title|#blog_title/gi, site.name || "")
+    .replace(/#tagline|#blog_description|#site_description/gi, site.description || "")
+    .replace(/#separator_sa|#separator/gi, "-")
+    .replace(/#[a-z_]+/gi, "")        // cualquier otro smart tag no resoluble → se quita (no se inventa)
+    .replace(/\s+-\s*$|^\s*-\s+/g, "").replace(/\s{2,}/g, " ").trim();
+  return out || null;
+}
+
 function maybeJson(metaValue) {
   if (typeof metaValue !== "string" || !metaValue) return null;
   try { return JSON.parse(metaValue); } catch {}
@@ -132,7 +157,15 @@ export const wordpressAdapter = {
     const attachedFile = new Map();   // post_id -> _wp_attached_file
     const menuItemMeta = new Map();    // post_id -> { url, objectId, parent }
     const options = {};
-    const aioseo = new Map();          // post_id -> { title, description }
+    // SEO por-página CUSTOM, genérico por plugin (post_id -> {title,description,canonical,ogTitle,ogDescription,source}).
+    const seoCustom = new Map();
+    const setSeo = (id, src, fields) => {
+      const cur = seoCustom.get(id) || { source: src };
+      for (const [k, v] of Object.entries(fields)) if (v && !cur[k]) cur[k] = v;
+      if (!cur.source) cur.source = src;
+      seoCustom.set(id, cur);
+    };
+    let aioseoGlobal = null;          // {titleFmt, descFmt} de aioseo_options (template global) o null
 
     await streamDump(dump, ["wp_posts", "wp_postmeta", "wp_options", "wp_aioseo_posts"], (table, row) => {
       if (table === "wp_posts") {
@@ -140,16 +173,36 @@ export const wordpressAdapter = {
         if (row.post_type === "attachment") posts.set(row.ID, row); // status 'inherit'
       } else if (table === "wp_postmeta") {
         const id = row.post_id;
-        if (row.meta_key === "_elementor_data" && row.meta_value && row.meta_value !== "[]") {
-          const j = maybeJson(row.meta_value); if (Array.isArray(j)) elementorByPost.set(id, j);
-        } else if (row.meta_key === "_wp_attached_file") attachedFile.set(id, row.meta_value);
-        else if (row.meta_key === "_menu_item_url") { const m = menuItemMeta.get(id) || {}; m.url = row.meta_value; menuItemMeta.set(id, m); }
-        else if (row.meta_key === "_menu_item_object_id") { const m = menuItemMeta.get(id) || {}; m.objectId = row.meta_value; menuItemMeta.set(id, m); }
-        else if (row.meta_key === "_menu_item_menu_item_parent") { const m = menuItemMeta.get(id) || {}; m.parent = row.meta_value; menuItemMeta.set(id, m); }
+        const k = row.meta_key, v = row.meta_value;
+        if (k === "_elementor_data" && v && v !== "[]") {
+          const j = maybeJson(v); if (Array.isArray(j)) elementorByPost.set(id, j);
+        } else if (k === "_wp_attached_file") attachedFile.set(id, v);
+        else if (k === "_menu_item_url") { const m = menuItemMeta.get(id) || {}; m.url = v; menuItemMeta.set(id, m); }
+        else if (k === "_menu_item_object_id") { const m = menuItemMeta.get(id) || {}; m.objectId = v; menuItemMeta.set(id, m); }
+        else if (k === "_menu_item_menu_item_parent") { const m = menuItemMeta.get(id) || {}; m.parent = v; menuItemMeta.set(id, m); }
+        // --- SEO por-página de los plugins COMUNES (genérico; ninguno hardcodeado como el único) ---
+        else if (k === "_yoast_wpseo_title") setSeo(id, "yoast", { title: v });
+        else if (k === "_yoast_wpseo_metadesc") setSeo(id, "yoast", { description: v });
+        else if (k === "_yoast_wpseo_canonical") setSeo(id, "yoast", { canonical: v });
+        else if (k === "_yoast_wpseo_opengraph-title") setSeo(id, "yoast", { ogTitle: v });
+        else if (k === "_yoast_wpseo_opengraph-description") setSeo(id, "yoast", { ogDescription: v });
+        else if (k === "rank_math_title") setSeo(id, "rankmath", { title: v });
+        else if (k === "rank_math_description") setSeo(id, "rankmath", { description: v });
+        else if (k === "rank_math_canonical_url") setSeo(id, "rankmath", { canonical: v });
+        else if (k === "rank_math_facebook_title") setSeo(id, "rankmath", { ogTitle: v });
+        else if (k === "rank_math_facebook_description") setSeo(id, "rankmath", { ogDescription: v });
+        else if (k === "_seopress_titles_title") setSeo(id, "seopress", { title: v });
+        else if (k === "_seopress_titles_desc") setSeo(id, "seopress", { description: v });
+        else if (k === "_seopress_robots_canonical") setSeo(id, "seopress", { canonical: v });
+        else if (k === "_seopress_social_fb_title") setSeo(id, "seopress", { ogTitle: v });
+        else if (k === "_seopress_social_fb_desc") setSeo(id, "seopress", { ogDescription: v });
       } else if (table === "wp_options") {
         if (["blogname", "blogdescription", "siteurl", "home", "WPLANG", "page_on_front", "show_on_front", "template"].includes(row.option_name)) options[row.option_name] = row.option_value;
+        else if (row.option_name === "aioseo_options") aioseoGlobal = parseAioseoGlobal(row.option_value);
       } else if (table === "wp_aioseo_posts") {
-        if (row.post_id) aioseo.set(row.post_id, { title: row.title || null, description: row.description || null });
+        // AIOSEO guarda el SEO custom por-página en columnas; null cuando el cliente no lo personalizó (usa el global).
+        if (row.post_id && (row.title || row.description || row.canonical_url || row.og_title || row.og_description))
+          setSeo(row.post_id, "aioseo", { title: row.title, description: row.description, canonical: row.canonical_url, ogTitle: row.og_title, ogDescription: row.og_description });
       }
     });
 
@@ -160,6 +213,36 @@ export const wordpressAdapter = {
       url: options.siteurl || options.home || null,
       language: (options.WPLANG || "").split("_")[0] || null,
       locale: options.WPLANG || null,
+    };
+
+    const frontId = options.show_on_front === "page" ? String(options.page_on_front || "") : "";
+    const isFront = (p) => String(p.ID) === frontId || p.post_name === "home" || p.post_name === "front-page";
+
+    // --- SEO por-página: custom (cualquier plugin) PRIORITARIO. Si HAY plugin de SEO (custom o un formato global
+    // de AIOSEO) pero la página no tiene custom, se DERIVA per-página con DATOS REALES (el título propio de la
+    // página + el nombre del sitio = el default de Yoast/AIOSEO; la description del template global → #tagline).
+    // Sin NINGÚN plugin de SEO → null (no inventa). El gate verifica el sub-campo (que no se caiga en silencio).
+    const pageHasSeoSource = (id) => seoCustom.has(id) || !!aioseoGlobal;
+    const pageSeo = (p) => {
+      const c = seoCustom.get(p.ID) || null;
+      if (!c && !aioseoGlobal) return null;                       // ningún plugin → sin SEO (no se inventa)
+      let title = c && c.title, description = c && c.description;
+      let source = (c && c.source) || (aioseoGlobal ? "aioseo:global" : null);
+      if (!title) {                                              // derivado per-página del título REAL de la página
+        title = isFront(p)
+          ? [ir.site.name, ir.site.description].filter(Boolean).join(" — ") || ir.site.name || null
+          : [p.post_title, ir.site.name].filter(Boolean).join(" — ") || p.post_title || null;
+      }
+      if (!description && aioseoGlobal) description = resolveSmartTags(aioseoGlobal.descFmt, { title: p.post_title }, ir.site);
+      const canonical = c && c.canonical, ogTitle = c && c.ogTitle, ogDescription = c && c.ogDescription;
+      if (!title && !description && !canonical && !ogTitle && !ogDescription) return null;
+      const seo = { source };
+      if (title) seo.title = title;
+      if (description) seo.description = description;
+      if (canonical) seo.canonical = canonical;
+      if (ogTitle) seo.ogTitle = ogTitle;
+      if (ogDescription) seo.ogDescription = ogDescription;
+      return seo;
     };
 
     // --- 3. media: TODAS las imágenes originales reales de uploads (lossless) ---
@@ -173,8 +256,7 @@ export const wordpressAdapter = {
     ir.media = [...mediaByFile.values()];
     const mediaIndex = new Map(ir.media.map((m) => [m.id, m]));
 
-    // --- 4. páginas (page/post publicados) → IR pages + bloques ---
-    const frontId = options.show_on_front === "page" ? String(options.page_on_front || "") : "";
+    // --- 4. páginas (page/post publicados) → IR pages + bloques --- (frontId/isFront definidos arriba)
     const counters = { elements: 0, contentBlocks: 0 };
     const pageRows = [...posts.values()].filter((p) => ["page", "post"].includes(p.post_type) && p.post_status === "publish");
     for (const p of pageRows) {
@@ -192,15 +274,14 @@ export const wordpressAdapter = {
       }
       // marcar media usada
       for (const u of mediaUrls) { const m = mediaIndex.get(mediaIdFromUrl(u)); if (m) { if (!m.src) m.src = u; if (!m.usedBy.includes(p.ID)) m.usedBy.push(p.ID); } }
-      const isFront = String(p.ID) === frontId || p.post_name === "home" || p.post_name === "front-page";
       ir.pages.push({
         id: p.ID, type: p.post_type,
         slug: p.post_name || slugify(p.post_title),
-        route: isFront ? "/" : "/" + (p.post_name || slugify(p.post_title)),
+        route: isFront(p) ? "/" : "/" + (p.post_name || slugify(p.post_title)),
         title: p.post_title || null,
         parent: p.post_parent && p.post_parent !== "0" ? p.post_parent : null,
         order: Number(p.menu_order || 0),
-        seo: aioseo.get(p.ID) || null,
+        seo: pageSeo(p),
         blocks,
       });
     }
@@ -219,9 +300,13 @@ export const wordpressAdapter = {
     }
 
     // --- 6. coverage (gate lossless): fuente == IR ---
+    // Sub-campo SEO: cuántas páginas DEBERÍAN tener SEO según la fuente (custom de cualquier plugin, o un formato
+    // global de AIOSEO que aplica a todas). El gate verifica que el IR las haya capturado todas (mide del IR real).
+    const seoSourcePages = pageRows.filter((p) => pageHasSeoSource(p.ID)).length;
     ir.coverage = {
       source: { pages: pageRows.length, blocks: counters.contentBlocks, media: mediaByFile.size },
       captured: { pages: ir.pages.length, blocks: counters.contentBlocks, media: ir.media.length },
+      subfields: { seo: { source: seoSourcePages } },   // el SEO por-página no se cae sin avisar
       dropped: [],   // por construcción NADA se descarta: cada widget → bloque (raw), cada original → media
       notInSource: [
         ...(uploadsDir ? [] : ["uploads (no había carpeta de imágenes en el backup)"]),

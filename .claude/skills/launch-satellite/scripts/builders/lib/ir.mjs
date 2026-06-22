@@ -50,6 +50,9 @@ export function irStats(ir) {
     forms: (ir.forms || []).length,
     words,
     blockMediaRefs,
+    // SUB-CAMPO: páginas con SEO real (title o description). El gate lo verifica para cazar SEO caído sin
+    // que cambie el nº de páginas (el punto ciego de "contar solo cantidades").
+    seoPages: (ir.pages || []).filter((p) => p.seo && (p.seo.title || p.seo.description)).length,
   };
 }
 

@@ -31,6 +31,19 @@ conocimiento de WP: `wp_posts`/`wp_postmeta._elementor_data`/`wp_options`/menús
 (excluye miniaturas -WxH = derivados regenerables, y ruido de wp-core/plugins/temas); idioma real (i18n).
 **Añadir otra fuente luego = otro adapter que produce el MISMO IR, sin tocar núcleo/IR/emitter.**
 
+### D — SEO por-página GENÉRICO + el gate verifica SUB-CAMPOS (no solo cantidades)
+Hueco cerrado: el adapter leía páginas/Elementor/uploads pero **no el SEO por-página** de los plugins → se caía
+y el gate (que solo contaba páginas/bloques/media) **no lo detectaba**. Ahora:
+- **Adapter**: lee el SEO por-página de los plugins **comunes** al campo `seo` del IR (title/description/canonical/
+  og): **AIOSEO** (tabla `aioseo_posts` custom + formato **global** resuelto por página con datos reales) +
+  **Yoast** (`_yoast_wpseo_*`) + **RankMath** (`rank_math_*`) + **SEOPress** (`_seopress_*`). Detecta cuál hay;
+  custom prioritario, si no el global resuelto (título per-página = título real de la página + sitio), si nada →
+  `null` (no inventa). **Genérico, sin hardcodear a un plugin.**
+- **Gate** (`lossless.mjs`): además de las cantidades, verifica **sub-campos** — `coverage.subfields.seo` declara
+  cuántas páginas tienen SEO en la fuente; el gate lo **mide del IR real** (`irStats.seoPages`) y **FALLA** si se
+  cayó en alguna. Principio: caza **sub-campos caídos**, no solo cantidades (cierra el punto ciego de la pérdida
+  silenciosa). Genérico: el gate no sabe de plugins, solo del IR.
+
 ### D — Orquestador `from-file.mjs`
 detecta la fuente → captura → `validateIR` → **gate lossless** → escribe el IR (`--out`). Exit 2 = fuente no
 reconocida, 1 = gate lossless FALLÓ (pérdida). **Re-cablea SOLO el caso "mejorar desde un backup"**; los demás
@@ -70,10 +83,14 @@ TODOS los bloques" es un gate que **no se puede omitir**, no una buena intenció
    un bloque por widget Elementor (raw preservado), todas las imágenes originales (miniaturas/core excluidas), idioma real.
 3. **Interfaz de adapter genérica** + registro; añadir otra fuente = otro adapter, mismo IR, sin tocar el núcleo.
 4. **Gate de completitud** (`lossless.mjs`): pasa cuando fuente == IR; **FALLA** si se pierde algo o el adapter miente.
-5. **Prueba LOSSLESS de Atis** (local; el dump está gitignored): 22 páginas · 170 bloques · 27 imágenes ·
-   26 ítems de menú · idioma `es` — vs el brief de hoy (~15 campos, 1 imagen).
-6. **Evaluación del proceso no-saltable** presentada (A/B/C + recomendación) — el operador decide.
-7. **Gates verdes**: `gates` (`Strategy: satellite-builders`, `check_ticket_link` ECO-63), Security Pipeline;
+   **Verifica SUB-CAMPOS** además de cantidades: el **SEO por-página** (`coverage.subfields.seo`, medido de
+   `irStats.seoPages`) — si la fuente tiene SEO y el IR lo perdió → FALLA.
+5. **SEO por-página genérico**: AIOSEO + Yoast + RankMath + SEOPress → `page.seo` (custom > global resuelto >
+   `null`); sin plugin → `null` (no inventa). Verificado con fixture (Yoast en una página, AIOSEO en otra).
+6. **Prueba LOSSLESS de Atis** (local; el dump está gitignored): 22 páginas · 170 bloques · 27 imágenes ·
+   26 ítems de menú · idioma `es` · **SEO por-página en 22/22** (AIOSEO) — vs el brief de hoy (~15 campos, 1 imagen).
+7. **Evaluación del proceso no-saltable** presentada (A/B/C + recomendación) — el operador decide.
+8. **Gates verdes**: `gates` (`Strategy: satellite-builders`, `check_ticket_link` ECO-63), Security Pipeline;
    tests skill + registry verdes (fixture WP sintético commiteado; el dump real corre local).
 
 ## Out of scope (= FB2 y posteriores)

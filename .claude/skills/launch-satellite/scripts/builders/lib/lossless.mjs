@@ -5,11 +5,15 @@
 // DECLARA como `notInSource`, no se cuenta como pérdida ni se inventa.
 //
 // El adapter adjunta `ir.coverage = { source:{pages,blocks,media,...}, captured:{...}, dropped:[{what,why}],
-//   notInSource:[...] }`. Aquí se evalúa y se reporta.
+//   subfields:{ seo:{source:N} }, notInSource:[...] }`. Aquí se evalúa y se reporta.
 import { irStats } from "./ir.mjs";
 
-// Dimensiones que el gate exige preservar (capturado >= fuente).
+// Dimensiones (cantidades) que el gate exige preservar (capturado >= fuente).
 const DIMS = ["pages", "blocks", "media"];
+// SUB-CAMPOS que el gate verifica ADEMÁS de las cantidades — cierra el punto ciego: un sub-campo (p.ej. el SEO
+// por-página) puede caerse SIN cambiar el nº de páginas/bloques/media. name → clave de irStats que lo MIDE del
+// IR real (genérico: el gate no sabe de plugins/fuentes, solo del IR). Extensible a más sub-campos.
+const SUBFIELD_STAT = { seo: "seoPages" };
 
 // Evalúa el IR contra su coverage declarada. Devuelve { ok, problems, lines, stats }.
 export function losslessReport(ir) {
@@ -30,6 +34,19 @@ export function losslessReport(ir) {
       outN < inN ? `${d}: la fuente tenía ${inN} pero el IR solo capturó ${outN} (PÉRDIDA de ${inN - outN})`
                  : `${d}: el adapter declaró ${claim} capturados pero el IR tiene ${outN} (incoherencia)`);
     lines.push(`  ${pass ? "✓" : "✗"} ${d}: fuente ${inN} → IR ${outN}`);
+  }
+
+  // SUB-CAMPOS: la fuente declara cuántas páginas TIENEN el sub-campo; el IR debe haberlo capturado en todas.
+  // Se mide del IR real (irStats) → si el adapter dejó SEO caído en algunas páginas, captured < source = FALLA.
+  const subfields = cov.subfields || {};
+  for (const [name, decl] of Object.entries(subfields)) {
+    const statKey = SUBFIELD_STAT[name];
+    if (!statKey) continue;                       // sub-campo no medible aún → no se gatea (no se finge)
+    const inN = Number(decl.source ?? 0);
+    const outN = Number(stats[statKey] ?? 0);
+    const pass = outN >= inN;
+    if (!pass) problems.push(`sub-campo ${name}: la fuente lo tenía en ${inN} página(s) pero el IR solo en ${outN} (SE CAYÓ en ${inN - outN})`);
+    lines.push(`  ${pass ? "✓" : "✗"} sub-campo ${name}: fuente ${inN} → IR ${outN} página(s)`);
   }
 
   const dropped = cov.dropped || [];

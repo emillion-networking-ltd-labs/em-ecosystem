@@ -82,6 +82,39 @@ test("adapter WordPress: captura LOSSLESS el fixture → IR correcto", async () 
   } finally { bk.cleanup(); }
 });
 
+test("SEO por-página GENÉRICO: AIOSEO (Home) + Yoast (About) capturados; sin plugin → null", async () => {
+  const bk = makeBackup();
+  try {
+    const ir = await wordpressAdapter.capture(bk.dir);
+    const home = ir.pages.find((p) => p.route === "/");
+    const about = ir.pages.find((p) => p.slug === "about");
+    const news = ir.pages.find((p) => p.type === "post");
+    // Home: SEO custom de AIOSEO (tabla)
+    assert.equal(home.seo.source, "aioseo");
+    assert.equal(home.seo.title, "Custom Home SEO Title");
+    assert.match(home.seo.description, /Custom home meta description/);
+    // About: SEO custom de Yoast (postmeta) — genericidad: otro plugin, mismo IR
+    assert.equal(about.seo.source, "yoast");
+    assert.equal(about.seo.title, "About Page — Yoast Title");
+    assert.match(about.seo.description, /Yoast about meta description/);
+    // News (post sin plugin de SEO) → null (no se inventa)
+    assert.equal(news.seo, null);
+  } finally { bk.cleanup(); }
+});
+
+test("gate SEO: la fuente declara 2 páginas con SEO; si el IR pierde una → FALLA (sub-campo caído)", async () => {
+  const bk = makeBackup();
+  try {
+    const ir = await wordpressAdapter.capture(bk.dir);
+    assert.equal(ir.coverage.subfields.seo.source, 2, "la fuente tiene SEO en 2 páginas");
+    assert.equal(losslessReport(ir).ok, true, "captura completa → pasa");
+    ir.pages.find((p) => p.seo).seo = null;   // simular SEO caído en una página que lo tenía
+    const r = losslessReport(ir);
+    assert.equal(r.ok, false);
+    assert.ok(r.problems.some((p) => /sub-campo seo/.test(p) && /CAYÓ/.test(p)), "el gate caza el SEO caído");
+  } finally { bk.cleanup(); }
+});
+
 test("gate de COMPLETITUD: FALLA si el IR pierde algo que la fuente tenía", async () => {
   const bk = makeBackup();
   try {

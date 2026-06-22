@@ -35,7 +35,20 @@ CREATE TABLE `wp_postmeta` (
 ) ENGINE=InnoDB;
 INSERT INTO `wp_postmeta` VALUES
 (1,2,'_elementor_data','[{"id":"s1","elType":"section","elements":[{"id":"c1","elType":"column","elements":[{"id":"w1","elType":"widget","widgetType":"heading","settings":{"title":"Welcome to Fixture Co"}},{"id":"w2","elType":"widget","widgetType":"image","settings":{"image":{"url":"https://fixture.test/wp-content/uploads/2024/hero.jpg","id":99}}},{"id":"w3","elType":"widget","widgetType":"text-editor","settings":{"editor":"We don\'t quit. Real copy, semicolons; and commas, kept."}}]}]}]'),
-(2,3,'_wp_attached_file','2024/team.png');
+(2,3,'_wp_attached_file','2024/team.png'),
+(3,3,'_yoast_wpseo_title','About Page — Yoast Title'),
+(4,3,'_yoast_wpseo_metadesc','Yoast about meta description, real and verbatim.');
+CREATE TABLE `wp_aioseo_posts` (
+  `id` bigint,
+  `post_id` bigint,
+  `title` text,
+  `description` text,
+  `canonical_url` text,
+  `og_title` text,
+  `og_description` text
+) ENGINE=InnoDB;
+INSERT INTO `wp_aioseo_posts` VALUES
+(1,2,'Custom Home SEO Title','Custom home meta description for SEO.',NULL,NULL,NULL);
 CREATE TABLE `wp_options` (
   `option_id` bigint,
   `option_name` varchar(191),
