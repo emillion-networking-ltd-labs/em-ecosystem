@@ -1,15 +1,17 @@
 "use client";
 
 import { useReveal } from "@/hooks/useReveal";
+import Image from "next/image";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 
-// Sección PORTFOLIO del design system (ECO-55, nivel 2). Galería de trabajos REALES del cliente (del brief —
-// nunca inventados; sin items, se omite). La imagen es OPCIONAL y se pinta como background-image (sin <img>/
-// next-image → sin config de dominios ni dep de assets): si no hay imagen, un tile de marca con el título.
-// Reveal escalonado, token-safe, a11y.
+// Sección PORTFOLIO del design system (ECO-55, nivel 2; fotos reales ECO-61/F7a). Galería de trabajos/fotos
+// REALES del cliente (del brief — nunca inventados; sin items, se omite). La imagen es OPCIONAL y se pinta con
+// `next/image` (optimizado, formatos modernos); sin imagen, un tile de marca con el título. El `title` es
+// OPCIONAL: una galería de fotos reales puede ser solo-imagen (sin barra de texto). Reveal escalonado, a11y.
 export interface PortfolioItem {
-  title: string;
+  /** Título del trabajo. Opcional: una foto de galería puede no tenerlo (tile solo-imagen). */
+  title?: string;
   description?: string;
   imageSrc?: string;
   href?: string;
@@ -26,25 +28,33 @@ export interface PortfolioProps {
 function PortfolioCard({ item, index, featured }: { item: PortfolioItem; index: number; featured: boolean }) {
   const { ref, style } = useReveal<HTMLElement>({ delay: (index % 3) * 90 });
   const hasImg = !!item.imageSrc;
+  const big = featured && index === 0;
   const Wrapper = item.href ? "a" : "div";
   return (
-    <article ref={ref} style={style} className={featured && index === 0 ? "sm:col-span-2" : ""}>
+    <article ref={ref} style={style} className={big ? "sm:col-span-2" : ""}>
       <Wrapper
         {...(item.href ? { href: item.href } : {})}
         className="group block overflow-hidden rounded-2xl border border-border-default bg-surface-primary transition-colors hover:border-accent"
       >
-        <div
-          className={`flex items-end ${hasImg ? "bg-cover bg-center" : "bg-gradient-to-br from-accent to-accent-dark"} ${featured && index === 0 ? "aspect-[2/1]" : "aspect-[4/3]"}`}
-          style={hasImg ? { backgroundImage: `url(${JSON.stringify(item.imageSrc)})` } : undefined}
-          role="img"
-          aria-label={item.title}
-        >
-          {!hasImg ? <span className="p-5 text-h3 font-semibold text-white">{item.title}</span> : null}
+        <div className={`relative ${big ? "aspect-[2/1]" : "aspect-[4/3]"} ${hasImg ? "" : "flex items-end bg-gradient-to-br from-accent to-accent-dark"}`}>
+          {hasImg ? (
+            <Image
+              src={item.imageSrc!}
+              alt={item.title || ""}
+              fill
+              sizes={big ? "(min-width: 1024px) 56rem, 100vw" : "(min-width: 1024px) 22rem, (min-width: 640px) 50vw, 100vw"}
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : item.title ? (
+            <span className="p-5 text-h3 font-semibold text-white">{item.title}</span>
+          ) : null}
         </div>
-        <div className="p-5">
-          <h3 className="text-h3 font-semibold text-content-primary">{item.title}</h3>
-          {item.description ? <p className="mt-1 text-body leading-relaxed text-content-secondary">{item.description}</p> : null}
-        </div>
+        {item.title || item.description ? (
+          <div className="p-5">
+            {item.title ? <h3 className="text-h3 font-semibold text-content-primary">{item.title}</h3> : null}
+            {item.description ? <p className="mt-1 text-body leading-relaxed text-content-secondary">{item.description}</p> : null}
+          </div>
+        ) : null}
       </Wrapper>
     </article>
   );

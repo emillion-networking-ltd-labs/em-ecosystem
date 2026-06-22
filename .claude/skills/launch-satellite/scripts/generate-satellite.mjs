@@ -3,9 +3,9 @@
 // Pipeline determinista, NO greenfield: scaffold forma-SAT01 + reuse de UI SOLO via `em-ui add`
 // (cierre transitivo) + `em-ui init` (tokens) + relleno desde el brief. Los `missing` -> placeholders
 // visibles, NUNCA datos fabricados. NO despliega (eso es F3).
-import { mkdirSync, writeFileSync, existsSync } from "node:fs";
+import { mkdirSync, writeFileSync, existsSync, copyFileSync, statSync } from "node:fs";
 import { execFileSync } from "node:child_process";
-import { dirname, join, resolve } from "node:path";
+import { dirname, join, resolve, isAbsolute } from "node:path";
 import { fileURLToPath } from "node:url";
 import { validateBrief, briefIntent, briefColorMode, briefSiteType, briefComposition, DEFAULT_INTENT } from "./lib/brief.mjs";
 import { chrome, FALLBACK_LANG } from "./lib/i18n.mjs";
@@ -83,6 +83,22 @@ function normFaqs(v) {
   const items = a.filter((q) => q && typeof q === "object").map((q) => ({ question: q.question || q.q, answer: q.answer || q.a }))
     .filter((q) => q.question && q.answer).map((q) => ({ question: q.question, answer: q.answer }));
   return items.length ? items : null;
+}
+
+// F7a (ECO-61, pilar P5 / ADR-011 — USAR ASSETS REALES): resuelve un path de asset a un FICHERO LEGIBLE real.
+// Acepta rutas absolutas, relativas al repo o al cwd. Las URLs http(s) NO son ficheros locales (no se copian).
+// Devuelve la ruta absoluta del fichero o null. No fabrica nada: solo encuentra lo que YA existe.
+function realAssetFile(pathStr) {
+  if (typeof pathStr !== "string" || !pathStr || /^https?:\/\//i.test(pathStr)) return null;
+  const cands = [
+    isAbsolute(pathStr) ? pathStr : null,
+    resolve(REPO_ROOT, pathStr.replace(/^\/+/, "")),
+    resolve(pathStr),
+  ].filter(Boolean);
+  for (const c of cands) {
+    try { if (statSync(c).isFile()) return c; } catch {}
+  }
+  return null;
 }
 
 // JSON-LD site-wide (F5): de los HECHOS del cliente. LocalBusiness SOLO si hay dirección real (su rasgo
@@ -207,11 +223,45 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
     return v;
   };
 
+  // --- F7a (ECO-61, P5): INGESTIÓN de ASSETS REALES → public/images/ del satélite, renderizados con next/image.
+  // SOLO assets reales (provided/extracted) cuyo path apunte a un fichero legible; jamás proposed/missing ni
+  // generados (eso es F7b). Devuelve la ruta web "/images/<file>" o null (→ on-screen se OMITE con gracia).
+  const imagesDir = join(dest, "public", "images");
+  const ingestedByFile = new Map();      // dedup por fichero origen
+  const usedNames = new Set();
+  trace.assets = [];
+  const ingestPath = (pathStr, provenance, preferredName) => {
+    if (!(provenance === "provided" || provenance === "extracted")) return null;
+    if (typeof pathStr === "string" && /^https?:\/\//i.test(pathStr)) return pathStr;   // remoto real → tal cual (OG/JSON-LD; sin copia)
+    const file = realAssetFile(pathStr);
+    if (!file) return null;
+    if (ingestedByFile.has(file)) return ingestedByFile.get(file);
+    mkdirSync(imagesDir, { recursive: true });
+    const ext = (file.match(/\.[A-Za-z0-9]+$/) || [".img"])[0].toLowerCase();
+    const stem = (preferredName || file.split(/[/\\]/).pop().replace(/\.[A-Za-z0-9]+$/, ""))
+      .toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "img";
+    let name = stem + ext, i = 1;
+    while (usedNames.has(name)) name = `${stem}-${i++}${ext}`;
+    usedNames.add(name);
+    copyFileSync(file, join(imagesDir, name));
+    const web = `/images/${name}`;
+    ingestedByFile.set(file, web);
+    trace.assets.push(web);
+    return web;
+  };
+  const ingestAsset = (fld, preferredName) => (fld ? ingestPath(fld.value, fld.provenance, preferredName) : null);
+
   const sector = track("identity.sector", brief.identity?.sector);
   const tagline = track("tagline", f.slogan || f.tagline || f.subtitle);
   const rawServices = track("services", f.services);
+  const servicesProv = (f.services)?.provenance;
   const serviceItems = Array.isArray(rawServices)
-    ? rawServices.map((s) => (typeof s === "string" ? { title: s } : { title: s.title || s.name || String(s), description: s.description || s.desc }))
+    ? rawServices.map((s, i) => {
+        const o = typeof s === "string" ? { title: s } : { title: s.title || s.name || String(s), description: s.description || s.desc };
+        const img = (s && typeof s === "object") ? ingestPath(s.image || s.imageSrc || s.photo, servicesProv, `service-${i + 1}`) : null;
+        if (img) o.imageSrc = img;          // foto REAL opcional por servicio (omit-if-absent)
+        return o;
+      })
     : null;
   const email = track("contactEmail", f.contactEmail);
   const phone = track("contactPhone", f.contactPhone);
@@ -219,7 +269,30 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   // Batch-2 (ECO-55): solo HECHOS reales; ausentes → null → sección OMITIDA. JAMÁS inventar testimonios/precios.
   const testimonials = normTestimonials(track("testimonials", f.testimonials));
   const plans = normPlans(track("pricing", f.pricing || f.plans));
-  const portfolioItems = normPortfolio(track("portfolio", f.portfolio || f.projects));
+  // Portfolio: items reales del brief; sus imágenes (si son ficheros reales) se ingieren. Más una GALERÍA de
+  // fotos reales (f.gallery/photos/images) → tiles solo-imagen. F7a: solo reales; sin imagen real → omit-if-absent.
+  const portfolioField = f.portfolio || f.projects;
+  let portfolioItems = normPortfolio(track("portfolio", portfolioField));
+  if (portfolioItems) portfolioItems = portfolioItems.map((it, i) => {
+    const img = ingestPath(it.imageSrc, portfolioField?.provenance, `work-${i + 1}`);
+    const o = { ...it }; if (img) o.imageSrc = img; else delete o.imageSrc; return o;
+  });
+  const galleryField = f.gallery || f.photos || f.images;
+  const galleryProv = galleryField?.provenance;
+  if (Array.isArray(galleryField?.value) && (galleryProv === "provided" || galleryProv === "extracted")) {
+    const tiles = galleryField.value.map((p, i) => {
+      const path = typeof p === "string" ? p : (p && (p.src || p.path || p.imageSrc || p.value));
+      const img = ingestPath(path, galleryProv, `gallery-${i + 1}`);
+      if (!img) return null;
+      const o = { imageSrc: img };
+      const title = (p && typeof p === "object") ? (p.title || p.caption) : null;
+      if (title) o.title = title;          // título solo si es REAL; si no, tile solo-imagen
+      return o;
+    }).filter(Boolean);
+    if (tiles.length) portfolioItems = (portfolioItems || []).concat(tiles);
+  }
+  // Hero: foto REAL de portada (opcional). Sin ella → hero de solo texto (omit-if-absent).
+  const heroImage = ingestAsset(f.heroImage || f.hero || f.coverImage || f.cover, "hero");
   const faqs = normFaqs(track("faqs", f.faqs || f.faq));
   const contactRoute = routes.find((r) => /contact/i.test(r)) || "/contact";
   const servicesRoute = routes.find((r) => /servic/i.test(r)) || null;
@@ -234,13 +307,15 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   trace.siteType = siteType;
   trace.compositionSource = briefComposition(brief) ? "brief" : (siteType ? `type:${siteType}` : "default");
   const ctx = { siteName, sector, tagline, serviceItems, email, phone, address, testimonials, plans,
-    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute, composition, t };
+    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute, composition, t, heroImage };
 
   // --- SEO de fábrica (F5/P1): el layout lleva metadata + Open Graph + JSON-LD site-wide + landmarks. ---
-  const logoFact = track("logo", f.logo || f.logoCandidate);
+  // F7a: el logo REAL se INGIERE a public/images/ → va EN PANTALLA (header) y también a OG/JSON-LD. Solo si es
+  // un fichero real del cliente (extracted/provided); si no, no hay logo on-screen (omit-if-absent, no inventa).
+  const logoSrc = ingestAsset(f.logo || f.logoCandidate, "logo");
   const seo = {
     siteName, description: tagline || null, sector, email, phone, address,
-    logo: typeof logoFact === "string" ? logoFact : null,
+    logo: logoSrc,
     nav: routes.map((r) => ({ href: r, label: navLabel(r, t) })),
   };
   const jsonld = buildJsonLd(seo);   // LocalBusiness SOLO si hay dirección real; si no, Organization (§D4)
@@ -309,8 +384,18 @@ const LAYOUT = (siteName, initScript, seo, jsonld, language, t) => {
     .map((n) => `            <li><Link href={${j(n.href)}} className="text-body text-content-secondary transition-colors hover:text-accent">{${j(n.label)}}</Link></li>`)
     .join("\n");
   const footerContact = [seo.phone, seo.email].filter(Boolean);
+  // F7a: el logo REAL LOCAL (ya ingerido a /images/) va EN PANTALLA en el header con next/image. Un logo remoto
+  // (URL) alimenta OG/JSON-LD pero no se renderiza con next/image (evita config de dominios) → marca textual.
+  // Sin logo → marca textual (omit-if-absent, nunca un placeholder).
+  const localLogo = typeof seo.logo === "string" && seo.logo.startsWith("/images/");
+  const imageImport = localLogo ? `\nimport Image from "next/image";` : "";
+  const brand = localLogo
+    ? `<Link href="/" className="flex items-center" aria-label={${j(siteName)}}>
+              <span className="relative block h-9 w-36"><Image src=${j(seo.logo)} alt={${j(siteName)}} fill priority sizes="144px" className="object-contain object-left" /></span>
+            </Link>`
+    : `<Link href="/" className="text-h3 font-bold text-content-primary">{${j(siteName)}}</Link>`;
   return `import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "next/link";${imageImport}
 import DeferredAnalytics from "@/components/DeferredAnalytics";
 import Providers from "./providers";
 import "./globals.css";
@@ -346,7 +431,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <header className="border-b border-border-default">
           <nav aria-label="${t.navAria}" className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-            <Link href="/" className="text-h3 font-bold text-content-primary">{${j(siteName)}}</Link>
+            ${brand}
             <ul className="hidden gap-6 sm:flex">
 ${navLis}
             </ul>
@@ -357,6 +442,7 @@ ${navLis}
         <footer className="border-t border-border-default">
           <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-10 text-caption text-content-tertiary">
             <p>© {new Date().getFullYear()} {${j(siteName)}}</p>${footerContact.length ? `\n            <p>{${j(footerContact.join(" · "))}}</p>` : ""}
+            <p className="mt-2">Powered by <span className="font-medium text-content-secondary">EM Ecosystem</span></p>
           </div>
         </footer>
         {/* Observabilidad diferida: no bloquea el main-thread (S2 Performance). */}
@@ -492,7 +578,7 @@ const navLabel = (route, t) => {
 // Solo importa las secciones que usa; lo ausente se omite (no se inventa). Labels de UI = chrome permitido.
 const PAGE = (route, ctx) => {
   const { siteName, sector, tagline, serviceItems, email, phone, address, testimonials, plans,
-    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute, composition, t } = ctx;
+    portfolioItems, faqs, contactRoute, servicesRoute, portfolioRoute, pricingRoute, composition, t, heroImage } = ctx;
   const j = (v) => JSON.stringify(v);
   const used = new Set();
   const blocks = [];
@@ -501,7 +587,7 @@ const PAGE = (route, ctx) => {
   // Builders de bloque (eyebrow/título = labels de UI; el CONTENIDO sale de los hechos del brief).
   // `variant` (opcional) viene de la composición elegida (F6) y sobreescribe el default de la sección.
   const va = (variant, def) => (variant ? ` variant=${j(variant)}` : def ? ` variant="${def}"` : "");
-  const heroBlock = (soft, variant) => `<Hero${va(variant, soft ? "soft" : "")}${sector ? ` eyebrow={${j(sector)}}` : ""} title={${j(soft ? navLabel(route, t) : siteName)}}${tagline && !soft ? ` subtitle={${j(tagline)}}` : ""} ctaText="${t.ctaContact}" ctaHref={${j(contactRoute)}}${servicesRoute && !soft ? ` secondaryCtaText="${t.ctaSeeServices}" secondaryCtaHref={${j(servicesRoute)}}` : ""} />`;
+  const heroBlock = (soft, variant) => `<Hero${va(variant, soft ? "soft" : "")}${sector ? ` eyebrow={${j(sector)}}` : ""} title={${j(soft ? navLabel(route, t) : siteName)}}${tagline && !soft ? ` subtitle={${j(tagline)}}` : ""} ctaText="${t.ctaContact}" ctaHref={${j(contactRoute)}}${servicesRoute && !soft ? ` secondaryCtaText="${t.ctaSeeServices}" secondaryCtaHref={${j(servicesRoute)}}` : ""}${heroImage && !soft ? ` imageSrc=${j(heroImage)} imageAlt=${j(siteName)}` : ""} />`;
   const servicesBlock = (full, variant) => `<Services eyebrow="${t.servicesEyebrow}" title={${j(full ? t.servicesFullTitle(siteName) : t.servicesHomeTitle(siteName))}} services={${j(serviceItems)}}${va(variant)}${!full && servicesRoute ? ` viewAllText="${t.servicesViewAll}" viewAllHref={${j(servicesRoute)}}` : ""} />`;
   const portfolioBlock = (full, variant) => `<Portfolio eyebrow="${t.portfolioEyebrow}" title={${j(full ? t.portfolioFullTitle(siteName) : t.portfolioHomeTitle)}} items={${j(portfolioItems)}}${!full && portfolioRoute ? ` viewAllText="${t.portfolioViewAll}" viewAllHref={${j(portfolioRoute)}}` : ""}${va(variant, "featured")} />`;
   const testimonialsBlock = (full, variant) => `<Testimonials eyebrow="${t.testimonialsEyebrow}" title={${j(full ? t.testimonialsFullTitle : t.testimonialsHomeTitle)}} items={${j(testimonials)}}${va(variant)} />`;

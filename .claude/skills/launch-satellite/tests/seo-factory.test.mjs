@@ -24,7 +24,7 @@ const WITH_BIZ = {
   slogan: field("Tu recuperación, nuestra prioridad", "provided"),
   contactPhone: field("+34 955 00 00 00", "provided"),
   address: field("Calle Sol 12, Sevilla", "provided"),
-  logo: field("/logo.png", "provided"),
+  logo: field("https://cdn.example.com/logo.png", "provided"),   // logo remoto real → alimenta OG/JSON-LD (F7a: solo assets resolubles)
   services: field(["Fisioterapia", "Rehabilitación"], "provided"),
 };
 
@@ -34,7 +34,7 @@ test("layout: Open Graph + JSON-LD + landmarks (header/nav/footer) generados por
     const layout = g.read("src/app/layout.tsx");
     assert.match(layout, /openGraph:/, "OG en metadata");
     assert.match(layout, /type: "website"/);
-    assert.match(layout, /images: \["\/logo\.png"\]/, "og:image = logo del brief");
+    assert.match(layout, /images: \["https:\/\/cdn\.example\.com\/logo\.png"\]/, "og:image = logo del brief");
     assert.match(layout, /application\/ld\+json/, "script JSON-LD");
     assert.match(layout, /<header/); assert.match(layout, /<nav aria-label="Principal"/); assert.match(layout, /<footer/);
     assert.match(layout, /metadataBase/);
