@@ -1,0 +1,43 @@
+{
+  "process": "strategy",
+  "state": "presented",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-06-22T21:55:32Z",
+      "topic": "satellite-builders"
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-06-22T21:55:32Z",
+      "sources": [
+        "https://html.to.design/",
+        "https://simplystatic.com/",
+        "https://github.com/aknuds1/html-to-react",
+        "https://faustjs.org/",
+        "https://www.wpgraphql.com/",
+        ".claude/skills/launch-satellite/scripts/generate-satellite.mjs:1"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-06-22T21:55:50Z",
+      "options": "Modelo de builder (decision PRESENTADA al gate): (1) status quo extract-then-compose [con PERDIDA, fallo del piloto], (2) clon estatico del render estilo wp2static [copia markup ajeno, sin ownership], (3) builders por FUENTE -> nucleo comun (modelo normalizado/IR) -> emitter Next ENRIQUECIDO [recomendado: captura lossless + reconstruccion con nuestras secciones+imagenes, generico, from-file primero], (4) WP headless Faust/WPGraphQL [exige WP vivo, no codigo propio]."
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-06-22T21:55:50Z",
+      "critique": "Adversarial: (a) 'nada se pierde' es honesto SOLO acotado a lo que el backup contiene -> si la BD no esta o hay contenido dinamico, se DECLARA (cobertura del adapter), no se inventa (\u00a7D4); (b) genericizacion real: el IR (site/pages/blocks/media/nav/forms) es el contrato, WP/Elementor es el PRIMER adapter no la forma del nucleo -> un backup no-WP implementa el mismo interfaz; (c) reuse/gobernanza: el nucleo comun impone i18n/SEO/guardrails/imagenes/em-ui/preview/S2 por construccion sobre el IR -> reproducible y gateado; el 'enriquecido en un flujo' preserva los HECHOS del IR (copy verbatim) y solo el DISENO es libre; (d) from-file primero valida la captura lossless (la parte dura) antes de from-url."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-06-22T21:55:50Z",
+      "check_passed": true
+    },
+    "presented": {
+      "done": true,
+      "timestamp": "2026-06-22T21:55:50Z",
+      "presented_to": "operador"
+    }
+  }
+}
