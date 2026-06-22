@@ -1,6 +1,6 @@
 # Strategy: satellite-builders
 
-Status: PRESENTED — PENDIENTE DE APROBACIÓN (gate humano, ECO-62)
+Status: APPROVED   <!-- gate humano 2026-06-22 (ECO-62): modelo = opción 3 (builders por fuente → núcleo común/IR → emitter Next enriquecido); arquitectura en ADR-012; FB0/FB1 = ECO-63 -->
 Strategy: satellite-builders   <!-- feature specs reference this with a `Strategy: satellite-builders` line -->
 
 > **Re-encuadre del norte de satélites alrededor de BUILDERS de fuente.** SUPERA a
@@ -50,8 +50,9 @@ CUALQUIER backup vía adapters pluggables). NO el cómo-paso-a-paso (eso es el r
 
 ## Recommendation
 <!-- which option + why — this is judgment; the human approves it at the gate -->
-**Recomiendo la Opción 3 — *builders por fuente → núcleo común (modelo normalizado) → emitter Next
-enriquecido*** (PENDIENTE de tu aprobación en el gate; **no lo decido yo**).
+**APROBADA por el operador (gate humano, 2026-06-22): Opción 3 — *builders por fuente → núcleo común (modelo
+normalizado/IR) → emitter Next enriquecido***. Arquitectura registrada en [ADR-012](../adr/012-satellite-builders-architecture.md);
+FB0/FB1 (núcleo + IR + adapter WP) en [ECO-63](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-63).
 
 - La **1** es el estado actual y **ya falló** (pérdida; piloto Atis): es la deuda a cerrar, no el norte.
 - La **2** (clon estático) es fiel pero copia el **markup ajeno**: no da diseño propio ni escalabilidad ni
@@ -113,8 +114,9 @@ construcción, sin re-litigarlo:
 - NO construye los builders aquí: fija el norte + la arquitectura + el plan; el cómo va en los ECO por fase.
 
 ## Decisions
-- **D — Modelo = Opción 3 (builders por fuente → núcleo común → emitter enriquecido).** PRESENTADA al gate
-  humano (ECO-62); **pendiente de tu aprobación** (`approved`). Reúsa el núcleo transversal de `satellites.md`.
+- **D — Modelo = Opción 3 (builders por fuente → núcleo común → emitter enriquecido). APROBADA (gate humano,
+  2026-06-22; ECO-62).** Arquitectura en [ADR-012](../adr/012-satellite-builders-architecture.md); FB0/FB1 en
+  [ECO-63](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-63). Reúsa el núcleo transversal de `satellites.md`.
 - **D — `satellites.md` queda SUPERADO** por este doc (puntero recíproco; historia preservada, no se borra).
 - **D — Roadmap from-file primero;** los demás builders se añaden incrementalmente tras pasar pruebas.
 
