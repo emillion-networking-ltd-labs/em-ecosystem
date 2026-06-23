@@ -33,7 +33,7 @@ export function val(field, label, intent = DEFAULT_INTENT) {
   if (p === "proposed" && has) return intent === "a-replica" ? `[PENDIENTE: ${label}]` : field.value;
   return `[FALTA: ${label}]`;
 }
-function emui(args, destSrc) {
+export function emui(args, destSrc) {
   return execFileSync("node", [EM_UI, ...args, "--dest", destSrc], { cwd: REPO_ROOT, encoding: "utf8" });
 }
 
@@ -104,7 +104,7 @@ function realAssetFile(pathStr) {
 // JSON-LD site-wide (F5): de los HECHOS del cliente. LocalBusiness SOLO si hay dirección real (su rasgo
 // definitorio); si no, Organization. JAMÁS se inventa un negocio local (guardrail §D4). url/logo los
 // completa el layout a runtime con SITE_URL (no se hornean aquí porque dependen del env del deploy).
-function buildJsonLd(seo) {
+export function buildJsonLd(seo) {
   const isLocal = !!seo.address;
   const ld = { "@context": "https://schema.org", "@type": isLocal ? "LocalBusiness" : "Organization", name: seo.siteName };
   if (seo.description) ld.description = seo.description;
@@ -354,7 +354,7 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
 }
 
 // ---- plantillas (derivadas de la forma SAT01) ----
-const NEXT_CONFIG = `import { fileURLToPath } from "node:url";
+export const NEXT_CONFIG = `import { fileURLToPath } from "node:url";
 import { dirname } from "node:path";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // Baseline de seguridad S2 (6 cabeceras) aplicado a toda ruta.
@@ -373,12 +373,12 @@ const nextConfig = {
 };
 export default nextConfig;
 `;
-const TSCONFIG = JSON.stringify({
+export const TSCONFIG = JSON.stringify({
   compilerOptions: { lib: ["dom", "dom.iterable", "esnext"], allowJs: true, skipLibCheck: true, strict: true, noEmit: true, esModuleInterop: true, module: "esnext", moduleResolution: "bundler", resolveJsonModule: true, isolatedModules: true, jsx: "react-jsx", incremental: true, plugins: [{ name: "next" }], paths: { "@/*": ["./src/*"] }, target: "ES2017" },
   include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"], exclude: ["node_modules"],
 }, null, 2) + "\n";
-const POSTCSS = `/** @type {import('postcss-load-config').Config} */\nconst config = { plugins: { '@tailwindcss/postcss': {} } };\nexport default config;\n`;
-const LAYOUT = (siteName, initScript, seo, jsonld, language, t) => {
+export const POSTCSS = `/** @type {import('postcss-load-config').Config} */\nconst config = { plugins: { '@tailwindcss/postcss': {} } };\nexport default config;\n`;
+export const LAYOUT = (siteName, initScript, seo, jsonld, language, t) => {
   const j = (v) => JSON.stringify(v);
   const navLis = seo.nav
     .map((n) => `            <li><Link href={${j(n.href)}} className="text-body text-content-secondary transition-colors hover:text-accent">{${j(n.label)}}</Link></li>`)
@@ -457,7 +457,7 @@ ${navLis}
 // --- maquinaria de TEMA (GENÉRICA, modelada en SAT01 proven): default parametrizado por colorMode ---
 // initScript anti-FOUC: añade `dark` a <html> antes del paint. dark → salvo 'light' guardado;
 // light → solo si 'dark' guardado; system → preferencia guardada o prefers-color-scheme.
-const themeInitScript = (mode) => {
+export const themeInitScript = (mode) => {
   const decide = mode === "light"
     ? "t==='dark'"
     : mode === "system"
@@ -467,7 +467,7 @@ const themeInitScript = (mode) => {
   return `(function(){try{var t=localStorage.getItem('theme');if(${decide}){document.documentElement.classList.add('dark')}}catch(e){${onError}}})()`;
 };
 
-const PROVIDERS = `"use client";
+export const PROVIDERS = `"use client";
 
 import ThemeProvider from "@/context/ThemeContext";
 
@@ -477,7 +477,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 `;
 
 // ThemeContext GENÉRICO: el default (dark/light/system) lo fija DEFAULT_MODE (parametrizado por el brief).
-const THEME_CONTEXT = (mode) => `"use client";
+export const THEME_CONTEXT = (mode) => `"use client";
 
 import { createContext, useState, useEffect, useCallback } from "react";
 
@@ -538,7 +538,7 @@ export default function ThemeProvider({ children }: { children: React.ReactNode 
 
 // ECO-39: monta @vercel/analytics + speed-insights ON-IDLE (fuera del hilo crítico de hydration)
 // para no inflar el Total Blocking Time. Son scripts INVISIBLES → el render visible no cambia (VRT verde).
-const DEFERRED_ANALYTICS = `"use client";
+export const DEFERRED_ANALYTICS = `"use client";
 import { useEffect, useState } from "react";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
@@ -568,7 +568,7 @@ export default function DeferredAnalytics() {
 `;
 // El label "Inicio"/"Home" es CHROME (del catálogo i18n); el label de una ruta no-home se deriva de su SLUG
 // (que ya viene en el idioma del cliente vía targetRoutes), así que es language-neutral.
-const navLabel = (route, t) => {
+export const navLabel = (route, t) => {
   if (route === "/") return t.navHome;
   const seg = route.replace(/^\/+|\/+$/g, "");
   return seg ? seg.charAt(0).toUpperCase() + seg.slice(1).replace(/-/g, " ") : t.navHome;
@@ -671,12 +671,12 @@ ${bcScript}${blocks.map((b) => "      " + b).join("\n")}
 }
 `;
 };
-const ROBOTS = `import type { MetadataRoute } from "next";
+export const ROBOTS = `import type { MetadataRoute } from "next";
 export default function robots(): MetadataRoute.Robots {
   return { rules: { userAgent: "*", allow: "/" }, sitemap: (process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.vercel.app") + "/sitemap.xml" };
 }
 `;
-const SITEMAP = (routes) => `import type { MetadataRoute } from "next";
+export const SITEMAP = (routes) => `import type { MetadataRoute } from "next";
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.vercel.app";
   return ${JSON.stringify(routes)}.map((r) => ({ url: base + (r === "/" ? "" : r), priority: r === "/" ? 1 : 0.7 }));
