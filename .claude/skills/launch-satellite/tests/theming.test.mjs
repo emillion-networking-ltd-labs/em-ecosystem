@@ -25,7 +25,7 @@ function gen(colorMode) {
   return { dir, trace, read, cleanup: () => { try { rmSync(dirname(dir), { recursive: true, force: true }); } catch {} } };
 }
 
-test("scaffolda la maquinaria de tema: ThemeContext + providers + useTheme nunca rompe (provider envuelve)", () => {
+test("scaffolda la maquinaria de tema: ThemeContext + providers + useTheme nunca rompe (provider envuelve header+children+footer)", () => {
   const g = gen("dark");
   try {
     assert.ok(existsSync(join(g.dir, "src/context/ThemeContext.tsx")), "falta ThemeContext");
@@ -37,8 +37,27 @@ test("scaffolda la maquinaria de tema: ThemeContext + providers + useTheme nunca
     assert.match(providers, /ThemeProvider/);
     const layout = g.read("src/app/layout.tsx");
     assert.match(layout, /import Providers from ".\/providers"/);
-    assert.match(layout, /<Providers>\{children\}<\/Providers>/);   // envuelve la app → useTheme no rompe
+    // ECO-68: <Providers> envuelve TODO el cuerpo (header+children+footer), no solo {children} → el toggle del
+    // header (useTheme) queda DENTRO del provider y nunca rompe.
+    assert.match(layout, /<Providers>[\s\S]*\{children\}[\s\S]*<\/Providers>/);
     assert.match(layout, /THEME_INIT_SCRIPT/);                       // anti-FOUC presente
+  } finally { g.cleanup(); }
+});
+
+test("ECO-68: el header monta un ThemeToggle (cambio MANUAL light↔dark), DENTRO de <Providers>, cableado al ThemeContext vía registry", () => {
+  const g = gen("dark");
+  try {
+    const layout = g.read("src/app/layout.tsx");
+    assert.match(layout, /import ThemeToggle from "@\/components\/ui\/ThemeToggle"/);
+    assert.match(layout, /<ThemeToggle \/>/);
+    // dentro del provider: <Providers> aparece ANTES que el <ThemeToggle> → es su descendiente (useTheme no rompe).
+    assert.ok(layout.indexOf("<Providers") < layout.indexOf("<ThemeToggle"), "el toggle debe ir DENTRO de <Providers>");
+    // llegó vía registry (no copia local) y está cableado a useTheme/toggleTheme + jala el hook useTheme.
+    assert.ok(existsSync(join(g.dir, "src/components/ui/ThemeToggle.tsx")), "falta ThemeToggle.tsx (registry)");
+    const toggle = g.read("src/components/ui/ThemeToggle.tsx");
+    assert.match(toggle, /useTheme/);
+    assert.match(toggle, /toggleTheme/);
+    assert.ok(existsSync(join(g.dir, "src/hooks/useTheme.ts")), "ThemeToggle jala hooks/useTheme.ts (internalDependency)");
   } finally { g.cleanup(); }
 });
 

@@ -194,6 +194,9 @@ export function generateSatellite(brief, destDir, { sections = DEFAULT_SECTIONS 
   mkdirSync(join(src, "context"), { recursive: true });
   writeFileSync(join(src, "context", "ThemeContext.tsx"), THEME_CONTEXT(colorMode));
   writeFileSync(join(app, "providers.tsx"), PROVIDERS);
+  // ECO-68 (núcleo común): el control MANUAL de tema del header (lo monta el LAYOUT) — vía registry, no copia
+  // local. Jala su cierre (IconButton/Tooltip + hooks/useTheme → @/context/ThemeContext, ya escrito arriba).
+  trace.emui.push(emui(["add", "ThemeToggle"], src).trim());
 
   // --- nombre del negocio (hecho) — usado por el layout (SEO) y por las páginas. El layout se escribe MÁS
   //     ABAJO, tras computar los hechos SEO (logo/dirección/teléfono) que alimentan OG + JSON-LD. ---
@@ -415,6 +418,7 @@ export const LAYOUT = (siteName, initScript, seo, jsonld, language, t, opts = {}
   return `import type { Metadata } from "next";
 import Link from "next/link";${imageImport}${scriptImport}
 import DeferredAnalytics from "@/components/DeferredAnalytics";
+import ThemeToggle from "@/components/ui/ThemeToggle";
 import Providers from "./providers";
 import "./globals.css";
 
@@ -447,23 +451,29 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />${faviconLinks}${cookiebotScript}
       </head>
       <body>
-        <header className="border-b border-border-default">
-          <nav aria-label="${t.navAria}" className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-            ${brandEl}
-            <ul className="hidden gap-6 sm:flex">
+        {/* ThemeProvider (dark/light) envuelve TODO el cuerpo → el ThemeToggle del header (useTheme) nunca rompe. */}
+        <Providers>
+          <header className="border-b border-border-default">
+            <nav aria-label="${t.navAria}" className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
+              ${brandEl}
+              <div className="flex items-center gap-4 sm:gap-6">
+                <ul className="hidden gap-6 sm:flex">
 ${navLis}
-            </ul>
-          </nav>
-        </header>
-        {/* ThemeProvider (dark/light + toggle) envuelve la app → useTheme nunca rompe. */}
-        <Providers>{children}</Providers>
-        <footer className="border-t border-border-default">
-          <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-10 text-caption text-content-tertiary">
-            <p>© {new Date().getFullYear()} {${j(siteName)}}</p>${footerContact.length ? `\n            <p>{${j(footerContact.join(" · "))}}</p>` : ""}
-            <p className="mt-2">Powered by <span className="font-medium text-content-secondary">EM Ecosystem</span></p>
-          </div>
-        </footer>
-        ${analyticsEl}
+                </ul>
+                {/* ECO-68: cambio MANUAL de tema (light↔dark), persiste; visible en todos los anchos. */}
+                <ThemeToggle />
+              </div>
+            </nav>
+          </header>
+          {children}
+          <footer className="border-t border-border-default">
+            <div className="mx-auto flex max-w-6xl flex-col gap-1 px-6 py-10 text-caption text-content-tertiary">
+              <p>© {new Date().getFullYear()} {${j(siteName)}}</p>${footerContact.length ? `\n              <p>{${j(footerContact.join(" · "))}}</p>` : ""}
+              <p className="mt-2">Powered by <span className="font-medium text-content-secondary">EM Ecosystem</span></p>
+            </div>
+          </footer>
+          ${analyticsEl}
+        </Providers>
       </body>
     </html>
   );

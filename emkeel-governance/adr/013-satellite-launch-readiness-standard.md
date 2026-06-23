@@ -28,6 +28,11 @@ Lo impone el núcleo → **lo hereda TODO builder** (desde-archivo, desde-URL, l
   real** (≥512² → favicon.ico/svg + apple-touch 180² + 192²/512² + `site.webmanifest`, vía sharp, nunca inventado);
   **404 de marca**; **GDPR Cookiebot**; **a11y WCAG AA con axe-core**; **SEO ampliado** (Twitter Cards + structured
   data por tipo).
+- **NUEVO (ECO-68):** **toggle de tema MANUAL en el header/nav** — el núcleo ya genera AMBOS temas (`ThemeContext`,
+  default parametrizable + `prefers-color-scheme`), pero faltaba el **control para que el visitante cambie a mano**
+  light↔dark; la elección **persiste** (`localStorage`). Se monta el **`ThemeToggle` de em-ui** (vía registry, no
+  copia local — `design-system/components/ThemeToggle.tsx`, usa `useTheme`/`toggleTheme`), DENTRO del `ThemeProvider`.
+  Primer indispensable añadido **vía el mecanismo de lista viva (§7)** tras el estándar inicial.
 
 ### 2. Formulario = opción 1 (Vercel Server Action + Resend + Turnstile) — APROBADA
 Formulario **propio**: Vercel Server Action/function + **Resend** (email/deliverability) + **anti-spam PROPIO** con
@@ -56,7 +61,8 @@ un sub-campo caído, este caza **cualquier indispensable que falte → nada sale
 construcción): Lighthouse S2 + audits SEO + OG/JSON-LD + Twitter Cards + structured-data-por-tipo válido · **a11y
 AA axe-core sin violations** (incomplete → humano) · **formulario** presente, endpoint responde, lleva Turnstile ·
 **favicon/manifest/apple-touch** · **404 de marca** · **Cookiebot CMP** + **analytics condicionado** · **headers
-HTTPS S2** · **legales** + **"Powered by EM"**. Falla cualquiera ⇒ NO "lanzado". (CWV de **campo** = objetivo
+HTTPS S2** · **legales** + **"Powered by EM"** · **toggle de tema en el header** cableado al `ThemeContext` y
+montado DENTRO del `ThemeProvider` (ECO-68). Falla cualquiera ⇒ NO "lanzado". (CWV de **campo** = objetivo
 post-lanzamiento, NO gate — ADR-010.)
 
 ### 7. El estándar es una LISTA VIVA / EXTENSIBLE
@@ -64,6 +70,13 @@ El estándar **no es cerrado**: es el **mecanismo de extensión**. Un indispensa
 refinamiento gobernado de `/strategy`** (como ECO-64) → al **estándar** + al **gate** → lo **heredan TODOS los
 builders sin reescribir nada por builder** (el núcleo común es el único punto de cambio). Así el estándar **crece
 con el producto** sin re-litigar el norte ni tocar los adapters.
+
+**Primera extensión aplicada — ECO-68 (toggle de tema):** ejercita el mecanismo de punta a punta. El indispensable
+se añadió en **un solo punto del núcleo común** (`generate-satellite.mjs` LAYOUT + `emit.mjs` jala el `ThemeToggle`
+del registry) y **un check** en el gate (`launch-ready.mjs`) → lo heredan TODOS los builders (desde-archivo y los
+que vengan) sin tocar adapters. El refinamiento del **norte** (`strategy/satellite-builders.md` §estándar) se
+tramita en su **propio lane `/strategy`** (acto deliberado, aprobado por humano) — esta ADR registra la decisión
+técnica; el norte la consagra por separado.
 
 ## Consecuencias
 - **Fasificación FB5** (con/sobre FB2, [ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65)):
