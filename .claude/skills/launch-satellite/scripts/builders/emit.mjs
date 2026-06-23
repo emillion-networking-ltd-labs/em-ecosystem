@@ -104,9 +104,10 @@ export async function emitFromIR(ir, destDir, opts = {}) {
   writeFileSync(join(dest, ".gitignore"), "/node_modules\n/.next\n/out\n/.preview.log\n");
   writeFileSync(join(dest, "playwright.config.ts"), PLAYWRIGHT_CONFIG());
 
-  // --- em-ui: tokens + componentes (TurnstileWidget para el formulario de contacto) ---
+  // --- em-ui: tokens + componentes (TurnstileWidget para el formulario; ThemeToggle para el cambio manual de
+  //     tema del header, ECO-68 — vía registry, no copia local; jala IconButton/Tooltip + hooks/useTheme) ---
   trace.emui.push(emui(["init"], src).trim());
-  for (const c of ["Button", "Badge", "Divider", "TurnstileWidget"]) trace.emui.push(emui(["add", c], src).trim());
+  for (const c of ["Button", "Badge", "Divider", "TurnstileWidget", "ThemeToggle"]) trace.emui.push(emui(["add", c], src).trim());
   writeFileSync(join(app, "globals.css"),
     `@import "../styles/em-ui-tokens.css";\n` +
     (brand ? `\n/* Marca del cliente → token de marca em-ui (accent). */\n:root { --color-accent: ${brand}; --color-accent-dark: ${brand}; }\n` : "") +

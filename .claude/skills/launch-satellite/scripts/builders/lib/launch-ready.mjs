@@ -138,6 +138,22 @@ export function verifyLaunchReady(satDir) {
   chk("Powered by EM Ecosystem (footer)", layout.includes("Powered by"),
     "el footer del layout debe llevar la firma 'Powered by EM Ecosystem'");
 
+  // ── Toggle de tema MANUAL en el header, cableado al ThemeContext (ADR-013 §1 NUEVO, ECO-68). El emitter ya
+  // genera AMBOS temas (ThemeContext) pero el visitante necesita un control MANUAL light↔dark (no solo
+  // default/SO). El ThemeToggle (em-ui, vía registry) usa useTheme→toggleTheme; el LAYOUT debe montarlo DENTRO
+  // de <Providers> (si queda fuera, useTheme rompe en runtime). Verifica las piezas + el ORDEN (provider antes
+  // que el toggle → el toggle es descendiente del provider, que es justo lo que este estándar exige).
+  let themeToggle = "";
+  try { themeToggle = readFileSync(join(satDir, "src/components/ui/ThemeToggle.tsx"), "utf8"); } catch {}
+  const provIdx = layout.indexOf("<Providers");
+  const togIdx = layout.indexOf("<ThemeToggle");
+  const toggleInsideProvider = provIdx !== -1 && togIdx !== -1 && provIdx < togIdx;
+  chk("toggle de tema en el header, cableado al ThemeContext y DENTRO de <Providers> (ThemeToggle + useTheme)",
+    /import\s+ThemeToggle\s+from\s+["']@\/components\/ui\/ThemeToggle["']/.test(layout) && toggleInsideProvider
+      && /useTheme/.test(themeToggle) && /toggleTheme/.test(themeToggle)
+      && existsSync(join(satDir, "src/context/ThemeContext.tsx")),
+    "el LAYOUT debe importar y montar <ThemeToggle /> DENTRO de <Providers>, ThemeToggle.tsx usar useTheme()/toggleTheme, y existir src/context/ThemeContext.tsx");
+
   // ── CALIDAD DE CONTENIDO (ADR-013): cero artefactos de render visibles. El gate estructural mira QUE existan
   // las piezas; este check mira que el contenido no se vea ROTO ("undefined"/"null"/"[object Object]"/<p></p>/
   // tokens sin resolver). Cubre el punto ciego: estructura válida pero basura visible.

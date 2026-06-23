@@ -40,9 +40,20 @@ function makeFullSat(root) {
   writeFileSync(join(comp, "ContactForm.tsx"), '"use client";\nimport TurnstileWidget from "@/components/ui/TurnstileWidget";\nimport { sendLead } from "@/app/actions/send-lead";\nexport default function ContactForm() { return <form onSubmit={() => sendLead(new FormData())}><TurnstileWidget /></form>; }');
   writeFileSync(join(acts, "send-lead.ts"), '"use server";\nexport async function sendLead() { return {}; }');
 
-  // Layout con Cookiebot + Twitter Cards + favicon links + Powered by
+  // Toggle de tema (ECO-68): el ThemeToggle (em-ui, cableado a useTheme/toggleTheme) + el ThemeContext que el
+  // núcleo genera. El gate exige que el header lo monte DENTRO de <Providers> y que el componente esté cableado.
+  const ui = join(comp, "ui");
+  const ctx = join(dir, "src", "context");
+  mkdirSync(ui, { recursive: true });
+  mkdirSync(ctx, { recursive: true });
+  writeFileSync(join(ui, "ThemeToggle.tsx"), '"use client";\nimport { useTheme } from "@/hooks/useTheme";\nexport default function ThemeToggle() { const { theme, toggleTheme } = useTheme(); return <button onClick={toggleTheme}>{theme}</button>; }');
+  writeFileSync(join(ctx, "ThemeContext.tsx"), '"use client";\nimport { createContext } from "react";\nexport const ThemeContext = createContext(null);\nexport default function ThemeProvider({ children }: any) { return <ThemeContext.Provider value={null}>{children}</ThemeContext.Provider>; }');
+
+  // Layout con Cookiebot + Twitter Cards + favicon links + Powered by + ThemeToggle dentro de <Providers>
   writeFileSync(join(app, "layout.tsx"), `
 import Script from "next/script";
+import ThemeToggle from "@/components/ui/ThemeToggle";
+import Providers from "./providers";
 export const metadata = {
   twitter: { card: "summary_large_image" as const },
 };
@@ -53,8 +64,12 @@ export default function RootLayout({ children }: any) {
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         {process.env.NEXT_PUBLIC_COOKIEBOT_ID ? <Script id="Cookiebot" src="..." data-cbid={process.env.NEXT_PUBLIC_COOKIEBOT_ID} strategy="beforeInteractive" /> : null}
       </head>
-      <body>{children}
-        <footer><p>Powered by EM Ecosystem</p></footer>
+      <body>
+        <Providers>
+          <header><nav aria-label="Principal"><ThemeToggle /></nav></header>
+          {children}
+          <footer><p>Powered by EM Ecosystem</p></footer>
+        </Providers>
       </body>
     </html>
   );
@@ -235,5 +250,45 @@ export default function RootLayout({ children }: any) {
     const r = verifyLaunchReady(dir);
     assert.equal(r.ok, false);
     assert.ok(r.problems.some((p) => /Powered/.test(p)), "debe reportar Powered by");
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("verifyLaunchReady: falla si el header NO monta el toggle de tema (ECO-68)", () => {
+  const root = mkdtempSync(join(tmpdir(), "lr-notoggle-"));
+  try {
+    const dir = makeFullSat(root);
+    // Layout completo SALVO el toggle: el hueco que arreglamos — ambos temas existen pero el visitante no puede
+    // cambiar a mano (no hay <ThemeToggle/> en el header).
+    writeFileSync(join(dir, "src", "app", "layout.tsx"), `
+import Script from "next/script";
+import Providers from "./providers";
+export const metadata = { twitter: { card: "summary_large_image" as const } };
+export default function RootLayout({ children }: any) {
+  return <html><head><link rel="apple-touch-icon" href="/apple-touch-icon.png" />{process.env.NEXT_PUBLIC_COOKIEBOT_ID ? <Script id="Cookiebot" src="..." data-cbid={process.env.NEXT_PUBLIC_COOKIEBOT_ID} strategy="beforeInteractive" /> : null}</head><body><Providers>{children}<footer><p>Powered by EM Ecosystem</p></footer></Providers></body></html>;
+}
+`);
+    const r = verifyLaunchReady(dir);
+    assert.equal(r.ok, false);
+    assert.ok(r.problems.some((p) => /toggle|ThemeToggle|tema/i.test(p)), "debe reportar el toggle ausente: " + r.problems.join("; "));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("verifyLaunchReady: falla si el toggle está FUERA de <Providers> (useTheme rompería en runtime — la regresión de ECO-68)", () => {
+  const root = mkdtempSync(join(tmpdir(), "lr-toggleout-"));
+  try {
+    const dir = makeFullSat(root);
+    // El toggle existe e importado, pero montado FUERA del provider (header antes que <Providers>) → useTheme rompe.
+    writeFileSync(join(dir, "src", "app", "layout.tsx"), `
+import Script from "next/script";
+import ThemeToggle from "@/components/ui/ThemeToggle";
+import Providers from "./providers";
+export const metadata = { twitter: { card: "summary_large_image" as const } };
+export default function RootLayout({ children }: any) {
+  return <html><head><link rel="apple-touch-icon" href="/apple-touch-icon.png" />{process.env.NEXT_PUBLIC_COOKIEBOT_ID ? <Script id="Cookiebot" src="..." data-cbid={process.env.NEXT_PUBLIC_COOKIEBOT_ID} strategy="beforeInteractive" /> : null}</head><body><header><nav aria-label="Principal"><ThemeToggle /></nav></header><Providers>{children}<footer><p>Powered by EM Ecosystem</p></footer></Providers></body></html>;
+}
+`);
+    const r = verifyLaunchReady(dir);
+    assert.equal(r.ok, false);
+    assert.ok(r.problems.some((p) => /toggle|ThemeToggle|tema/i.test(p)), "debe reportar el toggle fuera del provider: " + r.problems.join("; "));
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
