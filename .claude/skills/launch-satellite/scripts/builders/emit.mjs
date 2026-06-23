@@ -82,7 +82,7 @@ export async function emitFromIR(ir, destDir, opts = {}) {
     name: `@em-ecosystem/sat-${slug(siteName)}`, version: "0.1.0", private: true,
     scripts: { dev: "next dev -p 3100", build: "next build", start: "next start -p 3100", lint: "eslint \"src/**/*.{ts,tsx}\"" },
     dependencies: {
-      "@marsidev/react-turnstile": "^0.9.0",
+      "@marsidev/react-turnstile": "^1.5.0",
       "@vercel/analytics": "^2.0.1", "@vercel/speed-insights": "^2.0.0",
       "lucide-react": "^1.14.0", next: "^16.2.6", react: "^19.2.6", "react-dom": "^19.2.6",
       resend: "^4.5.1",

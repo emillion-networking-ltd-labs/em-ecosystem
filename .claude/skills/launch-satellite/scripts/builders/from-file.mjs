@@ -7,7 +7,7 @@
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { makeRegistry } from "./lib/adapter.mjs";
-import { validateIR, irStats } from "./lib/ir.mjs";
+import { validateIR, irStats, sectionsOf } from "./lib/ir.mjs";
 import { losslessReport } from "./lib/lossless.mjs";
 import { wordpressAdapter } from "./adapters/wordpress.mjs";
 
@@ -41,7 +41,15 @@ async function main() {
   const r = losslessReport(ir);
   for (const l of r.lines) console.log(l);
 
-  if (out) { writeFileSync(out, JSON.stringify(ir, null, 2) + "\n"); console.log(`IR escrito → ${out}`); }
+  // Secciones que el sitio TIENE (paso 4: informar antes de enriquecer). El operador decide si AÑADE secciones
+  // reales al ir.json (aporta el contenido, §D4) y luego emite con emit-from-ir.mjs.
+  console.log("\nSecciones capturadas (lo que el sitio TIENE — base para revisar/enriquecer en el paso 4):");
+  for (const pg of sectionsOf(ir)) {
+    console.log(`  ${pg.route}${pg.title ? ` — ${pg.title}` : ""}  (${pg.sections.length} sección/es)`);
+    for (const s of pg.sections) console.log(`      · ${s.heading || "(sin título)"} — ${s.blocks} bloque(s), ${s.words} palabra(s)${s.hasMedia ? ", con imagen" : ""}`);
+  }
+
+  if (out) { writeFileSync(out, JSON.stringify(ir, null, 2) + "\n"); console.log(`\nIR escrito → ${out}   (revísalo/enriquécelo y emite con: node scripts/builders/emit-from-ir.mjs ${out} <destDir>)`); }
 
   if (!r.ok) { console.error("from-file: GATE LOSSLESS FALLÓ (pérdida silenciosa):\n" + r.problems.map((p) => "  - " + p).join("\n")); process.exit(1); }
   console.log("from-file: ✓ captura LOSSLESS (nada de la fuente se perdió). Emitter enriquecido = FB2.");
