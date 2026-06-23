@@ -1,6 +1,6 @@
 # Strategy: satellite-builders
 
-Status: APPROVED (modelo) · REFINAMIENTO ECO-64 PENDIENTE (gate humano)   <!-- modelo aprobado 2026-06-22 (ECO-62, ADR-012); FB0/FB1 = ECO-63; refinamiento ECO-64 (estándar profesional completo del núcleo común + gate de launch-readiness; approach de formulario abierto) PENDIENTE de aprobación -->
+Status: APPROVED   <!-- modelo aprobado 2026-06-22 (ECO-62, ADR-012); FB0/FB1 = ECO-63; refinamiento ECO-64 (estándar profesional completo del núcleo común + gate de launch-readiness; formulario = opción 1 Vercel+Resend+Turnstile) APROBADO en el gate humano 2026-06-22, ADR-013, FB5 = ECO-65 -->
 Strategy: satellite-builders   <!-- feature specs reference this with a `Strategy: satellite-builders` line -->
 
 > **Re-encuadre del norte de satélites alrededor de BUILDERS de fuente.** SUPERA a
@@ -110,7 +110,7 @@ construcción, sin re-litigarlo:
 
 ## Refinamiento ECO-64 — estándar profesional COMPLETO del núcleo común + gate de launch-readiness
 
-**Estado: refinamiento — PENDIENTE DE APROBACIÓN (gate humano, ECO-64).** La estrategia fijó el MECANISMO
+**Estado: refinamiento APROBADO (gate humano, 2026-06-22; ECO-64) — formulario = opción 1; [ADR-013](../adr/013-satellite-launch-readiness-standard.md); FB5 = [ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65).** La estrategia fijó el MECANISMO
 (builders→IR→emitter) pero no un estándar COMPLETO de "sitio profesional óptimo" → los indispensables (formulario,
 favicon, 404, GDPR, a11y) salían **a parches**. Aquí se fija el estándar COMPLETO en el **NÚCLEO COMÚN**
 (**cross-cutting: lo hereda TODO builder** — desde-archivo, desde-URL, los que vengan; no por builder) + un **GATE
@@ -154,9 +154,10 @@ analytics respetuoso, páginas legales, firma **"Powered by EM Ecosystem"**.
 | 1 | **Vercel function/Server Action + Resend + Turnstile (em-ui)** | https://splitforms.com/blog/server-actions-vs-form-backend-nextjs | **formulario PROPIO** con deliverability (Resend) **y anti-spam PROPIO** (`TurnstileWidget`, `design-system/components/TurnstileWidget.tsx`) resueltos; ownership total, sin dep externa en runtime; satélite autosuficiente | mantenemos deliverability/dominio verificado; algo más a construir | medio |
 | 2 | **Form-backend service (Formspree)** | https://formspree.io/guides/nextjs/ | email-a-inbox out-of-the-box, dashboard, anti-spam/deliverability resueltos, cero backend | dep externa por satélite; menos "código propio"; límites del plan free | bajo-medio |
 
-**Recomendación (PENDIENTE de tu aprobación):** **Opción 1** (Vercel function + Resend) como **default** — encaja
-con "código en nuestro control" y deja el satélite autosuficiente; **pluggable** a un form-service por cliente
-cuando se prefiera cero mantenimiento. **Tú decides el approach en el gate; no lo decido yo.**
+**APROBADA por el operador (gate humano, 2026-06-22): Opción 1** (Vercel Server Action + Resend + Turnstile) —
+formulario **propio** con deliverability y anti-spam resueltos, encaja con "código en nuestro control" y deja el
+satélite autosuficiente; **pluggable** a un form-service por cliente cuando se prefiera cero mantenimiento.
+Registrada en [ADR-013](../adr/013-satellite-launch-readiness-standard.md).
 
 ### El GATE de launch-readiness (extiende S2 a un gate profesional COMPLETO)
 El núcleo común **NO declara "lanzado"** hasta que el satélite cumple TODO el estándar. Igual que el gate lossless
@@ -177,11 +178,12 @@ TODOS los builders** (desde-archivo, desde-URL, los que vengan) **sin reescribir
 común es el único punto de cambio; el gate garantiza que ningún satélite salga sin el nuevo indispensable. Así el
 estándar **crece con el producto** sin re-litigar el norte ni tocar los adapters.
 
-### Decisión — PRESENTADA al gate (no tomada)
+### Decisión — APROBADA (gate humano, 2026-06-22)
 Estándar profesional completo (incl. anti-spam Turnstile propio, SEO ampliado Twitter Cards + structured-data-por-tipo)
-+ gate de launch-readiness + el estándar como **lista viva/extensible**; approach de formulario **(1) recomendado**
-(Resend + Turnstile = formulario propio con deliverability **y** anti-spam resueltos). **PENDIENTE de tu aprobación**
-(`approved`). Reconcilia con ECO-56/58 + ADR-010/011/012; se implementa en **FB5** (con/sobre FB2). El operador aprueba/ajusta.
++ gate de launch-readiness + el estándar como **lista viva/extensible**; **formulario = opción 1 (Vercel Server
+Action + Resend + Turnstile)**. **APROBADA** por el operador. Registrada en
+[ADR-013](../adr/013-satellite-launch-readiness-standard.md); reconcilia con ECO-56/58 + ADR-010/011/012; se
+implementa en **FB5** ([ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65), con/sobre FB2).
 
 ## Non-goals
 - NO re-litiga lo válido de `satellites.md` (lo **trae**: i18n/SEO/guardrails/secciones/em-ui/imágenes).
@@ -196,17 +198,18 @@ Estándar profesional completo (incl. anti-spam Turnstile propio, SEO ampliado T
   [ECO-63](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-63). Reúsa el núcleo transversal de `satellites.md`.
 - **D — `satellites.md` queda SUPERADO** por este doc (puntero recíproco; historia preservada, no se borra).
 - **D — Roadmap from-file primero;** los demás builders se añaden incrementalmente tras pasar pruebas.
-- **D — Estándar profesional COMPLETO del núcleo común + GATE de launch-readiness (ECO-64, PENDIENTE de
-  aprobación — gate humano).** Fija de una vez el estándar de "sitio profesional óptimo" en el núcleo común
+- **D — Estándar profesional COMPLETO del núcleo común + GATE de launch-readiness (ECO-64, APROBADA — gate
+  humano 2026-06-22; [ADR-013](../adr/013-satellite-launch-readiness-standard.md); FB5 = [ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65)).** Fija de una vez el estándar de "sitio profesional óptimo" en el núcleo común
   (cross-cutting, todo builder lo hereda) para acabar con los indispensables a parches, + un gate que NO declara
   "lanzado" hasta cumplirlo TODO (ver §«Refinamiento ECO-64»). **(i)** Estándar = lo ya cubierto (SEO/i18n/S2/§D4/
   imágenes/em-ui/headers/legales/firma) **+** NUEVO: formulario funcional, favicon/manifest del logo real, 404 de
   marca, GDPR Cookiebot (free, pluggable), a11y AA con axe-core. **(ii)** Gate de launch-readiness = S2 + audits
   SEO/OG/JSON-LD + axe-core AA + form + favicon/manifest + 404 + Cookiebot + analytics-condicionado + headers +
-  legales + firma; falla cualquiera ⇒ no "lanzado". CWV de campo = post-lanzamiento (ADR-010). **(iii) DECISIÓN
-  ABIERTA presentada:** approach del formulario — (1) Vercel function + Resend [recomendado] / (2) Formspree. **(iv)**
-  Cookiebot DECIDIDO (pluggable, patrón del gateway de imágenes ADR-011). Reconcilia con ECO-56/58 + ADR-010/011/012,
-  no re-litiga; fasificado en **FB5**.
+  legales + firma; falla cualquiera ⇒ no "lanzado". CWV de campo = post-lanzamiento (ADR-010). **(iii) Formulario =
+  opción 1 APROBADA:** Vercel Server Action + Resend + **anti-spam propio Turnstile** (`TurnstileWidget` de em-ui).
+  **(iv)** Cookiebot DECIDIDO (pluggable, patrón del gateway de imágenes ADR-011). **(v)** estándar = **lista viva/
+  extensible** (nuevo indispensable → refinamiento /strategy → estándar+gate → todos los builders). Reconcilia con
+  ECO-56/58 + ADR-010/011/012, no re-litiga; fasificado en **FB5** (ECO-65).
 
 ## Sources (verificadas)
 - Repo (estado actual, COMMITEADO): generador *extract-then-compose* `.claude/skills/launch-satellite/scripts/generate-satellite.mjs`;
