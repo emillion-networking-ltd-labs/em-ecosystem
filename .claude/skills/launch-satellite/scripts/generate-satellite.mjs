@@ -378,7 +378,10 @@ export const TSCONFIG = JSON.stringify({
   include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"], exclude: ["node_modules"],
 }, null, 2) + "\n";
 export const POSTCSS = `/** @type {import('postcss-load-config').Config} */\nconst config = { plugins: { '@tailwindcss/postcss': {} } };\nexport default config;\n`;
-export const LAYOUT = (siteName, initScript, seo, jsonld, language, t) => {
+// opts: { cookiebot?: boolean, favicons?: boolean } — activados por el emitter (FB5, ECO-65).
+// cookiebot: añade script Cookiebot CMP (GDPR, Consent Mode v2) en <head> + analytics condicionado.
+// favicons: añade <link> tags al <head> para favicon.png/svg, apple-touch-icon, manifest.
+export const LAYOUT = (siteName, initScript, seo, jsonld, language, t, opts = {}) => {
   const j = (v) => JSON.stringify(v);
   const navLis = seo.nav
     .map((n) => `            <li><Link href={${j(n.href)}} className="text-body text-content-secondary transition-colors hover:text-accent">{${j(n.label)}}</Link></li>`)
@@ -389,20 +392,35 @@ export const LAYOUT = (siteName, initScript, seo, jsonld, language, t) => {
   // Sin logo → marca textual (omit-if-absent, nunca un placeholder).
   const localLogo = typeof seo.logo === "string" && seo.logo.startsWith("/images/");
   const imageImport = localLogo ? `\nimport Image from "next/image";` : "";
-  const brand = localLogo
+  const brandEl = localLogo
     ? `<Link href="/" className="flex items-center" aria-label={${j(siteName)}}>
               <span className="relative block h-9 w-36"><Image src=${j(seo.logo)} alt={${j(siteName)}} fill priority sizes="144px" className="object-contain object-left" /></span>
             </Link>`
     : `<Link href="/" className="text-h3 font-bold text-content-primary">{${j(siteName)}}</Link>`;
+
+  // ECO-65/FB5 additions
+  const scriptImport = opts.cookiebot ? `\nimport Script from "next/script";` : "";
+  const cookiebotScript = opts.cookiebot
+    ? `\n        {process.env.NEXT_PUBLIC_COOKIEBOT_ID ? <Script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid={process.env.NEXT_PUBLIC_COOKIEBOT_ID} type="text/javascript" strategy="beforeInteractive" /> : null}`
+    : "";
+  const faviconLinks = opts.favicons
+    ? `\n        <link rel="icon" type="image/png" href="/favicon.png" />\n        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />\n        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />\n        <link rel="manifest" href="/site.webmanifest" />`
+    : "";
+  const analyticsEl = opts.cookiebot
+    ? `{/* Analytics condicionado a consentimiento Cookiebot (Consent Mode v2, ADR-013 §3). */}\n        {!process.env.NEXT_PUBLIC_COOKIEBOT_ID && <DeferredAnalytics />}`
+    : `{/* Observabilidad diferida: no bloquea el main-thread (S2 Performance). */}\n        <DeferredAnalytics />`;
+  // Twitter Cards site-level (ECO-65/FB5 SEO ampliado)
+  const twitterMeta = `\n  twitter: { card: "summary_large_image" as const, title: ${j(siteName)}${seo.description ? `, description: ${j(seo.description)}` : ""}${seo.logo ? `, images: [${j(seo.logo)}]` : ""} },`;
+
   return `import type { Metadata } from "next";
-import Link from "next/link";${imageImport}
+import Link from "next/link";${imageImport}${scriptImport}
 import DeferredAnalytics from "@/components/DeferredAnalytics";
 import Providers from "./providers";
 import "./globals.css";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://example.vercel.app";
 
-// SEO de fábrica (ECO-56/F5): metadata + Open Graph site-wide. metadataBase env-driven (F3 cablea el dominio).
+// SEO de fábrica (ECO-56/F5): metadata + Open Graph + Twitter Cards site-wide.
 export const metadata: Metadata = {
   metadataBase: new URL(SITE_URL),
   title: { default: ${j(siteName)}, template: ${j(`%s · ${siteName}`)} },${seo.description ? `\n  description: ${j(seo.description)},` : ""}
@@ -411,7 +429,7 @@ export const metadata: Metadata = {
     siteName: ${j(siteName)},
     title: ${j(siteName)},
     url: SITE_URL,${seo.description ? `\n    description: ${j(seo.description)},` : ""}${seo.logo ? `\n    images: [${j(seo.logo)}],` : ""}
-  },
+  },${twitterMeta}
 };
 
 // JSON-LD (Google recomienda JSON-LD): ${jsonld["@type"]} de los HECHOS del cliente (nunca inventado).
@@ -426,12 +444,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="${language}">
       <head>
         <script dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(ld) }} />${faviconLinks}${cookiebotScript}
       </head>
       <body>
         <header className="border-b border-border-default">
           <nav aria-label="${t.navAria}" className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-6 py-4">
-            ${brand}
+            ${brandEl}
             <ul className="hidden gap-6 sm:flex">
 ${navLis}
             </ul>
@@ -445,8 +463,7 @@ ${navLis}
             <p className="mt-2">Powered by <span className="font-medium text-content-secondary">EM Ecosystem</span></p>
           </div>
         </footer>
-        {/* Observabilidad diferida: no bloquea el main-thread (S2 Performance). */}
-        <DeferredAnalytics />
+        ${analyticsEl}
       </body>
     </html>
   );

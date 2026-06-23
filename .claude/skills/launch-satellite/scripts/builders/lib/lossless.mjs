@@ -96,12 +96,29 @@ export function verifyEmit(ir, satDir) {
   const stats = irStats(ir);
 
   const problems = [], lines = [];
+
+  // Verificar por RUTA (no solo conteo): cada página del IR debe tener su page.tsx.
+  // El emitter puede añadir páginas extra (p.ej. /contact del estándar pro) — eso está bien; lo que NO está
+  // bien es que falte una ruta del IR aunque otra nueva haya inflado el conteo total.
+  const fileToRoute = (f) => {
+    const rel = f.substring(appDir.length).replace(/\\/g, "/").replace(/\/page\.tsx$/, "");
+    return rel || "/";
+  };
+  const emittedRoutes = new Set(files.map(fileToRoute));
+  const irRoutes = (ir.pages || []).map((p) => p.route);
+  const missing = irRoutes.filter((r) => !emittedRoutes.has(r));
+  if (missing.length) {
+    problems.push(`páginas: rutas del IR que CAYERON del sitio (${missing.length}): ${missing.join(", ")}`);
+    lines.push(`  ✗ páginas: IR ${irRoutes.length} rutas → sitio ${emittedRoutes.size} (faltan: ${missing.join(", ")})`);
+  } else {
+    lines.push(`  ✓ páginas: todas las ${irRoutes.length} rutas del IR presentes (+ ${emittedRoutes.size - irRoutes.length} extra del núcleo)`);
+  }
+
   const chk = (name, inN, outN) => {
     const pass = outN >= inN;
     if (!pass) problems.push(`emisión ${name}: el IR tenía ${inN} pero el sitio solo ${outN} (SE CAYÓ ${inN - outN})`);
     lines.push(`  ${pass ? "✓" : "✗"} ${name}: IR ${inN} → sitio ${outN}`);
   };
-  chk("páginas", stats.pages, files.length);
   chk("palabras (copy)", irWords, wordsEmitted);
   chk("imágenes usadas", usedMedia, imgRefs.size);
   return { ok: problems.length === 0, problems, lines };

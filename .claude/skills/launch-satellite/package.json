@@ -3,9 +3,14 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Skill /launch-satellite — onboarding (F2a/ECO-24): 5 modos de intake → brief estructurado. Sin deps externas.",
-  "engines": { "node": ">=22.0.0" },
+  "description": "Skill /launch-satellite — onboarding + builders (FB0→FB5): IR, emitter, estándar profesional. Dep: sharp (favicons desde logo real, ADR-013).",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "scripts": {
     "test": "node --test"
+  },
+  "dependencies": {
+    "sharp": "^0.35.2"
   }
 }
