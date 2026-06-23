@@ -68,6 +68,17 @@ next.config.mjs, "Powered by EM Ecosystem" en layout.tsx. **Falla cualquiera →
 que `verifyEmit` (`{ ok, problems, lines }`). `buildFromFile` lo corre después de `verifyEmit` → tres gates
 encadenados: captura + emisión + launch-readiness.
 
+### D — CALIDAD DE CONTENIDO: cero artefactos de render + check de gate
+El render de bloques (`emit-blocks.mjs`) es **omit-if-absent estricto**: un bloque del IR sin texto usable
+(`null`/`undefined`/objeto) NO emite `<p>{"undefined"}</p>` — normaliza con `txt()` (sólo string/number son
+contenido) y si el bloque queda vacío no se emite. NUNCA "undefined"/"null"/"[object Object]"/`<div>` vacío. No
+se pierde copy real (un bloque vacío no tiene copy → el gate de emisión lossless sigue verde).
+El gate añade un check de **calidad de contenido** (`scanContentArtifacts`): escanea los `.tsx` del sitio y
+FALLA si un nodo de texto visible `{"…"}` es exactamente un token roto (`undefined`/`null`/`[object Object]`),
+está vacío (`{""}`/`<p></p>`) o contiene un token sin resolver (`{{…}}`/`${…}`/`%token%`). Caza el punto ciego
+del gate estructural: estructura válida pero basura visible. (No marca prosa legítima que *contenga* la palabra
+"undefined" — sólo un nodo cuyo texto entero ES el token.)
+
 ### D — LISTA VIVA / EXTENSIBLE (ADR-013 §7)
 El estándar es extensible: un indispensable futuro entra en `emit.mjs` (para que el emitter lo genere) +
 `launch-ready.mjs` (para que el gate lo verifique) → **lo heredan TODOS los builders**. La lista no es cerrada.
@@ -85,7 +96,12 @@ El estándar es extensible: un indispensable futuro entra en `emit.mjs` (para qu
 - `scripts/generate-satellite.mjs` (MODIFICADO): LAYOUT acepta `opts = {}` (cookiebot, favicons) + Twitter
   Cards site-level. Sin cambio de comportamiento cuando no se pasan opts (backward compatible).
 - `package.json` skill: añade `sharp` como dep (requerido para favicon generation).
-- Tests: `tests/emitter.test.mjs` (extendido con await + FB5 checks) + `tests/launch-ready.test.mjs` (NUEVO).
+- `scripts/builders/lib/emit-blocks.mjs` (MODIFICADO): `txt()` normalizador (sólo string/number → contenido;
+  null/undefined/objeto/bool → "") cableado en `cleanInline`/`toParas`; `text-editor`/`icon-box` omiten el
+  wrapper si no hay copy real. Mata el artefacto `<p>{"undefined"}</p>` (omit-if-absent estricto).
+- `scripts/builders/lib/launch-ready.mjs` (MODIFICADO): `scanContentArtifacts` + check de calidad de contenido.
+- Tests: `tests/emitter.test.mjs` (extendido con await + FB5 checks + render sin artefactos) +
+  `tests/launch-ready.test.mjs` (NUEVO; incluye gate de calidad de contenido + no-false-positive).
 - **NO** toca los demás builders/modos ni la lógica de generación decorativa.
 
 ## Acceptance Criteria
@@ -105,9 +121,14 @@ El estándar es extensible: un indispensable futuro entra en `emit.mjs` (para qu
    `playwright.config.ts` + `@axe-core/playwright` en devDeps del satélite.
 7. **Gate de launch-readiness**: `verifyLaunchReady(satDir)` pasa en satélite completo; falla si falta
    CUALQUIER indispensable; encadenado en `buildFromFile` tras `verifyEmit`.
-8. **Tests verdes**: `launch-ready.test.mjs` (8 tests: pasa completo + falla por ítem) + `emitter.test.mjs`
-   (extendido: await + FB5 checks + launch-ready integration). CI 18+ tests verdes.
-9. **Backward compatible**: `LAYOUT` sin opts se comporta igual (sin cookiebot/favicons/twitter extra).
+8. **Calidad de contenido (cero artefactos de render)**: el render de bloques NUNCA emite
+   "undefined"/"null"/"[object Object]" ni `<div>`/`<p>` vacíos (omit-if-absent estricto en `emit-blocks.mjs`);
+   un bloque sin copy real no se emite (sin pérdida lossless). El gate añade un check que escanea el sitio y
+   FALLA con artefactos de texto visible (token roto entero, `{""}`, `<p></p>`, o token IR sin resolver),
+   reportando archivo + hallazgo; no marca prosa legítima que contenga la palabra "undefined".
+9. **Tests verdes**: `launch-ready.test.mjs` (pasa completo + falla por ítem + gate de contenido + no-FP) +
+   `emitter.test.mjs` (extendido: await + FB5 checks + render sin artefactos). Suite del skill 100 tests verdes.
+10. **Backward compatible**: `LAYOUT` sin opts se comporta igual (sin cookiebot/favicons/twitter extra).
 
 ## Alignment
 Implementa **FB5** de [`satellite-builders`](../strategy/satellite-builders.md) / [ADR-013](../adr/013-satellite-launch-readiness-standard.md).

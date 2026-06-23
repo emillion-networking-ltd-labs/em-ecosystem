@@ -25,6 +25,42 @@ function findContactPage(satDir) {
   return walk(join(satDir, "src/app"));
 }
 
+// Tokens que NUNCA deben aparecer como TEXTO VISIBLE (artefactos de render: String(undefined/null/objeto)).
+const ARTIFACT_TOKENS = ["undefined", "null", "[object Object]"];
+
+// Escanea el sitio emitido por ARTEFACTOS de CALIDAD DE CONTENIDO (no estructura). El gate estructural no los
+// caza: un <p>{"undefined"}</p> tiene markup válido pero el sitio se ve ROTO. Mira los nodos de texto JSX
+// visibles {"…"} (lo que el renderer emite con JSON.stringify) + párrafos vacíos. Devuelve lista de hallazgos
+// (ruta + descripción); vacía = limpio. Sólo .tsx bajo src/ (donde vive el contenido visible).
+function scanContentArtifacts(satDir) {
+  const hits = [];
+  const walk = (dir) => {
+    let entries = [];
+    try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return; }
+    for (const e of entries) {
+      const full = join(dir, e.name);
+      if (e.isDirectory()) { walk(full); continue; }
+      if (!e.name.endsWith(".tsx")) continue;
+      let src = "";
+      try { src = readFileSync(full, "utf8"); } catch { continue; }
+      const rel = full.slice(satDir.length + 1);
+      // Nodos de texto JSX visibles: {"…"} — exactamente lo que emite el renderer (texto del IR JSON-stringificado).
+      for (const m of src.matchAll(/\{"((?:[^"\\]|\\.)*)"\}/g)) {
+        let s;
+        try { s = JSON.parse('"' + m[1] + '"'); } catch { s = m[1]; }
+        const trimmed = s.trim();
+        if (ARTIFACT_TOKENS.includes(trimmed)) hits.push(`${rel}: texto visible "${trimmed}"`);
+        else if (trimmed === "") hits.push(`${rel}: nodo de texto vacío {""}`);
+        else if (/\{\{|\}\}|\$\{|%[A-Za-z0-9_]+%/.test(s)) hits.push(`${rel}: token del IR sin resolver ("${trimmed.slice(0, 40)}")`);
+      }
+      // Párrafos visualmente vacíos.
+      if (/<p[^>]*>\s*<\/p>/.test(src)) hits.push(`${rel}: <p></p> vacío`);
+    }
+  };
+  walk(join(satDir, "src"));
+  return hits;
+}
+
 // Verifica que el directorio de satélite cumple el estándar profesional (ADR-013).
 // Devuelve { ok, problems, lines } — mismo contrato que verifyEmit / losslessReport.
 export function verifyLaunchReady(satDir) {
@@ -101,6 +137,14 @@ export function verifyLaunchReady(satDir) {
   // ── Firma "Powered by EM Ecosystem" (governance, en footer del layout)
   chk("Powered by EM Ecosystem (footer)", layout.includes("Powered by"),
     "el footer del layout debe llevar la firma 'Powered by EM Ecosystem'");
+
+  // ── CALIDAD DE CONTENIDO (ADR-013): cero artefactos de render visibles. El gate estructural mira QUE existan
+  // las piezas; este check mira que el contenido no se vea ROTO ("undefined"/"null"/"[object Object]"/<p></p>/
+  // tokens sin resolver). Cubre el punto ciego: estructura válida pero basura visible.
+  const artifacts = scanContentArtifacts(satDir);
+  chk(`contenido sin artefactos de render (undefined/null/[object Object]/<p></p>)${artifacts.length ? ` — ${artifacts.length} hallazgo(s)` : ""}`,
+    artifacts.length === 0,
+    artifacts.length ? artifacts.slice(0, 8).join(" · ") + (artifacts.length > 8 ? ` · …(+${artifacts.length - 8})` : "") : "");
 
   return { ok: problems.length === 0, problems, lines };
 }

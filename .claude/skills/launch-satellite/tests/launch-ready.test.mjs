@@ -107,6 +107,43 @@ test("verifyLaunchReady: falla si la página de contacto NO monta el formulario 
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 
+test("verifyLaunchReady: falla si el sitio tiene artefactos de render ('undefined' visible)", () => {
+  const root = mkdtempSync(join(tmpdir(), "lr-artifact-"));
+  try {
+    const dir = makeFullSat(root);
+    // Inyecta el artefacto que destapó Atis: <p>{"undefined"}</p> como texto visible.
+    writeFileSync(join(dir, "src", "app", "page.tsx"),
+      'export default function Page() { return <main><h1>{"Welcome"}</h1><p>{"undefined"}</p></main>; }');
+    const r = verifyLaunchReady(dir);
+    assert.equal(r.ok, false);
+    assert.ok(r.problems.some((p) => /artefacto|undefined/.test(p)), "debe reportar el artefacto: " + r.problems.join("; "));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("verifyLaunchReady: falla con <p></p> vacío, [object Object] o null visibles", () => {
+  const root = mkdtempSync(join(tmpdir(), "lr-empty-"));
+  try {
+    const dir = makeFullSat(root);
+    writeFileSync(join(dir, "src", "app", "page.tsx"),
+      'export default function Page() { return <main><p></p><span>{"[object Object]"}</span><em>{"null"}</em></main>; }');
+    const r = verifyLaunchReady(dir);
+    assert.equal(r.ok, false);
+    assert.ok(r.problems.some((p) => /artefacto|<p><\/p>|object Object|null/.test(p)), "debe reportar artefactos: " + r.problems.join("; "));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("verifyLaunchReady: NO false-positive — texto legítimo con 'undefined' dentro de una frase pasa", () => {
+  const root = mkdtempSync(join(tmpdir(), "lr-nofp-"));
+  try {
+    const dir = makeFullSat(root);
+    // 'undefined' como palabra dentro de una frase real NO es artefacto (sólo lo es un nodo entero === token).
+    writeFileSync(join(dir, "src", "app", "page.tsx"),
+      'export default function Page() { return <main><p>{"Behavior is undefined when the input is empty."}</p></main>; }');
+    const r = verifyLaunchReady(dir);
+    assert.equal(r.ok, true, "no debe marcar prosa legítima: " + r.problems.join("; "));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
 test("verifyLaunchReady: falla si falta el favicon", () => {
   const root = mkdtempSync(join(tmpdir(), "lr-nofav-"));
   try {

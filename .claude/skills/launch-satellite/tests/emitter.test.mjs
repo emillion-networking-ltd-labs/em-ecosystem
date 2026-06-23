@@ -32,6 +32,26 @@ test("renderBlock: button real → CTA con su href; shortcode dinámico sin text
   assert.match(renderBlock({ kind: "button", text: "Contact", raw: { settings: { link: { url: "/contact" } } } }, ctx), /<Button[^>]*href="\/contact"[^>]*>\{"Contact"\}/);
   assert.equal(renderBlock({ kind: "shortcode", text: "" }, ctx), "");
 });
+test("renderBlock: bloque SIN texto (undefined/null/objeto) → omite, NUNCA emite 'undefined'/'null'/'[object Object]'", () => {
+  // El caso que destapó Atis: b.text ausente → String(undefined) emitía <p>{"undefined"}</p>.
+  for (const kind of ["heading", "text-editor", "html", "text", "icon-box", "testimonial", "icon-list", "divider", "shortcode"]) {
+    for (const bad of [undefined, null, {}, { foo: 1 }, true]) {
+      const out = renderBlock({ kind, text: bad }, ctx);
+      assert.doesNotMatch(out, /undefined|\bnull\b|\[object Object\]/, `${kind} con ${JSON.stringify(bad) ?? "undefined"} no debe emitir artefacto`);
+    }
+  }
+  // heading vacío → "" (omitido); divider sin texto → <hr/> limpio (no etiqueta "undefined")
+  assert.equal(renderBlock({ kind: "heading" }, ctx), "");
+  assert.match(renderBlock({ kind: "divider" }, ctx), /^<hr/);
+  // text-editor con sólo espacios → omitido (ni div vacío ni artefacto)
+  assert.equal(renderBlock({ kind: "text-editor", text: "   " }, ctx), "");
+});
+test("renderMain: una página con bloques vacíos NO emite secciones basura ('undefined')", () => {
+  const page = { route: "/contact", blocks: [{ kind: "heading", text: "Contact" }, { kind: "shortcode" }, { kind: "text-editor", text: null }, { kind: "default" }] };
+  const main = renderMain(page, { ...ctx, isHome: false });
+  assert.match(main, /\{"Contact"\}/, "el heading real se preserva");
+  assert.doesNotMatch(main, /undefined|\bnull\b|\[object Object\]/, "cero artefactos");
+});
 test("renderMain: HOME → primer grupo en Hero de marca; coloca imágenes usadas no-widget (fondos) como galería", () => {
   const page = { route: "/", blocks: [{ kind: "heading", text: "Welcome" }, { kind: "text-editor", text: "<p>Real copy.</p>" }] };
   const main = renderMain(page, { ...ctx, pageImages: ["/images/hero.jpg"] });
