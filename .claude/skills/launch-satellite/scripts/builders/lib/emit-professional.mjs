@@ -53,12 +53,18 @@ export async function sendLead(
 }
 `;
 
-// Contact page: client component con TurnstileWidget + form → Server Action. TurnstileWidget viene del
-// em-ui registry (emui(['add','TurnstileWidget']) lo instala + su dep hooks/useTheme.ts).
-export const CONTACT_PAGE = (siteName, t) => {
+// Formulario funcional REUTILIZABLE como SECCIÓN (client component). Se monta SIEMPRE en la página de contacto
+// del satélite — sea la del cliente (con su contenido real reconstruido del IR) o una /contact sintética. Aislar
+// el form en su propio client component permite que la página de contacto siga siendo SERVER component (metadata
+// válida + contenido real del IR sin perder nada) y que solo el form sea cliente. Un client component NO puede
+// exportar metadata, por eso el form va aparte. TurnstileWidget viene del em-ui registry.
+export const CONTACT_FORM_COMPONENT = (t) => {
   const j = (v) => JSON.stringify(String(v ?? ""));
-  const heading = `${siteName} — ${t?.contact ?? "Contact"}`;
-  const subText = t?.contactDesc ?? "Send us a message and we'll be in touch.";
+  const nameL = t?.contactFormName ?? "Name";
+  const emailL = t?.contactFormEmail ?? "Email";
+  const msgL = t?.contactFormMessage ?? "Message";
+  const sendL = t?.contactFormSend ?? "Send message";
+  const sendingL = t?.contactFormSending ?? "Sending…";
   return `"use client";
 
 import { useState, useRef, useCallback } from "react";
@@ -66,20 +72,16 @@ import Button from "@/components/ui/Button";
 import TurnstileWidget from "@/components/ui/TurnstileWidget";
 import { sendLead } from "@/app/actions/send-lead";
 
-export const metadata = {
-  title: { absolute: ${j(heading)} },
-  alternates: { canonical: "/contact" },
-  openGraph: { type: "website", title: ${j(heading)}, url: "/contact" },
-  twitter: { card: "summary_large_image" as const, title: ${j(heading)} },
-};
-
-export default function ContactPage() {
+// Formulario de contacto/lead funcional (ADR-013 §2). Props opcionales heading/lead para el encabezado de la
+// sección: la página sintética los pasa; al añadirlo a una página de contacto real, se omiten (la página ya
+// trae su propio título y contenido). Aislado como client component para que la página sea server component.
+export default function ContactForm({ heading, lead }: { heading?: string; lead?: string }) {
   const [status, setStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [resetKey, setResetKey] = useState(0);
   const [token, setToken] = useState("");
   const formRef = useRef<HTMLFormElement>(null);
 
-  const handleToken = useCallback((t: string) => setToken(t), []);
+  const handleToken = useCallback((tk: string) => setToken(tk), []);
   const handleExpire = useCallback(() => setToken(""), []);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
@@ -102,74 +104,105 @@ export default function ContactPage() {
   }
 
   return (
-    <main className="bg-surface-primary text-content-primary">
-      <section className="mx-auto max-w-2xl px-6 py-20 sm:py-28">
-        <h1 className="text-h1 font-bold text-content-primary">{${j(heading)}}</h1>
-        <p className="mt-4 text-body text-content-secondary">{${j(subText)}}</p>
-        {status === "ok" ? (
-          <div className="mt-10 rounded-2xl border border-border-default bg-surface-secondary p-8 text-center">
-            <p className="text-h3 font-semibold text-accent">{"Message sent!"}</p>
-            <p className="mt-2 text-body text-content-secondary">
-              {"Thank you, we\\u2019ll be in touch shortly."}
+    <section className="mx-auto max-w-2xl px-6 py-16 sm:py-20">
+      {heading ? <h2 className="text-h2 font-bold text-content-primary">{heading}</h2> : null}
+      {lead ? <p className="mt-3 text-body text-content-secondary">{lead}</p> : null}
+      {status === "ok" ? (
+        <div className="mt-10 rounded-2xl border border-border-default bg-surface-secondary p-8 text-center">
+          <p className="text-h3 font-semibold text-accent">{"Message sent!"}</p>
+          <p className="mt-2 text-body text-content-secondary">
+            {"Thank you, we\\u2019ll be in touch shortly."}
+          </p>
+        </div>
+      ) : (
+        <form ref={formRef} onSubmit={handleSubmit} className="mt-10 space-y-6" noValidate>
+          {status === "error" && (
+            <p className="rounded-lg bg-surface-secondary px-4 py-3 text-sm text-red-500">
+              {"Something went wrong — please try again."}
             </p>
+          )}
+          <div>
+            <label htmlFor="name" className="mb-1 block text-sm font-medium text-content-secondary">
+              {${j(nameL)}}
+            </label>
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              autoComplete="name"
+              className="w-full rounded-lg border border-border-default bg-surface-secondary px-4 py-2.5 text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent"
+            />
           </div>
-        ) : (
-          <form ref={formRef} onSubmit={handleSubmit} className="mt-10 space-y-6" noValidate>
-            {status === "error" && (
-              <p className="rounded-lg bg-surface-secondary px-4 py-3 text-sm text-red-500">
-                {"Something went wrong — please try again."}
-              </p>
-            )}
-            <div>
-              <label htmlFor="name" className="mb-1 block text-sm font-medium text-content-secondary">
-                {"Name"}
-              </label>
-              <input
-                id="name"
-                name="name"
-                type="text"
-                required
-                autoComplete="name"
-                className="w-full rounded-lg border border-border-default bg-surface-secondary px-4 py-2.5 text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
-            <div>
-              <label htmlFor="email" className="mb-1 block text-sm font-medium text-content-secondary">
-                {"Email"}
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                required
-                autoComplete="email"
-                className="w-full rounded-lg border border-border-default bg-surface-secondary px-4 py-2.5 text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
-            <div>
-              <label htmlFor="message" className="mb-1 block text-sm font-medium text-content-secondary">
-                {"Message"}
-              </label>
-              <textarea
-                id="message"
-                name="message"
-                rows={5}
-                required
-                className="w-full resize-none rounded-lg border border-border-default bg-surface-secondary px-4 py-2.5 text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent"
-              />
-            </div>
-            <TurnstileWidget onToken={handleToken} onExpire={handleExpire} resetKey={resetKey} />
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={!token || status === "sending"}
-              aria-busy={status === "sending"}
-            >
-              {status === "sending" ? "Sending…" : "Send message"}
-            </Button>
-          </form>
-        )}
-      </section>
+          <div>
+            <label htmlFor="email" className="mb-1 block text-sm font-medium text-content-secondary">
+              {${j(emailL)}}
+            </label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              autoComplete="email"
+              className="w-full rounded-lg border border-border-default bg-surface-secondary px-4 py-2.5 text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
+          <div>
+            <label htmlFor="message" className="mb-1 block text-sm font-medium text-content-secondary">
+              {${j(msgL)}}
+            </label>
+            <textarea
+              id="message"
+              name="message"
+              rows={5}
+              required
+              className="w-full resize-none rounded-lg border border-border-default bg-surface-secondary px-4 py-2.5 text-content-primary placeholder:text-content-tertiary focus:outline-none focus:ring-2 focus:ring-accent"
+            />
+          </div>
+          <TurnstileWidget onToken={handleToken} onExpire={handleExpire} resetKey={resetKey} />
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={!token || status === "sending"}
+            aria-busy={status === "sending"}
+          >
+            {status === "sending" ? ${j(sendingL)} : ${j(sendL)}}
+          </Button>
+        </form>
+      )}
+    </section>
+  );
+}
+`;
+};
+
+// Sección JSX que monta <ContactForm /> dentro de una página de contacto REAL del cliente (server component).
+// Se inyecta tras el contenido fiel del IR → contenido real + formulario funcional. Sin heading/lead: la página
+// ya trae su propio título. El import se añade aparte (ver CONTACT_FORM_IMPORT).
+export const CONTACT_FORM_IMPORT = `import ContactForm from "@/components/ContactForm";`;
+export const CONTACT_FORM_SECTION = `      <ContactForm />`;
+
+// Página de contacto SINTÉTICA (server component): SOLO cuando el cliente NO trae ninguna página de contacto.
+// Es server component → metadata válida (un client component no puede exportar metadata). El formulario es el
+// client component ContactForm, montado aquí con su encabezado.
+export const CONTACT_PAGE = (siteName, t) => {
+  const j = (v) => JSON.stringify(String(v ?? ""));
+  const heading = `${siteName} — ${t?.contactTitle ?? "Contact"}`;
+  const formTitle = t?.contactFormTitle ?? "Send us a message";
+  const formLead = t?.contactFormLead ?? "Send us a message and we'll be in touch shortly.";
+  return `import ContactForm from "@/components/ContactForm";
+
+export const metadata = {
+  title: { absolute: ${j(heading)} },
+  alternates: { canonical: "/contact" },
+  openGraph: { type: "website", title: ${j(heading)}, url: "/contact" },
+  twitter: { card: "summary_large_image" as const, title: ${j(heading)} },
+};
+
+export default function ContactPage() {
+  return (
+    <main className="bg-surface-primary text-content-primary">
+      <ContactForm heading={${j(formTitle)}} lead={${j(formLead)}} />
     </main>
   );
 }

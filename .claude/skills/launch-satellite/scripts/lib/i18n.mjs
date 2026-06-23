@@ -35,6 +35,9 @@ const CATALOGS = {
     faqEyebrow: "FAQ",
     faqTitle: "Preguntas frecuentes",
     contactTitle: "Contacto",
+    contactFormTitle: "Escríbenos",
+    contactFormLead: "Envíanos un mensaje y te responderemos lo antes posible.",
+    backHome: "Volver al inicio",
   },
   en: {
     navHome: "Home",
@@ -57,6 +60,9 @@ const CATALOGS = {
     faqEyebrow: "FAQ",
     faqTitle: "Frequently asked questions",
     contactTitle: "Contact",
+    contactFormTitle: "Send us a message",
+    contactFormLead: "Send us a message and we'll be in touch shortly.",
+    backHome: "Back to home",
   },
 };
 

@@ -12,12 +12,22 @@ satélite sale a medias. Fasificado: `emit.mjs` (núcleo emitter) + `lib/launch-
 
 ## Decisiones que resuelve
 
-### D — Formulario de contacto/lead funcional (ADR-013 §2: Vercel Server Action + Resend + TurnstileWidget)
-`CONTACT_PAGE` + `CONTACT_ACTION` en el núcleo. Vercel Server Action (code propio, `"use server"`) → Resend
-(email/deliverability) → anti-spam **TurnstileWidget** de em-ui (`@marsidev/react-turnstile`,
-`NEXT_PUBLIC_TURNSTILE_SITE_KEY`). Env vars: `RESEND_API_KEY`, `LEAD_EMAIL`, `TURNSTILE_SECRET_KEY`. Pluggable a
-un form-service por cliente. Si el IR ya tiene `/contact`, se añade igualmente (el operator puede decidir cuál
-usar); si no existe, se crea.
+### D — Formulario de contacto/lead funcional SIEMPRE en la ruta de contacto REAL (ADR-013 §2: Vercel Server Action + Resend + TurnstileWidget)
+`CONTACT_FORM_COMPONENT` (client component `ContactForm` aislado) + `CONTACT_ACTION` + `CONTACT_PAGE` en el
+núcleo. Vercel Server Action (code propio, `"use server"`) → Resend (email/deliverability) → anti-spam
+**TurnstileWidget** de em-ui (`@marsidev/react-turnstile`, `NEXT_PUBLIC_TURNSTILE_SITE_KEY`). Env vars:
+`RESEND_API_KEY`, `LEAD_EMAIL`, `TURNSTILE_SECRET_KEY`. Pluggable a un form-service por cliente.
+
+El formulario funcional se monta **SIEMPRE** en la página de contacto del satélite, sea cual sea su ruta:
+- Si el cliente YA trae página de contacto (cualquier variante: `/contact`, `/contact-us`, `/contacto`…), su
+  contenido REAL se reconstruye fiel del IR (el gate de emisión lo sigue verificando — lossless) y se le AÑADE
+  `<ContactForm />` como sección. Contenido real + formulario que funciona.
+- Si no trae ninguna, se crea `/contact` sintética (server component) que renderiza `<ContactForm />`.
+- El form va aislado como client component → la página de contacto sigue siendo **server component** (metadata
+  válida; un client component no puede exportar `metadata`).
+- El gate de launch-readiness verifica el formulario en la ruta de contacto REAL (no hardcodea `/contact`):
+  detecta la página de contacto, que monte `<ContactForm />`, y que `ContactForm.tsx` cablee TurnstileWidget +
+  `sendLead`.
 
 ### D — Favicon + iconos + web manifest desde el LOGO REAL (ADR-013 §1, sharp)
 `generateFavicons(logoFile, pubDir)` (async, em-professional.mjs): genera `favicon.png` (32×32),
@@ -50,7 +60,9 @@ AA total** (~57% automatizable). `playwright.config.ts` generado con `webServer`
 
 ### D — GATE de launch-readiness (`lib/launch-ready.mjs` `verifyLaunchReady`)
 Verifica por construcción: favicon (svg|png|ico), apple-touch-icon, android-chrome 192/512, site.webmanifest,
-favicon links en layout.tsx, not-found.tsx, contact/page.tsx, actions/send-lead.ts, Cookiebot en layout.tsx,
+favicon links en layout.tsx, not-found.tsx, **formulario funcional en la ruta de contacto REAL** (localiza la
+página de contacto del satélite — `/contact`, `/contact-us`, `/contacto`… — verifica que monte `<ContactForm />`
+y que `ContactForm.tsx` cablee TurnstileWidget), actions/send-lead.ts cableado, Cookiebot en layout.tsx,
 Twitter Cards (summary_large_image) en layout.tsx, tests/accessibility.spec.ts, security headers S2 en
 next.config.mjs, "Powered by EM Ecosystem" en layout.tsx. **Falla cualquiera → NO "lanzado"**. Mismo contrato
 que `verifyEmit` (`{ ok, problems, lines }`). `buildFromFile` lo corre después de `verifyEmit` → tres gates
@@ -61,8 +73,11 @@ El estándar es extensible: un indispensable futuro entra en `emit.mjs` (para qu
 `launch-ready.mjs` (para que el gate lo verifique) → **lo heredan TODOS los builders**. La lista no es cerrada.
 
 ## Scope
-- `scripts/builders/lib/emit-professional.mjs` (NUEVO): templates CONTACT_ACTION/CONTACT_PAGE/NOT_FOUND_PAGE/
-  WEBMANIFEST/A11Y_TEST/PLAYWRIGHT_CONFIG + `generateFavicons` async.
+- `scripts/builders/lib/emit-professional.mjs` (NUEVO): templates CONTACT_ACTION/CONTACT_FORM_COMPONENT
+  (ContactForm client component reutilizable)/CONTACT_FORM_IMPORT/CONTACT_FORM_SECTION/CONTACT_PAGE (server)/
+  NOT_FOUND_PAGE/WEBMANIFEST/A11Y_TEST/PLAYWRIGHT_CONFIG + `generateFavicons` async.
+- `scripts/lib/i18n.mjs` (MODIFICADO): chrome keys del formulario (`contactFormTitle`, `contactFormLead`,
+  `backHome`) en es/en — sólo ADITIVO (salida byte-idéntica para clientes existentes).
 - `scripts/builders/lib/launch-ready.mjs` (NUEVO): `verifyLaunchReady` / `assertLaunchReady`.
 - `scripts/builders/emit.mjs` (MODIFICADO): async, llama `generateFavicons` + todos los templates pro + LAYOUT
   con `{ cookiebot:true, favicons:true }` + Twitter Cards + JSON-LD por tipo en PAGE_FROM_IR.
@@ -74,8 +89,11 @@ El estándar es extensible: un indispensable futuro entra en `emit.mjs` (para qu
 - **NO** toca los demás builders/modos ni la lógica de generación decorativa.
 
 ## Acceptance Criteria
-1. **Formulario**: `src/app/contact/page.tsx` (TurnstileWidget + submit → Server Action) +
-   `src/app/actions/send-lead.ts` (Resend + Turnstile verify) emitidos en TODO satélite.
+1. **Formulario funcional SIEMPRE en la ruta de contacto REAL**: `src/components/ContactForm.tsx` (client
+   component: TurnstileWidget + submit → Server Action) + `src/app/actions/send-lead.ts` (Resend + Turnstile
+   verify) en TODO satélite. Si el cliente trae página de contacto (cualquier ruta), su contenido real se
+   preserva (lossless) y se le añade `<ContactForm />`; si no, se crea `/contact` sintética. El gate verifica
+   el form en la ruta REAL, no hardcodea `/contact`.
 2. **Favicon**: logo real → `favicon.png` (32×32) + `apple-touch-icon.png` (180×180) +
    `android-chrome-{192,512}x{192,512}.png` via sharp; `favicon.svg` si logo es SVG; `site.webmanifest`.
 3. **404 de marca**: `src/app/not-found.tsx` siempre presente, con siteName y enlace home.

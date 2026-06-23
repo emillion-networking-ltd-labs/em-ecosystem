@@ -99,13 +99,24 @@ test("emitFromIR FB5: estándar profesional emitido — formulario, 404, a11y, C
   try {
     await emitFromIR(ir, dest, { brand: "#0076a9", colorMode: "light" });
 
-    // Formulario de contacto + Server Action (ADR-013 §2)
+    // Formulario de contacto + Server Action (ADR-013 §2). El IR mínimo no trae contacto → /contact sintética.
     assert.ok(existsSync(join(dest, "src/app/contact/page.tsx")), "contact page");
     assert.ok(existsSync(join(dest, "src/app/actions/send-lead.ts")), "Server Action");
     const action = readFileSync(join(dest, "src/app/actions/send-lead.ts"), "utf8");
     assert.match(action, /"use server"/, "server action");
     assert.match(action, /Resend/, "Resend en el action");
     assert.match(action, /Turnstile|cf-turnstile/, "Turnstile en el action");
+
+    // Formulario aislado como client component reutilizable (ContactForm) → la página puede ser server component
+    assert.ok(existsSync(join(dest, "src/components/ContactForm.tsx")), "ContactForm component");
+    const form = readFileSync(join(dest, "src/components/ContactForm.tsx"), "utf8");
+    assert.match(form, /"use client"/, "ContactForm es client component");
+    assert.match(form, /TurnstileWidget/, "Turnstile en el form");
+    assert.match(form, /sendLead/, "form cablea el Server Action");
+    const contactPage = readFileSync(join(dest, "src/app/contact/page.tsx"), "utf8");
+    assert.match(contactPage, /<ContactForm/, "la página de contacto monta <ContactForm />");
+    assert.doesNotMatch(contactPage, /"use client"/, "la página de contacto es server component (metadata válida)");
+    assert.match(contactPage, /export const metadata/, "metadata válida en la página server");
 
     // 404 de marca (ADR-013 §1)
     assert.ok(existsSync(join(dest, "src/app/not-found.tsx")), "404 de marca");
@@ -141,6 +152,48 @@ test("emitFromIR FB5: estándar profesional emitido — formulario, 404, a11y, C
     // Playwright config
     assert.ok(existsSync(join(dest, "playwright.config.ts")), "playwright.config.ts");
 
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("emitFromIR FB5: el cliente YA trae página de contacto (/contact-us) → contenido REAL + formulario AÑADIDO, sin /contact sintética", async () => {
+  const root = mkdtempSync(join(tmpdir(), "emit-contact-"));
+  const pic = join(root, "pic.png"); writeFileSync(pic, "PNG");
+  const dest = join(root, "sat");
+  // IR con su propia página de contacto en /contact-us con contenido real (el caso Atis).
+  const ir = {
+    irVersion: IR_VERSION, source: { kind: "test" },
+    site: { name: "Demo Co", description: "Demo", language: "en", url: "https://demo.test" },
+    pages: [
+      { id: 2, type: "page", slug: "home", route: "/", title: "Home", parent: null, order: 0, seo: null,
+        blocks: [{ kind: "heading", text: "Welcome" }] },
+      { id: 9, type: "page", slug: "contact-us", route: "/contact-us", title: "Contact Us", parent: null, order: 1, seo: null,
+        blocks: [{ kind: "heading", text: "Reach Our Team" }, { kind: "text-editor", text: "Visit us at 10 Cargo Road, open Mon-Fri." }] },
+    ],
+    media: [], menus: [], forms: [],
+  };
+  try {
+    await emitFromIR(ir, dest, { brand: "#0076a9" });
+    // NO se crea /contact sintética: la ruta del cliente es /contact-us
+    assert.ok(!existsSync(join(dest, "src/app/contact/page.tsx")), "sin /contact sintética");
+    // La página real /contact-us preserva su contenido REAL (lossless) + monta el formulario funcional
+    const cu = readFileSync(join(dest, "src/app/contact-us/page.tsx"), "utf8");
+    assert.match(cu, /Reach Our Team/, "contenido real (heading) preservado");
+    assert.match(cu, /Visit us at 10 Cargo Road/, "contenido real (copy) preservado");
+    assert.match(cu, /<ContactForm/, "formulario funcional añadido a la página de contacto del cliente");
+    assert.match(cu, /import ContactForm/, "import del ContactForm");
+    assert.doesNotMatch(cu, /"use client"/, "la página sigue siendo server component");
+    // ContactForm + Server Action presentes
+    assert.ok(existsSync(join(dest, "src/components/ContactForm.tsx")), "ContactForm component");
+    assert.ok(existsSync(join(dest, "src/app/actions/send-lead.ts")), "Server Action");
+    // GATE de emisión: nada del IR se cae (la /contact-us real sigue ahí con su copy)
+    const e = verifyEmit(ir, dest);
+    assert.equal(e.ok, true, "emisión lossless: " + JSON.stringify(e.problems));
+    // GATE de launch-readiness detecta el form en la ruta REAL /contact-us (con favicons manuales)
+    for (const f of ["favicon.png", "apple-touch-icon.png", "android-chrome-192x192.png", "android-chrome-512x512.png"]) {
+      writeFileSync(join(dest, "public", f), "PNG");
+    }
+    const lr = verifyLaunchReady(dest);
+    assert.equal(lr.ok, true, "launch-readiness en ruta real: " + lr.problems.join("; "));
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 

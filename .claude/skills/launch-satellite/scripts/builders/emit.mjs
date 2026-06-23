@@ -16,9 +16,15 @@ import {
 import { chrome, FALLBACK_LANG } from "../lib/i18n.mjs";
 import { renderMain } from "./lib/emit-blocks.mjs";
 import {
-  CONTACT_ACTION, CONTACT_PAGE, NOT_FOUND_PAGE, WEBMANIFEST, A11Y_TEST,
-  PLAYWRIGHT_CONFIG, generateFavicons,
+  CONTACT_ACTION, CONTACT_PAGE, CONTACT_FORM_COMPONENT, CONTACT_FORM_IMPORT, CONTACT_FORM_SECTION,
+  NOT_FOUND_PAGE, WEBMANIFEST, A11Y_TEST, PLAYWRIGHT_CONFIG, generateFavicons,
 } from "./lib/emit-professional.mjs";
+
+// Detecta la ruta de contacto del cliente en el IR (cualquier variante: /contact, /contact-us, /contacto…).
+// El formulario funcional se monta SIEMPRE en ESTA ruta (ADR-013 §2): si el cliente ya la trae, su contenido
+// real se reconstruye fiel del IR + se le AÑADE el formulario; si no, se crea /contact sintética con el form.
+const CONTACT_ROUTE_RE = /\/contact(o|-?us)?$/i;
+const isContactRoute = (route) => CONTACT_ROUTE_RE.test(String(route || ""));
 
 const slug = (s) => String(s || "site").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "") || "site";
 const isHex = (s) => typeof s === "string" && /^#[0-9a-fA-F]{6}$/.test(s.trim());
@@ -169,35 +175,44 @@ export async function emitFromIR(ir, destDir, opts = {}) {
     favicons: true,
   }));
 
-  const ctx = { siteName, t, media: mediaWeb, contactHref: routes.find((r) => /contact|contacto/i.test(r)) || "/contact" };
+  // Ruta de contacto del cliente (la 1ª que matchea), o /contact sintética si no trae ninguna.
+  const clientContactRoute = routes.find(isContactRoute) || null;
+  const contactRoute = clientContactRoute || "/contact";
+  const ctx = { siteName, t, media: mediaWeb, contactHref: contactRoute };
   for (const p of pages) {
     const seg = p.route === "/" ? "" : p.route.replace(/^\/+/, "");
     const dir = seg ? join(app, seg) : app;
     mkdirSync(dir, { recursive: true });
     const pageImages = (ir.media || []).filter((m) => (m.usedBy || []).includes(p.id))
       .map((m) => mediaWeb.get(String(m.id).toLowerCase())).filter(Boolean);
-    writeFileSync(join(dir, "page.tsx"), PAGE_FROM_IR(p, { ...ctx, isHome: p.route === "/", pageImages }));
+    // La página de contacto del cliente: contenido REAL del IR + formulario funcional AÑADIDO como sección.
+    writeFileSync(join(dir, "page.tsx"), PAGE_FROM_IR(p, {
+      ...ctx, isHome: p.route === "/", pageImages, withContactForm: isContactRoute(p.route),
+    }));
     trace.pages.push(p.route);
   }
 
-  // --- Estándar profesional (ADR-013 §1/§2): formulario de contacto + 404 + a11y test ---
-  // Formulario: si el IR no tiene /contact, se añade; de lo contrario el endpoint es lo mismo.
-  const hasContactRoute = routes.some((r) => /\/contact(o|us|-us)?$/i.test(r));
-  if (!hasContactRoute) {
+  // --- Estándar profesional (ADR-013 §1/§2): formulario de contacto FUNCIONAL SIEMPRE + 404 + a11y test ---
+  // El formulario (client component ContactForm) se monta SIEMPRE en la página de contacto:
+  //  · cliente YA trae página de contacto → su contenido real (arriba) + <ContactForm /> añadido (lossless).
+  //  · cliente NO trae ninguna → /contact sintética (server component) que renderiza <ContactForm />.
+  mkdirSync(join(src, "components"), { recursive: true });
+  writeFileSync(join(src, "components", "ContactForm.tsx"), CONTACT_FORM_COMPONENT(t));
+  if (!clientContactRoute) {
     mkdirSync(join(app, "contact"), { recursive: true });
     writeFileSync(join(app, "contact", "page.tsx"), CONTACT_PAGE(siteName, t));
     trace.pages.push("/contact");
   }
-  // Server Action (siempre; necesario incluso si el IR tiene /contact)
+  // Server Action (siempre; el formulario lo invoca esté donde esté la página de contacto)
   mkdirSync(join(app, "actions"), { recursive: true });
   writeFileSync(join(app, "actions", "send-lead.ts"), CONTACT_ACTION());
 
   // 404 de marca
   writeFileSync(join(app, "not-found.tsx"), NOT_FOUND_PAGE(siteName, t));
 
-  // Test de a11y (Playwright + axe-core)
+  // Test de a11y (Playwright + axe-core) — incluye la ruta de contacto REAL del satélite
   mkdirSync(join(dest, "tests"), { recursive: true });
-  const allRoutes = [...new Set([...routes, ...(hasContactRoute ? [] : ["/contact"])])];
+  const allRoutes = [...new Set([...routes, contactRoute])];
   writeFileSync(join(dest, "tests", "accessibility.spec.ts"), A11Y_TEST(allRoutes));
 
   writeFileSync(join(app, "robots.ts"), ROBOTS);
@@ -214,9 +229,11 @@ function PAGE_FROM_IR(page, ctx) {
   const desc = seo.description || null;
   const main = renderMain(page, ctx);
   const jsonldBlock = pageJsonLdScript(page);
+  // Página de contacto del cliente: contenido real del IR + formulario funcional como sección (ADR-013 §2).
+  const withForm = !!ctx.withContactForm;
   return `import Image from "next/image";
 import Button from "@/components/ui/Button";
-${jsonldBlock ? "" : ""}
+${withForm ? CONTACT_FORM_IMPORT + "\n" : ""}
 export const metadata = {
   title: { absolute: ${j(title)} },${desc ? `\n  description: ${j(desc)},` : ""}
   alternates: { canonical: ${j(page.route)} },
@@ -227,7 +244,7 @@ export const metadata = {
 export default function Page() {
   return (
     <main className="bg-surface-primary text-content-primary">
-${main}${jsonldBlock ? `\n      ${jsonldBlock}` : ""}
+${main}${withForm ? `\n${CONTACT_FORM_SECTION}` : ""}${jsonldBlock ? `\n      ${jsonldBlock}` : ""}
     </main>
   );
 }

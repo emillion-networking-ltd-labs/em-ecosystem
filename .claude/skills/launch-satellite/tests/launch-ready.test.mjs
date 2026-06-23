@@ -13,11 +13,13 @@ function makeFullSat(root) {
   const dir = join(root, "sat");
   const pub = join(dir, "public");
   const app = join(dir, "src", "app");
+  const comp = join(dir, "src", "components");
   const acts = join(app, "actions");
   const contact = join(app, "contact");
   const tests = join(dir, "tests");
   mkdirSync(pub, { recursive: true });
   mkdirSync(app, { recursive: true });
+  mkdirSync(comp, { recursive: true });
   mkdirSync(acts, { recursive: true });
   mkdirSync(contact, { recursive: true });
   mkdirSync(tests, { recursive: true });
@@ -32,8 +34,10 @@ function makeFullSat(root) {
   // 404 de marca
   writeFileSync(join(app, "not-found.tsx"), "export default function NotFound() { return <p>404</p>; }");
 
-  // Formulario + Server Action
-  writeFileSync(join(contact, "page.tsx"), "export default function ContactPage() { return <form />; }");
+  // Formulario funcional: la página de contacto MONTA <ContactForm />; el form vive en su client component
+  // (TurnstileWidget + sendLead); + Server Action send-lead.ts.
+  writeFileSync(join(contact, "page.tsx"), "import ContactForm from '@/components/ContactForm';\nexport default function ContactPage() { return <main><ContactForm /></main>; }");
+  writeFileSync(join(comp, "ContactForm.tsx"), '"use client";\nimport TurnstileWidget from "@/components/ui/TurnstileWidget";\nimport { sendLead } from "@/app/actions/send-lead";\nexport default function ContactForm() { return <form onSubmit={() => sendLead(new FormData())}><TurnstileWidget /></form>; }');
   writeFileSync(join(acts, "send-lead.ts"), '"use server";\nexport async function sendLead() { return {}; }');
 
   // Layout con Cookiebot + Twitter Cards + favicon links + Powered by
@@ -72,6 +76,34 @@ test("verifyLaunchReady: satélite COMPLETO pasa todos los checks", () => {
     const dir = makeFullSat(root);
     const r = verifyLaunchReady(dir);
     assert.equal(r.ok, true, "debe pasar: " + r.problems.join("; "));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("verifyLaunchReady: el formulario vale en la RUTA de contacto REAL (/contact-us, no /contact)", () => {
+  const root = mkdtempSync(join(tmpdir(), "lr-realroute-"));
+  try {
+    const dir = makeFullSat(root);
+    // El cliente trae su propia página de contacto en /contact-us (no /contact): movemos la página ahí.
+    const app = join(dir, "src", "app");
+    rmSync(join(app, "contact"), { recursive: true });
+    const cu = join(app, "contact-us");
+    mkdirSync(cu, { recursive: true });
+    writeFileSync(join(cu, "page.tsx"), "import ContactForm from '@/components/ContactForm';\nexport default function Page() { return <main><h1>Contact Us</h1><ContactForm /></main>; }");
+    const r = verifyLaunchReady(dir);
+    assert.equal(r.ok, true, "debe detectar el form en /contact-us: " + r.problems.join("; "));
+  } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+test("verifyLaunchReady: falla si la página de contacto NO monta el formulario funcional", () => {
+  const root = mkdtempSync(join(tmpdir(), "lr-formless-"));
+  try {
+    const dir = makeFullSat(root);
+    // Página de contacto SIN <ContactForm /> (el bug original: contenido real reconstruido sin form).
+    writeFileSync(join(dir, "src", "app", "contact", "page.tsx"),
+      "export default function ContactPage() { return <main><h1>Contacto</h1><p>Llámanos.</p></main>; }");
+    const r = verifyLaunchReady(dir);
+    assert.equal(r.ok, false);
+    assert.ok(r.problems.some((p) => /ContactForm|formulario/.test(p)), "debe reportar formulario ausente");
   } finally { rmSync(root, { recursive: true, force: true }); }
 });
 

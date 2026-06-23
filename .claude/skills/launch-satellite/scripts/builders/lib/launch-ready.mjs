@@ -2,8 +2,28 @@
 // PROFESIONAL COMPLETO antes de declararlo "lanzado". Igual que el gate lossless (verifyEmit) caza contenido
 // caído, este gate caza INDISPENSABLES que falten → nada sale a medias. Extensible: añadir un indispensable
 // aquí + en emit.mjs (núcleo común) → lo heredan TODOS los builders automáticamente (ADR-013 §7).
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
+
+// Localiza la página de contacto REAL del satélite (la ruta del cliente: /contact, /contact-us, /contacto…,
+// o la /contact sintética). Recorre src/app y devuelve el page.tsx cuyo directorio matchea el patrón de
+// contacto. NO hardcodea /contact (ADR-013 §2). Devuelve la ruta absoluta del page.tsx o null.
+const CONTACT_DIR_RE = /^contact(o|-?us)?$/i;
+function findContactPage(satDir) {
+  const walk = (dir) => {
+    let entries = [];
+    try { entries = readdirSync(dir, { withFileTypes: true }); } catch { return null; }
+    for (const e of entries) {
+      if (!e.isDirectory()) continue;
+      const full = join(dir, e.name);
+      if (CONTACT_DIR_RE.test(e.name) && existsSync(join(full, "page.tsx"))) return join(full, "page.tsx");
+      const nested = walk(full);
+      if (nested) return nested;
+    }
+    return null;
+  };
+  return walk(join(satDir, "src/app"));
+}
 
 // Verifica que el directorio de satélite cumple el estándar profesional (ADR-013).
 // Devuelve { ok, problems, lines } — mismo contrato que verifyEmit / losslessReport.
@@ -43,10 +63,20 @@ export function verifyLaunchReady(satDir) {
   // ── 404 de marca (ADR-013 §1 NUEVO)
   chk("not-found.tsx (404 de marca)", existsSync(join(satDir, "src/app/not-found.tsx")));
 
-  // ── Formulario de contacto/lead funcional (ADR-013 §2: Vercel Server Action + Resend + Turnstile)
-  chk("contact/page.tsx (formulario)", existsSync(join(satDir, "src/app/contact/page.tsx")));
-  chk("actions/send-lead.ts (Server Action + Resend + Turnstile)",
-    existsSync(join(satDir, "src/app/actions/send-lead.ts")));
+  // ── Formulario de contacto/lead funcional en la RUTA de contacto REAL (ADR-013 §2). NO hardcodea /contact:
+  // localiza la página de contacto del satélite (/contact-us, /contacto, la que sea) y verifica que monta el
+  // formulario funcional ahí. El form vive en el client component ContactForm (Turnstile + sendLead).
+  const contactPagePath = findContactPage(satDir);
+  let contactPage = "";
+  try { if (contactPagePath) contactPage = readFileSync(contactPagePath, "utf8"); } catch {}
+  let contactForm = "";
+  try { contactForm = readFileSync(join(satDir, "src/components/ContactForm.tsx"), "utf8"); } catch {}
+  chk("formulario funcional en la ruta de contacto (ContactForm + Turnstile)",
+    !!contactPagePath && /<ContactForm/.test(contactPage) && /TurnstileWidget/.test(contactForm),
+    "la página de contacto del satélite debe montar <ContactForm /> y ContactForm.tsx referenciar TurnstileWidget");
+  chk("actions/send-lead.ts (Server Action + Resend + Turnstile) cableado en el formulario",
+    existsSync(join(satDir, "src/app/actions/send-lead.ts")) && /sendLead/.test(contactForm),
+    "ContactForm.tsx debe invocar sendLead del Server Action");
 
   // ── GDPR Cookiebot CMP (ADR-013 §3, Consent Mode v2)
   chk("Cookiebot CMP en layout.tsx", layout.includes("Cookiebot"),
