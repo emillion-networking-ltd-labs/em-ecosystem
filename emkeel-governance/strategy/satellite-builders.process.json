@@ -1,50 +1,52 @@
 {
   "process": "strategy",
-  "state": "approved",
+  "state": "presented",
   "steps": {
     "scaffolded": {
       "done": true,
-      "timestamp": "2026-06-23T09:18:28Z",
+      "timestamp": "2026-06-23T20:39:39Z",
       "topic": "satellite-builders"
     },
     "researched": {
       "done": true,
-      "timestamp": "2026-06-23T09:18:28Z",
+      "timestamp": "2026-06-23T20:39:39Z",
       "sources": [
-        "https://www.cookiebot.com/",
-        "https://splitforms.com/blog/server-actions-vs-form-backend-nextjs",
-        "https://formspree.io/guides/nextjs/",
-        "https://www.deque.com/axe/axe-core/",
-        "https://faviconbuilder.com/guides/pwa-favicon-manifest-guide/",
-        "https://developer.x.com/en/docs/twitter-for-websites/cards/overview/abouts-cards",
-        "https://schema.org/FAQPage",
-        "design-system/components/TurnstileWidget.tsx"
+        "https://web.dev/blog/inp-cwv-march-12",
+        "https://www.w3.org/WAI/news/2023-10-05/wcag22rec/",
+        "https://support.google.com/google-ads/answer/13695607",
+        "https://owasp.org/www-project-secure-headers/",
+        "https://ui.shadcn.com/docs/theming",
+        "https://vercel.com/blog/how-to-prompt-v0",
+        "https://docs.lovable.dev/prompting/prompting-one",
+        ".claude/skills/launch-satellite/scripts/builders/lib/emit-blocks.mjs:41",
+        ".claude/skills/launch-satellite/scripts/builders/lib/launch-ready.mjs:151",
+        "design-system/registry.json:344"
       ]
     },
     "proposed": {
       "done": true,
-      "timestamp": "2026-06-23T09:18:28Z",
-      "options": "Estandar profesional COMPLETO + GATE de launch-readiness, AHORA completado: anti-spam PROPIO (TurnstileWidget de em-ui) en el formulario; SEO ampliado (Twitter Cards + structured data por tipo FAQPage/Service); estandar como LISTA VIVA/EXTENSIBLE (nuevo indispensable -> refinamiento /strategy -> estandar+gate -> todos los builders lo heredan). Decision ABIERTA: approach del formulario = (1) Vercel+Resend+Turnstile [recomendado] vs (2) Formspree+Turnstile."
+      "timestamp": "2026-06-23T20:39:39Z",
+      "options": [
+        "1) Mecanico (status quo): bloque->seccion fija por siteType (emit-blocks.mjs:41) -> diseno pobre",
+        "no honra ADR-010 op.3; 2) RECOMENDADO Generativo por composicion: la IA compone (que componente/orden/layout) sobre componentes INMUTABLES + contenido lossless (v0/Lovable/shadcn) -> cumple ADR-010 op.3",
+        "reproponible",
+        "sin drift (gate). + estandar VIVO mantenido contra el mercado (disparador por norma GDPR/WCAG/CWV/seguridad + revision trimestral) + toggle registrado en el estandar + REGENERAR DISENO en el flujo visual."
+      ]
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-06-23T09:18:28Z",
-      "critique": "Adversarial (ajuste): (a) Turnstile reusa un componente em-ui YA existente (commiteado, en el registry) -> anti-spam propio sin dep externa, cierra el unico 'con' de la opcion 1; (b) Twitter Cards/FAQPage/Service se aplican SOLO si hay contenido real del tipo -> ausente se omite (no se inventa, \u00a7D4); el gate exige 'structured data por tipo VALIDO donde aplique', no inventar tipos; (c) lista viva: el riesgo de scope-creep se acota porque cada adicion pasa por un refinamiento gobernado /strategy (gate humano) y entra al unico punto de cambio (nucleo comun) -> no se reescribe por builder; (d) sin cambios al norte ni a ADR-010/011/012."
+      "timestamp": "2026-06-23T20:39:39Z",
+      "critique": "Adversarial (re-abriendo fuentes): (a) shadcn/ui CONFIRMADO via WebFetch -> themea por tokens semanticos \"sin reescribir las clases del componente\" y desaconseja modificar el fuente -> respalda COMPONENTES INMUTABLES (solo tamano/colores via tokens). (b) Disparadores de refresco CONFIRMADOS con fecha: INP reemplazo a FID 12-mar-2024 (web.dev), WCAG 2.2 Rec W3C 5-oct-2023 (w3.org), Consent Mode v2 obligatorio EEE 6-mar-2024 (Google) -> el suelo SE MUEVE, el mecanismo de refresco es necesario, no teorico. (c) Ataque principal: composicion generativa amenaza la REPRODUCIBILIDAD que ADR-010 exigio al descartar la op.2 (bespoke). Defensa: el diseno es proposed PERSISTIDO en el brief/IR (D5) y confirmable en el loop -> reproducible desde la propuesta grabada, NO freestyle por render; el sustrato (secciones gobernadas + componentes inmutables) mantiene S2/a11y/SEO por construccion -> sigue siendo HIBRIDO (op.3), no bespoke (op.2). (d) Riesgo del gate de drift = falsos positivos con el theming permitido; se acota: compara contra el registry y PERMITE la superficie de tokens/tamano/color, structural-diff mas alla de tokens = drift (el COMO exacto es build FB6, la DECISION es solida). (e) Scope-creep de la lista viva acotado: cada adicion pasa por gate humano /strategy + unico punto de cambio; trimestral = backstop, disparador-por-norma = primario. (f) NO re-litiga el norte: CUMPLE ADR-010 op.3, no la contradice; ADR-012/013 intactos."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-06-23T09:18:28Z",
+      "timestamp": "2026-06-23T20:39:39Z",
       "check_passed": true
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-06-23T09:18:29Z",
+      "timestamp": "2026-06-23T20:39:39Z",
       "presented_to": "operador"
-    },
-    "approved": {
-      "done": true,
-      "timestamp": "2026-06-23T12:53:44Z",
-      "approved_by": "operador"
     }
   }
 }

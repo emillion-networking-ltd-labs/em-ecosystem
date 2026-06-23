@@ -1,6 +1,6 @@
 # Strategy: satellite-builders
 
-Status: APPROVED   <!-- modelo aprobado 2026-06-22 (ECO-62, ADR-012); FB0/FB1 = ECO-63; refinamiento ECO-64 (estándar profesional completo del núcleo común + gate de launch-readiness; formulario = opción 1 Vercel+Resend+Turnstile) APROBADO en el gate humano 2026-06-22, ADR-013, FB5 = ECO-65 -->
+Status: APPROVED   <!-- modelo aprobado 2026-06-22 (ECO-62, ADR-012); FB0/FB1 = ECO-63; refinamiento ECO-64 (estándar profesional completo del núcleo común + gate de launch-readiness; formulario = opción 1 Vercel+Resend+Turnstile) APROBADO en el gate humano 2026-06-22, ADR-013, FB5 = ECO-65; refinamiento ECO-69 (diseño GENERATIVO por composición + componentes INMUTABLES + estándar VIVO mantenido contra el mercado + registro del toggle de tema) PRESENTADO al gate humano 2026-06-23 — PENDIENTE de aprobación (no decidido) -->
 Strategy: satellite-builders   <!-- feature specs reference this with a `Strategy: satellite-builders` line -->
 
 > **Re-encuadre del norte de satélites alrededor de BUILDERS de fuente.** SUPERA a
@@ -145,6 +145,11 @@ analytics respetuoso, páginas legales, firma **"Powered by EM Ecosystem"**.
   https://www.w3.org/WAI/standards-guidelines/act/implementations/axe-core/) en el gate, más allá del a11y de
   Lighthouse. **Honestidad:** axe-core caza ~57% de los criterios automatizables; lo no automatizable (alt
   significativo, orden de foco lógico) queda marcado `incomplete` para revisión humana — no se finge AA total.
+- **Toggle de tema MANUAL en el header** (añadido ECO-68; **registrado aquí por la lista viva**, §Refinamiento
+  ECO-69 D): botón visible cableado al `ThemeContext`, montado **DENTRO del `ThemeProvider`**; es el `ThemeToggle`
+  de em-ui vía registry (`design-system/components/ThemeToggle.tsx`, `design-system/registry.json:344`), **nunca**
+  copia local. Exigido por el gate de launch-readiness (`.claude/skills/launch-satellite/scripts/builders/lib/launch-ready.mjs:151`).
+  **Primer indispensable añadido por el mecanismo de lista viva** (§Refinamiento ECO-69 C).
 
 ### Eje de decisión ABIERTO — approach del FORMULARIO funcional (a aprobar en el gate)
 > El operador decide; aquí van las opciones investigadas + recomendación. (Presentada, **no tomada**.)
@@ -166,7 +171,8 @@ caza un sub-campo caído (SEO), este caza **cualquier indispensable que falte �
 **Twitter Cards** + **structured data por tipo válido** (FAQPage/Service donde aplique) · **a11y AA con axe-core
 sin violations** (incomplete → revisión humana) · **formulario** presente, su endpoint responde **y lleva el
 anti-spam Turnstile** · **favicon/manifest/apple-touch** presentes · **404 de marca** · **Cookiebot CMP** presente
-+ **analytics condicionado al consentimiento** · **headers HTTPS S2** · **páginas legales** + **"Powered by EM"**.
++ **analytics condicionado al consentimiento** · **toggle de tema manual** en el header, cableado al `ThemeContext`
+y montado DENTRO del `ThemeProvider` (ECO-68) · **headers HTTPS S2** · **páginas legales** + **"Powered by EM"**.
 Cada ítem = un check; **falla cualquiera ⇒ NO "lanzado"**. (CWV de **campo** = objetivo post-lanzamiento, no
 gate — ADR-010.)
 
@@ -184,6 +190,94 @@ Estándar profesional completo (incl. anti-spam Turnstile propio, SEO ampliado T
 Action + Resend + Turnstile)**. **APROBADA** por el operador. Registrada en
 [ADR-013](../adr/013-satellite-launch-readiness-standard.md); reconcilia con ECO-56/58 + ADR-010/011/012; se
 implementa en **FB5** ([ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65), con/sobre FB2).
+
+## Refinamiento ECO-69 — DISEÑO GENERATIVO por composición + COMPONENTES INMUTABLES + estándar VIVO contra el mercado
+
+**Estado: PRESENTADO al gate humano (2026-06-23) — PENDIENTE de aprobación (no decidido).** El operador
+aprueba / refina / aborta en el gate (`/strategy` paso 7). Reutiliza [ADR-010](../adr/010-satellite-design-generation.md)
+(diseño híbrido), [ADR-012](../adr/012-satellite-builders-architecture.md) (builders→IR→emitter) y
+[ADR-013](../adr/013-satellite-launch-readiness-standard.md) (estándar+gate, lista viva §7); **no re-litiga**.
+Cierra la brecha entre lo que el norte decidió (ADR-010 op.3: "la IA propone composición") y lo que el emit hace.
+
+**El problema medido.** ADR-010 §1 fijó el diseño **HÍBRIDO**: biblioteca de secciones gobernada (sustrato S2/a11y/
+SEO por construcción) **+** la IA **propone** tipo/secciones/composición como `proposed`, confirmable en el loop (§D4).
+Pero el emit actual **NO compone generativamente**: la composición la fija `siteType` con un orden por defecto
+(`.claude/skills/launch-satellite/scripts/generate-satellite.mjs:122`, `DEFAULT_HOME_COMPOSITION`) y cada bloque del IR
+cae en su renderer por un `switch (b.kind)` (`.claude/skills/launch-satellite/scripts/builders/lib/emit-blocks.mjs:41`)
+→ composición **MECÁNICA** (bloque→sección fija) → diseño **POBRE** (el piloto Atis salió "más feo que el original",
+[`satellites.md`](satellites.md)). La opción 3 quedó **decidida pero sin implementar generativamente**.
+
+### (A) DISEÑO GENERATIVO POR COMPOSICIÓN — cumple ADR-010 opción 3
+La IA **DISEÑA** generativamente sobre el contenido real (lossless) + la marca: decide **qué componente** va en cada
+sección, **en qué orden**, **con qué función**, **con qué layout y jerarquía visual** — para que el sitio resulte
+**ATRACTIVO**, no solo correcto. La creatividad vive en el **CÓMO se componen** los componentes (como un diseñador con
+un design system), **NO** en un mapeo mecánico bloque→sección-fija. Implementa el **"diseño libre" de §D4** que el
+emit mecánico no honró. Es el patrón de los builders con IA serios: v0 genera **variaciones** de composición
+(https://vercel.com/blog/how-to-prompt-v0), Lovable compone **sección a sección** y pregunta
+(https://docs.lovable.dev/prompting/prompting-one), sobre un vocabulario gobernado (Tailwind UI marketing,
+https://tailwindcss.com/plus/ui-blocks/marketing). **Guardrail intacto (§D4):** la libertad es de DISEÑO (capa
+`proposed`); los HECHOS (copy/servicios/contacto del IR) jamás se inventan ni se pierden (lossless).
+
+### (B) COMPONENTES INMUTABLES — nueva regla de gobierno de diseño + GATE de drift
+La IA **USA y COMPONE** los componentes de em-ui / design-system; **NO los modifica**. Lo único que ajusta para la
+marca es **TAMAÑO y COLORES**, vía **tokens** (no reescribiendo el componente). Es el patrón correcto de un design
+system: shadcn/ui themea **sobreescribiendo tokens semánticos** (`background`/`foreground`/`primary`) "para cambiar el
+aspecto **sin reescribir las clases del componente**" y **desaconseja modificar el código fuente del componente**
+(mantén los originales intactos; envuelve con wrappers) — https://ui.shadcn.com/docs/theming. Razón: un componente
+modificado **deriva (drift)** del registry y rompe la herencia transversal (el núcleo común deja de ser el único punto
+de cambio). Un cambio de componente para **UN** satélite concreto se decide **aparte/después** (su propia decisión),
+nunca como efecto colateral del diseño.
+**GATE (nuevo check de drift):** el gate de launch-readiness detecta **componentes copiados al satélite que difieren
+de los de em-ui** (fuente de verdad: `design-system/registry.json:344` + `design-system/components/`), salvo el theming
+por tokens permitido → **falla**. Igual que el gate lossless caza un sub-campo caído, este caza un componente
+"forkeado" → **nada deriva en silencio**.
+
+### (C) El ESTÁNDAR es una LISTA VIVA MANTENIDA CONTRA EL MERCADO ("siempre al día")
+Refina §7 (lista viva de ADR-013) con su **mecanismo de mantenimiento**. El estándar + el gate son un **SUELO
+DETERMINISTA** (checklist fijo, verificado por construcción — **no** la IA adivinando requisitos cada vez; eso sería
+no-reproducible, lo que ADR-010 descartó). Para que el suelo **no se congele** se declara un **MECANISMO DE REFRESCO**:
+- **Disparador por norma:** cuando una norma del sector cambia, se abre un refinamiento `/strategy` que actualiza la
+  lista viva. El suelo **se mueve con el mercado** — hechos: **CWV** cambió (INP **reemplazó** a FID como Core Web
+  Vital, 12-mar-2024, https://web.dev/blog/inp-cwv-march-12); **WCAG 2.2** pasó a Recomendación W3C (5-oct-2023,
+  https://www.w3.org/WAI/news/2023-10-05/wcag22rec/); **GDPR/consent** endureció (Google **Consent Mode v2**
+  obligatorio en EEE, 6-mar-2024, https://support.google.com/google-ads/answer/13695607); **seguridad** evoluciona
+  (OWASP Secure Headers Project mantiene el set recomendado, https://owasp.org/www-project-secure-headers/).
+- **Revisión periódica:** además del disparador reactivo, una **revisión trimestral** del estándar contra las mejores
+  prácticas del mercado (informada por research real, como este refinamiento), por si una práctica sube de
+  "nice-to-have" a indispensable sin un cambio de norma formal.
+- **Vía única:** cada cambio entra **solo** por un refinamiento gobernado de `/strategy` (gate humano) → al **estándar**
+  del núcleo común **y** al **gate** → lo **heredan TODOS los builders** sin reescribir nada por builder. El suelo es
+  determinista; el **mantenimiento** lo mantiene al día. (Acota el scope-creep: cada adición pasa por el gate humano y
+  el único punto de cambio.)
+
+### (D) REGISTRAR EL TOGGLE EN EL §ESTÁNDAR — primera extensión aplicada por la lista viva
+Ya implementado (ECO-68 + [ADR-013](../adr/013-satellite-launch-readiness-standard.md) §6; **check 16** del gate,
+`.claude/skills/launch-satellite/scripts/builders/lib/launch-ready.mjs:151`). Faltaba listarlo en el §estándar de este
+norte → **registrado** (ver §«El ESTÁNDAR profesional completo»): **toggle de tema MANUAL en el header**, cableado al
+`ThemeContext`, montado **DENTRO del `ThemeProvider`** — **exigido por el gate de launch-readiness** (`ThemeToggle` de
+em-ui vía registry, `design-system/components/ThemeToggle.tsx`; nunca copia local). Es el **ejemplo vivo** del
+mecanismo (C): un indispensable que entró por un refinamiento gobernado y ahora lo heredan todos los builders.
+
+### (E) FLUJO — "REGENERAR DISEÑO" en el gate de fidelidad visual
+La revisión humana del preview gana una **tercera** respuesta:
+- **"se ve bien"** → avanza (a F3 / lanzar).
+- **"ajusta X"** → ajuste **puntual** (un cambio acotado sobre la composición actual).
+- **"regenera el diseño"** → la IA **rediseña la composición desde cero** (otra propuesta generativa: **mismos
+  componentes inmutables + mismo contenido real lossless**, distinta composición / jerarquía). Materializa que el
+  diseño es `proposed` y **reproponible** (§D4), no un one-shot.
+
+### Eje de decisión — generación del diseño (a aprobar en el gate)
+> El operador decide; aquí van las opciones investigadas + recomendación. (Presentada, **no tomada**.)
+
+| # | Modelo de generación del diseño | Source | Pros | Cons | Riesgo |
+|---|---|---|---|---|---|
+| 1 | **Mecánico (status quo)** — bloque→sección fija, orden por `siteType` | .claude/skills/launch-satellite/scripts/builders/lib/emit-blocks.mjs:41 | simple, determinista, ya existe | diseño POBRE (Atis "más feo que el original"); **no honra** ADR-010 op.3 | **Alto** — es la brecha a cerrar |
+| 2 | **Generativo por composición** — la IA compone (qué componente / orden / layout) sobre componentes **inmutables** + contenido **lossless** | https://vercel.com/blog/how-to-prompt-v0 | **cumple ADR-010 op.3**; diseño atractivo; **reproponible** ("regenerar"); HECHOS intactos (§D4); sin drift (gate B) | exige el motor de composición + el gate de drift + revisión humana en el gate visual | Medio — acotado por gate de drift + §D4 |
+
+**Recomendación (PRESENTADA, no tomada):** **Opción 2** — diseño generativo por composición, con **componentes
+inmutables** (gate de drift), el **estándar como lista viva mantenida contra el mercado**, el **toggle registrado** en
+el §estándar como primer indispensable vivo, y **"regenerar diseño"** en el flujo visual. **El operador aprueba /
+refina / aborta en el gate.** Si se aprueba → ADR-014 + ECO de build (FB6 sobre FB2/emit). **No re-litiga** ADR-010/012/013.
 
 ## Non-goals
 - NO re-litiga lo válido de `satellites.md` (lo **trae**: i18n/SEO/guardrails/secciones/em-ui/imágenes).
@@ -210,6 +304,19 @@ implementa en **FB5** ([ECO-65](https://emillionnetworking-ltd-labs.atlassian.ne
   **(iv)** Cookiebot DECIDIDO (pluggable, patrón del gateway de imágenes ADR-011). **(v)** estándar = **lista viva/
   extensible** (nuevo indispensable → refinamiento /strategy → estándar+gate → todos los builders). Reconcilia con
   ECO-56/58 + ADR-010/011/012, no re-litiga; fasificado en **FB5** (ECO-65).
+- **D — Diseño GENERATIVO por composición + componentes INMUTABLES + estándar VIVO mantenido contra el mercado +
+  registro del toggle (ECO-69). PRESENTADA al gate humano 2026-06-23 — PENDIENTE de aprobación (no decidido).** Cierra
+  la brecha de ADR-010 op.3 (decidida pero implementada en emit MECÁNICO, `generate-satellite.mjs:122` /
+  `emit-blocks.mjs:41`). **(A)** la IA **diseña** la composición (qué componente / orden / función / layout) sobre
+  contenido lossless + marca — creatividad en el CÓMO, no en mapeo bloque→sección-fija (§D4 `proposed`). **(B)**
+  **componentes inmutables**: se USAN/COMPONEN, no se modifican; solo tamaño/colores vía tokens (patrón shadcn:
+  themear por tokens, no tocar el fuente); **GATE de drift** falla si un componente del satélite difiere del de em-ui
+  (`design-system/registry.json:344`). **(C)** estándar = **suelo determinista** + **mecanismo de refresco** (disparador
+  por cambio de norma GDPR/WCAG/CWV/seguridad + revisión trimestral) vía refinamiento `/strategy` → único punto de
+  cambio; el suelo se mueve con el mercado (INP↔FID, WCAG 2.2, Consent Mode v2, OWASP). **(D)** **toggle** registrado en
+  el §estándar (ya vivo en el gate, ECO-68, `launch-ready.mjs:151`) — 1ª extensión por la lista viva. **(E)** flujo
+  visual gana **"regenerar diseño"** (rediseño desde cero, mismos componentes + mismo contenido). **Recomendación:
+  opción 2 (generativo), PRESENTADA no tomada.** Si se aprueba → ADR-014 + build FB6. Reutiliza ADR-010/012/013, no re-litiga.
 
 ## Sources (verificadas)
 - Repo (estado actual, COMMITEADO): generador *extract-then-compose* `.claude/skills/launch-satellite/scripts/generate-satellite.mjs`;
@@ -232,3 +339,19 @@ implementa en **FB5** ([ECO-65](https://emillionnetworking-ltd-labs.atlassian.ne
   COMMITEADO en `design-system/components/TurnstileWidget.tsx` (en `design-system/registry.json`); Twitter Cards
   — https://developer.x.com/en/docs/twitter-for-websites/cards/overview/abouts-cards ; structured data por tipo
   — https://schema.org/FAQPage y https://schema.org/Service .
+- Refinamiento ECO-69 (diseño generativo + componentes inmutables + estándar vivo, research tight):
+  - **Brecha medida (repo, COMMITEADO):** composición mecánica `generate-satellite.mjs:122` (`DEFAULT_HOME_COMPOSITION`)
+    + `builders/lib/emit-blocks.mjs:41` (`switch (b.kind)`); toggle ya vivo en el gate `builders/lib/launch-ready.mjs:151`
+    (check 16, ECO-68); componente inmutable `design-system/components/ThemeToggle.tsx` en `design-system/registry.json:344`.
+  - **Composición generativa sobre vocabulario gobernado (mercado):** v0 genera variaciones
+    (https://vercel.com/blog/how-to-prompt-v0); Lovable compone sección a sección y pregunta
+    (https://docs.lovable.dev/prompting/prompting-one); vocabulario de secciones (Tailwind UI,
+    https://tailwindcss.com/plus/ui-blocks/marketing). *(reusa lo ya citado en ADR-010; no re-litiga.)*
+  - **Compose-not-modify = themear por tokens, no tocar el fuente (mercado):** shadcn/ui themea sobreescribiendo
+    tokens semánticos "sin reescribir las clases del componente" y desaconseja modificar el código del componente —
+    https://ui.shadcn.com/docs/theming .
+  - **El suelo se mueve con el mercado (disparadores de refresco):** INP reemplazó a FID como Core Web Vital (12-mar-2024,
+    https://web.dev/blog/inp-cwv-march-12); WCAG 2.2 → Recomendación W3C (5-oct-2023,
+    https://www.w3.org/WAI/news/2023-10-05/wcag22rec/); Google Consent Mode v2 obligatorio en EEE (6-mar-2024,
+    https://support.google.com/google-ads/answer/13695607); OWASP Secure Headers Project (set recomendado mantenido,
+    https://owasp.org/www-project-secure-headers/).
