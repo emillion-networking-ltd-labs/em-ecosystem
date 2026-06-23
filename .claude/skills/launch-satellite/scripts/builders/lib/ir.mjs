@@ -56,6 +56,59 @@ export function irStats(ir) {
   };
 }
 
+// Las SECCIONES de una página, tal como el emitter las AGRUPA (renderMain: una sección nueva en cada heading;
+// el primer grupo arranca aunque no empiece en heading). Es el "qué tiene el sitio" que el paso 4 del flujo
+// INFORMA al operador antes de enriquecer. Sólo lectura del IR (no toca nada). Devuelve, por página:
+//   { id, route, title, sections: [{ heading|null, kinds:[blockKind], blocks:N, words:N, hasMedia:bool }] }
+export function sectionsOf(ir) {
+  const wc = (b) => wordsOf(b.text);
+  return (ir.pages || []).map((p) => {
+    const groups = [];
+    for (const b of p.blocks || []) {
+      if (b.kind === "heading" || groups.length === 0) groups.push([b]);
+      else groups[groups.length - 1].push(b);
+    }
+    return {
+      id: p.id, route: p.route, title: p.title || null,
+      sections: groups.map((g) => ({
+        heading: g[0] && g[0].kind === "heading" ? (typeof g[0].text === "string" ? g[0].text.trim() : null) : null,
+        kinds: g.map((b) => b.kind),
+        blocks: g.length,
+        words: g.reduce((n, b) => n + wc(b), 0),
+        hasMedia: g.some((b) => (b.media || []).length > 0),
+      })),
+    };
+  });
+}
+
+// ENRIQUECER el IR con una sección APORTADA por el cliente (paso 4 del flujo). Guardrail §D4: el contenido lo
+// aporta el cliente — esta función SÓLO da forma a lo que se le pasa, NUNCA inventa. Una sección = un heading +
+// contenido real (párrafos y/o bloques ya en forma IR). Rechaza secciones vacías (sin heading o sin contenido)
+// → imposible añadir "ruido". Marca los bloques con raw.provenance para trazabilidad. Inserta en `index` (o al
+// final). MUTA y devuelve el IR. La sección añadida sube palabras/bloques → el gate de EMISIÓN exige que el
+// sitio la contenga (no se cae); el gate de CAPTURA ya pasó sobre el IR capturado (esto es contenido NUEVO,
+// post-captura, no "de la fuente"). Lanza si la página/ruta no existe o la sección está vacía.
+export function addSection(ir, spec = {}) {
+  const { route, pageId, heading, paragraphs = [], blocks = [], index = null, provenance = "provided" } = spec;
+  const page = (ir.pages || []).find((p) => (pageId != null && p.id === pageId) || (route != null && p.route === route));
+  if (!page) throw new Error(`addSection: no existe página con ${pageId != null ? `id=${pageId}` : `route=${route}`} en el IR`);
+  const h = typeof heading === "string" ? heading.trim() : "";
+  if (!h) throw new Error("addSection: 'heading' es obligatorio (una sección sin título no se añade — §D4, nunca inventar)");
+  const paras = (Array.isArray(paragraphs) ? paragraphs : [paragraphs]).map((s) => (typeof s === "string" ? s.trim() : "")).filter(Boolean);
+  const extra = (Array.isArray(blocks) ? blocks : []).filter((b) => b && typeof b.kind === "string");
+  if (!paras.length && !extra.length) throw new Error("addSection: la sección no aporta contenido real (ni párrafos ni bloques) — no se añade contenido vacío (§D4)");
+
+  const tag = { added: true, provenance };   // trazabilidad: el bloque es aportado, no de la fuente
+  const newBlocks = [{ kind: "heading", text: h, raw: { ...tag } }];
+  if (paras.length) newBlocks.push({ kind: "text-editor", text: paras.join("\n\n"), media: [], raw: { ...tag } });
+  for (const b of extra) newBlocks.push({ ...b, raw: { ...(b.raw || {}), ...tag } });
+
+  const at = Number.isInteger(index) ? Math.max(0, Math.min(index, (page.blocks || []).length)) : (page.blocks || []).length;
+  page.blocks = page.blocks || [];
+  page.blocks.splice(at, 0, ...newBlocks);
+  return ir;
+}
+
 // Validación estructural del IR (no semántica). Devuelve [] si OK, o lista de problemas.
 export function validateIR(ir) {
   const p = [];
