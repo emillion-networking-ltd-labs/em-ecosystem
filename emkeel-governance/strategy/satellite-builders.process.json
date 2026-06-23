@@ -4,40 +4,41 @@
   "steps": {
     "scaffolded": {
       "done": true,
-      "timestamp": "2026-06-23T08:42:42Z",
+      "timestamp": "2026-06-23T09:18:28Z",
       "topic": "satellite-builders"
     },
     "researched": {
       "done": true,
-      "timestamp": "2026-06-23T08:42:43Z",
+      "timestamp": "2026-06-23T09:18:28Z",
       "sources": [
         "https://www.cookiebot.com/",
-        "https://support.cookiebot.com/hc/en-us/articles/12756353963292-About-Google-Consent-Mode",
         "https://splitforms.com/blog/server-actions-vs-form-backend-nextjs",
         "https://formspree.io/guides/nextjs/",
         "https://www.deque.com/axe/axe-core/",
         "https://faviconbuilder.com/guides/pwa-favicon-manifest-guide/",
-        "emkeel-governance/adr/011-satellite-image-assets.md"
+        "https://developer.x.com/en/docs/twitter-for-websites/cards/overview/abouts-cards",
+        "https://schema.org/FAQPage",
+        "design-system/components/TurnstileWidget.tsx"
       ]
     },
     "proposed": {
       "done": true,
-      "timestamp": "2026-06-23T08:43:06Z",
-      "options": "Estandar profesional COMPLETO del nucleo comun + GATE de launch-readiness. Decision ABIERTA presentada: approach del formulario funcional = (1) Vercel function/Server Action + Resend [recomendado: codigo propio, satelite autosuficiente, pluggable] vs (2) Formspree [form-backend, cero backend, dep externa]. Resto del estandar fijado (no abierto): favicon/manifest del logo real, 404 de marca, Cookiebot free (decidido, pluggable), a11y AA via axe-core, + lo ya cubierto (SEO/i18n/S2/D4/imagenes/em-ui/headers/legales/firma)."
+      "timestamp": "2026-06-23T09:18:28Z",
+      "options": "Estandar profesional COMPLETO + GATE de launch-readiness, AHORA completado: anti-spam PROPIO (TurnstileWidget de em-ui) en el formulario; SEO ampliado (Twitter Cards + structured data por tipo FAQPage/Service); estandar como LISTA VIVA/EXTENSIBLE (nuevo indispensable -> refinamiento /strategy -> estandar+gate -> todos los builders lo heredan). Decision ABIERTA: approach del formulario = (1) Vercel+Resend+Turnstile [recomendado] vs (2) Formspree+Turnstile."
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-06-23T08:43:06Z",
-      "critique": "Adversarial: (a) Cookiebot free = un solo default global (sin geo) -> aceptable y se DECLARA; pluggable a uno propio (patron ADR-011) si hace falta geo. (b) axe-core solo caza ~57% de WCAG AA -> el gate exige axe sin violations PERO marca 'incomplete' para revision humana; no se finge AA total. (c) form opcion 1 (Resend) exige dominio verificado/deliverability -> es el coste asumido a cambio de ownership; opcion 2 lo evita pero mete dep externa por satelite -> el operador elige. (d) el gate NO debe gatear CWV de campo (sin trafico) -> se queda en lab + post-lanzamiento (consistente con ADR-010). (e) el estandar vive en el NUCLEO COMUN (cross-cutting) -> todo builder lo hereda, no se re-implementa por builder; el gate lossless ya probo que un gate de completitud caza lo que falta."
+      "timestamp": "2026-06-23T09:18:28Z",
+      "critique": "Adversarial (ajuste): (a) Turnstile reusa un componente em-ui YA existente (commiteado, en el registry) -> anti-spam propio sin dep externa, cierra el unico 'con' de la opcion 1; (b) Twitter Cards/FAQPage/Service se aplican SOLO si hay contenido real del tipo -> ausente se omite (no se inventa, \u00a7D4); el gate exige 'structured data por tipo VALIDO donde aplique', no inventar tipos; (c) lista viva: el riesgo de scope-creep se acota porque cada adicion pasa por un refinamiento gobernado /strategy (gate humano) y entra al unico punto de cambio (nucleo comun) -> no se reescribe por builder; (d) sin cambios al norte ni a ADR-010/011/012."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-06-23T08:43:06Z",
+      "timestamp": "2026-06-23T09:18:28Z",
       "check_passed": true
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-06-23T08:43:06Z",
+      "timestamp": "2026-06-23T09:18:29Z",
       "presented_to": "operador"
     }
   }
