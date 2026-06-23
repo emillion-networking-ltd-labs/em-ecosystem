@@ -1,6 +1,6 @@
 # Strategy: satellite-builders
 
-Status: APPROVED   <!-- gate humano 2026-06-22 (ECO-62): modelo = opción 3 (builders por fuente → núcleo común/IR → emitter Next enriquecido); arquitectura en ADR-012; FB0/FB1 = ECO-63 -->
+Status: APPROVED   <!-- modelo aprobado 2026-06-22 (ECO-62, ADR-012); FB0/FB1 = ECO-63; refinamiento ECO-64 (estándar profesional completo del núcleo común + gate de launch-readiness; formulario = opción 1 Vercel+Resend+Turnstile) APROBADO en el gate humano 2026-06-22, ADR-013, FB5 = ECO-65 -->
 Strategy: satellite-builders   <!-- feature specs reference this with a `Strategy: satellite-builders` line -->
 
 > **Re-encuadre del norte de satélites alrededor de BUILDERS de fuente.** SUPERA a
@@ -105,6 +105,85 @@ construcción, sin re-litigarlo:
   S2/SEO/i18n por construcción; preview; comparación "mejor que el original".
 - **FB3 — Builder DESDE-URL (web viva):** segundo adapter (captura el render → IR), reutilizando el núcleo.
 - **FB4 — Más adapters** (otros CMS/exports) según se necesiten y pasen pruebas.
+- **FB5 — Estándar profesional + gate de launch-readiness (ECO-64):** implementar los indispensables que faltan
+  en el núcleo común + el gate que los verifica (ver §«Refinamiento ECO-64»). *(se construye con/sobre FB2)*
+
+## Refinamiento ECO-64 — estándar profesional COMPLETO del núcleo común + gate de launch-readiness
+
+**Estado: refinamiento APROBADO (gate humano, 2026-06-22; ECO-64) — formulario = opción 1; [ADR-013](../adr/013-satellite-launch-readiness-standard.md); FB5 = [ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65).** La estrategia fijó el MECANISMO
+(builders→IR→emitter) pero no un estándar COMPLETO de "sitio profesional óptimo" → los indispensables (formulario,
+favicon, 404, GDPR, a11y) salían **a parches**. Aquí se fija el estándar COMPLETO en el **NÚCLEO COMÚN**
+(**cross-cutting: lo hereda TODO builder** — desde-archivo, desde-URL, los que vengan; no por builder) + un **GATE
+de launch-readiness** que lo verifica. Reutiliza lo ya definido (ECO-56/58, ADR-010/011/012); **no re-litiga**.
+
+### El ESTÁNDAR profesional completo (núcleo común)
+**Ya cubierto — codificado como estándar (no re-litigado):** SEO de fábrica (ECO-56), i18n idioma real (ECO-58),
+rendimiento/CWV-lab S2 (Lighthouse Perf/SEO/BP/A11y), responsive, HECHOS-vs-DISEÑO/no-inventar (§D4), imágenes
+reales + decorativas (ADR-011), código propio + em-ui (ownership), seguridad/headers HTTPS (6 cabeceras),
+analytics respetuoso, páginas legales, firma **"Powered by EM Ecosystem"**.
+**NUEVO — los indispensables que faltaban:**
+- **Formulario de contacto/lead FUNCIONAL** (backend/email real) — approach = **decisión ABIERTA** (abajo). El
+  **anti-spam es PROPIO**: el **`TurnstileWidget` de em-ui** (Cloudflare Turnstile, `design-system/components/TurnstileWidget.tsx`,
+  en el registry) — sin dependencia externa, consistente con el norte de ownership; cualquier opción de backend lo lleva.
+- **Favicon + iconos + web manifest DERIVADOS del logo real** del cliente (parte del pilar de imágenes, ADR-011):
+  de un logo ≥512² → `favicon.ico` (≥32²), `favicon.svg`, apple-touch-icon 180² (opaco, padding), 192²+512² PNG +
+  `site.webmanifest` — el set mínimo moderno (https://evilmartians.com/chronicles/how-to-favicon-in-2021-six-files-that-fit-most-needs,
+  https://faviconbuilder.com/guides/pwa-favicon-manifest-guide/). Generable de los assets reales (sharp), nunca inventado.
+- **SEO ampliado** (sobre el OG/JSON-LD de ECO-56): **Twitter Cards** (`twitter:card=summary_large_image` +
+  título/descripción/imagen, https://developer.x.com/en/docs/twitter-for-websites/cards/overview/abouts-cards) y
+  **structured data POR TIPO de contenido** — **FAQPage** para secciones FAQ, **Service/Offer** para servicios
+  (https://schema.org/FAQPage, https://schema.org/Service) — además de Organization/LocalBusiness/BreadcrumbList.
+  Aplicable **según el contenido**; ausente → se **omite, nunca se inventa** (mismo guardrail §D4).
+- **Página 404 personalizada y de marca** (no la genérica de Next).
+- **GDPR/cookies = Cookiebot** (plan **GRATIS**, https://www.cookiebot.com): script CMP + **Consent Mode v2**
+  (incluido en el free, https://support.cookiebot.com/hc/en-us/articles/12756353963292-About-Google-Consent-Mode)
+  → **bloquea cookies/scripts hasta el consentimiento**, y el **analytics se condiciona al consentimiento**.
+  **DECIDIDO por el operador**, **pluggable** hasta tener el nuestro (mismo patrón que el gateway de imágenes,
+  ADR-011). Nota: el free es **un default global** (sin geo-targeting).
+- **Accesibilidad WCAG AA real** (teclado, foco, ARIA, contraste, alt, landmarks) — verificada con **axe-core**
+  (@axe-core/playwright, MPL-2.0 libre para CI, ~90 reglas WCAG A/AA/AAA + ARIA, https://www.deque.com/axe/axe-core/,
+  https://www.w3.org/WAI/standards-guidelines/act/implementations/axe-core/) en el gate, más allá del a11y de
+  Lighthouse. **Honestidad:** axe-core caza ~57% de los criterios automatizables; lo no automatizable (alt
+  significativo, orden de foco lógico) queda marcado `incomplete` para revisión humana — no se finge AA total.
+
+### Eje de decisión ABIERTO — approach del FORMULARIO funcional (a aprobar en el gate)
+> El operador decide; aquí van las opciones investigadas + recomendación. (Presentada, **no tomada**.)
+
+| # | Approach del formulario | Source | Pros | Cons | Riesgo |
+|---|---|---|---|---|---|
+| 1 | **Vercel function/Server Action + Resend + Turnstile (em-ui)** | https://splitforms.com/blog/server-actions-vs-form-backend-nextjs | **formulario PROPIO** con deliverability (Resend) **y anti-spam PROPIO** (`TurnstileWidget`, `design-system/components/TurnstileWidget.tsx`) resueltos; ownership total, sin dep externa en runtime; satélite autosuficiente | mantenemos deliverability/dominio verificado; algo más a construir | medio |
+| 2 | **Form-backend service (Formspree)** | https://formspree.io/guides/nextjs/ | email-a-inbox out-of-the-box, dashboard, anti-spam/deliverability resueltos, cero backend | dep externa por satélite; menos "código propio"; límites del plan free | bajo-medio |
+
+**APROBADA por el operador (gate humano, 2026-06-22): Opción 1** (Vercel Server Action + Resend + Turnstile) —
+formulario **propio** con deliverability y anti-spam resueltos, encaja con "código en nuestro control" y deja el
+satélite autosuficiente; **pluggable** a un form-service por cliente cuando se prefiera cero mantenimiento.
+Registrada en [ADR-013](../adr/013-satellite-launch-readiness-standard.md).
+
+### El GATE de launch-readiness (extiende S2 a un gate profesional COMPLETO)
+El núcleo común **NO declara "lanzado"** hasta que el satélite cumple TODO el estándar. Igual que el gate lossless
+caza un sub-campo caído (SEO), este caza **cualquier indispensable que falte → nada sale a medias**. Verifica
+(lab, por construcción): **Lighthouse S2** (Perf≥90/SEO≥95/BP≥95/A11y≥90) + audits SEO nombrados + OG/JSON-LD +
+**Twitter Cards** + **structured data por tipo válido** (FAQPage/Service donde aplique) · **a11y AA con axe-core
+sin violations** (incomplete → revisión humana) · **formulario** presente, su endpoint responde **y lleva el
+anti-spam Turnstile** · **favicon/manifest/apple-touch** presentes · **404 de marca** · **Cookiebot CMP** presente
++ **analytics condicionado al consentimiento** · **headers HTTPS S2** · **páginas legales** + **"Powered by EM"**.
+Cada ítem = un check; **falla cualquiera ⇒ NO "lanzado"**. (CWV de **campo** = objetivo post-lanzamiento, no
+gate — ADR-010.)
+
+### El estándar es una LISTA VIVA / EXTENSIBLE (la escalabilidad, explícita)
+El estándar **no es una lista cerrada**: es el **mecanismo de extensión** del producto. Una demanda futura
+(otro indispensable que el mercado o un cliente exija) se añade **vía un refinamiento gobernado de `/strategy`**
+(como este ECO-64) → entra al **ESTÁNDAR** del núcleo común **y** al **GATE de launch-readiness** → lo **heredan
+TODOS los builders** (desde-archivo, desde-URL, los que vengan) **sin reescribir nada por builder**. El núcleo
+común es el único punto de cambio; el gate garantiza que ningún satélite salga sin el nuevo indispensable. Así el
+estándar **crece con el producto** sin re-litigar el norte ni tocar los adapters.
+
+### Decisión — APROBADA (gate humano, 2026-06-22)
+Estándar profesional completo (incl. anti-spam Turnstile propio, SEO ampliado Twitter Cards + structured-data-por-tipo)
++ gate de launch-readiness + el estándar como **lista viva/extensible**; **formulario = opción 1 (Vercel Server
+Action + Resend + Turnstile)**. **APROBADA** por el operador. Registrada en
+[ADR-013](../adr/013-satellite-launch-readiness-standard.md); reconcilia con ECO-56/58 + ADR-010/011/012; se
+implementa en **FB5** ([ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65), con/sobre FB2).
 
 ## Non-goals
 - NO re-litiga lo válido de `satellites.md` (lo **trae**: i18n/SEO/guardrails/secciones/em-ui/imágenes).
@@ -119,6 +198,18 @@ construcción, sin re-litigarlo:
   [ECO-63](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-63). Reúsa el núcleo transversal de `satellites.md`.
 - **D — `satellites.md` queda SUPERADO** por este doc (puntero recíproco; historia preservada, no se borra).
 - **D — Roadmap from-file primero;** los demás builders se añaden incrementalmente tras pasar pruebas.
+- **D — Estándar profesional COMPLETO del núcleo común + GATE de launch-readiness (ECO-64, APROBADA — gate
+  humano 2026-06-22; [ADR-013](../adr/013-satellite-launch-readiness-standard.md); FB5 = [ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65)).** Fija de una vez el estándar de "sitio profesional óptimo" en el núcleo común
+  (cross-cutting, todo builder lo hereda) para acabar con los indispensables a parches, + un gate que NO declara
+  "lanzado" hasta cumplirlo TODO (ver §«Refinamiento ECO-64»). **(i)** Estándar = lo ya cubierto (SEO/i18n/S2/§D4/
+  imágenes/em-ui/headers/legales/firma) **+** NUEVO: formulario funcional, favicon/manifest del logo real, 404 de
+  marca, GDPR Cookiebot (free, pluggable), a11y AA con axe-core. **(ii)** Gate de launch-readiness = S2 + audits
+  SEO/OG/JSON-LD + axe-core AA + form + favicon/manifest + 404 + Cookiebot + analytics-condicionado + headers +
+  legales + firma; falla cualquiera ⇒ no "lanzado". CWV de campo = post-lanzamiento (ADR-010). **(iii) Formulario =
+  opción 1 APROBADA:** Vercel Server Action + Resend + **anti-spam propio Turnstile** (`TurnstileWidget` de em-ui).
+  **(iv)** Cookiebot DECIDIDO (pluggable, patrón del gateway de imágenes ADR-011). **(v)** estándar = **lista viva/
+  extensible** (nuevo indispensable → refinamiento /strategy → estándar+gate → todos los builders). Reconcilia con
+  ECO-56/58 + ADR-010/011/012, no re-litiga; fasificado en **FB5** (ECO-65).
 
 ## Sources (verificadas)
 - Repo (estado actual, COMMITEADO): generador *extract-then-compose* `.claude/skills/launch-satellite/scripts/generate-satellite.mjs`;
@@ -130,3 +221,14 @@ construcción, sin re-litigarlo:
   (https://github.com/aknuds1/html-to-react); WP headless Faust.js (https://faustjs.org/) y WPGraphQL
   (https://www.wpgraphql.com/); modelo de contenido WP+Elementor en `wp_postmeta._elementor_data`
   (https://developers.elementor.com/docs/).
+- Refinamiento ECO-64 (estándar + gate, research tight): Cookiebot free + Consent Mode v2 (bloquea hasta
+  consentimiento) — https://www.cookiebot.com/ y https://support.cookiebot.com/hc/en-us/articles/12756353963292-About-Google-Consent-Mode ;
+  form-backend (Vercel function+Resend vs Formspree) — https://splitforms.com/blog/server-actions-vs-form-backend-nextjs
+  y https://formspree.io/guides/nextjs/ ; a11y axe-core (WCAG A/AA, MPL-2.0, ~57% automatizable) —
+  https://www.deque.com/axe/axe-core/ y https://www.w3.org/WAI/standards-guidelines/act/implementations/axe-core/ ;
+  favicon/manifest desde el logo — https://evilmartians.com/chronicles/how-to-favicon-in-2021-six-files-that-fit-most-needs
+  y https://faviconbuilder.com/guides/pwa-favicon-manifest-guide/ .
+- Ajuste ECO-64 (anti-spam propio + SEO ampliado): `TurnstileWidget` (Cloudflare Turnstile, anti-spam PROPIO)
+  COMMITEADO en `design-system/components/TurnstileWidget.tsx` (en `design-system/registry.json`); Twitter Cards
+  — https://developer.x.com/en/docs/twitter-for-websites/cards/overview/abouts-cards ; structured data por tipo
+  — https://schema.org/FAQPage y https://schema.org/Service .

@@ -4,44 +4,46 @@
   "steps": {
     "scaffolded": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:32Z",
+      "timestamp": "2026-06-23T09:18:28Z",
       "topic": "satellite-builders"
     },
     "researched": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:32Z",
+      "timestamp": "2026-06-23T09:18:28Z",
       "sources": [
-        "https://html.to.design/",
-        "https://simplystatic.com/",
-        "https://github.com/aknuds1/html-to-react",
-        "https://faustjs.org/",
-        "https://www.wpgraphql.com/",
-        ".claude/skills/launch-satellite/scripts/generate-satellite.mjs:1"
+        "https://www.cookiebot.com/",
+        "https://splitforms.com/blog/server-actions-vs-form-backend-nextjs",
+        "https://formspree.io/guides/nextjs/",
+        "https://www.deque.com/axe/axe-core/",
+        "https://faviconbuilder.com/guides/pwa-favicon-manifest-guide/",
+        "https://developer.x.com/en/docs/twitter-for-websites/cards/overview/abouts-cards",
+        "https://schema.org/FAQPage",
+        "design-system/components/TurnstileWidget.tsx"
       ]
     },
     "proposed": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:50Z",
-      "options": "Modelo de builder (decision PRESENTADA al gate): (1) status quo extract-then-compose [con PERDIDA, fallo del piloto], (2) clon estatico del render estilo wp2static [copia markup ajeno, sin ownership], (3) builders por FUENTE -> nucleo comun (modelo normalizado/IR) -> emitter Next ENRIQUECIDO [recomendado: captura lossless + reconstruccion con nuestras secciones+imagenes, generico, from-file primero], (4) WP headless Faust/WPGraphQL [exige WP vivo, no codigo propio]."
+      "timestamp": "2026-06-23T09:18:28Z",
+      "options": "Estandar profesional COMPLETO + GATE de launch-readiness, AHORA completado: anti-spam PROPIO (TurnstileWidget de em-ui) en el formulario; SEO ampliado (Twitter Cards + structured data por tipo FAQPage/Service); estandar como LISTA VIVA/EXTENSIBLE (nuevo indispensable -> refinamiento /strategy -> estandar+gate -> todos los builders lo heredan). Decision ABIERTA: approach del formulario = (1) Vercel+Resend+Turnstile [recomendado] vs (2) Formspree+Turnstile."
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:50Z",
-      "critique": "Adversarial: (a) 'nada se pierde' es honesto SOLO acotado a lo que el backup contiene -> si la BD no esta o hay contenido dinamico, se DECLARA (cobertura del adapter), no se inventa (\u00a7D4); (b) genericizacion real: el IR (site/pages/blocks/media/nav/forms) es el contrato, WP/Elementor es el PRIMER adapter no la forma del nucleo -> un backup no-WP implementa el mismo interfaz; (c) reuse/gobernanza: el nucleo comun impone i18n/SEO/guardrails/imagenes/em-ui/preview/S2 por construccion sobre el IR -> reproducible y gateado; el 'enriquecido en un flujo' preserva los HECHOS del IR (copy verbatim) y solo el DISENO es libre; (d) from-file primero valida la captura lossless (la parte dura) antes de from-url."
+      "timestamp": "2026-06-23T09:18:28Z",
+      "critique": "Adversarial (ajuste): (a) Turnstile reusa un componente em-ui YA existente (commiteado, en el registry) -> anti-spam propio sin dep externa, cierra el unico 'con' de la opcion 1; (b) Twitter Cards/FAQPage/Service se aplican SOLO si hay contenido real del tipo -> ausente se omite (no se inventa, \u00a7D4); el gate exige 'structured data por tipo VALIDO donde aplique', no inventar tipos; (c) lista viva: el riesgo de scope-creep se acota porque cada adicion pasa por un refinamiento gobernado /strategy (gate humano) y entra al unico punto de cambio (nucleo comun) -> no se reescribe por builder; (d) sin cambios al norte ni a ADR-010/011/012."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:50Z",
+      "timestamp": "2026-06-23T09:18:28Z",
       "check_passed": true
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:50Z",
+      "timestamp": "2026-06-23T09:18:29Z",
       "presented_to": "operador"
     },
     "approved": {
       "done": true,
-      "timestamp": "2026-06-22T22:11:13Z",
+      "timestamp": "2026-06-23T12:53:44Z",
       "approved_by": "operador"
     }
   }
