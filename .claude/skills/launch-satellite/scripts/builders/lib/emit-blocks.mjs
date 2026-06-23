@@ -4,11 +4,17 @@
 // el IR común. El "mapeo IR→secciones" que la IA PROPONE (capa proposed, F6) se apoya en este renderer base.
 const j = (v) => JSON.stringify(v == null ? "" : v);
 
+// Normaliza el texto de un bloque del IR a CONTENIDO REAL: sólo string/number cuentan; null/undefined/objeto/
+// boolean → "" (omit-if-absent, como el resto del renderer). EVITA que String(undefined)/String(null)/
+// String({}) emita "undefined"/"null"/"[object Object]" como texto visible (artefactos rotos). Un bloque sin
+// texto usable no aporta copy → no se pierde nada real y el gate de emisión lossless sigue verde.
+const txt = (v) => (typeof v === "string" ? v : (typeof v === "number" || typeof v === "bigint") ? String(v) : "");
+
 // El IR a veces trae HTML inline del original (p.ej. <br>, <p>, <strong>). Para un diseño FRESCO no inyectamos
 // ese markup crudo: lo limpiamos a texto (los tags de bloque → saltos de párrafo). El COPY se preserva (las
 // mismas palabras); el gate de emisión cuenta palabras reales (sin tags) en ambos lados → sigue verde.
-const cleanInline = (s) => String(s).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
-const toParas = (s) => String(s).replace(/<\/(p|div|li|h[1-6]|tr)>|<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, " ")
+const cleanInline = (s) => txt(s).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+const toParas = (s) => txt(s).replace(/<\/(p|div|li|h[1-6]|tr)>|<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, " ")
   .split(/\n+/).map((p) => p.replace(/[ \t]+/g, " ").trim()).filter(Boolean);
 
 // Texto (posible HTML) → párrafos JSX escapados, limpios (preserva el copy del IR, sin markup ajeno).
@@ -37,8 +43,10 @@ export function renderBlock(b, ctx) {
       const h = cleanInline(text);
       return h ? `<h2 className="text-h2 font-bold text-content-primary">{${j(h)}}</h2>` : "";
     }
-    case "text-editor": case "html": case "theme-post-content": case "text":
-      return text ? `<div className="max-w-3xl space-y-3 text-body leading-relaxed text-content-secondary">\n${paragraphs(text)}\n      </div>` : "";
+    case "text-editor": case "html": case "theme-post-content": case "text": {
+      const ps = paragraphs(text);   // omit-if-absent: párrafos reales o nada (ni div vacío ni "undefined")
+      return ps ? `<div className="max-w-3xl space-y-3 text-body leading-relaxed text-content-secondary">\n${ps}\n      </div>` : "";
+    }
     case "image": {
       const cap = cleanInline(text);
       const parts = [];
@@ -55,7 +63,8 @@ export function renderBlock(b, ctx) {
       // tarjeta de característica (título + descripción + imagen real si la hay)
       const parts = [];
       if (img) parts.push(imageEl(img, ctx.siteName));
-      if (text) parts.push(`<div className="space-y-2">\n${paragraphs(text)}\n        </div>`);
+      const body = paragraphs(text);   // omit-if-absent: sólo si hay copy real (evita div vacío / "undefined")
+      if (body) parts.push(`<div className="space-y-2">\n${body}\n        </div>`);
       return parts.length ? `<div className="rounded-2xl border border-border-default bg-surface-primary p-6 space-y-4">\n        ${parts.join("\n        ")}\n      </div>` : "";
     }
     case "testimonial": {
