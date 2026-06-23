@@ -159,7 +159,7 @@ umbrales S2 sobre la URL desplegada. Sin URL/chromium → **reporta gap** (no fa
 - `scripts/fetch-url.mjs <url> [c-improve-site|e-inspiration]` — modo (c) URL / (e), best-effort, degrada a preguntar.
 - `scripts/instagram-intake.mjs <handle>` — modo (d), cliente-primario + scrape best-effort + fallback.
 - `scripts/generate-satellite.mjs <brief.json> <destDir>` — F2b: brief → satélite S2-ready (scaffold + em-ui).
-- `scripts/preview-satellite.mjs <satDir> [puerto]` — preview local POR DEFECTO (Paso 6): deps + `next dev` en background + URL; gate visual antes de F3.
+- `scripts/builders/from-file.mjs <dir-backup> [--out ir.json]` — **builder DESDE-ARCHIVO** (ECO-63 / [ADR-012](../../../emkeel-governance/adr/012-satellite-builders-architecture.md), satellite-builders): adapter de fuente → **IR común LOSSLESS** + gate de completitud (fuente == IR). WordPress = primer adapter (BD + Elementor + uploads); cualquier backup = otro adapter, mismo IR. **Captura** (FB1); el **emitter** IR→satélite enriquecido es **FB2**. Sustituirá al resumen *extract-then-compose* en el caso "mejorar desde un backup".
 - `scripts/lighthouse-local.mjs <url>` — gate S2 local; reporta gap si no hay chromium (no falsea).
 - `scripts/provision-satellite.mjs <dir> [--apply --confirm] [--vercel-client-token X]` — F3b: prepara Jira+Vercel (dry-run por defecto).
 - `scripts/lighthouse-remote.mjs <url-desplegada>` — F3b: gate S2 remoto = "lanzado"; gap honesto sin URL.
