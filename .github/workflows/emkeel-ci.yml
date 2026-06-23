@@ -68,6 +68,11 @@ jobs:
         env:
           EMKEEL_BASE_REF: ${{ github.base_ref }}
         run: python -m emkeel.gates.check_strategy_process
+      - name: "Gate - critical change needs an integration test (tests/integration/)"
+        if: github.event_name == 'pull_request'
+        env:
+          EMKEEL_BASE_REF: ${{ github.base_ref }}
+        run: python -m emkeel.gates.check_critical_integration
       - name: "Gate - strategy alignment (feature acknowledges the north star)"
         if: github.event_name == 'pull_request'
         env:
