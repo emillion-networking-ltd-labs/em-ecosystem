@@ -1,48 +1,44 @@
 {
   "process": "strategy",
-  "state": "approved",
+  "state": "presented",
   "steps": {
     "scaffolded": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:32Z",
+      "timestamp": "2026-06-23T08:42:42Z",
       "topic": "satellite-builders"
     },
     "researched": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:32Z",
+      "timestamp": "2026-06-23T08:42:43Z",
       "sources": [
-        "https://html.to.design/",
-        "https://simplystatic.com/",
-        "https://github.com/aknuds1/html-to-react",
-        "https://faustjs.org/",
-        "https://www.wpgraphql.com/",
-        ".claude/skills/launch-satellite/scripts/generate-satellite.mjs:1"
+        "https://www.cookiebot.com/",
+        "https://support.cookiebot.com/hc/en-us/articles/12756353963292-About-Google-Consent-Mode",
+        "https://splitforms.com/blog/server-actions-vs-form-backend-nextjs",
+        "https://formspree.io/guides/nextjs/",
+        "https://www.deque.com/axe/axe-core/",
+        "https://faviconbuilder.com/guides/pwa-favicon-manifest-guide/",
+        "emkeel-governance/adr/011-satellite-image-assets.md"
       ]
     },
     "proposed": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:50Z",
-      "options": "Modelo de builder (decision PRESENTADA al gate): (1) status quo extract-then-compose [con PERDIDA, fallo del piloto], (2) clon estatico del render estilo wp2static [copia markup ajeno, sin ownership], (3) builders por FUENTE -> nucleo comun (modelo normalizado/IR) -> emitter Next ENRIQUECIDO [recomendado: captura lossless + reconstruccion con nuestras secciones+imagenes, generico, from-file primero], (4) WP headless Faust/WPGraphQL [exige WP vivo, no codigo propio]."
+      "timestamp": "2026-06-23T08:43:06Z",
+      "options": "Estandar profesional COMPLETO del nucleo comun + GATE de launch-readiness. Decision ABIERTA presentada: approach del formulario funcional = (1) Vercel function/Server Action + Resend [recomendado: codigo propio, satelite autosuficiente, pluggable] vs (2) Formspree [form-backend, cero backend, dep externa]. Resto del estandar fijado (no abierto): favicon/manifest del logo real, 404 de marca, Cookiebot free (decidido, pluggable), a11y AA via axe-core, + lo ya cubierto (SEO/i18n/S2/D4/imagenes/em-ui/headers/legales/firma)."
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:50Z",
-      "critique": "Adversarial: (a) 'nada se pierde' es honesto SOLO acotado a lo que el backup contiene -> si la BD no esta o hay contenido dinamico, se DECLARA (cobertura del adapter), no se inventa (\u00a7D4); (b) genericizacion real: el IR (site/pages/blocks/media/nav/forms) es el contrato, WP/Elementor es el PRIMER adapter no la forma del nucleo -> un backup no-WP implementa el mismo interfaz; (c) reuse/gobernanza: el nucleo comun impone i18n/SEO/guardrails/imagenes/em-ui/preview/S2 por construccion sobre el IR -> reproducible y gateado; el 'enriquecido en un flujo' preserva los HECHOS del IR (copy verbatim) y solo el DISENO es libre; (d) from-file primero valida la captura lossless (la parte dura) antes de from-url."
+      "timestamp": "2026-06-23T08:43:06Z",
+      "critique": "Adversarial: (a) Cookiebot free = un solo default global (sin geo) -> aceptable y se DECLARA; pluggable a uno propio (patron ADR-011) si hace falta geo. (b) axe-core solo caza ~57% de WCAG AA -> el gate exige axe sin violations PERO marca 'incomplete' para revision humana; no se finge AA total. (c) form opcion 1 (Resend) exige dominio verificado/deliverability -> es el coste asumido a cambio de ownership; opcion 2 lo evita pero mete dep externa por satelite -> el operador elige. (d) el gate NO debe gatear CWV de campo (sin trafico) -> se queda en lab + post-lanzamiento (consistente con ADR-010). (e) el estandar vive en el NUCLEO COMUN (cross-cutting) -> todo builder lo hereda, no se re-implementa por builder; el gate lossless ya probo que un gate de completitud caza lo que falta."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:50Z",
+      "timestamp": "2026-06-23T08:43:06Z",
       "check_passed": true
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-06-22T21:55:50Z",
+      "timestamp": "2026-06-23T08:43:06Z",
       "presented_to": "operador"
-    },
-    "approved": {
-      "done": true,
-      "timestamp": "2026-06-22T22:11:13Z",
-      "approved_by": "operador"
     }
   }
 }
