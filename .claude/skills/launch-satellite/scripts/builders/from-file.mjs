@@ -6,18 +6,18 @@
 //   exit 0 = IR capturado y lossless OK · 2 = fuente no reconocida · 1 = gate lossless FALLÓ (pérdida)
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { makeRegistry } from "./lib/adapter.mjs";
-import { validateIR, irStats, sectionsOf } from "./lib/ir.mjs";
-import { losslessReport } from "./lib/lossless.mjs";
-import { wordpressAdapter } from "./adapters/wordpress.mjs";
+import { makeRegistry } from "./capture/adapter.mjs";
+import { validateIR, irStats, sectionsOf } from "./model/ir.mjs";
+import { losslessReport } from "./capture/capture-gate.mjs";
+import { wordpressAdapter } from "./capture/adapters/wordpress.mjs";
 
 // Registro de adapters de fuente. Añadir otra fuente = añadir su adapter aquí (mismo IR, sin tocar el núcleo).
 export const REGISTRY = makeRegistry([wordpressAdapter]);
 
-export async function captureFromFile(dir) {
+export async function captureFromFile(dir, opts = {}) {
   const adapter = REGISTRY.detect(dir);
   if (!adapter) { const e = new Error(`from-file: ninguna fuente reconocida en ${dir} (adapters: ${REGISTRY.list.map((a) => a.kind).join(", ")})`); e.code = "NO_ADAPTER"; throw e; }
-  const ir = await adapter.capture(dir);
+  const ir = await adapter.capture(dir, opts);   // opts.targetDomain: cuál DB es producción si hay varias
   return { adapter: adapter.kind, ir };
 }
 
@@ -25,9 +25,11 @@ async function main() {
   const dir = resolve(process.argv[2] || ".");
   const outArg = process.argv.indexOf("--out");
   const out = outArg > -1 ? process.argv[outArg + 1] : null;
+  const di = process.argv.indexOf("--domain");
+  const targetDomain = di > -1 ? process.argv[di + 1] : undefined;   // cuál DB es producción si hay varias
 
   let cap;
-  try { cap = await captureFromFile(dir); }
+  try { cap = await captureFromFile(dir, { targetDomain }); }
   catch (e) { console.error(e.message); process.exit(e.code === "NO_ADAPTER" ? 2 : 1); }
   const { adapter, ir } = cap;
 

@@ -14,7 +14,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { emitFromIR } from "./emit.mjs";
-import { validateIR, irStats } from "./lib/ir.mjs";
+import { validateIR, irStats } from "./model/ir.mjs";
 import { verifyEmit } from "./lib/lossless.mjs";
 import { verifyLaunchReady } from "./lib/launch-ready.mjs";
 

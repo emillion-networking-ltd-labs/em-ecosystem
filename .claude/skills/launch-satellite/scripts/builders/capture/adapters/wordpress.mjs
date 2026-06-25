@@ -1,15 +1,16 @@
 // Adapter WordPress (FB1, ECO-63 / ADR-012) — el PRIMER adapter de fuente. Es el ÚNICO sitio con conocimiento
 // de WordPress: la BD (wp_posts/wp_postmeta/wp_options/menús), Elementor (_elementor_data) y el árbol uploads.
-// Produce el IR común (lib/ir.mjs) detrás de la interfaz genérica de adapter (lib/adapter.mjs). Añadir otra
+// Produce el IR común (model/ir.mjs) detrás de la interfaz genérica de adapter (capture/adapter.mjs). Añadir otra
 // fuente luego = otro adapter que produce el MISMO IR, sin tocar núcleo/IR/emitter. CERO supuestos de WP fuera.
 //
 // Captura LOSSLESS: TODAS las páginas/posts publicados, TODOS los bloques (cada elemento Elementor → un bloque,
-// preservando su `raw`), TODAS las imágenes reales de uploads (originales). El gate de completitud (lossless.mjs)
-// verifica fuente == IR. Lo que el backup no contiene se DECLARA (coverage.notInSource), no se inventa (§D4).
-import { readdirSync, statSync, existsSync } from "node:fs";
-import { join } from "node:path";
-import { emptyIR } from "../lib/ir.mjs";
-import { streamDump } from "../lib/sqldump.mjs";
+// preservando su `raw`), TODAS las imágenes reales de uploads (originales). El gate de captura
+// (capture/capture-gate.mjs) verifica fuente == IR. Lo que el backup no contiene se DECLARA (coverage.notInSource),
+// no se inventa (§D4).
+import { readdirSync, existsSync, createReadStream } from "node:fs";
+import { join, basename } from "node:path";
+import { emptyIR } from "../../model/ir.mjs";
+import { streamDump } from "../sqldump.mjs";
 
 // --- detección de ficheros del backup ---
 function findFile(dir, pred, depth = 4) {
@@ -25,7 +26,62 @@ function findFile(dir, pred, depth = 4) {
   walk(dir, depth);
   return out;
 }
-const findDump = (dir) => findFile(dir, (n) => n.toLowerCase().endsWith(".sql")).sort((a, b) => statSync(b).size - statSync(a).size)[0] || null;
+// TODOS los .sql del backup, orden ALFABÉTICO (determinista) — JAMÁS por tamaño. La DB de PRODUCCIÓN no es
+// necesariamente la mayor: con dos backups (producción vs dev) un dev más grande robaría la selección EN SILENCIO.
+const findDumps = (dir) => findFile(dir, (n) => n.toLowerCase().endsWith(".sql")).sort();
+
+// El host de una URL de siteurl/home, normalizado (sin protocolo, sin www, minúsculas). null si no parsea.
+const hostOf = (url) => {
+  if (!url) return null;
+  try { return new URL(/^https?:\/\//i.test(url) ? url : "https://" + url).host.replace(/^www\./i, "").toLowerCase() || null; }
+  catch { return null; }
+};
+
+// Lee el siteurl (o home) — el DOMINIO REAL del sitio — de un dump, en streaming y ABORTANDO al encontrarlo (no
+// parsea los cientos de MB del dump entero sólo para el dominio). Sólo acepta valores URL (anti-falso-positivo:
+// 'home' es palabra común; exigir https?:// evita casar un postmeta cualquiera). WP-específico → vive en el adapter.
+function dumpSiteUrl(dump) {
+  return new Promise((resolve) => {
+    const stream = createReadStream(dump, { encoding: "utf8" });
+    const found = {};
+    let tail = "";
+    const scan = (s) => { const re = /'(siteurl|home)',\s*'(https?:\/\/[^']*)'/gi; let m; while ((m = re.exec(s))) found[m[1].toLowerCase()] ||= m[2]; };
+    stream.on("data", (chunk) => {
+      scan(tail + chunk);
+      if (found.siteurl) { stream.destroy(); resolve(found.siteurl); return; }
+      tail = (tail + chunk).slice(-256);   // solape: no cortar el patrón en la frontera de chunk
+    });
+    stream.on("close", () => resolve(found.siteurl || found.home || null));
+    stream.on("error", () => resolve(null));
+  });
+}
+
+// Selecciona EL dump de PRODUCCIÓN del backup. INVARIANTE: NUNCA por tamaño.
+//  · 0 .sql → null (el caller lanza "no hay dump").
+//  · 1 .sql → ése (sin ambigüedad).
+//  · N .sql → el que casa el DOMINIO objetivo (hint explícito `targetDomain`, o el basename del backup — la
+//    convención .satellite-intake/<dominio>/). Exactamente 1 casa → ése. 0 o >1 (ambiguo) → FALLA RUIDOSO
+//    listando cada DB + su siteurl ("hay N bases, dime cuál"), jamás a ciegas.
+export async function selectDump(dir, { targetDomain } = {}) {
+  const dumps = findDumps(dir);
+  if (dumps.length <= 1) return dumps[0] || null;                 // 0 → null · 1 → ése (sin pre-scan)
+  const hintHost = hostOf(targetDomain) || hostOf(basename(dir)); // dominio objetivo: explícito o por convención
+  const info = [];
+  for (const d of dumps) { const url = await dumpSiteUrl(d); info.push({ dump: d, url, host: hostOf(url) }); }
+  const matches = hintHost
+    ? info.filter((i) => i.host && (i.host === hintHost || i.host.endsWith("." + hintHost) || hintHost.endsWith("." + i.host)))
+    : [];
+  if (matches.length === 1) return matches[0].dump;              // exactamente una DB es producción → ésa
+  const list = info.map((i) => `  - ${basename(i.dump)}  → siteurl: ${i.url || "(desconocido)"}`).join("\n");
+  const why = !hintHost ? "no hay dominio objetivo (pasa --domain <dominio>, o nombra el backup como el dominio real)"
+    : matches.length === 0 ? `ninguna DB casa el dominio objetivo "${hintHost}"`
+    : `${matches.length} DBs casan "${hintHost}" (ambiguo)`;
+  const e = new Error(`adapter wordpress: ${dumps.length} bases de datos .sql en el backup — JAMÁS elijo por tamaño y `
+    + `no puedo determinar cuál es PRODUCCIÓN sin ambigüedad (${why}):\n${list}\n`
+    + `Dime cuál es producción: pasa --domain <dominio> (o deja sólo esa DB en el backup).`);
+  e.code = "AMBIGUOUS_DB";
+  throw e;
+}
 function findUploads(dir) {
   const hits = findFile(dir, (n, p) => /wp-content[/\\]uploads$/.test(p) && false); // dirs no salen por findFile (solo files)
   // localizar el dir uploads explícitamente
@@ -142,11 +198,11 @@ export const wordpressAdapter = {
   detect(dir) {
     if (!existsSync(dir)) return false;
     if (findUploads(dir)) return true;
-    const dump = findDump(dir);
-    return !!dump;   // un .sql presente → candidato (capture confirma que es WP por las tablas)
+    return findDumps(dir).length > 0;   // un .sql presente → candidato (capture confirma que es WP por las tablas)
   },
-  async capture(dir) {
-    const dump = findDump(dir);
+  async capture(dir, opts = {}) {
+    // Selección de DB ENDURECIDA (G1): jamás por tamaño; producción por dominio; ambiguo → falla ruidoso.
+    const dump = await selectDump(dir, { targetDomain: opts.targetDomain });
     if (!dump) throw new Error(`adapter wordpress: no encuentro un dump .sql en ${dir}`);
     const uploadsDir = findUploads(dir);
     const ir = emptyIR({ kind: "wordpress", backup: dir, dump });
@@ -205,6 +261,12 @@ export const wordpressAdapter = {
           setSeo(row.post_id, "aioseo", { title: row.title, description: row.description, canonical: row.canonical_url, ogTitle: row.og_title, ogDescription: row.og_description });
       }
     });
+
+    // HARDENING (G1): un .sql que NO es WordPress (sin wp_posts ni wp_options) produciría un IR VACÍO que el gate
+    // de captura aprobaría en falso (0 == 0). Fallar LOUD evita esa "captura silenciosa vacía" — detect() acepta
+    // cualquier .sql; capture() confirma que de verdad es WP por sus tablas (igual que el comentario de detect()).
+    if (posts.size === 0 && Object.keys(options).length === 0)
+      throw new Error(`adapter wordpress: el dump ${dump} no parece WordPress (sin wp_posts ni wp_options) — fuente no soportada`);
 
     // --- 2. site ---
     ir.site = {

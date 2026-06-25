@@ -118,6 +118,8 @@ export function validateIR(ir) {
   if (!ir.site || typeof ir.site !== "object") p.push("falta site");
   if (!Array.isArray(ir.pages)) p.push("pages debe ser un array");
   if (!Array.isArray(ir.media)) p.push("media debe ser un array");
+  if (ir.menus != null && !Array.isArray(ir.menus)) p.push("menus debe ser un array");
+  if (ir.forms != null && !Array.isArray(ir.forms)) p.push("forms debe ser un array");
   const seenRoutes = new Set();
   for (const pg of ir.pages || []) {
     if (!pg.id && pg.id !== 0) p.push(`página sin id (${pg.title || pg.slug || "?"})`);
@@ -125,6 +127,19 @@ export function validateIR(ir) {
     else if (seenRoutes.has(pg.route)) p.push(`route duplicada: ${pg.route}`);
     else seenRoutes.add(pg.route);
     if (!Array.isArray(pg.blocks)) p.push(`página ${pg.id}: blocks debe ser un array`);
+    else {
+      // Cada bloque (incl. anidados) DEBE tener un `kind` string — es el discriminante del modelo; sin él, el
+      // emitter no sabe qué es. Recorre children para no dejar entrar bloques sin tipo por la puerta de atrás.
+      const stack = [...pg.blocks];
+      while (stack.length) {
+        const b = stack.shift();
+        if (!b || typeof b !== "object" || typeof b.kind !== "string" || !b.kind) {
+          p.push(`página ${pg.id}: un bloque no tiene 'kind' string (discriminante obligatorio del modelo)`);
+          continue;
+        }
+        if (Array.isArray(b.children)) stack.push(...b.children);
+      }
+    }
   }
   const ids = new Set();
   for (const m of ir.media || []) {
