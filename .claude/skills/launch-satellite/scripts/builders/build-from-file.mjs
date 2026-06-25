@@ -9,9 +9,10 @@
 import { resolve } from "node:path";
 import { captureFromFile } from "./from-file.mjs";
 import { emitFromIR } from "./emit.mjs";
-import { losslessReport, verifyEmit } from "./lib/lossless.mjs";
+import { losslessReport } from "./capture/capture-gate.mjs";
+import { verifyEmit } from "./lib/lossless.mjs";
 import { verifyLaunchReady } from "./lib/launch-ready.mjs";
-import { irStats } from "./lib/ir.mjs";
+import { irStats } from "./model/ir.mjs";
 
 export async function buildFromFile(backupDir, destDir, opts = {}) {
   const { adapter, ir } = await captureFromFile(backupDir);     // FB1: fuente → IR

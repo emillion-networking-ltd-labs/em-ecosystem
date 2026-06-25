@@ -4,15 +4,15 @@
 // supuestos WP fuera del adapter), y que el gate FALLA si se pierde algo.
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, mkdtempSync, rmSync, readdirSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { parseValues, streamDump } from "../scripts/builders/lib/sqldump.mjs";
-import { validateIR, irStats, IR_VERSION } from "../scripts/builders/lib/ir.mjs";
-import { losslessReport, assertLossless } from "../scripts/builders/lib/lossless.mjs";
-import { isAdapter, makeRegistry } from "../scripts/builders/lib/adapter.mjs";
-import { wordpressAdapter } from "../scripts/builders/adapters/wordpress.mjs";
+import { parseValues, streamDump } from "../scripts/builders/capture/sqldump.mjs";
+import { validateIR, irStats, IR_VERSION } from "../scripts/builders/model/ir.mjs";
+import { losslessReport, assertLossless } from "../scripts/builders/capture/capture-gate.mjs";
+import { isAdapter, makeRegistry } from "../scripts/builders/capture/adapter.mjs";
+import { wordpressAdapter } from "../scripts/builders/capture/adapters/wordpress.mjs";
 import { captureFromFile, REGISTRY } from "../scripts/builders/from-file.mjs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
@@ -124,7 +124,7 @@ test("gate de COMPLETITUD: FALLA si el IR pierde algo que la fuente tenía", asy
     const r = losslessReport(ir);
     assert.equal(r.ok, false);
     assert.ok(r.problems.some((p) => /PÉRDIDA/.test(p)));
-    assert.throws(() => assertLossless(ir), /gate lossless FALLÓ/);
+    assert.throws(() => assertLossless(ir), /gate lossless de CAPTURA FALLÓ/);
   } finally { bk.cleanup(); }
 });
 
@@ -141,14 +141,30 @@ test("from-file: detecta la fuente y captura; dir sin backup → NO_ADAPTER", as
   finally { rmSync(empty, { recursive: true, force: true }); }
 });
 
-test("GENERICIDAD (requisito duro #1): cero conocimiento de WordPress en el núcleo (IR/adapter/lossless/SQL)", () => {
-  // El núcleo común (IR + interfaz de adapter + gate lossless + parser SQL) NO conoce la fuente: cero
-  // identificadores de WordPress/Elementor. TODA esa lógica vive SOLO en adapters/wordpress.mjs.
-  for (const f of ["lib/ir.mjs", "lib/adapter.mjs", "lib/lossless.mjs", "lib/sqldump.mjs"]) {
-    const src = readFileSync(join(HERE, "..", "scripts", "builders", f), "utf8");
-    assert.ok(!/wordpress|elementor|wp_[a-z]+|wp-content/i.test(src), `${f} no debe tener conocimiento de WordPress`);
+test("GENERICIDAD (requisito duro): motor genérico sin conocimiento de fuente NI de em-ui (model/ + capture/)", () => {
+  const root = join(HERE, "..", "scripts", "builders");
+  const walk = (d) => { let e; try { e = readdirSync(d, { withFileTypes: true }); } catch { return []; }
+    return e.flatMap((x) => { const p = join(d, x.name); return x.isDirectory() ? walk(p) : (x.name.endsWith(".mjs") ? [p] : []); }); };
+  const rel = (p) => p.substring(root.length + 1).replace(/\\/g, "/");
+  const modelCapture = [...walk(join(root, "model")), ...walk(join(root, "capture"))];
+  assert.ok(modelCapture.length >= 5, "el escáner debe ver model/ + capture/ (no apuntar a un dir vacío)");
+
+  // (a) El NÚCLEO (model/ + capture/ SIN los adapters) no conoce ninguna fuente concreta: cero WordPress/Elementor.
+  // TODO ese conocimiento vive SOLO en capture/adapters/. Añadir otra fuente = otro adapter, sin tocar el núcleo.
+  for (const f of modelCapture.filter((p) => !/[/\\]adapters[/\\]/.test(p))) {
+    const src = readFileSync(f, "utf8");
+    assert.ok(!/wordpress|elementor|wp_[a-z]+|wp-content/i.test(src), `${rel(f)} no debe tener conocimiento de WordPress (vive en capture/adapters/)`);
   }
-  // Añadir otra fuente = otro adapter (mismo IR), sin tocar el núcleo. El registro es genérico.
+
+  // (b) El MOTOR GENÉRICO entero (model/ + capture/, INCLUIDOS los adapters) NO importa em-ui / design-system:
+  // captura y modelo son AGNÓSTICOS de producto; el binding em-ui es del lado de emisión (G2), nunca aquí (ADR-015 §6).
+  for (const f of modelCapture) {
+    const src = readFileSync(f, "utf8");
+    assert.ok(!/(?:from|import)\s+["'][^"']*(?:em-ui|design-system|registry)[^"']*["']/i.test(src),
+      `${rel(f)} no debe importar em-ui/design-system (motor genérico vs binding de producto)`);
+  }
+
+  // El registro es genérico: añadir otra fuente = otro adapter (mismo IR), sin tocar el núcleo.
   const reg = makeRegistry([wordpressAdapter]);
   assert.equal(reg.byKind("wordpress"), wordpressAdapter);
   const empty = mkdtempSync(join(tmpdir(), "no-src-"));

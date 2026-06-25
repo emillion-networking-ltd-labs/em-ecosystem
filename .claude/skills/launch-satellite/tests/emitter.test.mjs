@@ -11,7 +11,7 @@ import { renderBlock, renderMain } from "../scripts/builders/lib/emit-blocks.mjs
 import { verifyEmit } from "../scripts/builders/lib/lossless.mjs";
 import { verifyLaunchReady } from "../scripts/builders/lib/launch-ready.mjs";
 import { emitFromIR } from "../scripts/builders/emit.mjs";
-import { IR_VERSION } from "../scripts/builders/lib/ir.mjs";
+import { IR_VERSION } from "../scripts/builders/model/ir.mjs";
 
 const ctx = { siteName: "Demo Co", t: {}, media: new Map([["hero.jpg", "/images/hero.jpg"]]), contactHref: "/contact", isHome: true, pageImages: [] };
 

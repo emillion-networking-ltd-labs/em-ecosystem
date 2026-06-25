@@ -6,10 +6,10 @@
 //   exit 0 = IR capturado y lossless OK · 2 = fuente no reconocida · 1 = gate lossless FALLÓ (pérdida)
 import { writeFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { makeRegistry } from "./lib/adapter.mjs";
-import { validateIR, irStats, sectionsOf } from "./lib/ir.mjs";
-import { losslessReport } from "./lib/lossless.mjs";
-import { wordpressAdapter } from "./adapters/wordpress.mjs";
+import { makeRegistry } from "./capture/adapter.mjs";
+import { validateIR, irStats, sectionsOf } from "./model/ir.mjs";
+import { losslessReport } from "./capture/capture-gate.mjs";
+import { wordpressAdapter } from "./capture/adapters/wordpress.mjs";
 
 // Registro de adapters de fuente. Añadir otra fuente = añadir su adapter aquí (mismo IR, sin tocar el núcleo).
 export const REGISTRY = makeRegistry([wordpressAdapter]);

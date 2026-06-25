@@ -9,7 +9,7 @@ import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import sharp from "sharp";
-import { sectionsOf, addSection, irStats, validateIR, IR_VERSION } from "../scripts/builders/lib/ir.mjs";
+import { sectionsOf, addSection, irStats, validateIR, IR_VERSION } from "../scripts/builders/model/ir.mjs";
 import { detectSources } from "../scripts/builders/detect-source.mjs";
 import { emitFromIRFile } from "../scripts/builders/emit-from-ir.mjs";
 

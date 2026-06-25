@@ -1,15 +1,16 @@
 // Adapter WordPress (FB1, ECO-63 / ADR-012) — el PRIMER adapter de fuente. Es el ÚNICO sitio con conocimiento
 // de WordPress: la BD (wp_posts/wp_postmeta/wp_options/menús), Elementor (_elementor_data) y el árbol uploads.
-// Produce el IR común (lib/ir.mjs) detrás de la interfaz genérica de adapter (lib/adapter.mjs). Añadir otra
+// Produce el IR común (model/ir.mjs) detrás de la interfaz genérica de adapter (capture/adapter.mjs). Añadir otra
 // fuente luego = otro adapter que produce el MISMO IR, sin tocar núcleo/IR/emitter. CERO supuestos de WP fuera.
 //
 // Captura LOSSLESS: TODAS las páginas/posts publicados, TODOS los bloques (cada elemento Elementor → un bloque,
-// preservando su `raw`), TODAS las imágenes reales de uploads (originales). El gate de completitud (lossless.mjs)
-// verifica fuente == IR. Lo que el backup no contiene se DECLARA (coverage.notInSource), no se inventa (§D4).
+// preservando su `raw`), TODAS las imágenes reales de uploads (originales). El gate de captura
+// (capture/capture-gate.mjs) verifica fuente == IR. Lo que el backup no contiene se DECLARA (coverage.notInSource),
+// no se inventa (§D4).
 import { readdirSync, statSync, existsSync } from "node:fs";
 import { join } from "node:path";
-import { emptyIR } from "../lib/ir.mjs";
-import { streamDump } from "../lib/sqldump.mjs";
+import { emptyIR } from "../../model/ir.mjs";
+import { streamDump } from "../sqldump.mjs";
 
 // --- detección de ficheros del backup ---
 function findFile(dir, pred, depth = 4) {
@@ -205,6 +206,12 @@ export const wordpressAdapter = {
           setSeo(row.post_id, "aioseo", { title: row.title, description: row.description, canonical: row.canonical_url, ogTitle: row.og_title, ogDescription: row.og_description });
       }
     });
+
+    // HARDENING (G1): un .sql que NO es WordPress (sin wp_posts ni wp_options) produciría un IR VACÍO que el gate
+    // de captura aprobaría en falso (0 == 0). Fallar LOUD evita esa "captura silenciosa vacía" — detect() acepta
+    // cualquier .sql; capture() confirma que de verdad es WP por sus tablas (igual que el comentario de detect()).
+    if (posts.size === 0 && Object.keys(options).length === 0)
+      throw new Error(`adapter wordpress: el dump ${dump} no parece WordPress (sin wp_posts ni wp_options) — fuente no soportada`);
 
     // --- 2. site ---
     ir.site = {
