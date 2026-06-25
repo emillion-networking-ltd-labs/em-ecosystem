@@ -1,11 +1,11 @@
 # ADR-012 — Arquitectura de satélites: BUILDERS por fuente → núcleo común (IR) → emitter Next enriquecido
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-22
-- **Ticket:** [ECO-62](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-62) (decisión) · seguimiento [ECO-63](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-63) (FB0/FB1: núcleo + IR + adapter WP)
-- **Strategy:** satellite-builders
-- **Decisor:** Operador (human gate, 2026-06-22)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el norte
+- Status: accepted
+- Date: 2026-06-22
+- Ticket: [ECO-62](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-62) (decisión) · seguimiento [ECO-63](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-63) (FB0/FB1: núcleo + IR + adapter WP)
+- Strategy: satellite-builders
+- Deciders: Operador (human gate, 2026-06-22)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el norte
   [`strategy/satellite-builders.md`](../strategy/satellite-builders.md), que **SUPERA** a `satellites.md`
   (preservado como historia). **Reutiliza — no re-litiga —** los cimientos válidos: i18n (ECO-58), SEO de
   fábrica + gate ([ADR-010](010-satellite-design-generation.md), ECO-56), guardrail HECHOS-vs-DISEÑO §D4,

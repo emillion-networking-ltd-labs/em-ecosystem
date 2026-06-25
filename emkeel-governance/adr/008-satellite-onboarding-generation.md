@@ -1,11 +1,11 @@
 # ADR-008 — Skill `/launch-satellite`: brief-driven (onboarding) + generación por reuse (no greenfield)
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-19
-- **Tickets:** [ECO-24](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-24) (F2a onboarding), [ECO-25](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-25) (F2b generación)
-- **Strategy:** satellites
-- **Decisor:** Operador (human gate, 2026-06-19)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa la Fase 2 del norte (`strategy/satellites.md` §Recommendation, punto sistema `/launch-satellite`) sobre la base de [ADR-006](006-satellite-component-reuse.md)/[ADR-007](007-design-system-source-location.md) (reuse via em-ui desde `design-system/`).
+- Status: accepted
+- Date: 2026-06-19
+- Ticket: [ECO-24](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-24) (F2a onboarding), [ECO-25](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-25) (F2b generación)
+- Strategy: satellites
+- Deciders: Operador (human gate, 2026-06-19)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Materializa la Fase 2 del norte (`strategy/satellites.md` §Recommendation, punto sistema `/launch-satellite`) sobre la base de [ADR-006](006-satellite-component-reuse.md)/[ADR-007](007-design-system-source-location.md) (reuse via em-ui desde `design-system/`).
 
 ## Contexto
 La Fase 2 construye el sistema de facilitación `/launch-satellite`: onboarding (5 modos) + generación. Dos riesgos a gobernar: (1) que la IA **fabrique** datos del negocio (contrario a la regla del norte "no inventar"); (2) que la generación haga **greenfield** o copia manual, rompiendo el reuse gobernado de F1.

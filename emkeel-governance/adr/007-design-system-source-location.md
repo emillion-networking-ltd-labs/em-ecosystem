@@ -1,11 +1,11 @@
 # ADR-007 — Ubicación de la fuente del design system: `design-system/` dedicado, dashboard como legacy
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-18
-- **Ticket:** [ECO-23](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-23)
-- **Strategy:** satellites
-- **Decisor:** Operador (human gate)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Refina la decisión D1 de [ADR-006](006-satellite-component-reuse.md) — **solo la ubicación de la fuente**, no el mecanismo de reuse.
+- Status: accepted
+- Date: 2026-06-18
+- Ticket: [ECO-23](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-23)
+- Strategy: satellites
+- Deciders: Operador (human gate)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Refina la decisión D1 de [ADR-006](006-satellite-component-reuse.md) — **solo la ubicación de la fuente**, no el mecanismo de reuse.
 
 ## Contexto
 

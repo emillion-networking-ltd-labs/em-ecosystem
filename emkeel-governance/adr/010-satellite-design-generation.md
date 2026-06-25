@@ -1,11 +1,11 @@
 # ADR-010 — Generación de diseño de satélites: enfoque HÍBRIDO + producto profesional SEO-ready
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-22
-- **Ticket:** [ECO-52](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-52)
-- **Strategy:** satellites
-- **Decisor:** Operador (human gate, 2026-06-22)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el **refinamiento ECO-52**
+- Status: accepted
+- Date: 2026-06-22
+- Ticket: [ECO-52](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-52)
+- Strategy: satellites
+- Deciders: Operador (human gate, 2026-06-22)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el **refinamiento ECO-52**
   del norte ([`strategy/satellites.md` §«Refinamiento ECO-52» + D6](../strategy/satellites.md)). Absorbe y
   **supera** la decisión abierta del PR #435 (1/2/3), cerrado como superado.
 

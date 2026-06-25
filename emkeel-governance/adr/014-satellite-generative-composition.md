@@ -1,11 +1,12 @@
 # ADR-014 — Satélites: diseño GENERATIVO por composición + COMPONENTES INMUTABLES (cumple ADR-010 op.3) + estándar VIVO + regenerar
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-23
-- **Ticket:** [ECO-69](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-69) (decisión) · seguimiento [ECO-70](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-70) (FB6, build sobre el emit)
-- **Strategy:** satellite-builders
-- **Decisor:** Operador (human gate vía **review + merge** del PR de la lane, 2026-06-23)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el **refinamiento ECO-69**
+- Status: superseded
+- Superseded-by: ADR-015
+- Date: 2026-06-23
+- Ticket: [ECO-69](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-69) (decisión) · seguimiento [ECO-70](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-70) (FB6, build sobre el emit)
+- Strategy: satellite-builders
+- Deciders: Operador (human gate vía **review + merge** del PR de la lane, 2026-06-23)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el **refinamiento ECO-69**
   del norte ([`strategy/satellite-builders.md` §«Refinamiento ECO-69»](../strategy/satellite-builders.md)).
   **Reutiliza — no re-litiga —** [ADR-010](010-satellite-design-generation.md) (diseño HÍBRIDO op.3),
   [ADR-012](012-satellite-builders-architecture.md) (builders→IR→emitter), [ADR-013](013-satellite-launch-readiness-standard.md)
