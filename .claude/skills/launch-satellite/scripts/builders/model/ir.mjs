@@ -126,6 +126,9 @@ export function validateIR(ir) {
     if (typeof pg.route !== "string") p.push(`página ${pg.id}: route debe ser string`);
     else if (seenRoutes.has(pg.route)) p.push(`route duplicada: ${pg.route}`);
     else seenRoutes.add(pg.route);
+    // `design` (page.design) — OPCIONAL, AÑADIDO en G3 (ECO-75): el SPEC de diseño que la IA (R4) autora y se
+    // persiste aquí; lo valida en profundidad validateDesign (standard/). Aditivo + opcional → NO rompe IRs 1.0.0.
+    if (pg.design != null && typeof pg.design !== "object") p.push(`página ${pg.id}: design debe ser un objeto`);
     if (!Array.isArray(pg.blocks)) p.push(`página ${pg.id}: blocks debe ser un array`);
     else {
       // Cada bloque (incl. anidados) DEBE tener un `kind` string — es el discriminante del modelo; sin él, el

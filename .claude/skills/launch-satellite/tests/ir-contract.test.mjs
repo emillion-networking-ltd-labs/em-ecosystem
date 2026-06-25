@@ -9,7 +9,7 @@ import { IR_VERSION, emptyIR, validateIR } from "../scripts/builders/model/ir.mj
 
 // --- LA FORMA CONGELADA (el contrato). Cambiarla = romper el contrato = subir IR_VERSION. -------------------
 const TOP_KEYS = ["irVersion", "source", "site", "pages", "media", "menus", "forms"];       // raíz del IR
-const PAGE_KEYS = ["id", "type", "slug", "route", "title", "parent", "order", "seo", "blocks"]; // una página
+const PAGE_KEYS = ["id", "type", "slug", "route", "title", "parent", "order", "seo", "blocks", "design"]; // una página (`design` opcional, G3/ECO-75)
 const BLOCK_KEYS = ["kind", "text", "level", "href", "media", "raw", "children"];            // un bloque
 const MEDIA_KEYS = ["id", "file", "src", "usedBy", "alt", "mime"];                            // un media
 

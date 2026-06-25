@@ -14,7 +14,7 @@ import {
 } from "../generate-satellite.mjs";
 import { chrome, FALLBACK_LANG } from "../lib/i18n.mjs";
 import { writeScaffold } from "./standard/scaffold.mjs";   // SAT01 + em-ui + tema (R3, aislado)
-import { compileMinimal } from "./standard/compiler.mjs";  // SUELO: <main> lossless SIN composición (G3 trae el diseño)
+import { compileFromSpec } from "./standard/compiler.mjs";  // CORAZÓN G3: rinde page.design (la IA); sin spec → suelo lossless
 import {
   CONTACT_ACTION, CONTACT_PAGE, CONTACT_FORM_COMPONENT, CONTACT_FORM_IMPORT, CONTACT_FORM_SECTION,
   NOT_FOUND_PAGE, WEBMANIFEST, A11Y_TEST, generateFavicons,
@@ -188,7 +188,7 @@ function PAGE_FROM_IR(page, ctx) {
   const seo = page.seo || {};
   const title = seo.title || `${page.title || ctx.siteName}${page.route === "/" ? "" : " — " + ctx.siteName}`;
   const desc = seo.description || null;
-  const main = compileMinimal(page, ctx);   // SUELO lossless SIN composición (G3 reemplaza por el compilador del spec)
+  const main = compileFromSpec(page, ctx);   // rinde page.design (la IA-diseñador); sin spec → suelo lossless (G2)
   const jsonldBlock = pageJsonLdScript(page);
   // Página de contacto del cliente: contenido real del IR + formulario funcional como sección (ADR-013 §2).
   const withForm = !!ctx.withContactForm;
