@@ -10,15 +10,15 @@
 import { mkdirSync, writeFileSync, copyFileSync, statSync } from "node:fs";
 import { join, resolve } from "node:path";
 import {
-  emui, NEXT_CONFIG, TSCONFIG, POSTCSS, PROVIDERS, THEME_CONTEXT, DEFERRED_ANALYTICS,
   ROBOTS, SITEMAP, LAYOUT, buildJsonLd, themeInitScript, navLabel,
 } from "../generate-satellite.mjs";
 import { chrome, FALLBACK_LANG } from "../lib/i18n.mjs";
-import { renderMain } from "./lib/emit-blocks.mjs";
+import { writeScaffold } from "./standard/scaffold.mjs";   // SAT01 + em-ui + tema (R3, aislado)
+import { compileMinimal } from "./standard/compiler.mjs";  // SUELO: <main> lossless SIN composición (G3 trae el diseño)
 import {
   CONTACT_ACTION, CONTACT_PAGE, CONTACT_FORM_COMPONENT, CONTACT_FORM_IMPORT, CONTACT_FORM_SECTION,
-  NOT_FOUND_PAGE, WEBMANIFEST, A11Y_TEST, PLAYWRIGHT_CONFIG, generateFavicons,
-} from "./lib/emit-professional.mjs";
+  NOT_FOUND_PAGE, WEBMANIFEST, A11Y_TEST, generateFavicons,
+} from "./standard/professional.mjs";
 
 // Detecta la ruta de contacto del cliente en el IR (cualquier variante: /contact, /contact-us, /contacto…).
 // El formulario funcional se monta SIEMPRE en ESTA ruta (ADR-013 §2): si el cliente ya la trae, su contenido
@@ -77,48 +77,8 @@ export async function emitFromIR(ir, destDir, opts = {}) {
   const colorMode = ["dark", "light", "system"].includes(opts.colorMode) ? opts.colorMode : "system";
   const brand = isHex(opts.brand) ? opts.brand.trim() : (isHex(ir.site?.brand) ? ir.site.brand.trim() : null);
 
-  // --- scaffold forma-SAT01 (templates REUTILIZADOS del generador) ---
-  writeFileSync(join(dest, "package.json"), JSON.stringify({
-    name: `@em-ecosystem/sat-${slug(siteName)}`, version: "0.1.0", private: true,
-    scripts: { dev: "next dev -p 3100", build: "next build", start: "next start -p 3100", lint: "eslint \"src/**/*.{ts,tsx}\"" },
-    dependencies: {
-      "@marsidev/react-turnstile": "^1.5.0",
-      "@vercel/analytics": "^2.0.1", "@vercel/speed-insights": "^2.0.0",
-      "lucide-react": "^1.14.0", next: "^16.2.6", react: "^19.2.6", "react-dom": "^19.2.6",
-      resend: "^4.5.1",
-    },
-    devDependencies: {
-      "@axe-core/playwright": "^4.10.0",
-      "@playwright/test": "^1.49.0",
-      "@tailwindcss/postcss": "^4.3.0", "@types/node": "^22.19.18",
-      "@types/react": "^19.2.14", "@types/react-dom": "^19.2.3",
-      eslint: "^9.39.4", "eslint-config-next": "^16.2.6",
-      postcss: "^8.5.10", tailwindcss: "^4.3.0", typescript: "^6.0.3",
-    },
-    overrides: { next: { postcss: ">=8.5.10" } },
-  }, null, 2) + "\n");
-  writeFileSync(join(dest, "next.config.mjs"), NEXT_CONFIG);
-  writeFileSync(join(dest, "tsconfig.json"), TSCONFIG);
-  writeFileSync(join(dest, "postcss.config.mjs"), POSTCSS);
-  writeFileSync(join(dest, "next-env.d.ts"), `/// <reference types="next" />\n/// <reference types="next/image-types/global" />\n`);
-  writeFileSync(join(dest, ".gitignore"), "/node_modules\n/.next\n/out\n/.preview.log\n");
-  writeFileSync(join(dest, "playwright.config.ts"), PLAYWRIGHT_CONFIG());
-
-  // --- em-ui: tokens + componentes (TurnstileWidget para el formulario; ThemeToggle para el cambio manual de
-  //     tema del header, ECO-68 — vía registry, no copia local; jala IconButton/Tooltip + hooks/useTheme) ---
-  trace.emui.push(emui(["init"], src).trim());
-  for (const c of ["Button", "Badge", "Divider", "TurnstileWidget", "ThemeToggle"]) trace.emui.push(emui(["add", c], src).trim());
-  writeFileSync(join(app, "globals.css"),
-    `@import "../styles/em-ui-tokens.css";\n` +
-    (brand ? `\n/* Marca del cliente → token de marca em-ui (accent). */\n:root { --color-accent: ${brand}; --color-accent-dark: ${brand}; }\n` : "") +
-    `\nbody { font-family: var(--font-sans); }\n`);
-
-  // --- tema dark/light (REUTILIZADO) ---
-  mkdirSync(join(src, "context"), { recursive: true });
-  writeFileSync(join(src, "context", "ThemeContext.tsx"), THEME_CONTEXT(colorMode));
-  writeFileSync(join(app, "providers.tsx"), PROVIDERS);
-  mkdirSync(join(src, "components"), { recursive: true });
-  writeFileSync(join(src, "components", "DeferredAnalytics.tsx"), DEFERRED_ANALYTICS);
+  // --- scaffold SAT01 + em-ui + tema (R3 Arquitecto, AISLADO en standard/scaffold.mjs; templates reutilizados) ---
+  trace.emui = writeScaffold(dest, src, app, { siteName, brand, colorMode }).emui;
 
   // --- media REAL del IR → public/images/ (ingestión; ADR-011 assets reales) ---
   const pubDir = join(dest, "public");
@@ -228,7 +188,7 @@ function PAGE_FROM_IR(page, ctx) {
   const seo = page.seo || {};
   const title = seo.title || `${page.title || ctx.siteName}${page.route === "/" ? "" : " — " + ctx.siteName}`;
   const desc = seo.description || null;
-  const main = renderMain(page, ctx);
+  const main = compileMinimal(page, ctx);   // SUELO lossless SIN composición (G3 reemplaza por el compilador del spec)
   const jsonldBlock = pageJsonLdScript(page);
   // Página de contacto del cliente: contenido real del IR + formulario funcional como sección (ADR-013 §2).
   const withForm = !!ctx.withContactForm;

@@ -15,8 +15,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { emitFromIR } from "./emit.mjs";
 import { validateIR, irStats } from "./model/ir.mjs";
-import { verifyEmit } from "./lib/lossless.mjs";
-import { verifyLaunchReady } from "./lib/launch-ready.mjs";
+import { verifyEmit } from "./standard/emit-gate.mjs";
+import { verifyLaunchReady } from "./standard/launch-ready.mjs";
+import { verifyComponentDrift } from "./standard/component-drift.mjs";
 
 export async function emitFromIRFile(irPath, destDir, opts = {}) {
   const ir = JSON.parse(readFileSync(irPath, "utf8"));
@@ -25,7 +26,8 @@ export async function emitFromIRFile(irPath, destDir, opts = {}) {
   const trace = await emitFromIR(ir, destDir, opts);          // FB2+FB5: IR → satélite + estándar pro
   const emit = verifyEmit(ir, destDir);                       // gate de emisión (IR → sitio)
   const launch = verifyLaunchReady(destDir);                  // gate de launch-readiness (estándar pro)
-  return { ir, trace, emit, launch };
+  const drift = verifyComponentDrift(destDir);                // gate de drift (componentes em-ui sin forkear, ADR-014 §2)
+  return { ir, trace, emit, launch, drift };
 }
 
 async function main() {
@@ -43,9 +45,10 @@ async function main() {
   console.log(`emit-from-ir: IR ${s.pages} págs · ${s.blocks} bloques · ${s.media} imgs · ${s.words} palabras → emitido`);
   console.log("Gate de EMISIÓN (IR → sitio):"); for (const l of r.emit.lines) console.log(l);
   console.log("Gate de LAUNCH-READINESS (estándar profesional):"); for (const l of r.launch.lines) console.log(l);
-  if (!r.emit.ok || !r.launch.ok) {
+  console.log("Gate de DRIFT (componentes em-ui sin forkear):"); for (const l of r.drift.lines) console.log(l);
+  if (!r.emit.ok || !r.launch.ok || !r.drift.ok) {
     console.error("emit-from-ir: GATE FALLÓ — el satélite no está listo:\n" + [
-      ...r.emit.problems, ...r.launch.problems,
+      ...r.emit.problems, ...r.launch.problems, ...r.drift.problems,
     ].map((p) => "  - " + p).join("\n"));
     process.exit(1);
   }

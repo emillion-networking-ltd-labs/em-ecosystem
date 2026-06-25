@@ -6,7 +6,7 @@ import assert from "node:assert/strict";
 import { mkdtempSync, mkdirSync, writeFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { verifyLaunchReady } from "../scripts/builders/lib/launch-ready.mjs";
+import { verifyLaunchReady } from "../scripts/builders/standard/launch-ready.mjs";
 
 // Crea un satélite MÍNIMO con todos los indispensables del estándar (ADR-013).
 function makeFullSat(root) {

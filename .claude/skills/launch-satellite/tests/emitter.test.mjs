@@ -8,8 +8,8 @@ import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { renderBlock, renderMain } from "../scripts/builders/lib/emit-blocks.mjs";
-import { verifyEmit } from "../scripts/builders/lib/lossless.mjs";
-import { verifyLaunchReady } from "../scripts/builders/lib/launch-ready.mjs";
+import { verifyEmit } from "../scripts/builders/standard/emit-gate.mjs";
+import { verifyLaunchReady } from "../scripts/builders/standard/launch-ready.mjs";
 import { emitFromIR } from "../scripts/builders/emit.mjs";
 import { IR_VERSION } from "../scripts/builders/model/ir.mjs";
 
