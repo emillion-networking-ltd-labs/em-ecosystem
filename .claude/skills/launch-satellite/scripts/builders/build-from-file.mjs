@@ -10,8 +10,9 @@ import { resolve } from "node:path";
 import { captureFromFile } from "./from-file.mjs";
 import { emitFromIR } from "./emit.mjs";
 import { losslessReport } from "./capture/capture-gate.mjs";
-import { verifyEmit } from "./lib/lossless.mjs";
-import { verifyLaunchReady } from "./lib/launch-ready.mjs";
+import { verifyEmit } from "./standard/emit-gate.mjs";
+import { verifyLaunchReady } from "./standard/launch-ready.mjs";
+import { verifyComponentDrift } from "./standard/component-drift.mjs";
 import { irStats } from "./model/ir.mjs";
 
 export async function buildFromFile(backupDir, destDir, opts = {}) {
@@ -20,7 +21,8 @@ export async function buildFromFile(backupDir, destDir, opts = {}) {
   const trace = await emitFromIR(ir, destDir, opts);             // FB2+FB5: IR → satélite + estándar pro
   const emit = verifyEmit(ir, destDir);                          // gate de emisión (IR → sitio)
   const launch = verifyLaunchReady(destDir);                     // gate de launch-readiness (estándar pro)
-  return { adapter, ir, trace, cap, emit, launch };
+  const drift = verifyComponentDrift(destDir);                   // gate de drift (componentes em-ui sin forkear, ADR-014 §2)
+  return { adapter, ir, trace, cap, emit, launch, drift };
 }
 
 async function main() {
@@ -39,9 +41,10 @@ async function main() {
   console.log("Gate de CAPTURA (fuente → IR):"); for (const l of r.cap.lines) console.log(l);
   console.log("Gate de EMISIÓN (IR → sitio):"); for (const l of r.emit.lines) console.log(l);
   console.log("Gate de LAUNCH-READINESS (estándar profesional):"); for (const l of r.launch.lines) console.log(l);
-  if (!r.cap.ok || !r.emit.ok || !r.launch.ok) {
+  console.log("Gate de DRIFT (componentes em-ui sin forkear):"); for (const l of r.drift.lines) console.log(l);
+  if (!r.cap.ok || !r.emit.ok || !r.launch.ok || !r.drift.ok) {
     console.error("build-from-file: GATE FALLÓ — el satélite no está listo:\n" + [
-      ...r.cap.problems, ...r.emit.problems, ...r.launch.problems,
+      ...r.cap.problems, ...r.emit.problems, ...r.launch.problems, ...r.drift.problems,
     ].map((p) => "  - " + p).join("\n"));
     process.exit(1);
   }
