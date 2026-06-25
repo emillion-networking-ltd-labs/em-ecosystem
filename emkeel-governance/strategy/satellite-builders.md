@@ -1,6 +1,6 @@
 # Strategy: satellite-builders
 
-Status: APPROVED   <!-- modelo aprobado 2026-06-22 (ECO-62, ADR-012); FB0/FB1 = ECO-63; refinamiento ECO-64 (estándar profesional completo del núcleo común + gate de launch-readiness; formulario = opción 1 Vercel+Resend+Turnstile) APROBADO en el gate humano 2026-06-22, ADR-013, FB5 = ECO-65; refinamiento ECO-69 (diseño GENERATIVO por composición + componentes INMUTABLES + estándar VIVO mantenido contra el mercado + registro del toggle de tema) PRESENTADO al gate humano 2026-06-23 — PENDIENTE de aprobación (no decidido); refinamiento ECO-71 (SEPARAR el ESQUELETO determinista de la BELLEZA: la IA-diseñador GENERA el diseño, se PERSISTE como artefacto propio, los gates lo VALIDAN — SUPERA el MECANISMO de generación de ADR-014/ECO-69, reusa su esqueleto) PRESENTADO al gate humano 2026-06-25 — PENDIENTE de aprobación (no decidido) -->
+Status: APPROVED   <!-- modelo aprobado 2026-06-22 (ECO-62, ADR-012); FB0/FB1 = ECO-63; refinamiento ECO-64 (estándar profesional completo del núcleo común + gate de launch-readiness; formulario = opción 1 Vercel+Resend+Turnstile) APROBADO en el gate humano 2026-06-22, ADR-013, FB5 = ECO-65; refinamiento ECO-69 (diseño GENERATIVO por composición + componentes INMUTABLES + estándar VIVO mantenido contra el mercado + registro del toggle de tema) PRESENTADO al gate humano 2026-06-23 — PENDIENTE de aprobación (no decidido); refinamiento ECO-71 (SEPARAR el ESQUELETO determinista de la BELLEZA: la IA-diseñador GENERA el diseño, se PERSISTE como artefacto propio, los gates lo VALIDAN — SUPERA el MECANISMO de generación de ADR-014/ECO-69, reusa su esqueleto) APROBADA en el gate humano 2026-06-25 — opción 3 (spec de diseño persistido → compilador delgado) con el constraint INNEGOCIABLE: el spec debe ser EXPRESIVO de verdad (diseño arbitrario sobre todo el vocabulario em-ui + tokens), NUNCA un menú role→shell; ADR-015 -->
 Strategy: satellite-builders   <!-- feature specs reference this with a `Strategy: satellite-builders` line -->
 
 > **Re-encuadre del norte de satélites alrededor de BUILDERS de fuente.** SUPERA a
@@ -281,7 +281,7 @@ refina / aborta en el gate.** Si se aprueba → ADR-014 + ECO de build (FB6 sobr
 
 ## Refinamiento ECO-71 — SEPARAR el ESQUELETO (determinista) de la BELLEZA (la IA diseñadora): la IA GENERA el diseño, se PERSISTE, los gates lo VALIDAN
 
-**Estado: PRESENTADO al gate humano (2026-06-25, ECO-71) — PENDIENTE de aprobación (no decidido).** Re-examina DESDE CERO el
+**Estado: APROBADA en el gate humano (2026-06-25, ECO-71) — opción 3, con el constraint INNEGOCIABLE de expresividad (abajo). La aprobación se registra en el MERGE del PR de la lane; `process.json` queda en `presented`.** Re-examina DESDE CERO el
 MECANISMO de diseño. **SUPERA el enfoque de generación de [ADR-014](../adr/014-satellite-generative-composition.md)/ECO-69**
 ("generativo por composición" *tal como se implementó*) y la deuda de ECO-70 (FB6). **NO re-litiga**: builders→IR→emitter
 ([ADR-012](../adr/012-satellite-builders-architecture.md)), el estándar+gate ([ADR-013](../adr/013-satellite-launch-readiness-standard.md)),
@@ -382,9 +382,18 @@ secciones/componente/orden/jerarquía/énfasis/layout/ritmo, sobre el vocabulari
 VALOR del producto es el **SUELO GOBERNADO** (lossless + estándar + sin-drift + reproducible) — la op.3 mueve **TODA** la decisión
 de diseño a la IA (mata el clasificador/tabla que hacía gris a `compose`) **y** mantiene el suelo por construcción. La op.4 maximiza
 el techo pero **reabre justo los riesgos** (pérdida silenciosa, drift, estándar a medias) que los gates existen para prevenir, como
-bucle de reparación. **Constraint clave anti-recaída:** el SPEC debe ser **EXPRESIVO** (vocabulario completo del registry em-ui +
-composición libre + superficie de tokens), **NO** un enum fijo de roles — si degenera a "rol→shell", es el status quo otra vez.
-**El operador aprueba / refina / aborta en el gate.**
+bucle de reparación. **El operador aprueba / refina / aborta en el gate.**
+
+**DECISIÓN — APROBADA (gate humano, 2026-06-25; ECO-71): Opción 3.** La IA escribe un spec de diseño persistido y un compilador
+delgado lo emite con componentes inmutables; los gates lo validan. Se registra en [ADR-015](../adr/015-satellite-ai-design-authoring.md);
+la aprobación queda en el **merge** del PR de la lane (`process.json` en `presented`). Build por fases (G1…G5+) en ECOs aparte.
+
+> **⛔ CONSTRAINT INNEGOCIABLE (condición de la aprobación) — el SPEC debe ser EXPRESIVO DE VERDAD.** Capaz de expresar **diseño
+> ARBITRARIO** sobre **TODO** el vocabulario em-ui + la superficie de tokens (secciones/componente/orden/jerarquía/énfasis/layout/
+> ritmo/agrupado/anidado/spans), **NO** un menú `role→shell` ni un enum fijo de roles. **Si el spec recae en plantillas, volvemos al
+> status quo** (el fallo que este refinamiento cierra) — es un FALLO de diseño, no un detalle de build. El gate de la fase G3 debe
+> demostrar expresividad real (p.ej. dos satélites con composiciones genuinamente distintas del MISMO tipo de contenido), no sólo
+> "compila y pasa lossless". El compilador es un tipógrafo tonto; **toda** la decisión de diseño vive en el spec que autora la IA.
 
 ### (3) ORGANIZACIÓN — un skill, un rol = un directorio, el IR como frontera
 Sigue siendo **UN** skill (`launch-satellite`), pero **cada ROL vive en su propio directorio**, con el **IR como contrato** entre
@@ -458,7 +467,7 @@ IR=frontera, motor-genérico **vs** binding-de-producto.
   visual gana **"regenerar diseño"** (rediseño desde cero, mismos componentes + mismo contenido). **Recomendación:
   opción 2 (generativo), PRESENTADA no tomada.** Si se aprueba → ADR-014 + build FB6. Reutiliza ADR-010/012/013, no re-litiga.
 - **D — SEPARAR el ESQUELETO (determinista) de la BELLEZA (IA diseñadora): la IA GENERA el diseño, se PERSISTE, los gates lo VALIDAN
-  (ECO-71). PRESENTADA al gate humano 2026-06-25 — PENDIENTE de aprobación (no decidido).** Re-examina DESDE CERO el MECANISMO de
+  (ECO-71). APROBADA en el gate humano 2026-06-25 — opción 3 (spec de diseño persistido → compilador delgado); [ADR-015](../adr/015-satellite-ai-design-authoring.md); aprobación = merge del PR de la lane (`process.json` en `presented`). CONSTRAINT INNEGOCIABLE de la aprobación: el spec debe ser EXPRESIVO DE VERDAD (diseño arbitrario sobre TODO el vocabulario em-ui + tokens), NUNCA un menú role→shell — si recae en plantillas, vuelve el status quo; el gate de G3 debe demostrar expresividad real.** Re-examina DESDE CERO el MECANISMO de
   diseño y **SUPERA** el de ADR-014/ECO-69 (la "composición generativa" *salió otro motor determinista*: clasificador + tabla de
   layouts + *shells*, `generate-satellite.mjs:122` / `emit-blocks.mjs:93`). **Causa raíz:** el determinismo estaba en DECIDIR el
   diseño; debe vivir en CAPTURAR + VALIDAR. **(1) Roles:** R1 Archivista (captura) · R2 Modelador (IR=frontera) · R3 Arquitecto
