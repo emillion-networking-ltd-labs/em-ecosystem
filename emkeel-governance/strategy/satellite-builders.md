@@ -1,6 +1,6 @@
 # Strategy: satellite-builders
 
-Status: APPROVED   <!-- modelo aprobado 2026-06-22 (ECO-62, ADR-012); FB0/FB1 = ECO-63; refinamiento ECO-64 (estándar profesional completo del núcleo común + gate de launch-readiness; formulario = opción 1 Vercel+Resend+Turnstile) APROBADO en el gate humano 2026-06-22, ADR-013, FB5 = ECO-65; refinamiento ECO-69 (diseño GENERATIVO por composición + componentes INMUTABLES + estándar VIVO mantenido contra el mercado + registro del toggle de tema) PRESENTADO al gate humano 2026-06-23 — PENDIENTE de aprobación (no decidido) -->
+Status: APPROVED   <!-- modelo aprobado 2026-06-22 (ECO-62, ADR-012); FB0/FB1 = ECO-63; refinamiento ECO-64 (estándar profesional completo del núcleo común + gate de launch-readiness; formulario = opción 1 Vercel+Resend+Turnstile) APROBADO en el gate humano 2026-06-22, ADR-013, FB5 = ECO-65; refinamiento ECO-69 (diseño GENERATIVO por composición + componentes INMUTABLES + estándar VIVO mantenido contra el mercado + registro del toggle de tema) PRESENTADO al gate humano 2026-06-23 — PENDIENTE de aprobación (no decidido); refinamiento ECO-71 (SEPARAR el ESQUELETO determinista de la BELLEZA: la IA-diseñador GENERA el diseño, se PERSISTE como artefacto propio, los gates lo VALIDAN — SUPERA el MECANISMO de generación de ADR-014/ECO-69, reusa su esqueleto) APROBADA en el gate humano 2026-06-25 — opción 3 (spec de diseño persistido → compilador delgado) con el constraint INNEGOCIABLE: el spec debe ser EXPRESIVO de verdad (diseño arbitrario sobre todo el vocabulario em-ui + tokens), NUNCA un menú role→shell; ADR-015 -->
 Strategy: satellite-builders   <!-- feature specs reference this with a `Strategy: satellite-builders` line -->
 
 > **Re-encuadre del norte de satélites alrededor de BUILDERS de fuente.** SUPERA a
@@ -279,6 +279,155 @@ inmutables** (gate de drift), el **estándar como lista viva mantenida contra el
 el §estándar como primer indispensable vivo, y **"regenerar diseño"** en el flujo visual. **El operador aprueba /
 refina / aborta en el gate.** Si se aprueba → ADR-014 + ECO de build (FB6 sobre FB2/emit). **No re-litiga** ADR-010/012/013.
 
+## Refinamiento ECO-71 — SEPARAR el ESQUELETO (determinista) de la BELLEZA (la IA diseñadora): la IA GENERA el diseño, se PERSISTE, los gates lo VALIDAN
+
+**Estado: APROBADA en el gate humano (2026-06-25, ECO-71) — opción 3, con el constraint INNEGOCIABLE de expresividad (abajo). La aprobación se registra en el MERGE del PR de la lane; `process.json` queda en `presented`.** Re-examina DESDE CERO el
+MECANISMO de diseño. **SUPERA el enfoque de generación de [ADR-014](../adr/014-satellite-generative-composition.md)/ECO-69**
+("generativo por composición" *tal como se implementó*) y la deuda de ECO-70 (FB6). **NO re-litiga**: builders→IR→emitter
+([ADR-012](../adr/012-satellite-builders-architecture.md)), el estándar+gate ([ADR-013](../adr/013-satellite-launch-readiness-standard.md)),
+ni lo que de ADR-014 **SÍ es esqueleto y se conserva**: componentes INMUTABLES + gate de drift (§2), estándar VIVO contra el
+mercado (§3), "regenerar" (§5). Re-piensa SOLO el corazón: **cómo nace la belleza** — y dónde vive el determinismo.
+
+### El problema medido (por qué desde cero)
+Cada intento de "que la IA diseñe" terminó siendo un **MOTOR DETERMINISTA** — reglas, plantillas, clasificadores — que produce
+sitios CORRECTOS pero NO BELLOS:
+- El emit mecánico agrupa bloques por heading y **alterna fondos** (`gi % 2`) → bandas uniformes (`.claude/skills/launch-satellite/scripts/builders/lib/emit-blocks.mjs:93`),
+  y el orden lo fija una **constante** (`.claude/skills/launch-satellite/scripts/generate-satellite.mjs:122`, `DEFAULT_HOME_COMPOSITION`).
+- ECO-70/FB6 intentó "componer generativamente" pero **salió OTRO motor determinista**: un CLASIFICADOR de secciones + una TABLA
+  de layouts + N *shells* fijos → la **MÁQUINA decide** el diseño eligiendo 1-de-2 variantes por rol. **Más reglas variadas ≠ la IA diseña.**
+- **"Mejorar" un sitio sale PEOR:** la captura lossless guarda el **CONTENIDO** (no el diseño del original); el motor le pone solo
+  plantillas → se pierde el alma visual del original sin ganar una nueva.
+
+**Causa raíz:** pusimos el DETERMINISMO en el lugar equivocado — en **DECIDIR** el diseño. El determinismo debe vivir en
+**CAPTURAR** el contenido y en **VALIDAR** el resultado; la DECISIÓN de diseño es trabajo de un **DISEÑADOR** — y ese rol lo
+encarna la **IA**, no un clasificador.
+
+### Cómo lo hacen los builders reales (investigado) — el patrón dominante
+Los builders con IA serios **NO usan un motor de reglas para diseñar**: la IA GENERA código/diseño real, y la reproducibilidad se
+compra **PERSISTIENDO la salida**, no haciendo determinista al modelo.
+- **v0 (Vercel):** el LLM **GENERA** código React/Tailwind/shadcn real ("copy and paste that code into your app") — no elige
+  plantillas (https://vercel.com/blog/announcing-v0-generative-ui). Se mantiene en-sistema porque un **REGISTRY** le pasa los
+  componentes + design tokens al modelo ("a distribution specification designed to pass context from your design system to AI
+  Models", https://v0.app/docs/design-systems). Las generaciones se **PERSISTEN** (historial + GitHub sync, cada cambio = un
+  commit) y el código es **TUYO** (https://v0.app/faq). v0 es un modelo COMPUESTO: RAG + LLM (Sonnet) + post-procesador de
+  auto-fix (https://vercel.com/blog/v0-composite-model-family).
+- **Lovable / bolt.new:** generan **CÓDIGO estándar que el usuario POSEE** ("clone your repository, modify it outside Lovable",
+  https://docs.lovable.dev/tips-tricks/deployment-hosting-ownership); coherentes vía "knowledge"/reglas + stack fijo
+  (https://docs.lovable.dev/features/knowledge); se itera **re-prompteando el proyecto persistido** o editando código, con git
+  bidireccional (https://support.bolt.new/building/intro-bolt). Edición a nivel sección/estilo SIN prompt = "Visual Edits"
+  (tokens/clases) (https://lovable.dev/blog/introducing-visual-edits).
+- **shadcn/ui — codegen-as-source:** "a code distribution system" cuyo primer principio es **Open Code**: te entrega "the actual
+  component code... you own it" → se **GENERA una vez y se COMETE como fuente propia** (https://ui.shadcn.com/docs). Es exactamente
+  "generar → persistir como fuente → validar".
+- **El modelo NO es reproducible por sí solo:** aun con `temperature` 0 "the results will not be fully deterministic" (Anthropic,
+  https://platform.claude.com/docs/en/api/messages) ⇒ la reproducibilidad se OBTIENE persistiendo el artefacto, no re-rodando el
+  modelo en cada render.
+- **La validación es determinista (golden + por construcción):** regresión visual con golden images COMMITEADAS
+  (`toHaveScreenshot`, "commit this directory to your version control", https://playwright.dev/docs/test-snapshots), a11y con
+  axe-core (https://www.deque.com/axe/axe-core/), y **design tokens** como superficie de restricción (W3C Design Tokens,
+  https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/).
+
+**El patrón único que destila la investigación:** la IA **GENERA** el artefacto (creativo, no determinista) → el artefacto se
+**PERSISTE** como fuente propia → **gates DETERMINISTAS lo VALIDAN**. Creatividad arriba; determinismo en **fijar + validar**.
+
+### (1) ROLES del pipeline — cada etapa un rol de ingeniero que la IA encarna
+El pipeline se lee como un EQUIPO; el **IR es la frontera** entre captura y diseño, y el **artefacto de diseño** es la frontera
+entre diseño y validación.
+- **R1 · Archivista (captura):** backup → IR. Mandato: capturar TODO lo que el backup contiene, **no inventar nada**, declarar
+  `notInSource`. Determinista. *(reusa `adapters/wordpress.mjs`; gate `lib/lossless.mjs`.)*
+- **R2 · Modelador (el contrato):** normaliza CUALQUIER fuente al MISMO IR agnóstico. Mandato: **el IR es la frontera** — todo
+  adapter lo produce, todo aguas-abajo lo consume. *(reusa `lib/ir.mjs`.)*
+- **R3 · Arquitecto de sistema (el ESQUELETO + estándares):** arma el scaffold SAT01 + el estándar profesional (formulario/favicon/
+  404/Cookiebot/a11y/SEO) + **expone el VOCABULARIO GOBERNADO** (registry em-ui + tokens). Mandato: el **SUELO determinista** que
+  TODO satélite hereda — fuerte, aburrido, garantizado. *(reusa `lib/emit-professional.mjs`, `lib/launch-ready.mjs`.)*
+- **R4 · Diseñador SENIOR (el CORAZÓN, la BELLEZA):** la IA, como diseñador de producto senior, **GENERA** el diseño sobre el
+  contenido real (IR) + el vocabulario gobernado + los tokens de marca. Mandato: **que sea BELLO**; HECHOS intactos (§D4: nunca
+  inventar/perder copy); **COMPONER, no modificar** (componentes inmutables, tematizar por tokens). Salida: un **ARTEFACTO de
+  diseño PERSISTIDO**.
+- **R5 · Crítico / Director de arte (crítica):** revisa adversarialmente el diseño generado — ¿es bello? ¿en-marca? ¿accesible?
+  ¿lossless? ¿sin drift? Mandato: **aceptar o devolver a regenerar**; el **gate visual humano** es la autoridad final
+  ("se ve bien" / "ajusta X" / "regenera").
+
+### (2) EL CORAZÓN — la IA GENERA belleza Y se mantiene REPRODUCIBLE + GATEADA
+El mecanismo concreto, alineado con v0/Lovable/shadcn:
+1. **La IA DISEÑA** (R4): recibe el IR (contenido real) + el registry em-ui (vocabulario) + tokens de marca, y GENERA el diseño
+   **como un diseñador** — decide secciones, qué componente, orden, jerarquía, énfasis, layout, ritmo, tratamiento de hero. **NO**
+   es elegir 1-de-2 en una tabla: es **composición libre sobre un vocabulario gobernado** (el modelo de v0: el registry le pasa
+   componentes+tokens, la IA compone). Creatividad REAL.
+2. **Se PERSISTE** el resultado de la IA como **ARTEFACTO PROPIO** en el satélite (codegen-as-source, patrón shadcn *Open Code*).
+   Re-emitir **REPLAY-ea** el artefacto → reproducible (porque el output está COMMITEADO, **no re-rodado** — el modelo no es
+   determinista ni a temp 0).
+3. **Los gates lo VALIDAN** (deterministas): **lossless** (IR == sitio, nada se cae — `lib/lossless.mjs` `verifyEmit`), **estándar
+   profesional** (launch-readiness — `lib/launch-ready.mjs`), **drift** (componentes em-ui sin forkear — ADR-014 §2), y **regresión
+   visual + a11y** (golden images + axe-core).
+4. **"Regenerar"** (ADR-014 §5) = una **NUEVA pasada creativa** de la IA (otro artefacto), NO un re-roll en render. El humano juzga
+   en el gate visual.
+
+**El determinismo vive en FIJAR + VALIDAR lo que la IA creó, no en decidir el diseño.** Eso resuelve la confusión histórica
+("más reglas" ≠ diseño).
+
+### Eje de decisión — el MECANISMO de generación del diseño (a aprobar en el gate)
+> El operador decide; aquí van las opciones investigadas + recomendación. (Presentada, **no tomada**.)
+
+| # | Mecanismo de generación | Source | Pros | Cons | Riesgo |
+|---|---|---|---|---|---|
+| 1 | **Motor determinista (status quo)** — clasificador + tabla de layouts + *shells* fijos; la MÁQUINA decide el diseño | .claude/skills/launch-satellite/scripts/generate-satellite.mjs:122 | simple, reproducible, ya existe | **NO genera belleza** (el fallo medido); es "más reglas", no diseño; "mejorar" sale peor | **Alto** — la brecha a cerrar |
+| 2 | **IA en RENDER-time** — llamar al modelo en cada emisión | https://platform.claude.com/docs/en/api/messages | máxima libertad de la IA | **NO reproducible** (ni a temp 0) ni gateable; sin artefacto propio que validar/versionar | **Alto** — rompe la reproducibilidad que ADR-010 exigió |
+| 3 | **IA escribe un SPEC de diseño PERSISTIDO** (composición en vocabulario em-ui) → **compilador determinista** lo emite | https://v0.app/docs/design-systems | la IA decide **TODO** el diseño; el **SUELO** (lossless/drift/estándar/tokens) queda garantizado **POR CONSTRUCCIÓN**; reproducible (spec persistido); regenerar = nuevo spec; lossless/drift triviales de gatear | exige el compilador + un spec **EXPRESIVO** (si es pobre, recae en el status quo) | **Medio** — acotado por gates + §D4 |
+| 4 | **IA escribe el CÓDIGO final (JSX) directo** al satélite → gateado **a posteriori** | https://vercel.com/blog/announcing-v0-generative-ui | **techo creativo máximo** (patrón v0/bolt/Lovable: código real propio) | lossless/estándar/drift/tokens pasan a ser gates **POST-HOC** → bucles de reparación; el suelo **NO** está garantizado por construcción | **Medio-alto** — reabre la pérdida/drift que los gates existen para evitar |
+
+**Recomendación (PRESENTADA, no tomada): Opción 3** — la IA escribe un **SPEC de diseño EXPRESIVO** (toda la decisión de diseño:
+secciones/componente/orden/jerarquía/énfasis/layout/ritmo, sobre el vocabulario em-ui + tokens), **PERSISTIDO** en/junto al IR, y un
+**COMPILADOR delgado** lo emite con componentes inmutables; los gates (lossless/estándar/drift/visual+a11y) lo validan. Razón: el
+VALOR del producto es el **SUELO GOBERNADO** (lossless + estándar + sin-drift + reproducible) — la op.3 mueve **TODA** la decisión
+de diseño a la IA (mata el clasificador/tabla que hacía gris a `compose`) **y** mantiene el suelo por construcción. La op.4 maximiza
+el techo pero **reabre justo los riesgos** (pérdida silenciosa, drift, estándar a medias) que los gates existen para prevenir, como
+bucle de reparación. **El operador aprueba / refina / aborta en el gate.**
+
+**DECISIÓN — APROBADA (gate humano, 2026-06-25; ECO-71): Opción 3.** La IA escribe un spec de diseño persistido y un compilador
+delgado lo emite con componentes inmutables; los gates lo validan. Se registra en [ADR-015](../adr/015-satellite-ai-design-authoring.md);
+la aprobación queda en el **merge** del PR de la lane (`process.json` en `presented`). Build por fases (G1…G5+) en ECOs aparte.
+
+> **⛔ CONSTRAINT INNEGOCIABLE (condición de la aprobación) — el SPEC debe ser EXPRESIVO DE VERDAD.** Capaz de expresar **diseño
+> ARBITRARIO** sobre **TODO** el vocabulario em-ui + la superficie de tokens (secciones/componente/orden/jerarquía/énfasis/layout/
+> ritmo/agrupado/anidado/spans), **NO** un menú `role→shell` ni un enum fijo de roles. **Si el spec recae en plantillas, volvemos al
+> status quo** (el fallo que este refinamiento cierra) — es un FALLO de diseño, no un detalle de build. El gate de la fase G3 debe
+> demostrar expresividad real (p.ej. dos satélites con composiciones genuinamente distintas del MISMO tipo de contenido), no sólo
+> "compila y pasa lossless". El compilador es un tipógrafo tonto; **toda** la decisión de diseño vive en el spec que autora la IA.
+
+### (3) ORGANIZACIÓN — un skill, un rol = un directorio, el IR como frontera
+Sigue siendo **UN** skill (`launch-satellite`), pero **cada ROL vive en su propio directorio**, con el **IR como contrato** entre
+etapas y el **ARTEFACTO de diseño** como contrato entre diseño y validación:
+- **Motor genérico** (agnóstico de producto): captura+adapters, IR/modelo, gates lossless, el **contrato del compilador**, el gate
+  de drift. No sabe de em-ui.
+- **Binding de producto** (NexaCore): el **registry em-ui** (el vocabulario que R4 usa) + el estándar profesional.
+El layout exacto de directorios es trabajo de **build** (runbook), no del norte; el norte FIJA el **principio**: rol=directorio,
+IR=frontera, motor-genérico **vs** binding-de-producto.
+
+### (4) ROADMAP por fases — una habilidad/rol por fase; cada una entregable y verificable sola
+- **G1 — Captura + IR (R1/R2): REUSAR y endurecer.** Ya existe (`lib/ir.mjs`, `adapters/wordpress.mjs`, `lib/lossless.mjs`).
+  Re-hogar en `capture/`+`model/`. *Verificable:* gate de captura verde sobre Atis.
+- **G2 — Esqueleto + estándar (R3): REUSAR y aislar.** scaffold + estándar profesional + launch-readiness + drift
+  (`lib/emit-professional.mjs`, `lib/launch-ready.mjs`, drift §2). *Verificable:* 16 checks + drift verdes.
+- **G3 — El CORAZÓN (R4): REEMPLAZAR la capa de decisión.** La IA-diseñador + el **spec de diseño persistido** + el **compilador
+  delgado**, sustituyendo `compose`/`renderMain`/`DEFAULT_HOME_COMPOSITION`. *Verificable:* emitir un satélite cuyo diseño AUTORÓ la
+  IA, gates verdes, y **"mejor que el original"** en Atis (gate visual humano).
+- **G4 — Crítica + regenerar (R5):** crítica adversarial + **"regenerar diseño"** en el gate visual, persistido.
+- **G5+ — Generalización:** el corazón de diseño-autoría se reaplica a los otros modos de intake (URL/marca/…) cuando alimenten el IR.
+
+### (5) QUÉ SE REUSA vs QUÉ SE REEMPLAZA
+- **REUSAR (el esqueleto fuerte — mantener, endurecer, re-hogar):** IR (`lib/ir.mjs`); adapter de captura (`adapters/wordpress.mjs`);
+  gates lossless captura+emisión (`lib/lossless.mjs`); scaffold + estándar profesional + ingestión de media (`lib/emit-professional.mjs`);
+  launch-readiness (`lib/launch-ready.mjs:151`); componentes INMUTABLES + gate de drift (ADR-014 §2; registry `design-system/registry.json:344`);
+  el **render lossless POR BLOQUE como PRIMITIVA** (`lib/emit-blocks.mjs` `renderBlock` — la IA **compone CON** estas primitivas, no
+  las reescribe); preview, i18n, SEO.
+- **REEMPLAZAR (la capa de DECISIÓN determinista → la IA-diseñador):** la composición mecánica — `DEFAULT_HOME_COMPOSITION`
+  (`generate-satellite.mjs:122`), el agrupado-por-heading + bandas alternas de `renderMain` (`emit-blocks.mjs:93`), y el motor de
+  ECO-70/FB6 (clasificador + tabla de layouts + *shells* fijos). La **DECISIÓN** de qué/cómo componer pasa de **código** a la **IA**;
+  un compilador delgado RINDE lo que la IA decidió (lossless, con componentes inmutables).
+- **Matiz clave:** se reusa el **RENDER LOSSLESS de contenido atómico** (`renderBlock`); se reemplaza la **DECISIÓN compositiva**
+  (qué bloques agrupan en qué sección, con qué componente, en qué orden, con qué jerarquía y layout).
+
 ## Non-goals
 - NO re-litiga lo válido de `satellites.md` (lo **trae**: i18n/SEO/guardrails/secciones/em-ui/imágenes).
 - NO el cómo-paso-a-paso (eso es el **runbook**).
@@ -317,6 +466,22 @@ refina / aborta en el gate.** Si se aprueba → ADR-014 + ECO de build (FB6 sobr
   el §estándar (ya vivo en el gate, ECO-68, `launch-ready.mjs:151`) — 1ª extensión por la lista viva. **(E)** flujo
   visual gana **"regenerar diseño"** (rediseño desde cero, mismos componentes + mismo contenido). **Recomendación:
   opción 2 (generativo), PRESENTADA no tomada.** Si se aprueba → ADR-014 + build FB6. Reutiliza ADR-010/012/013, no re-litiga.
+- **D — SEPARAR el ESQUELETO (determinista) de la BELLEZA (IA diseñadora): la IA GENERA el diseño, se PERSISTE, los gates lo VALIDAN
+  (ECO-71). APROBADA en el gate humano 2026-06-25 — opción 3 (spec de diseño persistido → compilador delgado); [ADR-015](../adr/015-satellite-ai-design-authoring.md); aprobación = merge del PR de la lane (`process.json` en `presented`). CONSTRAINT INNEGOCIABLE de la aprobación: el spec debe ser EXPRESIVO DE VERDAD (diseño arbitrario sobre TODO el vocabulario em-ui + tokens), NUNCA un menú role→shell — si recae en plantillas, vuelve el status quo; el gate de G3 debe demostrar expresividad real.** Re-examina DESDE CERO el MECANISMO de
+  diseño y **SUPERA** el de ADR-014/ECO-69 (la "composición generativa" *salió otro motor determinista*: clasificador + tabla de
+  layouts + *shells*, `generate-satellite.mjs:122` / `emit-blocks.mjs:93`). **Causa raíz:** el determinismo estaba en DECIDIR el
+  diseño; debe vivir en CAPTURAR + VALIDAR. **(1) Roles:** R1 Archivista (captura) · R2 Modelador (IR=frontera) · R3 Arquitecto
+  (esqueleto+estándar+vocabulario em-ui) · **R4 Diseñador senior (GENERA la belleza)** · R5 Crítico (gate visual). **(2) El corazón
+  (patrón v0/Lovable/shadcn):** la IA DISEÑA sobre IR+registry+tokens → se PERSISTE como artefacto propio (codegen-as-source) →
+  gates deterministas lo VALIDAN (lossless/estándar/drift/visual+a11y); re-emitir replay-ea (reproducible porque está commiteado,
+  no re-rodado — el modelo no es determinista ni a temp 0); "regenerar" = nueva pasada creativa. **(3) Organización:** un skill,
+  rol=directorio, IR=frontera, motor genérico vs binding em-ui. **(4) Roadmap:** G1 captura+IR (reusar) · G2 esqueleto+estándar
+  (reusar) · G3 el corazón (REEMPLAZAR la decisión) · G4 crítica+regenerar · G5+ generalizar. **(5) Reuse vs replace:** REUSAR
+  IR/captura/lossless/estándar/drift/launch-readiness + `renderBlock` como primitiva lossless; REEMPLAZAR la composición mecánica
+  (`generate-satellite.mjs:122`, `emit-blocks.mjs:93`, motor ECO-70/FB6) por la IA-diseñador + compilador delgado. **Eje abierto:**
+  mecanismo de generación, **recomendación opción 3 (spec de diseño persistido → compilador delgado), PRESENTADA no tomada.** Si se
+  aprueba → ADR-015 + ECO de build por fase. **No re-litiga** ADR-012/013 ni el esqueleto de ADR-014 (§2 inmutables/drift, §3
+  estándar vivo, §5 regenerar); supersede SÓLO el MECANISMO de generación.
 
 ## Sources (verificadas)
 - Repo (estado actual, COMMITEADO): generador *extract-then-compose* `.claude/skills/launch-satellite/scripts/generate-satellite.mjs`;
@@ -355,3 +520,22 @@ refina / aborta en el gate.** Si se aprueba → ADR-014 + ECO de build (FB6 sobr
     https://www.w3.org/WAI/news/2023-10-05/wcag22rec/); Google Consent Mode v2 obligatorio en EEE (6-mar-2024,
     https://support.google.com/google-ads/answer/13695607); OWASP Secure Headers Project (set recomendado mantenido,
     https://owasp.org/www-project-secure-headers/).
+- Refinamiento ECO-71 (separar esqueleto/belleza: la IA genera → se persiste → los gates validan, research real):
+  - **Brecha medida (repo, COMMITEADO):** la decisión de diseño la toma el CÓDIGO, no la IA — orden fijo por constante
+    `generate-satellite.mjs:122` (`DEFAULT_HOME_COMPOSITION`) + agrupado-por-heading con bandas alternas `gi % 2` en
+    `builders/lib/emit-blocks.mjs:93` (`renderMain`); el render lossless por bloque a REUSAR como primitiva es `renderBlock`
+    (`builders/lib/emit-blocks.mjs:38`); esqueleto a reusar: IR `builders/lib/ir.mjs`, gates `builders/lib/lossless.mjs`,
+    launch-readiness `builders/lib/launch-ready.mjs:151`, adapter `builders/adapters/wordpress.mjs`, registry `design-system/registry.json:344`.
+  - **La IA GENERA código real, no plantillas (mercado):** v0 genera React/Tailwind/shadcn que copias a tu app
+    (https://vercel.com/blog/announcing-v0-generative-ui), constreñida por un REGISTRY que le pasa componentes + design tokens
+    al modelo (https://v0.app/docs/design-systems); v0 = modelo compuesto RAG+LLM+auto-fix (https://vercel.com/blog/v0-composite-model-family).
+  - **Código generado = fuente PROPIA persistida (mercado):** Lovable/bolt generan código estándar que el usuario posee, con git
+    bidireccional (https://docs.lovable.dev/tips-tricks/deployment-hosting-ownership, https://support.bolt.new/building/intro-bolt);
+    edición a nivel sección/estilo sin prompt = Visual Edits (https://lovable.dev/blog/introducing-visual-edits); coherencia vía
+    knowledge/reglas (https://docs.lovable.dev/features/knowledge); shadcn "Open Code" = codegen-as-source, lo posees
+    (https://ui.shadcn.com/docs).
+  - **Reproducibilidad = persistir el artefacto, NO el modelo:** el LLM no es determinista ni a `temperature` 0 ("the results
+    will not be fully deterministic", https://platform.claude.com/docs/en/api/messages) ⇒ se valida con gates deterministas:
+    regresión visual con golden commiteadas (https://playwright.dev/docs/test-snapshots), a11y axe-core
+    (https://www.deque.com/axe/axe-core/), design tokens como restricción (W3C DTCG estable 2025.10,
+    https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/).

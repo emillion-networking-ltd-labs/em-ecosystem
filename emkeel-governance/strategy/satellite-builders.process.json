@@ -4,48 +4,46 @@
   "steps": {
     "scaffolded": {
       "done": true,
-      "timestamp": "2026-06-23T20:39:39Z",
+      "timestamp": "2026-06-25T09:20:34Z",
       "topic": "satellite-builders"
     },
     "researched": {
       "done": true,
-      "timestamp": "2026-06-23T20:39:39Z",
+      "timestamp": "2026-06-25T09:25:04Z",
       "sources": [
-        "https://web.dev/blog/inp-cwv-march-12",
-        "https://www.w3.org/WAI/news/2023-10-05/wcag22rec/",
-        "https://support.google.com/google-ads/answer/13695607",
-        "https://owasp.org/www-project-secure-headers/",
-        "https://ui.shadcn.com/docs/theming",
-        "https://vercel.com/blog/how-to-prompt-v0",
-        "https://docs.lovable.dev/prompting/prompting-one",
-        ".claude/skills/launch-satellite/scripts/builders/lib/emit-blocks.mjs:41",
-        ".claude/skills/launch-satellite/scripts/builders/lib/launch-ready.mjs:151",
-        "design-system/registry.json:344"
+        "https://vercel.com/blog/announcing-v0-generative-ui",
+        "https://v0.app/docs/design-systems",
+        "https://docs.lovable.dev/tips-tricks/deployment-hosting-ownership",
+        "https://ui.shadcn.com/docs",
+        "https://platform.claude.com/docs/en/api/messages",
+        "https://playwright.dev/docs/test-snapshots",
+        ".claude/skills/launch-satellite/scripts/generate-satellite.mjs:122",
+        ".claude/skills/launch-satellite/scripts/builders/lib/emit-blocks.mjs:93"
       ]
     },
     "proposed": {
       "done": true,
-      "timestamp": "2026-06-23T20:39:39Z",
+      "timestamp": "2026-06-25T09:25:04Z",
       "options": [
-        "1) Mecanico (status quo): bloque->seccion fija por siteType (emit-blocks.mjs:41) -> diseno pobre",
-        "no honra ADR-010 op.3; 2) RECOMENDADO Generativo por composicion: la IA compone (que componente/orden/layout) sobre componentes INMUTABLES + contenido lossless (v0/Lovable/shadcn) -> cumple ADR-010 op.3",
-        "reproponible",
-        "sin drift (gate). + estandar VIVO mantenido contra el mercado (disparador por norma GDPR/WCAG/CWV/seguridad + revision trimestral) + toggle registrado en el estandar + REGENERAR DISENO en el flujo visual."
+        "1-motor-determinista-status-quo-NO-genera-belleza",
+        "2-IA-render-time-no-reproducible-ni-gateable",
+        "3-RECOMENDADO-IA-escribe-spec-de-dise\u00f1o-persistido-compilador-determinista-suelo-por-construcci\u00f3n-reproducible",
+        "4-IA-escribe-JSX-directo-gateado-post-hoc-techo-maximo-pero-reabre-perdida-y-drift"
       ]
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-06-23T20:39:39Z",
-      "critique": "Adversarial (re-abriendo fuentes): (a) shadcn/ui CONFIRMADO via WebFetch -> themea por tokens semanticos \"sin reescribir las clases del componente\" y desaconseja modificar el fuente -> respalda COMPONENTES INMUTABLES (solo tamano/colores via tokens). (b) Disparadores de refresco CONFIRMADOS con fecha: INP reemplazo a FID 12-mar-2024 (web.dev), WCAG 2.2 Rec W3C 5-oct-2023 (w3.org), Consent Mode v2 obligatorio EEE 6-mar-2024 (Google) -> el suelo SE MUEVE, el mecanismo de refresco es necesario, no teorico. (c) Ataque principal: composicion generativa amenaza la REPRODUCIBILIDAD que ADR-010 exigio al descartar la op.2 (bespoke). Defensa: el diseno es proposed PERSISTIDO en el brief/IR (D5) y confirmable en el loop -> reproducible desde la propuesta grabada, NO freestyle por render; el sustrato (secciones gobernadas + componentes inmutables) mantiene S2/a11y/SEO por construccion -> sigue siendo HIBRIDO (op.3), no bespoke (op.2). (d) Riesgo del gate de drift = falsos positivos con el theming permitido; se acota: compara contra el registry y PERMITE la superficie de tokens/tamano/color, structural-diff mas alla de tokens = drift (el COMO exacto es build FB6, la DECISION es solida). (e) Scope-creep de la lista viva acotado: cada adicion pasa por gate humano /strategy + unico punto de cambio; trimestral = backstop, disparador-por-norma = primario. (f) NO re-litiga el norte: CUMPLE ADR-010 op.3, no la contradice; ADR-012/013 intactos."
+      "timestamp": "2026-06-25T09:25:24Z",
+      "critique": "Adversarial (re-abriendo fuentes): (a) \u00bfla op.3 es OTRO motor determinista como el status quo? NO \u2014 diferencia categ\u00f3rica VERIFICADA: en v0 el LLM GENERA la composici\u00f3n y el registry solo le PASA el vocabulario (v0.app/docs/design-systems); en el status quo un CLASIFICADOR de c\u00f3digo decide rol+layout (generate-satellite.mjs:122 / emit-blocks.mjs:93). Riesgo de reca\u00edda (spec pobre = enum de roles) acotado por el CONSTRAINT expl\u00edcito: spec EXPRESIVO sobre el registry completo, no rol->shell. (b) \u00bfsobrevive la reproducibilidad a la IA-dise\u00f1ador? Conflicto y resoluci\u00f3n confirmados: el LLM no es determinista ni a temp 0 (Anthropic platform.claude.com) -> la reproducibilidad se compra PERSISTIENDO el artefacto (codegen-as-source; shadcn Open Code; v0/Lovable persisten+git), NO re-rodando; re-emitir replay-ea. (c) \u00bfop.4 codigo-directo es mejor por mas techo? Re-abierto v0 announcing-generative-ui: si da mas techo PERO mueve lossless/drift/estandar a gates POST-HOC = bucles de reparacion, reabriendo la perdida silenciosa que motivo los gates; op.3 los mantiene POR CONSTRUCCION. (d) \u00bfre-litiga el norte? NO: conserva ADR-012/013 y el ESQUELETO de ADR-014 (inmutables+drift, estandar vivo, regenerar); supersede SOLO el mecanismo de generacion de ADR-014/ECO-69 (decision presentada, aun mal implementada = deuda ECO-70/FB6). (e) honestidad: belleza no es totalmente automatizable -> el gate visual HUMANO (R5) sigue siendo autoridad final; golden+axe-core cazan regresion/a11y, no belleza (declarado, no fingido)."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-06-23T20:39:39Z",
+      "timestamp": "2026-06-25T09:25:24Z",
       "check_passed": true
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-06-23T20:39:39Z",
+      "timestamp": "2026-06-25T09:25:24Z",
       "presented_to": "operador"
     }
   }
