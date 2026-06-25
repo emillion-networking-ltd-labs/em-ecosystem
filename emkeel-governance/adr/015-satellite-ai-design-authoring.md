@@ -1,11 +1,12 @@
 # ADR-015 — Satélites: la IA-DISEÑADOR autora el diseño (spec persistido → compilador delgado → gates validan); separar ESQUELETO de BELLEZA
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-25
-- **Ticket:** [ECO-71](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-71) (decisión) · build por fases (G1…G5+) en ECOs aparte
-- **Strategy:** satellite-builders
-- **Decisor:** Operador (human gate vía **review + merge** del PR de la lane, 2026-06-25)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el **refinamiento ECO-71**
+- Status: accepted
+- Supersedes: ADR-014
+- Date: 2026-06-25
+- Ticket: [ECO-71](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-71) (decisión) · build por fases (G1…G5+) en ECOs aparte
+- Strategy: satellite-builders
+- Deciders: Operador (human gate vía **review + merge** del PR de la lane, 2026-06-25)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el **refinamiento ECO-71**
   del norte ([`strategy/satellite-builders.md` §«Refinamiento ECO-71»](../strategy/satellite-builders.md)).
   **SUPERA — sólo el MECANISMO de generación — de** [ADR-014](014-satellite-generative-composition.md). **Reutiliza,
   no re-litiga:** [ADR-010](010-satellite-design-generation.md) (diseño HÍBRIDO op.3), [ADR-012](012-satellite-builders-architecture.md)

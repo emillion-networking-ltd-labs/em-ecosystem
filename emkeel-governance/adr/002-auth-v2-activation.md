@@ -1,11 +1,11 @@
 # ADR-002 — Activación de AUTH v2 + norte del programa (Fases 3/4 sí · Fase 5 congelada)
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-14
-- **Ticket:** [ECO-14](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-14)
-- **Strategy:** auth
-- **Decisor:** Operador (human gate)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Estrategia fuente: [`emkeel-governance/strategy/auth.md`](../strategy/auth.md) (`Status: APPROVED`).
+- Status: accepted
+- Date: 2026-06-14
+- Ticket: [ECO-14](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-14)
+- Strategy: auth
+- Deciders: Operador (human gate)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Estrategia fuente: [`emkeel-governance/strategy/auth.md`](../strategy/auth.md) (`Status: APPROVED`).
 
 ## Contexto
 

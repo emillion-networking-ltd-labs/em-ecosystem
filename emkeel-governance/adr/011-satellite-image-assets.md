@@ -1,11 +1,11 @@
 # ADR-011 — Satélites: pilar de IMÁGENES/ASSETS (assets reales + generación IA decorativa) + re-aim del aim
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-22
-- **Ticket:** [ECO-60](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-60) (re-aim + decisión) · seguimiento [ECO-61](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-61) (F7, implementación)
-- **Strategy:** satellites
-- **Decisor:** Operador (human gate, 2026-06-22)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el **re-aim ECO-60** del norte
+- Status: accepted
+- Date: 2026-06-22
+- Ticket: [ECO-60](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-60) (re-aim + decisión) · seguimiento [ECO-61](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-61) (F7, implementación)
+- Strategy: satellites
+- Deciders: Operador (human gate, 2026-06-22)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el **re-aim ECO-60** del norte
   ([`strategy/satellites.md` §«Re-aim ECO-60» + D7 + F7](../strategy/satellites.md)). **Reconcilia con — no
   re-litiga —** §D4 (intent + split verdad/diseño), §D5 (brief persistido) y [ADR-010](010-satellite-design-generation.md)
   (diseño híbrido). El proceso `/strategy satellites` se re-corrió con research fresca → `approved`.

@@ -1,10 +1,10 @@
 # ADR-001 — Cadencia de sprints
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-11
-- **Ticket:** [ECO-5](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-5)
-- **Decisor:** Operador (em-ecosystem)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`).
+- Status: accepted
+- Date: 2026-06-11
+- Ticket: [ECO-5](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-5)
+- Deciders: Operador (em-ecosystem)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`).
 
 ## Contexto
 

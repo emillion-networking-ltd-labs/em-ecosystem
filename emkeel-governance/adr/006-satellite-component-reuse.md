@@ -1,11 +1,11 @@
 # ADR-006 — Reuse de componentes en satélites: registry + CLI interno (estilo shadcn), copia gobernada con reconciliación
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-18
-- **Ticket:** [ECO-20](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-20)
-- **Strategy:** satellites
-- **Decisor:** Operador (human gate)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa la decisión D1 de la estrategia [`satellites`](../strategy/satellites.md) sobre cómo los satélites reutilizan el UI Core de NexaCore.
+- Status: accepted
+- Date: 2026-06-18
+- Ticket: [ECO-20](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-20)
+- Strategy: satellites
+- Deciders: Operador (human gate)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Materializa la decisión D1 de la estrategia [`satellites`](../strategy/satellites.md) sobre cómo los satélites reutilizan el UI Core de NexaCore.
 
 ## Contexto
 

@@ -1,11 +1,11 @@
 # ADR-004 — Privilegio root de plataforma (User.isPlatformAdmin) — bypass de guards
 
-- **Estado:** Aceptada (modelo actual; enum `Role.SUPERADMIN` legacy en migración)
-- **Fecha:** 2026-06-16
-- **Ticket:** [ECO-18](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-18)
-- **Strategy:** auth
-- **Decisor:** Decisión YA implementada en código (SCRUM-489 / AUTH v2 Phase 0.3); extraída a ADR gobernado por el operador (ECO-18).
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`).
+- Status: accepted
+- Date: 2026-06-16
+- Ticket: [ECO-18](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-18)
+- Strategy: auth
+- Deciders: Decisión YA implementada en código (SCRUM-489 / AUTH v2 Phase 0.3); extraída a ADR gobernado por el operador (ECO-18).
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`).
 
 ## Contexto
 

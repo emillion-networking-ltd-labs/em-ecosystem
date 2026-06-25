@@ -1,11 +1,11 @@
 # ADR-013 — Satélites: estándar profesional COMPLETO del núcleo común + GATE de launch-readiness
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-22
-- **Ticket:** [ECO-64](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-64) (decisión) · seguimiento [ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65) (FB5, implementación)
-- **Strategy:** satellite-builders
-- **Decisor:** Operador (human gate, 2026-06-22)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el **refinamiento ECO-64**
+- Status: accepted
+- Date: 2026-06-22
+- Ticket: [ECO-64](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-64) (decisión) · seguimiento [ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65) (FB5, implementación)
+- Strategy: satellite-builders
+- Deciders: Operador (human gate, 2026-06-22)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Materializa el **refinamiento ECO-64**
   del norte [`strategy/satellite-builders.md` §«Refinamiento ECO-64» + D](../strategy/satellite-builders.md).
   **Reutiliza — no re-litiga —** ECO-56 (SEO), ECO-58 (i18n), [ADR-010](010-satellite-design-generation.md)
   (diseño/CWV), [ADR-011](011-satellite-image-assets.md) (imágenes), [ADR-012](012-satellite-builders-architecture.md)

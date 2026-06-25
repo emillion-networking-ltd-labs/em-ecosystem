@@ -1,11 +1,11 @@
 # ADR-003 — Autorización de tenant-role a nivel de servicio (no NestJS guards) + 404-not-403
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-16
-- **Ticket:** [ECO-16](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-16)
-- **Strategy:** auth
-- **Decisor:** Decisión YA implementada en la era framework (SCRUM-491/488/495); extraída a ADR gobernado por el operador (ECO-16).
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`).
+- Status: accepted
+- Date: 2026-06-16
+- Ticket: [ECO-16](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-16)
+- Strategy: auth
+- Deciders: Decisión YA implementada en la era framework (SCRUM-491/488/495); extraída a ADR gobernado por el operador (ECO-16).
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`).
 
 ## Contexto
 

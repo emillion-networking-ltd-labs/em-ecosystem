@@ -1,11 +1,11 @@
 # ADR-005 — Taxonomía de docs: la autoridad vive solo en `emkeel-governance/`; `docs/` es referencia no vinculante
 
-- **Estado:** Aceptada
-- **Fecha:** 2026-06-17
-- **Ticket:** [ECO-19](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-19)
-- **Strategy:** none (es una decisión de gobierno, no un feature)
-- **Decisor:** Operador (human gate)
-- **Contexto de gobierno:** repo gobernado por Emkeel (ver `AGENTS.md`). Decisión propia de em-ecosystem (NexaCore): fija la frontera autoridad/referencia entre `emkeel-governance/` (lo que exigen y versionan los gates de CI de este repo) y `docs/` (que ningún gate referencia).
+- Status: accepted
+- Date: 2026-06-17
+- Ticket: [ECO-19](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-19)
+- Strategy: none (es una decisión de gobierno, no un feature)
+- Deciders: Operador (human gate)
+- Contexto de gobierno: repo gobernado por Emkeel (ver `AGENTS.md`). Decisión propia de em-ecosystem (NexaCore): fija la frontera autoridad/referencia entre `emkeel-governance/` (lo que exigen y versionan los gates de CI de este repo) y `docs/` (que ningún gate referencia).
 
 ## Contexto
 
