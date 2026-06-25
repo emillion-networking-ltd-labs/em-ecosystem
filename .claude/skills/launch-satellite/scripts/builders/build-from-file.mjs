@@ -15,7 +15,7 @@ import { verifyLaunchReady } from "./lib/launch-ready.mjs";
 import { irStats } from "./model/ir.mjs";
 
 export async function buildFromFile(backupDir, destDir, opts = {}) {
-  const { adapter, ir } = await captureFromFile(backupDir);     // FB1: fuente → IR
+  const { adapter, ir } = await captureFromFile(backupDir, { targetDomain: opts.targetDomain });  // FB1: fuente → IR (DB de producción por dominio)
   const cap = losslessReport(ir);                                // gate de captura (fuente → IR)
   const trace = await emitFromIR(ir, destDir, opts);             // FB2+FB5: IR → satélite + estándar pro
   const emit = verifyEmit(ir, destDir);                          // gate de emisión (IR → sitio)
@@ -27,8 +27,8 @@ async function main() {
   const backup = resolve(process.argv[2] || ".");
   const dest = process.argv[3] && !process.argv[3].startsWith("--") ? resolve(process.argv[3]) : null;
   if (!dest) { console.error("uso: build-from-file.mjs <dir-backup> <destDir> [--brand #hex] [--color dark|light|system]"); process.exit(2); }
-  const bi = process.argv.indexOf("--brand"), ci = process.argv.indexOf("--color");
-  const opts = { brand: bi > -1 ? process.argv[bi + 1] : undefined, colorMode: ci > -1 ? process.argv[ci + 1] : undefined };
+  const bi = process.argv.indexOf("--brand"), ci = process.argv.indexOf("--color"), di = process.argv.indexOf("--domain");
+  const opts = { brand: bi > -1 ? process.argv[bi + 1] : undefined, colorMode: ci > -1 ? process.argv[ci + 1] : undefined, targetDomain: di > -1 ? process.argv[di + 1] : undefined };
 
   let r;
   try { r = await buildFromFile(backup, dest, opts); }

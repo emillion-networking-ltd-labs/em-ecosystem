@@ -45,6 +45,15 @@ IR vacío que el gate aprobaría en falso (`0 == 0` = "captura silenciosa vacía
 (`capture-gate.mjs`) conserva su rigor (dimensiones **+ sub-campos**, p.ej. SEO por-página, que se caen sin cambiar
 el conteo de páginas). Atis/fixture (con `wp_posts`+`wp_options`) no se ven afectados.
 
+### D — Selección de DB: NUNCA por tamaño → PRODUCCIÓN por dominio, o FALLA RUIDOSO (`selectDump`)
+Antes el adapter cogía el `.sql` **más GRANDE** (`sort` por size) — frágil: con dos DBs (producción `grupoatis.com`
+vs dev `dvp-grupoatis.emillion.link`) acertó **de chiripa** porque producción pesaba más; un dev mayor habría
+cogido la equivocada **EN SILENCIO**. **Invariante: jamás por tamaño.** `selectDump(dir, { targetDomain })`:
+**1 `.sql`** → ése; **N `.sql`** → el que casa el **DOMINIO objetivo** (hint `--domain`, o el `basename` del backup
+por la convención `.satellite-intake/<dominio>/`), leyendo el `siteurl`/`home` de cada dump (streaming, con
+early-abort); **0 o >1 casan (ambiguo)** → **FALLA RUIDOSO** listando cada DB + su `siteurl` ("hay N bases, dime
+cuál: `--domain <dominio>`"), jamás a ciegas. El `--domain` se enchufa por `from-file.mjs` y `build-from-file.mjs`.
+
 ## Scope
 - `scripts/builders/model/ir.mjs` (movido + `validateIR` endurecido), `scripts/builders/capture/**`
   (`adapter.mjs`, `sqldump.mjs`, `adapters/wordpress.mjs` movidos; `capture-gate.mjs` nuevo), `lib/lossless.mjs`
@@ -63,8 +72,11 @@ el conteo de páginas). Atis/fixture (con `wp_posts`+`wp_options`) no se ven afe
    (22 págs / 170 bloques / 27 imgs / SEO 22 págs), **`dropped=[]`**, `notInSource` declarado; exit 0.
 5. **Motor sin em-ui**: el escáner recursivo de `model/`+`capture/` confirma cero import de em-ui/design-system; el
    núcleo (sin `adapters/`) cero conocimiento de WordPress.
-6. **Endurecido**: un `.sql` no-WordPress falla LOUD (no IR vacío que pase el gate en falso).
-7. **Gates verdes**: suite del skill (`node --test`) **114 verdes**; `gates` (`Strategy: satellite-builders`,
+6. **Endurecido (no-WP)**: un `.sql` no-WordPress falla LOUD (no IR vacío que pase el gate en falso).
+7. **Selección de DB (NUNCA por tamaño)**: `selectDump` elige PRODUCCIÓN por dominio; 1 dump → ése; ambiguo →
+   FALLA RUIDOSO listando DBs + siteurl; test reproduce el caso REAL de Atis (prod `grupoatis.com` vs dev más
+   grande) y prueba que **jamás** coge la dev por tamaño. `--domain` enchufado en from-file/build-from-file.
+8. **Gates verdes**: suite del skill (`node --test`) **119 verdes**; `gates` (`Strategy: satellite-builders`,
    `check_ticket_link` ECO-73), Security Pipeline.
 
 ## Out of scope (= G2+)
