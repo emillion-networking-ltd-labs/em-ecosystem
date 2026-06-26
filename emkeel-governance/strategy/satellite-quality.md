@@ -1,6 +1,6 @@
 # Strategy: satellite-quality
 
-Status: DRAFT
+Status: APPROVED
 Strategy: satellite-quality   <!-- feature specs reference this with a `Strategy: satellite-quality` line -->
 
 ## Goal
@@ -73,4 +73,4 @@ Definir un ESTÁNDAR VIVO y versionado de "satélite óptimo/profesional" sobre 
 
 ## Decisions
 <!-- optional: link the chosen decision as an ADR, e.g. emkeel-governance/adr/007-<slug>.md -->
-<!-- on approval: record as ADR-017 (satellite-quality living standard) -->
+Aprobada por merge del PR #477 (ECO-78, 2026-06-26). Decisión registrada en [ADR-017](../adr/017-satellite-quality-living-standard.md).
