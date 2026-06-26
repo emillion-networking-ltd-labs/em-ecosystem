@@ -1,6 +1,6 @@
 # Strategy: satellite-design
 
-Status: DRAFT
+Status: APPROVED
 Strategy: satellite-design   <!-- feature specs reference this with a `Strategy: satellite-design` line -->
 Impact: high   <!-- cimiento del generador: panel adversarial completo -->
 
@@ -81,4 +81,4 @@ Decidir CÓMO la IA diseña un satélite bello y adaptado al sector sobre nuestr
 
 ## Decisions
 <!-- optional: link the chosen decision as an ADR, e.g. emkeel-governance/adr/007-<slug>.md -->
-<!-- on approval: record as ADR-018 (satellite-design generator) -->
+Aprobada por merge del PR #480 (ECO-79, 2026-06-26). Decisión registrada en [ADR-018](../adr/018-satellite-design-generator.md).
