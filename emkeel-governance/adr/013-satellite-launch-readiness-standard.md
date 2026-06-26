@@ -1,6 +1,7 @@
 # ADR-013 — Satélites: estándar profesional COMPLETO del núcleo común + GATE de launch-readiness
 
-- Status: accepted
+- Status: superseded
+- Superseded-by: ADR-016
 - Date: 2026-06-22
 - Ticket: [ECO-64](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-64) (decisión) · seguimiento [ECO-65](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-65) (FB5, implementación)
 - Strategy: satellite-builders

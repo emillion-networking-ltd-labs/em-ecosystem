@@ -1,6 +1,7 @@
 # ADR-012 — Arquitectura de satélites: BUILDERS por fuente → núcleo común (IR) → emitter Next enriquecido
 
-- Status: accepted
+- Status: superseded
+- Superseded-by: ADR-016
 - Date: 2026-06-22
 - Ticket: [ECO-62](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-62) (decisión) · seguimiento [ECO-63](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-63) (FB0/FB1: núcleo + IR + adapter WP)
 - Strategy: satellite-builders

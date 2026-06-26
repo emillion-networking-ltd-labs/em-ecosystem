@@ -1,6 +1,7 @@
 # ADR-008 — Skill `/launch-satellite`: brief-driven (onboarding) + generación por reuse (no greenfield)
 
-- Status: accepted
+- Status: superseded
+- Superseded-by: ADR-016
 - Date: 2026-06-19
 - Ticket: [ECO-24](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-24) (F2a onboarding), [ECO-25](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-25) (F2b generación)
 - Strategy: satellites
