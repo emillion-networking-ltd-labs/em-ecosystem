@@ -1,6 +1,7 @@
 # ADR-011 — Satélites: pilar de IMÁGENES/ASSETS (assets reales + generación IA decorativa) + re-aim del aim
 
-- Status: accepted
+- Status: superseded
+- Superseded-by: ADR-016
 - Date: 2026-06-22
 - Ticket: [ECO-60](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-60) (re-aim + decisión) · seguimiento [ECO-61](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-61) (F7, implementación)
 - Strategy: satellites

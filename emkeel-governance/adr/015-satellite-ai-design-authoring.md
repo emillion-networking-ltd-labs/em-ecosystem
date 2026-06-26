@@ -1,6 +1,7 @@
 # ADR-015 — Satélites: la IA-DISEÑADOR autora el diseño (spec persistido → compilador delgado → gates validan); separar ESQUELETO de BELLEZA
 
-- Status: accepted
+- Status: superseded
+- Superseded-by: ADR-016
 - Supersedes: ADR-014
 - Date: 2026-06-25
 - Ticket: [ECO-71](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-71) (decisión) · build por fases (G1…G5+) en ECOs aparte

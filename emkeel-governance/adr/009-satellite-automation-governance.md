@@ -1,6 +1,7 @@
 # ADR-009 — Satélites F3: auto-discovery en CI, repo-model monorepo, y frontera auto/humano
 
-- Status: accepted
+- Status: superseded
+- Superseded-by: ADR-016
 - Date: 2026-06-19
 - Ticket: [ECO-27](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-27) (F3a gobernanza), [ECO-28](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-28) (F3b automatización)
 - Strategy: satellites

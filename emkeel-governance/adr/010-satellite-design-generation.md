@@ -1,6 +1,7 @@
 # ADR-010 — Generación de diseño de satélites: enfoque HÍBRIDO + producto profesional SEO-ready
 
-- Status: accepted
+- Status: superseded
+- Superseded-by: ADR-016
 - Date: 2026-06-22
 - Ticket: [ECO-52](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-52)
 - Strategy: satellites
