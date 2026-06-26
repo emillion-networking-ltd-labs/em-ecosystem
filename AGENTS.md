@@ -11,9 +11,13 @@ Communicate like an engineer briefing the team: short and non-repetitive, withou
 
 ## Loop
 1. One branch per ticket: `feat/<KEY-123>-slug` for features; `fix/`, `chore/`, `docs/` otherwise.
-   **Create the ticket first**, in the project's INITIAL state — `emkeel jira create` has no `--status`; a
-   ticket is never born `Done`. If creating it fails (creds, a cross-project block) it errors red and
-   stops — do NOT proceed to open a PR without a ticket. Fix the cause (`emkeel connect`) and retry.
+   **Create the ticket FIRST, then branch from its key, then write the code** — that order is not advice:
+   `check_ticket_precedes_work` FAILS a PR whose ticket was created AFTER the branch's first commit
+   (Jira's `created` vs the first commit's author-date). The easy, correct path is `emkeel start <summary>`
+   — it creates the ticket and `git checkout -b <kind>/<KEY>-slug` in one step, so the order can't invert.
+   The ticket is born in the project's INITIAL state — `emkeel jira create` has no `--status`; a ticket is
+   never born `Done`. If creating it fails (creds, a cross-project block) it errors red and stops — do NOT
+   proceed to open a PR without a ticket. Fix the cause (`emkeel connect`) and retry.
    When the project uses sprints, create ALWAYS recommends a placement and leaves the ticket PENDING — it
    does NOT auto-place it in a sprint: the ticket stays in the backlog (labeled `emkeel-placement-pending`)
    and the OPERATOR decides the sprint. RELAY the recommendation (the `::notice::` it prints) to the
