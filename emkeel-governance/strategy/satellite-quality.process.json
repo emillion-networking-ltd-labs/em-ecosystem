@@ -1,0 +1,75 @@
+{
+  "process": "strategy",
+  "state": "presented",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-06-26T14:29:11Z",
+      "topic": "satellite-quality",
+      "kill_criteria": [
+        "\"si \u00f3ptimo no se puede volver criterios checkables la r\u00fabrica no eval\u00faa nada\"",
+        "\"si versionado+migraci\u00f3n cuesta m\u00e1s que su valor con pocos sat\u00e9lites\"",
+        "\"si un \u00fanico est\u00e1ndar no sirve a todos los tipos de sitio sin volverse trivial o contradictorio\"",
+        "\"si el gate determinista da falsa confianza: pasa sitios conformes pero malos\""
+      ]
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-06-26T14:29:11Z",
+      "sources": [
+        "https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview",
+        "https://www.w3.org/WAI/WCAG22/quickref/",
+        "https://web.dev/articles/inp",
+        "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html",
+        "https://googlechrome.github.io/lighthouse-ci/docs/configuration.html",
+        "https://semver.org/",
+        "https://www.brightlocal.com/learn/google-local-algorithm-and-ranking-factors/",
+        "https://www.aepd.es/guias/guia-cookies.pdf",
+        "https://owasp.org/Top10/2021/A06_2021-Vulnerable_and_Outdated_Components/",
+        "emkeel-governance/adr/013-satellite-launch-readiness-standard.md:59"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-06-26T14:29:11Z",
+      "options": [
+        "r\u00fabrica-doc viva sin gate",
+        "est\u00e1ndar versionado + gate CI + migraci\u00f3n manual ticketeada",
+        "est\u00e1ndar compuesto con migraci\u00f3n por codemod"
+      ]
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-06-26T14:29:43Z",
+      "critique": "Pase adversarial PROFUNDO: panel de 4 lentes independientes (SEO/descubrimiento local; completitud de entrega de agencia; calibracion contra el satelite real sat-cristian-garcia; cumplimiento legal a11y/GDPR/seguridad) mas verificacion de claims que corrigio 2 atribuciones (mala cita a Stefan Judis; yuxtaposicion enganosa 30-40 por ciento vs 57 por ciento por ejes distintos). Confirmado el nucleo on-page; incorporados al doc los huecos de SUSTANCIA: descubrimiento local (Google Business Profile, NAP, Search Console+sitemap, anti-noindex, imagenes-como-LCP, lab movil); operacional lanzado-de-verdad (deliverability SPF/DKIM/DMARC, analitica+conversion, uptime+dominio, redirects, OG real); GDPR/legal gatear CONTENIDO no existencia (Art.13/base juridica/derechos/DPA/transferencias, aviso legal LSSI Art.10, declaracion de accesibilidad, fuentes a AEPD/EUR-Lex/BOE); seguridad profunda (vulns OWASP A06, rate-limit+validacion server-side, check que verifica cabeceras, quitar X-Powered-By). Recalibraciones por PERFIL de satelite (no universal): form-backend/CSP/CMP/hreflang/EAA condicionales; WCAG 2.2 target-size no es machine-checkable fiable (baseline 2.1 AA); prohibido AggregateRating auto-servido. Ejecutabilidad: contrato del campo-version y baseline en deuda del satelite existente antes de imponer el gate. Recommendation (Opcion 2) inalterada."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-06-26T14:29:43Z",
+      "check_passed": true
+    },
+    "validated": {
+      "done": true,
+      "timestamp": "2026-06-26T14:29:43Z",
+      "case": "sat-cristian-garcia (satelite real desplegado)",
+      "method": "apliqu\u00e9 la checklist [M] como gate determinista: 6 checks resolvieron contra ficheros reales \u2014 3 PASS (security headers, html lang, robots+sitemap), 3 FAIL accionables (404, JSON-LD, Cookiebot ausentes)",
+      "outcome": "pass",
+      "evidence_ref": "satellites/sat-cristian-garcia/next.config.mjs:13-27"
+    },
+    "presented": {
+      "done": true,
+      "timestamp": "2026-06-26T14:29:43Z",
+      "presented_to": "operador"
+    }
+  },
+  "steps_schema": [
+    "scaffolded",
+    "researched",
+    "proposed",
+    "critiqued",
+    "checked",
+    "validated",
+    "presented",
+    "approved"
+  ]
+}
