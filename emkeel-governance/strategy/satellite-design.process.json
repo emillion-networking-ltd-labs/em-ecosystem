@@ -1,0 +1,79 @@
+{
+  "process": "strategy",
+  "state": "presented",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-06-26T21:19:18Z",
+      "topic": "satellite-design",
+      "kill_criteria": [
+        "\"si el balance elegido vuelve a sentirse PLANTILLA (el reuso gobernado mata la sensaci\u00f3n a-medida) se repite el fracaso de la l\u00ednea vieja\"",
+        "\"si para no parecer plantilla hay que soltar tanto la gobernanza que se rompe el est\u00e1ndar o el design-system (cae el pilar A)\"",
+        "\"si la IA con libertad produce incoherencia o fealdad sin la direcci\u00f3n de sector (libertad sola = caos",
+        "como G3)\"",
+        "\"si el enfoque no es gobernable: no se puede gatear ni versionar ni validar contra un caso real\""
+      ]
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-06-26T21:26:22Z",
+      "sources": [
+        "emkeel-governance/adr/015-satellite-ai-design-authoring.md:24",
+        "design-system/sections/Hero.tsx:11",
+        "design-system/tokens/tokens.css:8",
+        "https://vercel.com/blog/ai-powered-prototyping-with-design-systems",
+        "https://docs.lovable.dev/features/design-systems",
+        "https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/",
+        "https://motion.dev/motion/motion-config/",
+        "https://www.w3.org/WAI/WCAG22/Techniques/css/C39"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-06-26T21:26:23Z",
+      "options": [
+        "generaci\u00f3n libre y conformar despu\u00e9s",
+        "composici\u00f3n gobernada + theming por tokens + motion + adherence-gate",
+        "IA autora de intent-schema de dise\u00f1o"
+      ]
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-06-26T21:33:05Z",
+      "lens_relapse": "G3/ECO-75 ya componia sin plantillar y AUN ASI fallo por NO-belleza (ADR-016:11) con el token-audit en verde. Composicion+token-gate NO es el anti-relapse; es lo que ya fallo. Diagnostico del Context corregido; el anti-relapse se reasigna a preset multi-eje + motion + RIQUEZA del DS + un gate anti-plantilla con dientes (espejo del expresividad-real de ADR-015 seccion 5).",
+      "lens_calibration": "design-system ANEMICO: 8 secciones x 1 variante binaria (= el clasificador 1-de-2 que condeno ADR-015), tokens de dashboard (h1=24px, un solo font-sans, accent==accent-dark), sin eje de tipografia/imagineria/motion. sat-cristian-garcia (el unico bello) NO usa el design-system y el adherence-gate lo rechazaria. Realidad a\u00f1adida al Context + prerrequisito de crecer el DS antes de gatear.",
+      "lens_governance": "El adherence-gate sin one-offs estilo-Lovable es un deseo (Lovable reintenta con LLM, no gate determinista; Hero/CTA ya usan text-white literal) -> solo un allowlist AST estrecho es real. El motion-a11y del parallax-en-style casero no es verificable por AST -> confinar motion a primitivas gobernadas. Falta declarar que se versiona el GENERADOR y se congela el artefacto. Demarcar el gate visual como el casillero de A.",
+      "lens_creative": "La belleza de los kits vive en lo que la Opcion 2 prohibe: tipografia de marketing (clamp a display, no 24px), gradientes multi-stop, slots decorativos (scrollbar/mesh/tarjeta IG), pieza-estrella por vertical, familias tipograficas por sector. Con el token-set actual la Opcion 2 da correcto-pero-plano. A\u00f1adido prerrequisito de 6 ejes de riqueza antes del gate.",
+      "completeness": "La estrategia asumia que el design-system ACTUAL puede expresar belleza a-medida; NO puede hoy (anemico + el satelite bello lo bypasea). Crecer la RIQUEZA del DS es un PRERREQUISITO que el pilar B posee ANTES de que el gate bloquee; y falta un gate anti-plantilla (diferenciacion de belleza) ademas del de adherencia. Incorporado al doc."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-06-26T21:33:33Z",
+      "check_passed": true
+    },
+    "validated": {
+      "done": true,
+      "timestamp": "2026-06-26T21:33:33Z",
+      "case": "sat-cristian-garcia (satelite real de referencia, el unico bello)",
+      "method": "Apliqu\u00e9 la Opcion 2 (adherence-gate + composicion sobre el design-system) al satelite real: NO usa el design-system (grep design-system=0); su belleza viene de CSS bespoke/literales que el adherence-gate rechazaria; el DS anemico (8 secciones x1 variante, tokens dashboard 24px) no puede expresarla. Direccion correcta pero solo TRAS crecer el DS.",
+      "outcome": "mixed",
+      "evidence_ref": "satellites/sat-cristian-garcia/src/app/layout.tsx:14"
+    },
+    "presented": {
+      "done": true,
+      "timestamp": "2026-06-26T21:33:33Z",
+      "presented_to": "operador",
+      "proceed_justification": "Proceder porque la direccion de gobernanza (libertad en composicion/preset/theming + closed-sets gobernados) es correcta y el panel convirtio el hueco (anemia del DS) en una CONDICION explicita y poseida por el pilar B: crecer el design-system + un gate anti-plantilla con dientes ANTES de que el gate de adherencia bloquee. El mixed es honesto: la Opcion 2 funciona TRAS ese trabajo, ahora parte declarada del plan."
+    }
+  },
+  "steps_schema": [
+    "scaffolded",
+    "researched",
+    "proposed",
+    "critiqued",
+    "checked",
+    "validated",
+    "presented",
+    "approved"
+  ]
+}
