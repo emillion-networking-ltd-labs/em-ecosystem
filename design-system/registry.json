@@ -20,6 +20,15 @@
       "internalDependencies": []
     },
     {
+      "name": "AnimatedGradientText",
+      "type": "registry:ui",
+      "file": "components/AnimatedGradientText.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "Avatar",
       "type": "registry:ui",
       "file": "components/Avatar.tsx",
@@ -37,6 +46,13 @@
       "name": "BeforeAfterSlider",
       "type": "registry:ui",
       "file": "components/BeforeAfterSlider.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "BlurFade",
+      "type": "registry:ui",
+      "file": "components/BlurFade.tsx",
       "registryDependencies": [],
       "internalDependencies": []
     },
@@ -227,6 +243,15 @@
       "internalDependencies": []
     },
     {
+      "name": "Marquee",
+      "type": "registry:ui",
+      "file": "components/Marquee.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "MfaDigitInput",
       "type": "registry:ui",
       "file": "components/MfaDigitInput.tsx",
@@ -298,6 +323,15 @@
       "file": "components/Select.tsx",
       "registryDependencies": [],
       "internalDependencies": []
+    },
+    {
+      "name": "ShimmerButton",
+      "type": "registry:ui",
+      "file": "components/ShimmerButton.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
     },
     {
       "name": "SidebarNav",
