@@ -25,6 +25,9 @@ const config: StorybookConfig = {
       "@/components/ui": resolve(ds, "components"),
       "@/lib": resolve(ds, "lib"),
       "@/hooks": resolve(ds, "hooks"),
+      // El contexto de app (Theme/Toast) NO vive en la fuente del DS; se mockea para
+      // catalogar los componentes app-coupled (ThemeToggle/TurnstileWidget/ToastContainer). ECO-89.
+      "@/context": resolve(root, "mocks/context"),
     };
     return cfg;
   },

@@ -2,14 +2,15 @@
 // check-story-coverage — guardrail de sincronía catálogo (Storybook) ↔ registry (em-ui), ADR-020.
 //
 // El registry.json es la verdad de DISTRIBUCIÓN (qué componentes existen + grafo de deps).
-// Storybook es la VISUALIZACIÓN. Este check evita que se desincronicen, con DIENTES pero
-// honesto sobre el alcance "muestra" de ECO-85:
+// Storybook es la VISUALIZACIÓN. Desde ECO-89 el catálogo está 100% ALINEADO con la realidad:
 //
 //   FALLA si:
-//     (a) una story referencia un componente que NO está en el registry (huérfana / desync real), o
-//     (b) una EXCLUSIÓN declarada ya no es app-coupled (la lista no es un vertedero de "pendientes").
-//   REPORTA (no falla): cubierto / excluido / PENDIENTE (con la lista completa — sin truncado silencioso),
-//     porque la cobertura total de los 47 primitivos es incremento siguiente (ADR-020 §Consecuencias).
+//     (a) una story referencia un componente que NO está en el registry (huérfana / desync real),
+//     (b) una EXCLUSIÓN declarada ya no es app-coupled (la lista no es un vertedero), o
+//     (c) HAY PENDIENTES: algún item del registry sin story y sin exclusión (cobertura < 100%).
+//
+// Los componentes app-coupled (Theme/Toast) se catalogan con un @/context MOCK (ver
+// .storybook/mocks/context) → ya NO se excluyen; la lista de exclusión queda vacía.
 //
 // Uso: node scripts/check-story-coverage.mjs   (cwd = design-system/)
 
@@ -19,14 +20,9 @@ import { fileURLToPath } from "node:url";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-// --- Exclusiones documentadas: app-coupled (necesitan un provider de contexto que NO vive
-//     en la fuente del design-system). Mismo criterio que CommandPalette en ADR-006.
-//     Cada una se VERIFICA contra el código fuente (debe importar @/context/* o @/hooks/useTheme).
-const EXCLUSIONS = {
-  ThemeToggle: "usa @/hooks/useTheme → @/context/ThemeContext (no existe en la fuente)",
-  TurnstileWidget: "usa @/hooks/useTheme → @/context/ThemeContext (no existe en la fuente)",
-  ToastContainer: "usa @/context/ToastContext (no existe en la fuente)",
-};
+// --- Exclusiones documentadas (app-coupled SIN forma de catalogar). Hoy VACÍA: los app-coupled
+//     se catalogan vía @/context mock. Si algo se excluye, debe ser app-coupled de verdad (se verifica).
+const EXCLUSIONS = {};
 const APP_COUPLED_RE = /@\/context\/|@\/hooks\/useTheme/;
 
 function fail(msg) {
@@ -38,7 +34,7 @@ function fail(msg) {
 const registry = JSON.parse(readFileSync(join(ds, "registry.json"), "utf8"));
 const registryNames = new Set(registry.items.map((i) => i.name));
 
-// --- 2) Componentes cubiertos por una story (import `@/components/ui/<Name>`)
+// --- 2) Componentes cubiertos por una story (import `@/components/{ui,sections}/<Name>`)
 const storiesDir = join(ds, "stories");
 const covered = new Set();
 function walk(dir) {
@@ -48,7 +44,6 @@ function walk(dir) {
     if (entry.isDirectory()) walk(p);
     else if (entry.name.endsWith(".stories.tsx") || entry.name.endsWith(".stories.ts")) {
       const src = readFileSync(p, "utf8");
-      // Átomos (components/ → @/components/ui) y secciones (sections/ → @/components/sections).
       for (const m of src.matchAll(/@\/components\/(?:ui|sections)\/(\w+)/g)) covered.add(m[1]);
     }
   }
@@ -72,17 +67,21 @@ for (const name of Object.keys(EXCLUSIONS)) {
   }
 }
 
-// --- Reporte (sin truncado silencioso)
+// --- (c) cobertura 100%: ningún item del registry puede quedar sin story (salvo exclusión válida)
 const excluded = new Set(Object.keys(EXCLUSIONS));
 const pending = [...registryNames].filter((n) => !covered.has(n) && !excluded.has(n)).sort();
+if (pending.length) {
+  fail(`${pending.length} item(s) del registry SIN story (catálogo ≠ realidad): ${pending.join(", ")}`);
+}
 
+// --- Reporte (sin truncado silencioso)
 console.log(`Catálogo Storybook ↔ registry (${registryNames.size} items)`);
 console.log(`  ✓ con story:  ${covered.size}  [${[...covered].sort().join(", ")}]`);
-console.log(`  ⊘ excluidos:  ${excluded.size}  (app-coupled) [${[...excluded].sort().join(", ")}]`);
+console.log(`  ⊘ excluidos:  ${excluded.size}  [${[...excluded].sort().join(", ")}]`);
 console.log(`  … pendientes: ${pending.length}  [${pending.join(", ")}]`);
 
 if (process.exitCode) {
-  console.error("\n✗ coverage FALLA (huérfana o exclusión inválida).");
+  console.error("\n✗ coverage FALLA (huérfana, exclusión inválida o cobertura < 100%).");
 } else {
-  console.log("\n✓ coverage OK (sin huérfanas; exclusiones verificadas app-coupled).");
+  console.log("\n✓ coverage OK — catálogo 100% alineado con el registry.");
 }
