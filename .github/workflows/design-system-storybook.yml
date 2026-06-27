@@ -1,0 +1,65 @@
+# ============================================================================
+# Design-System Storybook — catálogo visual gobernado (ECO-85 / ADR-020)
+# ============================================================================
+# Cierra el lazo de validación VISUAL del design-system (la fuente solo se
+# validaba al consumirla en un satélite). El gate:
+#
+#   1. build-storybook  → prueba que TODOS los componentes con story BUILDEAN/
+#                         RENDERIZAN (Vite + nextjs-vite + wiring Tailwind v4).
+#   2. coverage         → catálogo (stories) ↔ registry.json no se desincronizan
+#                         (sin huérfanas; exclusiones verificadas app-coupled).
+#   3. lic:check:ds     → guardrail de licencias (ECO-81) sobre el árbol de tooling
+#                         de Storybook (allow-list dev-only revisado, ver THIRD-PARTY-NOTICES).
+#
+# VRT (test-runner Playwright, postVisit) queda CABLEADO en .storybook/test-runner.ts;
+# comprometer las baselines + correrlo en CI es follow-up (necesita browsers) — spec ECO-85 §Out of scope.
+#
+# Aislado: solo corre cuando cambia design-system/ (o este workflow / el script de licencias).
+# No toca el dashboard (ADR-019: aditivo).
+# ============================================================================
+
+name: Design-System Storybook
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "design-system/**"
+      - "scripts/check-licenses.mjs"
+      - ".github/workflows/design-system-storybook.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  storybook:
+    name: Storybook build + coverage + licenses
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout PR / branch
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+          cache: "npm"
+          cache-dependency-path: design-system/package-lock.json
+
+      - name: Install design-system deps
+        working-directory: design-system
+        run: npm ci
+
+      - name: Build Storybook (prueba build + render de los componentes)
+        working-directory: design-system
+        run: npm run build-storybook
+
+      - name: Coverage — catálogo ↔ registry
+        working-directory: design-system
+        run: npm run coverage
+
+      - name: License guardrail (árbol de tooling de Storybook)
+        run: npm run lic:check:ds

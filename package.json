@@ -10,7 +10,11 @@
     "test:api": "cd nexacore-api && npm test",
     "test:dashboard": "cd nexacore-dashboard && npm test",
     "dup:check": "jscpd --config .jscpd.json",
-    "lic:check": "node scripts/check-licenses.mjs"
+    "lic:check": "node scripts/check-licenses.mjs",
+    "lic:check:ds": "node scripts/check-licenses.mjs design-system --allow axe-core --allow lightningcss --allow lightningcss-linux-x64-gnu --allow @img/sharp-libvips-linux-x64",
+    "sb:build": "cd design-system && npm run build-storybook",
+    "sb:coverage": "cd design-system && npm run coverage",
+    "sb:test": "cd design-system && npm run test-storybook"
   },
   "devDependencies": {
     "husky": "^9.1.7",

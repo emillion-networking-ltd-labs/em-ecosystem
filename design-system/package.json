@@ -1,0 +1,39 @@
+{
+  "name": "@nexacore/design-system",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Catálogo visual gobernado del design-system de NexaCore (Storybook). Complementa em-ui/registry (distribución) con la capa de VISUALIZACIÓN — ADR-020.",
+  "type": "module",
+  "scripts": {
+    "storybook": "storybook dev -p 6006",
+    "build-storybook": "storybook build",
+    "test-storybook": "test-storybook",
+    "coverage": "node scripts/check-story-coverage.mjs"
+  },
+  "dependencies": {
+    "@marsidev/react-turnstile": "^1.5.2",
+    "clsx": "^2.1.1",
+    "framer-motion": "^12.38.0",
+    "lucide-react": "^1.14.0",
+    "motion": "^12.38.0",
+    "next": "^16.2.6",
+    "react": "^19.2.6",
+    "react-dom": "^19.2.6",
+    "react-easy-crop": "^5.5.7",
+    "tailwind-merge": "^3.6.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.59.1",
+    "@storybook/addon-a11y": "^10.4.6",
+    "@storybook/nextjs-vite": "^10.4.6",
+    "@storybook/test-runner": "^0.24.4",
+    "@tailwindcss/vite": "^4.3.1",
+    "@types/node": "^22.19.18",
+    "@types/react": "^19.2.14",
+    "@types/react-dom": "^19.2.3",
+    "storybook": "^10.4.6",
+    "tailwindcss": "^4.3.0",
+    "typescript": "^6.0.3",
+    "vite": "^7.0.0"
+  }
+}
