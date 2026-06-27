@@ -368,3 +368,36 @@
   65%, 85% { transform: translateZ(0) rotate(270deg); }
   100% { transform: translateZ(0) rotate(360deg); }
 }
+
+/* ===== Marketing design tokens (ECO-83, fase 1.3 / ADR-019) — cosechados del benchmark sat-cristian-garcia =====
+   ADITIVO: la escala base --text-h1..caption es de dashboard (24px tope); aquí va la tipografía DISPLAY
+   fluida de marketing, familias display/serif por sector, y un 2º acento para gradientes multi-stop
+   (hoy --color-accent == --color-accent-dark → gradiente plano). No altera ningún token existente.
+   El consumidor inyecta la CARA real de la fuente vía next/font (variable --font-display-face /
+   --font-serif-face); aquí va el token gobernado + los fallbacks de sistema. */
+@theme {
+  /* Familias (el consumidor provee la cara vía next/font como --font-*-face) */
+  --font-display: var(--font-display-face), -apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif;
+  --font-serif: var(--font-serif-face), Georgia, Cambria, "Times New Roman", Times, serif;
+
+  /* Escala DISPLAY fluida (clamp), tracking negativo + line-height ajustado (estilo .text-display del benchmark) */
+  --text-display-1: clamp(2.5rem, 1.4rem + 5.2vw, 5rem);
+  --text-display-1--line-height: 1;
+  --text-display-1--letter-spacing: -0.03em;
+  --text-display-2: clamp(2rem, 1.3rem + 3.4vw, 3.5rem);
+  --text-display-2--line-height: 1.05;
+  --text-display-2--letter-spacing: -0.02em;
+  --text-display-3: clamp(1.5rem, 1.1rem + 1.9vw, 2.25rem);
+  --text-display-3--line-height: 1.12;
+  --text-display-3--letter-spacing: -0.015em;
+
+  /* 2º acento — habilita gradientes de marca multi-stop NO planos; tematizable por satélite */
+  --color-accent-2: #2e7d32;
+}
+
+/* Gradientes de marca multi-stop (atmósfera). Vars planas (no @theme → no generan utilidad de color);
+   se usan con [background-image:var(--gradient-brand)] o en CSS. Tematizables vía --color-accent/-2. */
+:root {
+  --gradient-brand: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%);
+  --gradient-brand-radial: radial-gradient(120% 120% at 50% 0%, var(--color-accent-2) 0%, var(--color-accent) 55%, transparent 100%);
+}
