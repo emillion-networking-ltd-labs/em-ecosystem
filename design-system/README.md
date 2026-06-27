@@ -29,6 +29,23 @@ node design-system/registry/cli.mjs diff Button --target <fich>   # drift del co
 node design-system/registry/cli.mjs update Button --dest <src>    # re-pull reconciliando (sobrescribe)
 ```
 
+## Catálogo visual — Storybook (ECO-85, [ADR-020](../emkeel-governance/adr/020-design-system-storybook-catalog.md))
+Storybook es la **vitrina** del design-system (complementa el registry, que es la verdad de *distribución*).
+Cierra el lazo de validación **visual**: prueba que los componentes buildan/renderizan y da un catálogo navegable.
+
+```bash
+cd design-system && npm ci          # instala el tooling (Storybook 10 + addon-a11y + test-runner)
+npm run storybook                    # dev server en :6006
+npm run build-storybook              # build estático (storybook-static/, gitignored)
+npm run coverage                     # catálogo (stories) ↔ registry.json no se desincronizan
+```
+Wiring Tailwind v4 = **manual** (`@tailwindcss/vite` en `.storybook/main.ts` + `tokens.css` en `preview.ts`);
+los aliases que la fuente asume del consumidor (`@/components/ui`, `@/lib`, `@/hooks`) se mapean contra el
+árbol fuente. VRT = test-runner Playwright (`postVisit`), **no** Chromatic. Gate CI:
+`.github/workflows/design-system-storybook.yml` (build + coverage + licencias). Excluidos del catálogo los
+componentes **app-coupled** (`ThemeToggle`, `TurnstileWidget`, `ToastContainer` — necesitan un `@/context/*`
+que no vive en la fuente); la cobertura de esta tanda es **muestra** (4 marketing + 6 primitivos).
+
 ## Reconciliación del drift de SAT01 (ECO-23, scope c)
 `em-ui diff Button` contra `satellites/sat-cristian-garcia/` reveló **dos** divergencias respecto a la fuente:
 

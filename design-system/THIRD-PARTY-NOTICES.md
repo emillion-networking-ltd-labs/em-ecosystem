@@ -27,3 +27,28 @@ Licencia de Magic UI: MIT — https://github.com/magicuidesign/magicui/blob/main
 > Estos paquetes se declararán en el `package.json` del satélite cuando consuma estos componentes; el gate
 > `npm run lic:check` (ECO-81) verifica su licencia permisiva en ese momento. Aquí se registra el aviso de la
 > fuente adoptada. Los keyframes/tokens de animación que consumen viven en `tokens/tokens.css` (aditivos).
+
+## Tooling de catálogo: Storybook (ECO-85 / ADR-020)
+
+El `design-system/` adquiere un `package.json` propio con el tooling de **Storybook 10.x** (catálogo/VRT).
+Es **dev/build tooling**: NO se distribuye a sitios de cliente (el em-ui copia los `.tsx` fuente, nunca
+`node_modules`). El grueso del árbol (577 deps) es **permisivo** (MIT/Apache/BSD/ISC) y pasa
+`npm run lic:check:ds` tal cual. Storybook core + CLI + `@storybook/addon-a11y` + `@storybook/test-runner`
+son **MIT**.
+
+### Excepciones revisadas (`--allow`) — dev-tooling copyleft débil / LGPL, usado SIN MODIFICAR
+
+ADR-020 anticipó que el árbol de Storybook traería paquetes no-permisivos que requieren **revisión humana +
+`--allow` por paquete**. Tras revisión, se permiten estos 4 — todos **build/dev tooling, no redistribuidos**,
+y enlazados/usados **sin modificar** (la obligación copyleft de MPL es a nivel-fichero y LGPL aplica a la
+biblioteca enlazada, no a nuestro código):
+
+| Paquete | Licencia | Por qué se permite | URL |
+|---|---|---|---|
+| `axe-core` | MPL-2.0 | Motor de a11y de `@storybook/addon-a11y`; dev-only, sin modificar. | https://github.com/dequelabs/axe-core/blob/develop/LICENSE |
+| `lightningcss` | MPL-2.0 | Transformador CSS de Vite/Tailwind v4; dev/build, sin modificar. | https://github.com/parcel-bundler/lightningcss/blob/master/LICENSE |
+| `lightningcss-linux-x64-gnu` · `-musl` | MPL-2.0 | Binarios nativos de `lightningcss` (linux-x64 glibc/musl). | https://github.com/parcel-bundler/lightningcss/blob/master/LICENSE |
+| `@img/sharp-libvips-linux-x64` · `-linuxmusl-x64` | LGPL-3.0-or-later | libvips de `sharp` (optimización de imágenes de next), enlazado dinámicamente, sin modificar (binarios linux-x64 glibc/musl). | https://github.com/lovell/sharp-libvips/blob/main/LICENSE |
+
+> La línea verde de **DISTRIBUCIÓN** sigue intacta: `npm run lic:check` (root, target de distribución) y los
+> satélites NO permiten copyleft. El `--allow` aquí es exclusivo del árbol de **tooling** del catálogo.
