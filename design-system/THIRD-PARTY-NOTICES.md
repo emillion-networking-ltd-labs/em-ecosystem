@@ -16,6 +16,21 @@ la obligación de las licencias MIT (conservar el aviso de copyright) sin crédi
 
 Licencia de Magic UI: MIT — https://github.com/magicuidesign/magicui/blob/main/LICENSE.md
 
+### Tanda 2 — Aceternity UI (ECO-88)
+
+| Componente | Origen | Licencia | URL |
+|---|---|---|---|
+| `components/Meteors.tsx` | Aceternity UI (© Manu Arora) | MIT | https://ui.aceternity.com/components/meteors |
+| `components/AuroraBackground.tsx` | Aceternity UI (© Manu Arora) | MIT | https://ui.aceternity.com/components/aurora-background |
+| `components/Spotlight.tsx` | Aceternity UI (© Manu Arora) | MIT | https://ui.aceternity.com/components/spotlight |
+| `components/TextGenerateEffect.tsx` | Aceternity UI (© Manu Arora) | MIT | https://ui.aceternity.com/components/text-generate-effect |
+| `components/BentoGrid.tsx` (`BentoGrid`/`BentoGridItem`) | Aceternity UI (© Manu Arora) | MIT | https://ui.aceternity.com/components/bento-grid |
+
+Aceternity UI (componentes free): MIT — https://github.com/manuarora700/aceternity-ui. Adoptados **verbatim** (incluye sus
+colores/keyframes propios). Solo componentes **free**; el tier Pro NO es redistribuible y no se usa. Los keyframes
+`meteor`/`aurora`/`spotlight` que consumen viven (verbatim) en `tokens/tokens.css` (aditivos, ECO-88). `BentoGrid` NO
+arrastra `@tabler/icons-react` (eso era solo del demo del registry); el icono entra por prop.
+
 ## Dependencias npm que requieren estos componentes (las instala el satélite consumidor)
 
 | Paquete | Usado por | Licencia | URL |
