@@ -50,3 +50,55 @@ export const Outline: Story = {
     return <SegmentedControl {...args} value={value} onChange={setValue} />;
   },
 };
+
+const variants = ["primary", "secondary", "outline"] as const;
+
+export const AllVariants: Story = {
+  render: () => {
+    const [value, setValue] = useState("diario");
+    return (
+      <div className="flex flex-wrap items-end gap-4">
+        {variants.map((variant) => (
+          <div key={variant} className="flex flex-col gap-1.5">
+            <span className="text-caption text-content-tertiary">{variant}</span>
+            <SegmentedControl
+              options={opciones}
+              variant={variant}
+              value={value}
+              onChange={setValue}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  },
+};
+
+const sizes = ["sm", "md", "lg"] as const;
+
+export const AllSizes: Story = {
+  render: () => {
+    const [value, setValue] = useState("diario");
+    return (
+      <div className="flex flex-col items-start gap-3">
+        {sizes.map((size) => (
+          <div key={size} className="flex items-center gap-3">
+            <SegmentedControl
+              options={opciones}
+              size={size}
+              value={value}
+              onChange={setValue}
+            />
+            <span className="text-caption text-content-tertiary">
+              {size === "sm"
+                ? "sm · 32px"
+                : size === "md"
+                  ? "md · 40px"
+                  : "lg · 48px"}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  },
+};

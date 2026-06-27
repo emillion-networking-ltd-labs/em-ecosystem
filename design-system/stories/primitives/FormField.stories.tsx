@@ -32,6 +32,28 @@ export const WithError: Story = {
     label: "Correo electrónico",
     error: "Este campo es obligatorio",
     htmlFor: "correo-error",
-    children: <Input id="correo-error" placeholder="nombre@empresa.com" />,
+    children: <Input id="correo-error" placeholder="nombre@empresa.com" hasError />,
   },
+};
+
+// FormField no tiene sizes ni variants: sus estados son required y error,
+// y envuelve cualquier control de formulario (aquí Input).
+export const AllStates: Story = {
+  render: () => (
+    <div className="flex flex-col gap-4">
+      <FormField label="Por defecto" htmlFor="ff-default">
+        <Input id="ff-default" placeholder="Escribe aquí…" />
+      </FormField>
+      <FormField label="Campo obligatorio" htmlFor="ff-required" required>
+        <Input id="ff-required" placeholder="Obligatorio…" />
+      </FormField>
+      <FormField
+        label="Con error"
+        htmlFor="ff-error"
+        error="Este campo es obligatorio"
+      >
+        <Input id="ff-error" placeholder="…" hasError />
+      </FormField>
+    </div>
+  ),
 };

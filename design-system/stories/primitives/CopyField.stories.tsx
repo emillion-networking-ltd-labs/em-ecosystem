@@ -18,3 +18,20 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+// md → 48px (default) · sm → 40px
+export const AllSizes: Story = {
+  render: () => (
+    <div className="grid w-full max-w-md grid-cols-1 gap-4">
+      {(["md", "sm"] as const).map((s) => (
+        <div key={s} className="flex flex-col gap-1.5">
+          <CopyField value="JBSWY3DPEHPK3PXP" size={s} />
+          <span className="text-caption text-content-tertiary">
+            {s}
+            {s === "md" ? " (por defecto)" : ""}
+          </span>
+        </div>
+      ))}
+    </div>
+  ),
+};

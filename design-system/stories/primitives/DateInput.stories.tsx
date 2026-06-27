@@ -40,3 +40,36 @@ export const WithError: Story = {
     return <DateInput {...args} value={value} onChange={setValue} />;
   },
 };
+
+export const Disabled: Story = {
+  args: { label: "No editable", disabled: true },
+  render: (args) => {
+    const [value, setValue] = useState("2026-06-27");
+    return <DateInput {...args} value={value} onChange={setValue} />;
+  },
+};
+
+const sizes = ["sm", "md"] as const;
+
+export const AllSizes: Story = {
+  render: () => {
+    const [value, setValue] = useState("2026-06-27");
+    return (
+      <div className="flex flex-col gap-4">
+        {sizes.map((size) => (
+          <div key={size} className="flex flex-col gap-1.5">
+            <DateInput
+              size={size}
+              label={`Tamaño ${size}`}
+              value={value}
+              onChange={setValue}
+            />
+            <span className="text-caption text-content-tertiary">
+              {size === "sm" ? "sm · 40px" : "md · 48px (por defecto)"}
+            </span>
+          </div>
+        ))}
+      </div>
+    );
+  },
+};
