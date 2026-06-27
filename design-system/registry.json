@@ -50,6 +50,15 @@
       "internalDependencies": []
     },
     {
+      "name": "Blob",
+      "type": "registry:ui",
+      "file": "components/Blob.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "BlurFade",
       "type": "registry:ui",
       "file": "components/BlurFade.tsx",
@@ -97,6 +106,15 @@
       "internalDependencies": []
     },
     {
+      "name": "Container",
+      "type": "registry:ui",
+      "file": "components/Container.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "CopyField",
       "type": "registry:ui",
       "file": "components/CopyField.tsx",
@@ -136,6 +154,15 @@
       "internalDependencies": []
     },
     {
+      "name": "DotPattern",
+      "type": "registry:ui",
+      "file": "components/DotPattern.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "EmailSelector",
       "type": "registry:ui",
       "file": "components/EmailSelector.tsx",
@@ -169,6 +196,33 @@
         "InlineError"
       ],
       "internalDependencies": []
+    },
+    {
+      "name": "GradientBackdrop",
+      "type": "registry:ui",
+      "file": "components/GradientBackdrop.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
+      "name": "Grid",
+      "type": "registry:ui",
+      "file": "components/Grid.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
+      "name": "GridPattern",
+      "type": "registry:ui",
+      "file": "components/GridPattern.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
     },
     {
       "name": "IconBadge",
@@ -311,6 +365,15 @@
       "internalDependencies": []
     },
     {
+      "name": "Section",
+      "type": "registry:ui",
+      "file": "components/Section.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "SegmentedControl",
       "type": "registry:ui",
       "file": "components/SegmentedControl.tsx",
@@ -357,6 +420,24 @@
       "file": "components/Spinner.tsx",
       "registryDependencies": [],
       "internalDependencies": []
+    },
+    {
+      "name": "Split",
+      "type": "registry:ui",
+      "file": "components/Split.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
+      "name": "Stack",
+      "type": "registry:ui",
+      "file": "components/Stack.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
     },
     {
       "name": "StickyCard",
