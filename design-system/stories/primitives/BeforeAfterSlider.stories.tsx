@@ -47,3 +47,76 @@ export const Default: Story = {
     </div>
   ),
 };
+
+// orientation: union real "horizontal" | "vertical". El divisor (y las flechas
+// del handle) rotan según la orientación.
+export const Vertical: Story = {
+  args: { orientation: "vertical" },
+  render: (args) => (
+    <div className="w-64">
+      <BeforeAfterSlider {...args} />
+    </div>
+  ),
+};
+
+// aspectRatio: union real "4/5" | "1/1" | "16/9" | "3/4".
+export const AspectRatios: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-4">
+      {(["4/5", "1/1", "16/9", "3/4"] as const).map((ratio) => (
+        <div key={ratio} className="flex flex-col gap-1.5">
+          <span className="text-caption text-content-tertiary">{ratio}</span>
+          <div className="w-48">
+            <BeforeAfterSlider
+              before={{ src: beforeSrc, alt: "Antes" }}
+              after={{ src: afterSrc, alt: "Después" }}
+              aspectRatio={ratio}
+            />
+          </div>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+// objectFit: union real "cover" | "contain". "contain" muestra la imagen
+// completa (ideal para logos/diagramas); el hueco usa bg-surface-tertiary.
+export const ObjectFitContain: Story = {
+  args: { objectFit: "contain", aspectRatio: "16/9" },
+  render: (args) => (
+    <div className="w-64">
+      <BeforeAfterSlider {...args} />
+    </div>
+  ),
+};
+
+// Slots de composición reales: before.label (recortada con la imagen ANTES),
+// after.label (recorte inverso, solo donde se ve DESPUÉS). Igual que el
+// ComponentShowcase, que coloca Badges "BEFORE"/"AFTER".
+export const WithLabels: Story = {
+  render: () => (
+    <div className="w-64">
+      <BeforeAfterSlider
+        before={{
+          src: beforeSrc,
+          alt: "Antes",
+          label: (
+            <div className="absolute left-3 top-3 rounded-md bg-surface-inverse px-2 py-0.5 text-caption text-content-inverse">
+              ANTES
+            </div>
+          ),
+        }}
+        after={{
+          src: afterSrc,
+          alt: "Después",
+          label: (
+            <div className="absolute bottom-3 right-3 rounded-md bg-surface-inverse px-2 py-0.5 text-caption text-content-inverse">
+              DESPUÉS
+            </div>
+          ),
+        }}
+        aspectRatio="4/5"
+      />
+    </div>
+  ),
+};

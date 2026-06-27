@@ -15,10 +15,32 @@ export const Default: Story = {};
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-wrap gap-2">
-      {(["default", "success", "warning", "error", "info"] as const).map((v) => (
+    <div className="flex flex-wrap items-center gap-2">
+      {(
+        [
+          "default",
+          "success",
+          "warning",
+          "error",
+          "info",
+          "kbd",
+          "overlay",
+        ] as const
+      ).map((v) => (
         <Badge key={v} variant={v}>
-          {v}
+          {v === "kbd" ? "⌘K" : v}
+        </Badge>
+      ))}
+    </div>
+  ),
+};
+
+export const AllSizes: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-center gap-2">
+      {(["sm", "md", "lg"] as const).map((s) => (
+        <Badge key={s} variant="success" size={s}>
+          {s}
         </Badge>
       ))}
     </div>

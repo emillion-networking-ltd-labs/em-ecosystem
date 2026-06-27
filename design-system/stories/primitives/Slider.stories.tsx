@@ -26,6 +26,32 @@ export const Default: Story = {
   },
 };
 
+// Slider no tiene sizes ni variants: sus opciones de presentación son
+// label y showValue, y su único estado es disabled.
+export const WithoutValue: Story = {
+  args: { showValue: false },
+  render: (args) => {
+    const [value, setValue] = useState(60);
+    return <Slider {...args} value={value} onChange={setValue} />;
+  },
+};
+
+export const WithoutLabel: Story = {
+  args: { label: undefined, showValue: false },
+  render: (args) => {
+    const [value, setValue] = useState(25);
+    return <Slider {...args} value={value} onChange={setValue} />;
+  },
+};
+
+export const CustomRange: Story = {
+  args: { label: "Precio", min: 0, max: 500, step: 10 },
+  render: (args) => {
+    const [value, setValue] = useState(120);
+    return <Slider {...args} value={value} onChange={setValue} />;
+  },
+};
+
 export const Disabled: Story = {
   args: { disabled: true, label: "No editable" },
   render: (args) => {
