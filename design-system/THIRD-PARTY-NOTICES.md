@@ -47,8 +47,8 @@ biblioteca enlazada, no a nuestro código):
 |---|---|---|---|
 | `axe-core` | MPL-2.0 | Motor de a11y de `@storybook/addon-a11y`; dev-only, sin modificar. | https://github.com/dequelabs/axe-core/blob/develop/LICENSE |
 | `lightningcss` | MPL-2.0 | Transformador CSS de Vite/Tailwind v4; dev/build, sin modificar. | https://github.com/parcel-bundler/lightningcss/blob/master/LICENSE |
-| `lightningcss-linux-x64-gnu` | MPL-2.0 | Binario nativo de `lightningcss` (CI linux-x64). | https://github.com/parcel-bundler/lightningcss/blob/master/LICENSE |
-| `@img/sharp-libvips-linux-x64` | LGPL-3.0-or-later | libvips de `sharp` (optimización de imágenes de next), enlazado dinámicamente, sin modificar. | https://github.com/lovell/sharp-libvips/blob/main/LICENSE |
+| `lightningcss-linux-x64-gnu` · `-musl` | MPL-2.0 | Binarios nativos de `lightningcss` (linux-x64 glibc/musl). | https://github.com/parcel-bundler/lightningcss/blob/master/LICENSE |
+| `@img/sharp-libvips-linux-x64` · `-linuxmusl-x64` | LGPL-3.0-or-later | libvips de `sharp` (optimización de imágenes de next), enlazado dinámicamente, sin modificar (binarios linux-x64 glibc/musl). | https://github.com/lovell/sharp-libvips/blob/main/LICENSE |
 
 > La línea verde de **DISTRIBUCIÓN** sigue intacta: `npm run lic:check` (root, target de distribución) y los
 > satélites NO permiten copyleft. El `--allow` aquí es exclusivo del árbol de **tooling** del catálogo.
