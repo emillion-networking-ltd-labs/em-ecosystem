@@ -21,6 +21,7 @@ const config: StorybookConfig = {
     cfg.resolve ??= {};
     cfg.resolve.alias = {
       ...(cfg.resolve.alias as Record<string, string> | undefined),
+      "@/components/sections": resolve(ds, "sections"),
       "@/components/ui": resolve(ds, "components"),
       "@/lib": resolve(ds, "lib"),
       "@/hooks": resolve(ds, "hooks"),

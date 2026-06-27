@@ -48,7 +48,8 @@ function walk(dir) {
     if (entry.isDirectory()) walk(p);
     else if (entry.name.endsWith(".stories.tsx") || entry.name.endsWith(".stories.ts")) {
       const src = readFileSync(p, "utf8");
-      for (const m of src.matchAll(/@\/components\/ui\/(\w+)/g)) covered.add(m[1]);
+      // Átomos (components/ → @/components/ui) y secciones (sections/ → @/components/sections).
+      for (const m of src.matchAll(/@\/components\/(?:ui|sections)\/(\w+)/g)) covered.add(m[1]);
     }
   }
 }

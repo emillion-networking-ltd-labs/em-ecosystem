@@ -547,6 +547,26 @@
       "internalDependencies": []
     },
     {
+      "name": "HeroShowcase",
+      "type": "registry:section",
+      "file": "sections/HeroShowcase.tsx",
+      "registryDependencies": [
+        "AnimatedGradientText",
+        "Blob",
+        "Button",
+        "Container",
+        "DotPattern",
+        "GradientBackdrop",
+        "GridPattern",
+        "Section",
+        "Split",
+        "Stack"
+      ],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "Portfolio",
       "type": "registry:section",
       "file": "sections/Portfolio.tsx",
