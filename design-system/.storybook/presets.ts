@@ -25,7 +25,7 @@ export const PRESETS: Preset[] = [
     // El gradiente de marca (--gradient-brand) lo deriva el core de accent→accent-2 = verde→teal,
     // igual que el logo. El negro de marca se cubre con los neutros del core (content/surface-inverse).
     id: "emillion",
-    name: "EMILLION (marca)",
+    name: "EMILLION (brand)",
     vars: {
       "--color-accent": "#04433e", // verde oscuro EMILLION (principal)
       "--color-accent-2": "#1d9284", // teal (2º acento → gradiente)
@@ -39,7 +39,7 @@ export const PRESETS: Preset[] = [
     // Demo de contraste — SOLO para ver el conmutador en acción (no es marca real). Se sustituye por
     // presets de SECTOR reales en el ticket de seguimiento (paso 2).
     id: "contraste",
-    name: "Demo · contraste (placeholder)",
+    name: "Demo · contrast (placeholder)",
     vars: {
       "--color-accent": "#b45309",
       "--color-accent-2": "#f59e0b",

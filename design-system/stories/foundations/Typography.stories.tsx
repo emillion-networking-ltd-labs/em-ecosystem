@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Group, TokenMeta, useVar } from "./_helpers";
 
-// Foundations/Typography — familias y escalas tipográficas (ECO-95). La familia DISPLAY/SERIF cambia
-// con el preset de marca (toolbar); las escalas (tamaños) son semánticas y no cambian.
+// Foundations/Typography — type families and scales (ECO-95). The DISPLAY/SERIF family changes with the
+// brand preset (toolbar); the scales (sizes) are semantic and don't change.
 const meta = {
   title: "Foundations/Typography",
   parameters: { layout: "fullscreen" },
@@ -47,24 +47,24 @@ export const Typography: Story = {
   render: () => (
     <div className="text-content-primary">
       <Group
-        title="Familias"
-        description="display y serif son MARCA (cambian con el preset); sans es la base semántica del producto."
+        title="Families"
+        description="display and serif are BRAND (they change with the preset); sans is the product's semantic base."
       >
-        <Family token="--font-display" className="text-display-3 font-display" label="Display — titulares de marketing" />
-        <Family token="--font-serif" className="text-h1 font-serif" label="Serif — cuerpo editorial" />
-        <Family token="--font-sans" className="text-h1 font-sans" label="Sans — UI y cuerpo del producto" />
+        <Family token="--font-display" className="text-display-3 font-display" label="Display — marketing headlines" />
+        <Family token="--font-serif" className="text-h1 font-serif" label="Serif — editorial body" />
+        <Family token="--font-sans" className="text-h1 font-sans" label="Sans — product UI and body" />
       </Group>
 
       <Group
-        title="Escala display"
-        description="Tipografía fluida (clamp) para hero/marketing — cosechada del benchmark sat-cristian-garcia."
+        title="Display scale"
+        description="Fluid typography (clamp) for hero/marketing — harvested from the sat-cristian-garcia benchmark."
       >
         <Size utility="text-display-1 font-display" token="--text-display-1" className="text-display-1 font-display" />
         <Size utility="text-display-2 font-display" token="--text-display-2" className="text-display-2 font-display" />
         <Size utility="text-display-3 font-display" token="--text-display-3" className="text-display-3 font-display" />
       </Group>
 
-      <Group title="Escala base" description="Escala de producto (dashboard): titulares h1–h3, cuerpo y caption.">
+      <Group title="Base scale" description="Product scale (dashboard): h1–h3 headings, body and caption.">
         <Size utility="text-h1" token="--text-h1" className="text-h1 font-semibold" />
         <Size utility="text-h2" token="--text-h2" className="text-h2 font-semibold" />
         <Size utility="text-h3" token="--text-h3" className="text-h3 font-semibold" />

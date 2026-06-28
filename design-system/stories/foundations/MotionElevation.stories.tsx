@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Group, TokenMeta, useVar } from "./_helpers";
 
-// Foundations/Motion & Elevation — tokens SEMÁNTICOS de movimiento y profundidad (ECO-95).
+// Foundations/Motion & Elevation — SEMANTIC motion and depth tokens (ECO-95).
 const meta = {
   title: "Foundations/Motion & Elevation",
   parameters: { layout: "fullscreen" },
@@ -47,7 +47,7 @@ export const MotionElevation: Story = {
     <div className="text-content-primary">
       <Group
         title="Motion"
-        description="Duraciones (`--duration-*`) + curva `--ease-out-expo`. Pasa el cursor sobre cada fila para ver el ritmo."
+        description="Durations (`--duration-*`) + the `--ease-out-expo` curve. Hover each row to see the timing."
       >
         <div className="flex flex-col">
           {DURATIONS.map((k) => (
@@ -57,9 +57,9 @@ export const MotionElevation: Story = {
         <p className="mt-2 text-caption font-mono text-content-tertiary">--ease-out-expo</p>
       </Group>
 
-      <Group title="Elevación" description="Sombra de tarjeta (`--shadow-card`), el único shadow con uso real.">
+      <Group title="Elevation" description="Card shadow (`--shadow-card`), the only shadow with real usage.">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <ShadowCell token="--shadow-card" label="elevación de tarjeta" />
+          <ShadowCell token="--shadow-card" label="card elevation" />
         </div>
       </Group>
     </div>

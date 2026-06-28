@@ -65,10 +65,10 @@ const preview: Preview = {
   decorators: [withTheme],
   globalTypes: {
     theme: {
-      description: "Tema (light/dark) — conmuta la clase como en el dashboard",
+      description: "Theme (light/dark) — toggles the class like the dashboard",
       defaultValue: "light",
       toolbar: {
-        title: "Tema",
+        title: "Theme",
         icon: "contrast",
         items: [
           { value: "light", title: "Light", icon: "sun" },
@@ -80,7 +80,7 @@ const preview: Preview = {
     // Conmutador de PRESET de marca (ECO-95): cambia accent/-2 + familia tipográfica en TODO el
     // catálogo; los tokens semánticos (texto/fondos/bordes/escala) no cambian → lienzo neutro.
     preset: {
-      description: "Preset de marca — tematización por familia/sector (solo accent + tipografía)",
+      description: "Brand preset — theming by family/sector (accent + typography only)",
       defaultValue: DEFAULT_PRESET,
       toolbar: {
         title: "Preset",
@@ -113,7 +113,7 @@ const preview: Preview = {
     // responsive con Tailwind; faltaba poder verlo en el catálogo).
     viewport: {
       options: {
-        mobile: { name: "Móvil (375)", styles: { width: "375px", height: "720px" } },
+        mobile: { name: "Mobile (375)", styles: { width: "375px", height: "720px" } },
         tablet: { name: "Tablet (768)", styles: { width: "768px", height: "1024px" } },
         laptop: { name: "Laptop (1280)", styles: { width: "1280px", height: "800px" } },
         desktop: { name: "Desktop (1536)", styles: { width: "1536px", height: "900px" } },
