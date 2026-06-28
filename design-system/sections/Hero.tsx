@@ -1,107 +1,102 @@
 import Link from "next/link";
 import Image from "next/image";
-import Button from "@/components/ui/Button";
 
-// Sección HERO del design system (ECO-54, nivel 2; imagen real ECO-61/F7a). Diseño/responsive/a11y gobernados;
-// el CONTENIDO entra por props (desde el brief — nunca inventado). Marca de primera clase: variante `gradient`
-// pinta el fondo con el token de marca (`accent`); el CTA primario va en marca. Above-the-fold → SIN reveal
-// (protege LCP). `imageSrc` (foto REAL del cliente, opcional) restaura el visual: layout en split (texto +
-// imagen) con `next/image` (optimizado, `priority` para el LCP); SIN imagen → hero de solo texto (omit-if-absent,
-// nunca un placeholder). La generación decorativa para rellenar es F7b.
-export interface HeroProps {
-  /** Eyebrow corto (p.ej. el sector). Opcional. */
-  eyebrow?: string;
-  /** Titular principal (h1). Obligatorio. */
-  title: string;
-  /** Subtítulo/claim. Opcional. */
-  subtitle?: string;
-  ctaText?: string;
-  ctaHref?: string;
-  secondaryCtaText?: string;
-  secondaryCtaHref?: string;
-  /** `gradient` = fondo de marca (default); `soft` = superficie con acentos de marca. */
-  variant?: "gradient" | "soft";
-  /** Alineación del contenido (sin imagen). Con `imageSrc` el layout es siempre split. */
-  align?: "left" | "center";
-  /** Foto REAL del cliente (ya ingerida a /images/). Opcional → sin ella, hero de solo texto. */
-  imageSrc?: string;
-  /** Texto alternativo de la imagen (a11y). */
-  imageAlt?: string;
+// Sección HERO del design-system — REFINADA en ECO-93 replicando la ESTRUCTURA EXACTA del hero de
+// sat-cristian-garcia (benchmark), con lenguaje NEUTRO (tokens del design-system) y SIN vídeo: foto a
+// sangre en su lugar. Estructura del benchmark: banda 50vh/60vh; media a sangre + overlay de legibilidad
+// (`from-black`→transparent, abajo→arriba); contenido anclado ABAJO (`mt-auto mb-12`); en desktop el título
+// display + CTA ghost a la izquierda y un grid de stat-cards de cristal a la derecha (`items-end`/
+// `justify-between`); en móvil las stats salen DEBAJO del hero sobre `surface-secondary`. Marca por token
+// (`--color-accent`): lienzo en blanco, tematizable por cliente. El blanco/scrim sobre la foto es convención
+// de legibilidad (no color de marca). Server component, above-the-fold sin reveal → protege LCP.
+export interface HeroStat {
+  /** Cifra/dato (p.ej. "+500"). */
+  value: string;
+  /** Etiqueta corta. */
+  label: string;
 }
 
-export default function Hero({
-  eyebrow,
-  title,
-  subtitle,
-  ctaText,
-  ctaHref = "/contact",
-  secondaryCtaText,
-  secondaryCtaHref,
-  variant = "gradient",
-  align = "left",
-  imageSrc,
-  imageAlt,
-}: HeroProps) {
-  const onBrand = variant === "gradient";
-  const wrap = onBrand
-    ? "bg-gradient-to-br from-accent to-accent-dark text-white"
-    : "bg-surface-secondary text-content-primary";
-  const hasImg = !!imageSrc;
-  // Con imagen, el contenido va a la izquierda (split); sin imagen, respeta `align`.
-  const alignment = !hasImg && align === "center" ? "items-center text-center mx-auto" : "items-start text-left";
-  const sub = onBrand ? "text-white/90" : "text-content-secondary";
+export interface HeroProps {
+  /** Titular principal (h1). Obligatorio. */
+  title: string;
+  /** CTA principal (ghost sobre la media). Opcional. */
+  ctaText?: string;
+  ctaHref?: string;
+  /** Foto del hero (a sangre, con overlay). Obligatoria. */
+  imageSrc: string;
+  /** Texto alternativo de la imagen (a11y). */
+  imageAlt?: string;
+  /** Cifras destacadas: grid a la derecha en desktop, banda debajo en móvil. Opcional. */
+  stats?: HeroStat[];
+}
 
-  const content = (
-    <div className={`flex flex-col ${alignment} gap-6`}>
-      {eyebrow ? (
-        <span className={`text-caption font-semibold uppercase tracking-widest ${onBrand ? "text-white/80" : "text-accent"}`}>
-          {eyebrow}
-        </span>
-      ) : null}
-      <h1 className="max-w-3xl text-4xl font-bold leading-tight sm:text-5xl lg:text-6xl">{title}</h1>
-      {subtitle ? <p className={`max-w-2xl text-lg leading-relaxed ${sub}`}>{subtitle}</p> : null}
-      {ctaText || secondaryCtaText ? (
-        <div className={`mt-2 flex flex-col gap-3 sm:flex-row ${!hasImg && align === "center" ? "sm:justify-center" : ""}`}>
-          {ctaText ? (
-            <Link
-              href={ctaHref}
-              className={`inline-flex h-12 items-center justify-center rounded-md px-8 text-h3 font-semibold transition-opacity hover:opacity-90 ${
-                onBrand ? "bg-white text-accent" : "bg-accent text-white"
-              }`}
-            >
-              {ctaText}
-            </Link>
-          ) : null}
-          {secondaryCtaText && secondaryCtaHref ? (
-            <Button as="a" href={secondaryCtaHref} variant="outline" size="lg"
-              className={onBrand ? "border-white/40 text-white hover:bg-white/10" : ""}>
-              {secondaryCtaText}
-            </Button>
-          ) : null}
-        </div>
-      ) : null}
+function HeroStatCard({ stat, variant }: { stat: HeroStat; variant: "desktop" | "mobile" }) {
+  const onMedia = variant === "desktop";
+  return (
+    <div
+      className={
+        onMedia
+          ? "flex min-w-[120px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/25 px-5 py-6 backdrop-blur-xs"
+          : "card-flat py-8 text-center"
+      }
+    >
+      <p className={`text-h1 ${onMedia ? "text-white" : "text-content-primary"}`}>{stat.value}</p>
+      <p className={`mt-2 ${onMedia ? "text-caption text-white/60" : "text-body font-semibold text-content-secondary"}`}>{stat.label}</p>
     </div>
   );
+}
 
+export default function Hero({ title, ctaText, ctaHref = "/contact", imageSrc, imageAlt, stats }: HeroProps) {
+  const hasStats = !!stats && stats.length > 0;
   return (
-    <section className={`relative ${wrap}`}>
-      {hasImg ? (
-        <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-20 sm:py-24 lg:grid-cols-2 lg:py-28">
-          {content}
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl shadow-lg lg:aspect-[5/4]">
-            <Image
-              src={imageSrc!}
-              alt={imageAlt || title}
-              fill
-              priority
-              sizes="(min-width: 1024px) 36rem, 100vw"
-              className="object-cover"
-            />
+    <>
+      <section className="relative z-20 flex h-[50vh] flex-col landscape:max-lg:min-h-[440px] lg:h-[60vh]">
+        {/* Media + overlay contenidos (no se desbordan del hero) */}
+        <div className="absolute inset-0 overflow-hidden">
+          <Image src={imageSrc} alt={imageAlt || title} fill priority sizes="100vw" className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
+        </div>
+
+        {/* Contenido anclado abajo */}
+        <div className="relative z-10 mt-auto mb-12 w-full px-6 sm:px-12 lg:px-20">
+          <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
+            {/* Izquierda: título + CTA */}
+            <div>
+              <h1 className="max-w-2xl font-display text-display-1 font-bold text-white">{title}</h1>
+              {ctaText ? (
+                <div className="mt-10 flex">
+                  <Link
+                    href={ctaHref}
+                    className="inline-flex h-12 items-center justify-center rounded-md border border-white/30 px-5 py-3 text-body font-normal tracking-wider text-white transition-all hover:bg-white/10 md:px-8 md:text-h3"
+                  >
+                    {ctaText}
+                  </Link>
+                </div>
+              ) : null}
+            </div>
+
+            {/* Desktop: stats dentro del hero */}
+            {hasStats ? (
+              <div className="relative z-20 hidden grid-cols-2 gap-3 lg:grid xl:grid-cols-4">
+                {stats!.map((s) => (
+                  <HeroStatCard key={s.label} stat={s} variant="desktop" />
+                ))}
+              </div>
+            ) : null}
           </div>
         </div>
-      ) : (
-        <div className="mx-auto flex max-w-5xl px-6 py-24 sm:py-28 lg:py-32">{content}</div>
-      )}
-    </section>
+      </section>
+
+      {/* Móvil: stats fuera del hero, tema normal */}
+      {hasStats ? (
+        <div className="relative z-20 bg-surface-secondary px-6 py-10 lg:hidden">
+          <div className="grid grid-cols-2 gap-4">
+            {stats!.map((s) => (
+              <HeroStatCard key={s.label} stat={s} variant="mobile" />
+            ))}
+          </div>
+        </div>
+      ) : null}
+    </>
   );
 }

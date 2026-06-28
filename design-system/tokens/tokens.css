@@ -535,3 +535,13 @@
   --gradient-brand: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%);
   --gradient-brand-radial: radial-gradient(120% 120% at 50% 0%, var(--color-accent-2) 0%, var(--color-accent) 55%, transparent 100%);
 }
+
+/* Motion gobernado (ECO-93) — duración + easing para reveals/stagger/transiciones de las secciones, sin
+   números mágicos dispersos. `--ease-out-expo` genera la utilidad `ease-out-expo`; las duraciones se usan
+   vía `duration-[var(--duration-*)]`. Tematizables: el consumidor puede afinar el ritmo. */
+@theme {
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 600ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
