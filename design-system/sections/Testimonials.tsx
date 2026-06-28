@@ -1,54 +1,90 @@
 "use client";
 
-import { useReveal } from "@/hooks/useReveal";
-import Badge from "@/components/ui/Badge";
+import { Star } from "lucide-react";
+import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
+import { useReveal } from "@/hooks/useReveal";
 
-// Sección TESTIMONIOS del design system (ECO-55, nivel 2). Tarjetas con testimonios REALES del cliente
-// (del brief — JAMÁS inventados; sin testimonios reales, el generador omite la sección). Iniciales en círculo
-// de marca (sin depender del átomo Avatar, acoplado a la API del dashboard). Reveal escalonado, token-safe, a11y.
+// Sección TESTIMONIOS del design-system — RECONSTRUIDA ECO-93 replicando la PÁGINA /testimonios de
+// sat-cristian-garcia (no el teaser): cabecera + bloque de RATING AGREGADO opcional (número grande + estrellas
+// + total) + GRID de reseñas (cada card `card-flat` = Avatar + nombre + meta + StarRating opcional + texto) +
+// enlace opcional. Lenguaje NEUTRO (estrellas y rating en content-primary; Avatar primitivo neutro). La misma
+// pieza sirve para "reseñas" (avatar+estrellas+fecha) o "testimonios" (avatar+rol+cita) según qué props traiga.
+// Testimonios REALES del cliente (del brief — nunca inventados; sin items, se omite). Reveal escalonado, a11y.
 export interface Testimonial {
   name: string;
   quote: string;
-  result?: string;
+  /** Rol/empresa o fecha — meta bajo el nombre. Opcional. */
+  role?: string;
+  /** Valoración 1–5 (estrellas). Opcional. */
+  rating?: number;
+  /** Foto del autor. Opcional → el Avatar muestra iniciales neutras. */
+  avatarSrc?: string;
+  /** Enlace a la reseña completa. Si está, la tarjeta es clicable (hover de borde activo + cursor). */
+  href?: string;
 }
 export interface TestimonialsProps {
   eyebrow?: string;
   title: string;
+  subtitle?: string;
   items: Testimonial[];
+  /** Rating agregado (número grande + estrellas). Opcional. */
+  rating?: number;
+  /** Total que acompaña al rating (p.ej. "128 reviews"). */
+  ratingCount?: string;
   viewAllText?: string;
   viewAllHref?: string;
-  variant?: "cards" | "list";
 }
 
-function initials(name: string) {
-  return name.trim().split(/\s+/).slice(0, 2).map((p) => p[0]?.toUpperCase() ?? "").join("");
-}
-
-function TestimonialCard({ t, index, list }: { t: Testimonial; index: number; list: boolean }) {
-  const { ref, style } = useReveal<HTMLElement>({ delay: (index % 3) * 90 });
+function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
-    <figure
-      ref={ref}
-      style={style}
-      className={`flex flex-col rounded-2xl border border-border-default bg-surface-primary p-6 ${list ? "sm:flex-row sm:items-start sm:gap-6" : ""}`}
-    >
+    <div className="flex items-center gap-0.5" role="img" aria-label={`${rating} out of 5 stars`}>
+      {[1, 2, 3, 4, 5].map((n) => (
+        <Star
+          key={n}
+          size={size}
+          aria-hidden
+          className={n <= rating ? "fill-amber-400 text-amber-400" : "fill-border-strong text-border-strong"}
+        />
+      ))}
+    </div>
+  );
+}
+
+function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
+  const { ref, style } = useReveal<HTMLElement>({ delay: (index % 3) * 90 });
+  const interactive = !!t.href;
+  const cls = `card-flat flex h-full flex-col ${
+    interactive
+      ? "transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-components hover:shadow-[var(--shadow-card)]"
+      : ""
+  }`;
+  const inner = (
+    <>
       <div className="flex items-center gap-3">
-        <span aria-hidden="true" className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent text-caption font-semibold text-white">
-          {initials(t.name)}
-        </span>
-        <div>
+        <Avatar src={t.avatarSrc} name={t.name} size="md" />
+        <div className="flex-1">
           <figcaption className="text-body font-semibold text-content-primary">{t.name}</figcaption>
-          {t.result ? (
-            <Badge variant="success" size="sm">
-              {t.result}
-            </Badge>
-          ) : null}
+          {t.role ? <p className="text-caption text-content-tertiary">{t.role}</p> : null}
         </div>
       </div>
-      <blockquote className="mt-4 flex-1 text-body italic leading-relaxed text-content-secondary">
-        &ldquo;{t.quote}&rdquo;
-      </blockquote>
+      {t.rating ? (
+        <div className="mt-3">
+          <StarRating rating={t.rating} />
+        </div>
+      ) : null}
+      <blockquote className="mt-3 flex-1 text-body leading-relaxed text-content-secondary">{t.quote}</blockquote>
+    </>
+  );
+  return (
+    <figure ref={ref} style={style} className="h-full">
+      {interactive ? (
+        <a href={t.href} target="_blank" rel="noopener noreferrer" aria-label={`Read ${t.name}'s full review`} className={cls}>
+          {inner}
+        </a>
+      ) : (
+        <div className={cls}>{inner}</div>
+      )}
     </figure>
   );
 }
@@ -56,26 +92,33 @@ function TestimonialCard({ t, index, list }: { t: Testimonial; index: number; li
 export default function Testimonials({
   eyebrow,
   title,
+  subtitle,
   items,
+  rating,
+  ratingCount,
   viewAllText,
   viewAllHref,
-  variant = "cards",
 }: TestimonialsProps) {
-  const list = variant === "list";
   return (
     <section className="bg-surface-secondary">
-      <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-        <div className="flex flex-col items-center gap-2 text-center">
+      <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
+        <div className="mb-10 flex flex-col items-center gap-2 text-center">
           {eyebrow ? (
-            <Badge variant="default" size="sm" className="text-accent">
-              {eyebrow}
-            </Badge>
+            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
           ) : null}
-          <h2 className="text-3xl font-bold text-content-primary sm:text-4xl">{title}</h2>
+          <h2 className="font-display text-display-2 font-bold text-content-primary">{title}</h2>
+          {subtitle ? <p className="mx-auto mt-1 max-w-xl text-body text-content-secondary">{subtitle}</p> : null}
         </div>
-        <div className={`mt-12 grid gap-6 ${list ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
+        {rating ? (
+          <div className="mx-auto mb-10 flex max-w-md flex-col items-center gap-3 text-center">
+            <p className="font-display text-display-2 font-black leading-none text-content-primary">{rating.toFixed(1)}</p>
+            <StarRating rating={Math.round(rating)} size={20} />
+            {ratingCount ? <p className="text-body text-content-secondary">{ratingCount}</p> : null}
+          </div>
+        ) : null}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {items.map((t, i) => (
-            <TestimonialCard key={`${t.name}-${i}`} t={t} index={i} list={list} />
+            <TestimonialCard key={`${t.name}-${i}`} t={t} index={i} />
           ))}
         </div>
         {viewAllText && viewAllHref ? (
