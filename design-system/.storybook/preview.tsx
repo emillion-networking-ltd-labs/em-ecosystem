@@ -60,6 +60,14 @@ const preview: Preview = {
     },
   },
   parameters: {
+    // Orden del sidebar: ALFABÉTICO por componente. `method: "alphabetical"` con `includeNames`
+    // por defecto (false) ordena los grupos/componentes pero NO las stories hoja → dentro de cada
+    // componente se conserva el orden de export (Default primero → AllVariants último).
+    // Sin esto, Storybook usa el orden de carga del glob (no alfabético) y el listado sale revuelto
+    // (los SpinnerCircle/Infinity/Ring caían al final en vez de en su sitio entre Slider y StickyCard).
+    options: {
+      storySort: { method: "alphabetical" },
+    },
     // El decorator de tema pinta la página completa (100vh); fullscreen evita el centrado/padding
     // del canvas para que el fondo del tema cubra todo. Las stories controlan su propio layout interno.
     layout: "fullscreen",

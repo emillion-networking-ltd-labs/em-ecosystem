@@ -1,13 +1,13 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import RingSpinner from "@/components/ui/RingSpinner";
+import SpinnerRing from "@/components/ui/SpinnerRing";
 
 const meta = {
-  title: "Primitives/RingSpinner",
-  component: RingSpinner,
+  title: "Primitives/SpinnerRing",
+  component: SpinnerRing,
   tags: ["autodocs"],
   args: { size: "md" },
   argTypes: { size: { control: "inline-radio", options: ["sm", "md", "lg"] } },
-} satisfies Meta<typeof RingSpinner>;
+} satisfies Meta<typeof SpinnerRing>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
@@ -28,7 +28,7 @@ export const AllSizes: Story = {
       {SIZES.map(({ size, px }) => (
         <div key={size} className="flex flex-col items-center gap-1.5">
           <div className="flex h-8 items-center justify-center">
-            <RingSpinner size={size} />
+            <SpinnerRing size={size} />
           </div>
           <span className="text-caption text-content-tertiary font-mono">
             {size} · {px}px{size === "md" ? " (default)" : ""}

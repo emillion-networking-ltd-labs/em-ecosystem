@@ -25,10 +25,19 @@ props (`variant`/`align`/`size`/`intensity`/`gap`/`cols`…) con su etiqueta en 
 `layout: fullscreen` (son piezas de página completa) pero ganan el contenido en inglés + una vista que muestra
 sus variantes de un vistazo.
 
-### D — Solo presentación, aislado
-Es trabajo de **stories** (catálogo). No se tocan los componentes salvo que el cotejo destape un fix real y
-acotado; en ese caso se documenta. Cero cambios en `nexacore-api/` ni `nexacore-dashboard/`. El catálogo
-**lidera**; el dashboard no se muta aquí ([ADR-019](../adr/019-design-system-upstream-shadcn.md)).
+### D — Solo presentación, aislado del dashboard
+Es trabajo de **catálogo** (stories + un ajuste de primitives, ver abajo). No se tocan `nexacore-api/` ni
+`nexacore-dashboard/`. El catálogo **lidera**; el dashboard no se muta aquí ([ADR-019](../adr/019-design-system-upstream-shadcn.md)).
+
+### D — Primitives: convención de nombre de spinners + orden del catálogo
+Surgido al revisar el listado (la revisión 1:1 es global por ticket). Los 3 spinners tenían nombres dispares y
+caían dispersos en el sidebar. Se renombran a `Spinner<Tipo>` para agruparlos: **`SpinnerCircle`** (era
+`Spinner`, circular border, lo usa Input), **`SpinnerRing`** (era `RingSpinner`), **`SpinnerInfinity`** (era
+`InfinitySpinner`, el del Button). Y se fija **`storySort: { method: "alphabetical" }`** en `preview.tsx`
+(ordena el sidebar por componente preservando el orden de stories dentro de cada uno → Default primero). Toca
+los 3 componentes + importadores internos (`Button.tsx`/`Input.tsx`) + `registry.json` (regenerado) + el
+closure test. **Drift consciente con el dashboard** (conserva los nombres viejos), como los renames
+IconBadge/ButtonIcon de ECO-91 → repoint a su propio ticket.
 
 ## Scope
 - `design-system/stories/sections/*` (8) — inglés + organización + AllVariants.
@@ -37,6 +46,9 @@ acotado; en ese caso se documenta. Cero cambios en `nexacore-api/` ni `nexacore-
 - `design-system/stories/decoration/*` (4) — inglés + AllVariants (size/intensity), atmósferas tematizadas.
 - `design-system/stories/showcase/HeroShowcase.stories.tsx` — pasada de consistencia.
 - (consistencia) `design-system/stories/charts/*`, `design-system/stories/showcase/FullPageAlert.stories.tsx`.
+- **Primitives — spinners:** `design-system/components/{SpinnerCircle,SpinnerRing,SpinnerInfinity}.tsx`
+  (renombrados) + sus stories + `Button.tsx`/`Input.tsx` (importadores) + `registry.json` (regenerado) +
+  `registry/tests/registry-closure.test.mjs` + `.storybook/preview.tsx` (`storySort`).
 
 ## Acceptance Criteria
 1. **Inglés:** ninguna de las stories revisadas conserva copy en español; verificable en `npm run storybook`.
@@ -46,11 +58,18 @@ acotado; en ese caso se documenta. Cero cambios en `nexacore-api/` ni `nexacore-
    (`variant`/`align`/`size`/`intensity`/`gap`/`cols`).
 4. **Build + cobertura:** `build-storybook` verde; `coverage` (story 77/77 + variant) verde; closure 5/5.
 5. **Aislamiento:** el dashboard **no** se toca; suites `test:api`/`test:dashboard` + `dup:check` verdes;
-   Dashboard-VRT verde. Cambios = solo `design-system/stories/**` (+ ajuste de componente acotado si se justifica).
-6. **Gates** verdes (`Strategy: satellite-design`, ticket ECO-92), Security Pipeline (sin secretos).
+   Dashboard-VRT verde. Cambios contenidos en `design-system/` (stories + rename de spinners + preview).
+6. **Spinners (primitives):** los 3 quedan como `Spinner<Tipo>` (Circle/Ring/Infinity), agrupados y en su
+   posición alfabética en el catálogo; `registry.json` regenerado y el closure test (Button→SpinnerInfinity)
+   verdes.
+7. **Gates** verdes (`Strategy: satellite-design`, ticket ECO-92), Security Pipeline (sin secretos).
 
 ## Out of scope
 - Crecer el catálogo con piezas NUEVAS (más piezas-estrella/presets) → incrementos siguientes ("después seguimos").
+- **Refinar los COMPONENTES de `sections/`** (afinarlos a la calidad de `sat-cristian-garcia`, neutros por los
+  tokens del design-system = lienzo en blanco, tematizables por cliente) → **su propio ticket de refactor**.
+  ECO-92 revisó la PRESENTACIÓN (stories) de las sections, no rediseñó los componentes.
+- Repoint del dashboard a los nombres nuevos de spinner → ticket propio (drift consciente).
 - Baselines VRT del catálogo (snapshots).
 - El ADR / strategy-change de "design-system = librería de TODO el proyecto + recharts" → su propia lane.
 - Quitar `ErrorAlert` del dashboard → ticket propio.

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import InfinitySpinner from "./InfinitySpinner";
+import SpinnerInfinity from "./SpinnerInfinity";
 
 export type ButtonVariant =
   | "primary"
@@ -88,7 +88,7 @@ export default function Button({
         aria-label="Loading"
         className="absolute inset-0 flex items-center justify-center"
       >
-        <InfinitySpinner size={size === "sm" ? "sm" : "md"} />
+        <SpinnerInfinity size={size === "sm" ? "sm" : "md"} />
       </span>
     ),
   );

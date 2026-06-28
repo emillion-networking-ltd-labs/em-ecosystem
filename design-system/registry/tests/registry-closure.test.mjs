@@ -10,17 +10,17 @@ const DS = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const committed = JSON.parse(readFileSync(join(DS, "registry.json"), "utf8"));
 const itemOf = (reg, n) => reg.items.find((i) => i.name === n);
 
-// REGRESSION GUARD (ECO-26): el cierre de Button DEBE incluir InfinitySpinner.
+// REGRESSION GUARD (ECO-26): el cierre de Button DEBE incluir SpinnerInfinity.
 // Hoy (registry incompleto) falla; tras regenerar, pasa — y no puede volver a romperse.
-test("regresión: closure(Button) incluye InfinitySpinner", () => {
+test("regresión: closure(Button) incluye SpinnerInfinity", () => {
   const c = closure("Button", committed);
-  assert.ok(c.has("InfinitySpinner"), "Button debe arrastrar InfinitySpinner (import ./InfinitySpinner)");
+  assert.ok(c.has("SpinnerInfinity"), "Button debe arrastrar SpinnerInfinity (import ./SpinnerInfinity)");
 });
 
-test("regresión directa: registry de Button declara InfinitySpinner", () => {
+test("regresión directa: registry de Button declara SpinnerInfinity", () => {
   const it = itemOf(committed, "Button");
-  assert.ok(it && it.registryDependencies.includes("InfinitySpinner"),
-    `Button.registryDependencies = ${JSON.stringify(it?.registryDependencies)} — falta InfinitySpinner`);
+  assert.ok(it && it.registryDependencies.includes("SpinnerInfinity"),
+    `Button.registryDependencies = ${JSON.stringify(it?.registryDependencies)} — falta SpinnerInfinity`);
 });
 
 // ANTI-DRIFT (estilo KEEL-85): el registry COMMITEADO debe coincidir EXACTAMENTE con el grafo

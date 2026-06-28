@@ -1,5 +1,5 @@
 /**
- * RingSpinner — ripple/sonar ring loading indicator.
+ * SpinnerRing — ripple/sonar ring loading indicator.
  * Replicates DaisyUI `loading-ring` as inline SVG with SMIL animation.
  * No CSS @keyframes required — all animation is handled by SVG <animate> elements.
  *
@@ -16,12 +16,12 @@
  * Sizes match DaisyUI v5 loading size scale (square px values):
  *   xs=16  sm=20  md=24  lg=28  xl=32
  *
- * Usage: <RingSpinner /> or <RingSpinner size="sm" />
+ * Usage: <SpinnerRing /> or <SpinnerRing size="sm" />
  */
 
 type SpinnerSize = "sm" | "md" | "lg";
 
-export const ringSpinnerSpecs = {
+export const spinnerRingSpecs = {
   type: "Ripple/sonar rings — used for page loading",
   sizes: { sm: "16px", md: "24px", lg: "32px" },
   base: "SVG SMIL animate, stroke=currentColor, 1.8s staggered ripple",
@@ -33,7 +33,7 @@ const SIZES: Record<SpinnerSize, number> = {
   lg: 32,
 };
 
-export default function RingSpinner({ size = "md" }: { size?: SpinnerSize }) {
+export default function SpinnerRing({ size = "md" }: { size?: SpinnerSize }) {
   const px = SIZES[size];
   return (
     <svg

@@ -3,7 +3,7 @@ type SpinnerProps = {
   className?: string;
 };
 
-export const spinnerSpecs = {
+export const spinnerCircleSpecs = {
   type: "Circular border animation — data/section loading",
   sizes: {
     sm: "16px (h-4 w-4 border-[1.5px]) — inline (inputs)",
@@ -21,7 +21,7 @@ const sizeClasses = {
   lg: "h-8 w-8 border-[3px]",
 };
 
-export default function Spinner({ size = "md", className = "" }: SpinnerProps) {
+export default function SpinnerCircle({ size = "md", className = "" }: SpinnerProps) {
   return (
     <div
       className={`animate-spin rounded-full border-border-strong border-t-content-primary ${sizeClasses[size]} ${className}`}
