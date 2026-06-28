@@ -3,23 +3,18 @@ import { useState } from "react";
 import { Pencil, Copy, Archive, Trash2 } from "lucide-react";
 import Select from "@/components/ui/Select";
 
-const opciones = [
-  { label: "España", value: "es" },
-  { label: "México", value: "mx" },
+const options = [
+  { label: "Spain", value: "es" },
+  { label: "Mexico", value: "mx" },
   { label: "Argentina", value: "ar" },
   { label: "Colombia", value: "co" },
 ];
 
-const opcionesConIcono = [
-  { label: "Editar", value: "edit", icon: <Pencil size={16} /> },
-  { label: "Duplicar", value: "dup", icon: <Copy size={16} /> },
-  { label: "Archivar", value: "arch", icon: <Archive size={16} /> },
-  {
-    label: "Eliminar",
-    value: "del",
-    icon: <Trash2 size={16} />,
-    variant: "danger" as const,
-  },
+const optionsWithIcons = [
+  { label: "Edit", value: "edit", icon: <Pencil size={16} /> },
+  { label: "Duplicate", value: "dup", icon: <Copy size={16} /> },
+  { label: "Archive", value: "arch", icon: <Archive size={16} /> },
+  { label: "Delete", value: "del", icon: <Trash2 size={16} /> },
 ];
 
 const meta = {
@@ -27,8 +22,8 @@ const meta = {
   component: Select,
   tags: ["autodocs"],
   args: {
-    options: opciones,
-    placeholder: "Selecciona un país",
+    options,
+    placeholder: "Select a country",
     size: "sm",
     onChange: () => {},
   },
@@ -54,19 +49,11 @@ export const WithValue: Story = {
   },
 };
 
+// Options can carry an icon.
 export const WithIcons: Story = {
-  args: { options: opcionesConIcono, placeholder: "Elige una acción…" },
+  args: { options: optionsWithIcons, placeholder: "Choose an action…" },
   render: (args) => {
     const [value, setValue] = useState<string>();
-    return <Select {...args} value={value} onChange={setValue} />;
-  },
-};
-
-// Una opción puede declarar variant: "danger" (texto de error, hover bg-error-bg).
-export const DangerOption: Story = {
-  args: { options: opcionesConIcono, placeholder: "Elige una acción…" },
-  render: (args) => {
-    const [value, setValue] = useState<string>("del");
     return <Select {...args} value={value} onChange={setValue} />;
   },
 };
@@ -79,25 +66,28 @@ export const Disabled: Story = {
   },
 };
 
-const sizes = ["sm", "md"] as const;
+// Sizes (largest → smallest), with px. The trigger height: md = h-12 (48), sm = h-10 (40, default).
+const SIZES = [
+  { size: "md", px: "48" },
+  { size: "sm", px: "40" },
+] as const;
 
-// Select solo tiene sizes para el trigger (sm: h-10, md: h-12).
-export const AllSizes: Story = {
+export const Sizes: Story = {
   render: () => {
     const [value, setValue] = useState<string>("es");
     return (
       <div className="flex flex-col items-start gap-4">
-        {sizes.map((size) => (
+        {SIZES.map(({ size, px }) => (
           <div key={size} className="flex items-center gap-3">
             <Select
-              options={opciones}
+              options={options}
               size={size}
               value={value}
               onChange={setValue}
-              placeholder="Selecciona un país"
+              placeholder="Select a country"
             />
-            <span className="text-caption text-content-tertiary">
-              {size === "sm" ? "sm · 40px" : "md · 48px"}
+            <span className="text-caption text-content-tertiary font-mono">
+              {size} · {px}px{size === "sm" ? " (default)" : ""}
             </span>
           </div>
         ))}

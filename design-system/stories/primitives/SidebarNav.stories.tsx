@@ -9,143 +9,129 @@ import {
   ScrollText,
   Key,
   FileText,
+  PanelLeftClose,
+  PanelLeftOpen,
+  LogOut,
 } from "lucide-react";
 import SidebarNav, { type SidebarNavSection } from "@/components/ui/SidebarNav";
+import IconButton from "@/components/ui/IconButton";
+import Avatar from "@/components/ui/Avatar";
 
-const sections: SidebarNavSection[] = [
-  {
-    label: "Principal",
-    items: [
-      { href: "/dashboard", label: "Inicio", icon: LayoutDashboard, active: true },
-      { href: "/dashboard/proyectos", label: "Proyectos", icon: FolderKanban },
-      { href: "/dashboard/equipo", label: "Equipo", icon: Users },
-    ],
-  },
-  {
-    label: "Cuenta",
-    items: [{ href: "/dashboard/ajustes", label: "Ajustes", icon: Settings }],
-  },
-];
-
-const meta = {
-  title: "Primitives/SidebarNav",
-  component: SidebarNav,
-  tags: ["autodocs"],
-  args: {
-    sections,
-  },
-} satisfies Meta<typeof SidebarNav>;
-
-export default meta;
-type Story = StoryObj<typeof meta>;
-
-export const Default: Story = {
-  render: (args) => (
-    <div className="w-[300px] rounded-r-xl border border-border-strong bg-surface-primary shadow-card">
-      <SidebarNav {...args} />
-    </div>
-  ),
-};
-
-// Estado colapsado (68px): cada ítem es un IconButton boxed; el activo lleva
-// aria-pressed (ring). Las hojas muestran Tooltip a la derecha.
-export const Collapsed: Story = {
-  args: { collapsed: true },
-  render: (args) => (
-    <div className="w-[68px] rounded-r-xl border border-border-strong bg-surface-primary shadow-card">
-      <SidebarNav {...args} />
-    </div>
-  ),
-};
-
-// Secciones que incluyen un ítem padre con hijos: expandido → acordeón
-// (ChevronDown/Right + hijos anidados pl-4); colapsado → flyout al pasar el ratón.
-function withChildren(activeItem: string): SidebarNavSection[] {
+// Sections including a parent with children (Admin → Audit / Permissions) so the accordion
+// (expanded) and the flyout (collapsed) are both exercised.
+function buildSections(active: string): SidebarNavSection[] {
   return [
     {
-      label: "Paneles",
+      label: "Main",
       items: [
-        {
-          href: "#dashboard",
-          label: "Panel",
-          icon: LayoutDashboard,
-          active: activeItem === "#dashboard",
-        },
+        { href: "#dashboard", label: "Dashboard", icon: LayoutDashboard, active: active === "#dashboard" },
+        { href: "#projects", label: "Projects", icon: FolderKanban, active: active === "#projects" },
+        { href: "#team", label: "Team", icon: Users, active: active === "#team" },
         {
           href: "#admin",
-          label: "Administración",
+          label: "Admin",
           icon: Shield,
-          active: activeItem === "#admin",
+          active: active === "#admin",
           children: [
-            {
-              href: "#audit",
-              label: "Registros",
-              icon: ScrollText,
-              active: activeItem === "#audit",
-            },
-            {
-              href: "#permissions",
-              label: "Permisos",
-              icon: Key,
-              active: activeItem === "#permissions",
-            },
+            { href: "#audit", label: "Audit logs", icon: ScrollText, active: active === "#audit" },
+            { href: "#permissions", label: "Permissions", icon: Key, active: active === "#permissions" },
           ],
         },
       ],
     },
     {
-      label: "Cuenta",
+      label: "Account",
       items: [
-        {
-          href: "#settings",
-          label: "Ajustes",
-          icon: Settings,
-          active: activeItem === "#settings",
-        },
-        {
-          href: "#docs",
-          label: "Documentación",
-          icon: FileText,
-          active: activeItem === "#docs",
-        },
+        { href: "#settings", label: "Settings", icon: Settings, active: active === "#settings" },
+        { href: "#docs", label: "Documentation", icon: FileText, active: active === "#docs" },
       ],
     },
   ];
 }
 
-// Expandido con submenú (acordeón) — el padre alterna sus hijos al pulsar.
-export const Expanded: Story = {
-  render: () => {
-    const [active, setActive] = useState("#audit");
-    return (
-      <div className="w-[300px] rounded-r-xl border border-border-strong bg-surface-primary shadow-card">
+// Full sidebar, composed exactly like the dashboard (header with logo + collapse toggle, nav, footer)
+// and fully interactive: toggle collapses/expands; clicking an item updates the active state.
+function InteractiveSidebar({ initialCollapsed = false }: { initialCollapsed?: boolean }) {
+  const [collapsed, setCollapsed] = useState(initialCollapsed);
+  const [active, setActive] = useState("#audit");
+
+  const footer = (
+    <div
+      className={`flex items-center gap-2 border-t border-border-strong px-3 py-3 ${
+        collapsed ? "justify-center" : ""
+      }`}
+    >
+      <Avatar name="Ana Perez" size="sm" />
+      {!collapsed && (
+        <>
+          <div className="min-w-0 flex-1">
+            <p className="truncate text-body font-medium text-content-primary">Ana Perez</p>
+            <p className="truncate text-caption text-content-tertiary">ana@company.com</p>
+          </div>
+          <IconButton variant="default" size="sm" aria-label="Log out">
+            <LogOut size={16} />
+          </IconButton>
+        </>
+      )}
+    </div>
+  );
+
+  return (
+    <aside
+      className={`flex h-[560px] flex-col overflow-hidden rounded-r-xl border border-border-strong bg-surface-primary shadow-card transition-[width] duration-200 ${
+        collapsed ? "w-[68px]" : "w-[300px]"
+      }`}
+    >
+      <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-dashed border-border-strong px-4">
+        {!collapsed && (
+          <span className="text-h3 font-semibold text-content-primary">NexaCore</span>
+        )}
+        <IconButton
+          variant="boxed"
+          size="sm"
+          tooltip
+          tooltipPosition={collapsed ? "right" : "left"}
+          onClick={() => setCollapsed((c) => !c)}
+          className={collapsed ? "mx-auto" : ""}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+        </IconButton>
+      </div>
+      <div className="flex flex-1 flex-col overflow-y-auto">
         <SidebarNav
-          sections={withChildren(active)}
+          className="h-full"
+          sections={buildSections(active)}
+          collapsed={collapsed}
+          footer={footer}
           onNavigate={(href, e) => {
             e.preventDefault();
             setActive(href);
           }}
         />
       </div>
-    );
-  },
+    </aside>
+  );
+}
+
+const meta = {
+  title: "Primitives/SidebarNav",
+  component: SidebarNav,
+  tags: ["autodocs"],
+  args: { sections: buildSections("#audit") },
+} satisfies Meta<typeof SidebarNav>;
+
+export default meta;
+type Story = StoryObj<typeof meta>;
+
+// Interactive: collapse with the toggle, click items to navigate, hover the Admin item when
+// collapsed for the flyout, hover leaf items when collapsed for tooltips. Footer shows the user.
+export const Default: Story = {
+  render: () => <InteractiveSidebar />,
 };
 
-// Colapsado con hijos — el ítem padre abre un flyout al pasar el ratón.
-export const CollapsedWithChildren: Story = {
-  render: () => {
-    const [active, setActive] = useState("#audit");
-    return (
-      <div className="w-[68px] rounded-r-xl border border-border-strong bg-surface-primary shadow-card">
-        <SidebarNav
-          sections={withChildren(active)}
-          collapsed
-          onNavigate={(href, e) => {
-            e.preventDefault();
-            setActive(href);
-          }}
-        />
-      </div>
-    );
-  },
+// Starts collapsed (68px): each item is a boxed IconButton; active carries aria-pressed (ring),
+// leaf items show a tooltip on the right, the Admin parent opens a flyout on hover.
+export const Collapsed: Story = {
+  render: () => <InteractiveSidebar initialCollapsed />,
 };

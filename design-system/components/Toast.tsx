@@ -52,12 +52,12 @@ export default function Toast({
       transition={{ duration: 0.3 }}
       role="alert"
       aria-live="assertive"
-      className="pointer-events-auto group grid max-w-[550px] grid-cols-[14px_1fr_auto] items-start gap-x-2 rounded-3xl border border-border-components bg-surface-primary py-3 pl-5 pr-4"
+      className="pointer-events-auto group grid w-fit max-w-[550px] grid-cols-[14px_1fr_auto] items-start gap-x-2 rounded-3xl border border-border-components bg-surface-primary py-3 pl-5 pr-4"
     >
-      {/* Col 1: icon — centered vertically */}
+      {/* Col 1: icon — vertically centered with the title (row 1) */}
       <Icon
         size={14}
-        className={`row-span-2 self-start shrink-0 ${variantClass}`}
+        className={`self-center shrink-0 ${variantClass}`}
       />
       {/* Col 2: title */}
       <p className="min-w-0 text-caption font-semibold leading-4 text-content-primary">

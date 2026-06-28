@@ -4,6 +4,10 @@ import type { Preview, Decorator } from "@storybook/nextjs-vite";
 // dashboard/satélites consumen. Importarla aquí hace que las clases Tailwind v4 de
 // los componentes resuelvan contra los tokens reales (no un tema de Storybook aparte).
 import "../tokens/tokens.css";
+// Mismo ThemeContext mock que consume @/hooks/useTheme (alias @/context → este fichero). Proveerlo
+// con el tema del toolbar hace que useTheme() siga al toolbar → los componentes con tema en JS
+// (charts recharts, ThemeToggle, …) adaptan su color SIN stories "Dark" aparte.
+import { ThemeContext } from "./mocks/context/ThemeContext";
 
 // Dark mode REAL (ECO-90): el design-system conmuta por CLASE (`@custom-variant dark (&:is(.dark *))`
 // + bloque `.dark { --color-* }`). El fondo de Storybook solo pintaba el canvas; los componentes no
@@ -12,17 +16,29 @@ import "../tokens/tokens.css";
 // El fondo/color del lienzo siguen al TOKEN (no hex) para reflejar el tema fielmente.
 const withTheme: Decorator = (Story, context) => {
   const theme = context.globals.theme === "dark" ? "dark" : "light";
+  // Replica el BASELINE del `body` de producción (dashboard/satélite): el fondo de PÁGINA es
+  // `surface-secondary` (un tono DISTINTO al `surface-primary` de los componentes → contraste, se
+  // separan en dark), y la base tipográfica es `--text-body` (14px) + `--font-sans` + letter-spacing.
+  // Sin esto, el texto que HEREDA (p.ej. el contenido del Accordion) caía al 16px del navegador y se
+  // veía más grande que en el dashboard. A pantalla completa (100vh) para que el tema cubra el canvas.
   return (
-    <div
-      className={theme}
-      style={{
-        minHeight: "100%",
-        background: "var(--color-surface-primary)",
-        color: "var(--color-content-primary)",
-      }}
-    >
-      <Story />
-    </div>
+    <ThemeContext.Provider value={{ theme, toggleTheme: () => {} }}>
+      <div
+        className={theme}
+        style={{
+          minHeight: "100vh",
+          boxSizing: "border-box",
+          padding: "2rem",
+          background: "var(--color-surface-secondary)",
+          color: "var(--color-content-primary)",
+          fontFamily: "var(--font-sans)",
+          fontSize: "var(--text-body)",
+          letterSpacing: "0.01em",
+        }}
+      >
+        <Story />
+      </div>
+    </ThemeContext.Provider>
   );
 };
 
@@ -44,7 +60,9 @@ const preview: Preview = {
     },
   },
   parameters: {
-    layout: "centered",
+    // El decorator de tema pinta la página completa (100vh); fullscreen evita el centrado/padding
+    // del canvas para que el fondo del tema cubra todo. Las stories controlan su propio layout interno.
+    layout: "fullscreen",
     controls: {
       matchers: { color: /(background|color)$/i, date: /Date$/i },
     },

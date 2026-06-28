@@ -112,7 +112,9 @@ export default function DateInput({
       ref={containerRef}
     >
       {label && (
-        <label className="text-body font-semibold leading-[22px] text-content-primary">
+        <label
+          className={`text-body font-semibold leading-[22px] ${hasError ? "text-error" : "text-content-primary"}`}
+        >
           {label}
         </label>
       )}

@@ -17,6 +17,14 @@ const meta = {
       "C9D0-E1F2",
     ],
   },
+  // 2-column grid of short codes; constrain so it doesn't stretch full-bleed.
+  decorators: [
+    (Story) => (
+      <div className="max-w-xs">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof RecoveryCodesGrid>;
 
 export default meta;

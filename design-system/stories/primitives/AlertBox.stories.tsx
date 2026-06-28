@@ -5,7 +5,7 @@ const meta = {
   title: "Primitives/AlertBox",
   component: AlertBox,
   tags: ["autodocs"],
-  args: { variant: "info", children: "Tu sesión expira en 5 minutos." },
+  args: { variant: "info", children: "Your session expires in 5 minutes." },
   argTypes: {
     variant: { control: "select", options: ["warning", "error", "info", "success"] },
   },
@@ -15,20 +15,21 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Info: Story = {};
-export const Warning: Story = { args: { variant: "warning", children: "Revisa los datos." } };
-export const Error: Story = { args: { variant: "error", children: "No se pudo guardar." } };
-export const Success: Story = { args: { variant: "success", children: "Cambios guardados." } };
+export const Warning: Story = { args: { variant: "warning", children: "Double-check the details." } };
+export const Error: Story = { args: { variant: "error", children: "Couldn't save." } };
+export const Success: Story = { args: { variant: "success", children: "Changes saved." } };
 
 const variantCopy: Record<"warning" | "error" | "info" | "success", string> = {
-  warning: "Esta acción hará tu cuenta menos segura.",
-  error: "Código de verificación inválido. Inténtalo de nuevo.",
-  info: "Tu correo lo gestiona un proveedor externo.",
-  success: "Tus cambios se guardaron correctamente.",
+  warning: "This action will make your account less secure.",
+  error: "Invalid verification code. Please try again.",
+  info: "Your email is managed by an external provider.",
+  success: "Your changes were saved successfully.",
 };
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-2">
+    // items-start → cada alerta ajusta a su contenido (AlertBox es inline-flex), sin estirarse.
+    <div className="flex flex-col items-start gap-2">
       {(["warning", "error", "info", "success"] as const).map((v) => (
         <AlertBox key={v} variant={v}>
           {variantCopy[v]}

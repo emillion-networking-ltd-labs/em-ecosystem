@@ -1,21 +1,32 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Accordion, { SingleAccordion } from "@/components/ui/Accordion";
 
+// Content is wrapped in `text-body text-content-tertiary` — how the component is used in production
+// (same as the dashboard's ComponentShowcase); a bare string would inherit the size.
 const faqItems = [
   {
-    title: "¿Cómo creo un nuevo proyecto?",
-    children:
-      "Ve al panel de Proyectos y pulsa el botón «Nuevo proyecto». Rellena el nombre y asigna un responsable.",
+    title: "How do I create a new project?",
+    children: (
+      <p className="text-body text-content-tertiary">
+        Go to the Projects panel and click “New project”. Fill in the name and assign an owner.
+      </p>
+    ),
   },
   {
-    title: "¿Puedo invitar a mi equipo?",
-    children:
-      "Sí. Desde la sección Equipo puedes enviar invitaciones por correo y asignar roles a cada miembro.",
+    title: "Can I invite my team?",
+    children: (
+      <p className="text-body text-content-tertiary">
+        Yes. From the Team section you can send email invitations and assign roles to each member.
+      </p>
+    ),
   },
   {
-    title: "¿Cómo gestiono la facturación?",
-    children:
-      "La facturación se administra en Ajustes → Facturación, donde puedes ver tus planes y métodos de pago.",
+    title: "How do I manage billing?",
+    children: (
+      <p className="text-body text-content-tertiary">
+        Billing is managed in Settings → Billing, where you can see your plans and payment methods.
+      </p>
+    ),
   },
 ];
 
@@ -24,7 +35,7 @@ const meta = {
   component: Accordion,
   tags: ["autodocs"],
   argTypes: {
-    variant: { control: "inline-radio", options: ["default", "section"] },
+    variant: { control: "inline-radio", options: ["default", "uppercase"] },
     borderless: { control: "boolean" },
     defaultOpen: { control: "number" },
   },
@@ -39,27 +50,33 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// variant=default — trigger text-body, comportamiento exclusivo (un panel abierto).
-export const VariantDefault: Story = {
-  args: { variant: "default", defaultOpen: undefined },
+// SingleAccordion — standalone single-panel variant (boolean defaultOpen).
+export const Single: Story = {
+  render: () => (
+    <SingleAccordion title="Click to expand">
+      <p className="text-body text-content-tertiary">
+        Expandable panel. Used for specs, FAQs and collapsible sections.
+      </p>
+    </SingleAccordion>
+  ),
 };
 
-// variant=section — trigger text-h3 semibold uppercase tracking-wider.
-export const VariantSection: Story = {
-  args: { variant: "section", defaultOpen: undefined },
+// variant=uppercase — identical to default (same type/weight/size); the only difference is UPPERCASE.
+export const Uppercase: Story = {
+  args: { variant: "uppercase", defaultOpen: undefined },
 };
 
-// borderless — sin borde ni rounded en el contenedor (solo los divisores internos).
+// borderless — no border but KEEPS the rounded-md (same radius as the others).
 export const Borderless: Story = {
   args: { borderless: true, defaultOpen: undefined },
 };
 
-// defaultOpen — abre un panel concreto al montar (índice 1).
+// defaultOpen — opens a specific panel on mount (index 1).
 export const DefaultOpen: Story = {
   args: { defaultOpen: 1 },
 };
 
-// Las dos variantes lado a lado.
+// AllVariants — ALWAYS last: the two variants side by side.
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-6">
@@ -68,20 +85,9 @@ export const AllVariants: Story = {
         <Accordion items={faqItems} variant="default" />
       </div>
       <div>
-        <p className="mb-2 text-caption text-content-tertiary">section</p>
-        <Accordion items={faqItems} variant="section" />
+        <p className="mb-2 text-caption text-content-tertiary">uppercase</p>
+        <Accordion items={faqItems} variant="uppercase" />
       </div>
     </div>
-  ),
-};
-
-// SingleAccordion — variante de un solo panel (autónomo, defaultOpen booleano).
-export const Single: Story = {
-  render: () => (
-    <SingleAccordion title="Pulsa para expandir">
-      <p className="text-body text-content-tertiary">
-        Panel expandible. Se usa para specs, FAQs y secciones colapsables.
-      </p>
-    </SingleAccordion>
   ),
 };

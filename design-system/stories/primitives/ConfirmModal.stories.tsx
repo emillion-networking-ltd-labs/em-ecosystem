@@ -6,15 +6,16 @@ const meta = {
   title: "Primitives/ConfirmModal",
   component: ConfirmModal,
   tags: ["autodocs"],
+  // Default = primary (the component's default variant) — a standard confirmation.
   args: {
     open: true,
     onClose: () => {},
     onConfirm: () => {},
-    title: "Eliminar proyecto",
-    description: "Esta acción no se puede deshacer. ¿Quieres continuar?",
-    confirmLabel: "Eliminar",
-    cancelLabel: "Cancelar",
-    variant: "danger",
+    title: "Confirm action",
+    description: "Are you sure you want to continue? This action can be undone.",
+    confirmLabel: "Confirm",
+    cancelLabel: "Cancel",
+    variant: "primary",
   },
   argTypes: {
     variant: { control: "inline-radio", options: ["primary", "danger"] },
@@ -27,60 +28,46 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// variant real "primary" — confirmación estándar (botón primario). Tamaño sm,
-// el default de las confirmaciones simples (como en ComponentShowcase).
-export const Primary: Story = {
-  args: {
-    variant: "primary",
-    size: "sm",
-    title: "Confirmar acción",
-    description: "¿Seguro que quieres continuar? Esta acción se puede deshacer.",
-    confirmLabel: "Confirmar",
-  },
-};
-
-// variant real "danger" — acción destructiva (botón rojo, autofocus en Cancelar).
+// variant "danger" — destructive action (red button, autofocus on Cancel).
 export const Danger: Story = {
   args: {
     variant: "danger",
     size: "sm",
-    title: "Eliminar elemento",
-    description:
-      "Esta acción no se puede deshacer. Se borrarán todos los datos asociados.",
-    confirmLabel: "Eliminar",
+    title: "Delete item",
+    description: "This action can't be undone. All associated data will be removed.",
+    confirmLabel: "Delete",
   },
 };
 
-// Con children (campos de formulario) → size=md, como el diálogo "Edit Profile"
-// del ComponentShowcase. El primer input recibe el autofocus.
+// With children (form fields) → size=md, like the "Edit Profile" dialog in ComponentShowcase.
+// The first input gets autofocus.
 export const Form: Story = {
   args: {
     variant: "primary",
     size: "md",
-    title: "Editar perfil",
-    description: "Actualiza tu información.",
-    confirmLabel: "Guardar",
+    title: "Edit profile",
+    description: "Update your information.",
+    confirmLabel: "Save",
   },
   render: (args) => (
     <ConfirmModal {...args}>
       <div className="mt-4 space-y-4">
-        <Input label="Nombre" name="demo-first" placeholder="Juan" />
-        <Input label="Apellido" name="demo-last" placeholder="Pérez" />
+        <Input label="First name" name="demo-first" placeholder="John" />
+        <Input label="Last name" name="demo-last" placeholder="Doe" />
       </div>
     </ConfirmModal>
   ),
 };
 
-// sizes reales del componente: sm/md/lg/xl (max-w 390/480/600/720px). Solo se
-// puede mostrar uno a la vez (el modal es a pantalla completa); cambia el
-// control `size` para comparar. lg es el que usa ImageCropper.
+// Component sizes: sm/md/lg/xl (max-w 390/480/600/720px). Only one shows at a time (the modal is
+// full-screen); change the `size` control to compare. lg is the one ImageCropper uses.
 export const Large: Story = {
   args: {
     size: "lg",
     variant: "primary",
-    title: "Diálogo grande (lg)",
-    description: "max-w-[600px] — formularios complejos y diálogos multipaso.",
-    confirmLabel: "Aceptar",
+    title: "Large dialog (lg)",
+    description: "max-w-[600px] — complex forms and multi-step dialogs.",
+    confirmLabel: "OK",
   },
 };
 
@@ -88,8 +75,8 @@ export const ExtraLarge: Story = {
   args: {
     size: "xl",
     variant: "primary",
-    title: "Diálogo extra grande (xl)",
-    description: "max-w-[720px] — el contenedor más ancho disponible.",
-    confirmLabel: "Aceptar",
+    title: "Extra large dialog (xl)",
+    description: "max-w-[720px] — the widest container available.",
+    confirmLabel: "OK",
   },
 };

@@ -40,7 +40,9 @@ export default function Slider({
   className = "",
 }: SliderProps) {
   const id = useId();
-  const percentage = ((value - min) / (max - min)) * 100;
+  // Fill fraction 0..1 (thumb and fill reach the ends; the thumb is made visible via border + shadow
+  // so it reads clearly against the light track at the extremes).
+  const frac = (value - min) / (max - min);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,7 +79,7 @@ export default function Slider({
         {/* Progress fill */}
         <div
           className="absolute h-2 rounded-full bg-surface-inverse border-2 border-border-components"
-          style={{ width: `${percentage}%` }}
+          style={{ width: `${frac * 100}%` }}
         />
 
         {/* Handle (rendered via native range input styling) */}
@@ -95,22 +97,27 @@ export default function Slider({
           aria-valuemax={max}
           aria-valuenow={value}
           aria-label={label}
-          className={`absolute w-full h-4 appearance-none bg-transparent cursor-pointer
+          className={`absolute -ml-2 h-4 w-[calc(100%+1rem)] appearance-none bg-transparent cursor-pointer caret-transparent
+            focus:outline-none
             [&::-webkit-slider-thumb]:appearance-none
             [&::-webkit-slider-thumb]:w-4
             [&::-webkit-slider-thumb]:h-4
             [&::-webkit-slider-thumb]:rounded-full
             [&::-webkit-slider-thumb]:bg-white
-            [&::-webkit-slider-thumb]:border-2
+            [&::-webkit-slider-thumb]:border
             [&::-webkit-slider-thumb]:border-solid
-            [&::-webkit-slider-thumb]:border-[rgba(0,0,0,0.08)]
+            [&::-webkit-slider-thumb]:border-border-strong
+            [&::-webkit-slider-thumb]:shadow-[0_1px_3px_rgba(0,0,0,0.25)]
+            focus-visible:[&::-webkit-slider-thumb]:shadow-[0_0_0_2px_var(--border-components),0_1px_3px_rgba(0,0,0,0.25)]
             [&::-moz-range-thumb]:w-4
             [&::-moz-range-thumb]:h-4
             [&::-moz-range-thumb]:rounded-full
             [&::-moz-range-thumb]:bg-white
-            [&::-moz-range-thumb]:border-2
+            [&::-moz-range-thumb]:border
             [&::-moz-range-thumb]:border-solid
-            [&::-moz-range-thumb]:border-[rgba(0,0,0,0.08)]
+            [&::-moz-range-thumb]:border-border-strong
+            [&::-moz-range-thumb]:shadow-[0_1px_3px_rgba(0,0,0,0.25)]
+            focus-visible:[&::-moz-range-thumb]:shadow-[0_0_0_2px_var(--border-components),0_1px_3px_rgba(0,0,0,0.25)]
             ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         />
       </div>

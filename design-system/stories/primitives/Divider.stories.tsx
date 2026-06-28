@@ -22,8 +22,9 @@ export const Default: Story = {
   ),
 };
 
+// Label dividers render the label UPPERCASE (eyebrow style).
 export const WithLabel: Story = {
-  args: { label: "o" },
+  args: { label: "or" },
   render: (args) => (
     <div className="w-64">
       <Divider {...args} />
@@ -35,20 +36,20 @@ export const Vertical: Story = {
   args: { orientation: "vertical" },
   render: (args) => (
     <div className="flex h-16 items-center gap-3">
-      <p className="text-body text-content-tertiary">Izquierda</p>
+      <p className="text-body text-content-tertiary">Left</p>
       <Divider {...args} />
-      <p className="text-body text-content-tertiary">Derecha</p>
+      <p className="text-body text-content-tertiary">Right</p>
     </div>
   ),
 };
 
 export const VerticalWithLabel: Story = {
-  args: { orientation: "vertical", label: "o" },
+  args: { orientation: "vertical", label: "or" },
   render: (args) => (
     <div className="flex h-16 items-center gap-3">
-      <p className="text-body text-content-tertiary">Izquierda</p>
+      <p className="text-body text-content-tertiary">Left</p>
       <Divider {...args} />
-      <p className="text-body text-content-tertiary">Derecha</p>
+      <p className="text-body text-content-tertiary">Right</p>
     </div>
   ),
 };
@@ -57,25 +58,25 @@ export const AllVariants: Story = {
   render: () => (
     <div className="w-64 space-y-6">
       <div className="space-y-4">
-        <p className="text-body text-content-tertiary">Contenido arriba</p>
+        <p className="text-body text-content-tertiary">Content above</p>
         <Divider />
-        <p className="text-body text-content-tertiary">Contenido abajo</p>
+        <p className="text-body text-content-tertiary">Content below</p>
       </div>
       <div className="space-y-4">
-        <p className="text-body text-content-tertiary">Contenido arriba</p>
-        <Divider label="o" />
-        <p className="text-body text-content-tertiary">Contenido abajo</p>
+        <p className="text-body text-content-tertiary">Content above</p>
+        <Divider label="or" />
+        <p className="text-body text-content-tertiary">Content below</p>
       </div>
       <div className="flex items-center gap-6 h-16">
         <div className="flex items-center gap-3 h-full">
-          <p className="text-body text-content-tertiary">Izquierda</p>
+          <p className="text-body text-content-tertiary">Left</p>
           <Divider orientation="vertical" />
-          <p className="text-body text-content-tertiary">Derecha</p>
+          <p className="text-body text-content-tertiary">Right</p>
         </div>
         <div className="flex items-center gap-3 h-full">
-          <p className="text-body text-content-tertiary">Izquierda</p>
-          <Divider orientation="vertical" label="o" />
-          <p className="text-body text-content-tertiary">Derecha</p>
+          <p className="text-body text-content-tertiary">Left</p>
+          <Divider orientation="vertical" label="or" />
+          <p className="text-body text-content-tertiary">Right</p>
         </div>
       </div>
     </div>

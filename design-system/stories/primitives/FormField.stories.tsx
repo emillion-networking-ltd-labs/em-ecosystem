@@ -1,16 +1,26 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import FormField from "@/components/ui/FormField";
 import Input from "@/components/ui/Input";
+import EmailSelector from "@/components/ui/EmailSelector";
+import Card from "@/components/ui/Card";
 
 const meta = {
   title: "Primitives/FormField",
   component: FormField,
   tags: ["autodocs"],
   args: {
-    label: "Nombre completo",
-    htmlFor: "nombre",
-    children: <Input id="nombre" placeholder="Escribe tu nombre" />,
+    label: "Full name",
+    htmlFor: "name",
+    children: <Input id="name" placeholder="Type your name" />,
   },
+  // Constrain in the catalog so fields don't stretch across the full-bleed canvas.
+  decorators: [
+    (Story) => (
+      <div className="max-w-md">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof FormField>;
 
 export default meta;
@@ -20,40 +30,40 @@ export const Default: Story = {};
 
 export const Required: Story = {
   args: {
-    label: "Correo electrónico",
+    label: "Email",
     required: true,
-    htmlFor: "correo",
-    children: <Input id="correo" placeholder="nombre@empresa.com" />,
+    htmlFor: "email",
+    children: <Input id="email" placeholder="name@company.com" />,
   },
 };
 
+// On error the label turns red (general rule across inputs) + the InlineError shows below.
 export const WithError: Story = {
   args: {
-    label: "Correo electrónico",
-    error: "Este campo es obligatorio",
-    htmlFor: "correo-error",
-    children: <Input id="correo-error" placeholder="nombre@empresa.com" hasError />,
+    label: "Email",
+    error: "This field is required",
+    htmlFor: "email-error",
+    children: <Input id="email-error" placeholder="name@company.com" hasError />,
   },
 };
 
-// FormField no tiene sizes ni variants: sus estados son required y error,
-// y envuelve cualquier control de formulario (aquí Input).
-export const AllStates: Story = {
+// FormField wraps ANY control (Input, EmailSelector, …). A realistic form: several fields stacked
+// in a Card, including required and error states.
+export const Form: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
-      <FormField label="Por defecto" htmlFor="ff-default">
-        <Input id="ff-default" placeholder="Escribe aquí…" />
+    <Card className="flex flex-col gap-4">
+      <FormField label="Full name" htmlFor="f-name">
+        <Input id="f-name" placeholder="Type your name" />
       </FormField>
-      <FormField label="Campo obligatorio" htmlFor="ff-required" required>
-        <Input id="ff-required" placeholder="Obligatorio…" />
+      <FormField label="Email">
+        <EmailSelector email="user@example.com" onChangeEmail={() => {}} />
       </FormField>
-      <FormField
-        label="Con error"
-        htmlFor="ff-error"
-        error="Este campo es obligatorio"
-      >
-        <Input id="ff-error" placeholder="…" hasError />
+      <FormField label="Password" htmlFor="f-pass" required>
+        <Input id="f-pass" type="password" placeholder="At least 8 characters" />
       </FormField>
-    </div>
+      <FormField label="Confirm password" htmlFor="f-confirm" error="Passwords don't match">
+        <Input id="f-confirm" type="password" hasError />
+      </FormField>
+    </Card>
   ),
 };

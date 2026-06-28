@@ -17,6 +17,7 @@ const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 // claves de matriz que NO se exigen en stories (no son variantes de uso público).
 const IGNORE = {
   IconButton: ["inside input"], // está en variantClasses pero no en el union type público
+  Tabs: ["subtle"], // variante en desuso (no aparece en el dashboard); ese patrón lo cubre SegmentedControl
 };
 
 function fail(msg) {
@@ -51,16 +52,31 @@ function objectKeys(src, name) {
   return keys;
 }
 
-// Mapea nombre de componente → su story file (primitives/ o sections/).
+import { readdirSync } from "node:fs";
+
+// Mapea nombre de componente → su story file. 1º por NOMBRE de fichero canónico (<name>.stories.tsx);
+// 2º por CONTENIDO (qué story importa @/components/{ui,sections}/<name>) como fallback robusto a renames
+// (p.ej. IconButton vive en ButtonIcon.stories.tsx). El nombre canónico tiene prioridad para no
+// confundir una COMPOSICIÓN que importa el componente (p.ej. FullPageAlert importa Button) con su
+// story canónica (Button.stories.tsx) — que es la que lleva la matriz de variantes/sizes.
 function storyFor(name) {
-  for (const sub of ["primitives", "sections", "marketing", "layout", "decoration", "showcase"]) {
+  for (const sub of ["primitives", "sections", "marketing", "layout", "decoration", "showcase", "charts"]) {
     const p = join(ds, "stories", sub, `${name}.stories.tsx`);
     if (existsSync(p)) return p;
   }
+  const re = new RegExp(`@/components/(?:ui|sections)/${name}["']`);
+  const stack = [join(ds, "stories")];
+  while (stack.length) {
+    const dir = stack.pop();
+    if (!existsSync(dir)) continue;
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const p = join(dir, entry.name);
+      if (entry.isDirectory()) stack.push(p);
+      else if (entry.name.endsWith(".stories.tsx") && re.test(readFileSync(p, "utf8"))) return p;
+    }
+  }
   return null;
 }
-
-import { readdirSync } from "node:fs";
 const COMP = join(ds, "components");
 const components = readdirSync(COMP).filter((f) => f.endsWith(".tsx")).map((f) => f.slice(0, -4));
 

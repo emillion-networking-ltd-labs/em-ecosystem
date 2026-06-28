@@ -30,7 +30,9 @@ export default function Divider({
           className={`flex flex-col items-center gap-2 self-stretch ${className}`}
         >
           <div className="w-px flex-1 bg-border-strong" />
-          <span className="text-caption text-content-secondary">{label}</span>
+          <span className="text-caption uppercase tracking-wide text-content-secondary">
+            {label}
+          </span>
           <div className="w-px flex-1 bg-border-strong" />
         </div>
       );
@@ -44,7 +46,9 @@ export default function Divider({
     return (
       <div className={`flex items-center gap-4 ${className}`}>
         <div className="h-px flex-1 bg-border-strong" />
-        <span className="text-caption text-content-secondary">{label}</span>
+        <span className="text-caption uppercase tracking-wide text-content-secondary">
+          {label}
+        </span>
         <div className="h-px flex-1 bg-border-strong" />
       </div>
     );
