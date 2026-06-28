@@ -103,7 +103,7 @@ export default function Checkbox({
       {label && (
         <label
           htmlFor={id}
-          className={`text-body font-normal text-content-primary select-none ${
+          className={`text-body font-normal text-content-primary ${
             disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           }`}
         >
