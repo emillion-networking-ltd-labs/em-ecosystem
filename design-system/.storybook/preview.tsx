@@ -8,6 +8,10 @@ import "../tokens/tokens.css";
 // con el tema del toolbar hace que useTheme() siga al toolbar → los componentes con tema en JS
 // (charts recharts, ThemeToggle, …) adaptan su color SIN stories "Dark" aparte.
 import { ThemeContext } from "./mocks/context/ThemeContext";
+// Conmutador de PRESET de marca (ECO-95): un preset reescribe SOLO los tokens de marca (accent/-2 +
+// familia tipográfica) sobre el ancestro de la story — igual que `.dark` reescribe los de tema — sin
+// tocar los semánticos. Demuestra el lienzo neutro tematizable (satellite-design, pilar B).
+import { PRESETS, DEFAULT_PRESET } from "./presets";
 
 // Dark mode REAL (ECO-90): el design-system conmuta por CLASE (`@custom-variant dark (&:is(.dark *))`
 // + bloque `.dark { --color-* }`). El fondo de Storybook solo pintaba el canvas; los componentes no
@@ -16,6 +20,10 @@ import { ThemeContext } from "./mocks/context/ThemeContext";
 // El fondo/color del lienzo siguen al TOKEN (no hex) para reflejar el tema fielmente.
 const withTheme: Decorator = (Story, context) => {
   const theme = context.globals.theme === "dark" ? "dark" : "light";
+  // Preset de marca activo (default = NexaCore). Sus `vars` (accent/-2 + familia tipográfica) se
+  // inyectan en el MISMO wrapper; los componentes y las Foundations re-resuelven `--color-accent`,
+  // `--gradient-brand`, `--font-display` etc. desde aquí. Los tokens semánticos NO se tocan.
+  const preset = PRESETS.find((p) => p.id === context.globals.preset) ?? PRESETS[0];
   // Replica el BASELINE del `body` de producción (dashboard/satélite): el fondo de PÁGINA es
   // `surface-secondary` (un tono DISTINTO al `surface-primary` de los componentes → contraste, se
   // separan en dark), y la base tipográfica es `--text-body` (14px) + `--font-sans` + letter-spacing.
@@ -34,6 +42,7 @@ const withTheme: Decorator = (Story, context) => {
           fontFamily: "var(--font-sans)",
           fontSize: "var(--text-body)",
           letterSpacing: "0.01em",
+          ...preset.vars,
         }}
       >
         <Story />
@@ -55,6 +64,18 @@ const preview: Preview = {
           { value: "light", title: "Light", icon: "sun" },
           { value: "dark", title: "Dark", icon: "moon" },
         ],
+        dynamicTitle: true,
+      },
+    },
+    // Conmutador de PRESET de marca (ECO-95): cambia accent/-2 + familia tipográfica en TODO el
+    // catálogo; los tokens semánticos (texto/fondos/bordes/escala) no cambian → lienzo neutro.
+    preset: {
+      description: "Preset de marca — tematización por familia/sector (solo accent + tipografía)",
+      defaultValue: DEFAULT_PRESET,
+      toolbar: {
+        title: "Preset",
+        icon: "paintbrush",
+        items: PRESETS.map((p) => ({ value: p.id, title: p.name })),
         dynamicTitle: true,
       },
     },
