@@ -8,6 +8,7 @@ const meta = {
   args: { ratio: "1-1", gap: "lg", align: "center", reverse: false },
   argTypes: {
     ratio: { control: "inline-radio", options: ["1-1", "5-7", "7-5"] },
+    gap: { control: "inline-radio", options: ["md", "lg", "xl"] },
     align: { control: "inline-radio", options: ["start", "center", "stretch"] },
   },
 } satisfies Meta<typeof Split>;
@@ -15,23 +16,105 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Ratios — content-to-media split on desktop.
+const RATIOS = [
+  { ratio: "7-5", label: "content 7 / media 5" },
+  { ratio: "1-1", label: "content 1 / media 1" },
+  { ratio: "5-7", label: "content 5 / media 7" },
+] as const;
+// Gaps (largest → smallest), with the spacing value. lg is the default.
+const GAPS = [
+  { gap: "xl", px: "64" },
+  { gap: "lg", px: "48" },
+  { gap: "md", px: "32" },
+] as const;
+
 const Media = () => (
   <div className="aspect-video w-full rounded-xl border border-border-default [background-image:var(--gradient-brand)] opacity-80" />
 );
 
+const Content = () => (
+  <>
+    <h2 className="text-display-3 font-display">Text and media, split</h2>
+    <p className="mt-3 text-content-secondary">
+      Stacks on mobile; on desktop it splits by the ratio. <code>reverse</code> flips the visual
+      order without changing the DOM (content stays first for SEO/a11y).
+    </p>
+  </>
+);
+
+// Playground — two panels that stack on mobile and split on desktop.
 export const Default: Story = {
   render: (args) => (
     <Split {...args} media={<Media />}>
-      <h2 className="text-display-3 font-display">Texto y media, repartidos</h2>
-      <p className="mt-3 text-content-secondary">
-        Apila en móvil; en escritorio reparte según el ratio. `reverse` alterna el orden visual
-        sin cambiar el DOM (el contenido va primero para SEO/a11y).
-      </p>
+      <Content />
     </Split>
   ),
 };
 
+// Reverse — media on the left visually; the DOM keeps content → media.
 export const Reverse: Story = {
   args: { reverse: true, ratio: "5-7" },
   render: Default.render,
+};
+
+// Ratios — the three content/media proportions.
+export const Ratios: Story = {
+  render: () => (
+    <div className="space-y-8">
+      {RATIOS.map(({ ratio, label }) => (
+        <div key={ratio} className="space-y-1.5">
+          <span className="text-caption text-content-tertiary font-mono">
+            ratio=&quot;{ratio}&quot; · {label}
+            {ratio === "1-1" ? " (default)" : ""}
+          </span>
+          <Split ratio={ratio} media={<Media />}>
+            <Content />
+          </Split>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+// Gaps — largest → smallest, on the 1-1 ratio.
+export const Gaps: Story = {
+  render: () => (
+    <div className="space-y-8">
+      {GAPS.map(({ gap, px }) => (
+        <div key={gap} className="space-y-1.5">
+          <span className="text-caption text-content-tertiary font-mono">
+            {gap} · {px}px{gap === "lg" ? " (default)" : ""}
+          </span>
+          <Split gap={gap} media={<Media />}>
+            <Content />
+          </Split>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+// AllVariants — ALWAYS last: every ratio, plus the reverse order.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="space-y-8">
+      {RATIOS.map(({ ratio, label }) => (
+        <div key={ratio} className="space-y-1.5">
+          <span className="text-caption text-content-tertiary font-mono">
+            ratio=&quot;{ratio}&quot; · {label}
+          </span>
+          <Split ratio={ratio} media={<Media />}>
+            <Content />
+          </Split>
+        </div>
+      ))}
+      <div className="space-y-1.5">
+        <span className="text-caption text-content-tertiary font-mono">reverse · media first</span>
+        <Split ratio="5-7" reverse media={<Media />}>
+          <Content />
+        </Split>
+      </div>
+    </div>
+  ),
 };
