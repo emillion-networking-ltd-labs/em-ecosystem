@@ -21,18 +21,18 @@ export type Preset = {
 
 export const PRESETS: Preset[] = [
   {
-    // Marca EMILLION (real). Colores extraídos del logotipo (verde oscuro → teal del wordmark + negro).
-    // Hex ESTIMADOS de la imagen — pendiente de confirmar con el brand kit/SVG. El gradiente de marca
-    // (--gradient-brand) lo deriva el core de accent→accent-2 = verde→teal, igual que el logo.
+    // Marca EMILLION (real). Colores REALES del brand kit (ECO-96): verde oscuro + teal del wordmark.
+    // El gradiente de marca (--gradient-brand) lo deriva el core de accent→accent-2 = verde→teal,
+    // igual que el logo. El negro de marca se cubre con los neutros del core (content/surface-inverse).
     id: "emillion",
     name: "EMILLION (marca)",
     vars: {
-      "--color-accent": "#0b4233", // verde oscuro EMILLION (principal)
-      "--color-accent-2": "#1a9e8c", // teal (2º acento → gradiente)
-      "--color-accent-light": "#1a9e8c",
-      "--color-accent-dark": "#08382a",
-      "--accent": "#0b4233",
-      "--accent-light": "#1a9e8c",
+      "--color-accent": "#04433e", // verde oscuro EMILLION (principal)
+      "--color-accent-2": "#1d9284", // teal (2º acento → gradiente)
+      "--color-accent-light": "#1d9284",
+      "--color-accent-dark": "#04433e",
+      "--accent": "#04433e",
+      "--accent-light": "#1d9284",
     },
   },
   {
