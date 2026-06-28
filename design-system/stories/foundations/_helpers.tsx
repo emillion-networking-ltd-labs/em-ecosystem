@@ -1,9 +1,9 @@
-// Presentación compartida de las Foundations (ECO-95). NO es una story (sin sufijo `.stories`),
-// el glob del catálogo no la carga; las stories de Foundations la importan. Lee el valor COMPUTADO
-// de cada token en el árbol actual → refleja en vivo el preset de marca y el tema activos.
+// Shared presentation for the Foundations pages (ECO-95). NOT a story (no `.stories` suffix), so the
+// catalog glob doesn't load it; the Foundations stories import it. Reads each token's COMPUTED value in
+// the current tree → reflects the active brand preset and theme live.
 import React, { useEffect, useRef, useState } from "react";
 
-/** Valor computado de una CSS var en este punto del árbol (sigue al preset/tema de la toolbar). */
+/** Computed value of a CSS var at this point in the tree (follows the toolbar preset/theme). */
 export function useVar(token: string) {
   const ref = useRef<HTMLDivElement>(null);
   const [val, setVal] = useState("");
@@ -50,7 +50,7 @@ export function Grid({ children }: { children: React.ReactNode }) {
   );
 }
 
-/** Muestra de color: el cuadro pinta `var(--token)` y debajo se lee su valor computado. */
+/** Color swatch: the box paints `var(--token)` and its computed value is read below. */
 export function ColorSwatch({ token, note }: { token: string; note?: string }) {
   const [ref, val] = useVar(token);
   return (

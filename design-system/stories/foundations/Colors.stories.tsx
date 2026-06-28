@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ColorSwatch, Grid, Group, TokenMeta, useVar } from "./_helpers";
 
-// Foundations/Colors — la paleta de tokens de color, VISIBLE (ECO-95). Conmuta el preset de marca en
-// la toolbar: los tokens de MARCA (accent/-2 + gradientes) cambian; los SEMÁNTICOS no. Conmuta el tema
-// (light/dark): los semánticos y de estado cambian. El default reproduce NexaCore.
+// Foundations/Colors — the color token palette, VISIBLE (ECO-95). Switch the brand preset in the
+// toolbar: the BRAND tokens (accent/-2 + gradients) change; the SEMANTIC ones don't. Switch the theme
+// (light/dark): the semantic and state tokens change. The default reproduces the EMILLION brand.
 const meta = {
   title: "Foundations/Colors",
   parameters: { layout: "fullscreen" },
@@ -29,14 +29,14 @@ export const Colors: Story = {
   render: () => (
     <div className="text-content-primary">
       <Group
-        title="Marca"
-        description="Tokens de MARCA: el punto de tematización. Cambian con el preset de la toolbar (NexaCore / Editorial / Cálido). El cliente trae su marca aquí; el verde por defecto es solo un placeholder."
+        title="Brand"
+        description="BRAND tokens: the theming point. They change with the toolbar preset (EMILLION / contrast demo). The client brings their own brand here; the default is just the EMILLION brand."
       >
         <Grid>
-          <ColorSwatch token="--color-accent" note="acento primario" />
+          <ColorSwatch token="--color-accent" note="primary accent" />
           <ColorSwatch token="--color-accent-light" />
           <ColorSwatch token="--color-accent-dark" />
-          <ColorSwatch token="--color-accent-2" note="2º acento (gradientes)" />
+          <ColorSwatch token="--color-accent-2" note="2nd accent (gradients)" />
         </Grid>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <GradientBar token="--gradient-brand" />
@@ -45,8 +45,8 @@ export const Colors: Story = {
       </Group>
 
       <Group
-        title="Superficies"
-        description="Tokens SEMÁNTICOS de fondo. Neutros: NO cambian con el preset; sí con el tema (light/dark)."
+        title="Surfaces"
+        description="SEMANTIC background tokens. Neutral: they do NOT change with the preset; they do with the theme (light/dark)."
       >
         <Grid>
           <ColorSwatch token="--color-surface-primary" />
@@ -57,7 +57,7 @@ export const Colors: Story = {
         </Grid>
       </Group>
 
-      <Group title="Contenido" description="Tokens SEMÁNTICOS de texto/iconos (color como bloque).">
+      <Group title="Content" description="SEMANTIC text/icon tokens (color shown as a block).">
         <Grid>
           <ColorSwatch token="--color-content-primary" />
           <ColorSwatch token="--color-content-secondary" />
@@ -68,7 +68,7 @@ export const Colors: Story = {
         </Grid>
       </Group>
 
-      <Group title="Bordes" description="Tokens SEMÁNTICOS de borde/separador.">
+      <Group title="Borders" description="SEMANTIC border/separator tokens.">
         <Grid>
           <ColorSwatch token="--color-border-default" />
           <ColorSwatch token="--color-border-strong" />
@@ -78,8 +78,8 @@ export const Colors: Story = {
       </Group>
 
       <Group
-        title="Estado"
-        description="Tokens SEMÁNTICOS de feedback (error / warning / info / success) + su fondo."
+        title="State"
+        description="SEMANTIC feedback tokens (error / warning / info / success) + their background."
       >
         <Grid>
           <ColorSwatch token="--color-error" />

@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Group, TokenMeta, useVar } from "./_helpers";
 
-// Foundations/Spacing & Radius — escalas SEMÁNTICAS de ritmo y curvatura (ECO-95). No cambian con el preset.
+// Foundations/Spacing & Radius — SEMANTIC rhythm and corner scales (ECO-95). They don't change with the preset.
 const meta = {
   title: "Foundations/Spacing & Radius",
   parameters: { layout: "fullscreen" },
@@ -42,7 +42,7 @@ export const SpacingRadius: Story = {
   name: "Spacing & Radius",
   render: () => (
     <div className="text-content-primary">
-      <Group title="Spacing" description="Escala de espaciado (`--spacing-*`). La barra mide el token real.">
+      <Group title="Spacing" description="Spacing scale (`--spacing-*`). The bar measures the real token.">
         <div className="flex flex-col">
           {SPACING.map((k) => (
             <SpacingRow key={k} key_={k} />
@@ -50,7 +50,7 @@ export const SpacingRadius: Story = {
         </div>
       </Group>
 
-      <Group title="Radius" description="Escala de radio de esquina (`--radius-*`).">
+      <Group title="Radius" description="Corner radius scale (`--radius-*`).">
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {RADIUS.map((k) => (
             <RadiusCell key={k} key_={k} />
