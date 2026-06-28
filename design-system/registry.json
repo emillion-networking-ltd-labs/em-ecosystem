@@ -515,6 +515,13 @@
       ]
     },
     {
+      "name": "Textarea",
+      "type": "registry:ui",
+      "file": "components/Textarea.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
       "name": "ThemeToggle",
       "type": "registry:ui",
       "file": "components/ThemeToggle.tsx",
@@ -590,28 +597,31 @@
       "type": "registry:section",
       "file": "sections/Contact.tsx",
       "registryDependencies": [
-        "Button"
+        "Button",
+        "Checkbox",
+        "FormField",
+        "Input",
+        "Select",
+        "Textarea"
       ],
-      "internalDependencies": [
-        "hooks/useReveal.ts"
-      ]
+      "internalDependencies": []
     },
     {
       "name": "FAQ",
       "type": "registry:section",
       "file": "sections/FAQ.tsx",
       "registryDependencies": [
-        "Badge"
+        "Accordion"
       ],
-      "internalDependencies": []
+      "internalDependencies": [
+        "hooks/useReveal.ts"
+      ]
     },
     {
       "name": "Hero",
       "type": "registry:section",
       "file": "sections/Hero.tsx",
-      "registryDependencies": [
-        "Button"
-      ],
+      "registryDependencies": [],
       "internalDependencies": []
     },
     {
@@ -639,8 +649,8 @@
       "type": "registry:section",
       "file": "sections/Portfolio.tsx",
       "registryDependencies": [
-        "Badge",
-        "Button"
+        "Button",
+        "IconButton"
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
@@ -663,8 +673,8 @@
       "type": "registry:section",
       "file": "sections/Services.tsx",
       "registryDependencies": [
-        "Badge",
-        "Button"
+        "Accordion",
+        "Badge"
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
@@ -675,7 +685,7 @@
       "type": "registry:section",
       "file": "sections/Testimonials.tsx",
       "registryDependencies": [
-        "Badge",
+        "Avatar",
         "Button"
       ],
       "internalDependencies": [
