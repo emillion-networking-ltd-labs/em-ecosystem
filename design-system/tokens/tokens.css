@@ -51,12 +51,14 @@
    satélites, catálogo Storybook), por eso vive aquí (fuente única) y no solo en el globals del
    dashboard (ECO-91). Las utilidades cursor-not-allowed/cursor-default lo sobreescriben (mayor capa). */
 @layer base {
-  /* Los CONTROLES no son texto de contenido: no se seleccionan (evita el caret/efecto "editable")
-     y los clicables muestran el cursor pointer. Cubre botones, labels y roles ARIA interactivos.
-     El texto de CONTENIDO (párrafos, títulos) SÍ sigue siendo seleccionable (deseable en sitios reales). */
+  /* SELECCIÓN (global, ECO-93): el TEXTO es seleccionable por defecto — labels, badges, alerts, inline-errors,
+     breadcrumbs, banners y los textos de checkbox/toggle/slider deben poder copiarse. Sólo las SUPERFICIES de
+     control interactivas NO se seleccionan (evita el caret/efecto "editable" al pulsarlas) y muestran cursor
+     pointer. OJO: `label` NO va aquí — su texto SÍ se selecciona. Cuando el texto vive DENTRO del control (el
+     <button> de un checkbox/toggle), el primitivo reabre la selección con `select-text` SOBRE EL TEXTO y deja
+     `select-none` sólo en la caja/superficie. Fuente única → Storybook + satélites; dashboard al re-sincronizar. */
   button,
   [role="button"],
-  label,
   summary,
   [role="checkbox"],
   [role="switch"],
@@ -534,4 +536,14 @@
 :root {
   --gradient-brand: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%);
   --gradient-brand-radial: radial-gradient(120% 120% at 50% 0%, var(--color-accent-2) 0%, var(--color-accent) 55%, transparent 100%);
+}
+
+/* Motion gobernado (ECO-93) — duración + easing para reveals/stagger/transiciones de las secciones, sin
+   números mágicos dispersos. `--ease-out-expo` genera la utilidad `ease-out-expo`; las duraciones se usan
+   vía `duration-[var(--duration-*)]`. Tematizables: el consumidor puede afinar el ritmo. */
+@theme {
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 600ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }

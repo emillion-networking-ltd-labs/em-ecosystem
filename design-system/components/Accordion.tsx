@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Plus } from "lucide-react";
 
 interface AccordionItem {
   title: string;
@@ -14,6 +14,11 @@ interface AccordionProps {
   defaultOpen?: number;
   variant?: "default" | "uppercase";
   borderless?: boolean;
+  /** Disposición: `grouped` (caja única dividida, default) o `separated` (cada item en su propia tarjeta,
+   *  con separación entre ellos). Ambas conservan la animación de apertura. */
+  surface?: "grouped" | "separated";
+  /** Indicador: `chevron` (▾ rota 180°, default) o `plus` (un `+` que rota 45° → `×` al abrir). */
+  indicator?: "chevron" | "plus";
 }
 
 export const accordionSpecs = {
@@ -47,6 +52,8 @@ export default function Accordion({
   defaultOpen,
   variant = "default",
   borderless = false,
+  surface = "grouped",
+  indicator = "chevron",
 }: AccordionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(
     defaultOpen ?? null,
@@ -56,23 +63,35 @@ export default function Accordion({
     setOpenIndex(openIndex === index ? null : index);
   };
 
+  const container =
+    surface === "separated"
+      ? "flex flex-col gap-3"
+      : `rounded-md ${borderless ? "" : "border border-border-components"} overflow-hidden bg-surface-primary divide-y divide-border-strong`;
+  const itemClass =
+    surface === "separated" ? "overflow-hidden rounded-md border border-border-components bg-surface-primary" : "";
+
   return (
-    <div
-      className={`rounded-md ${borderless ? "" : "border border-border-components"} overflow-hidden bg-surface-primary divide-y divide-border-strong ${className}`}
-    >
+    <div className={`${container} ${className}`}>
       {items.map((item, i) => {
         const isOpen = openIndex === i;
         return (
-          <div key={i}>
+          <div key={i} className={itemClass}>
             <button
               onClick={() => toggle(i)}
               className={`flex w-full items-center justify-between px-4 py-3 ${triggerStyles[variant]} transition-colors hover:bg-surface-subtle`}
             >
               {item.title}
-              <ChevronDown
-                size={16}
-                className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
-              />
+              {indicator === "plus" ? (
+                <Plus
+                  size={16}
+                  className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}
+                />
+              ) : (
+                <ChevronDown
+                  size={16}
+                  className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                />
+              )}
             </button>
             <div
               className={`grid transition-[grid-template-rows] duration-200 ease-out ${

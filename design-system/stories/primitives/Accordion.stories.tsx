@@ -36,6 +36,8 @@ const meta = {
   tags: ["autodocs"],
   argTypes: {
     variant: { control: "inline-radio", options: ["default", "uppercase"] },
+    surface: { control: "inline-radio", options: ["grouped", "separated"] },
+    indicator: { control: "inline-radio", options: ["chevron", "plus"] },
     borderless: { control: "boolean" },
     defaultOpen: { control: "number" },
   },
@@ -76,18 +78,34 @@ export const DefaultOpen: Story = {
   args: { defaultOpen: 1 },
 };
 
-// AllVariants — ALWAYS last: the two variants side by side.
+// surface=separated — each item in its own card, with separation between them; keeps the open animation.
+export const Separated: Story = {
+  args: { surface: "separated", defaultOpen: undefined },
+};
+
+// indicator=plus — a `+` that rotates 45° into a `×` on open (the FAQ-style toggle), on the bordered layout.
+export const PlusIndicator: Story = {
+  args: { indicator: "plus", defaultOpen: undefined },
+};
+
+// AllVariants — ALWAYS last: every variant after the changes (default = grouped + chevron).
+const VARIANTS = [
+  { label: "grouped (default)", props: {} },
+  { label: "separated", props: { surface: "separated" as const } },
+  { label: "indicator: plus", props: { indicator: "plus" as const } },
+  { label: "borderless", props: { borderless: true } },
+  { label: "variant: uppercase", props: { variant: "uppercase" as const } },
+];
+
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-6">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary">default</p>
-        <Accordion items={faqItems} variant="default" />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary">uppercase</p>
-        <Accordion items={faqItems} variant="uppercase" />
-      </div>
+      {VARIANTS.map(({ label, props }) => (
+        <div key={label}>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">{label}</p>
+          <Accordion items={faqItems} {...props} />
+        </div>
+      ))}
     </div>
   ),
 };

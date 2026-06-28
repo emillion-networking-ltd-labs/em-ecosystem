@@ -1,82 +1,224 @@
 "use client";
 
-import { useReveal } from "@/hooks/useReveal";
+import { useState, type ReactNode } from "react";
+import { Check } from "lucide-react";
 import Button from "@/components/ui/Button";
+import Input from "@/components/ui/Input";
+import Select from "@/components/ui/Select";
+import FormField from "@/components/ui/FormField";
+import Checkbox from "@/components/ui/Checkbox";
+import Textarea from "@/components/ui/Textarea";
 
-// Sección CONTACTO del design system (ECO-54, nivel 2). Muestra los HECHOS de contacto reales del cliente
-// (email/teléfono/dirección — del brief, nunca inventados) como enlaces accionables (mailto:/tel:) + un CTA.
-// NO es un formulario: un form que no postea a ningún backend sería engañoso en un satélite estático; cuando
-// haya endpoint, será otra sección. Variantes `card` (default) y `split`. Reveal on-scroll, token-safe, a11y.
+// Sección CONTACTO del design-system — RECONSTRUIDA ECO-93 siguiendo la página /contacto del sat: 2 columnas
+// — MÉTODOS directos (enlaces que SIEMPRE funcionan, sin backend → no engañan) + un FORMULARIO con primitivos
+// (Input/Select/FormField/Checkbox/Button), validación, consentimiento GDPR y estado "enviado". Front-end: el
+// DS NO postea; el consumidor cablea su backend vía `onSubmit`. Lenguaje NEUTRO, a11y. Contenido por props.
+export interface ContactMethod {
+  /** Icono (p.ej. `<Mail size={18} />`). */
+  icon: ReactNode;
+  label: string;
+  value: string;
+  href?: string;
+  external?: boolean;
+}
+export interface ContactFormData {
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
+}
 export interface ContactProps {
-  title?: string;
-  description?: string;
-  email?: string;
-  phone?: string;
-  address?: string;
-  ctaText?: string;
-  ctaHref?: string;
-  variant?: "card" | "split";
+  eyebrow?: string;
+  title: string;
+  subtitle?: string;
+  methods?: ContactMethod[];
+  methodsTitle?: string;
+  formTitle?: string;
+  /** Opciones del select de asunto. Si no hay, se omite el campo. */
+  subjectOptions?: { value: string; label: string }[];
+  subjectLabel?: string;
+  privacyHref?: string;
+  submitText?: string;
+  /** Se llama con los datos válidos al enviar. El DS NO postea: cablea aquí tu backend (Resend, API route…). */
+  onSubmit?: (data: ContactFormData) => void;
+}
+
+function MethodCard({ method }: { method: ContactMethod }) {
+  const inner = (
+    <div className="flex items-start gap-4">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-surface-tertiary text-content-primary">
+        {method.icon}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-caption font-semibold uppercase tracking-widest text-content-tertiary">{method.label}</p>
+        <p className="mt-1 break-words text-body text-content-primary">{method.value}</p>
+      </div>
+    </div>
+  );
+  if (method.href) {
+    return (
+      <a
+        href={method.href}
+        {...(method.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        className="card-flat block transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-components hover:shadow-[var(--shadow-card)]"
+      >
+        {inner}
+      </a>
+    );
+  }
+  return <div className="card-flat">{inner}</div>;
+}
+
+function ContactFormBlock({
+  subjectOptions,
+  subjectLabel = "Subject",
+  privacyHref = "#",
+  submitText = "Send message",
+  onSubmit,
+}: Pick<ContactProps, "subjectOptions" | "subjectLabel" | "privacyHref" | "submitText" | "onSubmit">) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [consent, setConsent] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [submitted, setSubmitted] = useState(false);
+
+  const validate = () => {
+    const errs: Record<string, string> = {};
+    if (name.trim().length < 2) errs.name = "Please enter your name";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Enter a valid email";
+    if (!consent) errs.consent = "Please accept the privacy policy";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validate()) return;
+    onSubmit?.({ name, email, subject: subject || undefined, message });
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <div className="card-flat py-10 text-center">
+        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-surface-tertiary text-content-primary">
+          <Check size={24} />
+        </div>
+        <h3 className="mt-3 text-h2 font-semibold text-content-primary">Message sent</h3>
+        <p className="mt-2 text-body text-content-secondary">We&apos;ll get back to you within 24 hours.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="card-flat space-y-5" noValidate>
+      <FormField label="Name" error={errors.name} required>
+        <Input
+          value={name}
+          onChange={(e) => {
+            setName(e.target.value);
+            if (errors.name) setErrors((p) => ({ ...p, name: "" }));
+          }}
+          placeholder="Your name"
+          hasError={!!errors.name}
+        />
+      </FormField>
+      <FormField label="Email" error={errors.email} required>
+        <Input
+          type="email"
+          value={email}
+          onChange={(e) => {
+            setEmail(e.target.value);
+            if (errors.email) setErrors((p) => ({ ...p, email: "" }));
+          }}
+          placeholder="you@email.com"
+          hasError={!!errors.email}
+        />
+      </FormField>
+      {subjectOptions && subjectOptions.length ? (
+        <FormField label={subjectLabel}>
+          {/* El Select es inline-block (content-width por diseño). FormField es flex-col → estiraría el Select
+              a ancho completo y su dropdown se posicionaría respecto al borde del FORM, no del trigger. Un
+              wrapper en BLOQUE lo mantiene content-width → el panel cae bajo el trigger (como en el catálogo).
+              No tocamos el primitivo: el fix es del USO. */}
+          <div>
+            <Select options={subjectOptions} value={subject} onChange={setSubject} placeholder="Select an option" size="md" />
+          </div>
+        </FormField>
+      ) : null}
+      <FormField label="Message">
+        <Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} placeholder="Tell us about your project…" />
+      </FormField>
+      <div>
+        <Checkbox
+          checked={consent}
+          onChange={(c) => {
+            setConsent(c);
+            if (errors.consent && c) setErrors((p) => ({ ...p, consent: "" }));
+          }}
+          label="I have read and accept the privacy policy"
+        />
+        <a
+          href={privacyHref}
+          className="mt-1 ml-7 inline-block text-caption text-content-secondary underline decoration-dotted underline-offset-2 transition-colors hover:text-content-primary"
+        >
+          Read the privacy policy
+        </a>
+        {errors.consent ? <p className="mt-1 text-caption text-error">{errors.consent}</p> : null}
+      </div>
+      <Button variant="primary" size="lg" fullWidth type="submit">
+        {submitText}
+      </Button>
+    </form>
+  );
 }
 
 export default function Contact({
-  title = "Contacto",
-  description,
-  email,
-  phone,
-  address,
-  ctaText,
-  ctaHref = "/contact",
-  variant = "card",
+  eyebrow,
+  title,
+  subtitle,
+  methods,
+  methodsTitle = "Reach us directly",
+  formTitle = "Send a message",
+  subjectOptions,
+  subjectLabel,
+  privacyHref,
+  submitText,
+  onSubmit,
 }: ContactProps) {
-  const { ref, style } = useReveal<HTMLDivElement>();
-  const split = variant === "split";
-  const rows: Array<{ label: string; value: string; href?: string }> = [];
-  if (email) rows.push({ label: "Email", value: email, href: `mailto:${email}` });
-  if (phone) rows.push({ label: "Teléfono", value: phone, href: `tel:${phone.replace(/\s+/g, "")}` });
-  if (address) rows.push({ label: "Dirección", value: address });
-
+  const hasMethods = !!methods && methods.length > 0;
   return (
     <section className="bg-surface-primary">
-      <div className="mx-auto max-w-5xl px-6 py-20 sm:py-24">
-        <div
-          ref={ref}
-          style={style}
-          className={`rounded-3xl border border-border-default bg-surface-secondary p-8 sm:p-12 ${
-            split ? "grid gap-10 lg:grid-cols-2 lg:items-center" : "text-center"
-          }`}
-        >
-          <div className={split ? "" : "mx-auto max-w-xl"}>
-            <h2 className="text-3xl font-bold text-content-primary sm:text-4xl">{title}</h2>
-            {description ? (
-              <p className="mt-3 text-body leading-relaxed text-content-secondary">{description}</p>
-            ) : null}
-          </div>
-          <div className={split ? "" : "mx-auto mt-8 max-w-md"}>
-            {rows.length ? (
-              <dl className={`space-y-3 ${split ? "" : "text-left"}`}>
-                {rows.map((r) => (
-                  <div key={r.label} className="flex flex-col gap-0.5">
-                    <dt className="text-caption font-semibold uppercase tracking-wide text-content-tertiary">{r.label}</dt>
-                    <dd className="text-body text-content-primary">
-                      {r.href ? (
-                        <a href={r.href} className="text-accent transition-colors hover:underline">
-                          {r.value}
-                        </a>
-                      ) : (
-                        r.value
-                      )}
-                    </dd>
-                  </div>
+      <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
+        <div className="mb-12 flex flex-col items-center gap-2 text-center">
+          {eyebrow ? (
+            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
+          ) : null}
+          <h2 className="font-display text-display-2 font-bold text-content-primary">{title}</h2>
+          {subtitle ? <p className="mx-auto mt-1 max-w-xl text-body text-content-secondary">{subtitle}</p> : null}
+        </div>
+        <div className={`grid grid-cols-1 gap-12 ${hasMethods ? "lg:grid-cols-5" : "mx-auto max-w-xl"}`}>
+          {hasMethods ? (
+            <div className="lg:col-span-2">
+              <h3 className="text-h2 font-semibold text-content-primary">{methodsTitle}</h3>
+              <div className="mt-6 space-y-3">
+                {methods!.map((m) => (
+                  <MethodCard key={m.label} method={m} />
                 ))}
-              </dl>
-            ) : null}
-            {ctaText ? (
-              <div className={`mt-8 ${split ? "" : "flex justify-center"}`}>
-                <Button as="a" href={ctaHref} variant="primary" size="lg">
-                  {ctaText}
-                </Button>
               </div>
-            ) : null}
+            </div>
+          ) : null}
+          <div className={hasMethods ? "lg:col-span-3" : ""}>
+            {hasMethods ? <h3 className="mb-6 text-h2 font-semibold text-content-primary">{formTitle}</h3> : null}
+            <ContactFormBlock
+              subjectOptions={subjectOptions}
+              subjectLabel={subjectLabel}
+              privacyHref={privacyHref}
+              submitText={submitText}
+              onSubmit={onSubmit}
+            />
           </div>
         </div>
       </div>

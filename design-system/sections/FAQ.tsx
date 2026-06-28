@@ -1,9 +1,12 @@
-import Badge from "@/components/ui/Badge";
+"use client";
 
-// Sección FAQ del design system (ECO-55, nivel 2 — NUEVA, sin equivalente en SAT01). Preguntas frecuentes
-// del cliente (del brief — nunca inventadas; sin FAQs, se omite). Usa <details>/<summary> NATIVO: accesible
-// por defecto, sin JS (server component, mejor LCP/TBT) y con el contenido en el DOM (bueno para SEO). El
-// acento de marca (accent) marca el indicador. Token-safe, responsive.
+import Accordion from "@/components/ui/Accordion";
+import { useReveal } from "@/hooks/useReveal";
+
+// Sección FAQ del design-system — REFINADA ECO-93 siguiendo el sat (página /precios): cabecera estándar + el
+// primitivo `Accordion` (animación de apertura grid-rows; indicador `plus` `+`→`×` por defecto). Surface a
+// elegir (`grouped` caja única / `separated` tarjetas con separación). Preguntas REALES del cliente (del brief
+// — nunca inventadas; sin items, se omite). Lenguaje NEUTRO, primitivos. Reveal below-the-fold, a11y.
 export interface FAQItem {
   question: string;
   answer: string;
@@ -11,37 +14,36 @@ export interface FAQItem {
 export interface FAQProps {
   eyebrow?: string;
   title: string;
+  subtitle?: string;
   items: FAQItem[];
-  variant?: "list" | "boxed";
+  /** Disposición del acordeón: `grouped` (caja única, default) o `separated` (tarjetas). */
+  surface?: "grouped" | "separated";
+  /** Indicador de apertura. Default `plus` (`+`→`×`). */
+  indicator?: "chevron" | "plus";
 }
 
-export default function FAQ({ eyebrow, title, items, variant = "list" }: FAQProps) {
-  const boxed = variant === "boxed";
+export default function FAQ({ eyebrow, title, subtitle, items, surface = "grouped", indicator = "plus" }: FAQProps) {
+  const { ref, style } = useReveal<HTMLDivElement>();
   return (
     <section className="bg-surface-secondary">
       <div className="mx-auto max-w-3xl px-6 py-20 sm:py-24">
-        <div className="flex flex-col items-center gap-2 text-center">
+        <div className="mb-10 flex flex-col items-center gap-2 text-center">
           {eyebrow ? (
-            <Badge variant="default" size="sm" className="text-accent">
-              {eyebrow}
-            </Badge>
+            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
           ) : null}
-          <h2 className="text-3xl font-bold text-content-primary sm:text-4xl">{title}</h2>
+          <h2 className="font-display text-display-2 font-bold text-content-primary">{title}</h2>
+          {subtitle ? <p className="mx-auto mt-1 max-w-xl text-body text-content-secondary">{subtitle}</p> : null}
         </div>
-        <dl className="mt-12 space-y-3">
-          {items.map((item, i) => (
-            <details
-              key={i}
-              className={`group ${boxed ? "rounded-2xl border border-border-default bg-surface-primary p-5" : "border-b border-border-default pb-3"}`}
-            >
-              <summary className="flex cursor-pointer items-center justify-between gap-4 text-body font-semibold text-content-primary marker:content-none [&::-webkit-details-marker]:hidden">
-                <dt>{item.question}</dt>
-                <span aria-hidden="true" className="text-accent transition-transform group-open:rotate-45">+</span>
-              </summary>
-              <dd className="mt-3 text-body leading-relaxed text-content-secondary">{item.answer}</dd>
-            </details>
-          ))}
-        </dl>
+        <div ref={ref} style={style}>
+          <Accordion
+            surface={surface}
+            indicator={indicator}
+            items={items.map((i) => ({
+              title: i.question,
+              children: <p className="text-body leading-relaxed text-content-secondary">{i.answer}</p>,
+            }))}
+          />
+        </div>
       </div>
     </section>
   );

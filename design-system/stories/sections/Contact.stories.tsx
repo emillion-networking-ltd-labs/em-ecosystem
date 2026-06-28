@@ -1,5 +1,20 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import Contact from "@/components/sections/Contact";
+
+const METHODS = [
+  { icon: <Mail size={18} />, label: "Email", value: "hello@studio.com", href: "mailto:hello@studio.com" },
+  { icon: <MessageCircle size={18} />, label: "WhatsApp", value: "+1 555 123 4567", href: "https://wa.me/15551234567", external: true },
+  { icon: <Phone size={18} />, label: "Phone", value: "+1 555 123 4567", href: "tel:+15551234567" },
+  { icon: <MapPin size={18} />, label: "Location", value: "Remote · worldwide" },
+];
+
+const SUBJECTS = [
+  { value: "project", label: "New project" },
+  { value: "partnership", label: "Partnership" },
+  { value: "support", label: "Support" },
+  { value: "other", label: "Other" },
+];
 
 const meta = {
   title: "Sections/Contact",
@@ -7,47 +22,21 @@ const meta = {
   parameters: { layout: "fullscreen" },
   tags: ["autodocs"],
   args: {
+    eyebrow: "Contact",
     title: "Let's talk",
-    description: "We're just one message away.",
-    email: "hello@studio.com",
-    phone: "+1 555 123 4567",
-    address: "1 Main Street, New York",
-    ctaText: "Send a message",
-    ctaHref: "#form",
-    variant: "card",
+    subtitle: "Tell us about your project and we'll get back to you within 24 hours.",
+    methods: METHODS,
+    subjectOptions: SUBJECTS,
+    privacyHref: "#privacy",
   },
-  argTypes: { variant: { control: "inline-radio", options: ["card", "split"] } },
 } satisfies Meta<typeof Contact>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Default — two columns: direct methods (always work, no backend) + a real form with validation, GDPR consent
+// and a submitted state. Front-end: wire the backend via onSubmit. Submit the form to see the success state.
 export const Default: Story = {};
 
-// split = two-column layout (intro on the left, contact details on the right).
-export const Split: Story = { args: { variant: "split" } };
-
-// AllVariants — ALWAYS last: every layout variant, stacked full-width.
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col">
-      {(["card", "split"] as const).map((variant) => (
-        <div key={variant}>
-          <div className="bg-surface-primary px-6 py-2">
-            <span className="text-caption text-content-tertiary font-mono">{variant}</span>
-          </div>
-          <Contact
-            variant={variant}
-            title="Let's talk"
-            description="We're just one message away."
-            email="hello@studio.com"
-            phone="+1 555 123 4567"
-            address="1 Main Street, New York"
-            ctaText="Send a message"
-            ctaHref="#form"
-          />
-        </div>
-      ))}
-    </div>
-  ),
-};
+// FormOnly — no methods: the form centered on its own.
+export const FormOnly: Story = { args: { methods: undefined } };
