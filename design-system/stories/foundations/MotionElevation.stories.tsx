@@ -57,10 +57,9 @@ export const MotionElevation: Story = {
         <p className="mt-2 text-caption font-mono text-content-tertiary">--ease-out-expo</p>
       </Group>
 
-      <Group title="Elevación" description="Sombras (`--shadow-*`) sobre superficie primaria.">
+      <Group title="Elevación" description="Sombra de tarjeta (`--shadow-card`), el único shadow con uso real.">
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <ShadowCell token="--shadow-card" label="elevación de tarjeta" />
-          <ShadowCell token="--shadow-avatar" label="elevación de avatar" />
         </div>
       </Group>
     </div>
