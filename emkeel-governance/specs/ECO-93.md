@@ -49,7 +49,7 @@ nuevo: **motion** (`--duration-*`/`--ease-*`) para gobernar reveals/stagger sin 
 3. **Tematizable:** todo color sale de `--color-accent/-2` + tokens → el cliente cambia la marca sin tocar
    el componente (lienzo en blanco verificable conmutando el accent).
 4. **Catálogo:** las stories reflejan las secciones refinadas (variantes nuevas visibles); `build-storybook`
-   verde, story-coverage 77/77 + variant-coverage verdes, closure 5/5.
+   verde, story-coverage 78/78 (catálogo crece con el primitivo Textarea) + variant-coverage verdes, closure 5/5.
 5. **Aislamiento:** el dashboard **no** se toca; suites `test:api`/`test:dashboard` + `dup:check` verdes,
    Dashboard-VRT verde. Cambios contenidos en `design-system/` (sections + tokens + un nuevo SectionHeader + stories).
 6. **Gates** verdes (`Strategy: satellite-design`, ticket ECO-93), Security Pipeline (sin secretos).
