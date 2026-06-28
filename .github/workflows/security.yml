@@ -29,23 +29,42 @@ jobs:
   secrets-scan:
     name: 'Layer 1: Secrets Detection'
     runs-on: ubuntu-latest
-    # gitleaks-action@v2 posts a PR summary comment, which needs
-    # pull-requests:write. Without it the job crashed with "Resource not
-    # accessible by integration" and the secrets scan never ran (ECO-6).
-    # Job-level block = least privilege (only this job gets PR write).
+    # Se corre el BINARIO de gitleaks (open-source, gratis), NO el action wrapper: gitleaks-action@v2
+    # introdujo enforcement de licencia de pago para ORGANIZACIONES (secret GITLEAKS_LICENSE) y, al faltar,
+    # abortaba con "missing gitleaks license" ANTES de escanear — dejando en rojo este job y el Security Gate
+    # en CADA PR de la org (ECO-94). El binario hace el mismo escaneo sin licencia. Ya no postea comentario de
+    # PR, así que basta contents:read (antes pull-requests:write era para ese comentario del action — ECO-6).
     permissions:
       contents: read
-      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
-      - name: Run Gitleaks
-        uses: gitleaks/gitleaks-action@v2
+      # Escanea SOLO el rango introducido por el PR/push (lo que hacía el action), con el binario + .gitleaks.toml.
+      # Así caza secretos NUEVOS sin re-escanear todo el historial: ni ahoga el gate con placeholders viejos de
+      # docs ni necesita licencia. fetch-depth: 0 da el rango base..head completo.
+      - name: Run Gitleaks (binario fijado — sin licencia de org)
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GL_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          GL_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
+        run: |
+          set -euo pipefail
+          VERSION="8.18.4"
+          curl -sSfL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tar.gz
+          tar -xzf /tmp/gitleaks.tar.gz -C /tmp gitleaks
+          /tmp/gitleaks version
+          ZERO="0000000000000000000000000000000000000000"
+          if [ -n "${GL_BASE:-}" ] && [ "$GL_BASE" != "$ZERO" ] && git cat-file -e "${GL_BASE}^{commit}" 2>/dev/null; then
+            echo "Escaneando rango ${GL_BASE}..${GL_HEAD}"
+            /tmp/gitleaks detect --source . --config .gitleaks.toml --redact --verbose \
+              --exit-code 1 --log-opts="--no-merges ${GL_BASE}..${GL_HEAD}"
+          else
+            echo "Sin base válida (rama nueva / primer push): escaneo del último commit"
+            /tmp/gitleaks detect --source . --config .gitleaks.toml --redact --verbose \
+              --exit-code 1 --log-opts="--no-merges -1"
+          fi
 
   # ==========================================================================
   # Layer 2: Dependency Audit

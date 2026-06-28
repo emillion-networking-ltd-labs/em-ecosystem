@@ -48,6 +48,11 @@ severity = "CRITICAL"
 
 # Allowlist — files that are expected to contain placeholder values
 [allowlist]
+# regexTarget = line: los patrones de abajo se cotejan contra la LÍNEA completa, no solo el "secret"
+# capturado. Reglas con grupo de captura (database-url, oauth-client-secret) exponen el GRUPO como secret,
+# así que un allowlist de valor (localhost, your-*-client-secret) no casaba y los ejemplos del README/docs se
+# colaban como falsos positivos. Con "line" se cotejan contra la línea entera y sí aplican. (ECO-94)
+regexTarget = "line"
 paths = [
   '''.env\.example$''',
   '''.env\.template$''',
@@ -62,6 +67,7 @@ paths = [
 # Specific patterns that are known false positives
 regexes = [
   '''your[-_]?secret[-_]?here''',
+  '''your-(google|github)-client-secret''',
   '''changeme''',
   '''placeholder''',
   '''example\.com''',
