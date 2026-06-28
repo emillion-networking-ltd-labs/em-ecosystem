@@ -1,13 +1,11 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import ImageCropper from "@/components/ui/ImageCropper";
+// Real free image (Picsum, no people) so the crop region is appreciable. nextjs-vite resolves it to
+// StaticImageData ({src,...}) → take `.src` (guarded in case it's a string).
+import sampleImg from "../assets/sample-after.jpg";
 
-// Small inline SVG data URI used as the image to crop (self-contained).
-const sampleImage =
-  "data:image/svg+xml;utf8," +
-  encodeURIComponent(
-    '<svg xmlns="http://www.w3.org/2000/svg" width="400" height="400"><rect width="400" height="400" fill="%233b82f6"/><circle cx="200" cy="200" r="120" fill="%23ffffff"/></svg>',
-  );
+const sampleImage = typeof sampleImg === "string" ? sampleImg : sampleImg.src;
 
 const meta = {
   title: "Primitives/ImageCropper",

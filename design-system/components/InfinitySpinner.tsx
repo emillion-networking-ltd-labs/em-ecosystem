@@ -18,16 +18,16 @@
  * Usage: <InfinitySpinner /> or <InfinitySpinner size="lg" />
  */
 
-type SpinnerSize = "sm" | "md" | "lg";
+// Only md/lg are exposed: at sm the figure-8 is too small to read the animation (ECO-91).
+type SpinnerSize = "md" | "lg";
 
 export const infinitySpinnerSpecs = {
   type: "Figure-8 lemniscate — used inside buttons",
-  sizes: { sm: "16px", md: "24px", lg: "32px" },
+  sizes: { md: "24px", lg: "32px" },
   base: "SVG dashoffset animation 2s linear, stroke=currentColor",
 };
 
 const SIZES: Record<SpinnerSize, number> = {
-  sm: 16,
   md: 24,
   lg: 32,
 };

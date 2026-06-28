@@ -6,27 +6,24 @@ const meta = {
   component: InlineError,
   tags: ["autodocs"],
   args: {
-    message: "El correo electrónico no es válido",
+    message: "Enter a valid email address",
   },
 } satisfies Meta<typeof InlineError>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// InlineError no tiene sizes ni variants ni estados: solo recibe el mensaje
-// (icono AlertTriangle 16px + texto text-caption text-error).
+// InlineError has no sizes, variants or states: it only takes the message
+// (AlertTriangle 16px + text-caption text-error). A single message story is enough.
 export const Default: Story = {};
 
-export const RequiredField: Story = {
-  args: { message: "Este campo es obligatorio" },
-};
-
+// Long message: it wraps and the icon stays aligned to the FIRST line (items-start + mt-1).
 export const LongMessage: Story = {
   render: (args) => (
     <div className="max-w-sm">
       <InlineError
         {...args}
-        message="La contraseña debe tener al menos 8 caracteres, una mayúscula y un número."
+        message="Password must be at least 8 characters and include an uppercase letter and a number."
       />
     </div>
   ),

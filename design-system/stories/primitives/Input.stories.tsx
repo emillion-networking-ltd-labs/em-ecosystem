@@ -7,8 +7,8 @@ const meta = {
   component: Input,
   tags: ["autodocs"],
   args: {
-    label: "Correo electrónico",
-    placeholder: "nombre@empresa.com",
+    label: "Email",
+    placeholder: "name@company.com",
     size: "md",
     variant: "default",
   },
@@ -16,6 +16,14 @@ const meta = {
     size: { control: "inline-radio", options: ["sm", "md"] },
     variant: { control: "inline-radio", options: ["default", "filled"] },
   },
+  // Constrain in the catalog so inputs don't stretch full-bleed (forms are ~320px wide).
+  decorators: [
+    (Story) => (
+      <div className="max-w-xs">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof Input>;
 
 export default meta;
@@ -24,47 +32,49 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {};
 
 export const Password: Story = {
-  args: { label: "Contraseña", type: "password", placeholder: "Tu contraseña" },
+  args: { label: "Password", type: "password", placeholder: "Your password" },
 };
 
 export const WithLeftIcon: Story = {
+  args: { label: "Search", placeholder: "Search…", leftIcon: <Search size={16} /> },
+};
+
+export const WithError: Story = {
+  args: { label: "Email", error: "Enter a valid email address" },
+};
+
+export const Loading: Story = {
+  args: { label: "Search", loading: true, placeholder: "Loading…" },
+};
+
+export const Disabled: Story = {
+  args: { label: "Read only", placeholder: "Can't edit", disabled: true },
+};
+
+// filled — bg-surface-primary, no outline. Used in search bars / dropdowns (e.g. LanguageSelector).
+export const Filled: Story = {
   args: {
-    label: "Buscar",
-    placeholder: "Buscar…",
+    label: "Search",
+    variant: "filled",
+    placeholder: "Type to search…",
     leftIcon: <Search size={16} />,
   },
 };
 
-export const WithError: Story = {
-  args: { label: "Correo electrónico", error: "El correo no es válido" },
-};
+// Sizes (largest → smallest), with px (h-12 = 48, h-10 = 40). md is the default.
+const SIZES = [
+  { size: "md", px: "48" },
+  { size: "sm", px: "40" },
+] as const;
 
-export const Loading: Story = {
-  args: { label: "Buscando", loading: true, placeholder: "Cargando…" },
-};
-
-export const Disabled: Story = {
-  args: { label: "No editable", placeholder: "No se puede editar", disabled: true },
-};
-
-export const Filled: Story = {
-  args: { label: "Buscar", variant: "filled", placeholder: "Escribe para buscar" },
-};
-
-const sizes = ["sm", "md"] as const;
-
-export const AllSizes: Story = {
+export const Sizes: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
-      {sizes.map((size) => (
+      {SIZES.map(({ size, px }) => (
         <div key={size} className="flex flex-col gap-1.5">
-          <Input
-            size={size}
-            label={`Tamaño ${size}`}
-            placeholder={size === "sm" ? "sm · 40px" : "md · 48px (por defecto)"}
-          />
-          <span className="text-caption text-content-tertiary">
-            {size === "sm" ? "sm · 40px" : "md · 48px (por defecto)"}
+          <Input size={size} placeholder="name@company.com" />
+          <span className="text-caption text-content-tertiary font-mono">
+            {size} · {px}px{size === "md" ? " (default)" : ""}
           </span>
         </div>
       ))}
@@ -72,27 +82,16 @@ export const AllSizes: Story = {
   ),
 };
 
-const variants = ["default", "filled"] as const;
-
+// AllVariants — ALWAYS last: the key states (default, with icon, error, disabled, loading).
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
-      {variants.map((variant) => (
-        <div key={variant} className="flex flex-col gap-1.5">
-          <Input
-            variant={variant}
-            label={`Variante ${variant}`}
-            placeholder={
-              variant === "filled" ? "filled · sin outline" : "default · con outline"
-            }
-          />
-          <span className="text-caption text-content-tertiary">
-            {variant === "filled"
-              ? "filled · bg-surface-primary, sin outline"
-              : "default · con outline"}
-          </span>
-        </div>
-      ))}
+      <Input label="Default" placeholder="name@company.com" />
+      <Input label="With icon" placeholder="Search…" leftIcon={<Search size={16} />} />
+      <Input label="Filled" variant="filled" placeholder="Type to search…" leftIcon={<Search size={16} />} />
+      <Input label="Error" error="Enter a valid email address" />
+      <Input label="Disabled" placeholder="Can't edit" disabled />
+      <Input label="Loading" loading placeholder="Loading…" />
     </div>
   ),
 };

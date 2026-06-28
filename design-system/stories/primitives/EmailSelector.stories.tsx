@@ -6,7 +6,7 @@ const meta = {
   component: EmailSelector,
   tags: ["autodocs"],
   args: {
-    email: "ana.garcia@empresa.com",
+    email: "anna.smith@company.com",
     onChangeEmail: () => {},
   },
 } satisfies Meta<typeof EmailSelector>;
@@ -14,10 +14,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// EmailSelector no tiene sizes ni variants ni estados disabled/error:
-// solo recibe el email a mostrar y un callback para cambiarlo.
+// EmailSelector has no sizes, variants or disabled/error states: it just shows the email to display
+// plus a callback to change it. So a single Default story is enough.
 export const Default: Story = {};
-
-export const LongEmail: Story = {
-  args: { email: "nombre.muy.largo.de.usuario@dominio-extenso.com" },
-};

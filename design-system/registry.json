@@ -107,6 +107,15 @@
       "internalDependencies": []
     },
     {
+      "name": "Card",
+      "type": "registry:ui",
+      "file": "components/Card.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "Checkbox",
       "type": "registry:ui",
       "file": "components/Checkbox.tsx",
@@ -181,6 +190,13 @@
       ]
     },
     {
+      "name": "DoughnutChart",
+      "type": "registry:ui",
+      "file": "components/DoughnutChart.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
       "name": "EmailSelector",
       "type": "registry:ui",
       "file": "components/EmailSelector.tsx",
@@ -195,15 +211,6 @@
       "type": "registry:ui",
       "file": "components/EmptyState.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
-    },
-    {
-      "name": "ErrorAlert",
-      "type": "registry:ui",
-      "file": "components/ErrorAlert.tsx",
-      "registryDependencies": [
-        "IconButton"
-      ],
       "internalDependencies": []
     },
     {
@@ -442,6 +449,13 @@
       "internalDependencies": []
     },
     {
+      "name": "SpeedometerChart",
+      "type": "registry:ui",
+      "file": "components/SpeedometerChart.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
       "name": "Spinner",
       "type": "registry:ui",
       "file": "components/Spinner.tsx",
@@ -541,6 +555,15 @@
       "file": "components/Tooltip.tsx",
       "registryDependencies": [],
       "internalDependencies": []
+    },
+    {
+      "name": "TotalUsersChart",
+      "type": "registry:ui",
+      "file": "components/TotalUsersChart.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "hooks/useTheme.ts"
+      ]
     },
     {
       "name": "TurnstileWidget",

@@ -7,13 +7,21 @@ const meta = {
   component: Slider,
   tags: ["autodocs"],
   args: {
-    label: "Volumen",
+    label: "Volume",
     min: 0,
     max: 100,
     step: 1,
     showValue: true,
     onChange: () => {},
   },
+  // Constrain so it doesn't stretch full-bleed.
+  decorators: [
+    (Story) => (
+      <div className="max-w-xs">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof Slider>;
 
 export default meta;
@@ -26,8 +34,8 @@ export const Default: Story = {
   },
 };
 
-// Slider no tiene sizes ni variants: sus opciones de presentación son
-// label y showValue, y su único estado es disabled.
+// Slider has no sizes or variants: its presentation options are label and showValue,
+// and its only state is disabled.
 export const WithoutValue: Story = {
   args: { showValue: false },
   render: (args) => {
@@ -45,7 +53,7 @@ export const WithoutLabel: Story = {
 };
 
 export const CustomRange: Story = {
-  args: { label: "Precio", min: 0, max: 500, step: 10 },
+  args: { label: "Price", min: 0, max: 500, step: 10 },
   render: (args) => {
     const [value, setValue] = useState(120);
     return <Slider {...args} value={value} onChange={setValue} />;
@@ -53,7 +61,7 @@ export const CustomRange: Story = {
 };
 
 export const Disabled: Story = {
-  args: { disabled: true, label: "No editable" },
+  args: { disabled: true, label: "Disabled" },
   render: (args) => {
     const [value, setValue] = useState(70);
     return <Slider {...args} value={value} onChange={setValue} />;

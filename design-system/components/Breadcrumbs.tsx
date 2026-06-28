@@ -22,15 +22,14 @@ export const breadcrumbsSpecs = {
   separator: "ChevronRight 16px text-content-tertiary — between all levels",
   home: "text-content-tertiary hover:text-content-primary 16px Birdhouse icon shrink-0",
   collapse:
-    "Auto-collapse via ResizeObserver — Home / … / Last when content overflows container",
+    "Auto-collapse via ResizeObserver — Home / … / Last when content overflows. The … is a DISCLOSURE BUTTON (aria-expanded) that opens a menu with the hidden levels (navigable); closes on outside-click / Escape.",
 };
 
 export default function Breadcrumbs({ items }: BreadcrumbsProps) {
   const lastItem = items[items.length - 1];
   const middleItems = items.slice(0, -1);
 
-  // Render both versions, hide one with CSS based on overflow
-  // The "full" version is measured; if it overflows, it hides and collapsed shows
+  // The "full" version is measured; if it overflows, it hides and collapsed shows.
   const containerRef = useRef<HTMLDivElement>(null);
   const [collapsed, setCollapsed] = useState(false);
 
@@ -53,6 +52,33 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
     observer.observe(el);
     return () => observer.disconnect();
   }, [items]);
+
+  // Disclosure menu for the hidden levels (best-practice collapsed breadcrumbs): when it doesn't fit
+  // on screen, the intermediate levels collapse behind "…", which is a BUTTON that expands them so they
+  // stay navigable. Closes on outside-click or Escape.
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onPointer = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setMenuOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMenuOpen(false);
+    };
+    document.addEventListener("mousedown", onPointer);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onPointer);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
+  // If it stops being collapsed (e.g. the container widens), close the menu.
+  useEffect(() => {
+    if (!collapsed) setMenuOpen(false);
+  }, [collapsed]);
 
   const linkClass =
     "text-body font-normal text-content-tertiary transition-colors hover:text-content-primary";
@@ -103,11 +129,52 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
             <Birdhouse size={16} />
           </Link>
           {middleItems.length > 0 && (
-            <div className="flex items-center gap-1">
+            <div ref={menuRef} className="relative flex items-center gap-1">
               <ChevronRight size={16} className={sepClass} />
-              <span className="px-2 py-1 text-body font-normal text-content-tertiary">
+              <button
+                type="button"
+                onClick={() => setMenuOpen((o) => !o)}
+                aria-expanded={menuOpen}
+                aria-haspopup="menu"
+                aria-label="Show hidden levels"
+                className="rounded px-2 py-1 text-body font-normal text-content-tertiary transition-colors hover:bg-surface-subtle hover:text-content-primary"
+              >
                 …
-              </span>
+              </button>
+              {menuOpen && (
+                // SAME classes as the Select popup (1:1 coherence): panel p-6 rounded-xl
+                // border-border-components bg-surface-primary shadow-card gap-0.5; items h-10 px-6
+                // py-2.5 rounded-md, text-content-primary hover:bg-surface-subtle. A leading chevron
+                // per item echoes the breadcrumb separator.
+                <ul
+                  role="menu"
+                  className="absolute left-0 top-full z-50 mt-1 flex max-h-64 w-fit min-w-[160px] flex-col gap-0.5 overflow-auto rounded-xl border border-border-components bg-surface-primary p-6 shadow-card animate-dropdown-down"
+                >
+                  {middleItems.map((item) => (
+                    <li key={item.label} role="none">
+                      {item.href ? (
+                        <Link
+                          href={item.href}
+                          role="menuitem"
+                          onClick={() => setMenuOpen(false)}
+                          className="flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+                        >
+                          <ChevronRight size={16} className={sepClass} />
+                          {item.label}
+                        </Link>
+                      ) : (
+                        <span
+                          role="menuitem"
+                          className="flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-6 py-2.5 text-body font-normal text-content-tertiary"
+                        >
+                          <ChevronRight size={16} className={sepClass} />
+                          {item.label}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           )}
           <div className="flex items-center gap-1">

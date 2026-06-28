@@ -6,7 +6,7 @@ const meta = {
   component: InfinitySpinner,
   tags: ["autodocs"],
   args: { size: "md" },
-  argTypes: { size: { control: "inline-radio", options: ["sm", "md", "lg"] } },
+  argTypes: { size: { control: "inline-radio", options: ["md", "lg"] } },
 } satisfies Meta<typeof InfinitySpinner>;
 
 export default meta;
@@ -14,15 +14,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// Claves reales de SIZES (sm=16 / md=24 / lg=32). El SVG hereda el color del
-// texto (stroke=currentColor), de ahí el text-content-primary del contenedor.
+// Only md/lg: at sm the figure-8 is too small to read the animation. Largest → smallest.
+// The SVG inherits text color (stroke=currentColor) → text-content-primary on the container.
 const SIZES = [
   { size: "lg", px: "32" },
   { size: "md", px: "24" },
-  { size: "sm", px: "16" },
 ] as const;
 
-export const AllSizes: Story = {
+export const Sizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-end gap-6 text-content-primary">
       {SIZES.map(({ size, px }) => (
@@ -30,7 +29,7 @@ export const AllSizes: Story = {
           <div className="flex h-8 items-center justify-center">
             <InfinitySpinner size={size} />
           </div>
-          <span className="text-caption text-content-tertiary">
+          <span className="text-caption text-content-tertiary font-mono">
             {size} · {px}px{size === "md" ? " (default)" : ""}
           </span>
         </div>

@@ -9,12 +9,21 @@ const meta = {
   tags: ["autodocs"],
   args: {
     variant: "default",
-    title: "No hay proyectos todavía",
-    description: "Crea tu primer proyecto para empezar a trabajar.",
+    title: "No projects yet",
+    description: "Create your first project to get started.",
   },
   argTypes: {
     variant: { control: "inline-radio", options: ["default", "error"] },
   },
+  // EmptyState always lives inside a container (an empty area of a card/table/panel) — show it in a
+  // card so the catalog reflects real usage (same as the dashboard showcase).
+  decorators: [
+    (Story) => (
+      <div className="mx-auto max-w-md rounded-xl border border-border-components bg-surface-primary">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof EmptyState>;
 
 export default meta;
@@ -24,11 +33,11 @@ export const Default: Story = {};
 
 export const WithAction: Story = {
   args: {
-    title: "Aún no hay proyectos",
-    description: "Crea tu primer proyecto para empezar.",
+    title: "No projects yet",
+    description: "Create your first project to get started.",
     action: (
       <Button variant="primary" size="sm" fullWidth={false}>
-        Crear proyecto
+        Create project
       </Button>
     ),
   },
@@ -37,19 +46,19 @@ export const WithAction: Story = {
 export const CustomIcon: Story = {
   args: {
     icon: <Search size={48} />,
-    title: "Sin resultados",
-    description: "Ningún elemento coincide con tu búsqueda.",
+    title: "No results",
+    description: "No items match your search.",
   },
 };
 
 export const ErrorVariant: Story = {
   args: {
     variant: "error",
-    title: "No se pudieron cargar los usuarios",
-    description: "Error de red — inténtalo de nuevo.",
+    title: "Couldn't load users",
+    description: "Network error — please try again.",
     action: (
       <Button variant="primary" size="sm" fullWidth={false}>
-        Reintentar
+        Retry
       </Button>
     ),
   },

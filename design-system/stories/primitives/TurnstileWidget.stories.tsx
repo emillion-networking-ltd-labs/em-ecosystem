@@ -8,6 +8,15 @@ const meta = {
   component: TurnstileWidget,
   tags: ["autodocs"],
   args: { onToken: () => {} },
+  // The widget uses Turnstile size "flexible" (expands to its container). Constrain to the standard
+  // ~300px so it doesn't stretch full-bleed in the catalog; the real auth form sets its own width.
+  decorators: [
+    (Story) => (
+      <div className="max-w-[300px]">
+        <Story />
+      </div>
+    ),
+  ],
 } satisfies Meta<typeof TurnstileWidget>;
 
 export default meta;

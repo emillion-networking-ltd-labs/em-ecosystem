@@ -189,14 +189,16 @@ export default function ConfirmModal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="confirm-modal-title"
-        className={`w-full ${sizeClasses[size]} mx-4 max-h-[90vh] overflow-y-auto rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
+        className={`group w-full ${sizeClasses[size]} mx-4 max-h-[90vh] overflow-y-auto rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
       >
         {/* Top section */}
         <div className="relative rounded-t-xl border-b border-border-strong bg-surface-primary p-4 sm:p-6">
+          {/* Close — top-right CORNER (less inset than the content padding so it sits above-right of
+              the title, not crowding it). Appears on hover over the modal (or keyboard focus). */}
           <IconButton
             variant="default"
             size="sm"
-            className="absolute right-4 top-4 sm:right-6 sm:top-6"
+            className="absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 sm:right-4 sm:top-4"
             aria-label="Close"
             onClick={onClose}
           >

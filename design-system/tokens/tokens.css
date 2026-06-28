@@ -5,6 +5,81 @@
 @import 'tailwindcss';
 @custom-variant dark (&:is(.dark *));
 
+/* Superficies de tarjeta (ECO-91): utilidades distribuidas del design-system (antes vivían solo en el
+   globals del dashboard → StickyCard/Card no se estilaban en el catálogo/satélites). Dos ejes:
+   elevación (con sombra `card`/`card-container` vs plana `*-flat`) y radio (12px vs 24px `*-container*`).
+   Tematizadas por token (surface-primary/border-strong/shadow-card). */
+@utility card {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-card);
+  border-radius: 12px;
+  padding: 24px;
+}
+@utility card-container {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-strong);
+  box-shadow: var(--shadow-card);
+  border-radius: 24px;
+  padding: 24px;
+}
+@utility card-flat {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  padding: 24px;
+}
+@utility card-container-flat {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-strong);
+  border-radius: 24px;
+  padding: 24px;
+}
+
+/* scrollbar-hide (ECO-91): utilidad distribuida (antes solo en el globals del dashboard → en el
+   catálogo/satélites asomaba la barra nativa, p.ej. en los Tabs nav-horizontal con scroll). */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Tailwind v4 quitó el `cursor: pointer` implícito en <button>. Se restaura en la capa base para
+   que todo elemento clicable se vea clicable — necesidad COMPARTIDA de todo consumidor (dashboard,
+   satélites, catálogo Storybook), por eso vive aquí (fuente única) y no solo en el globals del
+   dashboard (ECO-91). Las utilidades cursor-not-allowed/cursor-default lo sobreescriben (mayor capa). */
+@layer base {
+  /* Los CONTROLES no son texto de contenido: no se seleccionan (evita el caret/efecto "editable")
+     y los clicables muestran el cursor pointer. Cubre botones, labels y roles ARIA interactivos.
+     El texto de CONTENIDO (párrafos, títulos) SÍ sigue siendo seleccionable (deseable en sitios reales). */
+  button,
+  [role="button"],
+  label,
+  summary,
+  [role="checkbox"],
+  [role="switch"],
+  [role="radio"],
+  [role="tab"],
+  [role="option"],
+  [role="menuitem"],
+  [role="menuitemradio"] {
+    user-select: none;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="checkbox"],
+  [role="switch"],
+  [role="radio"],
+  [role="tab"],
+  [role="option"],
+  [role="menuitem"],
+  [role="menuitemradio"] {
+    cursor: pointer;
+  }
+}
+
 @theme {
   --font-sans:
     -apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial,
@@ -390,6 +465,42 @@
 @keyframes spotlight {
   0% { opacity: 0; transform: translate(-72%, -62%) scale(0.5); }
   100% { opacity: 1; transform: translate(-50%, -40%) scale(1); }
+}
+
+/* InfinitySpinner (ECO-91): keyframes + clase distribuidas (antes vivían solo en el globals del
+   dashboard → el spinner no animaba en el catálogo/satélites). dashoffset 0 → 256.589 (dash+gap). */
+@keyframes infinity-spin {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 256.589; }
+}
+.infinity-spinner {
+  animation: infinity-spin 2s linear infinite;
+}
+
+/* Animaciones de entrada de icono (ECO-91): keyframes + clases distribuidas (antes solo en el globals
+   del dashboard → las pantallas de feedback full-page no animaban el icono en el catálogo/satélites).
+   success = pop-in; error = pop-in + shake horizontal (comunica rechazo). */
+@keyframes icon-success {
+  0% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; transform: scale(1.08); }
+  70% { transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes icon-error {
+  0% { opacity: 0; transform: scale(0.5); }
+  40% { opacity: 1; transform: scale(1); }
+  50% { transform: translateX(-6px); }
+  60% { transform: translateX(5px); }
+  70% { transform: translateX(-4px); }
+  80% { transform: translateX(3px); }
+  90% { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+.icon-success {
+  animation: icon-success 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.icon-error {
+  animation: icon-error 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* ===== Marketing design tokens (ECO-83, fase 1.3 / ADR-019) — cosechados del benchmark sat-cristian-garcia =====

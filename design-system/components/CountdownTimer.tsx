@@ -12,7 +12,7 @@
  */
 
 type CountdownVariant = "error" | "warning";
-type CountdownSize = "sm" | "lg";
+type CountdownSize = "sm" | "md" | "lg";
 
 const variantStyles: Record<
   CountdownVariant,
@@ -38,6 +38,11 @@ const sizeStyles: Record<
     digit: "w-[1.25em] h-[1.5em] text-[11px] rounded-[3px]",
     sep: "text-caption mx-px",
     gap: "gap-px",
+  },
+  md: {
+    digit: "w-6 h-8 text-base rounded-md",
+    sep: "text-base mx-0.5",
+    gap: "gap-0.5",
   },
   lg: {
     digit: "w-8 h-10 text-2xl rounded-lg",

@@ -7,9 +7,9 @@ const meta = {
   tags: ["autodocs"],
   args: {
     items: [
-      { label: "Proyectos", href: "/dashboard/proyectos" },
-      { label: "Sitio corporativo", href: "/dashboard/proyectos/sitio-corporativo" },
-      { label: "Configuración" },
+      { label: "Projects", href: "/dashboard/projects" },
+      { label: "Corporate site", href: "/dashboard/projects/corporate-site" },
+      { label: "Settings" },
     ],
   },
 } satisfies Meta<typeof Breadcrumbs>;
@@ -19,38 +19,44 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// Solo el ítem raíz (Birdhouse) + un nivel activo, sin enlaces intermedios.
+// Only the root item (Birdhouse) + one active level, no intermediate links.
 export const SingleLevel: Story = {
   args: {
-    items: [{ label: "Inicio" }],
+    items: [{ label: "Home" }],
   },
 };
 
-// Dos niveles: un enlace intermedio + el activo (último, sin href).
+// Two levels: one intermediate link + the active one (last, no href).
 export const TwoLevels: Story = {
   args: {
     items: [
-      { label: "Proyectos", href: "/dashboard/proyectos" },
-      { label: "Detalle" },
+      { label: "Projects", href: "/dashboard/projects" },
+      { label: "Detail" },
     ],
   },
 };
 
-// Cadena larga: auto-colapso vía ResizeObserver (Home / … / Último) al
-// desbordar el contenedor. Forzamos un contenedor estrecho para verlo.
+// Auto-collapse via ResizeObserver: when the full chain doesn't fit it shows Home / … / Last.
+// A fixed narrow container (e.g. mobile) triggers it; the … is a button that reveals the hidden levels.
 export const Collapsed: Story = {
   args: {
     items: [
-      { label: "Organización", href: "#" },
-      { label: "Proyectos", href: "#" },
-      { label: "Sitio corporativo", href: "#" },
-      { label: "Páginas", href: "#" },
-      { label: "Configuración avanzada de la página de inicio" },
+      { label: "Organization", href: "#" },
+      { label: "Projects", href: "#" },
+      { label: "Corporate site", href: "#" },
+      { label: "Pages", href: "#" },
+      { label: "Home" },
     ],
   },
   render: (args) => (
-    <div className="w-[260px] border border-border-components rounded-md p-3">
-      <Breadcrumbs {...args} />
+    <div className="flex flex-col gap-2">
+      <span className="text-caption text-content-tertiary">
+        On a narrow width (e.g. mobile) the path collapses to Home / … / Last.
+        Click “…” to expand and navigate the hidden levels.
+      </span>
+      <div className="w-[300px] rounded-md border border-border-components bg-surface-primary p-3">
+        <Breadcrumbs {...args} />
+      </div>
     </div>
   ),
 };

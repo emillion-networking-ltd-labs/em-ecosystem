@@ -6,7 +6,7 @@ const meta = {
   title: "Primitives/Checkbox",
   component: Checkbox,
   tags: ["autodocs"],
-  args: { label: "Acepto los términos", size: "md" },
+  args: { label: "I accept the terms", size: "md" },
   argTypes: {
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
   },
@@ -30,40 +30,41 @@ export const Checked: Story = {
 };
 
 export const Indeterminate: Story = {
-  args: { indeterminate: true, label: "Selección parcial" },
+  args: { indeterminate: true, label: "Partial selection" },
   render: (args) => <Checkbox {...args} checked={false} />,
 };
 
 export const Disabled: Story = {
-  args: { disabled: true, label: "No editable" },
+  args: { disabled: true, label: "Not editable" },
   render: (args) => <Checkbox {...args} checked={false} />,
 };
 
 export const DisabledChecked: Story = {
-  args: { disabled: true, checked: true, label: "No editable (marcado)" },
+  args: { disabled: true, checked: true, label: "Not editable (checked)" },
   render: (args) => <Checkbox {...args} />,
 };
 
-const sizes = ["sm", "md", "lg"] as const;
+// The 3 sizes (largest to smallest, like the rest), with px.
+const SIZES = [
+  { key: "lg", px: "24" },
+  { key: "md", px: "20" },
+  { key: "sm", px: "16" },
+] as const;
 
-export const AllSizes: Story = {
+export const Sizes: Story = {
   render: () => {
     const [values, setValues] = useState({ sm: true, md: true, lg: true });
     return (
       <div className="flex flex-wrap items-end gap-6">
-        {sizes.map((size) => (
-          <div key={size} className="flex flex-col items-center gap-1.5">
+        {SIZES.map(({ key, px }) => (
+          <div key={key} className="flex flex-col items-center gap-1.5">
             <Checkbox
-              size={size}
-              checked={values[size]}
-              onChange={(v) => setValues((s) => ({ ...s, [size]: v }))}
+              size={key}
+              checked={values[key]}
+              onChange={(v) => setValues((s) => ({ ...s, [key]: v }))}
             />
-            <span className="text-caption text-content-tertiary">
-              {size === "sm"
-                ? "sm · 16px"
-                : size === "md"
-                  ? "md · 20px (por defecto)"
-                  : "lg · 24px"}
+            <span className="text-caption text-content-tertiary font-mono">
+              {key} · {px}px{key === "md" ? " (default)" : ""}
             </span>
           </div>
         ))}
@@ -72,8 +73,7 @@ export const AllSizes: Story = {
   },
 };
 
-// Checkbox no tiene variants: sus estados visuales son
-// checked, unchecked, indeterminate y disabled.
+// Checkbox has no variants: its visual states are checked, unchecked, indeterminate and disabled.
 export const AllStates: Story = {
   render: () => {
     const [checked, setChecked] = useState(true);
@@ -82,27 +82,23 @@ export const AllStates: Story = {
       <div className="flex flex-wrap items-end gap-6">
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked={unchecked} onChange={setUnchecked} />
-          <span className="text-caption text-content-tertiary">Sin marcar</span>
+          <span className="text-caption text-content-tertiary">Unchecked</span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked={checked} onChange={setChecked} />
-          <span className="text-caption text-content-tertiary">Marcado</span>
+          <span className="text-caption text-content-tertiary">Checked</span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked={false} indeterminate />
-          <span className="text-caption text-content-tertiary">Indeterminado</span>
+          <span className="text-caption text-content-tertiary">Indeterminate</span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked={false} disabled />
-          <span className="text-caption text-content-tertiary">
-            Deshabilitado
-          </span>
+          <span className="text-caption text-content-tertiary">Disabled</span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked disabled />
-          <span className="text-caption text-content-tertiary">
-            Deshabilitado (marcado)
-          </span>
+          <span className="text-caption text-content-tertiary">Disabled (checked)</span>
         </div>
       </div>
     );

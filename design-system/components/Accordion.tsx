@@ -12,7 +12,7 @@ interface AccordionProps {
   items: AccordionItem[];
   className?: string;
   defaultOpen?: number;
-  variant?: "default" | "section";
+  variant?: "default" | "uppercase";
   borderless?: boolean;
 }
 
@@ -37,8 +37,8 @@ export const accordionSpecs = {
 
 const triggerStyles = {
   default: "text-body font-normal text-content-primary",
-  section:
-    "text-h3 font-semibold uppercase tracking-wider text-content-primary",
+  // `uppercase`: IDENTICAL to default (same type, weight and size) — the ONLY difference is UPPERCASE.
+  uppercase: "text-body font-normal uppercase text-content-primary",
 };
 
 export default function Accordion({
@@ -58,7 +58,7 @@ export default function Accordion({
 
   return (
     <div
-      className={`${borderless ? "" : "rounded-md border border-border-components"} overflow-hidden bg-surface-primary divide-y divide-border-strong ${className}`}
+      className={`rounded-md ${borderless ? "" : "border border-border-components"} overflow-hidden bg-surface-primary divide-y divide-border-strong ${className}`}
     >
       {items.map((item, i) => {
         const isOpen = openIndex === i;

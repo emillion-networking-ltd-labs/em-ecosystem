@@ -30,7 +30,7 @@ export const AllSizes: Story = {
           <div className="flex h-8 items-center justify-center">
             <RingSpinner size={size} />
           </div>
-          <span className="text-caption text-content-tertiary">
+          <span className="text-caption text-content-tertiary font-mono">
             {size} · {px}px{size === "md" ? " (default)" : ""}
           </span>
         </div>
