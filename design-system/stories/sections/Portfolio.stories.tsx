@@ -2,10 +2,12 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Portfolio from "@/components/sections/Portfolio";
 import photoA from "../assets/sample-after.jpg";
 import photoB from "../assets/sample-before.jpg";
+import photoC from "../assets/hero-sample.jpg";
 
 // Static image imports resolve to {src}|string under storybook-vite; normalize to the string the prop wants.
 const srcA = typeof photoA === "string" ? photoA : photoA.src;
 const srcB = typeof photoB === "string" ? photoB : photoB.src;
+const srcC = typeof photoC === "string" ? photoC : photoC.src;
 
 const ITEMS = [
   { title: "Atlas Rebrand", description: "Identity and website for a fintech." },
@@ -18,6 +20,18 @@ const ITEMS_IMG = [
   { title: "Atlas Rebrand", description: "Identity and website for a fintech.", imageSrc: srcA },
   { title: "Verde App", description: "A mobility mobile product.", imageSrc: srcB },
   { title: "Norte Store", description: "Custom e-commerce build.", imageSrc: srcA },
+];
+
+// Pure image set for the gallery variant (captions via `title`; images reused to fill the grid).
+const GALLERY = [
+  { title: "Backstage", imageSrc: srcA },
+  { title: "On set", imageSrc: srcB },
+  { title: "Studio portrait", imageSrc: srcC },
+  { title: "Golden hour", imageSrc: srcA },
+  { title: "Detail shot", imageSrc: srcB },
+  { title: "Wide angle", imageSrc: srcC },
+  { title: "Close up", imageSrc: srcA },
+  { title: "Final cut", imageSrc: srcB },
 ];
 
 const meta = {
@@ -33,7 +47,7 @@ const meta = {
     viewAllHref: "#",
     items: ITEMS,
   },
-  argTypes: { variant: { control: "inline-radio", options: ["grid", "featured"] } },
+  argTypes: { variant: { control: "inline-radio", options: ["grid", "featured", "gallery"] } },
 } satisfies Meta<typeof Portfolio>;
 
 export default meta;
@@ -47,12 +61,18 @@ export const Featured: Story = { args: { variant: "featured" } };
 // Every card has a real photo (the third reuses srcA).
 export const WithImages: Story = { args: { items: ITEMS_IMG } };
 
-// AllVariants — ALWAYS last: EVERY Portfolio example — grid / featured × without / with images.
+// gallery = image grid with hover captions + a full lightbox (click an image: zoom, drag-swipe, arrows, Esc).
+export const Gallery: Story = {
+  args: { variant: "gallery", eyebrow: "Gallery", title: "Selected shots", items: GALLERY },
+};
+
+// AllVariants — ALWAYS last: EVERY Portfolio example — grid / featured × without / with images, plus gallery.
 const ALL = [
   { label: "grid · no images", variant: "grid" as const, items: ITEMS },
   { label: "grid · with images", variant: "grid" as const, items: ITEMS_IMG },
   { label: "featured · no images", variant: "featured" as const, items: ITEMS },
   { label: "featured · with images", variant: "featured" as const, items: ITEMS_IMG },
+  { label: "gallery", variant: "gallery" as const, items: GALLERY },
 ];
 
 export const AllVariants: Story = {

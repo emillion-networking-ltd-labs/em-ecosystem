@@ -1,17 +1,19 @@
 "use client";
 
-import { useReveal } from "@/hooks/useReveal";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
+import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Button from "@/components/ui/Button";
+import IconButton from "@/components/ui/IconButton";
+import { useReveal } from "@/hooks/useReveal";
 
-// Sección PORTFOLIO del design system (ECO-55, nivel 2; fotos reales ECO-61/F7a). Galería de trabajos/fotos
-// REALES del cliente (del brief — nunca inventados; sin items, se omite). La imagen es OPCIONAL y se pinta con
-// `next/image` (optimizado, formatos modernos); sin imagen, un tile NEUTRO (surface-secondary) con el título.
-// Refinada ECO-93: lenguaje neutro — cabecera en `display`, eyebrow neutro (sin Badge), tile y hover sin el
-// accent placeholder. El `title` es
-// OPCIONAL: una galería de fotos reales puede ser solo-imagen (sin barra de texto). Reveal escalonado, a11y.
+// Sección PORTFOLIO del design-system (ECO-55; REFINADA ECO-93: lenguaje NEUTRO + variante `gallery`). Muestra
+// trabajos/fotos REALES del cliente (del brief — nunca inventados; sin items, se omite). Variantes:
+//   · `grid` (default) / `featured` → tarjetas con título/descripción + imagen opcional (tile NEUTRO si falta).
+//   · `gallery` → rejilla de imágenes con caption al hover + LIGHTBOX (zoom, drag-swipe, teclado, prev/next).
+// Cabecera en `display`, hover de borde neutro, cero accent placeholder. Genérico por props. Reveal, a11y.
 export interface PortfolioItem {
-  /** Título del trabajo. Opcional: una foto de galería puede no tenerlo (tile solo-imagen). */
+  /** Título del trabajo (o caption en `gallery`). Opcional. */
   title?: string;
   description?: string;
   imageSrc?: string;
@@ -23,7 +25,34 @@ export interface PortfolioProps {
   items: PortfolioItem[];
   viewAllText?: string;
   viewAllHref?: string;
-  variant?: "grid" | "featured";
+  variant?: "grid" | "featured" | "gallery";
+}
+
+interface GalleryImage {
+  imageSrc: string;
+  caption?: string;
+}
+
+function Header({ eyebrow, title }: { eyebrow?: string; title: string }) {
+  return (
+    <div className="flex flex-col items-center gap-2 text-center">
+      {eyebrow ? (
+        <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
+      ) : null}
+      <h2 className="font-display text-display-2 font-bold text-content-primary">{title}</h2>
+    </div>
+  );
+}
+
+function ViewAll({ text, href }: { text?: string; href?: string }) {
+  if (!text || !href) return null;
+  return (
+    <div className="mt-10 text-center">
+      <Button as="a" href={href} variant="outline" size="md">
+        {text}
+      </Button>
+    </div>
+  );
 }
 
 function PortfolioCard({ item, index, featured }: { item: PortfolioItem; index: number; featured: boolean }) {
@@ -61,36 +90,221 @@ function PortfolioCard({ item, index, featured }: { item: PortfolioItem; index: 
   );
 }
 
-export default function Portfolio({
-  eyebrow,
-  title,
-  items,
-  viewAllText,
-  viewAllHref,
-  variant = "grid",
-}: PortfolioProps) {
+function GalleryTile({ image, index, onOpen }: { image: GalleryImage; index: number; onOpen: () => void }) {
+  const { ref, style } = useReveal<HTMLButtonElement>({ delay: (index % 4) * 90 });
+  return (
+    <button
+      ref={ref}
+      style={style}
+      onClick={onOpen}
+      aria-label={`View image${image.caption ? `: ${image.caption}` : ` ${index + 1}`}`}
+      className="group relative aspect-3/4 cursor-zoom-in overflow-hidden rounded-lg"
+    >
+      <Image
+        src={image.imageSrc}
+        alt={image.caption || ""}
+        fill
+        sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
+        className="object-cover transition-transform duration-500 group-hover:scale-105"
+      />
+      {image.caption ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+          <p className="text-caption font-semibold uppercase tracking-wider text-white">{image.caption}</p>
+        </div>
+      ) : null}
+    </button>
+  );
+}
+
+const SWIPE_THRESHOLD = 80;
+const DRAG_DAMPING = 0.3;
+
+function Lightbox({
+  images,
+  index,
+  onClose,
+  onPrev,
+  onNext,
+}: {
+  images: GalleryImage[];
+  index: number;
+  onClose: () => void;
+  onPrev: () => void;
+  onNext: () => void;
+}) {
+  const image = images[index];
+  const total = images.length;
+  const [dragX, setDragX] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const dragStartXRef = useRef(0);
+  // True when a drag just crossed the threshold and changed slide → suppress the
+  // backdrop close that would otherwise fire when mouseup lands outside the image.
+  const justDraggedRef = useRef(false);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      else if (e.key === "ArrowRight") onNext();
+      else if (e.key === "ArrowLeft") onPrev();
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [onClose, onNext, onPrev]);
+
+  useEffect(() => {
+    if (!isDragging) return;
+    const onMove = (e: MouseEvent | TouchEvent) => {
+      const x = "touches" in e ? e.touches[0].clientX : e.clientX;
+      setDragX(x - dragStartXRef.current);
+    };
+    const onUp = () => {
+      setIsDragging(false);
+      setDragX((cur) => {
+        if (Math.abs(cur) > SWIPE_THRESHOLD) {
+          justDraggedRef.current = true;
+          if (cur > 0) onPrev();
+          else onNext();
+        }
+        return 0;
+      });
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchend", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchend", onUp);
+    };
+  }, [isDragging, onNext, onPrev]);
+
+  const onBackdrop = () => {
+    if (justDraggedRef.current) {
+      justDraggedRef.current = false;
+      return;
+    }
+    onClose();
+  };
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-label={image.caption || "Image"}
+      // `dark` fuerza los tokens de dark mode en los descendientes (IconButton boxed) para que el overlay
+      // oscuro los renderice con el contraste correcto sin importar el tema del usuario.
+      className="dark fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xs"
+      onClick={onBackdrop}
+    >
+      <IconButton
+        variant="boxed"
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          onClose();
+        }}
+        aria-label="Close"
+        className="absolute right-4 top-4 z-10 h-8 w-8 sm:right-8 sm:top-8"
+      >
+        <X size={16} />
+      </IconButton>
+      <IconButton
+        variant="boxed"
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          onPrev();
+        }}
+        aria-label="Previous image"
+        className="absolute left-3 top-1/2 z-10 h-8 w-8 -translate-y-1/2 sm:left-8"
+      >
+        <ChevronLeft size={16} />
+      </IconButton>
+      <IconButton
+        variant="boxed"
+        size="sm"
+        onClick={(e) => {
+          e.stopPropagation();
+          onNext();
+        }}
+        aria-label="Next image"
+        className="absolute right-3 top-1/2 z-10 h-8 w-8 -translate-y-1/2 sm:right-8"
+      >
+        <ChevronRight size={16} />
+      </IconButton>
+      <div
+        className={`relative h-[85vh] w-[90vw] touch-none select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
+        onClick={(e) => e.stopPropagation()}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          dragStartXRef.current = e.clientX;
+          setIsDragging(true);
+        }}
+        onTouchStart={(e) => {
+          dragStartXRef.current = e.touches[0].clientX;
+          setIsDragging(true);
+        }}
+        onDragStart={(e) => e.preventDefault()}
+        style={isDragging ? { transform: `translateX(${dragX * DRAG_DAMPING}px)`, transition: "none" } : undefined}
+      >
+        <Image src={image.imageSrc} alt={image.caption || ""} fill priority draggable={false} sizes="90vw" className="pointer-events-none object-contain" />
+      </div>
+      <div className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col items-center gap-1 px-4 text-center sm:bottom-6">
+        {image.caption ? <p className="text-caption font-semibold uppercase tracking-wider text-white">{image.caption}</p> : null}
+        <p className="text-caption text-white/60">
+          {index + 1} / {total}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function Gallery({ eyebrow, title, items, viewAllText, viewAllHref }: Omit<PortfolioProps, "variant">) {
+  const images: GalleryImage[] = items.filter((i) => i.imageSrc).map((i) => ({ imageSrc: i.imageSrc!, caption: i.title }));
+  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const total = images.length;
+  const close = () => setLightboxIndex(null);
+  const prev = () => setLightboxIndex((i) => (i === null ? null : (i - 1 + total) % total));
+  const next = () => setLightboxIndex((i) => (i === null ? null : (i + 1) % total));
+  return (
+    <section className="bg-surface-primary">
+      <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
+        <Header eyebrow={eyebrow} title={title} />
+        <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+          {images.map((img, i) => (
+            <GalleryTile key={img.imageSrc + i} image={img} index={i} onOpen={() => setLightboxIndex(i)} />
+          ))}
+        </div>
+        <ViewAll text={viewAllText} href={viewAllHref} />
+      </div>
+      {lightboxIndex !== null ? (
+        <Lightbox images={images} index={lightboxIndex} onClose={close} onPrev={prev} onNext={next} />
+      ) : null}
+    </section>
+  );
+}
+
+export default function Portfolio({ eyebrow, title, items, viewAllText, viewAllHref, variant = "grid" }: PortfolioProps) {
+  if (variant === "gallery") {
+    return <Gallery eyebrow={eyebrow} title={title} items={items} viewAllText={viewAllText} viewAllHref={viewAllHref} />;
+  }
   const featured = variant === "featured";
   return (
     <section className="bg-surface-primary">
       <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-        <div className="flex flex-col items-center gap-2 text-center">
-          {eyebrow ? (
-            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
-          ) : null}
-          <h2 className="font-display text-display-2 font-bold text-content-primary">{title}</h2>
-        </div>
+        <Header eyebrow={eyebrow} title={title} />
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, i) => (
             <PortfolioCard key={`${item.title}-${i}`} item={item} index={i} featured={featured} />
           ))}
         </div>
-        {viewAllText && viewAllHref ? (
-          <div className="mt-10 text-center">
-            <Button as="a" href={viewAllHref} variant="outline" size="md">
-              {viewAllText}
-            </Button>
-          </div>
-        ) : null}
+        <ViewAll text={viewAllText} href={viewAllHref} />
       </div>
     </section>
   );

@@ -1,87 +1,94 @@
 "use client";
 
-import { useReveal } from "@/hooks/useReveal";
-import Image from "next/image";
+import { Check } from "lucide-react";
 import Badge from "@/components/ui/Badge";
-import Button from "@/components/ui/Button";
+import Accordion from "@/components/ui/Accordion";
+import { useReveal } from "@/hooks/useReveal";
 
-// Sección SERVICIOS del design system (ECO-54, nivel 2; foto real opcional ECO-61/F7a). Rejilla de servicios
-// reales (del brief), con reveal escalonado y acento de marca. `imageSrc` (foto REAL del cliente, opcional)
-// ilustra la tarjeta con `next/image`; sin ella, tarjeta de solo texto (omit-if-absent, nunca placeholder).
-// Variantes `cards` (default) y `list`. Token-safe y a11y.
+// Sección SERVICIOS del design-system — REFINADA ECO-93 replicando la ESTRUCTURA EXACTA de la PÁGINA de
+// servicios (/servicios) de sat-cristian-garcia (NO el teaser de la home), con lenguaje NEUTRO (tokens).
+// Estructura del benchmark: cabecera centrada (etiqueta + título display + subtítulo) y una LISTA VERTICAL
+// (max-w-4xl) de servicios detallados; cada tarjeta `card-flat` (primitivo) con hover de borde ACTIVO trae un
+// NÚMERO de índice grande + (título + badge de categoría) + descripción completa + un `Accordion` (primitivo)
+// "qué incluye" con la lista de features (check con icono primitivo lucide). Marca por token (--color-accent):
+// lienzo en blanco. El CONTENIDO entra por props (nunca inventado). Reveal escalonado, a11y.
 export interface ServiceItem {
+  /** Categoría/etiqueta (badge). */
+  label: string;
   title: string;
-  description?: string;
-  /** Foto REAL del cliente (ya ingerida a /images/). Opcional. */
-  imageSrc?: string;
+  /** Descripción completa del servicio. */
+  fullDesc: string;
+  /** Lo que incluye (acordeón). Opcional. */
+  features?: string[];
 }
 export interface ServicesProps {
   eyebrow?: string;
   title: string;
+  subtitle?: string;
   services: ServiceItem[];
-  viewAllText?: string;
-  viewAllHref?: string;
-  variant?: "cards" | "list";
+  /** Título del acordeón "qué incluye" (default "What's included"). */
+  featuresTitle?: string;
 }
 
-function ServiceCard({ item, index, list }: { item: ServiceItem; index: number; list: boolean }) {
-  const { ref, style } = useReveal<HTMLDivElement>({ delay: (index % 3) * 90 });
-  const hasImg = !!item.imageSrc;
+function ServiceCard({ service, index, featuresTitle }: { service: ServiceItem; index: number; featuresTitle: string }) {
+  const { ref, style } = useReveal<HTMLDivElement>({ delay: (index % 3) * 120 });
   return (
-    <div
-      ref={ref}
-      style={style}
-      className={`overflow-hidden rounded-2xl border border-border-default bg-surface-primary transition-colors hover:border-accent ${
-        list ? "flex items-start gap-4 p-6" : ""
-      }`}
-    >
-      {hasImg && !list ? (
-        <div className="relative aspect-[16/9]">
-          <Image src={item.imageSrc!} alt={item.title} fill sizes="(min-width: 1024px) 22rem, (min-width: 640px) 50vw, 100vw" className="object-cover" />
+    <div ref={ref} style={style}>
+      <div className="card-flat scroll-mt-24 transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-components hover:shadow-[var(--shadow-card)]">
+        <div className="flex items-start gap-5">
+          <span className="text-3xl font-black text-content-primary">{String(index + 1).padStart(2, "0")}</span>
+          <div className="flex-1">
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
+              <h2 className="text-h2 font-semibold text-content-primary">{service.title}</h2>
+              <Badge variant="default" size="sm">
+                {service.label}
+              </Badge>
+            </div>
+            <p className="mt-2 text-body leading-relaxed text-content-secondary">{service.fullDesc}</p>
+            {service.features && service.features.length ? (
+              <div className="mt-4">
+                <Accordion
+                  items={[
+                    {
+                      title: featuresTitle,
+                      children: (
+                        <ul className="space-y-1">
+                          {service.features.map((f) => (
+                            <li key={f} className="flex items-start gap-2 text-body text-content-secondary">
+                              <Check size={18} aria-hidden className="mt-0.5 shrink-0 text-content-primary" />
+                              {f}
+                            </li>
+                          ))}
+                        </ul>
+                      ),
+                    },
+                  ]}
+                />
+              </div>
+            ) : null}
+          </div>
         </div>
-      ) : null}
-      <div className={list ? "flex-1" : "p-6"}>
-        <h3 className="text-h2 font-semibold text-content-primary">{item.title}</h3>
-        {item.description ? (
-          <p className="mt-2 text-body leading-relaxed text-content-secondary">{item.description}</p>
-        ) : null}
       </div>
     </div>
   );
 }
 
-export default function Services({
-  eyebrow,
-  title,
-  services,
-  viewAllText,
-  viewAllHref,
-  variant = "cards",
-}: ServicesProps) {
-  const list = variant === "list";
+export default function Services({ eyebrow, title, subtitle, services, featuresTitle = "What's included" }: ServicesProps) {
   return (
-    <section className="bg-surface-secondary">
-      <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
-        <div className="flex flex-col items-center gap-2 text-center">
+    <section className="bg-surface-secondary py-20">
+      <div className="mx-auto max-w-7xl px-6">
+        <div className="mb-12 text-center">
           {eyebrow ? (
-            <Badge variant="default" size="sm" className="text-accent">
-              {eyebrow}
-            </Badge>
+            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
           ) : null}
-          <h2 className="text-3xl font-bold text-content-primary sm:text-4xl">{title}</h2>
+          <h2 className="mt-2 font-display text-display-2 font-bold text-content-primary">{title}</h2>
+          {subtitle ? <p className="mx-auto mt-3 max-w-xl text-body text-content-secondary">{subtitle}</p> : null}
         </div>
-        <div className={`mt-12 grid gap-6 ${list ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"}`}>
+        <div className="mx-auto max-w-4xl space-y-6">
           {services.map((s, i) => (
-            <ServiceCard key={`${s.title}-${i}`} item={s} index={i} list={list} />
+            <ServiceCard key={s.label} service={s} index={i} featuresTitle={featuresTitle} />
           ))}
         </div>
-        {viewAllText && viewAllHref ? (
-          <div className="mt-10 text-center">
-            <Button as="a" href={viewAllHref} variant="outline" size="md">
-              {viewAllText}
-            </Button>
-          </div>
-        ) : null}
       </div>
     </section>
   );

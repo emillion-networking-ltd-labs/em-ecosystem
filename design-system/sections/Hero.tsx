@@ -40,8 +40,8 @@ function HeroStatCard({ stat, variant }: { stat: HeroStat; variant: "desktop" | 
           : "card-flat py-8 text-center"
       }
     >
-      <p className={`text-h1 ${onMedia ? "text-white" : "text-content-primary"}`}>{stat.value}</p>
-      <p className={`mt-2 ${onMedia ? "text-caption text-white/60" : "text-body font-semibold text-content-secondary"}`}>{stat.label}</p>
+      <p className={`text-h1 font-black ${onMedia ? "text-white" : "text-content-primary"}`}>{stat.value}</p>
+      <p className={`mt-2 ${onMedia ? "text-caption text-white/60" : "text-body text-content-secondary"}`}>{stat.label}</p>
     </div>
   );
 }
