@@ -2,9 +2,10 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import FAQ from "@/components/sections/FAQ";
 
 const ITEMS = [
-  { question: "How long does a project take?", answer: "Between 3 and 6 weeks depending on scope." },
-  { question: "Do you work remotely?", answer: "Yes, with teams across the world." },
-  { question: "Do you offer maintenance?", answer: "Yes, optional monthly plans." },
+  { question: "How long does a project take?", answer: "Between 3 and 6 weeks depending on scope and the level of polish you need." },
+  { question: "Do you work remotely?", answer: "Yes, with teams across the world — async-friendly and on your timezone when it matters." },
+  { question: "Do you offer maintenance?", answer: "Yes, optional monthly plans to keep everything fast, secure and up to date." },
+  { question: "How do we get started?", answer: "A short discovery call, a clear proposal, and a kickoff within the week." },
 ];
 
 const meta = {
@@ -13,32 +14,44 @@ const meta = {
   parameters: { layout: "fullscreen" },
   tags: ["autodocs"],
   args: {
-    eyebrow: "Questions",
+    eyebrow: "FAQ",
     title: "Frequently asked questions",
-    variant: "list",
     items: ITEMS,
   },
-  argTypes: { variant: { control: "inline-radio", options: ["list", "boxed"] } },
+  argTypes: {
+    surface: { control: "inline-radio", options: ["grouped", "separated"] },
+    indicator: { control: "inline-radio", options: ["chevron", "plus"] },
+  },
 } satisfies Meta<typeof FAQ>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Default — grouped accordion with the plus (+→×) indicator.
 export const Default: Story = {};
 
-// boxed = each question sits in its own bordered card instead of an underlined row.
-export const Boxed: Story = { args: { variant: "boxed" } };
+// Separated — each question in its own bordered card.
+export const Separated: Story = { args: { surface: "separated" } };
 
-// AllVariants — ALWAYS last: every layout variant, stacked full-width.
+// Chevron — the alternative indicator (▾ rotates 180° instead of the +→×).
+export const Chevron: Story = { args: { indicator: "chevron" } };
+
+// AllVariants — ALWAYS last: surfaces × indicator options.
+const VARIANTS = [
+  { label: "grouped · plus (default)", surface: "grouped" as const, indicator: "plus" as const },
+  { label: "separated · plus", surface: "separated" as const, indicator: "plus" as const },
+  { label: "grouped · chevron", surface: "grouped" as const, indicator: "chevron" as const },
+];
+
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col">
-      {(["list", "boxed"] as const).map((variant) => (
-        <div key={variant}>
+      {VARIANTS.map(({ label, surface, indicator }) => (
+        <div key={label}>
           <div className="bg-surface-primary px-6 py-2">
-            <span className="text-caption text-content-tertiary font-mono">{variant}</span>
+            <span className="text-caption text-content-tertiary font-mono">{label}</span>
           </div>
-          <FAQ eyebrow="Questions" title="Frequently asked questions" variant={variant} items={ITEMS} />
+          <FAQ eyebrow="FAQ" title="Frequently asked questions" items={ITEMS} surface={surface} indicator={indicator} />
         </div>
       ))}
     </div>
