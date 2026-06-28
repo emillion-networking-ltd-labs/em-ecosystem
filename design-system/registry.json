@@ -95,7 +95,7 @@
       "type": "registry:ui",
       "file": "components/Button.tsx",
       "registryDependencies": [
-        "InfinitySpinner"
+        "SpinnerInfinity"
       ],
       "internalDependencies": []
     },
@@ -288,13 +288,6 @@
       ]
     },
     {
-      "name": "InfinitySpinner",
-      "type": "registry:ui",
-      "file": "components/InfinitySpinner.tsx",
-      "registryDependencies": [],
-      "internalDependencies": []
-    },
-    {
       "name": "InlineError",
       "type": "registry:ui",
       "file": "components/InlineError.tsx",
@@ -307,7 +300,7 @@
       "file": "components/Input.tsx",
       "registryDependencies": [
         "IconButton",
-        "Spinner"
+        "SpinnerCircle"
       ],
       "internalDependencies": []
     },
@@ -383,13 +376,6 @@
       "internalDependencies": []
     },
     {
-      "name": "RingSpinner",
-      "type": "registry:ui",
-      "file": "components/RingSpinner.tsx",
-      "registryDependencies": [],
-      "internalDependencies": []
-    },
-    {
       "name": "SearchTrigger",
       "type": "registry:ui",
       "file": "components/SearchTrigger.tsx",
@@ -456,9 +442,23 @@
       "internalDependencies": []
     },
     {
-      "name": "Spinner",
+      "name": "SpinnerCircle",
       "type": "registry:ui",
-      "file": "components/Spinner.tsx",
+      "file": "components/SpinnerCircle.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "SpinnerInfinity",
+      "type": "registry:ui",
+      "file": "components/SpinnerInfinity.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "SpinnerRing",
+      "type": "registry:ui",
+      "file": "components/SpinnerRing.tsx",
       "registryDependencies": [],
       "internalDependencies": []
     },

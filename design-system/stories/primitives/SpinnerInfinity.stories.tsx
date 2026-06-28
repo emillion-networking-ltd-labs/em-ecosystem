@@ -1,34 +1,33 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import Spinner from "@/components/ui/Spinner";
+import SpinnerInfinity from "@/components/ui/SpinnerInfinity";
 
 const meta = {
-  title: "Primitives/Spinner",
-  component: Spinner,
+  title: "Primitives/SpinnerInfinity",
+  component: SpinnerInfinity,
   tags: ["autodocs"],
   args: { size: "md" },
-  argTypes: { size: { control: "inline-radio", options: ["sm", "md", "lg"] } },
-} satisfies Meta<typeof Spinner>;
+  argTypes: { size: { control: "inline-radio", options: ["md", "lg"] } },
+} satisfies Meta<typeof SpinnerInfinity>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// Las tres claves reales de `sizeClasses` (sm/md/lg), ordenadas y etiquetadas
-// con sus px como en ComponentShowcase (16/24/32 — md es el default).
+// Only md/lg: at sm the figure-8 is too small to read the animation. Largest → smallest.
+// The SVG inherits text color (stroke=currentColor) → text-content-primary on the container.
 const SIZES = [
   { size: "lg", px: "32" },
   { size: "md", px: "24" },
-  { size: "sm", px: "16" },
 ] as const;
 
-export const AllSizes: Story = {
+export const Sizes: Story = {
   render: () => (
-    <div className="flex flex-wrap items-end gap-6">
+    <div className="flex flex-wrap items-end gap-6 text-content-primary">
       {SIZES.map(({ size, px }) => (
         <div key={size} className="flex flex-col items-center gap-1.5">
           <div className="flex h-8 items-center justify-center">
-            <Spinner size={size} />
+            <SpinnerInfinity size={size} />
           </div>
           <span className="text-caption text-content-tertiary font-mono">
             {size} · {px}px{size === "md" ? " (default)" : ""}

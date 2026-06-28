@@ -2,7 +2,7 @@
 
 import { useState, useRef, forwardRef, type ReactNode } from "react";
 import { Eye, EyeOff, TriangleAlert } from "lucide-react";
-import Spinner from "./Spinner";
+import SpinnerCircle from "./SpinnerCircle";
 import IconButton from "./IconButton";
 
 interface InputProps extends Omit<
@@ -131,7 +131,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         )}
         {loading && (
           <span className="shrink-0">
-            <Spinner size="sm" />
+            <SpinnerCircle size="sm" />
           </span>
         )}
       </div>

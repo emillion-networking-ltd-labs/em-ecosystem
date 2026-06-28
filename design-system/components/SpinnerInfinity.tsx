@@ -1,5 +1,5 @@
 /**
- * InfinitySpinner — button loading indicator.
+ * SpinnerInfinity — button loading indicator.
  * Replicates DaisyUI `loading-infinity` as inline SVG + CSS @keyframes.
  *
  * All values extracted directly from DaisyUI v5 source:
@@ -15,13 +15,13 @@
  * vectorEffect="non-scaling-stroke" + strokeWidth="2" → exactly 2px stroke
  * at every size, immune to viewBox and CSS transform scaling.
  *
- * Usage: <InfinitySpinner /> or <InfinitySpinner size="lg" />
+ * Usage: <SpinnerInfinity /> or <SpinnerInfinity size="lg" />
  */
 
 // Only md/lg are exposed: at sm the figure-8 is too small to read the animation (ECO-91).
 type SpinnerSize = "md" | "lg";
 
-export const infinitySpinnerSpecs = {
+export const spinnerInfinitySpecs = {
   type: "Figure-8 lemniscate — used inside buttons",
   sizes: { md: "24px", lg: "32px" },
   base: "SVG dashoffset animation 2s linear, stroke=currentColor",
@@ -32,7 +32,7 @@ const SIZES: Record<SpinnerSize, number> = {
   lg: 32,
 };
 
-export default function InfinitySpinner({
+export default function SpinnerInfinity({
   size = "md",
 }: {
   size?: SpinnerSize;

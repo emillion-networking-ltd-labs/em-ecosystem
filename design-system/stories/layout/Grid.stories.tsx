@@ -15,18 +15,84 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Columns (most → fewest). 3 is the default. Always collapses to 1 on mobile.
+const COLS = [4, 3, 2, 1] as const;
+// Gaps (largest → smallest), with the spacing value. md is the default.
+const GAPS = [
+  { gap: "xl", px: "48" },
+  { gap: "lg", px: "32" },
+  { gap: "md", px: "24" },
+  { gap: "sm", px: "16" },
+] as const;
+
 const Cell = ({ n }: { n: number }) => (
-  <div className="rounded-lg border border-border-default bg-surface-secondary p-6 text-content-secondary">
-    Celda {n}
+  <div className="rounded-lg border border-border-default bg-surface-secondary p-6 text-center text-content-secondary">
+    Cell {n}
   </div>
 );
 
+const cells = (count: number) =>
+  Array.from({ length: count }, (_, i) => <Cell key={i} n={i + 1} />);
+
+// Playground — responsive grid with governed columns and gap.
 export const Default: Story = {
-  render: (args) => (
-    <Grid {...args}>
-      {Array.from({ length: 6 }, (_, i) => (
-        <Cell key={i} n={i + 1} />
+  render: (args) => <Grid {...args}>{cells(6)}</Grid>,
+};
+
+// Columns — 4 → 1, each with enough cells to fill a row at the top breakpoint.
+export const Columns: Story = {
+  render: () => (
+    <div className="space-y-8">
+      {COLS.map((c) => (
+        <div key={c} className="space-y-1.5">
+          <span className="text-caption text-content-tertiary font-mono">
+            cols={c}
+            {c === 3 ? " (default)" : ""}
+          </span>
+          <Grid cols={c}>{cells(c)}</Grid>
+        </div>
       ))}
-    </Grid>
+    </div>
+  ),
+};
+
+// Gaps — largest → smallest, on a fixed 3-column grid.
+export const Gaps: Story = {
+  render: () => (
+    <div className="space-y-8">
+      {GAPS.map(({ gap, px }) => (
+        <div key={gap} className="space-y-1.5">
+          <span className="text-caption text-content-tertiary font-mono">
+            {gap} · {px}px{gap === "md" ? " (default)" : ""}
+          </span>
+          <Grid cols={3} gap={gap}>
+            {cells(3)}
+          </Grid>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+// AllVariants — ALWAYS last: the column axis at each gap.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="space-y-10">
+      {GAPS.map(({ gap, px }) => (
+        <div key={gap} className="space-y-3">
+          <p className="text-caption text-content-tertiary font-mono">
+            gap {gap} · {px}px{gap === "md" ? " (default)" : ""}
+          </p>
+          {COLS.map((c) => (
+            <div key={c} className="space-y-1.5">
+              <span className="text-caption text-content-tertiary font-mono">cols={c}</span>
+              <Grid cols={c} gap={gap}>
+                {cells(c)}
+              </Grid>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
   ),
 };
