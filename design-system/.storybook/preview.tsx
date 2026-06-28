@@ -24,6 +24,15 @@ const withTheme: Decorator = (Story, context) => {
   // inyectan en el MISMO wrapper; los componentes y las Foundations re-resuelven `--color-accent`,
   // `--gradient-brand`, `--font-display` etc. desde aquí. Los tokens semánticos NO se tocan.
   const preset = PRESETS.find((p) => p.id === context.globals.preset) ?? PRESETS[0];
+  // Los gradientes de marca se DECLARAN en :root del core con var(--color-accent/-2) → se computan UNA
+  // vez en :root (con el accent base) y se heredan CONGELADOS; redefinir solo --color-accent en el preset
+  // NO los cambiaría. Re-declararlos aquí (mismas fórmulas que tokens.css) fuerza que se re-resuelvan en
+  // este wrapper con el accent/-2 del preset activo. Mantener en sync con tokens/tokens.css.
+  const brandGradients: Record<string, string> = {
+    "--gradient-brand": "linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%)",
+    "--gradient-brand-radial":
+      "radial-gradient(120% 120% at 50% 0%, var(--color-accent-2) 0%, var(--color-accent) 55%, transparent 100%)",
+  };
   // Replica el BASELINE del `body` de producción (dashboard/satélite): el fondo de PÁGINA es
   // `surface-secondary` (un tono DISTINTO al `surface-primary` de los componentes → contraste, se
   // separan en dark), y la base tipográfica es `--text-body` (14px) + `--font-sans` + letter-spacing.
@@ -43,6 +52,7 @@ const withTheme: Decorator = (Story, context) => {
           fontSize: "var(--text-body)",
           letterSpacing: "0.01em",
           ...preset.vars,
+          ...brandGradients,
         }}
       >
         <Story />
