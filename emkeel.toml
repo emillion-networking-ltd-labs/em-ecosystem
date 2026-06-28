@@ -12,4 +12,4 @@ repo = "emillionnetworking-ltd-labs/em-ecosystem"
 
 [emkeel]
 source = "emkeel~=0.1.0"
-generated_with = "0.1.101"   # the Emkeel version that wrote this wiring (emkeel doctor checks it)
+generated_with = "0.1.102"   # the Emkeel version that wrote this wiring (emkeel doctor checks it)
