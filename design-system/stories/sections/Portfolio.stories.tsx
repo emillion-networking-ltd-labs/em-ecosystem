@@ -13,6 +13,13 @@ const ITEMS = [
   { title: "Norte Store", description: "Custom e-commerce build." },
 ];
 
+// Same items but every card has a photo (the third reuses srcA) — for the image-driven views.
+const ITEMS_IMG = [
+  { title: "Atlas Rebrand", description: "Identity and website for a fintech.", imageSrc: srcA },
+  { title: "Verde App", description: "A mobility mobile product.", imageSrc: srcB },
+  { title: "Norte Store", description: "Custom e-commerce build.", imageSrc: srcA },
+];
+
 const meta = {
   title: "Sections/Portfolio",
   component: Portfolio,
@@ -37,27 +44,26 @@ export const Default: Story = {};
 // featured = the first item spans two columns as a hero tile.
 export const Featured: Story = { args: { variant: "featured" } };
 
-// Items without an image fall back to a brand-colored tile with the title.
-export const WithImages: Story = {
-  args: {
-    items: [
-      { title: "Atlas Rebrand", description: "Identity and website for a fintech.", imageSrc: srcA },
-      { title: "Verde App", description: "A mobility mobile product.", imageSrc: srcB },
-      { title: "Norte Store", description: "Custom e-commerce build." },
-    ],
-  },
-};
+// Every card has a real photo (the third reuses srcA).
+export const WithImages: Story = { args: { items: ITEMS_IMG } };
 
-// AllVariants — ALWAYS last: every layout variant, stacked full-width.
+// AllVariants — ALWAYS last: EVERY Portfolio example — grid / featured × without / with images.
+const ALL = [
+  { label: "grid · no images", variant: "grid" as const, items: ITEMS },
+  { label: "grid · with images", variant: "grid" as const, items: ITEMS_IMG },
+  { label: "featured · no images", variant: "featured" as const, items: ITEMS },
+  { label: "featured · with images", variant: "featured" as const, items: ITEMS_IMG },
+];
+
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col">
-      {(["grid", "featured"] as const).map((variant) => (
-        <div key={variant}>
+      {ALL.map(({ label, variant, items }) => (
+        <div key={label}>
           <div className="bg-surface-primary px-6 py-2">
-            <span className="text-caption text-content-tertiary font-mono">{variant}</span>
+            <span className="text-caption text-content-tertiary font-mono">{label}</span>
           </div>
-          <Portfolio eyebrow="Work" title="Recent projects" variant={variant} items={ITEMS} />
+          <Portfolio eyebrow="Work" title="Recent projects" variant={variant} items={items} viewAllText="View all" viewAllHref="#" />
         </div>
       ))}
     </div>

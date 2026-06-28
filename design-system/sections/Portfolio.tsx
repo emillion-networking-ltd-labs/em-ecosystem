@@ -2,12 +2,13 @@
 
 import { useReveal } from "@/hooks/useReveal";
 import Image from "next/image";
-import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
 
 // Sección PORTFOLIO del design system (ECO-55, nivel 2; fotos reales ECO-61/F7a). Galería de trabajos/fotos
 // REALES del cliente (del brief — nunca inventados; sin items, se omite). La imagen es OPCIONAL y se pinta con
-// `next/image` (optimizado, formatos modernos); sin imagen, un tile de marca con el título. El `title` es
+// `next/image` (optimizado, formatos modernos); sin imagen, un tile NEUTRO (surface-secondary) con el título.
+// Refinada ECO-93: lenguaje neutro — cabecera en `display`, eyebrow neutro (sin Badge), tile y hover sin el
+// accent placeholder. El `title` es
 // OPCIONAL: una galería de fotos reales puede ser solo-imagen (sin barra de texto). Reveal escalonado, a11y.
 export interface PortfolioItem {
   /** Título del trabajo. Opcional: una foto de galería puede no tenerlo (tile solo-imagen). */
@@ -34,9 +35,9 @@ function PortfolioCard({ item, index, featured }: { item: PortfolioItem; index: 
     <article ref={ref} style={style} className={big ? "sm:col-span-2" : ""}>
       <Wrapper
         {...(item.href ? { href: item.href } : {})}
-        className="group block overflow-hidden rounded-2xl border border-border-default bg-surface-primary transition-colors hover:border-accent"
+        className="group block overflow-hidden rounded-2xl border border-border-default bg-surface-primary transition-colors hover:border-border-strong"
       >
-        <div className={`relative ${big ? "aspect-[2/1]" : "aspect-[4/3]"} ${hasImg ? "" : "flex items-end bg-gradient-to-br from-accent to-accent-dark"}`}>
+        <div className={`relative ${big ? "aspect-[2/1]" : "aspect-[4/3]"} ${hasImg ? "" : "flex items-end bg-surface-secondary"}`}>
           {hasImg ? (
             <Image
               src={item.imageSrc!}
@@ -46,7 +47,7 @@ function PortfolioCard({ item, index, featured }: { item: PortfolioItem; index: 
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : item.title ? (
-            <span className="p-5 text-h3 font-semibold text-white">{item.title}</span>
+            <span className="p-5 text-h3 font-semibold text-content-primary">{item.title}</span>
           ) : null}
         </div>
         {item.title || item.description ? (
@@ -74,11 +75,9 @@ export default function Portfolio({
       <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
         <div className="flex flex-col items-center gap-2 text-center">
           {eyebrow ? (
-            <Badge variant="default" size="sm" className="text-accent">
-              {eyebrow}
-            </Badge>
+            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
           ) : null}
-          <h2 className="text-3xl font-bold text-content-primary sm:text-4xl">{title}</h2>
+          <h2 className="font-display text-display-2 font-bold text-content-primary">{title}</h2>
         </div>
         <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, i) => (
