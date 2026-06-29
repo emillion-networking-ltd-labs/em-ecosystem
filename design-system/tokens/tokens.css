@@ -594,3 +594,17 @@
     transform: translate(-50%, -50%) scale(0.9);
   }
 }
+
+/* PulsatingButton (ECO-106, fase 1 / ADR-019) — halo que late hacia fuera (box-shadow del color del botón,
+   expandiéndose y desvaneciéndose). Token de animación + keyframe que consume `animate-button-pulse`. Aditivo. */
+@theme inline {
+  --animate-button-pulse: button-pulse var(--duration, 1.5s) ease-out infinite;
+}
+@keyframes button-pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--pulse-color);
+  }
+  100% {
+    box-shadow: 0 0 0 var(--distance, 8px) transparent;
+  }
+}

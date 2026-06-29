@@ -69,9 +69,10 @@ color crudo `text-neutral-900 dark:text-neutral-100` → token `text-content-pri
 | `components/Ripple.tsx` | Magic UI | MIT (© Magic UI) | https://magicui.design/r/ripple.json |
 
 Los dos CTAs usan el esquema de color del `Button` primary (NO el accent): `bg-primary`/`text-primary-foreground`
-→ `surface-inverse`/`content-inverse`. `PulsatingButton`: reconstruido — el pulso = overlay con `animate-pulse`
-(utilidad core, sin keyframe nuevo); se omiten la variante `ripple` y el `useLayoutEffect` de sync `--bg` del
-original (innecesario con color por token). `InteractiveHoverButton`: verbatim salvo colores → tokens
+→ `surface-inverse`/`content-inverse`, y la misma redondez del `Button` del sistema (`rounded-md`, no la
+`pill`/`lg` del original — sin redondez huérfana). `PulsatingButton`: reconstruido — el pulso = halo `box-shadow`
+que late (keyframe `button-pulse` añadido a `tokens.css`, append); se omiten la variante `ripple` y el
+`useLayoutEffect` de sync `--bg` del original (innecesario con color por token). `InteractiveHoverButton`: verbatim salvo colores → tokens
 (`surface-primary`/`content-primary`/`surface-inverse`/`content-inverse`/`border-components`) y flecha lucide
 `size-4`. `Ripple`: verbatim salvo `bg-foreground/25` + `var(--foreground)` → token `content-primary`; el latido
 usa el keyframe `ripple` (`--animate-ripple`) añadido a `tokens.css` (append). Solo `cn`/`lucide-react` (ya
