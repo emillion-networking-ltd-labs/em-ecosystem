@@ -29,7 +29,7 @@ const variantCopy: Record<"warning" | "error" | "info" | "success", string> = {
 // AllVariants — ALWAYS last: the four semantic variants (warning · error · info · success).
 export const AllVariants: Story = {
   render: () => (
-    // items-start → cada alerta ajusta a su contenido (AlertBox es inline-flex), sin estirarse.
+    // items-start → each alert hugs its content (AlertBox is inline-flex) instead of stretching.
     <div className="flex flex-col items-start gap-2">
       {(["warning", "error", "info", "success"] as const).map((v) => (
         <AlertBox key={v} variant={v}>

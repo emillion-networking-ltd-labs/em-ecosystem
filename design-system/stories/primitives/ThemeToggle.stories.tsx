@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import ThemeToggle from "@/components/ui/ThemeToggle";
 
-// App-coupled: usa useTheme → @/context/ThemeContext. En el catálogo se cablea contra un
-// ThemeContext MOCK (ver .storybook/mocks/context); en la app real lo provee el dashboard.
+// App-coupled: uses useTheme → @/context/ThemeContext. In the catalog it's wired against a
+// MOCK ThemeContext (see .storybook/mocks/context); the real app's dashboard provides it.
 const meta = {
   title: "Primitives/ThemeToggle",
   component: ThemeToggle,

@@ -20,7 +20,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// Sin fecha seleccionada — solo el día de hoy aparece resaltado (bg-surface-subtle).
+// No date selected — only today is highlighted (bg-surface-subtle).
 export const NoSelection: Story = {
   render: (args) => {
     const [value, setValue] = useState<Date | undefined>(undefined);
@@ -28,7 +28,7 @@ export const NoSelection: Story = {
   },
 };
 
-// disabled — calendario completo inhabilitado (flechas y días bloqueados).
+// disabled — the whole calendar is disabled (arrows and days blocked).
 export const Disabled: Story = {
   args: { disabled: true },
   render: (args) => {
@@ -37,8 +37,8 @@ export const Disabled: Story = {
   },
 };
 
-// Rango acotado con minDate/maxDate — los días fuera del rango quedan
-// opacos (opacity-30, cursor-not-allowed).
+// Bounded range with minDate/maxDate — days outside the range are
+// dimmed (opacity-30, cursor-not-allowed).
 export const WithMinMax: Story = {
   render: (args) => {
     const today = new Date();

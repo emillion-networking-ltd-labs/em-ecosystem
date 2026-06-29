@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import ToastContainer from "@/components/ui/ToastContainer";
 
-// App-coupled: consume useToast → @/context/ToastContext (mock en el catálogo con toasts de
-// muestra; en la app real lo provee el dashboard). Renderiza los toasts fijos (top, fixed).
+// App-coupled: consumes useToast → @/context/ToastContext (mock in the catalog with sample
+// toasts; the real app's dashboard provides it). Renders the fixed toasts (top, fixed).
 const meta = {
   title: "Primitives/ToastContainer",
   component: ToastContainer,

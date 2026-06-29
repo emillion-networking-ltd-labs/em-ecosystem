@@ -28,22 +28,22 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// Pocas páginas (≤7) — se listan todas, sin elipsis.
+// Few pages (≤7) — all listed, no ellipsis.
 export const FewPages: Story = {
   args: { currentPage: 2, totalPages: 5 },
 };
 
-// Primera página — la flecha «anterior» queda deshabilitada; elipsis a la derecha.
+// First page — the "previous" arrow is disabled; ellipsis on the right.
 export const FirstPage: Story = {
   args: { currentPage: 1, totalPages: 12 },
 };
 
-// Página intermedia — elipsis a ambos lados.
+// Middle page — ellipsis on both sides.
 export const MiddlePage: Story = {
   args: { currentPage: 6, totalPages: 12 },
 };
 
-// Última página — la flecha «siguiente» queda deshabilitada; elipsis a la izquierda.
+// Last page — the "next" arrow is disabled; ellipsis on the left.
 export const LastPage: Story = {
   args: { currentPage: 12, totalPages: 12 },
 };

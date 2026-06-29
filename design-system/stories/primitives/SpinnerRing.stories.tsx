@@ -14,8 +14,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// Claves reales de SIZES (sm=16 / md=24 / lg=32). El SVG hereda el color del
-// texto (stroke=currentColor), de ahí el text-content-primary del contenedor.
+// Real SIZES keys (sm=16 / md=24 / lg=32). The SVG inherits the text color
+// (stroke=currentColor), hence text-content-primary on the container.
 const SIZES = [
   { size: "lg", px: "32" },
   { size: "md", px: "24" },

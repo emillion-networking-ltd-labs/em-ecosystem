@@ -14,8 +14,8 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// Las tres claves reales de `sizeClasses` (sm/md/lg), ordenadas y etiquetadas
-// con sus px como en ComponentShowcase (16/24/32 — md es el default).
+// The 3 real `sizeClasses` keys (sm/md/lg), ordered and labeled with their
+// px as in ComponentShowcase (16/24/32 — md is the default).
 const SIZES = [
   { size: "lg", px: "32" },
   { size: "md", px: "24" },

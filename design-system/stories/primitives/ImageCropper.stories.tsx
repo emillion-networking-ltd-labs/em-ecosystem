@@ -37,8 +37,8 @@ export const Default: Story = {
   },
 };
 
-// cropShape: union real "round" | "rect". round es el default (recorte circular,
-// como el Avatar). Estado controlado vía useState (open).
+// cropShape: real union "round" | "rect". round is the default (circular crop,
+// like the Avatar). Controlled state via useState (open).
 export const Rectangular: Story = {
   args: { cropShape: "rect" },
   render: (args) => {
