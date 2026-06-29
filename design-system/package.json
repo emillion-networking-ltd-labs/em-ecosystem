@@ -8,7 +8,7 @@
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
     "test-storybook": "test-storybook",
-    "coverage": "node scripts/check-story-coverage.mjs && node scripts/check-variant-coverage.mjs"
+    "coverage": "node scripts/check-story-coverage.mjs && node scripts/check-variant-coverage.mjs && node scripts/check-selection-model.mjs"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.2",

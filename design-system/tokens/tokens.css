@@ -80,6 +80,28 @@
   [role="menuitemradio"] {
     cursor: pointer;
   }
+
+  /* MODELO DE SELECCIÓN (ECO-99): por defecto NADA es seleccionable → ningún caret de texto dentro de
+     cards, cajas, layout ni elementos no-texto (el problema que el catálogo destapaba: clicar un card
+     metía un caret). Solo el contenido de TEXTO —y los campos editables— reactiva la selección, así que
+     el texto sigue siendo copiable. La regla de ECO-93 solo neutralizaba CONTROLES; este es el modelo
+     completo "solo el texto es seleccionable". El catálogo importa este core; el dashboard tiene su
+     propia copia de tokens (se re-sincroniza por ticket aparte). */
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  p, h1, h2, h3, h4, h5, h6,
+  span, a, li, code, pre, kbd, samp,
+  blockquote, q, cite, em, strong, b, i, u, s, small, mark, sub, sup,
+  abbr, dfn, time, label, dt, dd, figcaption, caption, th, td, address {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  input, textarea, [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
 }
 
 @theme {
