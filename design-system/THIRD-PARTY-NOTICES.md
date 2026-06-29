@@ -60,6 +60,23 @@ arbitrario (line-height fuera de la escala) y el cursor usa el keyframe `blink-c
 color crudo `text-neutral-900 dark:text-neutral-100` → token `text-content-primary`. Todos solo `motion` +
 `cn` (ya presentes). Cero dependencias npm nuevas.
 
+### Tanda 5 — CTAs de marketing + fondo (Tier 3, ECO-106)
+
+| Componente | Origen | Licencia | URL |
+|---|---|---|---|
+| `components/PulsatingButton.tsx` | Magic UI | MIT (© Magic UI) | https://magicui.design/r/pulsating-button.json |
+| `components/InteractiveHoverButton.tsx` | Magic UI | MIT (© Magic UI) | https://magicui.design/r/interactive-hover-button.json |
+| `components/Ripple.tsx` | Magic UI | MIT (© Magic UI) | https://magicui.design/r/ripple.json |
+
+Los dos CTAs usan el esquema de color del `Button` primary (NO el accent): `bg-primary`/`text-primary-foreground`
+→ `surface-inverse`/`content-inverse`. `PulsatingButton`: reconstruido — el pulso = overlay con `animate-pulse`
+(utilidad core, sin keyframe nuevo); se omiten la variante `ripple` y el `useLayoutEffect` de sync `--bg` del
+original (innecesario con color por token). `InteractiveHoverButton`: verbatim salvo colores → tokens
+(`surface-primary`/`content-primary`/`surface-inverse`/`content-inverse`/`border-components`) y flecha lucide
+`size-4`. `Ripple`: verbatim salvo `bg-foreground/25` + `var(--foreground)` → token `content-primary`; el latido
+usa el keyframe `ripple` (`--animate-ripple`) añadido a `tokens.css` (append). Solo `cn`/`lucide-react` (ya
+presentes). Cero dependencias npm nuevas.
+
 ## Dependencias npm que requieren estos componentes (las instala el satélite consumidor)
 
 | Paquete | Usado por | Licencia | URL |

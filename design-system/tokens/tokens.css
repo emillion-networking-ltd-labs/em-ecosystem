@@ -579,3 +579,18 @@
     opacity: 0;
   }
 }
+
+/* Ripple (ECO-106, fase 1 / ADR-019) — fondo de círculos concéntricos que laten (escala) con stagger por
+   `--i`. Token de animación + keyframe que consume la utilidad `animate-ripple`. Aditivo. */
+@theme inline {
+  --animate-ripple: ripple var(--duration, 2s) ease calc(var(--i, 0) * 0.2s) infinite;
+}
+@keyframes ripple {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}
