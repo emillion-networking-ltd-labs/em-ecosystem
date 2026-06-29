@@ -568,3 +568,14 @@
   --duration-slow: 600ms;
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
 }
+
+/* Cursor parpadeante de TypingAnimation (ECO-105, fase 1 / ADR-019) — token de animación + keyframe que
+   consume la utilidad `animate-blink-cursor`. Aditivo: no altera ningún token existente. */
+@theme inline {
+  --animate-blink-cursor: blink-cursor 1s step-end infinite;
+}
+@keyframes blink-cursor {
+  50% {
+    opacity: 0;
+  }
+}

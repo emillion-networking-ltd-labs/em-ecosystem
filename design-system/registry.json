@@ -234,6 +234,15 @@
       "internalDependencies": []
     },
     {
+      "name": "FlipWords",
+      "type": "registry:ui",
+      "file": "components/FlipWords.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "FormField",
       "type": "registry:ui",
       "file": "components/FormField.tsx",
@@ -610,6 +619,24 @@
       "registryDependencies": [],
       "internalDependencies": [
         "hooks/useTheme.ts"
+      ]
+    },
+    {
+      "name": "TypingAnimation",
+      "type": "registry:ui",
+      "file": "components/TypingAnimation.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
+      "name": "WordRotate",
+      "type": "registry:ui",
+      "file": "components/WordRotate.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
       ]
     },
     {
