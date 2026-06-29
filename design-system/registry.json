@@ -336,6 +336,15 @@
       "internalDependencies": []
     },
     {
+      "name": "InteractiveHoverButton",
+      "type": "registry:ui",
+      "file": "components/InteractiveHoverButton.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "LanguageSelector",
       "type": "registry:ui",
       "file": "components/LanguageSelector.tsx",
@@ -387,6 +396,15 @@
       "internalDependencies": []
     },
     {
+      "name": "PulsatingButton",
+      "type": "registry:ui",
+      "file": "components/PulsatingButton.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "QrCodeCard",
       "type": "registry:ui",
       "file": "components/QrCodeCard.tsx",
@@ -414,6 +432,15 @@
         "Button"
       ],
       "internalDependencies": []
+    },
+    {
+      "name": "Ripple",
+      "type": "registry:ui",
+      "file": "components/Ripple.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
     },
     {
       "name": "SearchTrigger",
