@@ -1,4 +1,5 @@
-// TextGenerateEffect — Aceternity UI (MIT, © Manu Arora), adoptado verbatim (ECO-88, fase 1 / ADR-019).
+// TextGenerateEffect — Aceternity UI (MIT, © Manu Arora), adoptado (ECO-88, fase 1 / ADR-019; alineado en
+// ECO-108: color crudo text-black/dark:text-white → token content-primary).
 // Usa `motion/react` (useAnimate + stagger). Revela palabras con desenfoque progresivo.
 "use client";
 import { useEffect } from "react";
@@ -39,7 +40,7 @@ export const TextGenerateEffect = ({
           return (
             <motion.span
               key={word + idx}
-              className="dark:text-white text-black opacity-0"
+              className="text-content-primary opacity-0"
               style={{
                 filter: filter ? "blur(10px)" : "none",
               }}
@@ -55,7 +56,7 @@ export const TextGenerateEffect = ({
   return (
     <div className={cn("font-bold", className)}>
       <div className="mt-4">
-        <div className=" dark:text-white text-black text-2xl leading-snug tracking-wide">
+        <div className=" text-content-primary text-2xl leading-snug tracking-wide">
           {renderWords()}
         </div>
       </div>

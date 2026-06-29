@@ -1,4 +1,6 @@
-// ShimmerButton — Magic UI (MIT), adoptado verbatim. Requiere keyframes `shimmer-slide`/`spin-around` (tokens.css).
+// ShimmerButton — Magic UI (MIT), adoptado (ECO-82; alineado en ECO-108: radio/color crudos → tokens del
+// sistema, base del Button primary — surface-inverse/content-inverse, rounded-md). Requiere keyframes
+// `shimmer-slide`/`spin-around` (tokens.css).
 import React, { type ComponentPropsWithoutRef, type CSSProperties } from "react";
 
 import { cn } from "@/lib/utils";
@@ -19,11 +21,11 @@ export const ShimmerButton = React.forwardRef<
 >(
   (
     {
-      shimmerColor = "#ffffff",
+      shimmerColor = "var(--color-content-inverse)",
       shimmerSize = "0.05em",
       shimmerDuration = "3s",
-      borderRadius = "100px",
-      background = "rgba(0, 0, 0, 1)",
+      borderRadius = "var(--radius-md)",
+      background = "var(--color-surface-inverse)",
       className,
       children,
       ...props
@@ -43,7 +45,7 @@ export const ShimmerButton = React.forwardRef<
           } as CSSProperties
         }
         className={cn(
-          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border border-white/10 px-6 py-3 whitespace-nowrap text-white [background:var(--bg)]",
+          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border border-content-inverse/10 px-6 py-3 whitespace-nowrap text-content-inverse [background:var(--bg)]",
           "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
           className,
         )}
@@ -70,7 +72,7 @@ export const ShimmerButton = React.forwardRef<
           className={cn(
             "absolute inset-0 size-full",
 
-            "rounded-2xl px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#ffffff1f]",
+            "rounded-[inherit] px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#ffffff1f]",
 
             // transition
             "transform-gpu transition-all duration-300 ease-in-out",

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Marquee } from "@/components/ui/Marquee";
+import Badge from "@/components/ui/Badge";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Requires the `marquee` / `marquee-vertical` keyframes (tokens.css).
 const meta = {
@@ -17,11 +18,8 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const Pill = ({ label }: { label: string }) => (
-  <span className="rounded-full border border-border-default bg-surface-secondary px-4 py-2 text-content-secondary">
-    {label}
-  </span>
-);
+// Chips de logos = primitivo Badge (etiqueta no interactiva del sistema), no un span pill ad-hoc.
+const Pill = ({ label }: { label: string }) => <Badge variant="default">{label}</Badge>;
 
 const LOGOS = ["Next.js", "Prisma", "NestJS", "Tailwind", "Storybook"];
 
