@@ -29,6 +29,15 @@
       ]
     },
     {
+      "name": "AnimatedTestimonials",
+      "type": "registry:ui",
+      "file": "components/AnimatedTestimonials.tsx",
+      "registryDependencies": [
+        "IconButton"
+      ],
+      "internalDependencies": []
+    },
+    {
       "name": "AuroraBackground",
       "type": "registry:ui",
       "file": "components/AuroraBackground.tsx",
@@ -111,6 +120,17 @@
       "type": "registry:ui",
       "file": "components/Card.tsx",
       "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
+    },
+    {
+      "name": "CardHoverEffect",
+      "type": "registry:ui",
+      "file": "components/CardHoverEffect.tsx",
+      "registryDependencies": [
+        "Card"
+      ],
       "internalDependencies": [
         "lib/utils.ts"
       ]
@@ -263,7 +283,9 @@
       "registryDependencies": [
         "Tooltip"
       ],
-      "internalDependencies": []
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
     },
     {
       "name": "IdleWarningModal",
@@ -338,6 +360,15 @@
       "file": "components/MfaDigitInput.tsx",
       "registryDependencies": [],
       "internalDependencies": []
+    },
+    {
+      "name": "NumberTicker",
+      "type": "registry:ui",
+      "file": "components/NumberTicker.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/utils.ts"
+      ]
     },
     {
       "name": "Pagination",

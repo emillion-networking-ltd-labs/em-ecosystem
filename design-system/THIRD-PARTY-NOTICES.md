@@ -31,6 +31,21 @@ colores/keyframes propios). Solo componentes **free**; el tier Pro NO es redistr
 `meteor`/`aurora`/`spotlight` que consumen viven (verbatim) en `tokens/tokens.css` (aditivos, ECO-88). `BentoGrid` NO
 arrastra `@tabler/icons-react` (eso era solo del demo del registry); el icono entra por prop.
 
+### Tanda 3 — Magic UI + Aceternity (ECO-101)
+
+| Componente | Origen | Licencia | URL |
+|---|---|---|---|
+| `components/NumberTicker.tsx` | Magic UI | MIT (© Magic UI) | https://magicui.design/r/number-ticker.json |
+| `components/AnimatedTestimonials.tsx` | basado en Aceternity UI (© Manu Arora) | MIT | https://ui.aceternity.com/components/animated-testimonials |
+| `components/CardHoverEffect.tsx` (`CardHoverEffect`) | basado en Aceternity UI (© Manu Arora) | MIT | https://ui.aceternity.com/components/card-hover-effect |
+
+`NumberTicker`: lógica/animación **verbatim**; solo theming a token (text-content-primary). `AnimatedTestimonials` y
+`CardHoverEffect`: estructura/animación de Aceternity pero **RECONSTRUIDOS sobre los primitivos del design-system** —
+los controles del carrusel son `IconButton` (variant boxed, shape circle, spinOnHover), la tarjeta es el primitivo
+`Card`, la tipografía usa la escala (text-h1/h3/body/caption) y el color va por tokens (content/surface/border), sin
+crudos. Usan solo `motion` + `cn` (+ `lucide-react` en Testimonials, ya presente); NO arrastran `@tabler/icons-react`.
+Cero dependencias npm nuevas.
+
 ## Dependencias npm que requieren estos componentes (las instala el satélite consumidor)
 
 | Paquete | Usado por | Licencia | URL |
