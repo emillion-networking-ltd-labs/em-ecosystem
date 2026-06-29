@@ -31,7 +31,7 @@ const Sample = () => (
     <span className="text-caption uppercase tracking-wide text-content-tertiary">Eyebrow</span>
     <h2 className="text-display-3 font-display">Headline with rhythm</h2>
     <p className="text-content-secondary">A claim with its spacing governed by the gap.</p>
-    <span className="text-accent">Call to action →</span>
+    <span className="text-content-primary">Call to action →</span>
   </>
 );
 

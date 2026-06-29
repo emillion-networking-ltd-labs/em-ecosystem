@@ -19,7 +19,7 @@ const Header = () => (
 
 // A token-driven glyph standing in for a real icon (passed through the `icon` prop).
 const Glyph = () => (
-  <div className="flex size-9 items-center justify-center rounded-lg bg-surface-secondary text-accent">
+  <div className="flex size-9 items-center justify-center rounded-lg bg-surface-secondary text-content-primary">
     <span className="text-body font-display">N</span>
   </div>
 );

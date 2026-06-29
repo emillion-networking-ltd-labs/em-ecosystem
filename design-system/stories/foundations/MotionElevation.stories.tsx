@@ -19,7 +19,7 @@ function MotionRow({ key_ }: { key_: string }) {
     <div ref={ref} className="group flex cursor-pointer items-center gap-4 py-3">
       <div className="relative h-10 flex-1 overflow-hidden rounded-md border border-border-subtle bg-surface-tertiary">
         <div
-          className="absolute left-1 top-1 h-8 w-8 rounded bg-accent transition-transform group-hover:translate-x-[300px]"
+          className="absolute left-1 top-1 h-8 w-8 rounded bg-content-primary transition-transform group-hover:translate-x-[300px]"
           style={{ transitionDuration: `var(${token})`, transitionTimingFunction: "var(--ease-out-expo)" }}
         />
       </div>
