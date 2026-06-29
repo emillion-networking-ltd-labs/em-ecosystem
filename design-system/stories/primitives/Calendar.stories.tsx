@@ -59,7 +59,6 @@ export const WithMinMax: Story = {
   },
 };
 
-// AllVariants — ALWAYS last: an overview of the calendar states (selection / disabled / min-max).
 function CalendarDemo({
   initial,
   disabled,
@@ -83,6 +82,7 @@ function CalendarDemo({
   );
 }
 
+// AllVariants — ALWAYS last: the states (selection · no-selection · disabled · min/max range).
 export const AllVariants: Story = {
   render: () => {
     const today = new Date();

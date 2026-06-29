@@ -72,6 +72,7 @@ const SIZES = [
   { size: "sm", px: "40" },
 ] as const;
 
+// AllSizes — the select sizes (sm/md), with px.
 export const AllSizes: Story = {
   render: () => {
     const [value, setValue] = useState<string>("es");

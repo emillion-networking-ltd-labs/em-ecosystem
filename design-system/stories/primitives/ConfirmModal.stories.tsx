@@ -83,8 +83,6 @@ export const ExtraLarge: Story = {
   },
 };
 
-// AllVariants — ALWAYS last: the modal is a full-screen overlay (one shows at a time), so each
-// variant is opened by its own labeled trigger, controlled via useState.
 const MODAL_VARIANTS = [
   { key: "default", label: "default" },
   { key: "danger", label: "danger" },
@@ -93,6 +91,7 @@ const MODAL_VARIANTS = [
   { key: "xl", label: "extra large (xl)" },
 ] as const;
 
+// AllVariants — ALWAYS last: each modal variant (default · danger · form · lg · xl), opened by its own trigger.
 export const AllVariants: Story = {
   render: () => {
     const [openKey, setOpenKey] = useState<string | null>(null);

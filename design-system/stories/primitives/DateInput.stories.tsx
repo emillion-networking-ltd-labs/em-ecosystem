@@ -64,6 +64,7 @@ const SIZES = [
   { key: "sm", px: "40" },
 ] as const;
 
+// AllSizes — the input sizes (sm/md), with px.
 export const AllSizes: Story = {
   render: () => {
     const [value, setValue] = useState("2026-06-27");

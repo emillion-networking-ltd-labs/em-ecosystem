@@ -156,7 +156,6 @@ export const NavHorizontal: Story = {
   },
 };
 
-// AllVariants — ALWAYS last: an overview of the variants (nav / nav-horizontal) and sizes.
 function TabsDemo({
   variant,
   size,
@@ -170,6 +169,7 @@ function TabsDemo({
   );
 }
 
+// AllVariants — ALWAYS last: the variants (nav · nav-horizontal) and the sizes.
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-5">

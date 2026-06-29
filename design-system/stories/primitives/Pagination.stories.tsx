@@ -48,7 +48,6 @@ export const LastPage: Story = {
   args: { currentPage: 12, totalPages: 12 },
 };
 
-// AllVariants — ALWAYS last: an overview of the page-position states (Pagination's only axis).
 function PaginationDemo({
   currentPage,
   totalPages,
@@ -60,6 +59,7 @@ function PaginationDemo({
   return <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />;
 }
 
+// AllVariants — ALWAYS last: the page-position states (few · first · middle · last).
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-5">

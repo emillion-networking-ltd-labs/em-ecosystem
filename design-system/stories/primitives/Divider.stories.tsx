@@ -54,6 +54,7 @@ export const VerticalWithLabel: Story = {
   ),
 };
 
+// AllVariants — ALWAYS last: horizontal and vertical dividers, with and without a label.
 export const AllVariants: Story = {
   render: () => (
     <div className="w-64 space-y-6">

@@ -68,7 +68,6 @@ export const Disabled: Story = {
   },
 };
 
-// AllVariants — ALWAYS last: an overview of the presentation options (label, showValue) and state.
 function SliderDemo({
   initial = 40,
   label,
@@ -101,6 +100,7 @@ function SliderDemo({
   );
 }
 
+// AllVariants — ALWAYS last: the presentation options (label, value) and the disabled state.
 export const AllVariants: Story = {
   render: () => (
     <div className="flex max-w-xs flex-col gap-5">

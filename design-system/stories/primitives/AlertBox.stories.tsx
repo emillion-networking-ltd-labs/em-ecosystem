@@ -26,6 +26,7 @@ const variantCopy: Record<"warning" | "error" | "info" | "success", string> = {
   success: "Your changes were saved successfully.",
 };
 
+// AllVariants — ALWAYS last: the four semantic variants (warning · error · info · success).
 export const AllVariants: Story = {
   render: () => (
     // items-start → cada alerta ajusta a su contenido (AlertBox es inline-flex), sin estirarse.

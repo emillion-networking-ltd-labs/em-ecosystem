@@ -51,6 +51,7 @@ const SIZES = [
   { key: "sm", px: "16" },
 ] as const;
 
+// AllSizes — the 3 checkbox sizes (sm/md/lg), with px.
 export const AllSizes: Story = {
   render: () => {
     const [values, setValues] = useState({ sm: true, md: true, lg: true });

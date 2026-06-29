@@ -102,6 +102,7 @@ const SIZES = [
   { key: "sm", px: "32" },
 ] as const;
 
+// AllSizes — the button sizes, with px.
 export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-end gap-4">

@@ -51,6 +51,7 @@ const TYPES = [
   { label: "card-container · elevated · 24", elevated: true, size: "lg" },
 ] as const;
 
+// AllVariants — ALWAYS last: the card types (default · elevated · container · container-elevated).
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-4">

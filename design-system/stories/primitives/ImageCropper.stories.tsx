@@ -54,13 +54,12 @@ export const Rectangular: Story = {
   },
 };
 
-// AllVariants — ALWAYS last: the cropper is a full-screen overlay (one at a time), so each crop
-// shape is opened by its own labeled trigger.
 const CROP_SHAPES = [
   { key: "round", label: "round (default)" },
   { key: "rect", label: "rect" },
 ] as const;
 
+// AllVariants — ALWAYS last: each crop shape (round · rect), opened by its own trigger.
 export const AllVariants: Story = {
   render: () => {
     const [openShape, setOpenShape] = useState<"round" | "rect" | null>(null);

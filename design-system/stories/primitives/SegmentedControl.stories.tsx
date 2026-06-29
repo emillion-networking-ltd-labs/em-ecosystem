@@ -53,6 +53,7 @@ export const Outline: Story = {
 
 const sizes = ["sm", "md", "lg"] as const;
 
+// AllSizes — the 3 control sizes (sm/md/lg), with px.
 export const AllSizes: Story = {
   render: () => {
     const [value, setValue] = useState("diario");

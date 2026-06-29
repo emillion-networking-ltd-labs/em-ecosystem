@@ -21,6 +21,7 @@ const SIZES = [
   { size: "md", px: "24" },
 ] as const;
 
+// AllSizes — the spinner sizes (md/lg), with px.
 export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-end gap-6 text-content-primary">

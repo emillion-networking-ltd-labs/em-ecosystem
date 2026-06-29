@@ -34,6 +34,7 @@ const SIZES = [
   { key: "sm", px: "40" },
 ] as const;
 
+// AllSizes — the field sizes (sm/md), with px.
 export const AllSizes: Story = {
   render: () => (
     <div className="grid grid-cols-1 gap-4">

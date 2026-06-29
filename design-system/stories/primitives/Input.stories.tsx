@@ -67,6 +67,7 @@ const SIZES = [
   { size: "sm", px: "40" },
 ] as const;
 
+// AllSizes — the input sizes (sm/md), with px.
 export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-col gap-4">
