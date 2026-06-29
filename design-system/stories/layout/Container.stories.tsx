@@ -36,8 +36,8 @@ export const Default: Story = {
   ),
 };
 
-// Sizes — each max-width on the full canvas so the difference in measure is visible.
-export const Sizes: Story = {
+// AllSizes — each max-width on the full canvas so the difference in measure is visible.
+export const AllSizes: Story = {
   render: () => (
     <div className="space-y-4">
       {SIZES.map(({ size, w }) => (

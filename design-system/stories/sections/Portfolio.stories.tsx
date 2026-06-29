@@ -75,12 +75,13 @@ const ALL = [
   { label: "gallery", variant: "gallery" as const, items: GALLERY },
 ];
 
+// AllVariants — ALWAYS last: the layout variants (featured · with-images · gallery).
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col">
       {ALL.map(({ label, variant, items }) => (
         <div key={label}>
-          <div className="bg-surface-primary px-6 py-2">
+          <div className="px-6 pt-6 pb-2">
             <span className="text-caption text-content-tertiary font-mono">{label}</span>
           </div>
           <Portfolio eyebrow="Work" title="Recent projects" variant={variant} items={items} viewAllText="View all" viewAllHref="#" />

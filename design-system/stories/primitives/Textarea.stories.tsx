@@ -37,3 +37,23 @@ export const Disabled: Story = {
     </div>
   ),
 };
+
+// AllVariants — ALWAYS last: an overview walking every axis (states: default · with-error · disabled).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5 w-96">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">default</p>
+        <Textarea placeholder="Tell us about your project…" />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">with error</p>
+        <Textarea hasError defaultValue="Too short" />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">disabled</p>
+        <Textarea disabled defaultValue="Read-only content." />
+      </div>
+    </div>
+  ),
+};

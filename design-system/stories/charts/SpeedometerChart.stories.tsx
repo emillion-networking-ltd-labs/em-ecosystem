@@ -17,14 +17,14 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// Sizes (largest → smallest), with px (svg width).
+// AllSizes — the gauge sizes (sm/md/lg), with px (svg width).
 const SIZES = [
   { size: "lg", px: "260" },
   { size: "md", px: "230" },
   { size: "sm", px: "180" },
 ] as const;
 
-export const Sizes: Story = {
+export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-end gap-6">
       {SIZES.map(({ size, px }) => (
@@ -35,6 +35,16 @@ export const Sizes: Story = {
           </span>
         </div>
       ))}
+    </div>
+  ),
+};
+
+// AllVariants — ALWAYS last: the value gauge (270° SVG speedometer, value shown as %).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-2">
+      <span className="text-caption text-content-tertiary font-mono">speedometer · value gauge</span>
+      <SpeedometerChart value={78} size="lg" />
     </div>
   ),
 };

@@ -20,7 +20,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// Sin fecha seleccionada — solo el día de hoy aparece resaltado (bg-surface-subtle).
+// No date selected — only today is highlighted (bg-surface-subtle).
 export const NoSelection: Story = {
   render: (args) => {
     const [value, setValue] = useState<Date | undefined>(undefined);
@@ -28,7 +28,7 @@ export const NoSelection: Story = {
   },
 };
 
-// disabled — calendario completo inhabilitado (flechas y días bloqueados).
+// disabled — the whole calendar is disabled (arrows and days blocked).
 export const Disabled: Story = {
   args: { disabled: true },
   render: (args) => {
@@ -37,8 +37,8 @@ export const Disabled: Story = {
   },
 };
 
-// Rango acotado con minDate/maxDate — los días fuera del rango quedan
-// opacos (opacity-30, cursor-not-allowed).
+// Bounded range with minDate/maxDate — days outside the range are
+// dimmed (opacity-30, cursor-not-allowed).
 export const WithMinMax: Story = {
   render: (args) => {
     const today = new Date();
@@ -55,6 +55,59 @@ export const WithMinMax: Story = {
         minDate={min}
         maxDate={max}
       />
+    );
+  },
+};
+
+function CalendarDemo({
+  initial,
+  disabled,
+  minDate,
+  maxDate,
+}: {
+  initial?: Date;
+  disabled?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
+}) {
+  const [value, setValue] = useState<Date | undefined>(initial);
+  return (
+    <Calendar
+      value={value}
+      onChange={setValue}
+      disabled={disabled}
+      minDate={minDate}
+      maxDate={maxDate}
+    />
+  );
+}
+
+// AllVariants — ALWAYS last: the states (selection · no-selection · disabled · min/max range).
+export const AllVariants: Story = {
+  render: () => {
+    const today = new Date();
+    const min = new Date(today.getFullYear(), today.getMonth(), 5);
+    const max = new Date(today.getFullYear(), today.getMonth(), 24);
+    const mid = new Date(today.getFullYear(), today.getMonth(), 15);
+    return (
+      <div className="flex flex-wrap gap-6">
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">with selection</p>
+          <CalendarDemo initial={today} />
+        </div>
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">no selection</p>
+          <CalendarDemo />
+        </div>
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">disabled</p>
+          <CalendarDemo initial={today} disabled />
+        </div>
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">min / max range</p>
+          <CalendarDemo initial={mid} minDate={min} maxDate={max} />
+        </div>
+      </div>
     );
   },
 };

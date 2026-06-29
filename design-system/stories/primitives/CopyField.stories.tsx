@@ -34,7 +34,8 @@ const SIZES = [
   { key: "sm", px: "40" },
 ] as const;
 
-export const Sizes: Story = {
+// AllSizes — the field sizes (sm/md), with px.
+export const AllSizes: Story = {
   render: () => (
     <div className="grid grid-cols-1 gap-4">
       {SIZES.map(({ key, px }) => (
@@ -45,6 +46,33 @@ export const Sizes: Story = {
           </span>
         </div>
       ))}
+    </div>
+  ),
+};
+
+// AllVariants — ALWAYS last: an overview walking every axis (sizes · long value).
+// CopyField has no persistent visual states beyond sizes — the copied state (icon toggle) is
+// transient (resets after 2s) and is exercised in the Default story via interaction.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5 max-w-md">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">sizes</p>
+        <div className="flex flex-col gap-3">
+          {([["md", "48"], ["sm", "40"]] as const).map(([size, px]) => (
+            <div key={size} className="flex flex-col gap-1.5">
+              <CopyField value="ABCD-2F4A-9C1B" size={size} />
+              <span className="text-caption text-content-tertiary font-mono">
+                {size} · {px}px{size === "md" ? " (default)" : ""}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">long value (truncates)</p>
+        <CopyField value="sk-live-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3IifQ" />
+      </div>
     </div>
   ),
 };

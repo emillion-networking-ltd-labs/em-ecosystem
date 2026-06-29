@@ -39,6 +39,7 @@ const VARIANTS = [
   { variant: "error", title: "Couldn't save", description: "Please try again." },
 ] as const;
 
+// AllVariants — ALWAYS last: every toast variant together (success · error · info).
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-4">

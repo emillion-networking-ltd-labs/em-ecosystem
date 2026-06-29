@@ -51,31 +51,9 @@ export const Outline: Story = {
   },
 };
 
-const variants = ["primary", "secondary", "outline"] as const;
-
-export const AllVariants: Story = {
-  render: () => {
-    const [value, setValue] = useState("diario");
-    return (
-      <div className="flex flex-wrap items-end gap-4">
-        {variants.map((variant) => (
-          <div key={variant} className="flex flex-col gap-1.5">
-            <span className="text-caption text-content-tertiary">{variant}</span>
-            <SegmentedControl
-              options={opciones}
-              variant={variant}
-              value={value}
-              onChange={setValue}
-            />
-          </div>
-        ))}
-      </div>
-    );
-  },
-};
-
 const sizes = ["sm", "md", "lg"] as const;
 
+// AllSizes — the 3 control sizes (sm/md/lg), with px.
 export const AllSizes: Story = {
   render: () => {
     const [value, setValue] = useState("diario");
@@ -89,13 +67,37 @@ export const AllSizes: Story = {
               value={value}
               onChange={setValue}
             />
-            <span className="text-caption text-content-tertiary">
+            <span className="text-caption text-content-tertiary font-mono">
               {size === "sm"
                 ? "sm · 32px"
                 : size === "md"
                   ? "md · 40px"
                   : "lg · 48px"}
             </span>
+          </div>
+        ))}
+      </div>
+    );
+  },
+};
+
+const variants = ["primary", "secondary", "outline"] as const;
+
+// AllVariants — ALWAYS last: every visual variant of the control.
+export const AllVariants: Story = {
+  render: () => {
+    const [value, setValue] = useState("diario");
+    return (
+      <div className="flex flex-wrap items-end gap-4">
+        {variants.map((variant) => (
+          <div key={variant} className="flex flex-col gap-1.5">
+            <span className="text-caption text-content-tertiary font-mono">{variant}</span>
+            <SegmentedControl
+              options={opciones}
+              variant={variant}
+              value={value}
+              onChange={setValue}
+            />
           </div>
         ))}
       </div>

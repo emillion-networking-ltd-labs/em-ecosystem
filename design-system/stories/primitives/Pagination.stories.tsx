@@ -28,22 +28,59 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// Pocas páginas (≤7) — se listan todas, sin elipsis.
+// Few pages (≤7) — all listed, no ellipsis.
 export const FewPages: Story = {
   args: { currentPage: 2, totalPages: 5 },
 };
 
-// Primera página — la flecha «anterior» queda deshabilitada; elipsis a la derecha.
+// First page — the "previous" arrow is disabled; ellipsis on the right.
 export const FirstPage: Story = {
   args: { currentPage: 1, totalPages: 12 },
 };
 
-// Página intermedia — elipsis a ambos lados.
+// Middle page — ellipsis on both sides.
 export const MiddlePage: Story = {
   args: { currentPage: 6, totalPages: 12 },
 };
 
-// Última página — la flecha «siguiente» queda deshabilitada; elipsis a la izquierda.
+// Last page — the "next" arrow is disabled; ellipsis on the left.
 export const LastPage: Story = {
   args: { currentPage: 12, totalPages: 12 },
+};
+
+function PaginationDemo({
+  currentPage,
+  totalPages,
+}: {
+  currentPage: number;
+  totalPages: number;
+}) {
+  const [page, setPage] = useState(currentPage);
+  return <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />;
+}
+
+// AllVariants — ALWAYS last: the page-position states (few · first · middle · last).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">
+          few pages (≤7, no ellipsis)
+        </p>
+        <PaginationDemo currentPage={2} totalPages={5} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">first page</p>
+        <PaginationDemo currentPage={1} totalPages={12} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">middle page</p>
+        <PaginationDemo currentPage={6} totalPages={12} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">last page</p>
+        <PaginationDemo currentPage={12} totalPages={12} />
+      </div>
+    </div>
+  ),
 };

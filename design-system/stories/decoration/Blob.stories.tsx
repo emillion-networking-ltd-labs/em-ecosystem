@@ -48,8 +48,8 @@ export const Default: Story = {
   ),
 };
 
-// Sizes — one halo per diameter, centered.
-export const Sizes: Story = {
+// AllSizes — one halo per diameter, centered.
+export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-wrap gap-4">
       {SIZES.map(({ size, px }) => (

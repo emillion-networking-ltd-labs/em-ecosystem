@@ -31,3 +31,24 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+// AllVariants — ALWAYS last: the 2-column grid of recovery codes with a copy-all action.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">codes grid</p>
+        <RecoveryCodesGrid
+          codes={[
+            "A1B2-C3D4",
+            "E5F6-G7H8",
+            "I9J0-K1L2",
+            "M3N4-O5P6",
+            "Q7R8-S9T0",
+            "U1V2-W3X4",
+          ]}
+        />
+      </div>
+    </div>
+  ),
+};

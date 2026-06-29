@@ -40,3 +40,32 @@ export const Default: Story = {};
 
 // FormOnly — no methods: the form centered on its own.
 export const FormOnly: Story = { args: { methods: undefined } };
+
+// AllVariants — ALWAYS last: with contact methods (default) and form-only.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col">
+      <div className="px-6 pt-6 pb-2">
+        <span className="text-caption text-content-tertiary font-mono">with methods · two columns</span>
+      </div>
+      <Contact
+        eyebrow="Contact"
+        title="Let's talk"
+        subtitle="Tell us about your project and we'll get back to you within 24 hours."
+        methods={METHODS}
+        subjectOptions={SUBJECTS}
+        privacyHref="#privacy"
+      />
+      <div className="px-6 pt-6 pb-2">
+        <span className="text-caption text-content-tertiary font-mono">form only · centered</span>
+      </div>
+      <Contact
+        eyebrow="Contact"
+        title="Let's talk"
+        subtitle="Tell us about your project and we'll get back to you within 24 hours."
+        subjectOptions={SUBJECTS}
+        privacyHref="#privacy"
+      />
+    </div>
+  ),
+};

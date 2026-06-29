@@ -36,8 +36,8 @@ export const Variants: Story = {
   ),
 };
 
-// The 3 sizes (error variant).
-export const Sizes: Story = {
+// AllSizes — the 3 sizes (error variant).
+export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-end gap-6">
       {SIZES.map((s) => (

@@ -51,7 +51,8 @@ const SIZES = [
   { key: "sm", px: "16" },
 ] as const;
 
-export const Sizes: Story = {
+// AllSizes — the 3 checkbox sizes (sm/md/lg), with px.
+export const AllSizes: Story = {
   render: () => {
     const [values, setValues] = useState({ sm: true, md: true, lg: true });
     return (
@@ -73,8 +74,8 @@ export const Sizes: Story = {
   },
 };
 
-// Checkbox has no variants: its visual states are checked, unchecked, indeterminate and disabled.
-export const AllStates: Story = {
+// AllVariants — ALWAYS last: a Checkbox has no color variants; its axes are its visual states.
+export const AllVariants: Story = {
   render: () => {
     const [checked, setChecked] = useState(true);
     const [unchecked, setUnchecked] = useState(false);
@@ -82,23 +83,23 @@ export const AllStates: Story = {
       <div className="flex flex-wrap items-end gap-6">
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked={unchecked} onChange={setUnchecked} />
-          <span className="text-caption text-content-tertiary">Unchecked</span>
+          <span className="text-caption text-content-tertiary font-mono">unchecked</span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked={checked} onChange={setChecked} />
-          <span className="text-caption text-content-tertiary">Checked</span>
+          <span className="text-caption text-content-tertiary font-mono">checked</span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked={false} indeterminate />
-          <span className="text-caption text-content-tertiary">Indeterminate</span>
+          <span className="text-caption text-content-tertiary font-mono">indeterminate</span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked={false} disabled />
-          <span className="text-caption text-content-tertiary">Disabled</span>
+          <span className="text-caption text-content-tertiary font-mono">disabled</span>
         </div>
         <div className="flex flex-col items-center gap-1.5">
           <Checkbox checked disabled />
-          <span className="text-caption text-content-tertiary">Disabled (checked)</span>
+          <span className="text-caption text-content-tertiary font-mono">disabled (checked)</span>
         </div>
       </div>
     );

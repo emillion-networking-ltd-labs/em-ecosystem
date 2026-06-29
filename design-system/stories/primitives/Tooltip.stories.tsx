@@ -54,16 +54,19 @@ export const Auto: Story = {
   ),
 };
 
-// The four fixed positions, with room around the row so none clip.
-export const AllPositions: Story = {
+// AllVariants — ALWAYS last: the four fixed positions, with room around the row so none clip.
+export const AllVariants: Story = {
   render: () => (
-    <div className="flex min-h-[200px] flex-wrap items-center justify-center gap-3 px-20">
+    <div className="flex min-h-[240px] flex-wrap items-center justify-center gap-x-12 gap-y-10 px-20">
       {(["top", "bottom", "left", "right"] as const).map((pos) => (
-        <Tooltip key={pos} content={`Tooltip ${pos}`} position={pos}>
-          <button type="button" className={triggerClass}>
-            {pos.charAt(0).toUpperCase() + pos.slice(1)}
-          </button>
-        </Tooltip>
+        <div key={pos} className="flex flex-col items-center gap-3">
+          <span className="text-caption text-content-tertiary font-mono">{pos}</span>
+          <Tooltip content={`Tooltip ${pos}`} position={pos}>
+            <button type="button" className={triggerClass}>
+              Hover me
+            </button>
+          </Tooltip>
+        </div>
       ))}
     </div>
   ),

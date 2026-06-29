@@ -31,7 +31,8 @@ const SIZES = [
   { size: "sm", px: "32" },
 ] as const;
 
-export const Sizes: Story = {
+// AllSizes — the 3 toggle sizes (sm/md/lg), with px.
+export const AllSizes: Story = {
   render: () => {
     const [vals, setVals] = useState({ sm: true, md: true, lg: true });
     return (

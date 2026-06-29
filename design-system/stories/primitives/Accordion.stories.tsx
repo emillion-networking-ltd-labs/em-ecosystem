@@ -97,6 +97,7 @@ const VARIANTS = [
   { label: "variant: uppercase", props: { variant: "uppercase" as const } },
 ];
 
+// AllVariants — ALWAYS last: every accordion variant together.
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col gap-6">

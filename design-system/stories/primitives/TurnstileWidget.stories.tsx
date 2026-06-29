@@ -1,8 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import TurnstileWidget from "@/components/ui/TurnstileWidget";
 
-// App-coupled: usa useTheme → @/context/ThemeContext (mock en el catálogo). El widget real de
-// Cloudflare Turnstile requiere una site-key del entorno; aquí se cataloga el contenedor.
+// App-coupled: uses useTheme → @/context/ThemeContext (mock in the catalog). The real Cloudflare
+// Turnstile widget needs a site-key from the environment; here we catalog the container.
 const meta = {
   title: "Primitives/TurnstileWidget",
   component: TurnstileWidget,
@@ -23,3 +23,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+// AllVariants — ALWAYS last: the Turnstile container (the real widget needs a Cloudflare site-key).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">widget container</p>
+        <TurnstileWidget onToken={() => {}} />
+      </div>
+    </div>
+  ),
+};
