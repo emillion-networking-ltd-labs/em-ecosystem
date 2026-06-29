@@ -39,22 +39,12 @@ export const AllSizes: Story = {
   ),
 };
 
-const VALUES = [
-  { value: 24, label: "low · 24" },
-  { value: 68, label: "mid · 68" },
-  { value: 93, label: "high · 93" },
-] as const;
-
-// AllVariants — ALWAYS last: the gauge at low / mid / high values.
+// AllVariants — ALWAYS last: the value gauge (270° SVG speedometer, value shown as %).
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-wrap items-end gap-6">
-      {VALUES.map(({ value, label }) => (
-        <div key={label} className="flex flex-col items-center gap-1.5">
-          <SpeedometerChart value={value} size="md" />
-          <span className="text-caption text-content-tertiary font-mono">{label}</span>
-        </div>
-      ))}
+    <div className="flex flex-col gap-2">
+      <span className="text-caption text-content-tertiary font-mono">speedometer · value gauge</span>
+      <SpeedometerChart value={78} size="lg" />
     </div>
   ),
 };
