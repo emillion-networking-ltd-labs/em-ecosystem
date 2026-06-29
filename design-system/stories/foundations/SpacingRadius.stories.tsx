@@ -18,7 +18,7 @@ function SpacingRow({ key_ }: { key_: string }) {
   const [ref, val] = useVar(token);
   return (
     <div ref={ref} className="flex items-center gap-4 py-2">
-      <div className="h-4 rounded-sm bg-accent" style={{ width: `var(${token})` }} />
+      <div className="h-4 rounded-sm bg-content-primary" style={{ width: `var(${token})` }} />
       <TokenMeta token={token} value={val} />
     </div>
   );
