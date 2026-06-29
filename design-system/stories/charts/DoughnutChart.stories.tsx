@@ -19,3 +19,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+// AllVariants — ALWAYS last: the doughnut chart with its legend.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-2">
+      <span className="text-caption text-content-tertiary font-mono">doughnut · users by role</span>
+      <DoughnutChart title="Users by Role" />
+    </div>
+  ),
+};
