@@ -75,6 +75,7 @@ const ALL = [
   { label: "gallery", variant: "gallery" as const, items: GALLERY },
 ];
 
+// AllVariants — ALWAYS last: the layout variants (featured · with-images · gallery).
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col">

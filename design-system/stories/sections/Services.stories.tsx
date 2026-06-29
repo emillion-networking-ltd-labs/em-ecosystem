@@ -39,3 +39,20 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+// AllVariants — ALWAYS last: the services grid with its expandable "what's included" details.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col">
+      <div className="bg-surface-primary px-6 py-2">
+        <span className="text-caption text-content-tertiary font-mono">services · expandable details</span>
+      </div>
+      <Services
+        eyebrow="Services"
+        title="What we do"
+        subtitle="A complete system from strategy to launch, built to deliver real results."
+        services={SERVICES}
+      />
+    </div>
+  ),
+};

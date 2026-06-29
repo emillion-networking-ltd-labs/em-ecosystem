@@ -43,6 +43,7 @@ const VARIANTS = [
   { label: "grouped · chevron", surface: "grouped" as const, indicator: "chevron" as const },
 ];
 
+// AllVariants — ALWAYS last: the surface and indicator combinations (plain · separated · grouped + chevron).
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col">

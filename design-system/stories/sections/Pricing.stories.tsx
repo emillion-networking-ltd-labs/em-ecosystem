@@ -45,3 +45,25 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+// AllVariants — ALWAYS last: default and with a "Most popular" highlight label on the featured plan.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col">
+      <div className="bg-surface-primary px-6 py-2">
+        <span className="text-caption text-content-tertiary font-mono">default · Pro highlighted</span>
+      </div>
+      <Pricing eyebrow="Plans" title="Clear pricing" subtitle="No surprises. Cancel anytime." plans={PLANS} />
+      <div className="bg-surface-primary px-6 py-2">
+        <span className="text-caption text-content-tertiary font-mono">with highlight label</span>
+      </div>
+      <Pricing
+        eyebrow="Plans"
+        title="Clear pricing"
+        subtitle="No surprises. Cancel anytime."
+        plans={PLANS}
+        highlightLabel="Most popular"
+      />
+    </div>
+  ),
+};
