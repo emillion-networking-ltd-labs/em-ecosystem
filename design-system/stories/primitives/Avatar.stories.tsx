@@ -53,7 +53,7 @@ export const Fallbacks: Story = {
 };
 
 // The 3 sizes (initials), with px.
-export const Sizes: Story = {
+export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-end gap-4">
       {SIZES.map(({ key, px }) => (

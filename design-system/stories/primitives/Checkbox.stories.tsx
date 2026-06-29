@@ -51,7 +51,7 @@ const SIZES = [
   { key: "sm", px: "16" },
 ] as const;
 
-export const Sizes: Story = {
+export const AllSizes: Story = {
   render: () => {
     const [values, setValues] = useState({ sm: true, md: true, lg: true });
     return (

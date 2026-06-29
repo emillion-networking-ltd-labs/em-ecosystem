@@ -92,7 +92,7 @@ export const FourDigits: Story = {
 // Sizes — RESPONSIVE behavior, not a prop. Cells are always square (aspect-square) and the SAME
 // component auto-switches their size by container width (ResizeObserver): ≥ 348px → md (48×48,
 // gap-3), < 348px → sm (40×40, gap-2). Resize the container, not a size option.
-export const Sizes: Story = {
+export const AllSizes: Story = {
   render: () => {
     const filled = ["1", "2", "3", "4", "5", "6"];
     return (

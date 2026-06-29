@@ -20,3 +20,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+// AllVariants — ALWAYS last: the QR card for a TOTP secret (fixed 192px QR + copyable secret).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">default</p>
+        <QrCodeCard secret="JBSWY3DPEHPK3PXP" />
+      </div>
+    </div>
+  ),
+};

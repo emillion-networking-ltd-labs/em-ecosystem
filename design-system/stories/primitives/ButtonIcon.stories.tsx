@@ -64,7 +64,7 @@ const SIZES = [
   { key: "sm", px: "32" },
 ] as const;
 
-export const Sizes: Story = {
+export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-end gap-4">
       {SIZES.map(({ key, px }) => (

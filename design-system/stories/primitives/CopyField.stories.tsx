@@ -34,7 +34,7 @@ const SIZES = [
   { key: "sm", px: "40" },
 ] as const;
 
-export const Sizes: Story = {
+export const AllSizes: Story = {
   render: () => (
     <div className="grid grid-cols-1 gap-4">
       {SIZES.map(({ key, px }) => (

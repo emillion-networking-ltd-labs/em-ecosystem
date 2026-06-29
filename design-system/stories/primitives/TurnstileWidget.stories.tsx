@@ -23,3 +23,15 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+// AllVariants — ALWAYS last: the Turnstile container (the real widget needs a Cloudflare site-key).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">widget container</p>
+        <TurnstileWidget onToken={() => {}} />
+      </div>
+    </div>
+  ),
+};

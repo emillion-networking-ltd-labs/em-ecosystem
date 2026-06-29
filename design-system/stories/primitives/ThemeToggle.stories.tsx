@@ -22,3 +22,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
+
+// AllVariants — ALWAYS last: the toggle (its icon follows the active theme — flip it with the
+// catalog's theme toolbar; sits inline like in the dashboard top bar).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">theme toggle</p>
+        <ThemeToggle tooltipPosition="right" />
+      </div>
+    </div>
+  ),
+};

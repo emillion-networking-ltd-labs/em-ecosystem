@@ -64,7 +64,7 @@ const SIZES = [
   { key: "sm", px: "40" },
 ] as const;
 
-export const Sizes: Story = {
+export const AllSizes: Story = {
   render: () => {
     const [value, setValue] = useState("2026-06-27");
     return (

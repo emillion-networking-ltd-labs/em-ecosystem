@@ -69,7 +69,7 @@ export const Variants: Story = {
 };
 
 // The 3 sizes (default variant), with box/icon px.
-export const Sizes: Story = {
+export const AllSizes: Story = {
   render: () => (
     <div className="flex flex-wrap items-end gap-4">
       {SIZES.map(({ key, box }) => (
