@@ -50,3 +50,19 @@ export const Default: Story = {
 export const Autoplay: Story = {
   render: () => <AnimatedTestimonials testimonials={testimonials} autoplay />,
 };
+
+// AllVariants — ALWAYS last: the manual and autoplay configurations.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-8">
+      <div>
+        <p className="mb-2 px-4 text-caption text-content-tertiary font-mono">manual (default)</p>
+        <AnimatedTestimonials testimonials={testimonials} />
+      </div>
+      <div>
+        <p className="mb-2 px-4 text-caption text-content-tertiary font-mono">autoplay · 5000ms</p>
+        <AnimatedTestimonials testimonials={testimonials} autoplay />
+      </div>
+    </div>
+  ),
+};

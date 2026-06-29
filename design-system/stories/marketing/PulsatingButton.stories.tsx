@@ -18,3 +18,21 @@ export const Default: Story = {};
 
 // Disabled — no pulse interaction; dimmed.
 export const Disabled: Story = { args: { disabled: true } };
+
+// AllVariants — ALWAYS last: states + pulse speed (the `duration` of the breathing overlay).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-start gap-6">
+      {[
+        { label: "default · 1.5s", props: {} },
+        { label: "fast · 1s", props: { duration: "1s" } },
+        { label: "disabled", props: { disabled: true } },
+      ].map(({ label, props }) => (
+        <div key={label} className="flex flex-col items-start gap-1.5">
+          <PulsatingButton {...props}>Get started</PulsatingButton>
+          <span className="text-caption text-content-tertiary font-mono">{label}</span>
+        </div>
+      ))}
+    </div>
+  ),
+};

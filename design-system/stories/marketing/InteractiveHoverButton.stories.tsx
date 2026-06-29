@@ -18,3 +18,23 @@ export const Default: Story = {};
 
 // Disabled — dimmed, no hover effect.
 export const Disabled: Story = { args: { disabled: true, className: "opacity-50 pointer-events-none" } };
+
+// AllVariants — ALWAYS last: the interaction states (hover to see the reveal on `default`).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-start gap-6">
+      {[
+        { label: "default", props: {} },
+        {
+          label: "disabled",
+          props: { disabled: true, className: "opacity-50 pointer-events-none" },
+        },
+      ].map(({ label, props }) => (
+        <div key={label} className="flex flex-col items-start gap-1.5">
+          <InteractiveHoverButton {...props}>Get started</InteractiveHoverButton>
+          <span className="text-caption text-content-tertiary font-mono">{label}</span>
+        </div>
+      ))}
+    </div>
+  ),
+};

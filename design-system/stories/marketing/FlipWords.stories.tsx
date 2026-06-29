@@ -27,3 +27,24 @@ export const InContext: Story = {
     </h2>
   ),
 };
+
+// AllVariants — ALWAYS last: standalone and inside a headline.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">standalone</p>
+        <FlipWords
+          words={["beautiful", "modern", "fast", "yours"]}
+          className="text-display-2 font-display font-bold"
+        />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">in a headline</p>
+        <h2 className="text-display-3 font-display font-bold text-content-primary">
+          Build something <FlipWords words={["beautiful", "modern", "fast"]} />
+        </h2>
+      </div>
+    </div>
+  ),
+};

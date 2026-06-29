@@ -26,3 +26,33 @@ export const Loop: Story = {
 
 // CursorBlock — block cursor instead of the line caret.
 export const CursorBlock: Story = { args: { cursorStyle: "block" } };
+
+// AllVariants — ALWAYS last: the three cursor styles + the looping mode.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6">
+      {(["line", "block", "underscore"] as const).map((cursorStyle) => (
+        <div key={cursorStyle}>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">
+            cursor · {cursorStyle}
+            {cursorStyle === "line" ? " (default)" : ""}
+          </p>
+          <TypingAnimation
+            cursorStyle={cursorStyle}
+            className="text-display-3 font-display font-bold text-content-primary"
+          >
+            Where bold brands begin.
+          </TypingAnimation>
+        </div>
+      ))}
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">loop · words</p>
+        <TypingAnimation
+          words={["Design.", "Develop.", "Deliver."]}
+          loop
+          className="text-display-3 font-display font-bold text-content-primary"
+        />
+      </div>
+    </div>
+  ),
+};
