@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Marquee } from "@/components/ui/Marquee";
 import Badge from "@/components/ui/Badge";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Requires the `marquee` / `marquee-vertical` keyframes (tokens.css).
 const meta = {
@@ -62,27 +63,23 @@ const VARIANTS = [
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
+    <DemoStack>
       {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
+        <DemoCell key={v.label} caption={v.label} className="bg-surface-secondary py-6">
           <Marquee {...v.props}>
             {LOGOS.map((l) => (
               <Pill key={l} label={l} />
             ))}
           </Marquee>
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-        </div>
+        </DemoCell>
       ))}
-      <div className="flex flex-col gap-1.5">
-        <div className="h-56">
-          <Marquee vertical pauseOnHover>
-            {LOGOS.map((l) => (
-              <Pill key={l} label={l} />
-            ))}
-          </Marquee>
-        </div>
-        <span className="text-caption text-content-tertiary font-mono">vertical</span>
-      </div>
-    </div>
+      <DemoCell caption="vertical" className="h-56 bg-surface-secondary py-6">
+        <Marquee vertical pauseOnHover>
+          {LOGOS.map((l) => (
+            <Pill key={l} label={l} />
+          ))}
+        </Marquee>
+      </DemoCell>
+    </DemoStack>
   ),
 };

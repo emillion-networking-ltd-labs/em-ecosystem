@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AnimatedGradientText } from "@/components/ui/AnimatedGradientText";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Requires the `gradient` keyframe (tokens.css).
 // colorFrom/colorTo default to the upstream palette (#ffaa40 → #9c40ff) — respected in the Default demo.
@@ -46,17 +47,16 @@ const VARIANTS = [
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col items-start gap-4">
+    <DemoStack>
       {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col items-start gap-1.5">
+        <DemoCell key={v.label} caption={v.label}>
           <span className="text-display-3 font-display">
             <AnimatedGradientText speed={v.speed} colorFrom={v.colorFrom} colorTo={v.colorTo}>
               {v.text}
             </AnimatedGradientText>
           </span>
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-        </div>
+        </DemoCell>
       ))}
-    </div>
+    </DemoStack>
   ),
 };

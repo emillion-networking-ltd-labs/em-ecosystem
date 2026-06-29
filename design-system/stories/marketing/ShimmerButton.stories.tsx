@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ShimmerButton } from "@/components/ui/ShimmerButton";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Requires the `shimmer-slide` / `spin-around` keyframes (tokens.css).
 // background / shimmerColor default to the upstream values (rgba(0,0,0,1) + #ffffff) — respected in Default.
@@ -37,13 +38,12 @@ const VARIANTS = [
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col items-start gap-4">
+    <DemoStack>
       {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col items-start gap-1.5">
+        <DemoCell key={v.label} caption={v.label}>
           <ShimmerButton {...v.props} />
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-        </div>
+        </DemoCell>
       ))}
-    </div>
+    </DemoStack>
   ),
 };

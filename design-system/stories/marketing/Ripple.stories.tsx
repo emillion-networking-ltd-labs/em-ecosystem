@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Ripple } from "@/components/ui/Ripple";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Marketing/Ripple — background of concentric circles that pulse (scale) with a stagger and fade toward the
 // center via a mask. Color by token (content-primary). Lives behind hero/CTA content (absolute inset-0).
@@ -34,18 +35,15 @@ export const Dense: Story = { args: { numCircles: 12, mainCircleSize: 160 } };
 export const AllVariants: Story = {
   parameters: { framed: false },
   render: () => (
-    <div className="flex flex-wrap items-center justify-center gap-6">
+    <DemoStack>
       {[
         { label: "default · 8 · 210px", props: {} },
         { label: "dense · 12 · 160px", props: { numCircles: 12, mainCircleSize: 160 } },
       ].map(({ label, props }) => (
-        <div key={label} className="flex flex-col items-center gap-2">
-          <div className="relative flex h-[280px] w-[280px] items-center justify-center overflow-hidden rounded-xl">
-            <Ripple {...props} />
-          </div>
-          <span className="text-caption text-content-tertiary font-mono">{label}</span>
-        </div>
+        <DemoCell key={label} caption={label} className="h-72 bg-surface-secondary">
+          <Ripple {...props} />
+        </DemoCell>
       ))}
-    </div>
+    </DemoStack>
   ),
 };

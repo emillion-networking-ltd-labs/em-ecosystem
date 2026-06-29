@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BlurFade } from "@/components/ui/BlurFade";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Blur-in reveal. Uses `motion/react`.
 const meta = {
@@ -45,18 +46,18 @@ const DIRECTIONS = ["up", "down", "left", "right"] as const;
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col items-start gap-4">
+    <DemoStack>
       {DIRECTIONS.map((direction) => (
-        <div key={direction} className="flex flex-col items-start gap-1.5">
+        <DemoCell
+          key={direction}
+          caption={`direction: ${direction}${direction === "down" ? " (default)" : ""}`}
+          className="min-h-[140px] bg-surface-secondary p-8"
+        >
           <BlurFade direction={direction} inView duration={0.6}>
             <p className="text-content-secondary">Reveal from {direction}</p>
           </BlurFade>
-          <span className="text-caption text-content-tertiary font-mono">
-            direction: {direction}
-            {direction === "down" ? " (default)" : ""}
-          </span>
-        </div>
+        </DemoCell>
       ))}
-    </div>
+    </DemoStack>
   ),
 };

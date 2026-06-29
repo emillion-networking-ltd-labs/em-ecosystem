@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FlipWords } from "@/components/ui/FlipWords";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Marketing/FlipWords — flips between words letter by letter (blur in/out). Theme-aware (content-primary);
 // size from className. Useful as the animated highlight inside a headline.
@@ -31,20 +32,18 @@ export const InContext: Story = {
 // AllVariants — ALWAYS last: standalone and inside a headline.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-6">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">standalone</p>
+    <DemoStack>
+      <DemoCell caption="standalone">
         <FlipWords
           words={["beautiful", "modern", "fast", "yours"]}
           className="text-display-2 font-display font-bold"
         />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">in a headline</p>
+      </DemoCell>
+      <DemoCell caption="in a headline">
         <h2 className="text-display-3 font-display font-bold text-content-primary">
           Build something <FlipWords words={["beautiful", "modern", "fast"]} />
         </h2>
-      </div>
-    </div>
+      </DemoCell>
+    </DemoStack>
   ),
 };

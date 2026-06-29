@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TextGenerateEffect } from "@/components/ui/TextGenerateEffect";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Reveals words one by one with a progressive blur.
 const meta = {
@@ -30,17 +31,16 @@ const VARIANTS = [
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col items-start gap-6">
+    <DemoStack>
       {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col items-start gap-1.5">
+        <DemoCell key={v.label} caption={v.label} className="min-h-[140px] bg-surface-secondary p-8">
           <TextGenerateEffect
             words="Reveal the headline with intent."
             filter={v.filter}
             duration={v.duration}
           />
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-        </div>
+        </DemoCell>
       ))}
-    </div>
+    </DemoStack>
   ),
 };

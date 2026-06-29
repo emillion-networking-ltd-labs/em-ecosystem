@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TypingAnimation } from "@/components/ui/TypingAnimation";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Marketing/TypingAnimation — typewriter effect (type/delete, optional loop, blinking cursor). Starts on
 // view. Color/size from className. The cursor uses the `blink-cursor` keyframe (tokens.css).
@@ -30,29 +31,27 @@ export const CursorBlock: Story = { args: { cursorStyle: "block" } };
 // AllVariants — ALWAYS last: the three cursor styles + the looping mode.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-6">
+    <DemoStack>
       {(["line", "block", "underscore"] as const).map((cursorStyle) => (
-        <div key={cursorStyle}>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">
-            cursor · {cursorStyle}
-            {cursorStyle === "line" ? " (default)" : ""}
-          </p>
+        <DemoCell
+          key={cursorStyle}
+          caption={`cursor · ${cursorStyle}${cursorStyle === "line" ? " (default)" : ""}`}
+        >
           <TypingAnimation
             cursorStyle={cursorStyle}
             className="text-display-3 font-display font-bold text-content-primary"
           >
             Where bold brands begin.
           </TypingAnimation>
-        </div>
+        </DemoCell>
       ))}
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">loop · words</p>
+      <DemoCell caption="loop · words">
         <TypingAnimation
           words={["Design.", "Develop.", "Deliver."]}
           loop
           className="text-display-3 font-display font-bold text-content-primary"
         />
-      </div>
-    </div>
+      </DemoCell>
+    </DemoStack>
   ),
 };

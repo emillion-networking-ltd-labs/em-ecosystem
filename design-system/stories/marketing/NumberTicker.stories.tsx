@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { NumberTicker } from "@/components/ui/NumberTicker";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Marketing/NumberTicker — animated count-up/down to a target (marketing stats). Theme-aware via
 // content-primary; animates on scroll into view.
@@ -63,16 +64,20 @@ const STATS = [
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
-      {STATS.map(({ value, suffix, label, decimals }) => (
-        <div key={label} className="flex flex-col items-center gap-1">
-          <span className="text-h1 font-black text-content-primary">
-            <NumberTicker value={value} decimalPlaces={decimals ?? 0} />
-            {suffix}
-          </span>
-          <span className="text-caption text-content-tertiary">{label}</span>
+    <DemoStack>
+      <DemoCell caption="stats band · up / down / decimals / suffix" className="bg-surface-secondary p-10">
+        <div className="grid w-full grid-cols-2 gap-8 sm:grid-cols-4">
+          {STATS.map(({ value, suffix, label, decimals }) => (
+            <div key={label} className="flex flex-col items-center gap-1">
+              <span className="text-h1 font-black text-content-primary">
+                <NumberTicker value={value} decimalPlaces={decimals ?? 0} />
+                {suffix}
+              </span>
+              <span className="text-caption text-content-tertiary">{label}</span>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
+      </DemoCell>
+    </DemoStack>
   ),
 };

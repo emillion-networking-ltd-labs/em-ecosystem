@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { InteractiveHoverButton } from "@/components/ui/InteractiveHoverButton";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Marketing/InteractiveHoverButton — CTA whose dot grows on hover to cover the button and reveals the label
 // + arrow sliding in. Colors by token (surface-primary base, surface-inverse fill, content-inverse label).
@@ -22,7 +23,7 @@ export const Disabled: Story = { args: { disabled: true, className: "opacity-50 
 // AllVariants — ALWAYS last: the interaction states (hover to see the reveal on `default`).
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-wrap items-start gap-6">
+    <DemoStack>
       {[
         { label: "default", props: {} },
         {
@@ -30,11 +31,10 @@ export const AllVariants: Story = {
           props: { disabled: true, className: "opacity-50 pointer-events-none" },
         },
       ].map(({ label, props }) => (
-        <div key={label} className="flex flex-col items-start gap-1.5">
+        <DemoCell key={label} caption={label}>
           <InteractiveHoverButton {...props}>Get started</InteractiveHoverButton>
-          <span className="text-caption text-content-tertiary font-mono">{label}</span>
-        </div>
+        </DemoCell>
       ))}
-    </div>
+    </DemoStack>
   ),
 };

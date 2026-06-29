@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AnimatedTestimonials } from "@/components/ui/AnimatedTestimonials";
+import { DemoCell, DemoStack } from "./_frame";
 
 // Marketing/AnimatedTestimonials — a testimonial carousel with photo + word-by-word blur-in (social
 // proof). Theme-aware (content/surface tokens). Photos here are inline SVG placeholders (no network).
@@ -54,15 +55,13 @@ export const Autoplay: Story = {
 // AllVariants — ALWAYS last: the manual and autoplay configurations.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-8">
-      <div>
-        <p className="mb-2 px-4 text-caption text-content-tertiary font-mono">manual (default)</p>
+    <DemoStack>
+      <DemoCell caption="manual (default)" className="bg-surface-secondary px-4 py-6">
         <AnimatedTestimonials testimonials={testimonials} />
-      </div>
-      <div>
-        <p className="mb-2 px-4 text-caption text-content-tertiary font-mono">autoplay · 5000ms</p>
+      </DemoCell>
+      <DemoCell caption="autoplay · 5000ms" className="bg-surface-secondary px-4 py-6">
         <AnimatedTestimonials testimonials={testimonials} autoplay />
-      </div>
-    </div>
+      </DemoCell>
+    </DemoStack>
   ),
 };

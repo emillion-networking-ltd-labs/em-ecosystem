@@ -104,6 +104,23 @@ export const AllVariants: Story = {
       </Group>
 
       <Group
+        title="Framing — the demo cell"
+        description="So the overview reads uniformly, every config that is a loose element (text, button, background, scroller, stat) sits in the SAME bordered demo cell + mono caption — not floating on the bare canvas. Marketing uses the shared `DemoCell`/`DemoStack` helper (stories/marketing/_frame.tsx)."
+      >
+        <ul className="ml-5 list-disc space-y-2">
+          <Rule>
+            The cell frame is fixed: <Code>rounded-2xl border border-border-default</Code>, centered,
+            with a height. Text/buttons use a light <Code>bg-surface-secondary</Code> (the gray box);
+            light-on-dark effects use <Code>bg-surface-inverse</Code>.
+          </Rule>
+          <Rule>
+            Self-contained compositions that already render their own surface (card grids like
+            BentoGrid/CardHoverEffect) are the exception — they are NOT wrapped in a second frame.
+          </Rule>
+        </ul>
+      </Group>
+
+      <Group
         title="Naming & language"
         description="Consistent names so the sidebar reads predictably."
       >
