@@ -30,13 +30,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// AllVariants — ALWAYS last: with stats (default) and without stats.
+// AllVariants — ALWAYS last: the hero section.
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col">
-      <div className="bg-surface-primary px-6 py-2">
-        <span className="text-caption text-content-tertiary font-mono">with stats</span>
-      </div>
+      <span className="px-6 pt-6 pb-2 text-caption text-content-tertiary font-mono">hero section</span>
       <Hero
         title="Where bold brands begin."
         ctaText="Start your project"
@@ -49,16 +47,6 @@ export const AllVariants: Story = {
           { value: "98%", label: "Client retention" },
           { value: "30+", label: "Awards won" },
         ]}
-      />
-      <div className="bg-surface-primary px-6 py-2">
-        <span className="text-caption text-content-tertiary font-mono">without stats</span>
-      </div>
-      <Hero
-        title="Where bold brands begin."
-        ctaText="Start your project"
-        ctaHref="#contact"
-        imageSrc={heroSrc}
-        imageAlt="Mountain landscape at dawn"
       />
     </div>
   ),

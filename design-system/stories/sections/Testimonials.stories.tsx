@@ -57,11 +57,11 @@ export const Quotes: Story = {
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col">
-      <div className="bg-surface-primary px-6 py-2">
+      <div className="px-6 pt-6 pb-2">
         <span className="text-caption text-content-tertiary font-mono">reviews · rating + stars</span>
       </div>
       <Testimonials eyebrow="Testimonials" title="What people say" items={REVIEWS} rating={4.9} ratingCount="128 reviews on Google" />
-      <div className="bg-surface-primary px-6 py-2">
+      <div className="px-6 pt-6 pb-2">
         <span className="text-caption text-content-tertiary font-mono">quotes · role + quote</span>
       </div>
       <Testimonials eyebrow="Testimonials" title="Trusted by teams" items={QUOTES} />
