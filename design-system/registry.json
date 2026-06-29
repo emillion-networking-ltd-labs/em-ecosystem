@@ -652,7 +652,9 @@
       "name": "Hero",
       "type": "registry:section",
       "file": "sections/Hero.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "NumberTicker"
+      ],
       "internalDependencies": []
     },
     {
