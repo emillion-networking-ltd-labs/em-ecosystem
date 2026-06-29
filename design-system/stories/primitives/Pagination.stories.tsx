@@ -47,3 +47,40 @@ export const MiddlePage: Story = {
 export const LastPage: Story = {
   args: { currentPage: 12, totalPages: 12 },
 };
+
+// AllVariants — ALWAYS last: an overview of the page-position states (Pagination's only axis).
+function PaginationDemo({
+  currentPage,
+  totalPages,
+}: {
+  currentPage: number;
+  totalPages: number;
+}) {
+  const [page, setPage] = useState(currentPage);
+  return <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />;
+}
+
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">
+          few pages (≤7, no ellipsis)
+        </p>
+        <PaginationDemo currentPage={2} totalPages={5} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">first page</p>
+        <PaginationDemo currentPage={1} totalPages={12} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">middle page</p>
+        <PaginationDemo currentPage={6} totalPages={12} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">last page</p>
+        <PaginationDemo currentPage={12} totalPages={12} />
+      </div>
+    </div>
+  ),
+};

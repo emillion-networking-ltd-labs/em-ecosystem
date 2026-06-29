@@ -44,3 +44,22 @@ export const KeyboardShortcut: Story = {
     </div>
   ),
 };
+
+// AllVariants — ALWAYS last: an overview of the trigger standalone and how it sits in a top bar.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">standalone</p>
+        <SearchTrigger onClick={() => {}} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">in a top bar</p>
+        <div className="flex w-[420px] items-center justify-between rounded-md border border-border-components bg-surface-primary px-4 py-2">
+          <span className="text-body font-semibold text-content-primary">NexaCore</span>
+          <SearchTrigger onClick={() => {}} />
+        </div>
+      </div>
+    </div>
+  ),
+};

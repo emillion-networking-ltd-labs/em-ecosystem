@@ -58,3 +58,56 @@ export const WithMinMax: Story = {
     );
   },
 };
+
+// AllVariants — ALWAYS last: an overview of the calendar states (selection / disabled / min-max).
+function CalendarDemo({
+  initial,
+  disabled,
+  minDate,
+  maxDate,
+}: {
+  initial?: Date;
+  disabled?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
+}) {
+  const [value, setValue] = useState<Date | undefined>(initial);
+  return (
+    <Calendar
+      value={value}
+      onChange={setValue}
+      disabled={disabled}
+      minDate={minDate}
+      maxDate={maxDate}
+    />
+  );
+}
+
+export const AllVariants: Story = {
+  render: () => {
+    const today = new Date();
+    const min = new Date(today.getFullYear(), today.getMonth(), 5);
+    const max = new Date(today.getFullYear(), today.getMonth(), 24);
+    const mid = new Date(today.getFullYear(), today.getMonth(), 15);
+    return (
+      <div className="flex flex-wrap gap-6">
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">with selection</p>
+          <CalendarDemo initial={today} />
+        </div>
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">no selection</p>
+          <CalendarDemo />
+        </div>
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">disabled</p>
+          <CalendarDemo initial={today} disabled />
+        </div>
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">min / max range</p>
+          <CalendarDemo initial={mid} minDate={min} maxDate={max} />
+        </div>
+      </div>
+    );
+  },
+};

@@ -120,3 +120,58 @@ export const Sizes: Story = {
     );
   },
 };
+
+// AllVariants — ALWAYS last: an overview walking every axis (states · digit counts · sizes).
+export const AllVariants: Story = {
+  render: () => {
+    const [emptyVal, setEmptyVal] = useState<string[]>(["", "", "", "", "", ""]);
+    const [filledVal, setFilledVal] = useState<string[]>(["1", "2", "3", "4", "5", "6"]);
+    const [errorVal, setErrorVal] = useState<string[]>(["1", "2", "3", "", "", ""]);
+    const [fourVal, setFourVal] = useState<string[]>(["1", "2", "3", "4"]);
+    return (
+      <div className="flex flex-col gap-6">
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">states</p>
+          <div className="flex flex-col gap-4">
+            <Field label="Verification code">
+              <MfaDigitInput value={emptyVal} onChange={setEmptyVal} idPrefix="av-empty" />
+            </Field>
+            <Field label="Verification code (filled)">
+              <MfaDigitInput value={filledVal} onChange={setFilledVal} idPrefix="av-filled" />
+            </Field>
+            <Field label="Verification code" error>
+              <MfaDigitInput value={errorVal} onChange={setErrorVal} error idPrefix="av-error" />
+              <InlineError message="Enter all 6 digits" />
+            </Field>
+          </div>
+        </div>
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">digit counts</p>
+          <div className="flex flex-col gap-4">
+            <Field label="6 digits (default)">
+              <MfaDigitInput length={6} value={filledVal} onChange={setFilledVal} idPrefix="av-6" />
+            </Field>
+            <Field label="4 digits (PIN)">
+              <MfaDigitInput length={4} value={fourVal} onChange={setFourVal} idPrefix="av-4" />
+            </Field>
+          </div>
+        </div>
+        <div>
+          <p className="mb-2 text-caption text-content-tertiary font-mono">sizes (responsive — fixed container widths)</p>
+          <div className="flex flex-col gap-4">
+            <div className="w-[360px]">
+              <Field label="md · 48×48px (container ≥ 348px)">
+                <MfaDigitInput value={filledVal} onChange={setFilledVal} idPrefix="av-size-md" />
+              </Field>
+            </div>
+            <div className="w-[280px]">
+              <Field label="sm · 40×40px (container &lt; 348px)">
+                <MfaDigitInput value={filledVal} onChange={setFilledVal} idPrefix="av-size-sm" />
+              </Field>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  },
+};

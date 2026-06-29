@@ -60,3 +60,45 @@ export const Collapsed: Story = {
     </div>
   ),
 };
+
+// AllVariants — ALWAYS last: an overview of the depth levels (Breadcrumbs' only axis).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">single level</p>
+        <Breadcrumbs items={[{ label: "Home" }]} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">two levels</p>
+        <Breadcrumbs
+          items={[{ label: "Projects", href: "/dashboard/projects" }, { label: "Detail" }]}
+        />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">full path</p>
+        <Breadcrumbs
+          items={[
+            { label: "Projects", href: "/dashboard/projects" },
+            { label: "Corporate site", href: "/dashboard/projects/corporate-site" },
+            { label: "Settings" },
+          ]}
+        />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">collapsed (narrow)</p>
+        <div className="w-[300px] rounded-md border border-border-components bg-surface-primary p-3">
+          <Breadcrumbs
+            items={[
+              { label: "Organization", href: "#" },
+              { label: "Projects", href: "#" },
+              { label: "Corporate site", href: "#" },
+              { label: "Pages", href: "#" },
+              { label: "Home" },
+            ]}
+          />
+        </div>
+      </div>
+    </div>
+  ),
+};

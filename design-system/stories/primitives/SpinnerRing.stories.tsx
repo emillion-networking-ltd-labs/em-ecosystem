@@ -38,3 +38,26 @@ export const AllSizes: Story = {
     </div>
   ),
 };
+
+// AllVariants — ALWAYS last: an overview walking every axis (size is a spinner's only one).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">sizes</p>
+        <div className="flex flex-wrap items-end gap-6 text-content-primary">
+          {SIZES.map(({ size, px }) => (
+            <div key={size} className="flex flex-col items-center gap-1.5">
+              <div className="flex h-8 items-center justify-center">
+                <SpinnerRing size={size} />
+              </div>
+              <span className="text-caption text-content-tertiary font-mono">
+                {size} · {px}px{size === "md" ? " (default)" : ""}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  ),
+};

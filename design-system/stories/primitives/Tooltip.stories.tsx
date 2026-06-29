@@ -54,8 +54,8 @@ export const Auto: Story = {
   ),
 };
 
-// The four fixed positions, with room around the row so none clip.
-export const AllPositions: Story = {
+// AllVariants — ALWAYS last: the four fixed positions, with room around the row so none clip.
+export const AllVariants: Story = {
   render: () => (
     <div className="flex min-h-[200px] flex-wrap items-center justify-center gap-3 px-20">
       {(["top", "bottom", "left", "right"] as const).map((pos) => (

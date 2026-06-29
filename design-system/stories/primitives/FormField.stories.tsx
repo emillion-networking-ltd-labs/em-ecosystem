@@ -67,3 +67,29 @@ export const Form: Story = {
     </Card>
   ),
 };
+
+// AllVariants — ALWAYS last: an overview walking every axis (states · required · error).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5 max-w-md">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">default</p>
+        <FormField label="Full name" htmlFor="av-default">
+          <Input id="av-default" placeholder="Type your name" />
+        </FormField>
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">required</p>
+        <FormField label="Email" htmlFor="av-required" required>
+          <Input id="av-required" placeholder="name@company.com" />
+        </FormField>
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">with error</p>
+        <FormField label="Email" htmlFor="av-error" error="This field is required">
+          <Input id="av-error" placeholder="name@company.com" hasError />
+        </FormField>
+      </div>
+    </div>
+  ),
+};

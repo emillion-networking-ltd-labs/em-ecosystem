@@ -67,3 +67,63 @@ export const Disabled: Story = {
     return <Slider {...args} value={value} onChange={setValue} />;
   },
 };
+
+// AllVariants — ALWAYS last: an overview of the presentation options (label, showValue) and state.
+function SliderDemo({
+  initial = 40,
+  label,
+  min,
+  max,
+  step,
+  showValue,
+  disabled,
+}: {
+  initial?: number;
+  label?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  showValue?: boolean;
+  disabled?: boolean;
+}) {
+  const [value, setValue] = useState(initial);
+  return (
+    <Slider
+      value={value}
+      onChange={setValue}
+      label={label}
+      min={min}
+      max={max}
+      step={step}
+      showValue={showValue}
+      disabled={disabled}
+    />
+  );
+}
+
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex max-w-xs flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">label + value</p>
+        <SliderDemo label="Volume" initial={40} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">without value</p>
+        <SliderDemo label="Volume" showValue={false} initial={60} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">without label</p>
+        <SliderDemo showValue={false} initial={25} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">custom range (0–500)</p>
+        <SliderDemo label="Price" min={0} max={500} step={10} initial={120} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">disabled</p>
+        <SliderDemo label="Disabled" disabled initial={70} />
+      </div>
+    </div>
+  ),
+};

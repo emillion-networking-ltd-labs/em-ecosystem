@@ -155,3 +155,48 @@ export const NavHorizontal: Story = {
     );
   },
 };
+
+// AllVariants — ALWAYS last: an overview of the variants (nav / nav-horizontal) and sizes.
+function TabsDemo({
+  variant,
+  size,
+}: {
+  variant?: "nav" | "nav-horizontal";
+  size?: "sm" | "md" | "lg";
+}) {
+  const [active, setActive] = useState("dashboard");
+  return (
+    <Tabs tabs={navItems} variant={variant} size={size} activeTab={active} onChange={setActive} />
+  );
+}
+
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">variant=nav (vertical)</p>
+        <div className="w-[240px]">
+          <TabsDemo variant="nav" />
+        </div>
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">variant=nav-horizontal</p>
+        <TabsDemo variant="nav-horizontal" />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">sizes (nav)</p>
+        <div className="flex flex-wrap gap-6">
+          {(["sm", "md", "lg"] as const).map((s) => (
+            <div key={s} className="w-[200px]">
+              <span className="mb-1.5 block text-caption text-content-tertiary font-mono">
+                {s}
+                {s === "md" ? " (default)" : ""}
+              </span>
+              <TabsDemo variant="nav" size={s} />
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  ),
+};

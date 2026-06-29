@@ -28,3 +28,19 @@ export const LongMessage: Story = {
     </div>
   ),
 };
+
+// AllVariants — ALWAYS last: an overview walking every axis (default · long message).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5 max-w-sm">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">default</p>
+        <InlineError message="Enter a valid email address" />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">long message</p>
+        <InlineError message="Password must be at least 8 characters and include an uppercase letter and a number." />
+      </div>
+    </div>
+  ),
+};

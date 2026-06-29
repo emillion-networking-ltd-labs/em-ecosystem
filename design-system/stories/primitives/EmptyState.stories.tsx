@@ -63,3 +63,59 @@ export const ErrorVariant: Story = {
     ),
   },
 };
+
+// AllVariants — ALWAYS last: an overview of the variants (default/error), icon and action axes.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">default</p>
+        <div className="max-w-md rounded-xl border border-border-components bg-surface-primary">
+          <EmptyState
+            title="No projects yet"
+            description="Create your first project to get started."
+          />
+        </div>
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">with action</p>
+        <div className="max-w-md rounded-xl border border-border-components bg-surface-primary">
+          <EmptyState
+            title="No projects yet"
+            description="Create your first project to get started."
+            action={
+              <Button variant="primary" size="sm" fullWidth={false}>
+                Create project
+              </Button>
+            }
+          />
+        </div>
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">custom icon</p>
+        <div className="max-w-md rounded-xl border border-border-components bg-surface-primary">
+          <EmptyState
+            icon={<Search size={48} />}
+            title="No results"
+            description="No items match your search."
+          />
+        </div>
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">error variant</p>
+        <div className="max-w-md rounded-xl border border-border-components bg-surface-primary">
+          <EmptyState
+            variant="error"
+            title="Couldn't load users"
+            description="Network error — please try again."
+            action={
+              <Button variant="primary" size="sm" fullWidth={false}>
+                Retry
+              </Button>
+            }
+          />
+        </div>
+      </div>
+    </div>
+  ),
+};

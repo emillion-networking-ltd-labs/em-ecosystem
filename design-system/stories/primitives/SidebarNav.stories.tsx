@@ -135,3 +135,19 @@ export const Default: Story = {
 export const Collapsed: Story = {
   render: () => <InteractiveSidebar initialCollapsed />,
 };
+
+// AllVariants — ALWAYS last: both states (expanded / collapsed) side by side.
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-wrap items-start gap-6">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">expanded (default)</p>
+        <InteractiveSidebar />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">collapsed</p>
+        <InteractiveSidebar initialCollapsed />
+      </div>
+    </div>
+  ),
+};

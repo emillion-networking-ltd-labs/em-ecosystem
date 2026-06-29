@@ -105,3 +105,20 @@ export const StickyTop: Story = { render: () => <StickyDemo position="top" /> };
 
 // Sticks to the BOTTOM of the scroll container; when stuck, the bottom corners go square.
 export const StickyBottom: Story = { render: () => <StickyDemo position="bottom" /> };
+
+// AllVariants — ALWAYS last: both positions, each in its own scroll container. Scroll within each
+// to see the card stick (top vs bottom).
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">position=&quot;top&quot;</p>
+        <StickyDemo position="top" />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">position=&quot;bottom&quot;</p>
+        <StickyDemo position="bottom" />
+      </div>
+    </div>
+  ),
+};
