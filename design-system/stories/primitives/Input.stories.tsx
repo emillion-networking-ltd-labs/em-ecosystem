@@ -86,13 +86,31 @@ export const AllSizes: Story = {
 // AllVariants — ALWAYS last: the key states (default, with icon, error, disabled, loading).
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
-      <Input label="Default" placeholder="name@company.com" />
-      <Input label="With icon" placeholder="Search…" leftIcon={<Search size={16} />} />
-      <Input label="Filled" variant="filled" placeholder="Type to search…" leftIcon={<Search size={16} />} />
-      <Input label="Error" error="Enter a valid email address" />
-      <Input label="Disabled" placeholder="Can't edit" disabled />
-      <Input label="Loading" loading placeholder="Loading…" />
+    <div className="flex flex-col gap-5">
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">default</p>
+        <Input placeholder="name@company.com" />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">with icon</p>
+        <Input placeholder="Search…" leftIcon={<Search size={16} />} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">filled</p>
+        <Input variant="filled" placeholder="Type to search…" leftIcon={<Search size={16} />} />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">error</p>
+        <Input error="Enter a valid email address" placeholder="name@company.com" />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">disabled</p>
+        <Input placeholder="Can't edit" disabled />
+      </div>
+      <div>
+        <p className="mb-2 text-caption text-content-tertiary font-mono">loading</p>
+        <Input loading placeholder="Loading…" />
+      </div>
     </div>
   ),
 };

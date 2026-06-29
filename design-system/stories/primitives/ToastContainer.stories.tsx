@@ -17,5 +17,12 @@ export const Default: Story = {};
 
 // AllVariants — ALWAYS last: the container rendering the (mock) stacked toasts, fixed at the top.
 export const AllVariants: Story = {
-  render: () => <ToastContainer />,
+  render: () => (
+    <div className="min-h-[220px]">
+      <p className="text-caption text-content-tertiary font-mono">
+        stacked toasts — fixed at the top, from the mock toast context
+      </p>
+      <ToastContainer />
+    </div>
+  ),
 };

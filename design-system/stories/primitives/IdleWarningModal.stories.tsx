@@ -18,5 +18,12 @@ export const Default: Story = {};
 
 // AllVariants — ALWAYS last: the idle warning with its live countdown (a single modal state).
 export const AllVariants: Story = {
-  render: () => <IdleWarningModal secondsLeft={60} onKeepAlive={() => {}} />,
+  render: () => (
+    <>
+      <p className="fixed left-4 top-4 z-[60] text-caption text-content-tertiary font-mono">
+        idle warning — full-screen modal with a live countdown
+      </p>
+      <IdleWarningModal secondsLeft={60} onKeepAlive={() => {}} />
+    </>
+  ),
 };

@@ -30,11 +30,12 @@ const variantCopy: Record<"warning" | "error" | "info" | "success", string> = {
 export const AllVariants: Story = {
   render: () => (
     // items-start → each alert hugs its content (AlertBox is inline-flex) instead of stretching.
-    <div className="flex flex-col items-start gap-2">
+    <div className="flex flex-col items-start gap-4">
       {(["warning", "error", "info", "success"] as const).map((v) => (
-        <AlertBox key={v} variant={v}>
-          {variantCopy[v]}
-        </AlertBox>
+        <div key={v} className="flex flex-col items-start gap-1.5">
+          <span className="text-caption text-content-tertiary font-mono">{v}</span>
+          <AlertBox variant={v}>{variantCopy[v]}</AlertBox>
+        </div>
       ))}
     </div>
   ),
