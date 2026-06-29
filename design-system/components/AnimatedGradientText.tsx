@@ -1,4 +1,5 @@
-// AnimatedGradientText — Magic UI (MIT), adoptado verbatim. Requiere keyframe `gradient` (tokens.css).
+// AnimatedGradientText — Magic UI (MIT), adoptado (ECO-82; alineado en ECO-108: defaults del gradiente →
+// colores de marca accent/accent-2, no naranja/morado genéricos). Requiere keyframe `gradient` (tokens.css).
 import { type ComponentPropsWithoutRef } from "react";
 
 import { cn } from "@/lib/utils";
@@ -13,8 +14,8 @@ export function AnimatedGradientText({
   children,
   className,
   speed = 1,
-  colorFrom = "#ffaa40",
-  colorTo = "#9c40ff",
+  colorFrom = "var(--color-accent)",
+  colorTo = "var(--color-accent-2)",
   ...props
 }: AnimatedGradientTextProps) {
   return (
