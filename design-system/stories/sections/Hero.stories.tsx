@@ -17,10 +17,10 @@ const meta = {
     imageSrc: heroSrc,
     imageAlt: "Mountain landscape at dawn",
     stats: [
-      { value: "+500", label: "Projects shipped" },
-      { value: "12", label: "Years of craft" },
-      { value: "98%", label: "Client retention" },
-      { value: "30+", label: "Awards won" },
+      { value: 500, prefix: "+", label: "Projects shipped" },
+      { value: 12, label: "Years of craft" },
+      { value: 98, suffix: "%", label: "Client retention" },
+      { value: 30, suffix: "+", label: "Awards won" },
     ],
   },
 } satisfies Meta<typeof Hero>;

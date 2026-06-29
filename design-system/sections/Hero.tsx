@@ -1,6 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 
+import { NumberTicker } from "@/components/ui/NumberTicker";
+
 // Sección HERO del design-system — REFINADA en ECO-93 replicando la ESTRUCTURA EXACTA del hero de
 // sat-cristian-garcia (benchmark), con lenguaje NEUTRO (tokens del design-system) y SIN vídeo: foto a
 // sangre en su lugar. Estructura del benchmark: banda 50vh/60vh; media a sangre + overlay de legibilidad
@@ -8,10 +10,17 @@ import Image from "next/image";
 // display + CTA ghost a la izquierda y un grid de stat-cards de cristal a la derecha (`items-end`/
 // `justify-between`); en móvil las stats salen DEBAJO del hero sobre `surface-secondary`. Marca por token
 // (`--color-accent`): lienzo en blanco, tematizable por cliente. El blanco/scrim sobre la foto es convención
-// de legibilidad (no color de marca). Server component, above-the-fold sin reveal → protege LCP.
+// de legibilidad (no color de marca). Server component; las stat-cards animan la cifra con NumberTicker
+// (client island, cuenta al entrar en vista). El LCP es el titular (h1), no las stats (ECO-104).
 export interface HeroStat {
-  /** Cifra/dato (p.ej. "+500"). */
-  value: string;
+  /** Cifra a animar (p.ej. 500). */
+  value: number;
+  /** Prefijo opcional delante de la cifra (p.ej. "+"). */
+  prefix?: string;
+  /** Sufijo opcional detrás de la cifra (p.ej. "%", "+"). */
+  suffix?: string;
+  /** Decimales a mostrar (p.ej. 1 → 4.9). @default 0 */
+  decimals?: number;
   /** Etiqueta corta. */
   label: string;
 }
@@ -40,7 +49,15 @@ function HeroStatCard({ stat, variant }: { stat: HeroStat; variant: "desktop" | 
           : "card-flat py-8 text-center"
       }
     >
-      <p className={`text-h1 font-black ${onMedia ? "text-white" : "text-content-primary"}`}>{stat.value}</p>
+      <p className={`text-h1 font-black ${onMedia ? "text-white" : "text-content-primary"}`}>
+        {stat.prefix}
+        <NumberTicker
+          value={stat.value}
+          decimalPlaces={stat.decimals ?? 0}
+          className={onMedia ? "text-white" : "text-content-primary"}
+        />
+        {stat.suffix}
+      </p>
       <p className={`mt-2 ${onMedia ? "text-caption text-white/60" : "text-body text-content-secondary"}`}>{stat.label}</p>
     </div>
   );
@@ -67,7 +84,7 @@ export default function Hero({ title, ctaText, ctaHref = "/contact", imageSrc, i
                 <div className="mt-10 flex">
                   <Link
                     href={ctaHref}
-                    className="inline-flex h-12 items-center justify-center rounded-md border border-white/30 px-5 py-3 text-body font-normal tracking-wider text-white transition-all hover:bg-white/10 md:px-8 md:text-h3"
+                    className="inline-flex h-12 select-none items-center justify-center rounded-md border border-white/30 px-5 py-3 text-body font-normal tracking-wider text-white transition-all hover:bg-white/10 md:px-8 md:text-h3"
                   >
                     {ctaText}
                   </Link>
