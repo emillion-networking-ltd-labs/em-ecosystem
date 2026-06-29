@@ -17,6 +17,7 @@ const checks = [
   [/body\s*\{[^}]*user-select:\s*none/s, "`body` debe declarar user-select: none (elementos no seleccionables → sin caret)"],
   [/user-select:\s*text/, "debe existir un opt-in user-select: text para el texto (copiable)"],
   [/input,\s*textarea[^{]*\{[^}]*user-select:\s*text/s, "input/textarea deben reactivar user-select: text"],
+  [/button\s*\*[^{]*\{[^}]*user-select:\s*none/s, "los descendientes de un control (`button *`, `[role] *`) deben ser user-select: none — el opt-in de texto (span/a) NO debe reactivar la selección dentro de un botón (si no, reaparece el caret I-beam sobre el texto de cada control)"],
 ];
 
 let failed = 0;
