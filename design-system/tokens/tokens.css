@@ -91,8 +91,13 @@
     -webkit-user-select: none;
     user-select: none;
   }
+  /* Opt-in de selección del TEXTO. `a` NO va aquí (ECO-107): un enlace queda en `user-select: auto`, que
+     hereda el COMPORTAMIENTO del contexto → seleccionable dentro de prose (sus padres p/li son `text`) pero
+     NO suelto (en un div hereda `none` de body). Así un enlace-botón (p.ej. el CTA del Hero) no muestra el
+     caret I-beam sin necesidad de `select-none` a mano, y el texto de un enlace dentro de un párrafo sigue
+     copiándose. */
   p, h1, h2, h3, h4, h5, h6,
-  span, a, li, code, pre, kbd, samp,
+  span, li, code, pre, kbd, samp,
   blockquote, q, cite, em, strong, b, i, u, s, small, mark, sub, sup,
   abbr, dfn, time, label, dt, dd, figcaption, caption, th, td, address {
     -webkit-user-select: text;
@@ -101,6 +106,16 @@
   input, textarea, [contenteditable="true"] {
     -webkit-user-select: text;
     user-select: text;
+  }
+  /* DESCENDIENTES DE CONTROL (ECO-107): el opt-in de texto (span/a/…) NO debe reactivar la selección
+     DENTRO de un control. Va DESPUÉS del opt-in y gana (orden; `[role]` por especificidad) → el texto de
+     un botón nunca muestra el caret I-beam (el bug que reaparecía en CADA botón nuevo). Un primitivo que
+     necesite texto copiable dentro de un control lo reabre con `select-text` explícito (clase, gana). */
+  button *, [role="button"] *, summary *,
+  [role="checkbox"] *, [role="switch"] *, [role="radio"] *,
+  [role="tab"] *, [role="option"] *, [role="menuitem"] *, [role="menuitemradio"] * {
+    -webkit-user-select: none;
+    user-select: none;
   }
 }
 

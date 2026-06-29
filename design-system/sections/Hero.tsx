@@ -84,7 +84,7 @@ export default function Hero({ title, ctaText, ctaHref = "/contact", imageSrc, i
                 <div className="mt-10 flex">
                   <Link
                     href={ctaHref}
-                    className="inline-flex h-12 select-none items-center justify-center rounded-md border border-white/30 px-5 py-3 text-body font-normal tracking-wider text-white transition-all hover:bg-white/10 md:px-8 md:text-h3"
+                    className="inline-flex h-12 items-center justify-center rounded-md border border-white/30 px-5 py-3 text-body font-normal tracking-wider text-white transition-all hover:bg-white/10 md:px-8 md:text-h3"
                   >
                     {ctaText}
                   </Link>
