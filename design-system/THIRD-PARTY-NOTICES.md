@@ -46,6 +46,20 @@ los controles del carrusel son `IconButton` (variant boxed, shape circle, spinOn
 crudos. Usan solo `motion` + `cn` (+ `lucide-react` en Testimonials, ya presente); NO arrastran `@tabler/icons-react`.
 Cero dependencias npm nuevas.
 
+### Tanda 4 — texto animado de hero (ECO-105)
+
+| Componente | Origen | Licencia | URL |
+|---|---|---|---|
+| `components/WordRotate.tsx` | Magic UI | MIT (© Magic UI) | https://magicui.design/r/word-rotate.json |
+| `components/TypingAnimation.tsx` | Magic UI | MIT (© Magic UI) | https://magicui.design/r/typing-animation.json |
+| `components/FlipWords.tsx` | Aceternity UI (© Manu Arora) | MIT | https://ui.aceternity.com/components/flip-words |
+
+`WordRotate`: VERBATIM (sin color crudo). `TypingAnimation`: lógica verbatim; se quita el `leading-20`
+arbitrario (line-height fuera de la escala) y el cursor usa el keyframe `blink-cursor`
+(`--animate-blink-cursor`) añadido a `tokens.css` (append). `FlipWords`: estructura/animación verbatim; el
+color crudo `text-neutral-900 dark:text-neutral-100` → token `text-content-primary`. Todos solo `motion` +
+`cn` (ya presentes). Cero dependencias npm nuevas.
+
 ## Dependencias npm que requieren estos componentes (las instala el satélite consumidor)
 
 | Paquete | Usado por | Licencia | URL |
