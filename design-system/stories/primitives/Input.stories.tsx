@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Search } from "lucide-react";
 import Input from "@/components/ui/Input";
+import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
   title: "Primitives/Input",
@@ -16,19 +17,20 @@ const meta = {
     size: { control: "inline-radio", options: ["sm", "md"] },
     variant: { control: "inline-radio", options: ["default", "filled"] },
   },
-  // Constrain in the catalog so inputs don't stretch full-bleed (forms are ~320px wide).
-  decorators: [
-    (Story) => (
-      <div className="max-w-xs">
-        <Story />
+  // Full-width card, the field centered at a form width (~320px) inside it.
+  render: (args) => (
+    <DemoCard>
+      <div className="w-80">
+        <Input {...args} />
       </div>
-    ),
-  ],
+    </DemoCard>
+  ),
 } satisfies Meta<typeof Input>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Default — playground: the default variant; try size/variant from the controls.
 export const Default: Story = {};
 
 export const Password: Story = {
@@ -70,47 +72,31 @@ const SIZES = [
 // AllSizes — the input sizes (sm/md), with px.
 export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
-      {SIZES.map(({ size, px }) => (
-        <div key={size} className="flex flex-col gap-1.5">
-          <Input size={size} placeholder="name@company.com" />
-          <span className="text-caption text-content-tertiary font-mono">
-            {size} · {px}px{size === "md" ? " (default)" : ""}
-          </span>
-        </div>
-      ))}
-    </div>
+    <Sizes
+      items={SIZES.map(({ size, px }) => ({
+        label: `${size} · ${px}px${size === "md" ? " (default)" : ""}`,
+        node: (
+          <div className="w-80">
+            <Input size={size} placeholder="name@company.com" />
+          </div>
+        ),
+      }))}
+    />
   ),
 };
 
-// AllVariants — ALWAYS last: the key states (default, with icon, error, disabled, loading).
+// AllVariants — ALWAYS last: the two style variants (default / filled), same content so only the style differs.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">default</p>
-        <Input placeholder="name@company.com" />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">with icon</p>
-        <Input placeholder="Search…" leftIcon={<Search size={16} />} />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">filled</p>
-        <Input variant="filled" placeholder="Type to search…" leftIcon={<Search size={16} />} />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">error</p>
-        <Input error="Enter a valid email address" placeholder="name@company.com" />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">disabled</p>
-        <Input placeholder="Can't edit" disabled />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">loading</p>
-        <Input loading placeholder="Loading…" />
-      </div>
-    </div>
+    <Variants
+      items={(["default", "filled"] as const).map((variant) => ({
+        label: variant.charAt(0).toUpperCase() + variant.slice(1),
+        node: (
+          <div className="w-80">
+            <Input variant={variant} placeholder="name@company.com" />
+          </div>
+        ),
+      }))}
+    />
   ),
 };

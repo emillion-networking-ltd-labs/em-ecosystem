@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import SegmentedControl from "@/components/ui/SegmentedControl";
+import { DemoCard, Variants, Sizes } from "../_kit";
 
 const opciones = [
   { value: "diario", label: "Diario" },
@@ -23,84 +24,56 @@ const meta = {
     variant: { control: "inline-radio", options: ["primary", "secondary", "outline"] },
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
   },
+  // Stateful wrapper so the control is interactive; `value` arg seeds the selection.
+  render: (args) => {
+    const [value, setValue] = useState(args.value ?? "diario");
+    return (
+      <DemoCard>
+        <SegmentedControl {...args} value={value} onChange={setValue} />
+      </DemoCard>
+    );
+  },
 } satisfies Meta<typeof SegmentedControl>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  render: (args) => {
-    const [value, setValue] = useState("diario");
-    return <SegmentedControl {...args} value={value} onChange={setValue} />;
-  },
-};
+const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 
-export const Secondary: Story = {
-  args: { variant: "secondary" },
-  render: (args) => {
-    const [value, setValue] = useState("semanal");
-    return <SegmentedControl {...args} value={value} onChange={setValue} />;
-  },
-};
+// One story per variant (the design axis), before AllVariants groups them.
+export const Default: Story = {};
+export const Secondary: Story = { args: { variant: "secondary" } };
+export const Outline: Story = { args: { variant: "outline" } };
 
-export const Outline: Story = {
-  args: { variant: "outline" },
-  render: (args) => {
-    const [value, setValue] = useState("mensual");
-    return <SegmentedControl {...args} value={value} onChange={setValue} />;
-  },
-};
-
-const sizes = ["sm", "md", "lg"] as const;
+// Sizes (smallest → largest), with the control height. sm is the default.
+const SIZES = [
+  { size: "lg", px: "48" },
+  { size: "md", px: "40" },
+  { size: "sm", px: "32" },
+] as const;
 
 // AllSizes — the 3 control sizes (sm/md/lg), with px.
 export const AllSizes: Story = {
-  render: () => {
-    const [value, setValue] = useState("diario");
-    return (
-      <div className="flex flex-col items-start gap-3">
-        {sizes.map((size) => (
-          <div key={size} className="flex items-center gap-3">
-            <SegmentedControl
-              options={opciones}
-              size={size}
-              value={value}
-              onChange={setValue}
-            />
-            <span className="text-caption text-content-tertiary font-mono">
-              {size === "sm"
-                ? "sm · 32px"
-                : size === "md"
-                  ? "md · 40px"
-                  : "lg · 48px"}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  },
+  render: () => (
+    <Sizes
+      items={SIZES.map(({ size, px }) => ({
+        label: `${size} · ${px}px${size === "sm" ? " (default)" : ""}`,
+        node: <SegmentedControl options={opciones} size={size} value="diario" onChange={() => {}} />,
+      }))}
+    />
+  ),
 };
 
-const variants = ["primary", "secondary", "outline"] as const;
+const VARIANTS = ["primary", "secondary", "outline"] as const;
 
-// AllVariants — ALWAYS last: every visual variant of the control.
+// AllVariants — ALWAYS last: every variant (default size), grouping the variant stories above.
 export const AllVariants: Story = {
-  render: () => {
-    const [value, setValue] = useState("diario");
-    return (
-      <div className="flex flex-wrap items-end gap-4">
-        {variants.map((variant) => (
-          <div key={variant} className="flex flex-col gap-1.5">
-            <span className="text-caption text-content-tertiary font-mono">{variant}</span>
-            <SegmentedControl
-              options={opciones}
-              variant={variant}
-              value={value}
-              onChange={setValue}
-            />
-          </div>
-        ))}
-      </div>
-    );
-  },
+  render: () => (
+    <Variants
+      items={VARIANTS.map((variant) => ({
+        label: cap(variant),
+        node: <SegmentedControl options={opciones} variant={variant} value="diario" onChange={() => {}} />,
+      }))}
+    />
+  ),
 };

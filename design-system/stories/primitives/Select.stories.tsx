@@ -2,6 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import { Pencil, Copy, Archive, Trash2 } from "lucide-react";
 import Select from "@/components/ui/Select";
+import { DemoCard, Sizes } from "../_kit";
 
 const options = [
   { label: "Spain", value: "es" },
@@ -30,41 +31,36 @@ const meta = {
   argTypes: {
     size: { control: "inline-radio", options: ["sm", "md"] },
   },
+  // Stateful wrapper so the select is interactive; `value` arg seeds the initial selection.
+  render: (args) => {
+    const [value, setValue] = useState<string | undefined>(args.value);
+    return (
+      <DemoCard>
+        <div className="w-80">
+          <Select {...args} value={value} onChange={setValue} />
+        </div>
+      </DemoCard>
+    );
+  },
 } satisfies Meta<typeof Select>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  render: (args) => {
-    const [value, setValue] = useState<string>();
-    return <Select {...args} value={value} onChange={setValue} />;
-  },
-};
+// A Select has no design-variant axis — its axes are size (AllSizes) and states (value / icons / disabled,
+// each its own story). So there is no AllVariants.
 
-export const WithValue: Story = {
-  render: (args) => {
-    const [value, setValue] = useState<string>("mx");
-    return <Select {...args} value={value} onChange={setValue} />;
-  },
-};
+// Default — playground (no selection).
+export const Default: Story = {};
+
+export const WithValue: Story = { args: { value: "mx" } };
 
 // Options can carry an icon.
 export const WithIcons: Story = {
   args: { options: optionsWithIcons, placeholder: "Choose an action…" },
-  render: (args) => {
-    const [value, setValue] = useState<string>();
-    return <Select {...args} value={value} onChange={setValue} />;
-  },
 };
 
-export const Disabled: Story = {
-  args: { disabled: true },
-  render: (args) => {
-    const [value, setValue] = useState<string>();
-    return <Select {...args} value={value} onChange={setValue} />;
-  },
-};
+export const Disabled: Story = { args: { disabled: true } };
 
 // Sizes (largest → smallest), with px. The trigger height: md = h-12 (48), sm = h-10 (40, default).
 const SIZES = [
@@ -72,75 +68,18 @@ const SIZES = [
   { size: "sm", px: "40" },
 ] as const;
 
-// AllSizes — the select sizes (sm/md), with px.
+// AllSizes — the select sizes (sm/md), with px. Last (no AllVariants: no design-variant axis).
 export const AllSizes: Story = {
-  render: () => {
-    const [value, setValue] = useState<string>("es");
-    return (
-      <div className="flex flex-col items-start gap-4">
-        {SIZES.map(({ size, px }) => (
-          <div key={size} className="flex items-center gap-3">
-            <Select
-              options={options}
-              size={size}
-              value={value}
-              onChange={setValue}
-              placeholder="Select a country"
-            />
-            <span className="text-caption text-content-tertiary font-mono">
-              {size} · {px}px{size === "sm" ? " (default)" : ""}
-            </span>
+  render: () => (
+    <Sizes
+      items={SIZES.map(({ size, px }) => ({
+        label: `${size} · ${px}px${size === "sm" ? " (default)" : ""}`,
+        node: (
+          <div className="w-80">
+            <Select options={options} size={size} value="es" onChange={() => {}} />
           </div>
-        ))}
-      </div>
-    );
-  },
-};
-
-// AllVariants — ALWAYS last: an overview walking every axis (states · with-icons · sizes).
-export const AllVariants: Story = {
-  render: () => {
-    const [stateVal, setStateVal] = useState<string>();
-    const [valueVal, setValueVal] = useState<string>("mx");
-    const [iconVal, setIconVal] = useState<string>();
-    const [sizeVal, setSizeVal] = useState<string>("es");
-    return (
-      <div className="flex flex-col gap-5">
-        <div>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">states</p>
-          <div className="flex flex-wrap items-center gap-4">
-            <div className="flex flex-col gap-1">
-              <span className="text-caption text-content-tertiary font-mono">default</span>
-              <Select options={options} value={stateVal} onChange={setStateVal} placeholder="Select a country" />
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-caption text-content-tertiary font-mono">with value</span>
-              <Select options={options} value={valueVal} onChange={setValueVal} />
-            </div>
-            <div className="flex flex-col gap-1">
-              <span className="text-caption text-content-tertiary font-mono">disabled</span>
-              <Select options={options} value={undefined} onChange={() => {}} disabled placeholder="Select a country" />
-            </div>
-          </div>
-        </div>
-        <div>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">with icons</p>
-          <Select options={optionsWithIcons} value={iconVal} onChange={setIconVal} placeholder="Choose an action…" />
-        </div>
-        <div>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">sizes</p>
-          <div className="flex flex-col items-start gap-3">
-            {([["md", "48"], ["sm", "40"]] as const).map(([size, px]) => (
-              <div key={size} className="flex items-center gap-3">
-                <Select options={options} size={size} value={sizeVal} onChange={setSizeVal} placeholder="Select a country" />
-                <span className="text-caption text-content-tertiary font-mono">
-                  {size} · {px}px{size === "sm" ? " (default)" : ""}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-    );
-  },
+        ),
+      }))}
+    />
+  ),
 };
