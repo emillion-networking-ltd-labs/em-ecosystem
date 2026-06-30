@@ -135,8 +135,12 @@ export const StoryConventions: Story = {
             <Code>layout: &quot;fullscreen&quot;</Code>.
           </Rule>
           <Rule>
-            <strong>Layout</strong> (Container, Grid, Stack, Split) → at real width, with placeholder content
-            that reveals the structure.
+            <strong>Layout</strong> (Container, Grid, Stack, Split, Section) → at real width, with placeholder
+            content that reveals the structure. A layout primitive has <strong>no design-variant axis</strong>{" "}
+            → <strong>no AllVariants</strong>. A structural axis that reads clearly (cols, ratio, align, surface)
+            → its own named story; an incidental <Code>gap</Code> → just a Control on <Code>Default</Code>.{" "}
+            <Code>AllSizes</Code> is <strong>only the element&apos;s OWN size</strong> (e.g. Container&apos;s
+            max-width) — a spacing/gap measure is a parameter, not AllSizes, even when it has named tiers.
           </Rule>
           <Rule>
             <strong>Charts</strong> → <Code>DemoCard</Code>; AllVariants = the real data states (data / empty).
@@ -149,6 +153,12 @@ export const StoryConventions: Story = {
         description="The closing story of every file: one project Card per real STYLE variant, name above. Built with the kit."
       >
         <ul className="ml-5 list-disc space-y-2">
+          <Rule>
+            A <strong>design variant</strong> is a visual STYLE choice (variant / shape / brand) — <strong>not a
+            parameter or option</strong> (surface, columns, ratio, alignment, count). A parameter gets its own
+            named story; it <strong>never</strong> becomes AllVariants. If a component has no style axis (e.g. a
+            layout primitive), it has <strong>no AllVariants at all</strong>.
+          </Rule>
           <Rule>
             One card per <strong>real variant</strong> — a configuration that EXISTS as its own named story.
             Two sections → two cards. <strong>Never invent variants.</strong>
@@ -214,6 +224,13 @@ export const AllVariants: Story = { render: () => <Variants items={VARIANTS} /> 
             Button, Blob). <strong>Continuous measures</strong> (gap, radius, stroke — arbitrary px) are NOT
             AllSizes: they go as <strong>parameter stories</strong> (<Code>Gaps</Code>, <Code>Radii</Code>,{" "}
             <Code>Strokes</Code>) with the measure in the label, before AllSizes/AllVariants.
+          </Rule>
+          <Rule>
+            <strong>A measure earns a story only if its variation is instructive</strong> — when the measure IS
+            the component&apos;s point (DotPattern radius/gap define the texture). <strong>Incidental
+            spacing</strong> whose tiers read the same (a layout <Code>gap</Code> between panels) does NOT get a
+            story: leave it adjustable from the <Code>Default</Code> Controls. An overview of three near-identical
+            measures is noise.
           </Rule>
         </ul>
         <Snippet>{`// AllSizes — size overview. Label = size token + its real measure for this component.
