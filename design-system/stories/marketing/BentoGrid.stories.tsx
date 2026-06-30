@@ -1,9 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { Zap, Accessibility, ShieldCheck, Blocks, type LucideIcon } from "lucide-react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/BentoGrid";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Asymmetric grid for highlighting features.
-// The icon enters via the `icon` prop (no external icon dep in the component itself).
+// The icon enters via the `icon` prop — a feature glyph above the title: a bare lucide glyph at the default
+// 16px size, in `content-primary` (same colour as the title, for visibility).
 const meta = {
   title: "Marketing/BentoGrid",
   component: BentoGrid,
@@ -17,18 +19,16 @@ const Header = () => (
   <div className="flex h-full min-h-24 w-full rounded-xl [background-image:var(--gradient-brand)] opacity-80" />
 );
 
-// A token-driven glyph standing in for a real icon (passed through the `icon` prop).
-const Glyph = () => (
-  <div className="flex size-9 items-center justify-center rounded-lg bg-surface-secondary text-content-primary">
-    <span className="text-body font-display">N</span>
-  </div>
+// A feature glyph: a bare lucide icon at the default 16px size, in the title's colour (content-primary).
+const Glyph = ({ icon: Icon }: { icon: LucideIcon }) => (
+  <Icon size={16} className="text-content-primary" />
 );
 
-const items = [
-  { title: "Fast by default", description: "Production performance out of the box.", className: "md:col-span-2" },
-  { title: "Accessible", description: "WCAG AA by construction.", className: "" },
-  { title: "Governed", description: "Tokens and a component registry.", className: "" },
-  { title: "Composable", description: "Assembled per sector preset.", className: "md:col-span-2" },
+const items: { title: string; description: string; className: string; icon: LucideIcon }[] = [
+  { title: "Fast by default", description: "Production performance out of the box.", className: "md:col-span-2", icon: Zap },
+  { title: "Accessible", description: "WCAG AA by construction.", className: "", icon: Accessibility },
+  { title: "Governed", description: "Tokens and a component registry.", className: "", icon: ShieldCheck },
+  { title: "Composable", description: "Assembled per sector preset.", className: "md:col-span-2", icon: Blocks },
 ];
 
 const Grid = ({ withIcons = false }: { withIcons?: boolean }) => (
@@ -39,7 +39,7 @@ const Grid = ({ withIcons = false }: { withIcons?: boolean }) => (
         title={it.title}
         description={it.description}
         header={<Header />}
-        icon={withIcons ? <Glyph /> : undefined}
+        icon={withIcons ? <Glyph icon={it.icon} /> : undefined}
         className={it.className}
       />
     ))}
@@ -48,36 +48,28 @@ const Grid = ({ withIcons = false }: { withIcons?: boolean }) => (
 
 export const Default: Story = {
   render: () => (
-    <Card>
+    <DemoCard block>
       <Grid />
-    </Card>
+    </DemoCard>
   ),
 };
 
 // WithIcons — the `icon` prop populated on every item.
 export const WithIcons: Story = {
   render: () => (
-    <Card>
+    <DemoCard block>
       <Grid withIcons />
-    </Card>
+    </DemoCard>
   ),
 };
 
-// AllVariants — ALWAYS last: the real variants (Default, WithIcons) — one project Card each, name above.
+// AllVariants — ALWAYS last: the real variants (Default, WithIcons) — one project Card each (block, since the
+// grid keeps its own width), name above.
 const VARIANTS = [
-  { label: "Default", node: <Grid /> },
-  { label: "WithIcons", node: <Grid withIcons /> },
+  { label: "Default", node: <Grid />, block: true },
+  { label: "WithIcons", node: <Grid withIcons />, block: true },
 ];
 
 export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card>{v.node}</Card>
-        </div>
-      ))}
-    </div>
-  ),
+  render: () => <Variants items={VARIANTS} />,
 };

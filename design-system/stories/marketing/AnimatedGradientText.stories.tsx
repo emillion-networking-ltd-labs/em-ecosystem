@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AnimatedGradientText } from "@/components/ui/AnimatedGradientText";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Requires the `gradient` keyframe (tokens.css).
 // colorFrom/colorTo default to the upstream palette (#ffaa40 → #9c40ff) — respected in the Default demo.
@@ -21,11 +21,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <span className="text-display-2 font-display">
         <AnimatedGradientText {...args} />
       </span>
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -33,40 +33,33 @@ export const Default: Story = {
 export const BrandColors: Story = {
   args: { colorFrom: "var(--color-accent)", colorTo: "var(--color-accent-2)", children: "Built for your brand" },
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <span className="text-display-2 font-display">
         <AnimatedGradientText {...args} />
       </span>
-    </Card>
+    </DemoCard>
   ),
 };
 
 // AllVariants — ALWAYS last: the real variants (Default, Brand colors) — one project Card each, name above.
-const VARIANTS = [
-  { label: "Default", colorFrom: "#ffaa40", colorTo: "#9c40ff", text: "NexaCore" },
-  {
-    label: "Brand colors",
-    colorFrom: "var(--color-accent)",
-    colorTo: "var(--color-accent-2)",
-    text: "Built for your brand",
-  },
-] as const;
+const gradient = (colorFrom: string, colorTo: string, text: string) => (
+  <span className="text-display-2 font-display">
+    <AnimatedGradientText colorFrom={colorFrom} colorTo={colorTo}>
+      {text}
+    </AnimatedGradientText>
+  </span>
+);
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="flex min-h-[140px] items-center justify-center">
-            <span className="text-display-2 font-display">
-              <AnimatedGradientText colorFrom={v.colorFrom} colorTo={v.colorTo}>
-                {v.text}
-              </AnimatedGradientText>
-            </span>
-          </Card>
-        </div>
-      ))}
-    </div>
+    <Variants
+      items={[
+        { label: "Default", node: gradient("#ffaa40", "#9c40ff", "NexaCore") },
+        {
+          label: "Brand colors",
+          node: gradient("var(--color-accent)", "var(--color-accent-2)", "Built for your brand"),
+        },
+      ]}
+    />
   ),
 };

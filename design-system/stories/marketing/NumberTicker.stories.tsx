@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { NumberTicker } from "@/components/ui/NumberTicker";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Marketing/NumberTicker — animated count-up/down to a target (marketing stats). Theme-aware via
 // content-primary; animates on scroll into view.
@@ -23,73 +23,62 @@ const NUM = "text-h1 font-black text-content-primary";
 
 export const Default: Story = {
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <span className={NUM}>
         <NumberTicker {...args} />
       </span>
-    </Card>
+    </DemoCard>
   ),
 };
 
 // Up — counts from 0 up to the value (default).
 export const Up: Story = {
   render: () => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <span className={NUM}>
         <NumberTicker value={500} direction="up" />+
       </span>
-    </Card>
+    </DemoCard>
   ),
 };
 
 // Down — counts from the value down to 0.
 export const Down: Story = {
   render: () => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <span className={NUM}>
         <NumberTicker value={100} direction="down" />
       </span>
-    </Card>
+    </DemoCard>
   ),
 };
 
 // Decimals — fractional target with fixed decimal places.
 export const Decimals: Story = {
   render: () => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <span className={NUM}>
         <NumberTicker value={4.9} decimalPlaces={1} />
       </span>
-    </Card>
+    </DemoCard>
   ),
 };
 
 // AllVariants — ALWAYS last: the real variants (Default, Up, Down, Decimals) — one project Card each, name above.
 const VARIANTS = [
-  { label: "Default", node: <NumberTicker value={100} /> },
+  { label: "Default", node: <span className={NUM}><NumberTicker value={100} /></span> },
   {
     label: "Up",
     node: (
-      <>
+      <span className={NUM}>
         <NumberTicker value={500} direction="up" />+
-      </>
+      </span>
     ),
   },
-  { label: "Down", node: <NumberTicker value={100} direction="down" /> },
-  { label: "Decimals", node: <NumberTicker value={4.9} decimalPlaces={1} /> },
+  { label: "Down", node: <span className={NUM}><NumberTicker value={100} direction="down" /></span> },
+  { label: "Decimals", node: <span className={NUM}><NumberTicker value={4.9} decimalPlaces={1} /></span> },
 ];
 
 export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="flex min-h-[140px] items-center justify-center">
-            <span className={NUM}>{v.node}</span>
-          </Card>
-        </div>
-      ))}
-    </div>
-  ),
+  render: () => <Variants items={VARIANTS} />,
 };

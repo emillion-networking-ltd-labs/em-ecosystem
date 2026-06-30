@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BlurFade } from "@/components/ui/BlurFade";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Blur-in reveal. Uses `motion/react`.
 const meta = {
@@ -20,26 +20,26 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <BlurFade {...args}>
-        <h2 className="text-display-3 font-display text-content-primary">Arrives with poise</h2>
+        <p className="text-display-2 font-display font-bold text-content-primary">Arrives with poise</p>
       </BlurFade>
-    </Card>
+    </DemoCard>
   ),
 };
 
 // Staggered — the `delay` prop fanned across a list for a cascading reveal.
 export const Staggered: Story = {
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <div className="flex flex-col gap-3">
         {["True to the facts", "Beautiful per sector", "First-party code"].map((t, i) => (
           <BlurFade key={t} {...args} delay={i * 0.15}>
-            <p className="text-content-secondary">{t}</p>
+            <p className="text-display-3 font-display font-bold text-content-primary">{t}</p>
           </BlurFade>
         ))}
       </div>
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -49,7 +49,7 @@ const VARIANTS = [
     label: "Default",
     node: (
       <BlurFade inView duration={0.6}>
-        <h2 className="text-display-3 font-display text-content-primary">Arrives with poise</h2>
+        <p className="text-display-2 font-display font-bold text-content-primary">Arrives with poise</p>
       </BlurFade>
     ),
   },
@@ -59,7 +59,7 @@ const VARIANTS = [
       <div className="flex flex-col gap-3">
         {["True to the facts", "Beautiful per sector", "First-party code"].map((t, i) => (
           <BlurFade key={t} inView duration={0.6} delay={i * 0.15}>
-            <p className="text-content-secondary">{t}</p>
+            <p className="text-display-3 font-display font-bold text-content-primary">{t}</p>
           </BlurFade>
         ))}
       </div>
@@ -68,14 +68,5 @@ const VARIANTS = [
 ];
 
 export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="flex min-h-[140px] items-center justify-center">{v.node}</Card>
-        </div>
-      ))}
-    </div>
-  ),
+  render: () => <Variants items={VARIANTS} />,
 };

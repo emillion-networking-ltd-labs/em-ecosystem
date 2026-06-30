@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Spotlight } from "@/components/ui/Spotlight";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Decorative SVG spotlight; needs a bounded, relative parent.
 // `fill` defaults to "white" inside the component — respected in the Default demo.
@@ -25,18 +25,18 @@ const Tile = ({ fill, label, height = "h-72" }: { fill: string; label: string; h
 
 export const Default: Story = {
   render: () => (
-    <Card className="overflow-hidden">
+    <DemoCard block className="overflow-hidden">
       <Tile fill="white" label="In the spotlight" />
-    </Card>
+    </DemoCard>
   ),
 };
 
 // Themed — drive the fill from the accent token instead of the default white.
 export const Accent: Story = {
   render: () => (
-    <Card className="overflow-hidden">
+    <DemoCard block className="overflow-hidden">
       <Tile fill="var(--color-accent)" label="On brand" />
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -49,15 +49,13 @@ const VARIANTS = [
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="overflow-hidden">
-            <Tile fill={v.fill} label="Spotlight" height="h-56" />
-          </Card>
-        </div>
-      ))}
-    </div>
+    <Variants
+      items={VARIANTS.map((v) => ({
+        label: v.label,
+        className: "overflow-hidden",
+        block: true,
+        node: <Tile fill={v.fill} label="Spotlight" height="h-56" />,
+      }))}
+    />
   ),
 };
