@@ -1,11 +1,12 @@
 import type { ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Group } from "./_helpers";
-import { DemoCard, Variants } from "../_kit";
+import { DemoCard, Variants, Sizes } from "../_kit";
 
 // Foundations/Story Conventions — the CANONICAL rules EVERY catalog story follows, in ALL sections
 // (Primitives, Layout, Marketing, Sections, Charts, Decoration, Showcase). It documents the catalog itself —
-// it registers no component. (ECO-109.)
+// it registers no component. A guard ENFORCES it (`npm run coverage` → check-story-norm), so nothing enters
+// off-norm. (ECO-109 / ECO-112.)
 const meta = {
   title: "Foundations/Story Conventions",
   parameters: { layout: "fullscreen" },
@@ -34,12 +35,13 @@ function Snippet({ children }: { children: string }) {
   );
 }
 
-// A stand-in "element" for the live example — looks like a real CTA so the framing reads.
-function Sample({ children }: { children: ReactNode }) {
+// A stand-in "element" for the live examples — looks like a real CTA so the framing reads. `size` lets the
+// AllSizes example show three real sizes.
+function Sample({ children, size = "md" }: { children: ReactNode; size?: "sm" | "md" | "lg" }) {
+  const pad =
+    size === "sm" ? "px-3 py-1.5 text-caption" : size === "lg" ? "px-7 py-3.5 text-h3" : "px-5 py-2.5 text-body";
   return (
-    <span className="rounded-md bg-surface-inverse px-5 py-2.5 text-body font-medium text-content-inverse">
-      {children}
-    </span>
+    <span className={`rounded-md bg-surface-inverse font-medium text-content-inverse ${pad}`}>{children}</span>
   );
 }
 
@@ -49,22 +51,43 @@ export const StoryConventions: Story = {
     <div className="mx-auto max-w-3xl px-6 py-10 text-content-primary">
       <h1 className="text-display-3 font-display font-bold">Story conventions</h1>
       <p className="mt-3 max-w-2xl text-body text-content-secondary">
-        Every story in the catalog follows the same shape, in <strong>all</strong> sections. The rules
-        below are the standard; a gate keeps coverage honest (<Code>npm run coverage</Code>). All catalog
-        copy is in English, all colour comes from tokens, and stories never change a registered component —
-        they only present it.
+        Every story in the catalog follows the same shape, in <strong>all</strong> sections. One principle
+        drives it — <strong>three orthogonal axes</strong> — and a gate keeps it honest (
+        <Code>npm run coverage</Code>). All copy is in English, all colour comes from tokens, and stories
+        never change a registered component — they only present it.
       </p>
 
       <Group
+        title="The three axes"
+        description="Every component is described by three independent axes. Each has a FIXED home — they never mix or repeat."
+      >
+        <ul className="ml-5 list-disc space-y-2">
+          <Rule>
+            <strong>Style</strong> (variant / shape / brand) → <Code>AllVariants</Code>.
+          </Rule>
+          <Rule>
+            <strong>Size</strong> (sm / md / lg) → <Code>AllSizes</Code> — only when the component has a size axis.
+          </Rule>
+          <Rule>
+            <strong>State</strong> (disabled / loading / hover / pressed) → its own named story.
+          </Rule>
+        </ul>
+        <p className="mt-3 text-body text-content-secondary">
+          So <Code>AllVariants</Code> shows <strong>only style</strong>; sizes live in <Code>AllSizes</Code>.
+          Never repeat a size inside AllVariants.
+        </p>
+      </Group>
+
+      <Group
         title="Live example"
-        description="The same rules, rendered with the shared kit. A single story shows its element in the project card; AllVariants is one project Card per real variant, each with its name above."
+        description="The same rules, rendered with the shared kit. A single story shows its element in the project card; the overviews are one card per real item, with its label above."
       >
         <p className="mb-2 text-caption font-mono text-content-tertiary">a single story → DemoCard</p>
         <DemoCard>
           <Sample>Your element</Sample>
         </DemoCard>
         <p className="mb-2 mt-6 text-caption font-mono text-content-tertiary">
-          AllVariants → Variants (one card per real variant, name above)
+          AllVariants (style) → Variants — one card per real variant
         </p>
         <Variants
           items={[
@@ -72,95 +95,152 @@ export const StoryConventions: Story = {
             { label: "Brand", node: <Sample>Brand</Sample> },
           ]}
         />
+        <p className="mb-2 mt-6 text-caption font-mono text-content-tertiary">
+          AllSizes (size) → Sizes — one card per real size
+        </p>
+        <Sizes
+          items={[
+            { label: "sm · 32px", node: <Sample size="sm">Button</Sample> },
+            { label: "md · 40px (default)", node: <Sample size="md">Button</Sample> },
+            { label: "lg · 48px", node: <Sample size="lg">Button</Sample> },
+          ]}
+        />
       </Group>
 
       <Group
-        title="The card frame"
-        description="Every story shows its element inside the project Card (the card-flat surface) — centered, never floating loose in a corner of the canvas. This is what makes the whole catalog read as one."
+        title="Which frame, by section type"
+        description="The element-in-a-card frame covers most cases; two kinds need a different treatment. Pick by what the component IS."
       >
         <ul className="ml-5 list-disc space-y-2">
           <Rule>
-            Wrap the element in <Code>{`<Card className="flex min-h-[140px] items-center justify-center">`}</Code>.
+            <strong>Simple element</strong> (badge, marketing CTA, animated text) → <Code>DemoCard</Code>{" "}
+            (centered). AllVariants = one card per style; AllSizes = one card per size.
           </Rule>
           <Rule>
-            <strong>Full-bleed effects</strong> (animated backgrounds like Aurora/Meteors/Spotlight/Ripple)
-            can&apos;t use the padded card directly — host the effect as a <strong>tile inside</strong> the
-            Card (a dark tile for light-on-dark effects; a taller tile for radial ones).
+            <strong>&quot;Matrix&quot; primitive</strong> (Button, Input, Select — variant × size × state) →{" "}
+            <Code>AllVariants</Code> is an overview <strong>by variant</strong> (in the default size),{" "}
+            <Code>AllSizes</Code> an overview <strong>by size</strong> (in the default variant). Never the full
+            cartesian product — that&apos;s noise.
           </Rule>
           <Rule>
-            <strong>Self-contained compositions</strong> (card grids like BentoGrid/CardHoverEffect) go
-            inside the Card as a whole — one card around the composition.
+            <strong>Composition / grid</strong> (BentoGrid, CardHoverEffect, Pricing) → the whole composition
+            inside one card: <Code>{`<DemoCard block>`}</Code>.
           </Rule>
           <Rule>
-            Don&apos;t override the global <Code>layout: &quot;fullscreen&quot;</Code> with{" "}
-            <Code>padded</Code>/<Code>centered</Code> — that re-adds margins and breaks the full-width frame.
+            <strong>Full-bleed effect</strong> (Aurora, Meteors, Ripple, Blob) → host it as a tile inside the
+            card: <Code>{`<DemoCard block className="overflow-hidden">`}</Code> with a bounded height.
+          </Rule>
+          <Rule>
+            <strong>Page section</strong> (Hero, FAQ, Testimonials) → full width, NOT inside a 140px card. Keep{" "}
+            <Code>layout: &quot;fullscreen&quot;</Code>.
+          </Rule>
+          <Rule>
+            <strong>Layout</strong> (Container, Grid, Stack, Split) → at real width, with placeholder content
+            that reveals the structure.
+          </Rule>
+          <Rule>
+            <strong>Charts</strong> → <Code>DemoCard</Code>; AllVariants = the real data states (data / empty).
           </Rule>
         </ul>
-        <Snippet>{`export const Default: Story = {
-  render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
-      <Component {...args} />
-    </Card>
-  ),
-};`}</Snippet>
       </Group>
 
       <Group
-        title="AllVariants — the final overview"
-        description="The closing story of every file: one project Card per real variant, with the variant name ABOVE each card. It lets the component be read at a glance."
+        title="AllVariants — the style overview (always last)"
+        description="The closing story of every file: one project Card per real STYLE variant, name above. Built with the kit."
       >
         <ul className="ml-5 list-disc space-y-2">
           <Rule>
-            One <Code>{`<Card>`}</Code> per <strong>real variant</strong> — a variant is a configuration
-            that EXISTS as its own named story (section). Two sections → two cards; one → one.
+            One card per <strong>real variant</strong> — a configuration that EXISTS as its own named story.
+            Two sections → two cards. <strong>Never invent variants.</strong>
           </Rule>
           <Rule>
-            <strong>Never invent variants.</strong> If a configuration is worth showing in AllVariants, it
-            must first exist as its own named story (e.g. Meteors&apos; <Code>Dense</Code>/<Code>Sparse</Code>).
+            AllVariants <strong>groups</strong> variants that already have a story — it never{" "}
+            <strong>introduces</strong> one here for the first time. The bad pattern (which the guard rejects):
+            just <Code>Default</Code> + an AllVariants full of variants never shown on their own.
           </Rule>
           <Rule>
-            The variant name sits <strong>above</strong> each card, in a mono caption:{" "}
-            <Code>text-caption text-content-tertiary font-mono</Code>.
+            <strong>ALWAYS last</strong>, preceded by the marker <Code>{`// AllVariants — ALWAYS last:`}</Code>.
           </Rule>
-          <Rule>
-            <strong>ALWAYS last</strong>, preceded by the marker comment{" "}
-            <Code>{`// AllVariants — ALWAYS last:`}</Code> directly above the export.
-          </Rule>
+          <Rule>Style only — no sizes here (those are AllSizes).</Rule>
         </ul>
-        <Snippet>{`// AllVariants — ALWAYS last: one project Card per real variant, name above.
+        <Snippet>{`// AllVariants — ALWAYS last: one project Card per real STYLE variant, name above.
+import { Variants } from "../_kit";
+
 const VARIANTS = [
   { label: "Default", node: <Component /> },
-  { label: "Brand", node: <Component brand /> },   // each label = an existing section
+  { label: "Brand",   node: <Component brand /> },   // each label = an existing named story
 ];
 
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="flex min-h-[140px] items-center justify-center">{v.node}</Card>
-        </div>
-      ))}
-    </div>
+export const AllVariants: Story = { render: () => <Variants items={VARIANTS} /> };`}</Snippet>
+      </Group>
+
+      <Group
+        title="AllSizes — the size overview"
+        description="When the component has a size axis: one card per real size, label above — right BEFORE AllVariants. Same kit, the Sizes helper."
+      >
+        <ul className="ml-5 list-disc space-y-2">
+          <Rule>
+            One card per <strong>real size</strong>, size only — no style mixed in.
+          </Rule>
+          <Rule>
+            The label is the <strong>size token + its real measure</strong> for THIS component (e.g.{" "}
+            <Code>sm · 12px</Code>, <Code>lg · 48px</Code>) — never a bare <Code>sm</Code>. It gives the reader
+            (and the AI) the concrete value each size maps to. Mark the default, e.g.{" "}
+            <Code>md · 16px (default)</Code>.
+          </Rule>
+          <Rule>
+            Named <Code>AllSizes</Code> (never a bare <Code>Sizes</Code>); second-to-last, just before{" "}
+            <Code>AllVariants</Code>.
+          </Rule>
+        </ul>
+        <Snippet>{`// AllSizes — size overview. Label = size token + its real measure for this component.
+import { Sizes } from "../_kit";
+
+const SIZES = [
+  { label: "sm · 12px",            node: <Component size="sm" /> },
+  { label: "md · 16px (default)",  node: <Component size="md" /> },
+  { label: "lg · 20px",            node: <Component size="lg" /> },
+];
+
+export const AllSizes: Story = { render: () => <Sizes items={SIZES} /> };`}</Snippet>
+      </Group>
+
+      <Group title="A single story — the card frame" description="Every non-overview story shows its element inside the project Card, centered, via DemoCard.">
+        <Snippet>{`import { DemoCard } from "../_kit";
+
+export const Default: Story = {
+  render: (args) => (
+    <DemoCard>
+      <Component {...args} />
+    </DemoCard>
   ),
 };`}</Snippet>
       </Group>
 
-      <Group
-        title="Ordering & naming"
-        description="So the sidebar reads predictably."
-      >
+      <Group title="Ordering & naming" description="So the sidebar reads predictably.">
         <ul className="ml-5 list-disc space-y-2">
           <Rule>
-            Order: <Code>Default</Code> (the playground) → one section per real variant/state → then{" "}
-            <Code>AllVariants</Code> last.
+            Order: <Code>Default</Code> (the playground, with <Code>args</Code>) → one section per real
+            variant/state → <Code>AllSizes</Code> (if any — <strong>second-to-last</strong>, immediately before
+            AllVariants) → <Code>AllVariants</Code> last.
           </Rule>
-          <Rule>
-            A literal size axis is named <Code>AllSizes</Code> (never a bare <Code>Sizes</Code>).
-          </Rule>
-          <Rule>All story names, captions and copy are in English.</Rule>
+          <Rule>The size axis is named <Code>AllSizes</Code> (never a bare <Code>Sizes</Code>).</Rule>
+          <Rule>Each story carries a <Code>{`// Name — what it is / when to use`}</Code> comment. All copy in English.</Rule>
         </ul>
+      </Group>
+
+      <Group
+        title="Enforced, not just documented"
+        description="A guard makes this non-optional — so new components inherit the norm by construction, with no hand-fixing later."
+      >
+        <p className="text-body text-content-secondary">
+          <Code>npm run coverage</Code> runs <Code>check-story-norm</Code>, which FAILS the build if a component
+          story is missing <Code>AllVariants</Code> (or it isn&apos;t last), if a component with a size axis is
+          missing <Code>AllSizes</Code>, if <Code>AllSizes</Code> isn&apos;t second-to-last (right before
+          AllVariants), if <Code>AllVariants</Code> mixes in sizes, or if a style variant (from{" "}
+          <Code>variantClasses</Code>) appears only inside AllVariants without its own story. The doc
+          explains; the guard obliges.
+        </p>
       </Group>
     </div>
   ),
