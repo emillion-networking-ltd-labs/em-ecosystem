@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import SpeedometerChart from "@/components/ui/SpeedometerChart";
-import { DemoCard, Variants, Sizes } from "../_kit";
+import { DemoCard, Sizes } from "../_kit";
 
-// Charts/SpeedometerChart — pure-SVG 270° gauge (no chart library), value shown as %. `value` is a
-// continuous measure (Values story); `size` is a named scale (AllSizes, with the svg width). No discrete
-// style axis → no AllVariants. Colours come from theme tokens (stroke/fill classes).
+// Charts/SpeedometerChart — pure-SVG 270° gauge, value shown as %. `value` is adjustable from Controls (a
+// range), so it needs no story of its own; `size` is a named scale → AllSizes (with the svg width). No
+// discrete style axis → no AllVariants. Colours come from theme tokens (stroke/fill classes).
 const meta = {
   title: "Charts/SpeedometerChart",
   component: SpeedometerChart,
@@ -19,8 +19,6 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// A few values across the range, to read where the needle lands (continuous measure).
-const VALUES = [12, 50, 78, 100] as const;
 // Sizes (largest → smallest), with the svg width. lg is the default.
 const SIZES = [
   { size: "lg", px: "260" },
@@ -28,7 +26,7 @@ const SIZES = [
   { size: "sm", px: "180" },
 ] as const;
 
-// Default — playground: the gauge at lg, needle pointing to the value (shown as %).
+// Default — playground: the gauge; move the needle with the Controls (value range).
 export const Default: Story = {
   render: (args) => (
     <DemoCard>
@@ -37,20 +35,7 @@ export const Default: Story = {
   ),
 };
 
-// Values — the needle across the range (a continuous measure parameter), the value in the label.
-export const Values: Story = {
-  render: () => (
-    <Variants
-      items={VALUES.map((value) => ({
-        label: `value=${value}%${value === 78 ? " (default)" : ""}`,
-        node: <SpeedometerChart value={value} size="lg" />,
-      }))}
-    />
-  ),
-};
-
-// AllSizes — the gauge sizes (named scale), label = size + svg width. Last (no AllVariants: the gauge
-// has no discrete style axis).
+// AllSizes — the gauge sizes (named scale), label = size + svg width. Last (no AllVariants: no discrete style axis).
 export const AllSizes: Story = {
   render: () => (
     <Sizes
