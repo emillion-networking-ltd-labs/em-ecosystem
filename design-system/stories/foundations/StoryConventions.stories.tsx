@@ -249,6 +249,12 @@ export const Default: Story = {
           </Rule>
           <Rule>The size axis is named <Code>AllSizes</Code> (never a bare <Code>Sizes</Code>).</Rule>
           <Rule>Each story carries a <Code>{`// Name — what it is / when to use`}</Code> comment. All copy in English.</Rule>
+          <Rule>
+            <strong>Theme is global</strong> — the Storybook toolbar switches light/dark; a story renders in the
+            current theme. <strong>Never</strong> <Code>Light</Code>/<Code>Dark</Code> stories (that duplicates
+            the toolbar). A prop that forces a specific backdrop (e.g. a chart on a dark surface) is a{" "}
+            <em>surface/context</em> variant, named as such — not a theme story.
+          </Rule>
         </ul>
       </Group>
 
