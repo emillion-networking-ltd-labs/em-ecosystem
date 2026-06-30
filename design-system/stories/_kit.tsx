@@ -32,9 +32,9 @@ export interface Variant {
   block?: boolean;
 }
 
-// Variants — the AllVariants overview: one project Card per REAL variant, with its name above each card.
-// ALWAYS the last export of a file. Pass only variants that exist as their own named story — never invent.
-export function Variants({ items }: { items: Variant[] }) {
+// Overview — shared layout of the closing overviews: one project Card per REAL item, label above each card.
+// Used by both Variants (style axis) and Sizes (size axis) so the two read identically.
+function Overview({ items }: { items: Variant[] }) {
   return (
     <div className="flex flex-col gap-6">
       {items.map((v) => (
@@ -47,4 +47,18 @@ export function Variants({ items }: { items: Variant[] }) {
       ))}
     </div>
   );
+}
+
+// Variants — the `AllVariants` overview (STYLE axis): one card per REAL variant (primary/secondary/danger,
+// shape, brand…), label above. ALWAYS the last export of a file. Only variants that exist as their own named
+// story — never invent. Sizes do NOT belong here — they have their own `AllSizes` (see Sizes below).
+export function Variants({ items }: { items: Variant[] }) {
+  return <Overview items={items} />;
+}
+
+// Sizes — the `AllSizes` overview (SIZE axis): one card per REAL size (sm/md/lg), label above. Use it when the
+// component has a size axis; it goes right BEFORE AllVariants. Same shape as Variants, different axis — so the
+// two never mix (style in AllVariants, size in AllSizes).
+export function Sizes({ items }: { items: Variant[] }) {
+  return <Overview items={items} />;
 }

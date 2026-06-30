@@ -48,24 +48,6 @@ export const Default: Story = {
   ),
 };
 
-// AllSizes — one halo per diameter, centered.
-export const AllSizes: Story = {
-  render: () => (
-    <div className="flex flex-wrap gap-4">
-      {SIZES.map(({ size, px }) => (
-        <div key={size} className="flex flex-col items-center gap-1.5">
-          <div className="relative isolate flex h-56 w-56 items-center justify-center overflow-hidden rounded-2xl border border-border-default bg-surface-primary">
-            <Blob size={size} intensity="soft" className="static -z-0" />
-          </div>
-          <span className="text-caption text-content-tertiary font-mono">
-            {size} · {px}px{size === "lg" ? " (default)" : ""}
-          </span>
-        </div>
-      ))}
-    </div>
-  ),
-};
-
 // Intensities — same halo, opacity boldest → faintest.
 export const Intensities: Story = {
   render: () => (
@@ -77,6 +59,24 @@ export const Intensities: Story = {
           </div>
           <span className="text-caption text-content-tertiary font-mono">
             {intensity} · {op}{intensity === "soft" ? " (default)" : ""}
+          </span>
+        </div>
+      ))}
+    </div>
+  ),
+};
+
+// AllSizes — one halo per diameter, centered. (Penúltima: justo antes de AllVariants.)
+export const AllSizes: Story = {
+  render: () => (
+    <div className="flex flex-wrap gap-4">
+      {SIZES.map(({ size, px }) => (
+        <div key={size} className="flex flex-col items-center gap-1.5">
+          <div className="relative isolate flex h-56 w-56 items-center justify-center overflow-hidden rounded-2xl border border-border-default bg-surface-primary">
+            <Blob size={size} intensity="soft" className="static -z-0" />
+          </div>
+          <span className="text-caption text-content-tertiary font-mono">
+            {size} · {px}px{size === "lg" ? " (default)" : ""}
           </span>
         </div>
       ))}
