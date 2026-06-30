@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Settings, ArrowLeft } from "lucide-react";
 import Button from "@/components/ui/Button";
+import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
   title: "Primitives/Button",
@@ -17,11 +18,17 @@ const meta = {
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
     fullWidth: { control: "boolean" },
   },
+  render: (args) => (
+    <DemoCard>
+      <Button {...args} />
+    </DemoCard>
+  ),
 } satisfies Meta<typeof Button>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// One story per variant (the design axis), before AllVariants groups them.
 export const Primary: Story = {};
 export const Secondary: Story = { args: { variant: "secondary" } };
 export const Outline: Story = { args: { variant: "outline" } };
@@ -42,6 +49,8 @@ export const LinkUnderlineWithIcon: Story = {
     ),
   },
 };
+
+// States.
 export const Loading: Story = { args: { loading: true } };
 export const Disabled: Story = { args: { disabled: true } };
 
@@ -59,16 +68,17 @@ export const WithIcon: Story = {
 
 // Round button: override rounded-full + 36px square + no padding (same as the dashboard).
 const CIRCLE = "h-9! w-9! min-w-0! rounded-full! px-0!";
-const VARIANTS = ["primary", "secondary", "outline", "danger"] as const;
+const CIRCLE_VARIANTS = ["primary", "secondary", "outline", "danger"] as const;
 
 // Circular — two forms: with text and with icon.
 export const Circular: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
-      <div>
+    <DemoCard>
+      <div className="flex flex-col items-center gap-4">
+        <div>
         <p className="mb-2 text-caption text-content-tertiary font-mono">with text</p>
         <div className="flex flex-wrap items-center gap-3">
-          {VARIANTS.map((v) => (
+          {CIRCLE_VARIANTS.map((v) => (
             <Button key={v} variant={v} fullWidth={false} className={CIRCLE}>
               15
             </Button>
@@ -78,7 +88,7 @@ export const Circular: Story = {
       <div>
         <p className="mb-2 text-caption text-content-tertiary font-mono">with icon</p>
         <div className="flex flex-wrap items-center gap-3">
-          {VARIANTS.map((v) => (
+          {CIRCLE_VARIANTS.map((v) => (
             <Button
               key={v}
               variant={v}
@@ -91,7 +101,8 @@ export const Circular: Story = {
           ))}
         </div>
       </div>
-    </div>
+      </div>
+    </DemoCard>
   ),
 };
 
@@ -105,80 +116,42 @@ const SIZES = [
 // AllSizes — the button sizes, with px.
 export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-wrap items-end gap-4">
-      {SIZES.map(({ key, px }) => (
-        <div key={key} className="flex flex-col items-center gap-1">
+    <Sizes
+      items={SIZES.map(({ key, px }) => ({
+        label: `${key} · ${px}px${key === "md" ? " (default)" : ""}`,
+        node: (
           <Button variant="primary" size={key} fullWidth={false}>
             Continue
           </Button>
-          <span className="text-caption text-content-tertiary font-mono">
-            {key} · {px}px{key === "md" ? " (default)" : ""}
-          </span>
-        </div>
-      ))}
-    </div>
+        ),
+      }))}
+    />
   ),
 };
 
-// AllVariants — ALWAYS last: full overview (variants + links + states + circular).
+// The 6 variants (default size), labelled by their story name.
+const VARIANT_CARDS = [
+  { v: "primary", label: "Primary", children: "Continue" },
+  { v: "secondary", label: "Secondary", children: "Continue" },
+  { v: "outline", label: "Outline", children: "Continue" },
+  { v: "danger", label: "Danger", children: "Delete" },
+  { v: "link", label: "Link", children: "See more" },
+  { v: "link-underline", label: "LinkUnderline", children: "See more" },
+] as const;
+
+// AllVariants — ALWAYS last: every variant (default size), grouping the variant stories above. States
+// (Loading/Disabled), icons and Circular each have their own story — they do not belong here.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">variants</p>
-        <div className="flex flex-wrap items-center gap-3">
-          {(["primary", "secondary", "outline", "danger"] as const).map((v) => (
-            <Button key={v} variant={v} fullWidth={false}>
-              {v}
-            </Button>
-          ))}
-        </div>
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">links</p>
-        <div className="flex flex-wrap items-center gap-4">
-          {(["link", "link-underline"] as const).map((v) => (
-            <Button key={v} variant={v} fullWidth={false}>
-              {v}
-            </Button>
-          ))}
-          <Button variant="link-underline" fullWidth={false}>
-            <ArrowLeft size={16} />
-            underline + icon
+    <Variants
+      items={VARIANT_CARDS.map(({ v, label, children }) => ({
+        label,
+        node: (
+          <Button variant={v} fullWidth={false}>
+            {children}
           </Button>
-        </div>
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">states</p>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="primary" fullWidth={false}>
-            <Settings size={16} />
-            With icon
-          </Button>
-          <Button variant="primary" fullWidth={false} loading>
-            Loading
-          </Button>
-          <Button variant="primary" fullWidth={false} disabled>
-            Disabled
-          </Button>
-        </div>
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">circular</p>
-        <div className="flex flex-wrap items-center gap-3">
-          <Button variant="primary" fullWidth={false} className={CIRCLE}>
-            15
-          </Button>
-          <Button
-            variant="primary"
-            fullWidth={false}
-            aria-label="Settings"
-            className={CIRCLE}
-          >
-            <Settings size={16} />
-          </Button>
-        </div>
-      </div>
-    </div>
+        ),
+      }))}
+    />
   ),
 };
