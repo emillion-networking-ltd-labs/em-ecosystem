@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { ShimmerButton } from "@/components/ui/ShimmerButton";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Requires the `shimmer-slide` / `spin-around` keyframes (tokens.css).
 // background / shimmerColor default to the upstream values (rgba(0,0,0,1) + #ffffff) — respected in Default.
@@ -19,9 +19,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <ShimmerButton {...args} />
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -33,9 +33,9 @@ export const Brand: Story = {
     shimmerColor: "#ffffff",
   },
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <ShimmerButton {...args} />
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -53,14 +53,5 @@ const VARIANTS = [
 ];
 
 export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="flex min-h-[140px] items-center justify-center">{v.node}</Card>
-        </div>
-      ))}
-    </div>
-  ),
+  render: () => <Variants items={VARIANTS} />,
 };

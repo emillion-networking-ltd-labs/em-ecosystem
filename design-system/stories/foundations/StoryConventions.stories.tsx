@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Group } from "./_helpers";
+import { DemoCard, Variants } from "../_kit";
 
 // Foundations/Story Conventions — the CANONICAL rules EVERY catalog story follows, in ALL sections
 // (Primitives, Layout, Marketing, Sections, Charts, Decoration, Showcase). It documents the catalog itself —
@@ -33,6 +34,15 @@ function Snippet({ children }: { children: string }) {
   );
 }
 
+// A stand-in "element" for the live example — looks like a real CTA so the framing reads.
+function Sample({ children }: { children: ReactNode }) {
+  return (
+    <span className="rounded-md bg-surface-inverse px-5 py-2.5 text-body font-medium text-content-inverse">
+      {children}
+    </span>
+  );
+}
+
 export const StoryConventions: Story = {
   name: "Story Conventions",
   render: () => (
@@ -44,6 +54,25 @@ export const StoryConventions: Story = {
         copy is in English, all colour comes from tokens, and stories never change a registered component —
         they only present it.
       </p>
+
+      <Group
+        title="Live example"
+        description="The same rules, rendered with the shared kit. A single story shows its element in the project card; AllVariants is one project Card per real variant, each with its name above."
+      >
+        <p className="mb-2 text-caption font-mono text-content-tertiary">a single story → DemoCard</p>
+        <DemoCard>
+          <Sample>Your element</Sample>
+        </DemoCard>
+        <p className="mb-2 mt-6 text-caption font-mono text-content-tertiary">
+          AllVariants → Variants (one card per real variant, name above)
+        </p>
+        <Variants
+          items={[
+            { label: "Default", node: <Sample>Default</Sample> },
+            { label: "Brand", node: <Sample>Brand</Sample> },
+          ]}
+        />
+      </Group>
 
       <Group
         title="The card frame"

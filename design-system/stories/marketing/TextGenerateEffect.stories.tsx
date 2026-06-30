@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TextGenerateEffect } from "@/components/ui/TextGenerateEffect";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Reveals words one by one with a progressive blur.
 const meta = {
@@ -19,9 +19,9 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <TextGenerateEffect {...args} />
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -29,9 +29,9 @@ export const Default: Story = {
 export const NoBlur: Story = {
   args: { filter: false },
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <TextGenerateEffect {...args} />
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -43,14 +43,5 @@ const VARIANTS = [
 ];
 
 export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="flex min-h-[140px] items-center justify-center">{v.node}</Card>
-        </div>
-      ))}
-    </div>
-  ),
+  render: () => <Variants items={VARIANTS} />,
 };

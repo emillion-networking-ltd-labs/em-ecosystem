@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Meteors } from "@/components/ui/Meteors";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Decorative meteor shower; needs a bounded, relative parent.
 const meta = {
@@ -25,27 +25,27 @@ const Tile = ({ number, height = "h-72" }: { number?: number; height?: string })
 
 export const Default: Story = {
   render: (args) => (
-    <Card className="overflow-hidden">
+    <DemoCard block className="overflow-hidden">
       <Tile number={args.number} />
-    </Card>
+    </DemoCard>
   ),
 };
 
 // Dense — a thicker shower (higher `number`).
 export const Dense: Story = {
   render: () => (
-    <Card className="overflow-hidden">
+    <DemoCard block className="overflow-hidden">
       <Tile number={40} />
-    </Card>
+    </DemoCard>
   ),
 };
 
 // Sparse — fewer meteors (lower `number`).
 export const Sparse: Story = {
   render: () => (
-    <Card className="overflow-hidden">
+    <DemoCard block className="overflow-hidden">
       <Tile number={8} />
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -59,15 +59,13 @@ const VARIANTS = [
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="overflow-hidden">
-            <Tile number={v.number} height="h-56" />
-          </Card>
-        </div>
-      ))}
-    </div>
+    <Variants
+      items={VARIANTS.map((v) => ({
+        label: v.label,
+        className: "overflow-hidden",
+        block: true,
+        node: <Tile number={v.number} height="h-56" />,
+      }))}
+    />
   ),
 };

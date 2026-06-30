@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Ripple } from "@/components/ui/Ripple";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Marketing/Ripple — background of concentric circles that pulse (scale) with a stagger and fade toward the
 // center via a mask. Color by token (content-primary). Lives behind hero/CTA content (absolute inset-0).
@@ -34,18 +34,18 @@ const Tile = ({
 // Default — 8 concentric circles pulsing outward.
 export const Default: Story = {
   render: () => (
-    <Card className="overflow-hidden">
+    <DemoCard block className="overflow-hidden">
       <Tile />
-    </Card>
+    </DemoCard>
   ),
 };
 
 // Dense — more, tighter circles.
 export const Dense: Story = {
   render: () => (
-    <Card className="overflow-hidden">
+    <DemoCard block className="overflow-hidden">
       <Tile numCircles={12} mainCircleSize={160} />
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -58,15 +58,13 @@ const VARIANTS = [
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="overflow-hidden">
-            <Tile {...v.props} height="h-80" />
-          </Card>
-        </div>
-      ))}
-    </div>
+    <Variants
+      items={VARIANTS.map((v) => ({
+        label: v.label,
+        className: "overflow-hidden",
+        block: true,
+        node: <Tile {...v.props} height="h-80" />,
+      }))}
+    />
   ),
 };

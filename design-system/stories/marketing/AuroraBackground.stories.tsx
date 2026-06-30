@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AuroraBackground } from "@/components/ui/AuroraBackground";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Decorative animated light field.
 // The component is full-height by default; the demos bound it to a card so it never goes full-bleed.
@@ -16,7 +16,7 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-    <Card className="overflow-hidden">
+    <DemoCard block className="overflow-hidden">
       <div className="overflow-hidden rounded-xl">
         <AuroraBackground {...args} className="h-72">
           <div className="relative z-10 flex flex-col items-center gap-4 px-4 text-center">
@@ -27,7 +27,7 @@ export const Default: Story = {
           </div>
         </AuroraBackground>
       </div>
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -35,18 +35,18 @@ export const Default: Story = {
 export const FullField: Story = {
   args: { showRadialGradient: false },
   render: (args) => (
-    <Card className="overflow-hidden">
+    <DemoCard block className="overflow-hidden">
       <div className="overflow-hidden rounded-xl">
         <AuroraBackground {...args} className="h-72">
           <h2 className="relative z-10 text-display-2 font-display">Edge to edge</h2>
         </AuroraBackground>
       </div>
-    </Card>
+    </DemoCard>
   ),
 };
 
 // AllVariants — ALWAYS last: the real variants (Default, FullField) — one project Card each, name above.
-// The full-bleed effect is hosted as a tile inside the card.
+// The full-bleed effect is hosted as a tile inside the card. (The radial mask reads best in dark mode.)
 const VARIANTS = [
   { label: "Default", showRadialGradient: true },
   { label: "FullField", showRadialGradient: false },
@@ -54,19 +54,19 @@ const VARIANTS = [
 
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="overflow-hidden">
-            <div className="overflow-hidden rounded-xl">
-              <AuroraBackground showRadialGradient={v.showRadialGradient} className="h-56">
-                <span className="relative z-10 text-display-3 font-display">Aurora</span>
-              </AuroraBackground>
-            </div>
-          </Card>
-        </div>
-      ))}
-    </div>
+    <Variants
+      items={VARIANTS.map((v) => ({
+        label: v.label,
+        className: "overflow-hidden",
+        block: true,
+        node: (
+          <div className="overflow-hidden rounded-xl">
+            <AuroraBackground showRadialGradient={v.showRadialGradient} className="h-56">
+              <span className="relative z-10 text-display-3 font-display">Aurora</span>
+            </AuroraBackground>
+          </div>
+        ),
+      }))}
+    />
   ),
 };

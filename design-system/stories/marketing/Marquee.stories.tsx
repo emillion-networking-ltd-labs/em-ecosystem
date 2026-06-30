@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Marquee } from "@/components/ui/Marquee";
 import Badge from "@/components/ui/Badge";
-import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Requires the `marquee` / `marquee-vertical` keyframes (tokens.css).
 const meta = {
@@ -34,11 +34,11 @@ const Logos = () => (
 
 export const Default: Story = {
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <Marquee {...args}>
         <Logos />
       </Marquee>
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -52,13 +52,13 @@ export const Reverse: Story = {
 export const Vertical: Story = {
   args: { vertical: true },
   render: (args) => (
-    <Card className="flex min-h-[140px] items-center justify-center">
+    <DemoCard>
       <div className="h-72 overflow-hidden">
         <Marquee {...args} className="h-full">
           <Logos />
         </Marquee>
       </div>
-    </Card>
+    </DemoCard>
   ),
 };
 
@@ -79,14 +79,5 @@ const VARIANTS = [
 ];
 
 export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
-          <Card className="flex min-h-[140px] items-center justify-center">{v.node}</Card>
-        </div>
-      ))}
-    </div>
-  ),
+  render: () => <Variants items={VARIANTS} />,
 };
