@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AnimatedGradientText } from "@/components/ui/AnimatedGradientText";
-import { DemoCell, DemoStack } from "./_frame";
+import Card from "@/components/ui/Card";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Requires the `gradient` keyframe (tokens.css).
 // colorFrom/colorTo default to the upstream palette (#ffaa40 → #9c40ff) — respected in the Default demo.
@@ -21,9 +21,11 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {
   render: (args) => (
-    <span className="text-display-2 font-display">
-      <AnimatedGradientText {...args} />
-    </span>
+    <Card className="flex min-h-[140px] items-center justify-center">
+      <span className="text-display-2 font-display">
+        <AnimatedGradientText {...args} />
+      </span>
+    </Card>
   ),
 };
 
@@ -31,32 +33,40 @@ export const Default: Story = {
 export const BrandColors: Story = {
   args: { colorFrom: "var(--color-accent)", colorTo: "var(--color-accent-2)", children: "Built for your brand" },
   render: (args) => (
-    <span className="text-display-2 font-display">
-      <AnimatedGradientText {...args} />
-    </span>
+    <Card className="flex min-h-[140px] items-center justify-center">
+      <span className="text-display-2 font-display">
+        <AnimatedGradientText {...args} />
+      </span>
+    </Card>
   ),
 };
 
-// AllVariants — ALWAYS last: speed axis (faster → slower) × the real color props.
+// AllVariants — ALWAYS last: the real variants (Default, Brand colors) — one project Card each, name above.
 const VARIANTS = [
-  { label: "speed 2 · default palette", speed: 2, colorFrom: "#ffaa40", colorTo: "#9c40ff", text: "Move fast" },
-  { label: "speed 1 · default palette", speed: 1, colorFrom: "#ffaa40", colorTo: "#9c40ff", text: "Stay sharp" },
-  { label: "speed 1 · brand palette", speed: 1, colorFrom: "var(--color-accent)", colorTo: "var(--color-accent-2)", text: "Ship beautifully" },
-  { label: "speed 0.5 · brand palette", speed: 0.5, colorFrom: "var(--color-accent)", colorTo: "var(--color-accent-2)", text: "On message" },
+  { label: "Default", colorFrom: "#ffaa40", colorTo: "#9c40ff", text: "NexaCore" },
+  {
+    label: "Brand colors",
+    colorFrom: "var(--color-accent)",
+    colorTo: "var(--color-accent-2)",
+    text: "Built for your brand",
+  },
 ] as const;
 
 export const AllVariants: Story = {
   render: () => (
-    <DemoStack>
+    <div className="flex flex-col gap-6">
       {VARIANTS.map((v) => (
-        <DemoCell key={v.label} caption={v.label}>
-          <span className="text-display-3 font-display">
-            <AnimatedGradientText speed={v.speed} colorFrom={v.colorFrom} colorTo={v.colorTo}>
-              {v.text}
-            </AnimatedGradientText>
-          </span>
-        </DemoCell>
+        <div key={v.label} className="flex flex-col gap-1.5">
+          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
+          <Card className="flex min-h-[140px] items-center justify-center">
+            <span className="text-display-2 font-display">
+              <AnimatedGradientText colorFrom={v.colorFrom} colorTo={v.colorTo}>
+                {v.text}
+              </AnimatedGradientText>
+            </span>
+          </Card>
+        </div>
       ))}
-    </DemoStack>
+    </div>
   ),
 };

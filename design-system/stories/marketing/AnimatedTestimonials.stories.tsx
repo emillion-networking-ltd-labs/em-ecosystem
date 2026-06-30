@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AnimatedTestimonials } from "@/components/ui/AnimatedTestimonials";
-import { DemoCell, DemoStack } from "./_frame";
+import Card from "@/components/ui/Card";
 
 // Marketing/AnimatedTestimonials — a testimonial carousel with photo + word-by-word blur-in (social
 // proof). Theme-aware (content/surface tokens). Photos here are inline SVG placeholders (no network).
@@ -44,24 +44,39 @@ const testimonials = [
 ];
 
 export const Default: Story = {
-  render: () => <AnimatedTestimonials testimonials={testimonials} />,
+  render: () => (
+    <Card className="flex min-h-[140px] items-center justify-center">
+      <AnimatedTestimonials testimonials={testimonials} />
+    </Card>
+  ),
 };
 
 // Autoplay — rotates every 5s on its own.
 export const Autoplay: Story = {
-  render: () => <AnimatedTestimonials testimonials={testimonials} autoplay />,
+  render: () => (
+    <Card className="flex min-h-[140px] items-center justify-center">
+      <AnimatedTestimonials testimonials={testimonials} autoplay />
+    </Card>
+  ),
 };
 
-// AllVariants — ALWAYS last: the manual and autoplay configurations.
+// AllVariants — ALWAYS last: the real variants (Default, Autoplay) — one project Card each, name above.
+const VARIANTS = [
+  { label: "Default", autoplay: false },
+  { label: "Autoplay", autoplay: true },
+] as const;
+
 export const AllVariants: Story = {
   render: () => (
-    <DemoStack>
-      <DemoCell caption="manual (default)" className="bg-surface-secondary px-4 py-6">
-        <AnimatedTestimonials testimonials={testimonials} />
-      </DemoCell>
-      <DemoCell caption="autoplay · 5000ms" className="bg-surface-secondary px-4 py-6">
-        <AnimatedTestimonials testimonials={testimonials} autoplay />
-      </DemoCell>
-    </DemoStack>
+    <div className="flex flex-col gap-6">
+      {VARIANTS.map((v) => (
+        <div key={v.label} className="flex flex-col gap-1.5">
+          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
+          <Card className="flex min-h-[140px] items-center justify-center">
+            <AnimatedTestimonials testimonials={testimonials} autoplay={v.autoplay} />
+          </Card>
+        </div>
+      ))}
+    </div>
   ),
 };

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Ripple } from "@/components/ui/Ripple";
-import { DemoCell, DemoStack } from "./_frame";
+import Card from "@/components/ui/Card";
 
 // Marketing/Ripple — background of concentric circles that pulse (scale) with a stagger and fade toward the
 // center via a mask. Color by token (content-primary). Lives behind hero/CTA content (absolute inset-0).
@@ -8,42 +8,65 @@ const meta = {
   title: "Marketing/Ripple",
   component: Ripple,
   tags: ["autodocs"],
-  // Single stories get the centered demo frame; the overview (`framed: false`) brings its own frames.
-  decorators: [
-    (Story, ctx) =>
-      ctx.parameters.framed === false ? (
-        <Story />
-      ) : (
-        <div className="relative flex h-[420px] w-full items-center justify-center overflow-hidden rounded-xl">
-          <Story />
-          <p className="z-10 text-h2 font-semibold text-content-primary">Ripple</p>
-        </div>
-      ),
-  ],
 } satisfies Meta<typeof Ripple>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Ripple is an absolute-positioned background; it needs a bounded tile to live in — hosted inside the project Card.
+const Tile = ({
+  numCircles,
+  mainCircleSize,
+  height = "h-96",
+}: {
+  numCircles?: number;
+  mainCircleSize?: number;
+  height?: string;
+}) => (
+  <div
+    className={`relative flex ${height} w-full items-center justify-center overflow-hidden rounded-xl bg-surface-secondary`}
+  >
+    <Ripple numCircles={numCircles} mainCircleSize={mainCircleSize} />
+    <span className="relative z-10 text-h2 font-semibold text-content-primary">Ripple</span>
+  </div>
+);
+
 // Default — 8 concentric circles pulsing outward.
-export const Default: Story = {};
+export const Default: Story = {
+  render: () => (
+    <Card className="overflow-hidden">
+      <Tile />
+    </Card>
+  ),
+};
 
 // Dense — more, tighter circles.
-export const Dense: Story = { args: { numCircles: 12, mainCircleSize: 160 } };
-
-// AllVariants — ALWAYS last: the density configs (numCircles × mainCircleSize), each in its own frame.
-export const AllVariants: Story = {
-  parameters: { framed: false },
+export const Dense: Story = {
   render: () => (
-    <DemoStack>
-      {[
-        { label: "default · 8 · 210px", props: {} },
-        { label: "dense · 12 · 160px", props: { numCircles: 12, mainCircleSize: 160 } },
-      ].map(({ label, props }) => (
-        <DemoCell key={label} caption={label} className="h-72 bg-surface-secondary">
-          <Ripple {...props} />
-        </DemoCell>
+    <Card className="overflow-hidden">
+      <Tile numCircles={12} mainCircleSize={160} />
+    </Card>
+  ),
+};
+
+// AllVariants — ALWAYS last: the real variants (Default, Dense) — one project Card each, name above.
+// The effect is hosted as a tile inside the card.
+const VARIANTS = [
+  { label: "Default", props: {} },
+  { label: "Dense", props: { numCircles: 12, mainCircleSize: 160 } },
+] as const;
+
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex flex-col gap-6">
+      {VARIANTS.map((v) => (
+        <div key={v.label} className="flex flex-col gap-1.5">
+          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
+          <Card className="overflow-hidden">
+            <Tile {...v.props} height="h-80" />
+          </Card>
+        </div>
       ))}
-    </DemoStack>
+    </div>
   ),
 };

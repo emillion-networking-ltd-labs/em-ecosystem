@@ -1,12 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { BentoGrid, BentoGridItem } from "@/components/ui/BentoGrid";
+import Card from "@/components/ui/Card";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Asymmetric grid for highlighting features.
 // The icon enters via the `icon` prop (no external icon dep in the component itself).
 const meta = {
   title: "Marketing/BentoGrid",
   component: BentoGrid,
-  parameters: { layout: "padded" },
   tags: ["autodocs"],
 } satisfies Meta<typeof BentoGrid>;
 
@@ -31,66 +31,53 @@ const items = [
   { title: "Composable", description: "Assembled per sector preset.", className: "md:col-span-2" },
 ];
 
+const Grid = ({ withIcons = false }: { withIcons?: boolean }) => (
+  <BentoGrid>
+    {items.map((it) => (
+      <BentoGridItem
+        key={it.title}
+        title={it.title}
+        description={it.description}
+        header={<Header />}
+        icon={withIcons ? <Glyph /> : undefined}
+        className={it.className}
+      />
+    ))}
+  </BentoGrid>
+);
+
 export const Default: Story = {
   render: () => (
-    <BentoGrid>
-      {items.map((it) => (
-        <BentoGridItem
-          key={it.title}
-          title={it.title}
-          description={it.description}
-          header={<Header />}
-          className={it.className}
-        />
-      ))}
-    </BentoGrid>
+    <Card>
+      <Grid />
+    </Card>
   ),
 };
 
 // WithIcons — the `icon` prop populated on every item.
 export const WithIcons: Story = {
   render: () => (
-    <BentoGrid>
-      {items.map((it) => (
-        <BentoGridItem
-          key={it.title}
-          title={it.title}
-          description={it.description}
-          header={<Header />}
-          icon={<Glyph />}
-          className={it.className}
-        />
-      ))}
-    </BentoGrid>
+    <Card>
+      <Grid withIcons />
+    </Card>
   ),
 };
 
-// AllVariants — ALWAYS last: every real BentoGridItem prop combination.
+// AllVariants — ALWAYS last: the real variants (Default, WithIcons) — one project Card each, name above.
+const VARIANTS = [
+  { label: "Default", node: <Grid /> },
+  { label: "WithIcons", node: <Grid withIcons /> },
+];
+
 export const AllVariants: Story = {
   render: () => (
-    <BentoGrid>
-      <BentoGridItem
-        title="Header + icon + wide"
-        description="Full item across two columns."
-        header={<Header />}
-        icon={<Glyph />}
-        className="md:col-span-2"
-      />
-      <BentoGridItem
-        title="Header only"
-        description="No icon, single column."
-        header={<Header />}
-      />
-      <BentoGridItem
-        title="Icon, no header"
-        description="Text-forward, glyph above the title."
-        icon={<Glyph />}
-      />
-      <BentoGridItem
-        title="Title + description only"
-        description="The bare item with no header and no icon."
-        className="md:col-span-2"
-      />
-    </BentoGrid>
+    <div className="flex flex-col gap-6">
+      {VARIANTS.map((v) => (
+        <div key={v.label} className="flex flex-col gap-1.5">
+          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
+          <Card>{v.node}</Card>
+        </div>
+      ))}
+    </div>
   ),
 };

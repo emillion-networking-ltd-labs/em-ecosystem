@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { NumberTicker } from "@/components/ui/NumberTicker";
-import { DemoCell, DemoStack } from "./_frame";
+import Card from "@/components/ui/Card";
 
 // Marketing/NumberTicker — animated count-up/down to a target (marketing stats). Theme-aware via
 // content-primary; animates on scroll into view.
@@ -19,65 +19,77 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+const NUM = "text-h1 font-black text-content-primary";
+
 export const Default: Story = {
   render: (args) => (
-    <span className="text-h1 font-black text-content-primary">
-      <NumberTicker {...args} />
-    </span>
+    <Card className="flex min-h-[140px] items-center justify-center">
+      <span className={NUM}>
+        <NumberTicker {...args} />
+      </span>
+    </Card>
   ),
 };
 
 // Up — counts from 0 up to the value (default).
 export const Up: Story = {
   render: () => (
-    <span className="text-h1 font-black text-content-primary">
-      <NumberTicker value={500} direction="up" />+
-    </span>
+    <Card className="flex min-h-[140px] items-center justify-center">
+      <span className={NUM}>
+        <NumberTicker value={500} direction="up" />+
+      </span>
+    </Card>
   ),
 };
 
 // Down — counts from the value down to 0.
 export const Down: Story = {
   render: () => (
-    <span className="text-h1 font-black text-content-primary">
-      <NumberTicker value={100} direction="down" />
-    </span>
+    <Card className="flex min-h-[140px] items-center justify-center">
+      <span className={NUM}>
+        <NumberTicker value={100} direction="down" />
+      </span>
+    </Card>
   ),
 };
 
 // Decimals — fractional target with fixed decimal places.
 export const Decimals: Story = {
   render: () => (
-    <span className="text-h1 font-black text-content-primary">
-      <NumberTicker value={4.9} decimalPlaces={1} />
-    </span>
+    <Card className="flex min-h-[140px] items-center justify-center">
+      <span className={NUM}>
+        <NumberTicker value={4.9} decimalPlaces={1} />
+      </span>
+    </Card>
   ),
 };
 
-// AllVariants — ALWAYS last: a stats band, the real marketing use.
-const STATS = [
-  { value: 500, suffix: "+", label: "Clients" },
-  { value: 12, suffix: "", label: "Years" },
-  { value: 98, suffix: "%", label: "Satisfaction" },
-  { value: 4.9, suffix: "", label: "Rating", decimals: 1 },
-] as const;
+// AllVariants — ALWAYS last: the real variants (Default, Up, Down, Decimals) — one project Card each, name above.
+const VARIANTS = [
+  { label: "Default", node: <NumberTicker value={100} /> },
+  {
+    label: "Up",
+    node: (
+      <>
+        <NumberTicker value={500} direction="up" />+
+      </>
+    ),
+  },
+  { label: "Down", node: <NumberTicker value={100} direction="down" /> },
+  { label: "Decimals", node: <NumberTicker value={4.9} decimalPlaces={1} /> },
+];
 
 export const AllVariants: Story = {
   render: () => (
-    <DemoStack>
-      <DemoCell caption="stats band · up / down / decimals / suffix" className="bg-surface-secondary p-10">
-        <div className="grid w-full grid-cols-2 gap-8 sm:grid-cols-4">
-          {STATS.map(({ value, suffix, label, decimals }) => (
-            <div key={label} className="flex flex-col items-center gap-1">
-              <span className="text-h1 font-black text-content-primary">
-                <NumberTicker value={value} decimalPlaces={decimals ?? 0} />
-                {suffix}
-              </span>
-              <span className="text-caption text-content-tertiary">{label}</span>
-            </div>
-          ))}
+    <div className="flex flex-col gap-6">
+      {VARIANTS.map((v) => (
+        <div key={v.label} className="flex flex-col gap-1.5">
+          <span className="text-caption text-content-tertiary font-mono">{v.label}</span>
+          <Card className="flex min-h-[140px] items-center justify-center">
+            <span className={NUM}>{v.node}</span>
+          </Card>
         </div>
-      </DemoCell>
-    </DemoStack>
+      ))}
+    </div>
   ),
 };

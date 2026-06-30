@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { CardHoverEffect } from "@/components/ui/CardHoverEffect";
+import Card from "@/components/ui/Card";
 
 // Marketing/CardHoverEffect — a grid of cards where a soft surface follows the hovered card (services/
 // features). Theme-aware (surface/content/border tokens), not the original fixed-dark cards.
@@ -23,17 +24,22 @@ const services = [
 
 export const Default: Story = {
   render: () => (
-    <div className="mx-auto max-w-5xl px-8">
+    <Card>
       <CardHoverEffect items={services} />
-    </div>
+    </Card>
   ),
 };
 
-// AllVariants — ALWAYS last: a smaller 3-item set to see the hover band on a single row.
+// AllVariants — ALWAYS last: the only variant (Default) — in a project Card, name above.
 export const AllVariants: Story = {
   render: () => (
-    <div className="mx-auto max-w-5xl px-8">
-      <CardHoverEffect items={services.slice(0, 3)} />
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-1.5">
+        <span className="text-caption text-content-tertiary font-mono">Default</span>
+        <Card>
+          <CardHoverEffect items={services} />
+        </Card>
+      </div>
     </div>
   ),
 };
