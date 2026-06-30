@@ -154,6 +154,15 @@ export const StoryConventions: Story = {
             Two sections → two cards. <strong>Never invent variants.</strong>
           </Rule>
           <Rule>
+            Each variant is its <strong>own named story</strong> (<Code>Radial</Code>, <Code>Linear</Code>,{" "}
+            <Code>Primary</Code>…); AllVariants only <strong>groups</strong> them. Never a single story that
+            bundles several variants (no <Code>Variants</Code> story with Radial+Linear inside).
+          </Rule>
+          <Rule>
+            <strong>Only when there are ≥2 style variants.</strong> With 0–1, <strong>omit</strong> AllVariants
+            — an overview of one adds nothing (e.g. a pattern whose only style axis is a free color).
+          </Rule>
+          <Rule>
             AllVariants <strong>groups</strong> variants that already have a story — it never{" "}
             <strong>introduces</strong> one here for the first time. The bad pattern (which the guard rejects):
             just <Code>Default</Code> + an AllVariants full of variants never shown on their own.
@@ -161,7 +170,15 @@ export const StoryConventions: Story = {
           <Rule>
             <strong>ALWAYS last</strong>, preceded by the marker <Code>{`// AllVariants — ALWAYS last:`}</Code>.
           </Rule>
-          <Rule>Style only — no sizes here (those are AllSizes).</Rule>
+          <Rule>
+            Each card&apos;s <strong>label is the NAME of the story it mirrors</strong> (<Code>Default</Code>,{" "}
+            <Code>Subtle</Code>, <Code>Bold</Code>…), not a different descriptive caption — so the
+            correspondence with its own stories is obvious.
+          </Rule>
+          <Rule>
+            <strong>No measures here</strong> (px, %, opacity, sizes). AllVariants is style <em>names</em> only;
+            every measurement lives in <Code>AllSizes</Code> or in the measure stories — never in AllVariants.
+          </Rule>
         </ul>
         <Snippet>{`// AllVariants — ALWAYS last: one project Card per real STYLE variant, name above.
 import { Variants } from "../_kit";
@@ -190,7 +207,13 @@ export const AllVariants: Story = { render: () => <Variants items={VARIANTS} /> 
           </Rule>
           <Rule>
             Named <Code>AllSizes</Code> (never a bare <Code>Sizes</Code>); second-to-last, just before{" "}
-            <Code>AllVariants</Code>.
+            <Code>AllVariants</Code> — or <strong>last</strong> if the component has no AllVariants.
+          </Rule>
+          <Rule>
+            <strong>Only for NAMED scales</strong> (sm/md/lg, declared in <Code>sizeClasses</Code> — e.g.
+            Button, Blob). <strong>Continuous measures</strong> (gap, radius, stroke — arbitrary px) are NOT
+            AllSizes: they go as <strong>parameter stories</strong> (<Code>Gaps</Code>, <Code>Radii</Code>,{" "}
+            <Code>Strokes</Code>) with the measure in the label, before AllSizes/AllVariants.
           </Rule>
         </ul>
         <Snippet>{`// AllSizes — size overview. Label = size token + its real measure for this component.

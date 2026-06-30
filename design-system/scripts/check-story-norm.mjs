@@ -92,22 +92,38 @@ for (const sub of SECTIONS) {
     const exports = storyExports(src);
     checked++;
 
-    if (!exports.includes("AllVariants")) {
-      fail(`${rel}: falta la story \`AllVariants\` (overview de estilo, obligatoria en toda story de componente)`);
-    } else if (exports[exports.length - 1] !== "AllVariants") {
-      fail(`${rel}: \`AllVariants\` debe ser la ÚLTIMA story (ahora la última es \`${exports[exports.length - 1]}\`)`);
+    // AllVariants: SI existe, debe ser la ÚLTIMA. La OBLIGATORIEDAD se verifica por componente (pasada C):
+    // solo es obligatoria cuando el componente declara ≥2 variantes de estilo (`variantClasses`); un overview
+    // de <2 variantes no aporta y se omite.
+    if (exports.includes("AllVariants") && exports[exports.length - 1] !== "AllVariants") {
+      fail(`${rel}: \`AllVariants\`, si existe, debe ser la ÚLTIMA story (ahora la última es \`${exports[exports.length - 1]}\`)`);
     }
 
-    // AllSizes, si existe, va JUSTO antes de AllVariants (penúltima)
-    if (exports.includes("AllSizes") && exports.indexOf("AllSizes") !== exports.length - 2) {
-      fail(`${rel}: \`AllSizes\` debe ir JUSTO antes de \`AllVariants\` (penúltima); hay otra story entre medias`);
+    // AllSizes, si existe: penúltima (justo antes de AllVariants) cuando HAY AllVariants; si NO hay
+    // AllVariants (componente con <2 variantes de estilo), AllSizes debe ser la ÚLTIMA.
+    if (exports.includes("AllSizes")) {
+      const szIdx = exports.indexOf("AllSizes");
+      const hasAV = exports.includes("AllVariants");
+      const expected = hasAV ? exports.length - 2 : exports.length - 1;
+      if (szIdx !== expected) {
+        fail(
+          hasAV
+            ? `${rel}: \`AllSizes\` debe ir JUSTO antes de \`AllVariants\` (penúltima); hay otra story entre medias`
+            : `${rel}: \`AllSizes\` debe ser la ÚLTIMA story (no hay AllVariants); hay otra story después`,
+        );
+      }
     }
 
     const avStart = src.indexOf("AllVariants");
     if (avStart !== -1) {
       for (const m of src.slice(avStart).matchAll(/label:\s*["'`]([^"'`]+)["'`]/g)) {
-        if (SIZE_ONLY.test(m[1].trim())) {
-          fail(`${rel}: \`AllVariants\` incluye el tamaño "${m[1]}" — los tamaños van en \`AllSizes\`, no aquí`);
+        const lbl = m[1].trim();
+        if (SIZE_ONLY.test(lbl)) {
+          fail(`${rel}: \`AllVariants\` incluye el tamaño "${lbl}" — los tamaños van en \`AllSizes\`, no aquí`);
+          break;
+        }
+        if (/\d+(?:\.\d+)?\s*(px|%|rem|em|pt)\b/i.test(lbl)) {
+          fail(`${rel}: \`AllVariants\` lleva una medida en el label "${lbl}" — las medidas van en \`AllSizes\` o en stories de medida, NO en AllVariants (que es solo nombres de estilo)`);
           break;
         }
       }
@@ -135,6 +151,9 @@ for (const file of readdirSync(COMP)) {
     const sf = storyFor(name);
     if (sf) {
       const story = readFileSync(sf, "utf8");
+      if (!/export const AllVariants/.test(story)) {
+        fail(`${name}: declara ≥2 variantes (variantClasses) → su story debe incluir \`AllVariants\` que las agrupe`);
+      }
       const avAt = story.indexOf("AllVariants");
       const before = avAt === -1 ? story : story.slice(0, avAt);
       const ignore = new Set(IGNORE[name] || []);

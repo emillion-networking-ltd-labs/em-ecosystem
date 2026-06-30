@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import type { ReactNode } from "react";
 import { Blob } from "@/components/ui/Blob";
+import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
   title: "Decoration/Blob",
@@ -24,89 +25,90 @@ const SIZES = [
   { size: "sm", px: "192" },
 ] as const;
 
-// Intensities (boldest → faintest), with the opacity. soft is the default.
+// Intensity variants, each grouping an existing story (label = that story's name). No measures here.
 const INTENSITIES = [
-  { intensity: "bold", op: "50%" },
-  { intensity: "soft", op: "30%" },
-  { intensity: "subtle", op: "20%" },
+  { label: "Default", intensity: "soft" },
+  { label: "Subtle", intensity: "subtle" },
+  { label: "Bold", intensity: "bold" },
 ] as const;
 
-const Canvas = ({ children }: { children: ReactNode }) => (
-  <div className="relative isolate flex h-80 items-center justify-center overflow-hidden rounded-2xl border border-border-default bg-surface-primary">
+// The bounded surface the absolute halo lives on (the inner tile; DemoCard frames it as the project Card).
+const Surface = ({ h = "h-56", children }: { h?: string; children: ReactNode }) => (
+  <div
+    className={`relative isolate flex ${h} w-full items-center justify-center overflow-hidden rounded-xl bg-surface-primary`}
+  >
     {children}
   </div>
 );
 
-// Playground — a soft brand halo anchored at two corners.
+// Default — playground: a soft brand halo anchored at two corners.
 export const Default: Story = {
   render: (args) => (
-    <Canvas>
-      <Blob {...args} className="-left-16 -top-16" />
-      <Blob {...args} className="-bottom-16 -right-16" />
-      <h2 className="text-display-3 font-display">Depth halo</h2>
-    </Canvas>
+    <DemoCard block className="overflow-hidden">
+      <Surface h="h-72">
+        <Blob {...args} className="-left-16 -top-16" />
+        <Blob {...args} className="-bottom-16 -right-16" />
+        <h2 className="text-display-3 font-display">Depth halo</h2>
+      </Surface>
+    </DemoCard>
   ),
 };
 
-// Intensities — same halo, opacity boldest → faintest.
-export const Intensities: Story = {
+// Subtle — the faintest intensity (20% opacity), for a barely-there atmosphere.
+export const Subtle: Story = {
   render: () => (
-    <div className="flex flex-wrap gap-4">
-      {INTENSITIES.map(({ intensity, op }) => (
-        <div key={intensity} className="flex flex-col items-center gap-1.5">
-          <div className="relative isolate flex h-56 w-56 items-center justify-center overflow-hidden rounded-2xl border border-border-default bg-surface-primary">
-            <Blob size="md" intensity={intensity} className="static -z-0" />
-          </div>
-          <span className="text-caption text-content-tertiary font-mono">
-            {intensity} · {op}{intensity === "soft" ? " (default)" : ""}
-          </span>
-        </div>
-      ))}
-    </div>
+    <DemoCard block className="overflow-hidden">
+      <Surface>
+        <Blob size="lg" intensity="subtle" className="static -z-0" />
+      </Surface>
+    </DemoCard>
   ),
 };
 
-// AllSizes — one halo per diameter, centered. (Penúltima: justo antes de AllVariants.)
+// Bold — the strongest intensity (50% opacity), for a pronounced brand halo.
+export const Bold: Story = {
+  render: () => (
+    <DemoCard block className="overflow-hidden">
+      <Surface>
+        <Blob size="lg" intensity="bold" className="static -z-0" />
+      </Surface>
+    </DemoCard>
+  ),
+};
+
+// AllSizes — one halo per diameter (size axis); the measurements (px) live here. Penúltima.
 export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-wrap gap-4">
-      {SIZES.map(({ size, px }) => (
-        <div key={size} className="flex flex-col items-center gap-1.5">
-          <div className="relative isolate flex h-56 w-56 items-center justify-center overflow-hidden rounded-2xl border border-border-default bg-surface-primary">
+    <Sizes
+      items={SIZES.map(({ size, px }) => ({
+        label: `${size} · ${px}px${size === "lg" ? " (default)" : ""}`,
+        className: "overflow-hidden",
+        block: true,
+        node: (
+          <Surface>
             <Blob size={size} intensity="soft" className="static -z-0" />
-          </div>
-          <span className="text-caption text-content-tertiary font-mono">
-            {size} · {px}px{size === "lg" ? " (default)" : ""}
-          </span>
-        </div>
-      ))}
-    </div>
+          </Surface>
+        ),
+      }))}
+    />
   ),
 };
 
-// AllVariants — ALWAYS last: every size × intensity.
+// AllVariants — ALWAYS last: the intensity variants (style axis), labels = the existing stories'
+// names (Default / Subtle / Bold). Sizes/measurements live in AllSizes, not here.
 export const AllVariants: Story = {
   render: () => (
-    <div className="space-y-6">
-      {INTENSITIES.map(({ intensity, op }) => (
-        <div key={intensity} className="space-y-2">
-          <p className="text-caption text-content-tertiary font-mono">
-            {intensity} · {op}
-          </p>
-          <div className="flex flex-wrap gap-4">
-            {SIZES.map(({ size, px }) => (
-              <div key={size} className="flex flex-col items-center gap-1.5">
-                <div className="relative isolate flex h-48 w-48 items-center justify-center overflow-hidden rounded-2xl border border-border-default bg-surface-primary">
-                  <Blob size={size} intensity={intensity} className="static -z-0" />
-                </div>
-                <span className="text-caption text-content-tertiary font-mono">
-                  {size} · {px}px
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
+    <Variants
+      items={INTENSITIES.map(({ label, intensity }) => ({
+        label,
+        className: "overflow-hidden",
+        block: true,
+        node: (
+          <Surface>
+            <Blob size="lg" intensity={intensity} className="static -z-0" />
+          </Surface>
+        ),
+      }))}
+    />
   ),
 };
