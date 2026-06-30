@@ -1,7 +1,8 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Settings, Check, AlertTriangle, X, Info } from "lucide-react";
+import { Settings, Check, AlertTriangle, X, Info as InfoIcon } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import IconBadge, { type IconBadgeVariant } from "@/components/ui/IconBadge";
+import { DemoCard, Variants, Sizes } from "../_kit";
 
 // Title "BadgeIcon" so it sits right after "Badge" in the sidebar (Badge family).
 // SEMANTIC icons per variant + icon size that scales with the box, same as the dashboard.
@@ -10,7 +11,7 @@ const ICONS: Record<IconBadgeVariant, LucideIcon> = {
   success: Check,
   warning: AlertTriangle,
   error: X,
-  info: Info,
+  info: InfoIcon,
 };
 // box → icon: sm 32px→16 · md 40px→24 · lg 56px→32 (iconBadgeSpecs).
 const ICON_PX = { sm: 16, md: 24, lg: 32 } as const;
@@ -32,6 +33,11 @@ const meta = {
     },
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
   },
+  render: (args) => (
+    <DemoCard>
+      <IconBadge {...args}>{renderIcon(args.variant ?? "default", args.size ?? "md")}</IconBadge>
+    </DemoCard>
+  ),
 } satisfies Meta<typeof IconBadge>;
 
 export default meta;
@@ -46,65 +52,35 @@ const SIZES = [
 
 const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 
-// Playground — the icon scales with size and changes with the variant (use the controls).
-export const Default: Story = {
-  render: (args) => (
-    <IconBadge {...args}>
-      {renderIcon(args.variant ?? "default", args.size ?? "md")}
-    </IconBadge>
-  ),
-};
+// Default — playground: the icon scales with size and changes with the variant (use the controls).
+export const Default: Story = {};
 
-// All 5 variants (md size), each with its semantic icon.
-export const Variants: Story = {
-  render: () => (
-    <div className="flex flex-wrap items-center gap-3">
-      {VARIANTS.map((v) => (
-        <IconBadge key={v} variant={v}>
-          {renderIcon(v, "md")}
-        </IconBadge>
-      ))}
-    </div>
-  ),
-};
+// One story per variant (the design axis), before AllVariants groups them.
+export const Success: Story = { args: { variant: "success" } };
+export const Warning: Story = { args: { variant: "warning" } };
+export const Error: Story = { args: { variant: "error" } };
+export const Info: Story = { args: { variant: "info" } };
 
 // AllSizes — the 3 sizes (default variant), with box/icon px.
 export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-wrap items-end gap-4">
-      {SIZES.map(({ key, box }) => (
-        <div key={key} className="flex flex-col items-center gap-1">
-          <IconBadge size={key}>{renderIcon("default", key)}</IconBadge>
-          <span className="text-caption text-content-tertiary font-mono">
-            {key} · {box}px · {ICON_PX[key]}px{key === "md" ? " (default)" : ""}
-          </span>
-        </div>
-      ))}
-    </div>
+    <Sizes
+      items={SIZES.map(({ key, box }) => ({
+        label: `${key} · ${box}px · ${ICON_PX[key]}px${key === "md" ? " (default)" : ""}`,
+        node: <IconBadge size={key}>{renderIcon("default", key)}</IconBadge>,
+      }))}
+    />
   ),
 };
 
-// AllVariants — ALWAYS last: full size × variant matrix (semantic icon).
+// AllVariants — ALWAYS last: every variant (default size), each with its semantic icon.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      {SIZES.map(({ key, box }) => (
-        <div key={key}>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">
-            {key} · {box}px · {ICON_PX[key]}px{key === "md" ? " (default)" : ""}
-          </p>
-          <div className="flex flex-wrap items-center gap-3">
-            {VARIANTS.map((v) => (
-              <div key={v} className="flex flex-col items-center gap-1">
-                <IconBadge variant={v} size={key}>
-                  {renderIcon(v, key)}
-                </IconBadge>
-                <span className="text-caption text-content-tertiary">{cap(v)}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
+    <Variants
+      items={VARIANTS.map((v) => ({
+        label: cap(v),
+        node: <IconBadge variant={v}>{renderIcon(v, "md")}</IconBadge>,
+      }))}
+    />
   ),
 };

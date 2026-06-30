@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Badge from "@/components/ui/Badge";
+import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
   title: "Primitives/Badge",
@@ -13,6 +14,11 @@ const meta = {
     },
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
   },
+  render: (args) => (
+    <DemoCard>
+      <Badge {...args} />
+    </DemoCard>
+  ),
 } satisfies Meta<typeof Badge>;
 
 export default meta;
@@ -25,61 +31,45 @@ const SIZES = [
   { key: "sm", px: "12" },
 ] as const;
 
-const label = (v: (typeof VARIANTS)[number]) =>
-  v === "kbd" ? "⌘K" : v.charAt(0).toUpperCase() + v.slice(1);
+const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
+// kbd shows a key combo as its content; the rest show their name.
+const content = (v: (typeof VARIANTS)[number]) => (v === "kbd" ? "⌘K" : cap(v));
 
-// Playground — use the controls to try variant and size.
+// Default — playground: try variant and size from the controls.
 export const Default: Story = {};
 
-// All 7 variants (md size).
-export const Variants: Story = {
-  render: () => (
-    <div className="flex flex-wrap items-center gap-2">
-      {VARIANTS.map((v) => (
-        <Badge key={v} variant={v}>
-          {label(v)}
-        </Badge>
-      ))}
-    </div>
-  ),
-};
+// One story per variant (the design axis), before AllVariants groups them.
+export const Success: Story = { args: { variant: "success", children: "Success" } };
+export const Warning: Story = { args: { variant: "warning", children: "Warning" } };
+export const Error: Story = { args: { variant: "error", children: "Error" } };
+export const Info: Story = { args: { variant: "info", children: "Info" } };
+export const Kbd: Story = { args: { variant: "kbd", children: "⌘K" } };
+export const Overlay: Story = { args: { variant: "overlay", children: "Overlay" } };
 
 // AllSizes — the 3 sizes (default variant), with px.
 export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-wrap items-end gap-4">
-      {SIZES.map(({ key, px }) => (
-        <div key={key} className="flex flex-col items-center gap-1">
+    <Sizes
+      items={SIZES.map(({ key, px }) => ({
+        label: `${key} · ${px}px${key === "md" ? " (default)" : ""}`,
+        node: (
           <Badge variant="default" size={key}>
             Default
           </Badge>
-          <span className="text-caption text-content-tertiary font-mono">
-            {key} · {px}px{key === "md" ? " (default)" : ""}
-          </span>
-        </div>
-      ))}
-    </div>
+        ),
+      }))}
+    />
   ),
 };
 
-// AllVariants — ALWAYS last: full size × variant matrix (dashboard layout).
+// AllVariants — ALWAYS last: every variant (default size), grouping the stories above.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      {SIZES.map(({ key, px }) => (
-        <div key={key}>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">
-            {key} · {px}px{key === "md" ? " (default)" : ""}
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            {VARIANTS.map((v) => (
-              <Badge key={v} variant={v} size={key}>
-                {label(v)}
-              </Badge>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
+    <Variants
+      items={VARIANTS.map((v) => ({
+        label: cap(v),
+        node: <Badge variant={v}>{content(v)}</Badge>,
+      }))}
+    />
   ),
 };
