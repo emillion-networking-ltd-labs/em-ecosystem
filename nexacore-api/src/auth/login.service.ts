@@ -168,10 +168,7 @@ export class LoginService {
   ): Promise<AuthResult | MfaChallengeResult | MfaSetupRequiredResult> {
     const start = Date.now();
     let result:
-      | AuthResult
-      | MfaChallengeResult
-      | MfaSetupRequiredResult
-      | undefined;
+      AuthResult | MfaChallengeResult | MfaSetupRequiredResult | undefined;
     let error: unknown;
 
     try {
