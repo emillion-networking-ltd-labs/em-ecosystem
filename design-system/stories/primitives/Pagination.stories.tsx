@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import Pagination from "@/components/ui/Pagination";
+import { DemoCard } from "../_kit";
 
 const meta = {
   title: "Primitives/Pagination",
@@ -11,14 +12,13 @@ const meta = {
     totalPages: 10,
     onPageChange: () => {},
   },
+  // Stateful wrapper so it's interactive; `currentPage` arg seeds the position.
   render: (args) => {
     const [currentPage, setCurrentPage] = useState(args.currentPage);
     return (
-      <Pagination
-        totalPages={args.totalPages}
-        currentPage={currentPage}
-        onPageChange={setCurrentPage}
-      />
+      <DemoCard>
+        <Pagination totalPages={args.totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
+      </DemoCard>
     );
   },
 } satisfies Meta<typeof Pagination>;
@@ -26,61 +26,20 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Pagination has no design-variant/size axis — its only axis is the page position (few / first / middle /
+// last), which are states, each its own story. So there is no AllVariants.
+
+// Default — a middle-ish position with ellipsis.
 export const Default: Story = {};
 
 // Few pages (≤7) — all listed, no ellipsis.
-export const FewPages: Story = {
-  args: { currentPage: 2, totalPages: 5 },
-};
+export const FewPages: Story = { args: { currentPage: 2, totalPages: 5 } };
 
 // First page — the "previous" arrow is disabled; ellipsis on the right.
-export const FirstPage: Story = {
-  args: { currentPage: 1, totalPages: 12 },
-};
+export const FirstPage: Story = { args: { currentPage: 1, totalPages: 12 } };
 
 // Middle page — ellipsis on both sides.
-export const MiddlePage: Story = {
-  args: { currentPage: 6, totalPages: 12 },
-};
+export const MiddlePage: Story = { args: { currentPage: 6, totalPages: 12 } };
 
 // Last page — the "next" arrow is disabled; ellipsis on the left.
-export const LastPage: Story = {
-  args: { currentPage: 12, totalPages: 12 },
-};
-
-function PaginationDemo({
-  currentPage,
-  totalPages,
-}: {
-  currentPage: number;
-  totalPages: number;
-}) {
-  const [page, setPage] = useState(currentPage);
-  return <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />;
-}
-
-// AllVariants — ALWAYS last: the page-position states (few · first · middle · last).
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">
-          few pages (≤7, no ellipsis)
-        </p>
-        <PaginationDemo currentPage={2} totalPages={5} />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">first page</p>
-        <PaginationDemo currentPage={1} totalPages={12} />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">middle page</p>
-        <PaginationDemo currentPage={6} totalPages={12} />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">last page</p>
-        <PaginationDemo currentPage={12} totalPages={12} />
-      </div>
-    </div>
-  ),
-};
+export const LastPage: Story = { args: { currentPage: 12, totalPages: 12 } };
