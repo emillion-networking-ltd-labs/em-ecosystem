@@ -66,16 +66,14 @@ export const Gallery: Story = {
   args: { variant: "gallery", eyebrow: "Gallery", title: "Selected shots", items: GALLERY },
 };
 
-// AllVariants — ALWAYS last: EVERY Portfolio example — grid / featured × without / with images, plus gallery.
+// AllVariants — ALWAYS last: the layout variants (grid · featured · gallery), grouping the stories above.
+// Only the variant axis — with-images is a content story (WithImages), not a variant, so it's not here.
 const ALL = [
-  { label: "grid · no images", variant: "grid" as const, items: ITEMS },
-  { label: "grid · with images", variant: "grid" as const, items: ITEMS_IMG },
-  { label: "featured · no images", variant: "featured" as const, items: ITEMS },
-  { label: "featured · with images", variant: "featured" as const, items: ITEMS_IMG },
-  { label: "gallery", variant: "gallery" as const, items: GALLERY },
+  { label: "Grid", variant: "grid" as const, items: ITEMS },
+  { label: "Featured", variant: "featured" as const, items: ITEMS },
+  { label: "Gallery", variant: "gallery" as const, items: GALLERY },
 ];
 
-// AllVariants — ALWAYS last: the layout variants (featured · with-images · gallery).
 export const AllVariants: Story = {
   render: () => (
     <div className="flex flex-col">

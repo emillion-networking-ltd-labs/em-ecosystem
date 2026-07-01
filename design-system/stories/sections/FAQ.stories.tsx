@@ -36,25 +36,5 @@ export const Separated: Story = { args: { surface: "separated" } };
 // Chevron — the alternative indicator (▾ rotates 180° instead of the +→×).
 export const Chevron: Story = { args: { indicator: "chevron" } };
 
-// AllVariants — ALWAYS last: surfaces × indicator options.
-const VARIANTS = [
-  { label: "grouped · plus (default)", surface: "grouped" as const, indicator: "plus" as const },
-  { label: "separated · plus", surface: "separated" as const, indicator: "plus" as const },
-  { label: "grouped · chevron", surface: "grouped" as const, indicator: "chevron" as const },
-];
-
-// AllVariants — ALWAYS last: the surface and indicator combinations (plain · separated · grouped + chevron).
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col">
-      {VARIANTS.map(({ label, surface, indicator }) => (
-        <div key={label}>
-          <div className="px-6 pt-6 pb-2">
-            <span className="text-caption text-content-tertiary font-mono">{label}</span>
-          </div>
-          <FAQ eyebrow="FAQ" title="Frequently asked questions" items={ITEMS} surface={surface} indicator={indicator} />
-        </div>
-      ))}
-    </div>
-  ),
-};
+// surface (grouped/separated) and indicator (plus/chevron) are config params, each its own story — not a
+// single design-variant axis. The old AllVariants was a surface×indicator matrix → removed.

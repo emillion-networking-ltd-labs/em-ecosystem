@@ -24,6 +24,11 @@ const withTheme: Decorator = (Story, context) => {
   // inyectan en el MISMO wrapper; los componentes y las Foundations re-resuelven `--color-accent`,
   // `--gradient-brand`, `--font-display` etc. desde aquí. Los tokens semánticos NO se tocan.
   const preset = PRESETS.find((p) => p.id === context.globals.preset) ?? PRESETS[0];
+  // Full-bleed for page-level compositions (Sections/* and Showcase/HeroShowcase): they render edge-to-edge
+  // (layout:fullscreen), so the wrapper's 2rem padding would box them in a grey band. Drop it for those; keep
+  // it everywhere else (primitives sit in a DemoCard; the foundations docs rely on this breathing room).
+  const fullBleed =
+    context.parameters?.layout === "fullscreen" && /^(Sections|Showcase)\//.test(context.title ?? "");
   // Los gradientes de marca se DECLARAN en :root del core con var(--color-accent/-2) → se computan UNA
   // vez en :root (con el accent base) y se heredan CONGELADOS; redefinir solo --color-accent en el preset
   // NO los cambiaría. Re-declararlos aquí (mismas fórmulas que tokens.css) fuerza que se re-resuelvan en
@@ -45,7 +50,7 @@ const withTheme: Decorator = (Story, context) => {
         style={{
           minHeight: "100vh",
           boxSizing: "border-box",
-          padding: "2rem",
+          padding: fullBleed ? 0 : "2rem",
           background: "var(--color-surface-secondary)",
           color: "var(--color-content-primary)",
           fontFamily: "var(--font-sans)",
