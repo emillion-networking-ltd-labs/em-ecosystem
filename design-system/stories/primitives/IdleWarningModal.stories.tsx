@@ -14,16 +14,5 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// A single full-screen modal state (live countdown) — no design-variant/size axis, so no AllVariants.
 export const Default: Story = {};
-
-// AllVariants — ALWAYS last: the idle warning with its live countdown (a single modal state).
-export const AllVariants: Story = {
-  render: () => (
-    <>
-      <p className="fixed left-4 top-4 z-[60] text-caption text-content-tertiary font-mono">
-        idle warning — full-screen modal with a live countdown
-      </p>
-      <IdleWarningModal secondsLeft={60} onKeepAlive={() => {}} />
-    </>
-  ),
-};

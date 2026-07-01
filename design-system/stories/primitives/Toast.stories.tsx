@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Toast from "@/components/ui/Toast";
+import { DemoCard, Variants } from "../_kit";
 
 // A single toast notification (the item). Its TYPES live here (error / success / warning / info).
 // The fixed region that stacks several live toasts is a separate component: ToastContainer.
@@ -24,28 +25,44 @@ const meta = {
       options: ["error", "success", "warning", "info"],
     },
   },
+  render: (args) => (
+    <DemoCard>
+      <Toast {...args} />
+    </DemoCard>
+  ),
 } satisfies Meta<typeof Toast>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
+// One story per variant (the design axis), before AllVariants groups them. None is marked "default" — a
+// toast doesn't always show one particular type; success only seeds the playground.
+export const Success: Story = {};
+export const Error: Story = {
+  args: { variant: "error", title: "Couldn't save", description: "Please try again." },
+};
+export const Warning: Story = {
+  args: { variant: "warning", title: "Storage almost full", description: "Free up space to keep syncing." },
+};
+export const Info: Story = {
+  args: { variant: "info", title: "Syncing…", description: "This will only take a moment." },
+};
 
-// AllVariants — ALWAYS last: the 4 types.
 const VARIANTS = [
   { variant: "success", title: "Changes saved", description: "Your profile has been updated." },
-  { variant: "info", title: "Syncing…", description: "This will only take a moment." },
-  { variant: "warning", title: "Storage almost full", description: "Free up space to keep syncing." },
   { variant: "error", title: "Couldn't save", description: "Please try again." },
+  { variant: "warning", title: "Storage almost full", description: "Free up space to keep syncing." },
+  { variant: "info", title: "Syncing…", description: "This will only take a moment." },
 ] as const;
+const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 
-// AllVariants — ALWAYS last: every toast variant together (success · error · info).
+// AllVariants — ALWAYS last: every toast variant, grouping the stories above.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
-      {VARIANTS.map((v, i) => (
-        <div key={v.variant} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">{v.variant}</span>
+    <Variants
+      items={VARIANTS.map((v, i) => ({
+        label: cap(v.variant),
+        node: (
           <Toast
             id={i + 1}
             variant={v.variant}
@@ -54,8 +71,8 @@ export const AllVariants: Story = {
             duration={STAY}
             onClose={() => {}}
           />
-        </div>
-      ))}
-    </div>
+        ),
+      }))}
+    />
   ),
 };
