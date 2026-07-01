@@ -123,8 +123,17 @@ export const StoryConventions: Story = {
             cartesian product — that&apos;s noise.
           </Rule>
           <Rule>
-            <strong>Composition / grid</strong> (BentoGrid, CardHoverEffect, Pricing) → the whole composition
-            inside one card: <Code>{`<DemoCard block>`}</Code>.
+            <strong>Default is CENTERED</strong> (<Code>DemoCard</Code>, no <Code>block</Code>): the element is
+            centered both axes at a prudent, uniform width. This is the case for almost everything — a table, a
+            trigger, a top-bar row, a scroll demo, a selector: all <strong>centered</strong>, never left-aligned.
+            If a demo looks tiny because it shrinks to its content, wrap it in a fixed width (e.g.{" "}
+            <Code>w-[560px]</Code>) so all its stories match.
+          </Rule>
+          <Rule>
+            <strong>Full-width (<Code>block</Code>) is the EXCEPTION</strong> — only for elements that are meant
+            to span full width: a real card grid (BentoGrid, CardHoverEffect, Pricing), a full-bleed effect
+            tile, or the <Code>Card</Code> surface itself. Having several parts does <strong>not</strong> make a
+            demo full-width — a multi-part demo is still centered.
           </Rule>
           <Rule>
             <strong>Full-bleed effect</strong> (Aurora, Meteors, Ripple, Blob) → host it as a tile inside the

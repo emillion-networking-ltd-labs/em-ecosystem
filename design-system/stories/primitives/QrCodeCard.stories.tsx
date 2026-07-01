@@ -1,34 +1,21 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import QrCodeCard from "@/components/ui/QrCodeCard";
+import { DemoCard } from "../_kit";
 
 const meta = {
   title: "Primitives/QrCodeCard",
   component: QrCodeCard,
   tags: ["autodocs"],
   args: { secret: "JBSWY3DPEHPK3PXP" },
-  // The QR is fixed at 192px; constrain so the card hugs it instead of stretching full-bleed.
-  decorators: [
-    (Story) => (
-      <div className="max-w-[256px]">
-        <Story />
-      </div>
-    ),
-  ],
+  render: (args) => (
+    <DemoCard>
+      <QrCodeCard {...args} />
+    </DemoCard>
+  ),
 } satisfies Meta<typeof QrCodeCard>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// A single card (fixed 192px QR + copyable secret for a TOTP secret) — no variants/sizes, so no AllVariants.
 export const Default: Story = {};
-
-// AllVariants — ALWAYS last: the QR card for a TOTP secret (fixed 192px QR + copyable secret).
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">default</p>
-        <QrCodeCard secret="JBSWY3DPEHPK3PXP" />
-      </div>
-    </div>
-  ),
-};

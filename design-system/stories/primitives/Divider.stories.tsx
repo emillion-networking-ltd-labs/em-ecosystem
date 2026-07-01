@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Divider from "@/components/ui/Divider";
+import { DemoCard } from "../_kit";
 
 const meta = {
   title: "Primitives/Divider",
@@ -14,11 +15,19 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// A Divider has no design-variant/size axis — its axes are orientation (h/v) and an optional label, each
+// its own story. So there is no AllVariants. Content around each divider shows what it separates.
+
+// Default — horizontal, between two blocks of content.
 export const Default: Story = {
   render: (args) => (
-    <div className="w-64">
-      <Divider {...args} />
-    </div>
+    <DemoCard>
+      <div className="w-64 space-y-4">
+        <p className="text-body text-content-tertiary">Content above</p>
+        <Divider {...args} />
+        <p className="text-body text-content-tertiary">Content below</p>
+      </div>
+    </DemoCard>
   ),
 };
 
@@ -26,72 +35,39 @@ export const Default: Story = {
 export const WithLabel: Story = {
   args: { label: "or" },
   render: (args) => (
-    <div className="w-64">
-      <Divider {...args} />
-    </div>
+    <DemoCard>
+      <div className="w-64 space-y-4">
+        <p className="text-body text-content-tertiary">Content above</p>
+        <Divider {...args} />
+        <p className="text-body text-content-tertiary">Content below</p>
+      </div>
+    </DemoCard>
   ),
 };
 
+// Vertical — separates content left/right.
 export const Vertical: Story = {
   args: { orientation: "vertical" },
   render: (args) => (
-    <div className="flex h-16 items-center gap-3">
-      <p className="text-body text-content-tertiary">Left</p>
-      <Divider {...args} />
-      <p className="text-body text-content-tertiary">Right</p>
-    </div>
+    <DemoCard>
+      <div className="flex h-16 items-center gap-3">
+        <p className="text-body text-content-tertiary">Content left</p>
+        <Divider {...args} />
+        <p className="text-body text-content-tertiary">Content right</p>
+      </div>
+    </DemoCard>
   ),
 };
 
 export const VerticalWithLabel: Story = {
   args: { orientation: "vertical", label: "or" },
   render: (args) => (
-    <div className="flex h-16 items-center gap-3">
-      <p className="text-body text-content-tertiary">Left</p>
-      <Divider {...args} />
-      <p className="text-body text-content-tertiary">Right</p>
-    </div>
-  ),
-};
-
-// AllVariants — ALWAYS last: horizontal and vertical dividers, with and without a label.
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex w-72 flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">horizontal</p>
-        <div className="space-y-4">
-          <p className="text-body text-content-tertiary">Content above</p>
-          <Divider />
-          <p className="text-body text-content-tertiary">Content below</p>
-        </div>
+    <DemoCard>
+      <div className="flex h-16 items-center gap-3">
+        <p className="text-body text-content-tertiary">Content left</p>
+        <Divider {...args} />
+        <p className="text-body text-content-tertiary">Content right</p>
       </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">horizontal + label</p>
-        <div className="space-y-4">
-          <p className="text-body text-content-tertiary">Content above</p>
-          <Divider label="or" />
-          <p className="text-body text-content-tertiary">Content below</p>
-        </div>
-      </div>
-      <div className="flex gap-8">
-        <div>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">vertical</p>
-          <div className="flex h-16 items-center gap-3">
-            <p className="text-body text-content-tertiary">Left</p>
-            <Divider orientation="vertical" />
-            <p className="text-body text-content-tertiary">Right</p>
-          </div>
-        </div>
-        <div>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">vertical + label</p>
-          <div className="flex h-16 items-center gap-3">
-            <p className="text-body text-content-tertiary">Left</p>
-            <Divider orientation="vertical" label="or" />
-            <p className="text-body text-content-tertiary">Right</p>
-          </div>
-        </div>
-      </div>
-    </div>
+    </DemoCard>
   ),
 };

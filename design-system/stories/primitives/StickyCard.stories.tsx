@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useEffect, useRef, useState } from "react";
 import StickyCard from "@/components/ui/StickyCard";
+import { DemoCard } from "../_kit";
 
 // NOTE: the real StickyCard sticks to the PAGE viewport via position:fixed + IntersectionObserver,
 // so it can't be shown statically or inside a Storybook scroll container without hijacking the page.
@@ -101,24 +102,20 @@ function StickyDemo({ position }: { position: "top" | "bottom" }) {
 }
 
 // Sticks to the TOP of the scroll container; when stuck, the top corners go square.
-export const StickyTop: Story = { render: () => <StickyDemo position="top" /> };
+export const StickyTop: Story = {
+  render: () => (
+    <DemoCard>
+      <StickyDemo position="top" />
+    </DemoCard>
+  ),
+};
 
 // Sticks to the BOTTOM of the scroll container; when stuck, the bottom corners go square.
-export const StickyBottom: Story = { render: () => <StickyDemo position="bottom" /> };
-
-// AllVariants — ALWAYS last: both positions, each in its own scroll container. Scroll within each
-// to see the card stick (top vs bottom).
-export const AllVariants: Story = {
+// position (top/bottom) is a placement, each its own story; no design-variant/size axis → no AllVariants.
+export const StickyBottom: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">position=&quot;top&quot;</p>
-        <StickyDemo position="top" />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">position=&quot;bottom&quot;</p>
-        <StickyDemo position="bottom" />
-      </div>
-    </div>
+    <DemoCard>
+      <StickyDemo position="bottom" />
+    </DemoCard>
   ),
 };

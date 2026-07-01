@@ -1,8 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import ThemeToggle from "@/components/ui/ThemeToggle";
+import { DemoCard } from "../_kit";
 
-// App-coupled: uses useTheme → @/context/ThemeContext. In the catalog it's wired against a
-// MOCK ThemeContext (see .storybook/mocks/context); the real app's dashboard provides it.
+// App-coupled: uses useTheme → @/context/ThemeContext. In the catalog it's wired against a MOCK
+// ThemeContext (see .storybook/mocks/context). The icon follows the active theme (flip it with the
+// catalog's theme toolbar). Making the click itself toggle+apply the theme is tracked in ECO-119.
 const meta = {
   title: "Primitives/ThemeToggle",
   component: ThemeToggle,
@@ -16,22 +18,15 @@ const meta = {
       options: ["auto", "top", "bottom", "left", "right"],
     },
   },
+  render: (args) => (
+    <DemoCard>
+      <ThemeToggle {...args} />
+    </DemoCard>
+  ),
 } satisfies Meta<typeof ThemeToggle>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// A single toggle (no variants/sizes) — so no AllVariants.
 export const Default: Story = {};
-
-// AllVariants — ALWAYS last: the toggle (its icon follows the active theme — flip it with the
-// catalog's theme toolbar; sits inline like in the dashboard top bar).
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">theme toggle</p>
-        <ThemeToggle tooltipPosition="right" />
-      </div>
-    </div>
-  ),
-};

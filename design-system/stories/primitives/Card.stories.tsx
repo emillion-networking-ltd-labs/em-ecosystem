@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Card from "@/components/ui/Card";
+import { DemoCard, Variants } from "../_kit";
 
 const sample = (
   <>
@@ -19,13 +20,11 @@ const meta = {
     elevated: { control: "boolean" },
     size: { control: "inline-radio", options: ["md", "lg"] },
   },
-  decorators: [
-    (Story) => (
-      <div className="max-w-md">
-        <Story />
-      </div>
-    ),
-  ],
+  render: (args) => (
+    <DemoCard block>
+      <Card {...args} />
+    </DemoCard>
+  ),
 } satisfies Meta<typeof Card>;
 
 export default meta;
@@ -43,26 +42,27 @@ export const Container: Story = { args: { size: "lg" } };
 // card-container — elevated, radius 24.
 export const ContainerElevated: Story = { args: { elevated: true, size: "lg" } };
 
-// AllVariants — ALWAYS last: the 4 surfaces (elevation × radius).
+// The 4 surfaces (elevation × radius), each with its own story.
 const TYPES = [
-  { label: "card-flat · 12 (default)", elevated: false, size: "md" },
-  { label: "card · elevated · 12", elevated: true, size: "md" },
-  { label: "card-container-flat · 24", elevated: false, size: "lg" },
-  { label: "card-container · elevated · 24", elevated: true, size: "lg" },
-] as const;
+  { label: "Default", elevated: false, size: "md" as const },
+  { label: "Elevated", elevated: true, size: "md" as const },
+  { label: "Container", elevated: false, size: "lg" as const },
+  { label: "ContainerElevated", elevated: true, size: "lg" as const },
+];
 
-// AllVariants — ALWAYS last: the card types (default · elevated · container · container-elevated).
+// AllVariants — ALWAYS last: the 4 card surfaces, grouping the stories above.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-4">
-      {TYPES.map(({ label, elevated, size }) => (
-        <div key={label}>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">{label}</p>
+    <Variants
+      items={TYPES.map(({ label, elevated, size }) => ({
+        label,
+        block: true,
+        node: (
           <Card elevated={elevated} size={size}>
             {sample}
           </Card>
-        </div>
-      ))}
-    </div>
+        ),
+      }))}
+    />
   ),
 };
