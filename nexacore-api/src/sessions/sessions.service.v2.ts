@@ -57,10 +57,7 @@ export interface RotateResult extends MintResult {
 }
 
 type RejectReasonClass =
-  | 'not-found'
-  | 'revoked'
-  | 'expired'
-  | 'membership-stale';
+  'not-found' | 'revoked' | 'expired' | 'membership-stale';
 
 @Injectable()
 export class SessionsServiceV2 {

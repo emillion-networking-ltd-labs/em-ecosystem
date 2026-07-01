@@ -170,8 +170,7 @@ export class PasskeyService {
     email?: string,
   ): Promise<{ options: Record<string, unknown>; challengeId: string }> {
     let allowCredentials:
-      | { id: string; transports: AuthenticatorTransportFuture[] }[]
-      | undefined;
+      { id: string; transports: AuthenticatorTransportFuture[] }[] | undefined;
 
     if (email) {
       const user = await this.usersService.findByEmail(email);

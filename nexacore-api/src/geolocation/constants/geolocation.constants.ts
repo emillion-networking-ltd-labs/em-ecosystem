@@ -46,9 +46,7 @@ export const IMPOSSIBLE_TRAVEL_MIN_DISTANCE_KM = parseInt(
  */
 export const IMPOSSIBLE_TRAVEL_ALERT_STRATEGY = (process.env
   .IMPOSSIBLE_TRAVEL_ALERT_STRATEGY || 'alert_only') as
-  | 'alert_only'
-  | 'challenge'
-  | 'block';
+  'alert_only' | 'challenge' | 'block';
 
 /**
  * Private/reserved IP prefixes that cannot be geolocated.
