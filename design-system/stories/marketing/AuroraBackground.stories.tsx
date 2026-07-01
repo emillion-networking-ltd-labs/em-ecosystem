@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AuroraBackground } from "@/components/ui/AuroraBackground";
-import { DemoCard, Variants } from "../_kit";
+import { DemoCard } from "../_kit";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Decorative animated light field.
 // The component is full-height by default; the demos bound it to a card so it never goes full-bleed.
@@ -42,31 +42,5 @@ export const FullField: Story = {
         </AuroraBackground>
       </div>
     </DemoCard>
-  ),
-};
-
-// AllVariants — ALWAYS last: the real variants (Default, FullField) — one project Card each, name above.
-// The full-bleed effect is hosted as a tile inside the card. (The radial mask reads best in dark mode.)
-const VARIANTS = [
-  { label: "Default", showRadialGradient: true },
-  { label: "FullField", showRadialGradient: false },
-] as const;
-
-export const AllVariants: Story = {
-  render: () => (
-    <Variants
-      items={VARIANTS.map((v) => ({
-        label: v.label,
-        className: "overflow-hidden",
-        block: true,
-        node: (
-          <div className="overflow-hidden rounded-xl">
-            <AuroraBackground showRadialGradient={v.showRadialGradient} className="h-56">
-              <span className="relative z-10 text-display-3 font-display">Aurora</span>
-            </AuroraBackground>
-          </div>
-        ),
-      }))}
-    />
   ),
 };

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Meteors } from "@/components/ui/Meteors";
-import { DemoCard, Variants } from "../_kit";
+import { DemoCard } from "../_kit";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Decorative meteor shower; needs a bounded, relative parent.
 const meta = {
@@ -46,26 +46,5 @@ export const Sparse: Story = {
     <DemoCard block className="overflow-hidden">
       <Tile number={8} />
     </DemoCard>
-  ),
-};
-
-// AllVariants — ALWAYS last: the real variants (Default, Dense, Sparse) — one project Card each, name above.
-// The effect is hosted as a dark tile inside the card.
-const VARIANTS = [
-  { label: "Default", number: 20 },
-  { label: "Dense", number: 40 },
-  { label: "Sparse", number: 8 },
-] as const;
-
-export const AllVariants: Story = {
-  render: () => (
-    <Variants
-      items={VARIANTS.map((v) => ({
-        label: v.label,
-        className: "overflow-hidden",
-        block: true,
-        node: <Tile number={v.number} height="h-56" />,
-      }))}
-    />
   ),
 };

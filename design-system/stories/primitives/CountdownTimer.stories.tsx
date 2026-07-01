@@ -27,10 +27,8 @@ const SIZES = ["lg", "md", "sm"] as const;
 
 const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 
-// Default — playground: use the controls (variant, size). The default variant is `error`.
-export const Default: Story = {};
-
-// Warning — the non-default variant (error is shown by Default), before AllVariants groups both.
+// One story per variant (named by variant, no generic "Default"). error is the component default / seed.
+export const Error: Story = {};
 export const Warning: Story = { args: { variant: "warning" } };
 
 // AllSizes — the 3 sizes (error variant). sm is the default.

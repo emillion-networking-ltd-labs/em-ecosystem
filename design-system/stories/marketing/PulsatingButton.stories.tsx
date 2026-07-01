@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { PulsatingButton } from "@/components/ui/PulsatingButton";
-import { DemoCard, Variants } from "../_kit";
+import { DemoCard } from "../_kit";
 
 // Marketing/PulsatingButton — CTA that "breathes": an overlay inherits the button background and pulses
 // (animate-pulse). Uses the brand button colors (surface-inverse / content-inverse), like Button primary.
@@ -31,14 +31,4 @@ export const Disabled: Story = {
       <PulsatingButton {...args} />
     </DemoCard>
   ),
-};
-
-// AllVariants — ALWAYS last: the real variants (Default, Disabled) — one project Card each, name above.
-const VARIANTS = [
-  { label: "Default", node: <PulsatingButton>Get started</PulsatingButton> },
-  { label: "Disabled", node: <PulsatingButton disabled>Get started</PulsatingButton> },
-];
-
-export const AllVariants: Story = {
-  render: () => <Variants items={VARIANTS} />,
 };

@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { NumberTicker } from "@/components/ui/NumberTicker";
-import { DemoCard, Variants } from "../_kit";
+import { DemoCard } from "../_kit";
 
 // Marketing/NumberTicker — animated count-up/down to a target (marketing stats). Theme-aware via
 // content-primary; animates on scroll into view.
@@ -62,23 +62,4 @@ export const Decimals: Story = {
       </span>
     </DemoCard>
   ),
-};
-
-// AllVariants — ALWAYS last: the real variants (Default, Up, Down, Decimals) — one project Card each, name above.
-const VARIANTS = [
-  { label: "Default", node: <span className={NUM}><NumberTicker value={100} /></span> },
-  {
-    label: "Up",
-    node: (
-      <span className={NUM}>
-        <NumberTicker value={500} direction="up" />+
-      </span>
-    ),
-  },
-  { label: "Down", node: <span className={NUM}><NumberTicker value={100} direction="down" /></span> },
-  { label: "Decimals", node: <span className={NUM}><NumberTicker value={4.9} decimalPlaces={1} /></span> },
-];
-
-export const AllVariants: Story = {
-  render: () => <Variants items={VARIANTS} />,
 };

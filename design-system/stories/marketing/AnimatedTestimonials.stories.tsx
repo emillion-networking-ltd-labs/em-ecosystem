@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { AnimatedTestimonials } from "@/components/ui/AnimatedTestimonials";
-import { DemoCard, Variants } from "../_kit";
+import { DemoCard } from "../_kit";
 
 // Marketing/AnimatedTestimonials — a testimonial carousel with photo + word-by-word blur-in (social
 // proof). Theme-aware (content/surface tokens). Photos here are inline SVG placeholders (no network).
@@ -57,17 +57,5 @@ export const Autoplay: Story = {
     <DemoCard>
       <AnimatedTestimonials testimonials={testimonials} autoplay />
     </DemoCard>
-  ),
-};
-
-// AllVariants — ALWAYS last: the real variants (Default, Autoplay) — one project Card each, name above.
-export const AllVariants: Story = {
-  render: () => (
-    <Variants
-      items={[
-        { label: "Default", node: <AnimatedTestimonials testimonials={testimonials} autoplay={false} /> },
-        { label: "Autoplay", node: <AnimatedTestimonials testimonials={testimonials} autoplay={true} /> },
-      ]}
-    />
   ),
 };

@@ -7,7 +7,7 @@ const meta = {
   component: InlineError,
   tags: ["autodocs"],
   args: {
-    message: "Enter a valid email address",
+    message: "Enter a valid email address.",
   },
   render: (args) => (
     <DemoCard>

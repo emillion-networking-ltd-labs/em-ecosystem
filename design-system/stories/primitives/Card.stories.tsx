@@ -21,8 +21,10 @@ const meta = {
     size: { control: "inline-radio", options: ["md", "lg"] },
   },
   render: (args) => (
-    <DemoCard block>
-      <Card {...args} />
+    <DemoCard>
+      <div className="w-full max-w-sm">
+        <Card {...args} />
+      </div>
     </DemoCard>
   ),
 } satisfies Meta<typeof Card>;
@@ -56,11 +58,12 @@ export const AllVariants: Story = {
     <Variants
       items={TYPES.map(({ label, elevated, size }) => ({
         label,
-        block: true,
         node: (
-          <Card elevated={elevated} size={size}>
-            {sample}
-          </Card>
+          <div className="w-full max-w-sm">
+            <Card elevated={elevated} size={size}>
+              {sample}
+            </Card>
+          </div>
         ),
       }))}
     />
