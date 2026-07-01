@@ -66,7 +66,7 @@ function InteractiveSidebar({ initialCollapsed = false }: { initialCollapsed?: b
         <>
           <div className="min-w-0 flex-1">
             <p className="truncate text-body font-medium text-content-primary">Ana Perez</p>
-            <p className="truncate text-caption text-content-tertiary">ana@company.com</p>
+            <p className="truncate text-caption text-content-secondary">ana@company.com</p>
           </div>
           <IconButton variant="default" size="sm" aria-label="Log out">
             <LogOut size={16} />

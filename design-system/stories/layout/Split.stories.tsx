@@ -57,7 +57,7 @@ export const Ratios: Story = {
     <div className="space-y-8">
       {RATIOS.map(({ ratio, label }) => (
         <div key={ratio} className="space-y-1.5">
-          <span className="text-caption text-content-tertiary font-mono">
+          <span className="text-caption text-content-secondary font-mono">
             ratio=&quot;{ratio}&quot; · {label}
             {ratio === "1-1" ? " (default)" : ""}
           </span>

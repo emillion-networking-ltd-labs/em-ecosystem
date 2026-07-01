@@ -38,7 +38,7 @@ export const Columns: Story = {
     <div className="space-y-8">
       {COLS.map((c) => (
         <div key={c} className="space-y-1.5">
-          <span className="text-caption text-content-tertiary font-mono">
+          <span className="text-caption text-content-secondary font-mono">
             cols={c}
             {c === 3 ? " (default)" : ""}
           </span>

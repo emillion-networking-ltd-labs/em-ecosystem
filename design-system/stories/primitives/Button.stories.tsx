@@ -76,7 +76,7 @@ export const Circular: Story = {
     <DemoCard>
       <div className="flex flex-col items-center gap-4">
         <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">with text</p>
+        <p className="mb-2 text-caption text-content-secondary font-mono">with text</p>
         <div className="flex flex-wrap items-center gap-3">
           {CIRCLE_VARIANTS.map((v) => (
             <Button key={v} variant={v} fullWidth={false} className={CIRCLE}>
@@ -86,7 +86,7 @@ export const Circular: Story = {
         </div>
       </div>
       <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">with icon</p>
+        <p className="mb-2 text-caption text-content-secondary font-mono">with icon</p>
         <div className="flex flex-wrap items-center gap-3">
           {CIRCLE_VARIANTS.map((v) => (
             <Button

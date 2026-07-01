@@ -61,7 +61,7 @@ export const AllVariants: Story = {
     <div className="flex flex-wrap items-start gap-6">
       {(["error", "success"] as const).map((type) => (
         <div key={type} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-tertiary font-mono">
+          <span className="text-caption text-content-secondary font-mono">
             {type === "error" ? "Error" : "Success"}
           </span>
           <FullPageCard type={type} />

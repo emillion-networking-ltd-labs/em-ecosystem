@@ -43,7 +43,7 @@ export const AllSizes: Story = {
     <div className="space-y-6">
       {SIZES.map(({ size, w }) => (
         <div key={size} className="space-y-1.5">
-          <span className="text-caption text-content-tertiary font-mono">
+          <span className="text-caption text-content-secondary font-mono">
             {size} · {w}
             {size === "lg" ? " (default)" : ""}
           </span>

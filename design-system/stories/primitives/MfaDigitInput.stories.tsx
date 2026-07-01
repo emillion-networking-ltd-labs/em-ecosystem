@@ -114,7 +114,7 @@ export const AllSizes: Story = {
           <div className="w-[360px]">
             <Field label="Verification code">
               <MfaDigitInput value={filled} onChange={() => {}} idPrefix="size-md" />
-              <span className="text-caption text-content-tertiary font-mono">
+              <span className="text-caption text-content-secondary font-mono">
                 md · 48×48px gap-3 (default — container ≥ 348px)
               </span>
             </Field>
@@ -122,7 +122,7 @@ export const AllSizes: Story = {
           <div className="w-[280px]">
             <Field label="Verification code">
               <MfaDigitInput value={filled} onChange={() => {}} idPrefix="size-sm" />
-              <span className="text-caption text-content-tertiary font-mono">
+              <span className="text-caption text-content-secondary font-mono">
                 sm · 40×40px gap-2 (auto — container &lt; 348px)
               </span>
             </Field>

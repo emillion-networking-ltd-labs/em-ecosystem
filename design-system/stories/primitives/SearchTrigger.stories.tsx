@@ -47,11 +47,11 @@ export const KeyboardShortcut: Story = {
         <Badge variant="kbd" size="sm">
           ⌘K
         </Badge>
-        <span className="text-caption text-content-tertiary">Mac</span>
+        <span className="text-caption text-content-secondary">Mac</span>
         <Badge variant="kbd" size="sm">
           Ctrl+K
         </Badge>
-        <span className="text-caption text-content-tertiary">Windows / Linux</span>
+        <span className="text-caption text-content-secondary">Windows / Linux</span>
       </div>
     </DemoCard>
   ),

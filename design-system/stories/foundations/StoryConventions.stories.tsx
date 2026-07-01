@@ -82,11 +82,11 @@ export const StoryConventions: Story = {
         title="Live example"
         description="The same rules, rendered with the shared kit. A single story shows its element in the project card; the overviews are one card per real item, with its label above."
       >
-        <p className="mb-2 text-caption font-mono text-content-tertiary">a single story → DemoCard</p>
+        <p className="mb-2 text-caption font-mono text-content-secondary">a single story → DemoCard</p>
         <DemoCard>
           <Sample>Your element</Sample>
         </DemoCard>
-        <p className="mb-2 mt-6 text-caption font-mono text-content-tertiary">
+        <p className="mb-2 mt-6 text-caption font-mono text-content-secondary">
           AllVariants (style) → Variants — one card per real variant
         </p>
         <Variants
@@ -95,7 +95,7 @@ export const StoryConventions: Story = {
             { label: "Brand", node: <Sample>Brand</Sample> },
           ]}
         />
-        <p className="mb-2 mt-6 text-caption font-mono text-content-tertiary">
+        <p className="mb-2 mt-6 text-caption font-mono text-content-secondary">
           AllSizes (size) → Sizes — one card per real size
         </p>
         <Sizes

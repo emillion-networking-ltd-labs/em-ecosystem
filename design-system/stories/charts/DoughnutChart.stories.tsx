@@ -17,8 +17,10 @@ type Story = StoryObj<typeof meta>;
 // Default — the donut with its legend (slice count + share); follows the theme toolbar.
 export const Default: Story = {
   render: (args) => (
-    <DemoCard className="max-w-md">
-      <DoughnutChart {...args} />
+    <DemoCard>
+      <div className="w-full max-w-md">
+        <DoughnutChart {...args} />
+      </div>
     </DemoCard>
   ),
 };

@@ -64,7 +64,7 @@ export const Spacing: Story = {
     <div className="space-y-4">
       {SPACING.map(({ spacing, px }) => (
         <div key={spacing}>
-          <span className="text-caption text-content-tertiary font-mono">
+          <span className="text-caption text-content-secondary font-mono">
             {spacing} · {px}px{spacing === "lg" ? " (default)" : ""}
           </span>
           <Section spacing={spacing} surface="secondary" className="mt-1.5 rounded-lg border border-border-default">

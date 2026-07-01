@@ -20,7 +20,7 @@ type Story = StoryObj<typeof meta>;
 
 function ContentCard() {
   return (
-    <div className="mx-4 mb-4 mt-3 space-y-3 rounded-xl border border-border-strong bg-surface-primary p-4 text-caption text-content-tertiary">
+    <div className="mx-4 mb-4 mt-3 space-y-3 rounded-xl border border-border-strong bg-surface-primary p-4 text-caption text-content-secondary">
       {Array.from({ length: 8 }, (_, i) => (
         <p key={i}>
           Filler paragraph {i + 1} — scroll to see the card stick while the content scrolls
@@ -62,7 +62,7 @@ function StickyDemo({ position }: { position: "top" | "bottom" }) {
     >
       <div className="flex items-center justify-between gap-4">
         <p className="text-body font-semibold text-content-primary">StickyCard content</p>
-        <span className="font-mono text-caption text-content-tertiary">
+        <span className="font-mono text-caption text-content-secondary">
           position=&quot;{position}&quot;
         </span>
       </div>
@@ -72,7 +72,7 @@ function StickyDemo({ position }: { position: "top" | "bottom" }) {
   // Same clarifying line as top, but for "bottom" it sits BELOW the card (so the card is separated
   // from the bottom edge by default, mirroring how the intro separates the top card from the top).
   const intro = (
-    <div className="px-4 py-3 text-center text-caption text-content-tertiary">
+    <div className="px-4 py-3 text-center text-caption text-content-secondary">
       {arrow} Scroll inside this container — the card sticks to the {position} {arrow}
     </div>
   );

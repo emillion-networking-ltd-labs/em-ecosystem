@@ -56,7 +56,7 @@ export const Collapsed: Story = {
   render: (args) => (
     <DemoCard block>
       <div className="flex flex-col gap-2">
-        <span className="text-caption text-content-tertiary">
+        <span className="text-caption text-content-secondary">
           On a narrow width (e.g. mobile) the path collapses to Home / … / Last. Click “…” to expand and
           navigate the hidden levels.
         </span>

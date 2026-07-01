@@ -18,7 +18,7 @@ type Story = StoryObj<typeof meta>;
 export const Default: Story = {
   render: () => (
     <>
-      <p className="fixed bottom-4 left-4 text-caption text-content-tertiary font-mono">
+      <p className="fixed bottom-4 left-4 text-caption text-content-secondary font-mono">
         stacked toasts — fixed at the top, from the mock toast context
       </p>
       <ToastContainer />
