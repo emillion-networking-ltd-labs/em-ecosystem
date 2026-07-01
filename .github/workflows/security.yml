@@ -143,29 +143,9 @@ jobs:
 
       - name: Verify integrity hashes
         working-directory: ${{ matrix.package }}
-        run: |
-          # Check that all packages in lock file have integrity hashes
-          MISSING=$(node -e "
-            const lock = require('./package-lock.json');
-            const missing = [];
-            function check(deps, path) {
-              for (const [name, info] of Object.entries(deps || {})) {
-                // Skip the root project entry (empty name at root path).
-                // It represents the workspace itself and never carries an integrity hash.
-                if (name === '' && path === '') continue;
-                if (!info.integrity && !info.link) missing.push(path + name);
-                if (info.dependencies) check(info.dependencies, path + name + '/');
-              }
-            }
-            check(lock.packages, '');
-            if (missing.length > 0) {
-              console.log('Packages missing integrity hash: ' + missing.length);
-              missing.slice(0, 10).forEach(p => console.log('  - ' + p));
-              process.exit(1);
-            }
-            console.log('All packages have integrity hashes');
-          ")
-          echo "$MISSING"
+        # ECO-125: la lógica vive en un script testeado que TOLERA deps opcionales de plataforma sin hash
+        # (p.ej. @tailwindcss/oxide-wasm32-wasi/* en linux) y sigue estricto para las deps normales.
+        run: node "$GITHUB_WORKSPACE/.github/scripts/check-lockfile-integrity.mjs" package-lock.json
 
   # ==========================================================================
   # Layer 3: Static Analysis (ESLint + Security Plugin)
@@ -410,16 +390,35 @@ jobs:
   # ==========================================================================
   # Pipeline Summary
   # ==========================================================================
+  # ECO-125: self-test de la lógica de los gates que vive en .github/scripts (p.ej. el check de integrity
+  # que tolera deps opcionales). Así un cambio que rompa esa lógica se caza aquí.
+  gate-selftests:
+    name: 'Gate self-tests'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+      - name: Run .github/scripts tests
+        run: node --test .github/scripts/*.test.mjs
+
   security-gate:
     name: 'Security Gate (All Checks)'
     runs-on: ubuntu-latest
-    needs: [secrets-scan, dependency-audit, build-backend, build-frontend]
+    needs: [secrets-scan, dependency-audit, build-backend, build-frontend, gate-selftests]
     if: always()
     steps:
       - name: Check all jobs passed
         run: |
           if [ "${{ needs.secrets-scan.result }}" != "success" ]; then
             echo "::error::Secrets scan failed"
+            exit 1
+          fi
+          if [ "${{ needs.gate-selftests.result }}" != "success" ]; then
+            echo "::error::Gate self-tests failed"
             exit 1
           fi
           if [ "${{ needs.dependency-audit.result }}" != "success" ]; then
