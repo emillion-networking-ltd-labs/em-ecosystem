@@ -197,8 +197,7 @@ export function usePasskey() {
   useEffect(() => {
     let cancelled = false;
     const pk = window.PublicKeyCredential as unknown as
-      | { isConditionalMediationAvailable?: () => Promise<boolean> }
-      | undefined;
+      { isConditionalMediationAvailable?: () => Promise<boolean> } | undefined;
     if (pk?.isConditionalMediationAvailable) {
       pk.isConditionalMediationAvailable().then((available) => {
         if (!cancelled) setIsConditionalAvailable(available);

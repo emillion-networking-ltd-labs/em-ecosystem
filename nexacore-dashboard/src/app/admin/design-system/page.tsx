@@ -235,10 +235,7 @@ export default function DesignSystemPage() {
                       <Badge
                         variant={
                           categoryColors[entry.category] as
-                            | "default"
-                            | "info"
-                            | "success"
-                            | "warning"
+                            "default" | "info" | "success" | "warning"
                         }
                         size="sm"
                       >

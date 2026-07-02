@@ -228,6 +228,14 @@ jobs:
         # Next 16 removed `next lint` — use eslint directly with the flat config (SCRUM-364).
         run: npx eslint "src/**/*.{ts,tsx}" --max-warnings 0
 
+      # ECO-126: prettier en CI para el dashboard. La API ya valida formato vía eslint-plugin-prettier
+      # (SAST Backend), pero el eslint del dashboard NO lo incluye → el formato solo se veía en el pre-push
+      # LOCAL, que Dependabot no ejecuta. Un bump de prettier (o drift manual) pasaba CI entero sin ser
+      # cazado. Mismo comando que el pre-commit/pre-push (package.json lint-staged) → una sola fuente de norma.
+      - name: Check formatting (Prettier)
+        working-directory: nexacore-dashboard
+        run: npx prettier --check "src/**/*.{ts,tsx}"
+
       - name: Check for dangerous frontend patterns
         working-directory: nexacore-dashboard
         run: |

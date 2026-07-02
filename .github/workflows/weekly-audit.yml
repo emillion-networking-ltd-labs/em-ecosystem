@@ -254,12 +254,66 @@ jobs:
         run: echo "No stale merged branches found. Repo hygiene OK."
 
   # ==========================================================================
+  # Branch Protection Drift Audit (ECO-126)
+  # Verifica que la branch protection de main sigue exigiendo los required checks
+  # correctos (Security Gate + gates + Dashboard VRT) y strict:true. La deriva de
+  # esta config (Security Gate NO-required) fue lo que dejó auto-mergear los bumps
+  # rotos #515/#516. Leer la protección necesita permiso ADMIN → si el runner solo
+  # tiene GITHUB_TOKEN el script sale 2 (warn, no rojo); define el secret ADMIN_TOKEN
+  # (PAT con admin:repo) para que la guardia sea EXIGENTE.
+  # ==========================================================================
+  branch-protection-audit:
+    name: 'Branch Protection Audit'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check branch protection drift
+        id: drift
+        env:
+          GH_TOKEN: ${{ secrets.ADMIN_TOKEN || secrets.GITHUB_TOKEN }}
+        run: |
+          set +e
+          out=$(node .github/scripts/check-branch-protection.mjs 2>&1); code=$?
+          printf '%s\n' "$out"
+          printf '%s\n' "$out" > drift.md
+          echo "code=${code}" >> "$GITHUB_OUTPUT"
+          # 2 = no se pudo leer la protección (runner sin admin) → warn, no romper el audit.
+          [ "$code" = "2" ] && exit 0
+          exit "$code"
+
+      - name: Open or update tracking issue on drift
+        if: failure() && steps.drift.outputs.code == '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          today=$(date -u +%Y-%m-%d)
+          title="[branch-protection] main protection has drifted ($today)"
+          body="## Branch protection drift\n\nLa guardia anti-deriva (ECO-126) detectó que la branch protection de \`main\` ya no coincide con el intent:\n\n\`\`\`\n$(cat drift.md)\n\`\`\`\n\nReaplica la config con el comando que imprime el script (necesita admin).\n\n## Referencias\n- ADR-021 (política de required checks)\n- \`.github/scripts/check-branch-protection.mjs\`\n"
+          existing=$(gh issue list --state open --search "in:title [branch-protection]" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            printf "%b" "$body" | gh issue comment "$existing" --body-file -
+          else
+            printf "%b" "$body" | gh issue create --title "$title" --label "tech-debt" --body-file -
+          fi
+
+  # ==========================================================================
   # Weekly Summary Report
   # ==========================================================================
   summary:
     name: 'Weekly Summary'
     runs-on: ubuntu-latest
-    needs: [full-dependency-audit, supply-chain, branch-audit]
+    needs: [full-dependency-audit, supply-chain, branch-audit, branch-protection-audit]
     if: always()
     steps:
       - name: Generate summary
@@ -274,5 +328,6 @@ jobs:
           echo "| Dependency Audit | ${{ needs.full-dependency-audit.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Supply Chain | ${{ needs.supply-chain.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Branch Hygiene | ${{ needs.branch-audit.result }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Branch Protection | ${{ needs.branch-protection-audit.result }} |" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Standards: OWASP A06:2021, NIST SA-11, SOC 2 CC7.1" >> $GITHUB_STEP_SUMMARY
