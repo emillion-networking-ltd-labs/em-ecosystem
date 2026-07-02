@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
 import Avatar from "./Avatar";
 import Button from "./Button";
+import Tooltip from "./Tooltip";
 
 export const emailSelectorSpecs = {
   trigger:
@@ -53,7 +54,11 @@ export default function EmailSelector({
             : "border border-border-components bg-transparent text-content-primary hover:bg-surface-subtle"
         }`}
       >
-        <span className="whitespace-nowrap leading-none">{email}</span>
+        {/* ECO-118: el email largo TRUNCA (…) con ancho tope en vez de agrandar el trigger; al hover, un
+            tooltip muestra el valor completo. Tamaño de trigger estable. */}
+        <Tooltip content={email} position="top">
+          <span className="max-w-[220px] truncate leading-none">{email}</span>
+        </Tooltip>
         <ChevronDown
           size={16}
           className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}

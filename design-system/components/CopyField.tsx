@@ -45,9 +45,13 @@ export default function CopyField({
     <div
       className={`flex ${sizeClasses[size]} items-center gap-2 rounded-lg border border-border-components bg-surface-subtle px-4 overflow-hidden ${className}`}
     >
-      <code className="flex-1 truncate font-mono text-body leading-6 text-content-primary">
-        {value}
-      </code>
+      {/* ECO-118: el valor ya trunca (…); al hover, un tooltip muestra el valor completo (el botón de al
+          lado lo copia). Tamaño estable. */}
+      <Tooltip content={value} position="top">
+        <code className="flex-1 truncate font-mono text-body leading-6 text-content-primary">
+          {value}
+        </code>
+      </Tooltip>
       <Tooltip content={copied ? "Copied!" : "Copy to clipboard"}>
         <button
           type="button"
