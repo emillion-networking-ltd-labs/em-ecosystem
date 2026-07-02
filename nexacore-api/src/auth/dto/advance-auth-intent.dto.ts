@@ -28,10 +28,7 @@ import {
  *   - 'passkey'     — `assertion` (declared for Phase 3 forward-compat; transition NOT wired in 2.2)
  */
 export type AdvanceIntentKind =
-  | 'credentials'
-  | 'mfa'
-  | 'tenant_pick'
-  | 'passkey';
+  'credentials' | 'mfa' | 'tenant_pick' | 'passkey';
 
 export class AdvanceAuthIntentDto {
   @IsIn(['credentials', 'mfa', 'tenant_pick', 'passkey'])
