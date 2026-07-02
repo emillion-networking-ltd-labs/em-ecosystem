@@ -28,7 +28,7 @@ export const languageSelectorSpecs = {
   popover: {
     position: "absolute w-fit min-w-[200px]",
     container:
-      "rounded-xl border border-border-components bg-surface-primary p-4 shadow-card max-h-[240px] overflow-y-auto",
+      "rounded-xl border border-border-components bg-surface-primary p-2 shadow-card max-h-[240px] overflow-y-auto",
     search:
       "h-12 rounded-lg border border-border-components bg-surface-primary px-4 shadow-card",
   },
@@ -176,7 +176,7 @@ export default function LanguageSelector({
             </div>
 
             {/* Results — appears second (stagger child 2) */}
-            <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-components bg-surface-primary p-4 shadow-card">
+            <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-components bg-surface-primary p-2 shadow-card">
               {filtered.length === 0 ? (
                 <p className="py-2 text-center text-body text-content-primary/50">
                   No results
@@ -190,7 +190,7 @@ export default function LanguageSelector({
                         key={lang.code}
                         type="button"
                         onClick={() => handleSelect(lang)}
-                        className={`flex h-10 items-center gap-2 rounded-md px-2 text-body font-normal transition-colors ${
+                        className={`flex items-center gap-2 rounded-lg px-3 py-2 text-body font-normal transition-colors ${
                           isSelected
                             ? "bg-surface-subtle text-content-primary"
                             : "bg-transparent text-content-primary hover:bg-surface-subtle"
