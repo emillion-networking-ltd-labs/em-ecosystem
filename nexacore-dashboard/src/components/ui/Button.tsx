@@ -4,12 +4,7 @@ import React from "react";
 import InfinitySpinner from "./InfinitySpinner";
 
 export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "outline"
-  | "danger"
-  | "link"
-  | "link-underline";
+  "primary" | "secondary" | "outline" | "danger" | "link" | "link-underline";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
