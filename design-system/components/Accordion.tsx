@@ -19,6 +19,9 @@ interface AccordionProps {
   surface?: "grouped" | "separated";
   /** Indicador: `chevron` (▾ rota 180°, default) o `plus` (un `+` que rota 45° → `×` al abrir). */
   indicator?: "chevron" | "plus";
+  /** Estilo por item (aplicado al card de cada item). Genérico; p.ej. para un revelado con delay
+   *  incremental (stagger) construido por la sección — el Accordion no conoce el "reveal". */
+  itemStyle?: (index: number) => React.CSSProperties;
 }
 
 export const accordionSpecs = {
@@ -54,6 +57,7 @@ export default function Accordion({
   borderless = false,
   surface = "grouped",
   indicator = "chevron",
+  itemStyle,
 }: AccordionProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(
     defaultOpen ?? null,
@@ -68,14 +72,16 @@ export default function Accordion({
       ? "flex flex-col gap-3"
       : `rounded-md ${borderless ? "" : "border border-border-components"} overflow-hidden bg-surface-primary divide-y divide-border-strong`;
   const itemClass =
-    surface === "separated" ? "overflow-hidden rounded-md border border-border-components bg-surface-primary" : "";
+    surface === "separated"
+      ? "overflow-hidden rounded-md border border-border-components bg-surface-primary"
+      : "";
 
   return (
     <div className={`${container} ${className}`}>
       {items.map((item, i) => {
         const isOpen = openIndex === i;
         return (
-          <div key={i} className={itemClass}>
+          <div key={i} className={itemClass} style={itemStyle?.(i)}>
             <button
               onClick={() => toggle(i)}
               className={`flex w-full items-center justify-between px-4 py-3 ${triggerStyles[variant]} transition-colors hover:bg-surface-subtle`}

@@ -8,7 +8,9 @@ import { useEffect, useRef, useState, type CSSProperties } from "react";
 // (muestra el contenido sin animar) y degrada a visible si no hay IntersectionObserver. El HTML siempre
 // contiene el texto (opacity-0 no lo oculta a los crawlers); úsalo SOLO en secciones below-the-fold
 // (no en el hero, para no penalizar el LCP).
-export function useReveal<T extends HTMLElement>(opts: { delay?: number } = {}) {
+export function useReveal<T extends HTMLElement>(
+  opts: { delay?: number } = {},
+) {
   const { delay = 0 } = opts;
   const ref = useRef<T>(null);
   const [shown, setShown] = useState(false);
@@ -45,5 +47,7 @@ export function useReveal<T extends HTMLElement>(opts: { delay?: number } = {}) 
     transition: `opacity 600ms ease ${delay}ms, transform 600ms ease ${delay}ms`,
     willChange: "opacity, transform",
   };
-  return { ref, style };
+  // `shown` se expone (ECO-122) para revelados por-item con delay incremental (stagger): el consumidor
+  // construye el estilo de cada hijo a partir de `shown` + su índice, con el ref/observer en el contenedor.
+  return { ref, style, shown };
 }
