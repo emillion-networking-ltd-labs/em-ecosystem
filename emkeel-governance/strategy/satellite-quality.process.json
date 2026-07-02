@@ -4,62 +4,59 @@
   "steps": {
     "scaffolded": {
       "done": true,
-      "timestamp": "2026-06-26T14:29:11Z",
+      "timestamp": "2026-07-02T16:00:09Z",
       "topic": "satellite-quality",
       "kill_criteria": [
-        "\"si \u00f3ptimo no se puede volver criterios checkables la r\u00fabrica no eval\u00faa nada\"",
-        "\"si versionado+migraci\u00f3n cuesta m\u00e1s que su valor con pocos sat\u00e9lites\"",
-        "\"si un \u00fanico est\u00e1ndar no sirve a todos los tipos de sitio sin volverse trivial o contradictorio\"",
-        "\"si el gate determinista da falsa confianza: pasa sitios conformes pero malos\""
+        "el gate de contraste da falsos positivos y bloquea satelites conformes",
+        "computar AA por preset es demasiado caro o fragil en CI",
+        "los pares de token del pilar B no llegan a existir y el gate no tiene que medir"
       ]
     },
     "researched": {
       "done": true,
-      "timestamp": "2026-06-26T14:29:11Z",
+      "timestamp": "2026-07-02T16:00:09Z",
       "sources": [
-        "https://developers.google.com/search/docs/crawling-indexing/sitemaps/overview",
-        "https://www.w3.org/WAI/WCAG22/quickref/",
-        "https://web.dev/articles/inp",
-        "https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html",
-        "https://googlechrome.github.io/lighthouse-ci/docs/configuration.html",
-        "https://semver.org/",
-        "https://www.brightlocal.com/learn/google-local-algorithm-and-ranking-factors/",
-        "https://www.aepd.es/guias/guia-cookies.pdf",
-        "https://owasp.org/Top10/2021/A06_2021-Vulnerable_and_Outdated_Components/",
-        "emkeel-governance/adr/013-satellite-launch-readiness-standard.md:59"
+        "design-system/.storybook/preview.tsx:113",
+        "emkeel-governance/adr/023-retirar-heroshowcase-composicion-diferida.md:20",
+        "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum.html",
+        "https://www.deque.com/blog/automated-testing-study-identifies-57-percent-of-digital-accessibility-issues/"
       ]
     },
     "proposed": {
       "done": true,
-      "timestamp": "2026-06-26T14:29:11Z",
+      "timestamp": "2026-07-02T16:00:09Z",
       "options": [
-        "r\u00fabrica-doc viva sin gate",
-        "est\u00e1ndar versionado + gate CI + migraci\u00f3n manual ticketeada",
-        "est\u00e1ndar compuesto con migraci\u00f3n por codemod"
+        "gate de contraste brand-aware por pares y por preset + a11y report->error (elegida)",
+        "seguir con axe generico en modo report no bloqueante"
       ]
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-06-26T14:29:43Z",
-      "critique": "Pase adversarial PROFUNDO: panel de 4 lentes independientes (SEO/descubrimiento local; completitud de entrega de agencia; calibracion contra el satelite real sat-cristian-garcia; cumplimiento legal a11y/GDPR/seguridad) mas verificacion de claims que corrigio 2 atribuciones (mala cita a Stefan Judis; yuxtaposicion enganosa 30-40 por ciento vs 57 por ciento por ejes distintos). Confirmado el nucleo on-page; incorporados al doc los huecos de SUSTANCIA: descubrimiento local (Google Business Profile, NAP, Search Console+sitemap, anti-noindex, imagenes-como-LCP, lab movil); operacional lanzado-de-verdad (deliverability SPF/DKIM/DMARC, analitica+conversion, uptime+dominio, redirects, OG real); GDPR/legal gatear CONTENIDO no existencia (Art.13/base juridica/derechos/DPA/transferencias, aviso legal LSSI Art.10, declaracion de accesibilidad, fuentes a AEPD/EUR-Lex/BOE); seguridad profunda (vulns OWASP A06, rate-limit+validacion server-side, check que verifica cabeceras, quitar X-Powered-By). Recalibraciones por PERFIL de satelite (no universal): form-backend/CSP/CMP/hreflang/EAA condicionales; WCAG 2.2 target-size no es machine-checkable fiable (baseline 2.1 AA); prohibido AggregateRating auto-servido. Ejecutabilidad: contrato del campo-version y baseline en deuda del satelite existente antes de imponer el gate. Recommendation (Opcion 2) inalterada."
+      "timestamp": "2026-07-02T16:00:09Z",
+      "lens_contrast_gate": "axe-sobre-DOM solo ve el preset RENDERIZADO; un swap de token puede romper contraste en otro preset sin story que lo muestre. Un check determinista de ratio sobre PARES de token, por preset, es [M] real y lo pilla. Sube report->error.",
+      "lens_ownership": "Los tokens/pares los DEFINE el pilar B (satellite-design); este estandar los CONSUME y verifica. Sin costura de propiedad: design=vocabulario+pares, quality=gate que los mide. No se duplica la definicion de token.",
+      "lens_scope": "El gate cubre CONTRASTE (automatizable), NO maquetacion (juicio humano, se queda tras el gate visual humano). No prometer que valida layout \u2014 ADR-023:18 dice que componer hero no es fiable por IA.",
+      "lens_baseline": "El satelite/catalogo existente puede fallar el nuevo check -> nace en DEUDA ticketeada (patron ya en el doc), no bloquea el unico satelite vivo el dia 1.",
+      "completeness": "Cubre la dimension a11y-contraste [M] con dientes. El resto del estandar (SEO/seguridad/GDPR/perf) no cambia. La maquetacion queda [H] explicitamente fuera del gate."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-06-26T14:29:43Z",
+      "timestamp": "2026-07-02T16:00:20Z",
       "check_passed": true
     },
     "validated": {
       "done": true,
-      "timestamp": "2026-06-26T14:29:43Z",
-      "case": "sat-cristian-garcia (satelite real desplegado)",
-      "method": "apliqu\u00e9 la checklist [M] como gate determinista: 6 checks resolvieron contra ficheros reales \u2014 3 PASS (security headers, html lang, robots+sitemap), 3 FAIL accionables (404, JSON-LD, Cookiebot ausentes)",
-      "outcome": "pass",
-      "evidence_ref": "satellites/sat-cristian-garcia/next.config.mjs:13-27"
+      "timestamp": "2026-07-02T16:00:20Z",
+      "case": "el catalogo Storybook (a11y en modo report) + la retirada de HeroShowcase (ECO-114/ADR-023)",
+      "method": "El catalogo pasa a11y en verde (modo report, preview.tsx:113) y aun asi el hero compuesto salio de bajo contraste porque el accent no lee sobre oscuro y ningun gate mide pares por preset. Un gate de contraste brand-aware sobre los pares del pilar B, re-ejecutado por preset, lo habria bloqueado.",
+      "outcome": "mixed",
+      "evidence_ref": "design-system/.storybook/preview.tsx:113"
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-06-26T14:29:43Z",
-      "presented_to": "operador"
+      "timestamp": "2026-07-02T16:00:20Z",
+      "presented_to": "operador",
+      "proceed_justification": "El gate de contraste por pares y por preset es la dimension a11y [M] de este estandar hecha concreta; el post-mortem de ECO-114 prueba el hueco (verde y aun asi ilegible). mixed honesto: los pares que mide los debe crear antes el pilar B. Se deja en presented; aprobacion = merge del PR."
     }
   },
   "steps_schema": [
