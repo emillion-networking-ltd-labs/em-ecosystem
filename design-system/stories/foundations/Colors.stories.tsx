@@ -17,7 +17,7 @@ function GradientBar({ token }: { token: string }) {
   return (
     <div ref={ref} className="flex flex-col gap-2">
       <div
-        className="h-24 w-full rounded-lg border border-border-default"
+        className="h-24 w-full rounded-xl border border-border-strong"
         style={{ backgroundImage: `var(${token})` }}
       />
       <TokenMeta token={token} value={val} />
@@ -33,10 +33,10 @@ export const Colors: Story = {
         description="BRAND tokens: the theming point. They change with the toolbar preset (EMILLION / contrast demo). The client brings their own brand here; the default is just the EMILLION brand."
       >
         <Grid>
-          <ColorSwatch token="--color-accent" note="primary accent" />
+          <ColorSwatch token="--color-accent" />
           <ColorSwatch token="--color-accent-light" />
           <ColorSwatch token="--color-accent-dark" />
-          <ColorSwatch token="--color-accent-2" note="2nd accent (gradients)" />
+          <ColorSwatch token="--color-accent-2" />
         </Grid>
         <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
           <GradientBar token="--gradient-brand" />

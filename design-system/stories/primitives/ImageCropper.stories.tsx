@@ -1,7 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import ImageCropper from "@/components/ui/ImageCropper";
-import Button from "@/components/ui/Button";
 // Real free image (Picsum, no people) so the crop region is appreciable. nextjs-vite resolves it to
 // StaticImageData ({src,...}) → take `.src` (guarded in case it's a string).
 import sampleImg from "../assets/sample-after.jpg";
@@ -54,47 +53,5 @@ export const Rectangular: Story = {
   },
 };
 
-const CROP_SHAPES = [
-  { key: "round", label: "round (default)" },
-  { key: "rect", label: "rect" },
-] as const;
-
-// AllVariants — ALWAYS last: each crop shape (round · rect), opened by its own trigger.
-export const AllVariants: Story = {
-  render: () => {
-    const [openShape, setOpenShape] = useState<"round" | "rect" | null>(null);
-    const close = () => setOpenShape(null);
-    return (
-      <div className="flex flex-col gap-3">
-        <p className="text-caption text-content-tertiary font-mono">open each crop shape →</p>
-        <div className="flex flex-wrap items-center gap-3">
-          {CROP_SHAPES.map(({ key, label }) => (
-            <Button
-              key={key}
-              variant="outline"
-              size="md"
-              fullWidth={false}
-              onClick={() => setOpenShape(key)}
-            >
-              {label}
-            </Button>
-          ))}
-        </div>
-        <ImageCropper
-          open={openShape === "round"}
-          imageSrc={sampleImage}
-          cropShape="round"
-          onClose={close}
-          onCrop={close}
-        />
-        <ImageCropper
-          open={openShape === "rect"}
-          imageSrc={sampleImage}
-          cropShape="rect"
-          onClose={close}
-          onCrop={close}
-        />
-      </div>
-    );
-  },
-};
+// A full-screen overlay: only one shows at a time, so each crop shape is its own story (no side-by-side
+// AllVariants). round is the default; rect is the other shape.

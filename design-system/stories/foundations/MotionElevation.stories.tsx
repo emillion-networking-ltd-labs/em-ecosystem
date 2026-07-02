@@ -54,7 +54,7 @@ export const MotionElevation: Story = {
             <MotionRow key={k} key_={k} />
           ))}
         </div>
-        <p className="mt-2 text-caption font-mono text-content-tertiary">--ease-out-expo</p>
+        <p className="mt-2 text-caption font-mono text-content-secondary">--ease-out-expo</p>
       </Group>
 
       <Group title="Elevation" description="Card shadow (`--shadow-card`), the only shadow with real usage.">

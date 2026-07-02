@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Tooltip from "@/components/ui/Tooltip";
+import { DemoCard, Variants } from "../_kit";
 
 const triggerClass =
   "rounded-lg border border-border-components bg-surface-primary px-4 py-2 text-body text-content-primary";
@@ -11,6 +12,7 @@ const meta = {
   args: {
     content: "Hover to see more details.",
     position: "top",
+    // Must be a real DOM element: Tooltip cloneElement()s the child to attach hover + a ref.
     children: (
       <button type="button" className={triggerClass}>
         Hover me
@@ -23,51 +25,43 @@ const meta = {
       options: ["top", "bottom", "left", "right", "auto"],
     },
   },
+  // The tooltip renders in a portal (fixed), so the DemoCard never clips it. min-h gives the (top) tooltip
+  // room so it isn't cut by the canvas edge. `auto` (flips to the free viewport edge) is on the control.
+  render: (args) => (
+    <DemoCard>
+      <div className="flex min-h-[120px] items-center justify-center">
+        <Tooltip {...args} />
+      </div>
+    </DemoCard>
+  ),
 } satisfies Meta<typeof Tooltip>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Centered with room so the (top) tooltip isn't clipped by the canvas edge.
-export const Default: Story = {
-  decorators: [
-    (Story) => (
-      <div className="flex min-h-[200px] items-center justify-center">
-        <Story />
-      </div>
-    ),
-  ],
-};
+// Default — playground: hover the trigger; change the position (incl. `auto`) from the controls.
+export const Default: Story = {};
 
-// auto — genuinely adapts to the nearest viewport edge. The trigger sits near the TOP (centered
-// horizontally), so there's no room above and auto opens it BELOW. Move a trigger near another edge
-// and it flips accordingly — that's the whole point of auto.
-export const Auto: Story = {
-  render: () => (
-    <div className="flex justify-center pt-1">
-      <Tooltip position="auto" content="No room above → auto opens below.">
-        <button type="button" className={triggerClass}>
-          Hover me (near the top edge)
-        </button>
-      </Tooltip>
-    </div>
-  ),
-};
+const POSITIONS = ["top", "bottom", "left", "right"] as const;
+const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 
-// AllVariants — ALWAYS last: the four fixed positions, with room around the row so none clip.
-export const AllVariants: Story = {
+// Positions — the four fixed placements (a placement parameter, not a design variant), each in its own card
+// with room so the tooltip reads. Hover each trigger.
+export const Positions: Story = {
   render: () => (
-    <div className="flex min-h-[240px] flex-wrap items-center justify-center gap-x-12 gap-y-10 px-20">
-      {(["top", "bottom", "left", "right"] as const).map((pos) => (
-        <div key={pos} className="flex flex-col items-center gap-3">
-          <span className="text-caption text-content-tertiary font-mono">{pos}</span>
-          <Tooltip content={`Tooltip ${pos}`} position={pos}>
-            <button type="button" className={triggerClass}>
-              Hover me
-            </button>
-          </Tooltip>
-        </div>
-      ))}
-    </div>
+    <Variants
+      items={POSITIONS.map((pos) => ({
+        label: cap(pos),
+        node: (
+          <div className="flex min-h-[80px] items-center justify-center px-10">
+            <Tooltip content={`Tooltip ${pos}`} position={pos}>
+              <button type="button" className={triggerClass}>
+                Hover me
+              </button>
+            </Tooltip>
+          </div>
+        ),
+      }))}
+    />
   ),
 };

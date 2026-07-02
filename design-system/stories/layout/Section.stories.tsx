@@ -41,14 +41,15 @@ export const Default: Story = {
   ),
 };
 
-// Surfaces — every background token, on a compact band.
+// Surfaces — which background a Section sits on (a parameter, not a design variant). Each band is one
+// surface token; the label names it so the (deliberately subtle) differences read.
 export const Surfaces: Story = {
   render: () => (
     <>
-      {SURFACES.map((s) => (
-        <Section key={s} spacing="sm" surface={s}>
+      {SURFACES.map((surface) => (
+        <Section key={surface} spacing="sm" surface={surface}>
           <Container>
-            <span className="text-caption font-mono">surface=&quot;{s}&quot;</span>
+            <span className="text-caption font-mono text-content-secondary">surface=&quot;{surface}&quot;</span>
           </Container>
         </Section>
       ))}
@@ -56,13 +57,14 @@ export const Surfaces: Story = {
   ),
 };
 
-// Spacing — vertical rhythm, tallest → shortest. The colored band shows the padding-block.
+// Spacing — the vertical rhythm (padding-block) scale, tallest → shortest. A parameter (a spacing measure),
+// NOT the element's own size, so it is a named story — not AllSizes. The bordered band shows the padding-block.
 export const Spacing: Story = {
   render: () => (
     <div className="space-y-4">
       {SPACING.map(({ spacing, px }) => (
         <div key={spacing}>
-          <span className="text-caption text-content-tertiary font-mono">
+          <span className="text-caption text-content-secondary font-mono">
             {spacing} · {px}px{spacing === "lg" ? " (default)" : ""}
           </span>
           <Section spacing={spacing} surface="secondary" className="mt-1.5 rounded-lg border border-border-default">
@@ -74,30 +76,6 @@ export const Spacing: Story = {
           </Section>
         </div>
       ))}
-    </div>
-  ),
-};
-
-// AllVariants — ALWAYS last: every surface at each spacing.
-export const AllVariants: Story = {
-  render: () => (
-    <div className="space-y-2">
-      {SPACING.filter((s) => s.spacing !== "none").map(({ spacing, px }) =>
-        SURFACES.map((surface) => (
-          <Section
-            key={`${spacing}-${surface}`}
-            spacing={spacing}
-            surface={surface}
-            className="rounded-lg border border-border-default"
-          >
-            <Container>
-              <span className="text-caption font-mono">
-                {spacing} · {px}px / surface=&quot;{surface}&quot;
-              </span>
-            </Container>
-          </Section>
-        )),
-      )}
     </div>
   ),
 };

@@ -1,9 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Spotlight } from "@/components/ui/Spotlight";
-import { DemoCard, Variants } from "../_kit";
+import { DemoCard } from "../_kit";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Decorative SVG spotlight; needs a bounded, relative parent.
-// `fill` defaults to "white" inside the component — respected in the Default demo.
+// A single Default (fill="white"). The accent-driven "themed" variant is dropped — accent is a placeholder
+// brand colour, not real; theming happens per satellite, not as a showcased variant. So no AllVariants.
 const meta = {
   title: "Marketing/Spotlight",
   component: Spotlight,
@@ -28,34 +29,5 @@ export const Default: Story = {
     <DemoCard block className="overflow-hidden">
       <Tile fill="white" label="In the spotlight" />
     </DemoCard>
-  ),
-};
-
-// Themed — drive the fill from the accent token instead of the default white.
-export const Accent: Story = {
-  render: () => (
-    <DemoCard block className="overflow-hidden">
-      <Tile fill="var(--color-accent)" label="On brand" />
-    </DemoCard>
-  ),
-};
-
-// AllVariants — ALWAYS last: the real variants (Default, Accent) — one project Card each, name above.
-// The effect is hosted as a dark tile inside the card.
-const VARIANTS = [
-  { label: "Default", fill: "white" },
-  { label: "Accent", fill: "var(--color-accent)" },
-] as const;
-
-export const AllVariants: Story = {
-  render: () => (
-    <Variants
-      items={VARIANTS.map((v) => ({
-        label: v.label,
-        className: "overflow-hidden",
-        block: true,
-        node: <Tile fill={v.fill} label="Spotlight" height="h-56" />,
-      }))}
-    />
   ),
 };

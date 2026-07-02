@@ -1,7 +1,7 @@
-import type { Meta, StoryObj, Decorator } from "@storybook/nextjs-vite";
-import { Search } from "lucide-react";
+import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import EmptyState from "@/components/ui/EmptyState";
 import Button from "@/components/ui/Button";
+import { DemoCard, Variants } from "../_kit";
 
 const meta = {
   title: "Primitives/EmptyState",
@@ -15,102 +15,82 @@ const meta = {
   argTypes: {
     variant: { control: "inline-radio", options: ["default", "error"] },
   },
+  // EmptyState always lives inside a container (an empty area of a card/table/panel) — the DemoCard is
+  // that container.
+  render: (args) => (
+    <DemoCard block>
+      <EmptyState {...args} />
+    </DemoCard>
+  ),
 } satisfies Meta<typeof EmptyState>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// EmptyState always lives inside a container (an empty area of a card/table/panel) — frame the
-// single-state stories in a card so they reflect real usage (same as the dashboard showcase).
-const inCard: Decorator = (Story) => (
-  <div className="mx-auto max-w-md rounded-xl border border-border-components bg-surface-primary">
-    <Story />
-  </div>
+const Action = ({ label }: { label: string }) => (
+  <Button variant="primary" size="sm" fullWidth={false}>
+    {label}
+  </Button>
 );
 
-export const Default: Story = { decorators: [inCard] };
+// Default — playground (the default variant, no action). The icon is a prop (default Inbox), variable via
+// the control — no dedicated "custom icon" story needed.
+export const Default: Story = {};
 
+// With an action (a CTA below the copy).
 export const WithAction: Story = {
-  decorators: [inCard],
-  args: {
-    title: "No projects yet",
-    description: "Create your first project to get started.",
-    action: (
-      <Button variant="primary" size="sm" fullWidth={false}>
-        Create project
-      </Button>
-    ),
-  },
+  args: { action: <Action label="Create project" /> },
 };
 
-export const CustomIcon: Story = {
-  decorators: [inCard],
-  args: {
-    icon: <Search size={48} />,
-    title: "No results",
-    description: "No items match your search.",
-  },
-};
-
+// The error variant (design axis).
 export const ErrorVariant: Story = {
-  decorators: [inCard],
   args: {
     variant: "error",
     title: "Couldn't load users",
     description: "Network error — please try again.",
-    action: (
-      <Button variant="primary" size="sm" fullWidth={false}>
-        Retry
-      </Button>
-    ),
+    action: <Action label="Retry" />,
   },
 };
 
-// AllVariants — ALWAYS last: an overview of the variants (default/error), icon and action axes.
-// Shown plainly (no card framing) so the four read cleanly side by side without nested boxes.
+// AllVariants — ALWAYS last: the meaningful cases (default · with action · error), grouping the stories above.
 export const AllVariants: Story = {
   render: () => (
-    <div className="grid gap-8 sm:grid-cols-2">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">default</p>
-        <EmptyState
-          title="No projects yet"
-          description="Create your first project to get started."
-        />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">with action</p>
-        <EmptyState
-          title="No projects yet"
-          description="Create your first project to get started."
-          action={
-            <Button variant="primary" size="sm" fullWidth={false}>
-              Create project
-            </Button>
-          }
-        />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">custom icon</p>
-        <EmptyState
-          icon={<Search size={48} />}
-          title="No results"
-          description="No items match your search."
-        />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">error variant</p>
-        <EmptyState
-          variant="error"
-          title="Couldn't load users"
-          description="Network error — please try again."
-          action={
-            <Button variant="primary" size="sm" fullWidth={false}>
-              Retry
-            </Button>
-          }
-        />
-      </div>
-    </div>
+    <Variants
+      items={[
+        {
+          label: "Default",
+          block: true,
+          node: (
+            <EmptyState
+              title="No projects yet"
+              description="Create your first project to get started."
+            />
+          ),
+        },
+        {
+          label: "With action",
+          block: true,
+          node: (
+            <EmptyState
+              title="No projects yet"
+              description="Create your first project to get started."
+              action={<Action label="Create project" />}
+            />
+          ),
+        },
+        {
+          label: "Error",
+          block: true,
+          node: (
+            <EmptyState
+              variant="error"
+              title="Couldn't load users"
+              description="Network error — please try again."
+              action={<Action label="Retry" />}
+            />
+          ),
+        },
+      ]}
+    />
   ),
 };

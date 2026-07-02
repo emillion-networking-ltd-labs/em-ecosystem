@@ -13,14 +13,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
-// AllVariants — ALWAYS last: the container rendering the (mock) stacked toasts, fixed at the top.
-// The toasts are fixed at top-center, so the caption is pinned bottom-left to avoid overlapping them.
-export const AllVariants: Story = {
+// App-coupled fixed region (no design-variant/size axis) → a single story, no AllVariants. The mock toast
+// context provides the stacked toasts, fixed at the top; the caption is pinned bottom-left to not overlap.
+export const Default: Story = {
   render: () => (
     <>
-      <p className="fixed bottom-4 left-4 text-caption text-content-tertiary font-mono">
+      <p className="fixed bottom-4 left-4 text-caption text-content-secondary font-mono">
         stacked toasts — fixed at the top, from the mock toast context
       </p>
       <ToastContainer />

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import SpinnerCircle from "@/components/ui/SpinnerCircle";
+import { DemoCard, Sizes } from "../_kit";
 
 const meta = {
   title: "Primitives/SpinnerCircle",
@@ -12,53 +13,30 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
-// The 3 real `sizeClasses` keys (sm/md/lg), ordered and labeled with their
-// px as in ComponentShowcase (16/24/32 — md is the default).
+// The 3 real sizeClasses keys (sm/md/lg), with px (16/24/32 — md is the default).
 const SIZES = [
   { size: "lg", px: "32" },
   { size: "md", px: "24" },
   { size: "sm", px: "16" },
 ] as const;
 
-// AllSizes — the 3 spinner sizes (sm/md/lg), with px.
-export const AllSizes: Story = {
-  render: () => (
-    <div className="flex flex-wrap items-end gap-6">
-      {SIZES.map(({ size, px }) => (
-        <div key={size} className="flex flex-col items-center gap-1.5">
-          <div className="flex h-8 items-center justify-center">
-            <SpinnerCircle size={size} />
-          </div>
-          <span className="text-caption text-content-tertiary font-mono">
-            {size} · {px}px{size === "md" ? " (default)" : ""}
-          </span>
-        </div>
-      ))}
-    </div>
+// Default — playground: the spinner; change its size from the Controls.
+export const Default: Story = {
+  render: (args) => (
+    <DemoCard>
+      <SpinnerCircle {...args} />
+    </DemoCard>
   ),
 };
 
-// AllVariants — ALWAYS last: an overview walking every axis (size is a spinner's only one).
-export const AllVariants: Story = {
+// AllSizes — the 3 spinner sizes (sm/md/lg), with px. Last: a spinner's only axis is size (no AllVariants).
+export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">sizes</p>
-        <div className="flex flex-wrap items-end gap-6">
-          {SIZES.map(({ size, px }) => (
-            <div key={size} className="flex flex-col items-center gap-1.5">
-              <div className="flex h-8 items-center justify-center">
-                <SpinnerCircle size={size} />
-              </div>
-              <span className="text-caption text-content-tertiary font-mono">
-                {size} · {px}px{size === "md" ? " (default)" : ""}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <Sizes
+      items={SIZES.map(({ size, px }) => ({
+        label: `${size} · ${px}px${size === "md" ? " (default)" : ""}`,
+        node: <SpinnerCircle size={size} />,
+      }))}
+    />
   ),
 };

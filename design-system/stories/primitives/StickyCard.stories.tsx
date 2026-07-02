@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useEffect, useRef, useState } from "react";
 import StickyCard from "@/components/ui/StickyCard";
+import { DemoCard } from "../_kit";
 
 // NOTE: the real StickyCard sticks to the PAGE viewport via position:fixed + IntersectionObserver,
 // so it can't be shown statically or inside a Storybook scroll container without hijacking the page.
@@ -19,7 +20,7 @@ type Story = StoryObj<typeof meta>;
 
 function ContentCard() {
   return (
-    <div className="mx-4 mb-4 mt-3 space-y-3 rounded-xl border border-border-strong bg-surface-primary p-4 text-caption text-content-tertiary">
+    <div className="mx-4 mb-4 mt-3 space-y-3 rounded-xl border border-border-strong bg-surface-primary p-4 text-caption text-content-secondary">
       {Array.from({ length: 8 }, (_, i) => (
         <p key={i}>
           Filler paragraph {i + 1} — scroll to see the card stick while the content scrolls
@@ -61,7 +62,7 @@ function StickyDemo({ position }: { position: "top" | "bottom" }) {
     >
       <div className="flex items-center justify-between gap-4">
         <p className="text-body font-semibold text-content-primary">StickyCard content</p>
-        <span className="font-mono text-caption text-content-tertiary">
+        <span className="font-mono text-caption text-content-secondary">
           position=&quot;{position}&quot;
         </span>
       </div>
@@ -71,7 +72,7 @@ function StickyDemo({ position }: { position: "top" | "bottom" }) {
   // Same clarifying line as top, but for "bottom" it sits BELOW the card (so the card is separated
   // from the bottom edge by default, mirroring how the intro separates the top card from the top).
   const intro = (
-    <div className="px-4 py-3 text-center text-caption text-content-tertiary">
+    <div className="px-4 py-3 text-center text-caption text-content-secondary">
       {arrow} Scroll inside this container — the card sticks to the {position} {arrow}
     </div>
   );
@@ -101,24 +102,20 @@ function StickyDemo({ position }: { position: "top" | "bottom" }) {
 }
 
 // Sticks to the TOP of the scroll container; when stuck, the top corners go square.
-export const StickyTop: Story = { render: () => <StickyDemo position="top" /> };
+export const StickyTop: Story = {
+  render: () => (
+    <DemoCard>
+      <StickyDemo position="top" />
+    </DemoCard>
+  ),
+};
 
 // Sticks to the BOTTOM of the scroll container; when stuck, the bottom corners go square.
-export const StickyBottom: Story = { render: () => <StickyDemo position="bottom" /> };
-
-// AllVariants — ALWAYS last: both positions, each in its own scroll container. Scroll within each
-// to see the card stick (top vs bottom).
-export const AllVariants: Story = {
+// position (top/bottom) is a placement, each its own story; no design-variant/size axis → no AllVariants.
+export const StickyBottom: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">position=&quot;top&quot;</p>
-        <StickyDemo position="top" />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">position=&quot;bottom&quot;</p>
-        <StickyDemo position="bottom" />
-      </div>
-    </div>
+    <DemoCard>
+      <StickyDemo position="bottom" />
+    </DemoCard>
   ),
 };

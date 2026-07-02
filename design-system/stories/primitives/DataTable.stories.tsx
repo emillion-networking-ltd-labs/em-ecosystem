@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import DataTable, { type ColumnDef } from "@/components/ui/DataTable";
 import Badge from "@/components/ui/Badge";
+import { DemoCard } from "../_kit";
 
 interface Row {
   id: string;
@@ -48,18 +49,21 @@ const meta = {
     columns,
     keyExtractor: (row: Row) => row.id,
   },
-  // Constrain in the catalog so the table sizes sensibly instead of stretching the full-bleed canvas.
-  decorators: [
-    (Story) => (
-      <div className="max-w-2xl">
-        <Story />
+  // Fixed, uniform width for the three states, centered in the card (the table is w-full inside).
+  render: (args) => (
+    <DemoCard>
+      <div className="w-[560px] max-w-full">
+        <DataTable {...args} />
       </div>
-    ),
-  ],
+    </DemoCard>
+  ),
 } satisfies Meta<typeof DataTable<Row>>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
+
+// No design-variant/size axis — its axes are states (with data / loading / empty), each its own story.
+// So there is no AllVariants.
 
 // With data — cells can hold any content (Role/Status rendered as Badge).
 export const Default: Story = {};
@@ -72,35 +76,4 @@ export const Loading: Story = {
 // Empty — custom message when there are no rows.
 export const Empty: Story = {
   args: { data: [], emptyMessage: "No users match your filters." },
-};
-
-// AllVariants — ALWAYS last: the three states together (with data / loading / empty).
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">with data</p>
-        <DataTable data={data} columns={columns} keyExtractor={(row) => row.id} />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">loading</p>
-        <DataTable
-          data={[]}
-          columns={columns}
-          keyExtractor={(row) => row.id}
-          loading
-          loadingRows={3}
-        />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">empty</p>
-        <DataTable
-          data={[]}
-          columns={columns}
-          keyExtractor={(row) => row.id}
-          emptyMessage="No users match your filters."
-        />
-      </div>
-    </div>
-  ),
 };

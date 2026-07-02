@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import Calendar from "@/components/ui/Calendar";
+import { DemoCard } from "../_kit";
 
 const meta = {
   title: "Primitives/Calendar",
@@ -11,20 +12,32 @@ const meta = {
   },
   render: (args) => {
     const [value, setValue] = useState<Date | undefined>(new Date());
-    return <Calendar {...args} value={value} onChange={setValue} />;
+    return (
+      <DemoCard>
+        <Calendar {...args} value={value} onChange={setValue} />
+      </DemoCard>
+    );
   },
 } satisfies Meta<typeof Calendar>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// No design-variant/size axis — its axes are visual states (selection / no-selection / disabled / min-max
+// range), each its own story. So there is no AllVariants.
+
+// Default — a date selected (today highlighted).
 export const Default: Story = {};
 
 // No date selected — only today is highlighted (bg-surface-subtle).
 export const NoSelection: Story = {
   render: (args) => {
     const [value, setValue] = useState<Date | undefined>(undefined);
-    return <Calendar {...args} value={value} onChange={setValue} />;
+    return (
+      <DemoCard>
+        <Calendar {...args} value={value} onChange={setValue} />
+      </DemoCard>
+    );
   },
 };
 
@@ -33,12 +46,15 @@ export const Disabled: Story = {
   args: { disabled: true },
   render: (args) => {
     const [value, setValue] = useState<Date | undefined>(new Date());
-    return <Calendar {...args} value={value} onChange={setValue} />;
+    return (
+      <DemoCard>
+        <Calendar {...args} value={value} onChange={setValue} />
+      </DemoCard>
+    );
   },
 };
 
-// Bounded range with minDate/maxDate — days outside the range are
-// dimmed (opacity-30, cursor-not-allowed).
+// Bounded range with minDate/maxDate — days outside the range are dimmed (opacity-30, cursor-not-allowed).
 export const WithMinMax: Story = {
   render: (args) => {
     const today = new Date();
@@ -48,66 +64,9 @@ export const WithMinMax: Story = {
       new Date(today.getFullYear(), today.getMonth(), 15),
     );
     return (
-      <Calendar
-        {...args}
-        value={value}
-        onChange={setValue}
-        minDate={min}
-        maxDate={max}
-      />
-    );
-  },
-};
-
-function CalendarDemo({
-  initial,
-  disabled,
-  minDate,
-  maxDate,
-}: {
-  initial?: Date;
-  disabled?: boolean;
-  minDate?: Date;
-  maxDate?: Date;
-}) {
-  const [value, setValue] = useState<Date | undefined>(initial);
-  return (
-    <Calendar
-      value={value}
-      onChange={setValue}
-      disabled={disabled}
-      minDate={minDate}
-      maxDate={maxDate}
-    />
-  );
-}
-
-// AllVariants — ALWAYS last: the states (selection · no-selection · disabled · min/max range).
-export const AllVariants: Story = {
-  render: () => {
-    const today = new Date();
-    const min = new Date(today.getFullYear(), today.getMonth(), 5);
-    const max = new Date(today.getFullYear(), today.getMonth(), 24);
-    const mid = new Date(today.getFullYear(), today.getMonth(), 15);
-    return (
-      <div className="flex flex-wrap gap-6">
-        <div>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">with selection</p>
-          <CalendarDemo initial={today} />
-        </div>
-        <div>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">no selection</p>
-          <CalendarDemo />
-        </div>
-        <div>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">disabled</p>
-          <CalendarDemo initial={today} disabled />
-        </div>
-        <div>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">min / max range</p>
-          <CalendarDemo initial={mid} minDate={min} maxDate={max} />
-        </div>
-      </div>
+      <DemoCard>
+        <Calendar {...args} value={value} onChange={setValue} minDate={min} maxDate={max} />
+      </DemoCard>
     );
   },
 };

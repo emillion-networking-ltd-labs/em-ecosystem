@@ -55,15 +55,18 @@ export const Error: Story = { render: () => <FullPageCard type="error" /> };
 
 export const Success: Story = { render: () => <FullPageCard type="success" /> };
 
-// Both side by side — hover each to preview the icon animation.
+// AllVariants — both feedback screens grouped, labelled by story name; hover each to replay the icon animation.
 export const AllVariants: Story = {
   render: () => (
-    <div>
-      <p className="mb-2 text-caption text-content-tertiary font-mono">full page — hover to preview</p>
-      <div className="flex flex-wrap items-start gap-4">
-        <FullPageCard type="error" />
-        <FullPageCard type="success" />
-      </div>
+    <div className="flex flex-wrap items-start gap-6">
+      {(["error", "success"] as const).map((type) => (
+        <div key={type} className="flex flex-col gap-1.5">
+          <span className="text-caption text-content-secondary font-mono">
+            {type === "error" ? "Error" : "Success"}
+          </span>
+          <FullPageCard type={type} />
+        </div>
+      ))}
     </div>
   ),
 };

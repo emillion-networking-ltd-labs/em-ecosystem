@@ -36,9 +36,9 @@ export function Group({
 export function TokenMeta({ token, value }: { token: string; value?: string }) {
   return (
     <div className="flex flex-col">
-      <code className="text-caption font-mono text-content-tertiary">{token}</code>
+      <code className="text-caption font-mono text-content-secondary">{token}</code>
       {value !== undefined && (
-        <code className="text-caption font-mono text-content-tertiary">{value || "—"}</code>
+        <code className="text-caption font-mono text-content-secondary">{value || "—"}</code>
       )}
     </div>
   );
@@ -46,7 +46,7 @@ export function TokenMeta({ token, value }: { token: string; value?: string }) {
 
 export function Grid({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">{children}</div>
+    <div className="grid grid-cols-2 items-start gap-4 sm:grid-cols-3 lg:grid-cols-4">{children}</div>
   );
 }
 
@@ -56,11 +56,11 @@ export function ColorSwatch({ token, note }: { token: string; note?: string }) {
   return (
     <div ref={ref} className="flex flex-col gap-2">
       <div
-        className="h-16 w-full rounded-lg border border-border-default"
+        className="h-16 w-full rounded-xl border border-border-strong"
         style={{ background: `var(${token})` }}
       />
-      <TokenMeta token={token} value={val} />
       {note && <span className="text-caption text-content-secondary">{note}</span>}
+      <TokenMeta token={token} value={val} />
     </div>
   );
 }

@@ -1,83 +1,57 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { useState } from "react";
 import Toggle from "@/components/ui/Toggle";
+import { DemoCard, Sizes } from "../_kit";
 
 const meta = {
   title: "Primitives/Toggle",
   component: Toggle,
   tags: ["autodocs"],
-  args: { label: "Notifications", size: "md" },
+  args: { label: "Notifications", size: "md", checked: true },
+  argTypes: {
+    size: { control: "inline-radio", options: ["sm", "md", "lg"] },
+  },
+  // Stateful wrapper so the toggle is interactive; `checked` arg seeds the initial state.
+  render: (args) => {
+    const [on, setOn] = useState(args.checked ?? false);
+    return (
+      <DemoCard>
+        <Toggle {...args} checked={on} onChange={setOn} />
+      </DemoCard>
+    );
+  },
 } satisfies Meta<typeof Toggle>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {
-  render: (args) => {
-    const [on, setOn] = useState(true);
-    return <Toggle {...args} checked={on} onChange={setOn} />;
-  },
-};
+// A Toggle has no design-variant axis — its axes are size (AllSizes) and on/off + disabled states (each its
+// own story). So there is no AllVariants.
 
-export const Disabled: Story = {
-  args: { disabled: true, label: "Disabled" },
-  render: (args) => <Toggle {...args} checked={false} />,
-};
+// Default — playground (on).
+export const Default: Story = {};
+
+export const Off: Story = { args: { checked: false } };
+
+export const Disabled: Story = { args: { disabled: true, checked: false, label: "Disabled" } };
+
+export const DisabledOn: Story = { args: { disabled: true, checked: true, label: "Disabled (on)" } };
 
 // Sizes (largest → smallest), with px (track width). md is the default.
 const SIZES = [
-  { size: "lg", px: "48" },
-  { size: "md", px: "40" },
-  { size: "sm", px: "32" },
+  { key: "lg", px: "48" },
+  { key: "md", px: "40" },
+  { key: "sm", px: "32" },
 ] as const;
 
-// AllSizes — the 3 toggle sizes (sm/md/lg), with px.
+// AllSizes — the 3 toggle sizes (sm/md/lg), with px. Last (no AllVariants: no design-variant axis).
 export const AllSizes: Story = {
-  render: () => {
-    const [vals, setVals] = useState({ sm: true, md: true, lg: true });
-    return (
-      <div className="flex items-end gap-6">
-        {SIZES.map(({ size, px }) => (
-          <div key={size} className="flex flex-col items-center gap-1.5">
-            <Toggle
-              size={size}
-              checked={vals[size]}
-              onChange={(v) => setVals((p) => ({ ...p, [size]: v }))}
-            />
-            <span className="text-caption text-content-tertiary font-mono">
-              {size} · {px}px{size === "md" ? " (default)" : ""}
-            </span>
-          </div>
-        ))}
-      </div>
-    );
-  },
-};
-
-// AllVariants — ALWAYS last: every state (off / on / disabled off / disabled on).
-export const AllVariants: Story = {
-  render: () => {
-    const [off, setOff] = useState(false);
-    const [on, setOn] = useState(true);
-    return (
-      <div className="flex items-end gap-6">
-        <div className="flex flex-col items-center gap-1.5">
-          <Toggle checked={off} onChange={setOff} />
-          <span className="text-caption text-content-tertiary font-mono">off</span>
-        </div>
-        <div className="flex flex-col items-center gap-1.5">
-          <Toggle checked={on} onChange={setOn} />
-          <span className="text-caption text-content-tertiary font-mono">on</span>
-        </div>
-        <div className="flex flex-col items-center gap-1.5">
-          <Toggle checked={false} disabled />
-          <span className="text-caption text-content-tertiary font-mono">disabled off</span>
-        </div>
-        <div className="flex flex-col items-center gap-1.5">
-          <Toggle checked={true} disabled />
-          <span className="text-caption text-content-tertiary font-mono">disabled on</span>
-        </div>
-      </div>
-    );
-  },
+  render: () => (
+    <Sizes
+      items={SIZES.map(({ key, px }) => ({
+        label: `${key} · ${px}px${key === "md" ? " (default)" : ""}`,
+        node: <Toggle size={key} checked onChange={() => {}} />,
+      }))}
+    />
+  ),
 };

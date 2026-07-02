@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import CountdownTimer from "@/components/ui/CountdownTimer";
+import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
   title: "Primitives/CountdownTimer",
@@ -10,6 +11,11 @@ const meta = {
     variant: { control: "inline-radio", options: ["error", "warning"] },
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
   },
+  render: (args) => (
+    <DemoCard>
+      <CountdownTimer {...args} />
+    </DemoCard>
+  ),
 } satisfies Meta<typeof CountdownTimer>;
 
 export default meta;
@@ -19,60 +25,32 @@ const VARIANTS = ["error", "warning"] as const;
 // Largest to smallest, like the rest. sm is the component default.
 const SIZES = ["lg", "md", "sm"] as const;
 
-// Playground — use the controls (variant, size).
-export const Default: Story = {};
+const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 
-// The 2 variants (md size).
-export const Variants: Story = {
-  render: () => (
-    <div className="flex flex-wrap items-center gap-6">
-      {VARIANTS.map((v) => (
-        <div key={v} className="flex flex-col items-center gap-1">
-          <CountdownTimer seconds={120} variant={v} size="md" />
-          <span className="text-caption text-content-tertiary font-mono">{v}</span>
-        </div>
-      ))}
-    </div>
-  ),
-};
+// One story per variant (named by variant, no generic "Default"). error is the component default / seed.
+export const Error: Story = {};
+export const Warning: Story = { args: { variant: "warning" } };
 
-// AllSizes — the 3 sizes (error variant).
+// AllSizes — the 3 sizes (error variant). sm is the default.
 export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-wrap items-end gap-6">
-      {SIZES.map((s) => (
-        <div key={s} className="flex flex-col items-center gap-1">
-          <CountdownTimer seconds={120} variant="error" size={s} />
-          <span className="text-caption text-content-tertiary font-mono">
-            {s}
-            {s === "sm" ? " (default)" : ""}
-          </span>
-        </div>
-      ))}
-    </div>
+    <Sizes
+      items={SIZES.map((s) => ({
+        label: `${s}${s === "sm" ? " (default)" : ""}`,
+        node: <CountdownTimer seconds={120} variant="error" size={s} />,
+      }))}
+    />
   ),
 };
 
-// AllVariants — ALWAYS last: full variant × size matrix.
+// AllVariants — ALWAYS last: every variant at the default size (sm), matching the variant stories above.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      {VARIANTS.map((v) => (
-        <div key={v}>
-          <p className="mb-2 text-caption text-content-tertiary font-mono">{v}</p>
-          <div className="flex flex-wrap items-end gap-6">
-            {SIZES.map((s) => (
-              <div key={s} className="flex flex-col items-center gap-1">
-                <CountdownTimer seconds={120} variant={v} size={s} />
-                <span className="text-caption text-content-tertiary font-mono">
-                  {s}
-                  {s === "sm" ? " (default)" : ""}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
-    </div>
+    <Variants
+      items={VARIANTS.map((v) => ({
+        label: cap(v),
+        node: <CountdownTimer seconds={120} variant={v} />,
+      }))}
+    />
   ),
 };

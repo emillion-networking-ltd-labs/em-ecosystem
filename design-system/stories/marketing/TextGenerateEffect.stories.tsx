@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { TextGenerateEffect } from "@/components/ui/TextGenerateEffect";
-import { DemoCard, Variants } from "../_kit";
+import { DemoCard } from "../_kit";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Reveals words one by one with a progressive blur.
 const meta = {
@@ -33,15 +33,4 @@ export const NoBlur: Story = {
       <TextGenerateEffect {...args} />
     </DemoCard>
   ),
-};
-
-// AllVariants — ALWAYS last: the real variants (Default, NoBlur) — one project Card each, name above.
-const WORDS = "Design that arrives word by word, with craft.";
-const VARIANTS = [
-  { label: "Default", node: <TextGenerateEffect words={WORDS} filter duration={0.5} /> },
-  { label: "NoBlur", node: <TextGenerateEffect words={WORDS} filter={false} duration={0.5} /> },
-];
-
-export const AllVariants: Story = {
-  render: () => <Variants items={VARIANTS} />,
 };

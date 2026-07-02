@@ -1,7 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Marquee } from "@/components/ui/Marquee";
 import Badge from "@/components/ui/Badge";
-import { DemoCard, Variants } from "../_kit";
+import { DemoCard } from "../_kit";
 
 // Magic UI (MIT), adopted verbatim in ECO-82. Requires the `marquee` / `marquee-vertical` keyframes (tokens.css).
 const meta = {
@@ -60,24 +60,4 @@ export const Vertical: Story = {
       </div>
     </DemoCard>
   ),
-};
-
-// AllVariants — ALWAYS last: the real variants (Default, Reverse, Vertical) — one project Card each, name above.
-const VARIANTS = [
-  { label: "Default", node: <Marquee pauseOnHover><Logos /></Marquee> },
-  { label: "Reverse", node: <Marquee reverse pauseOnHover><Logos /></Marquee> },
-  {
-    label: "Vertical",
-    node: (
-      <div className="h-72 overflow-hidden">
-        <Marquee vertical pauseOnHover className="h-full">
-          <Logos />
-        </Marquee>
-      </div>
-    ),
-  },
-];
-
-export const AllVariants: Story = {
-  render: () => <Variants items={VARIANTS} />,
 };

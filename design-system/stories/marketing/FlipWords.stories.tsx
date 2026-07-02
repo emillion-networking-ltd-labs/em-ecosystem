@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { FlipWords } from "@/components/ui/FlipWords";
-import { DemoCard, Variants } from "../_kit";
+import { DemoCard } from "../_kit";
 
 // Marketing/FlipWords — flips between words letter by letter (blur in/out). Theme-aware (content-primary);
 // size from className. Useful as the animated highlight inside a headline.
@@ -35,29 +35,4 @@ export const InContext: Story = {
       </h2>
     </DemoCard>
   ),
-};
-
-// AllVariants — ALWAYS last: the real variants (Default, InContext) — one project Card each, name above.
-const VARIANTS = [
-  {
-    label: "Default",
-    node: (
-      <FlipWords
-        words={["beautiful", "modern", "fast", "yours"]}
-        className="text-display-2 font-display font-bold"
-      />
-    ),
-  },
-  {
-    label: "InContext",
-    node: (
-      <h2 className="text-display-3 font-display font-bold text-content-primary">
-        Build something <FlipWords words={["beautiful", "modern", "fast"]} />
-      </h2>
-    ),
-  },
-];
-
-export const AllVariants: Story = {
-  render: () => <Variants items={VARIANTS} />,
 };

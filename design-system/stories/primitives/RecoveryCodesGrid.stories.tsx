@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import RecoveryCodesGrid from "@/components/ui/RecoveryCodesGrid";
+import { DemoCard } from "../_kit";
 
 const meta = {
   title: "Primitives/RecoveryCodesGrid",
@@ -17,38 +18,17 @@ const meta = {
       "C9D0-E1F2",
     ],
   },
-  // 2-column grid of short codes; constrain so it doesn't stretch full-bleed.
-  decorators: [
-    (Story) => (
-      <div className="max-w-xs">
-        <Story />
+  render: (args) => (
+    <DemoCard>
+      <div className="w-full max-w-xs">
+        <RecoveryCodesGrid {...args} />
       </div>
-    ),
-  ],
+    </DemoCard>
+  ),
 } satisfies Meta<typeof RecoveryCodesGrid>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// A single 2-column grid of recovery codes (copy-all action) — no variants/sizes, so no AllVariants.
 export const Default: Story = {};
-
-// AllVariants — ALWAYS last: the 2-column grid of recovery codes with a copy-all action.
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">codes grid</p>
-        <RecoveryCodesGrid
-          codes={[
-            "A1B2-C3D4",
-            "E5F6-G7H8",
-            "I9J0-K1L2",
-            "M3N4-O5P6",
-            "Q7R8-S9T0",
-            "U1V2-W3X4",
-          ]}
-        />
-      </div>
-    </div>
-  ),
-};

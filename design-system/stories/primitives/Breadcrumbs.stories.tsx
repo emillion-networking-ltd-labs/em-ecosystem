@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
+import { DemoCard } from "../_kit";
 
 const meta = {
   title: "Primitives/Breadcrumbs",
@@ -12,27 +13,31 @@ const meta = {
       { label: "Settings" },
     ],
   },
+  render: (args) => (
+    <DemoCard block>
+      <Breadcrumbs {...args} />
+    </DemoCard>
+  ),
 } satisfies Meta<typeof Breadcrumbs>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// Breadcrumbs has no design-variant/size axis — its only axis is depth (how many levels), which are
+// content states, each its own story. So there is no AllVariants.
+
+// Default — the full path (root → intermediate links → active).
 export const Default: Story = {};
 
-// Only the root item (Birdhouse) + one active level, no intermediate links.
+// Only the root item + one active level, no intermediate links.
 export const SingleLevel: Story = {
-  args: {
-    items: [{ label: "Home" }],
-  },
+  args: { items: [{ label: "Home" }] },
 };
 
 // Two levels: one intermediate link + the active one (last, no href).
 export const TwoLevels: Story = {
   args: {
-    items: [
-      { label: "Projects", href: "/dashboard/projects" },
-      { label: "Detail" },
-    ],
+    items: [{ label: "Projects", href: "/dashboard/projects" }, { label: "Detail" }],
   },
 };
 
@@ -49,56 +54,16 @@ export const Collapsed: Story = {
     ],
   },
   render: (args) => (
-    <div className="flex flex-col gap-2">
-      <span className="text-caption text-content-tertiary">
-        On a narrow width (e.g. mobile) the path collapses to Home / … / Last.
-        Click “…” to expand and navigate the hidden levels.
-      </span>
-      <div className="w-[300px] rounded-md border border-border-components bg-surface-primary p-3">
-        <Breadcrumbs {...args} />
-      </div>
-    </div>
-  ),
-};
-
-// AllVariants — ALWAYS last: an overview of the depth levels (Breadcrumbs' only axis).
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">single level</p>
-        <Breadcrumbs items={[{ label: "Home" }]} />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">two levels</p>
-        <Breadcrumbs
-          items={[{ label: "Projects", href: "/dashboard/projects" }, { label: "Detail" }]}
-        />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">full path</p>
-        <Breadcrumbs
-          items={[
-            { label: "Projects", href: "/dashboard/projects" },
-            { label: "Corporate site", href: "/dashboard/projects/corporate-site" },
-            { label: "Settings" },
-          ]}
-        />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">collapsed (narrow)</p>
+    <DemoCard block>
+      <div className="flex flex-col gap-2">
+        <span className="text-caption text-content-secondary">
+          On a narrow width (e.g. mobile) the path collapses to Home / … / Last. Click “…” to expand and
+          navigate the hidden levels.
+        </span>
         <div className="w-[300px] rounded-md border border-border-components bg-surface-primary p-3">
-          <Breadcrumbs
-            items={[
-              { label: "Organization", href: "#" },
-              { label: "Projects", href: "#" },
-              { label: "Corporate site", href: "#" },
-              { label: "Pages", href: "#" },
-              { label: "Home" },
-            ]}
-          />
+          <Breadcrumbs {...args} />
         </div>
       </div>
-    </div>
+    </DemoCard>
   ),
 };

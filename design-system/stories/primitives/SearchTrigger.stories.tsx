@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import SearchTrigger from "@/components/ui/SearchTrigger";
 import Badge from "@/components/ui/Badge";
+import { DemoCard } from "../_kit";
 
 const meta = {
   title: "Primitives/SearchTrigger",
@@ -9,22 +10,31 @@ const meta = {
   args: {
     onClick: () => {},
   },
+  render: (args) => (
+    <DemoCard>
+      <SearchTrigger {...args} />
+    </DemoCard>
+  ),
 } satisfies Meta<typeof SearchTrigger>;
 
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Single trigger: outline sm button (Search icon 16px + "Search..." + a kbd Badge with the shortcut
-// ⌘K/Ctrl+K resolved per platform via navigator.platform). No variants or sizes.
+// No variants/sizes: an outline sm trigger (Search icon + "Search…" + a kbd Badge with the ⌘K/Ctrl+K
+// shortcut per platform). So there is no AllVariants — just the trigger, its context and the shortcut.
+
+// Default — the standalone trigger.
 export const Default: Story = {};
 
 // In context, inside a top bar.
 export const InTopBar: Story = {
   render: (args) => (
-    <div className="flex w-[420px] items-center justify-between rounded-md border border-border-components bg-surface-primary px-4 py-2">
-      <span className="text-body font-semibold text-content-primary">NexaCore</span>
-      <SearchTrigger {...args} />
-    </div>
+    <DemoCard>
+      <div className="flex w-[420px] items-center justify-between rounded-md border border-border-components bg-surface-primary px-4 py-2">
+        <span className="text-body font-semibold text-content-primary">NexaCore</span>
+        <SearchTrigger {...args} />
+      </div>
+    </DemoCard>
   ),
 };
 
@@ -32,34 +42,17 @@ export const InTopBar: Story = {
 // documented here for both (kbd Badge): ⌘K on Mac, Ctrl+K on Windows / Linux.
 export const KeyboardShortcut: Story = {
   render: () => (
-    <div className="flex flex-wrap items-center gap-3">
-      <Badge variant="kbd" size="sm">
-        ⌘K
-      </Badge>
-      <span className="text-caption text-content-tertiary">Mac</span>
-      <Badge variant="kbd" size="sm">
-        Ctrl+K
-      </Badge>
-      <span className="text-caption text-content-tertiary">Windows / Linux</span>
-    </div>
-  ),
-};
-
-// AllVariants — ALWAYS last: an overview of the trigger standalone and how it sits in a top bar.
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">standalone</p>
-        <SearchTrigger onClick={() => {}} />
+    <DemoCard>
+      <div className="flex flex-wrap items-center gap-3">
+        <Badge variant="kbd" size="sm">
+          ⌘K
+        </Badge>
+        <span className="text-caption text-content-secondary">Mac</span>
+        <Badge variant="kbd" size="sm">
+          Ctrl+K
+        </Badge>
+        <span className="text-caption text-content-secondary">Windows / Linux</span>
       </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">in a top bar</p>
-        <div className="flex w-[420px] items-center justify-between rounded-md border border-border-components bg-surface-primary px-4 py-2">
-          <span className="text-body font-semibold text-content-primary">NexaCore</span>
-          <SearchTrigger onClick={() => {}} />
-        </div>
-      </div>
-    </div>
+    </DemoCard>
   ),
 };

@@ -30,24 +30,4 @@ type Story = StoryObj<typeof meta>;
 
 export const Default: Story = {};
 
-// AllVariants — ALWAYS last: the hero section.
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col">
-      <span className="px-6 pt-6 pb-2 text-caption text-content-tertiary font-mono">hero section</span>
-      <Hero
-        title="Where bold brands begin."
-        ctaText="Start your project"
-        ctaHref="#contact"
-        imageSrc={heroSrc}
-        imageAlt="Mountain landscape at dawn"
-        stats={[
-          { value: "+500", label: "Projects shipped" },
-          { value: "12", label: "Years of craft" },
-          { value: "98%", label: "Client retention" },
-          { value: "30+", label: "Awards won" },
-        ]}
-      />
-    </div>
-  ),
-};
+// A single hero section — no design-variant/size axis, so no AllVariants.

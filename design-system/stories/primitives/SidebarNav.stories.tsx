@@ -66,7 +66,7 @@ function InteractiveSidebar({ initialCollapsed = false }: { initialCollapsed?: b
         <>
           <div className="min-w-0 flex-1">
             <p className="truncate text-body font-medium text-content-primary">Ana Perez</p>
-            <p className="truncate text-caption text-content-tertiary">ana@company.com</p>
+            <p className="truncate text-caption text-content-secondary">ana@company.com</p>
           </div>
           <IconButton variant="default" size="sm" aria-label="Log out">
             <LogOut size={16} />
@@ -132,22 +132,8 @@ export const Default: Story = {
 
 // Starts collapsed (68px): each item is a boxed IconButton; active carries aria-pressed (ring),
 // leaf items show a tooltip on the right, the Admin parent opens a flyout on hover.
+// A full self-framed composition (its own aside border); expanded/collapsed are states, each its own
+// story; no design-variant/size axis, so no AllVariants.
 export const Collapsed: Story = {
   render: () => <InteractiveSidebar initialCollapsed />,
-};
-
-// AllVariants — ALWAYS last: both states (expanded / collapsed) side by side.
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-wrap items-start gap-6">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">expanded (default)</p>
-        <InteractiveSidebar />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">collapsed</p>
-        <InteractiveSidebar initialCollapsed />
-      </div>
-    </div>
-  ),
 };

@@ -1,5 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import SpinnerRing from "@/components/ui/SpinnerRing";
+import { DemoCard, Sizes } from "../_kit";
 
 const meta = {
   title: "Primitives/SpinnerRing",
@@ -12,53 +13,32 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-export const Default: Story = {};
-
-// Real SIZES keys (sm=16 / md=24 / lg=32). The SVG inherits the text color
-// (stroke=currentColor), hence text-content-primary on the container.
+// Real sizeClasses keys (sm=16 / md=24 / lg=32). The SVG inherits the text color (stroke=currentColor),
+// hence text-content-primary on the card.
 const SIZES = [
   { size: "lg", px: "32" },
   { size: "md", px: "24" },
   { size: "sm", px: "16" },
 ] as const;
 
-// AllSizes — the 3 spinner sizes (sm/md/lg), with px.
-export const AllSizes: Story = {
-  render: () => (
-    <div className="flex flex-wrap items-end gap-6 text-content-primary">
-      {SIZES.map(({ size, px }) => (
-        <div key={size} className="flex flex-col items-center gap-1.5">
-          <div className="flex h-8 items-center justify-center">
-            <SpinnerRing size={size} />
-          </div>
-          <span className="text-caption text-content-tertiary font-mono">
-            {size} · {px}px{size === "md" ? " (default)" : ""}
-          </span>
-        </div>
-      ))}
-    </div>
+// Default — playground: the spinner; change its size from the Controls.
+export const Default: Story = {
+  render: (args) => (
+    <DemoCard className="text-content-primary">
+      <SpinnerRing {...args} />
+    </DemoCard>
   ),
 };
 
-// AllVariants — ALWAYS last: an overview walking every axis (size is a spinner's only one).
-export const AllVariants: Story = {
+// AllSizes — the 3 spinner sizes (sm/md/lg), with px. Last: a spinner's only axis is size (no AllVariants).
+export const AllSizes: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">sizes</p>
-        <div className="flex flex-wrap items-end gap-6 text-content-primary">
-          {SIZES.map(({ size, px }) => (
-            <div key={size} className="flex flex-col items-center gap-1.5">
-              <div className="flex h-8 items-center justify-center">
-                <SpinnerRing size={size} />
-              </div>
-              <span className="text-caption text-content-tertiary font-mono">
-                {size} · {px}px{size === "md" ? " (default)" : ""}
-              </span>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
+    <Sizes
+      items={SIZES.map(({ size, px }) => ({
+        label: `${size} · ${px}px${size === "md" ? " (default)" : ""}`,
+        className: "text-content-primary",
+        node: <SpinnerRing size={size} />,
+      }))}
+    />
   ),
 };

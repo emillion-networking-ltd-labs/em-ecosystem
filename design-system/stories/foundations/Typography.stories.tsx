@@ -36,9 +36,9 @@ function Size({
     <div ref={ref} className="flex items-baseline justify-between gap-6 border-b border-border-subtle py-3">
       <span className={`${className} text-content-primary`}>The quick brown fox</span>
       <div className="shrink-0 text-right">
-        <code className="text-caption font-mono text-content-tertiary">{utility}</code>
+        <code className="text-caption font-mono text-content-secondary">{utility}</code>
         <br />
-        <code className="text-caption font-mono text-content-tertiary">{val || "—"}</code>
+        <code className="text-caption font-mono text-content-secondary">{val || "—"}</code>
       </div>
     </div>
   );
@@ -82,8 +82,8 @@ function UsageRow({ sample, cls, when }: { sample: ReactNode; cls: string; when:
     <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border-subtle py-3">
       <div className="min-w-0 text-content-primary">{sample}</div>
       <div className="shrink-0 text-right">
-        <code className="text-caption font-mono text-content-tertiary">{cls}</code>
-        <p className="text-caption text-content-tertiary">{when}</p>
+        <code className="text-caption font-mono text-content-secondary">{cls}</code>
+        <p className="text-caption text-content-secondary">{when}</p>
       </div>
     </div>
   );
@@ -113,7 +113,7 @@ export const InUse: Story = {
           cls="text-body font-semibold text-content-primary"
           when="Label, name, emphasised body (very common)"
         />
-        <UsageRow sample={<p className="text-caption text-content-tertiary">Caption / metadata</p>} cls="text-caption text-content-tertiary" when="Caption, meta, mono labels" />
+        <UsageRow sample={<p className="text-caption text-content-secondary">Caption / metadata</p>} cls="text-caption text-content-secondary" when="Caption, meta, mono labels" />
         <UsageRow
           sample={<p className="text-caption font-semibold text-content-secondary">Highlighted meta</p>}
           cls="text-caption font-semibold text-content-secondary"

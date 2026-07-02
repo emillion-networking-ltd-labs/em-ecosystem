@@ -36,40 +36,21 @@ export const Default: Story = {
   ),
 };
 
-// AllSizes — each max-width on the full canvas so the difference in measure is visible.
+// AllSizes — each max-width on the full canvas so the difference in measure is visible. The text shows how
+// the line length clamps as the container narrows (the caption carries the size + token, not the box).
 export const AllSizes: Story = {
   render: () => (
-    <div className="space-y-4">
+    <div className="space-y-6">
       {SIZES.map(({ size, w }) => (
         <div key={size} className="space-y-1.5">
+          <span className="text-caption text-content-secondary font-mono">
+            {size} · {w}
+            {size === "lg" ? " (default)" : ""}
+          </span>
           <Container size={size}>
-            <Box label={`size="${size}"`} />
-          </Container>
-          <Container size={size}>
-            <span className="text-caption text-content-tertiary font-mono">
-              {size} · {w}
-              {size === "lg" ? " (default)" : ""}
-            </span>
+            <Box label="A comfortable reading measure keeps line length in check: the wider the container, the longer each line runs before it wraps and re-centers." />
           </Container>
         </div>
-      ))}
-    </div>
-  ),
-};
-
-// AllVariants — ALWAYS last: every size stacked, narrowest on top, to compare the measures.
-export const AllVariants: Story = {
-  render: () => (
-    <div className="space-y-3">
-      {[...SIZES].reverse().map(({ size, w }) => (
-        <Container key={size} size={size}>
-          <div className="rounded-lg border border-border-default bg-surface-secondary px-4 py-2 text-center">
-            <span className="text-caption text-content-tertiary font-mono">
-              {size} · {w}
-              {size === "lg" ? " (default)" : ""}
-            </span>
-          </div>
-        </Container>
       ))}
     </div>
   ),

@@ -31,7 +31,7 @@ function Code({ children }: { children: string }) {
 }
 
 function Caption({ children }: { children: string }) {
-  return <span className="text-caption font-mono text-content-tertiary">{children}</span>;
+  return <span className="text-caption font-mono text-content-secondary">{children}</span>;
 }
 
 const SAMPLE: LucideIcon[] = [Search, Bell, Settings, User, Check, ArrowRight, ShieldCheck, Zap];

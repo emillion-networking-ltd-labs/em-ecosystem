@@ -53,18 +53,5 @@ export const Quotes: Story = {
   },
 };
 
-// AllVariants — ALWAYS last: reviews (with aggregate rating) and plain quotes, stacked.
-export const AllVariants: Story = {
-  render: () => (
-    <div className="flex flex-col">
-      <div className="px-6 pt-6 pb-2">
-        <span className="text-caption text-content-tertiary font-mono">reviews · rating + stars</span>
-      </div>
-      <Testimonials eyebrow="Testimonials" title="What people say" items={REVIEWS} rating={4.9} ratingCount="128 reviews on Google" />
-      <div className="px-6 pt-6 pb-2">
-        <span className="text-caption text-content-tertiary font-mono">quotes · role + quote</span>
-      </div>
-      <Testimonials eyebrow="Testimonials" title="Trusted by teams" items={QUOTES} />
-    </div>
-  ),
-};
+// No design-variant axis — reviews (Default, with rating+stars) vs plain quotes are two content modes,
+// each its own story. So there is no AllVariants.

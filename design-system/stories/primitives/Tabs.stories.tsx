@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 import { BarChart3, ShoppingCart, Settings } from "lucide-react";
 import Tabs from "@/components/ui/Tabs";
+import { DemoCard, Variants } from "../_kit";
 
 // Only the variants the dashboard uses: nav (vertical) and nav-horizontal (top bar). The bordered
 // "subtle" selector variant isn't documented here — that pattern is covered by SegmentedControl.
@@ -134,9 +135,11 @@ export const Nav: Story = {
   render: (args) => {
     const [active, setActive] = useState(args.activeTab);
     return (
-      <div className="w-[240px]">
-        <Tabs {...args} variant="nav" activeTab={active} onChange={setActive} />
-      </div>
+      <DemoCard>
+        <div className="w-[240px]">
+          <Tabs {...args} variant="nav" activeTab={active} onChange={setActive} />
+        </div>
+      </DemoCard>
     );
   },
 };
@@ -149,9 +152,11 @@ export const NavHorizontal: Story = {
   render: (args) => {
     const [active, setActive] = useState(args.activeTab);
     return (
-      <ScrollDotsWrapper tabs={navItems} activeTab={active} onChange={setActive}>
-        <Tabs {...args} variant="nav-horizontal" activeTab={active} onChange={setActive} />
-      </ScrollDotsWrapper>
+      <DemoCard block>
+        <ScrollDotsWrapper tabs={navItems} activeTab={active} onChange={setActive}>
+          <Tabs {...args} variant="nav-horizontal" activeTab={active} onChange={setActive} />
+        </ScrollDotsWrapper>
+      </DemoCard>
     );
   },
 };
@@ -169,34 +174,27 @@ function TabsDemo({
   );
 }
 
-// AllVariants — ALWAYS last: the variants (nav · nav-horizontal) and the sizes.
+// AllVariants — ALWAYS last: the two presentation variants (nav · nav-horizontal). No AllSizes: the size
+// prop doesn't change the tabs' look meaningfully.
 export const AllVariants: Story = {
   render: () => (
-    <div className="flex flex-col gap-5">
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">variant=nav (vertical)</p>
-        <div className="w-[240px]">
-          <TabsDemo variant="nav" />
-        </div>
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">variant=nav-horizontal</p>
-        <TabsDemo variant="nav-horizontal" />
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-tertiary font-mono">sizes (nav)</p>
-        <div className="flex flex-wrap gap-6">
-          {(["sm", "md", "lg"] as const).map((s) => (
-            <div key={s} className="w-[200px]">
-              <span className="mb-1.5 block text-caption text-content-tertiary font-mono">
-                {s}
-                {s === "md" ? " (default)" : ""}
-              </span>
-              <TabsDemo variant="nav" size={s} />
+    <Variants
+      items={[
+        {
+          label: "Nav",
+          block: true,
+          node: (
+            <div className="w-[240px]">
+              <TabsDemo variant="nav" />
             </div>
-          ))}
-        </div>
-      </div>
-    </div>
+          ),
+        },
+        {
+          label: "NavHorizontal",
+          block: true,
+          node: <TabsDemo variant="nav-horizontal" />,
+        },
+      ]}
+    />
   ),
 };

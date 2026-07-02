@@ -82,11 +82,11 @@ export const StoryConventions: Story = {
         title="Live example"
         description="The same rules, rendered with the shared kit. A single story shows its element in the project card; the overviews are one card per real item, with its label above."
       >
-        <p className="mb-2 text-caption font-mono text-content-tertiary">a single story → DemoCard</p>
+        <p className="mb-2 text-caption font-mono text-content-secondary">a single story → DemoCard</p>
         <DemoCard>
           <Sample>Your element</Sample>
         </DemoCard>
-        <p className="mb-2 mt-6 text-caption font-mono text-content-tertiary">
+        <p className="mb-2 mt-6 text-caption font-mono text-content-secondary">
           AllVariants (style) → Variants — one card per real variant
         </p>
         <Variants
@@ -95,7 +95,7 @@ export const StoryConventions: Story = {
             { label: "Brand", node: <Sample>Brand</Sample> },
           ]}
         />
-        <p className="mb-2 mt-6 text-caption font-mono text-content-tertiary">
+        <p className="mb-2 mt-6 text-caption font-mono text-content-secondary">
           AllSizes (size) → Sizes — one card per real size
         </p>
         <Sizes
@@ -123,8 +123,17 @@ export const StoryConventions: Story = {
             cartesian product — that&apos;s noise.
           </Rule>
           <Rule>
-            <strong>Composition / grid</strong> (BentoGrid, CardHoverEffect, Pricing) → the whole composition
-            inside one card: <Code>{`<DemoCard block>`}</Code>.
+            <strong>Default is CENTERED</strong> (<Code>DemoCard</Code>, no <Code>block</Code>): the element is
+            centered both axes at a prudent, uniform width. This is the case for almost everything — a table, a
+            trigger, a top-bar row, a scroll demo, a selector: all <strong>centered</strong>, never left-aligned.
+            If a demo looks tiny because it shrinks to its content, wrap it in a fixed width (e.g.{" "}
+            <Code>w-[560px]</Code>) so all its stories match.
+          </Rule>
+          <Rule>
+            <strong>Full-width (<Code>block</Code>) is the EXCEPTION</strong> — only for elements that are meant
+            to span full width: a real card grid (BentoGrid, CardHoverEffect, Pricing), a full-bleed effect
+            tile, or the <Code>Card</Code> surface itself. Having several parts does <strong>not</strong> make a
+            demo full-width — a multi-part demo is still centered.
           </Rule>
           <Rule>
             <strong>Full-bleed effect</strong> (Aurora, Meteors, Ripple, Blob) → host it as a tile inside the
@@ -135,8 +144,12 @@ export const StoryConventions: Story = {
             <Code>layout: &quot;fullscreen&quot;</Code>.
           </Rule>
           <Rule>
-            <strong>Layout</strong> (Container, Grid, Stack, Split) → at real width, with placeholder content
-            that reveals the structure.
+            <strong>Layout</strong> (Container, Grid, Stack, Split, Section) → at real width, with placeholder
+            content that reveals the structure. A layout primitive has <strong>no design-variant axis</strong>{" "}
+            → <strong>no AllVariants</strong>. A structural axis that reads clearly (cols, ratio, align, surface)
+            → its own named story; an incidental <Code>gap</Code> → just a Control on <Code>Default</Code>.{" "}
+            <Code>AllSizes</Code> is <strong>only the element&apos;s OWN size</strong> (e.g. Container&apos;s
+            max-width) — a spacing/gap measure is a parameter, not AllSizes, even when it has named tiers.
           </Rule>
           <Rule>
             <strong>Charts</strong> → <Code>DemoCard</Code>; AllVariants = the real data states (data / empty).
@@ -150,8 +163,23 @@ export const StoryConventions: Story = {
       >
         <ul className="ml-5 list-disc space-y-2">
           <Rule>
+            A <strong>design variant</strong> is a visual STYLE choice (variant / shape / brand) — <strong>not a
+            parameter or option</strong> (surface, columns, ratio, alignment, count). A parameter gets its own
+            named story; it <strong>never</strong> becomes AllVariants. If a component has no style axis (e.g. a
+            layout primitive), it has <strong>no AllVariants at all</strong>.
+          </Rule>
+          <Rule>
             One card per <strong>real variant</strong> — a configuration that EXISTS as its own named story.
             Two sections → two cards. <strong>Never invent variants.</strong>
+          </Rule>
+          <Rule>
+            Each variant is its <strong>own named story</strong> (<Code>Radial</Code>, <Code>Linear</Code>,{" "}
+            <Code>Primary</Code>…); AllVariants only <strong>groups</strong> them. Never a single story that
+            bundles several variants (no <Code>Variants</Code> story with Radial+Linear inside).
+          </Rule>
+          <Rule>
+            <strong>Only when there are ≥2 style variants.</strong> With 0–1, <strong>omit</strong> AllVariants
+            — an overview of one adds nothing (e.g. a pattern whose only style axis is a free color).
           </Rule>
           <Rule>
             AllVariants <strong>groups</strong> variants that already have a story — it never{" "}
@@ -161,7 +189,15 @@ export const StoryConventions: Story = {
           <Rule>
             <strong>ALWAYS last</strong>, preceded by the marker <Code>{`// AllVariants — ALWAYS last:`}</Code>.
           </Rule>
-          <Rule>Style only — no sizes here (those are AllSizes).</Rule>
+          <Rule>
+            Each card&apos;s <strong>label is the NAME of the story it mirrors</strong> (<Code>Default</Code>,{" "}
+            <Code>Subtle</Code>, <Code>Bold</Code>…), not a different descriptive caption — so the
+            correspondence with its own stories is obvious.
+          </Rule>
+          <Rule>
+            <strong>No measures here</strong> (px, %, opacity, sizes). AllVariants is style <em>names</em> only;
+            every measurement lives in <Code>AllSizes</Code> or in the measure stories — never in AllVariants.
+          </Rule>
         </ul>
         <Snippet>{`// AllVariants — ALWAYS last: one project Card per real STYLE variant, name above.
 import { Variants } from "../_kit";
@@ -190,7 +226,20 @@ export const AllVariants: Story = { render: () => <Variants items={VARIANTS} /> 
           </Rule>
           <Rule>
             Named <Code>AllSizes</Code> (never a bare <Code>Sizes</Code>); second-to-last, just before{" "}
-            <Code>AllVariants</Code>.
+            <Code>AllVariants</Code> — or <strong>last</strong> if the component has no AllVariants.
+          </Rule>
+          <Rule>
+            <strong>Only for NAMED scales</strong> (sm/md/lg, declared in <Code>sizeClasses</Code> — e.g.
+            Button, Blob). <strong>Continuous measures</strong> (gap, radius, stroke — arbitrary px) are NOT
+            AllSizes: they go as <strong>parameter stories</strong> (<Code>Gaps</Code>, <Code>Radii</Code>,{" "}
+            <Code>Strokes</Code>) with the measure in the label, before AllSizes/AllVariants.
+          </Rule>
+          <Rule>
+            <strong>A measure earns a story only if its variation is instructive</strong> — when the measure IS
+            the component&apos;s point (DotPattern radius/gap define the texture). <strong>Incidental
+            spacing</strong> whose tiers read the same (a layout <Code>gap</Code> between panels) does NOT get a
+            story: leave it adjustable from the <Code>Default</Code> Controls. An overview of three near-identical
+            measures is noise.
           </Rule>
         </ul>
         <Snippet>{`// AllSizes — size overview. Label = size token + its real measure for this component.
@@ -226,6 +275,12 @@ export const Default: Story = {
           </Rule>
           <Rule>The size axis is named <Code>AllSizes</Code> (never a bare <Code>Sizes</Code>).</Rule>
           <Rule>Each story carries a <Code>{`// Name — what it is / when to use`}</Code> comment. All copy in English.</Rule>
+          <Rule>
+            <strong>Theme is global</strong> — the Storybook toolbar switches light/dark; a story renders in the
+            current theme. <strong>Never</strong> <Code>Light</Code>/<Code>Dark</Code> stories (that duplicates
+            the toolbar). A prop that forces a specific backdrop (e.g. a chart on a dark surface) is a{" "}
+            <em>surface/context</em> variant, named as such — not a theme story.
+          </Rule>
         </ul>
       </Group>
 
