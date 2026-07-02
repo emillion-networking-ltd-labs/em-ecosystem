@@ -177,22 +177,28 @@ function ContactFormBlock({
         />
       </FormField>
       <div>
-        <Checkbox
-          checked={consent}
-          onChange={(c) => {
-            setConsent(c);
-            if (errors.consent && c) setErrors((p) => ({ ...p, consent: "" }));
-          }}
-          label="I have read and accept the privacy policy"
-        />
-        <a
-          href={privacyHref}
-          className="mt-1 ml-7 inline-block text-caption text-content-secondary underline decoration-dotted underline-offset-2 transition-colors hover:text-content-primary"
-        >
-          Read the privacy policy
-        </a>
-        {/* ECO-121: el slot del error está SIEMPRE montado (con altura reservada) → marcar el checkbox o
-            enviar NO empuja el botón. `aria-live` anuncia el error cuando aparece. */}
+        {/* ECO-121: consentimiento y enlace en UNA fila — checkbox a la izquierda, enlace a la derecha,
+            centrados en su eje vertical, con altura fija (min-h-9). Marcar/desmarcar no cambia la altura de
+            la fila → el botón no se mueve. flex-wrap para que en móvil el enlace baje sin desbordar. */}
+        <div className="flex min-h-9 flex-wrap items-center justify-between gap-x-4 gap-y-1">
+          <Checkbox
+            checked={consent}
+            onChange={(c) => {
+              setConsent(c);
+              if (errors.consent && c)
+                setErrors((p) => ({ ...p, consent: "" }));
+            }}
+            label="I have read and accept the privacy policy"
+          />
+          <a
+            href={privacyHref}
+            className="shrink-0 text-caption text-content-secondary underline decoration-dotted underline-offset-2 transition-colors hover:text-content-primary"
+          >
+            Read the privacy policy
+          </a>
+        </div>
+        {/* El slot del error del consent está SIEMPRE montado con altura reservada → no empuja el botón.
+            `aria-live` lo anuncia cuando aparece. */}
         <p className="mt-1 min-h-5 text-caption text-error" aria-live="polite">
           {errors.consent}
         </p>
