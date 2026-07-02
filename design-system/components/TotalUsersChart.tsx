@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -10,10 +9,12 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
-import { useTheme } from "@/hooks/useTheme";
 
-// TotalUsersChart — recharts line chart inside a ChartCard (this year vs last year). `forceDark`
-// overrides the theme (used by the catalog to render light/dark); otherwise it follows useTheme.
+// TotalUsersChart — recharts line chart inside a ChartCard (this year vs last year). Colours are brand
+// tokens resolved as CSS variables (content-primary for the primary line, accent for the comparison,
+// content-tertiary / border-strong for ticks and grid), so the chart follows the theme purely via the
+// CSS cascade (the `.light` / `.dark` wrapper) — no useTheme, no per-instance flag. The catalog renders
+// light and dark side by side by wrapping each pane in a themed div, and both work with the same tokens.
 const chartData = [
   { month: "JAN", thisYear: 10000, lastYear: 8000 },
   { month: "FEB", thisYear: 14000, lastYear: 10000 },
@@ -26,21 +27,16 @@ const chartData = [
 
 const formatYAxis = (v: number) => (v >= 1000 ? `${v / 1000}K` : String(v));
 
-function getColors(isDark: boolean) {
-  return {
-    line: isDark ? "#f5f5f5" : "rgb(28, 28, 28)",
-    ticks: isDark ? "rgba(245,245,245,0.5)" : "rgba(28, 28, 28, 0.5)",
-    grid: isDark ? "rgba(255,255,255,0.08)" : "rgba(28, 28, 28, 0.08)",
-  };
-}
+// Brand-token palette (CSS variables → theme-driven). recharts writes these straight to SVG
+// stroke/fill attributes, which resolve the variable from the surrounding themed wrapper.
+const COLORS = {
+  line: "var(--color-content-primary)",
+  compare: "var(--color-accent)",
+  ticks: "var(--color-content-tertiary)",
+  grid: "var(--border-strong)",
+};
 
-export default function TotalUsersChart({
-  forceDark,
-}: { forceDark?: boolean } = {}) {
-  const { theme } = useTheme();
-  const isDark = forceDark ?? theme === "dark";
-  const colors = useMemo(() => getColors(isDark), [isDark]);
-
+export default function TotalUsersChart() {
   return (
     <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
       <div className="mb-4 flex items-center justify-between">
@@ -52,7 +48,7 @@ export default function TotalUsersChart({
           </div>
           <span className="text-caption text-content-primary/20">|</span>
           <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#a0bce8]" />
+            <span className="h-2 w-2 rounded-full bg-accent" />
             <span className="text-caption text-content-tertiary">Last year</span>
           </div>
         </div>
@@ -61,16 +57,16 @@ export default function TotalUsersChart({
           first render. Pass a numeric height directly. */}
       <ResponsiveContainer width="100%" height={250}>
         <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -10 }}>
-          <CartesianGrid stroke={colors.grid} strokeDasharray="3 3" vertical={false} />
+          <CartesianGrid stroke={COLORS.grid} strokeDasharray="3 3" vertical={false} />
           <XAxis
             dataKey="month"
-            tick={{ fontSize: 12, fill: colors.ticks }}
+            tick={{ fontSize: 12, fill: COLORS.ticks }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={formatYAxis}
-            tick={{ fontSize: 12, fill: colors.ticks }}
+            tick={{ fontSize: 12, fill: COLORS.ticks }}
             axisLine={false}
             tickLine={false}
           />
@@ -102,20 +98,20 @@ export default function TotalUsersChart({
             type="monotone"
             dataKey="thisYear"
             name="This year"
-            stroke={colors.line}
+            stroke={COLORS.line}
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 4, fill: colors.line, strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: COLORS.line, strokeWidth: 0 }}
           />
           <Line
             type="monotone"
             dataKey="lastYear"
             name="Last year"
-            stroke="#a0bce8"
+            stroke={COLORS.compare}
             strokeWidth={2}
             strokeDasharray="5 5"
             dot={false}
-            activeDot={{ r: 4, fill: "#a0bce8", strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: COLORS.compare, strokeWidth: 0 }}
           />
         </LineChart>
       </ResponsiveContainer>

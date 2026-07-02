@@ -4,7 +4,8 @@ import { DemoCard } from "../_kit";
 
 // Charts/TotalUsersChart — recharts line chart (this year vs last year) in its own panel. Full-width card
 // with the chart centered at a sensible width (max-w-2xl) so it doesn't stretch. Renders in the CURRENT
-// theme (Storybook toolbar). Line colours come from the chart's palette (→ brand tokens in ECO-113).
+// theme (Storybook toolbar). Line colours are brand tokens (content-primary for the primary line,
+// accent for the comparison) as CSS variables, so the chart follows the theme via the CSS cascade.
 const meta = {
   title: "Charts/TotalUsersChart",
   component: TotalUsersChart,

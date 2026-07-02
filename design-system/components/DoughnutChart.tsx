@@ -8,33 +8,32 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-// DoughnutChart — recharts Pie (donut) with a legend. `forceDark` overrides the theme for the one
-// theme-dependent slice color (used by the catalog to render light/dark side by side); in the app it
-// can be derived from the real theme.
+// DoughnutChart — recharts Pie (donut) with a legend. Slice colours are brand tokens resolved as CSS
+// variables (accent / accent-2 / content-primary), so the chart follows the theme purely via the CSS
+// cascade (the `.light` / `.dark` wrapper) — no per-instance theme flag. The catalog renders light and
+// dark side by side by wrapping each pane in a themed div, so both views work with the same tokens.
 export interface DoughnutDatum {
   name: string;
   value: number;
   fill: string;
 }
 
-function defaultData(isDark: boolean): DoughnutDatum[] {
-  return [
-    { name: "USER", value: 150, fill: "#a0bce8" },
-    { name: "ADMIN", value: 75, fill: "#6be6d3" },
-    { name: "SUPERADMIN", value: 25, fill: isDark ? "#f5f5f5" : "#1c1c1c" },
-  ];
-}
+// Default palette: the comparison roles use the brand accents, the primary role uses content-primary
+// (which itself flips with the theme). All are CSS variables — no raw hex.
+const DEFAULT_DATA: DoughnutDatum[] = [
+  { name: "USER", value: 150, fill: "var(--color-accent)" },
+  { name: "ADMIN", value: 75, fill: "var(--color-accent-2)" },
+  { name: "SUPERADMIN", value: 25, fill: "var(--color-content-primary)" },
+];
 
 export default function DoughnutChart({
   title = "Users by Role",
   data,
-  forceDark = false,
 }: {
   title?: string;
   data?: DoughnutDatum[];
-  forceDark?: boolean;
 }) {
-  const chartData = data ?? defaultData(forceDark);
+  const chartData = data ?? DEFAULT_DATA;
   const total = chartData.reduce((sum, d) => sum + d.value, 0);
 
   return (

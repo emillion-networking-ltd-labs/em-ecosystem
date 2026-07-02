@@ -3,19 +3,22 @@
 // sweeps 270° from bottom-left to bottom-right; a tapered needle points to the value.
 type SpeedometerSize = "sm" | "md" | "lg";
 
+// h and cy are tuned so the 270° arc sits vertically centred in the viewBox (~6px margin top and
+// bottom): the arc spans cy−R (top) to cy+R·sin135° (the bottom ends), so cy = margin + R + strokeHalf
+// and h = arc height + 2·margin. The earlier values left a large empty band above the gauge.
 const speedoSizes = {
   sm: {
-    w: 180, h: 145, cx: 90, cy: 90, R: 55, progressW: 12, trackW: 10, dashR: 38,
+    w: 180, h: 118, cx: 90, cy: 67, R: 55, progressW: 12, trackW: 10, dashR: 38,
     needleLen: 34, needleBase: 4, hub: 6, hubInner: 2, fontSize: 12, labelOffset: 16,
     textClass: "text-body",
   },
   md: {
-    w: 230, h: 185, cx: 115, cy: 120, R: 72, progressW: 16, trackW: 14, dashR: 50,
+    w: 230, h: 151, cx: 115, cy: 86, R: 72, progressW: 16, trackW: 14, dashR: 50,
     needleLen: 48, needleBase: 5, hub: 8, hubInner: 3, fontSize: 12, labelOffset: 20,
     textClass: "text-h3",
   },
   lg: {
-    w: 260, h: 200, cx: 130, cy: 130, R: 85, progressW: 18, trackW: 16, dashR: 60,
+    w: 260, h: 175, cx: 130, cy: 100, R: 85, progressW: 18, trackW: 16, dashR: 60,
     needleLen: 55, needleBase: 6, hub: 10, hubInner: 4, fontSize: 12, labelOffset: 22,
     textClass: "text-h1",
   },
