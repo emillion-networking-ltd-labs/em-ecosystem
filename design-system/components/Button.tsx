@@ -65,8 +65,11 @@ export default function Button({
   const sizes = isLink ? linkSizeClasses[size] : sizeClasses[size];
   const display = isLink ? "inline-flex" : fullWidth ? "flex" : "inline-flex";
 
+  // ECO-115: las variantes no-link son SUPERFICIE DE CONTROL. Como <button> ya lo cubre el core (tokens.css),
+  // pero `as="a"` rinde un <a> SIN role=button (enlace-botón, p.ej. el CTA del Hero), se marca `select-none`
+  // aquí para que tampoco muestre el caret I-beam. Las variantes link/link-underline son texto → seleccionables.
   const componentProps: Record<string, unknown> = {
-    className: `${display} ${baseClass} ${variantClasses[variant]} ${sizes} ${!isLink && fullWidth ? "w-full" : ""} ${className}`,
+    className: `${display} ${baseClass} ${variantClasses[variant]} ${sizes} ${!isLink ? "select-none" : ""} ${!isLink && fullWidth ? "w-full" : ""} ${className}`,
     ...props,
   };
 
