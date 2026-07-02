@@ -3,11 +3,7 @@
 import React from "react";
 
 export type IconBadgeVariant =
-  | "default"
-  | "success"
-  | "warning"
-  | "error"
-  | "info";
+  "default" | "success" | "warning" | "error" | "info";
 
 export const iconBadgeSpecs = {
   variants: {
