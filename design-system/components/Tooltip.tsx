@@ -198,7 +198,7 @@ export default function Tooltip({
         style={{ ...style, maxWidth }}
       >
         {typeof content === "string" ? (
-          <p className="text-caption font-normal text-content-primary">
+          <p className="break-words text-caption font-normal text-content-primary">
             {content}
           </p>
         ) : (
@@ -212,6 +212,11 @@ export default function Tooltip({
     ) : null;
 
   if (!isValidElement(children)) return children;
+
+  // ECO-129: sin content no hay nada que mostrar → devuelve el hijo tal cual (sin comportamiento de
+  // tooltip). Permite el patrón "tooltip solo cuando el texto trunca": el consumidor pasa content=""
+  // cuando el valor cabe y el valor completo cuando está recortado.
+  if (content === "" || content == null) return children;
 
   // Inject ref + event handlers directly into the child — no wrapper div (Radix pattern)
   const child = cloneElement(children, {

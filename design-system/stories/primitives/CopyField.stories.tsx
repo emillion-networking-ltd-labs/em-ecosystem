@@ -7,7 +7,8 @@ const meta = {
   component: CopyField,
   tags: ["autodocs"],
   args: {
-    value: "https://nexacore.app/invite/ab12cd34",
+    // Corto → se ve completo → SIN tooltip (el tooltip sale solo cuando trunca, ver LongValue).
+    value: "https://nexa.link/xY9kQ2",
     size: "md",
   },
   argTypes: {
@@ -33,7 +34,9 @@ export const Default: Story = {};
 
 // Long value — truncates. (Hover tooltip with the full value is tracked in ECO-118.)
 export const LongValue: Story = {
-  args: { value: "sk-live-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3IifQ" },
+  args: {
+    value: "sk-live-eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c3IifQ",
+  },
 };
 
 // The 2 sizes (largest to smallest), with px.

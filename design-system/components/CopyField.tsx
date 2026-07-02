@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import Tooltip from "./Tooltip";
+import { useIsTruncated } from "@/hooks/useIsTruncated";
 
 export const copyFieldSpecs = {
   container:
@@ -34,6 +35,7 @@ export default function CopyField({
   className = "",
 }: CopyFieldProps) {
   const [copied, setCopied] = useState(false);
+  const [codeRef, truncated] = useIsTruncated<HTMLElement>();
 
   const handleCopy = () => {
     navigator.clipboard.writeText(value);
@@ -41,15 +43,18 @@ export default function CopyField({
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // ECO-118: el tooltip con el valor completo va sobre TODO el campo (no solo el <code>) y position="auto"
-  // (elige el lado según el viewport). El <code> trunca (…) → tamaño estable. El botón de copiar da su
-  // feedback con el icono (Copy→Check) + aria-label, SIN tooltip propio (evita dos tooltips a la vez).
+  // ECO-118/129: el tooltip con el valor completo va sobre TODO el campo (position="auto") y SOLO cuando el
+  // <code> TRUNCA (no cabe → useIsTruncated); si el valor se ve entero, no sale tooltip. El botón de copiar
+  // da su feedback con el icono (Copy→Check) + aria-label, sin tooltip propio (evita dos a la vez).
   return (
-    <Tooltip content={value} position="auto">
+    <Tooltip content={truncated ? value : ""} position="auto">
       <div
         className={`flex ${sizeClasses[size]} items-center gap-2 rounded-lg border border-border-components bg-surface-subtle px-4 overflow-hidden ${className}`}
       >
-        <code className="flex-1 truncate font-mono text-body leading-6 text-content-primary">
+        <code
+          ref={codeRef}
+          className="flex-1 truncate font-mono text-body leading-6 text-content-primary"
+        >
           {value}
         </code>
         <button
