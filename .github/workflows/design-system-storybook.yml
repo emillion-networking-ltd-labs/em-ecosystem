@@ -61,5 +61,12 @@ jobs:
         working-directory: design-system
         run: npm run coverage
 
+      # ECO-116: tests unitarios (vitest+jsdom) para LÓGICA de componente que el catálogo visual no puede
+      # aseverar de forma determinista (p.ej. el re-anclaje del Tooltip en scroll/resize). Sin navegador →
+      # inmune a los quirks de layout de Storybook y al doble-React de worktrees de agentes en paralelo.
+      - name: Unit tests (vitest)
+        working-directory: design-system
+        run: npm test
+
       - name: License guardrail (árbol de tooling de Storybook)
         run: npm run lic:check:ds

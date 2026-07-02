@@ -159,6 +159,19 @@ export default function Tooltip({
     if (visible) updatePosition();
   }, [visible, updatePosition]);
 
+  // ECO-116: while open, re-anchor to the trigger on scroll/resize. The tooltip is position: fixed and
+  // computed its coords once on open, so scrolling (without moving the mouse) left it detached from the
+  // trigger. `capture: true` catches scroll on ANY ancestor (scrollable containers), not just the window.
+  useEffect(() => {
+    if (!visible) return;
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [visible, updatePosition]);
+
   const isTouchDevice =
     typeof window !== "undefined" &&
     window.matchMedia("(pointer: coarse)").matches;
