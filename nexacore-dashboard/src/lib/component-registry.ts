@@ -172,7 +172,7 @@ export const componentRegistry: ComponentEntry[] = [
     name: "Feedback / Alerts",
     category: "molecule",
     description:
-      "Toast, ToastContainer, AlertBox, ErrorAlert, InlineError, RateLimitBanner, CountdownTimer",
+      "Toast, ToastContainer, AlertBox, InlineError, RateLimitBanner, CountdownTimer",
     files: [
       "Toast.tsx",
       "ToastContainer.tsx",
@@ -180,9 +180,8 @@ export const componentRegistry: ComponentEntry[] = [
       "InlineError.tsx",
       "RateLimitBanner.tsx",
       "CountdownTimer.tsx",
-      "ErrorAlert.tsx",
     ],
-    count: 7,
+    count: 6,
   },
   {
     name: "Calendar",

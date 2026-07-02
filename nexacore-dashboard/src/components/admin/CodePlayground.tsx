@@ -18,7 +18,6 @@ import Tabs from "@/components/ui/Tabs";
 import Select from "@/components/ui/Select";
 import Calendar from "@/components/ui/Calendar";
 import Pagination from "@/components/ui/Pagination";
-import ErrorAlert from "@/components/ui/ErrorAlert";
 import Breadcrumbs from "@/components/ui/Breadcrumbs";
 
 const scope = {
@@ -36,7 +35,6 @@ const scope = {
   Select,
   Calendar,
   Pagination,
-  ErrorAlert,
   Breadcrumbs,
   useState,
 };
