@@ -1,5 +1,6 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import Accordion from "@/components/ui/Accordion";
 import { useReveal } from "@/hooks/useReveal";
 
@@ -22,25 +23,54 @@ export interface FAQProps {
   indicator?: "chevron" | "plus";
 }
 
-export default function FAQ({ eyebrow, title, subtitle, items, surface = "grouped", indicator = "plus" }: FAQProps) {
-  const { ref, style } = useReveal<HTMLDivElement>();
+export default function FAQ({
+  eyebrow,
+  title,
+  subtitle,
+  items,
+  surface = "grouped",
+  indicator = "plus",
+}: FAQProps) {
+  const { ref, style, shown } = useReveal<HTMLDivElement>();
+  // ECO-122: en `separated` cada tarjeta se revela UNA A UNA (stagger, delay incremental por índice); en
+  // `grouped` (caja única) se mantiene el reveal único del bloque. El observer (ref) va en el contenedor.
+  const isSeparated = surface === "separated";
+  const cardReveal = (i: number): CSSProperties => ({
+    opacity: shown ? 1 : 0,
+    transform: shown ? "none" : "translateY(16px)",
+    transition: `opacity 500ms ease ${i * 90}ms, transform 500ms ease ${i * 90}ms`,
+    willChange: "opacity, transform",
+  });
   return (
     <section className="bg-surface-secondary">
       <div className="mx-auto max-w-3xl px-6 py-20 sm:py-24">
         <div className="mb-10 flex flex-col items-center gap-2 text-center">
           {eyebrow ? (
-            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
+            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">
+              {eyebrow}
+            </p>
           ) : null}
-          <h2 className="font-display text-display-2 font-bold text-content-primary">{title}</h2>
-          {subtitle ? <p className="mx-auto mt-1 max-w-xl text-body text-content-secondary">{subtitle}</p> : null}
+          <h2 className="font-display text-display-2 font-bold text-content-primary">
+            {title}
+          </h2>
+          {subtitle ? (
+            <p className="mx-auto mt-1 max-w-xl text-body text-content-secondary">
+              {subtitle}
+            </p>
+          ) : null}
         </div>
-        <div ref={ref} style={style}>
+        <div ref={ref} style={isSeparated ? undefined : style}>
           <Accordion
             surface={surface}
             indicator={indicator}
+            itemStyle={isSeparated ? cardReveal : undefined}
             items={items.map((i) => ({
               title: i.question,
-              children: <p className="text-body leading-relaxed text-content-secondary">{i.answer}</p>,
+              children: (
+                <p className="text-body leading-relaxed text-content-secondary">
+                  {i.answer}
+                </p>
+              ),
             }))}
           />
         </div>
