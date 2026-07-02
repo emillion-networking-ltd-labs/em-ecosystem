@@ -50,8 +50,12 @@ function MethodCard({ method }: { method: ContactMethod }) {
         {method.icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-caption font-semibold uppercase tracking-widest text-content-tertiary">{method.label}</p>
-        <p className="mt-1 break-words text-body text-content-primary">{method.value}</p>
+        <p className="text-caption font-semibold uppercase tracking-widest text-content-tertiary">
+          {method.label}
+        </p>
+        <p className="mt-1 break-words text-body text-content-primary">
+          {method.value}
+        </p>
       </div>
     </div>
   );
@@ -59,7 +63,9 @@ function MethodCard({ method }: { method: ContactMethod }) {
     return (
       <a
         href={method.href}
-        {...(method.external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+        {...(method.external
+          ? { target: "_blank", rel: "noopener noreferrer" }
+          : {})}
         className="card-flat block transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-components hover:shadow-[var(--shadow-card)]"
       >
         {inner}
@@ -75,7 +81,10 @@ function ContactFormBlock({
   privacyHref = "#",
   submitText = "Send message",
   onSubmit,
-}: Pick<ContactProps, "subjectOptions" | "subjectLabel" | "privacyHref" | "submitText" | "onSubmit">) {
+}: Pick<
+  ContactProps,
+  "subjectOptions" | "subjectLabel" | "privacyHref" | "submitText" | "onSubmit"
+>) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
@@ -87,7 +96,8 @@ function ContactFormBlock({
   const validate = () => {
     const errs: Record<string, string> = {};
     if (name.trim().length < 2) errs.name = "Please enter your name";
-    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) errs.email = "Enter a valid email";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))
+      errs.email = "Enter a valid email";
     if (!consent) errs.consent = "Please accept the privacy policy";
     setErrors(errs);
     return Object.keys(errs).length === 0;
@@ -106,8 +116,12 @@ function ContactFormBlock({
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-surface-tertiary text-content-primary">
           <Check size={24} />
         </div>
-        <h3 className="mt-3 text-h2 font-semibold text-content-primary">Message sent</h3>
-        <p className="mt-2 text-body text-content-secondary">We&apos;ll get back to you within 24 hours.</p>
+        <h3 className="mt-3 text-h2 font-semibold text-content-primary">
+          Message sent
+        </h3>
+        <p className="mt-2 text-body text-content-secondary">
+          We&apos;ll get back to you within 24 hours.
+        </p>
       </div>
     );
   }
@@ -144,12 +158,23 @@ function ContactFormBlock({
               wrapper en BLOQUE lo mantiene content-width → el panel cae bajo el trigger (como en el catálogo).
               No tocamos el primitivo: el fix es del USO. */}
           <div>
-            <Select options={subjectOptions} value={subject} onChange={setSubject} placeholder="Select an option" size="md" />
+            <Select
+              options={subjectOptions}
+              value={subject}
+              onChange={setSubject}
+              placeholder="Select an option"
+              size="md"
+            />
           </div>
         </FormField>
       ) : null}
       <FormField label="Message">
-        <Textarea value={message} onChange={(e) => setMessage(e.target.value)} rows={4} placeholder="Tell us about your project…" />
+        <Textarea
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          rows={4}
+          placeholder="Tell us about your project…"
+        />
       </FormField>
       <div>
         <Checkbox
@@ -166,7 +191,11 @@ function ContactFormBlock({
         >
           Read the privacy policy
         </a>
-        {errors.consent ? <p className="mt-1 text-caption text-error">{errors.consent}</p> : null}
+        {/* ECO-121: el slot del error está SIEMPRE montado (con altura reservada) → marcar el checkbox o
+            enviar NO empuja el botón. `aria-live` anuncia el error cuando aparece. */}
+        <p className="mt-1 min-h-5 text-caption text-error" aria-live="polite">
+          {errors.consent}
+        </p>
       </div>
       <Button variant="primary" size="lg" fullWidth type="submit">
         {submitText}
@@ -194,15 +223,27 @@ export default function Contact({
       <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
         <div className="mb-12 flex flex-col items-center gap-2 text-center">
           {eyebrow ? (
-            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
+            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">
+              {eyebrow}
+            </p>
           ) : null}
-          <h2 className="font-display text-display-2 font-bold text-content-primary">{title}</h2>
-          {subtitle ? <p className="mx-auto mt-1 max-w-xl text-body text-content-secondary">{subtitle}</p> : null}
+          <h2 className="font-display text-display-2 font-bold text-content-primary">
+            {title}
+          </h2>
+          {subtitle ? (
+            <p className="mx-auto mt-1 max-w-xl text-body text-content-secondary">
+              {subtitle}
+            </p>
+          ) : null}
         </div>
-        <div className={`grid grid-cols-1 gap-12 ${hasMethods ? "lg:grid-cols-5" : "mx-auto max-w-xl"}`}>
+        <div
+          className={`grid grid-cols-1 gap-12 ${hasMethods ? "lg:grid-cols-5" : "mx-auto max-w-xl"}`}
+        >
           {hasMethods ? (
             <div className="lg:col-span-2">
-              <h3 className="text-h2 font-semibold text-content-primary">{methodsTitle}</h3>
+              <h3 className="text-h2 font-semibold text-content-primary">
+                {methodsTitle}
+              </h3>
               <div className="mt-6 space-y-3">
                 {methods!.map((m) => (
                   <MethodCard key={m.label} method={m} />
@@ -211,7 +252,11 @@ export default function Contact({
             </div>
           ) : null}
           <div className={hasMethods ? "lg:col-span-3" : ""}>
-            {hasMethods ? <h3 className="mb-6 text-h2 font-semibold text-content-primary">{formTitle}</h3> : null}
+            {hasMethods ? (
+              <h3 className="mb-6 text-h2 font-semibold text-content-primary">
+                {formTitle}
+              </h3>
+            ) : null}
             <ContactFormBlock
               subjectOptions={subjectOptions}
               subjectLabel={subjectLabel}
