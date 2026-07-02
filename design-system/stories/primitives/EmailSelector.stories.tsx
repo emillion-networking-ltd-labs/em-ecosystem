@@ -25,6 +25,12 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // Just shows the email plus a callback to change it — no sizes/variants, so no AllVariants.
-// (Long-email handling — fixed width + ellipsis + hover tooltip with the full value — is tracked in ECO-118;
-// once done, add a LongEmail story showing the truncation.)
 export const Default: Story = {};
+
+// ECO-118 — a long email TRUNCATES (max-w + ellipsis) instead of growing the trigger; hover it to see the
+// full address in a tooltip. The trigger keeps a stable size.
+export const LongEmail: Story = {
+  args: {
+    email: "a-very-long-email-address@long-company-example.com",
+  },
+};
