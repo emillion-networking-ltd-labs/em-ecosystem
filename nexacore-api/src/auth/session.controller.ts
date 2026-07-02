@@ -49,8 +49,7 @@ export class SessionController {
 
   private getCurrentSessionId(req: AuthenticatedRequest): string | undefined {
     const refreshToken = req.cookies?.[REFRESH_TOKEN_COOKIE_NAME] as
-      | string
-      | undefined;
+      string | undefined;
     if (!refreshToken) return undefined;
     try {
       const payload = this.jwtService.verify<RefreshTokenPayload>(refreshToken);
