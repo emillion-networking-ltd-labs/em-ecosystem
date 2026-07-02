@@ -5,6 +5,7 @@ import { ChevronDown } from "lucide-react";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Tooltip from "./Tooltip";
+import { useIsTruncated } from "@/hooks/useIsTruncated";
 
 export const emailSelectorSpecs = {
   trigger:
@@ -28,6 +29,7 @@ export default function EmailSelector({
 }: EmailSelectorProps) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const [emailRef, truncated] = useIsTruncated<HTMLSpanElement>();
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -45,11 +47,10 @@ export default function EmailSelector({
 
   return (
     <div ref={ref} className={`relative self-start ${className}`}>
-      {/* ECO-118: el email largo TRUNCA (…) con ancho tope en vez de agrandar el trigger. El tooltip con el
-          valor completo va sobre TODO el trigger (no solo el texto, que se pierde al truncar) y position="auto"
-          (elige el lado según el viewport). El tooltip se renderiza en portal a body → NO cae dentro del
-          desplegable. Tamaño de trigger estable. */}
-      <Tooltip content={email} position="auto">
+      {/* ECO-118/129: el email largo TRUNCA (max-w + …) sin agrandar el trigger. El tooltip con el valor
+          completo va sobre TODO el trigger (position="auto") y SOLO cuando el email TRUNCA (no cabe →
+          useIsTruncated); si se ve entero, no sale. Portal a body → no cae dentro del desplegable. */}
+      <Tooltip content={truncated ? email : ""} position="auto">
         <button
           type="button"
           onClick={() => setOpen(!open)}
@@ -59,7 +60,9 @@ export default function EmailSelector({
               : "border border-border-components bg-transparent text-content-primary hover:bg-surface-subtle"
           }`}
         >
-          <span className="max-w-[220px] truncate leading-none">{email}</span>
+          <span ref={emailRef} className="max-w-[220px] truncate leading-none">
+            {email}
+          </span>
           <ChevronDown
             size={16}
             className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
