@@ -18,7 +18,8 @@ describe("CopyField — trunca + tooltip con el valor completo (ECO-118)", () =>
     const code = container.querySelector("code")!;
     expect(code.className).toMatch(/\btruncate\b/);
 
-    act(() => fireEvent.mouseEnter(code));
+    // El tooltip está sobre TODO el campo (no el <code>) → el hover se dispara en el contenedor.
+    act(() => fireEvent.mouseEnter(code.parentElement!));
     act(() => vi.advanceTimersByTime(250));
 
     const tip = document.querySelector('[role="tooltip"]');

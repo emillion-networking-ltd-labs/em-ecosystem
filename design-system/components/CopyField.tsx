@@ -41,23 +41,22 @@ export default function CopyField({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // ECO-118: el tooltip con el valor completo va sobre TODO el campo (no solo el <code>) y position="auto"
+  // (elige el lado según el viewport). El <code> trunca (…) → tamaño estable. El botón de copiar da su
+  // feedback con el icono (Copy→Check) + aria-label, SIN tooltip propio (evita dos tooltips a la vez).
   return (
-    <div
-      className={`flex ${sizeClasses[size]} items-center gap-2 rounded-lg border border-border-components bg-surface-subtle px-4 overflow-hidden ${className}`}
-    >
-      {/* ECO-118: el valor ya trunca (…); al hover, un tooltip muestra el valor completo (el botón de al
-          lado lo copia). Tamaño estable. */}
-      <Tooltip content={value} position="top">
+    <Tooltip content={value} position="auto">
+      <div
+        className={`flex ${sizeClasses[size]} items-center gap-2 rounded-lg border border-border-components bg-surface-subtle px-4 overflow-hidden ${className}`}
+      >
         <code className="flex-1 truncate font-mono text-body leading-6 text-content-primary">
           {value}
         </code>
-      </Tooltip>
-      <Tooltip content={copied ? "Copied!" : "Copy to clipboard"}>
         <button
           type="button"
           onClick={handleCopy}
           className="shrink-0 text-content-primary/50 transition-colors hover:text-content-primary"
-          aria-label="Copy to clipboard"
+          aria-label={copied ? "Copied" : "Copy to clipboard"}
         >
           {copied ? (
             <Check size={14} className="text-green-600" />
@@ -65,7 +64,7 @@ export default function CopyField({
             <Copy size={14} />
           )}
         </button>
-      </Tooltip>
-    </div>
+      </div>
+    </Tooltip>
   );
 }
