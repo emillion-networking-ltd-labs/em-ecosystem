@@ -635,9 +635,7 @@
       "type": "registry:ui",
       "file": "components/TotalUsersChart.tsx",
       "registryDependencies": [],
-      "internalDependencies": [
-        "hooks/useTheme.ts"
-      ]
+      "internalDependencies": []
     },
     {
       "name": "TurnstileWidget",
@@ -710,26 +708,6 @@
         "NumberTicker"
       ],
       "internalDependencies": []
-    },
-    {
-      "name": "HeroShowcase",
-      "type": "registry:section",
-      "file": "sections/HeroShowcase.tsx",
-      "registryDependencies": [
-        "AnimatedGradientText",
-        "Blob",
-        "Button",
-        "Container",
-        "DotPattern",
-        "GradientBackdrop",
-        "GridPattern",
-        "Section",
-        "Split",
-        "Stack"
-      ],
-      "internalDependencies": [
-        "lib/utils.ts"
-      ]
     },
     {
       "name": "Portfolio",
