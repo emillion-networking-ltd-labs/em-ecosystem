@@ -31,6 +31,6 @@ export const Default: Story = {};
 // full address in a tooltip. The trigger keeps a stable size.
 export const LongEmail: Story = {
   args: {
-    email: "una-direccion-de-correo-muy-larga@ejemplo-empresa-larga.com",
+    email: "a-very-long-email-address@long-company-example.com",
   },
 };

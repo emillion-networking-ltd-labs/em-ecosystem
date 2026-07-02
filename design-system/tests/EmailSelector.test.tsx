@@ -18,7 +18,7 @@ describe("EmailSelector — trigger trunca + tooltip con el email completo (ECO-
     cleanup();
   });
 
-  const long = "una-direccion-de-correo-muy-larga@ejemplo-empresa-larga.com";
+  const long = "a-very-long-email-address@long-company-example.com";
 
   it("trunca el email del trigger y lo muestra completo en un tooltip al hover", () => {
     render(<EmailSelector email={long} onChangeEmail={() => {}} />);
@@ -26,7 +26,9 @@ describe("EmailSelector — trigger trunca + tooltip con el email completo (ECO-
     expect(span.className).toMatch(/\btruncate\b/);
     expect(span.className).toMatch(/max-w/);
 
-    act(() => fireEvent.mouseEnter(span));
+    // El tooltip está sobre TODO el trigger (no el span) → el hover se dispara en el botón.
+    const trigger = screen.getByRole("button");
+    act(() => fireEvent.mouseEnter(trigger));
     act(() => vi.advanceTimersByTime(250));
 
     const tip = document.querySelector('[role="tooltip"]');

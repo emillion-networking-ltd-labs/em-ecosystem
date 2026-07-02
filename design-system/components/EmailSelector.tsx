@@ -45,25 +45,27 @@ export default function EmailSelector({
 
   return (
     <div ref={ref} className={`relative self-start ${className}`}>
-      <button
-        type="button"
-        onClick={() => setOpen(!open)}
-        className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap transition-colors ${
-          open
-            ? "border border-border-components bg-surface-subtle text-content-primary"
-            : "border border-border-components bg-transparent text-content-primary hover:bg-surface-subtle"
-        }`}
-      >
-        {/* ECO-118: el email largo TRUNCA (…) con ancho tope en vez de agrandar el trigger; al hover, un
-            tooltip muestra el valor completo. Tamaño de trigger estable. */}
-        <Tooltip content={email} position="top">
+      {/* ECO-118: el email largo TRUNCA (…) con ancho tope en vez de agrandar el trigger. El tooltip con el
+          valor completo va sobre TODO el trigger (no solo el texto, que se pierde al truncar) y position="auto"
+          (elige el lado según el viewport). El tooltip se renderiza en portal a body → NO cae dentro del
+          desplegable. Tamaño de trigger estable. */}
+      <Tooltip content={email} position="auto">
+        <button
+          type="button"
+          onClick={() => setOpen(!open)}
+          className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap transition-colors ${
+            open
+              ? "border border-border-components bg-surface-subtle text-content-primary"
+              : "border border-border-components bg-transparent text-content-primary hover:bg-surface-subtle"
+          }`}
+        >
           <span className="max-w-[220px] truncate leading-none">{email}</span>
-        </Tooltip>
-        <ChevronDown
-          size={16}
-          className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
-        />
-      </button>
+          <ChevronDown
+            size={16}
+            className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
+          />
+        </button>
+      </Tooltip>
 
       {open && (
         <div className="absolute left-0 top-full z-50 mt-1 w-[300px] animate-dropdown-down">
