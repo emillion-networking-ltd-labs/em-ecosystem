@@ -177,10 +177,10 @@ function ContactFormBlock({
         />
       </FormField>
       <div>
-        {/* ECO-121: consentimiento y enlace en UNA fila — checkbox a la izquierda, enlace a la derecha,
-            centrados en su eje vertical, con altura fija (min-h-9). Marcar/desmarcar no cambia la altura de
-            la fila → el botón no se mueve. flex-wrap para que en móvil el enlace baje sin desbordar. */}
-        <div className="flex min-h-9 flex-wrap items-center gap-x-5 gap-y-1">
+        {/* ECO-121: consentimiento y enlace en UNA fila, centrados en su eje vertical, separados por la
+            medida estándar del form (gap-2 = 8px, la misma que FormField/Input), con altura fija (min-h-9).
+            Marcar/desmarcar no cambia la altura → el botón no se mueve. flex-wrap para que en móvil baje. */}
+        <div className="flex min-h-9 flex-wrap items-center gap-2">
           <Checkbox
             checked={consent}
             onChange={(c) => {
