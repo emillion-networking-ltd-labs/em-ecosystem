@@ -24,7 +24,7 @@ const withTheme: Decorator = (Story, context) => {
   // inyectan en el MISMO wrapper; los componentes y las Foundations re-resuelven `--color-accent`,
   // `--gradient-brand`, `--font-display` etc. desde aquí. Los tokens semánticos NO se tocan.
   const preset = PRESETS.find((p) => p.id === context.globals.preset) ?? PRESETS[0];
-  // Full-bleed for page-level compositions (Sections/* and Showcase/HeroShowcase): they render edge-to-edge
+  // Full-bleed for page-level compositions (Sections/* and Showcase/*, e.g. FullPageAlert): they render edge-to-edge
   // (layout:fullscreen), so the wrapper's 2rem padding would box them in a grey band. Drop it for those; keep
   // it everywhere else (primitives sit in a DemoCard; the foundations docs rely on this breathing room).
   const fullBleed =
