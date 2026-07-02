@@ -45,7 +45,11 @@ export default function FormField({
         </label>
       )}
       {children}
-      {error && <InlineError message={error} />}
+      {/* ECO-121: el error reserva su hueco SIEMPRE (min-h) → aparecer/desaparecer NO empuja lo de
+          abajo (botón, siguiente campo). aria-live lo anuncia cuando aparece. */}
+      <div className="min-h-6" aria-live="polite">
+        {error && <InlineError message={error} />}
+      </div>
     </div>
   );
 }
