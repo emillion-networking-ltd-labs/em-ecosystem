@@ -180,7 +180,7 @@ function ContactFormBlock({
         {/* ECO-121: consentimiento y enlace en UNA fila — checkbox a la izquierda, enlace a la derecha,
             centrados en su eje vertical, con altura fija (min-h-9). Marcar/desmarcar no cambia la altura de
             la fila → el botón no se mueve. flex-wrap para que en móvil el enlace baje sin desbordar. */}
-        <div className="flex min-h-9 flex-wrap items-center justify-between gap-x-4 gap-y-1">
+        <div className="flex min-h-9 flex-wrap items-center gap-x-5 gap-y-1">
           <Checkbox
             checked={consent}
             onChange={(c) => {
