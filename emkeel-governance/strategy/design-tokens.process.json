@@ -1,0 +1,86 @@
+{
+  "process": "strategy",
+  "state": "presented",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-07-03T17:13:00Z",
+      "topic": "design-tokens",
+      "kill_criteria": [
+        "No existe un mecanismo limpio que permita override de marca por satelite SIN romper el baseline AA (obligatorio y brandeable son irreconciliables)",
+        "El coste del pipeline (manifiesto+generador+gate) supera el ahorro de mantenimiento para un DS de ~90 componentes y pocos satelites (over-engineering)",
+        "El modelo @theme de Tailwind v4 impide un cableado de fuente unica robusto en la practica",
+        "La copia del dashboard no puede regenerarse desde la fuente sin romper su lane de re-sync"
+      ]
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-07-03T17:17:39Z",
+      "sources": [
+        "design-system/tokens/tokens.css:335-340 (freeze @theme v4)",
+        "design-system/tokens/tokens.css:121-447 (capas @theme/:root/.dark/.light + duplicacion)",
+        "design-system/registry/cli.mjs:94-101 (em-ui init = copyFileSync sin transformar)",
+        "emkeel-governance/adr/007-design-system-source-location.md:35 (dos copias = deuda consciente)",
+        "satellites/sat-cristian-garcia/src/app/globals.css:167",
+        "214-215 (fork inline; solo --accent cambia)",
+        "nexacore-dashboard/src/styles/em-ui-tokens.css (copia stale)",
+        "https://styledictionary.com/",
+        "https://styledictionary.com/info/dtcg/",
+        "https://terrazzo.app/docs/guides/modes/",
+        "https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/",
+        "https://bradfrost.com/blog/post/the-many-faces-of-themeable-design-systems/",
+        "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum",
+        "https://www.npmjs.com/package/wcag-contrast",
+        "https://colorjs.io/docs/contrast",
+        "https://tailwindcss.com/docs/theme",
+        "https://github.com/tailwindlabs/tailwindcss/discussions/18471"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-07-03T17:19:29Z",
+      "options": [
+        "Arreglo minimo CSS a mano (wiring var(--x) + gate contraste)",
+        "Var-layering runtime patron TW v4 + gate + override por scope",
+        "Pipeline DTCG->generador (Style Dictionary/Terrazzo) emite DS+consumidores + gate"
+      ]
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-07-03T17:24:13Z",
+      "lens_calibration": "Fase 2 (manifiesto DTCG + Style Dictionary) es YAGNI para 2 consumidores de copia literal y roza la kill-criterion; el drift se cierra con un gate de CI sobre el em-ui diff existente (cli.mjs:85-93), sin generador ni migracion -> degradar Fase 2 a no-goal.",
+      "lens_legal": "El gate AA NO es computable sobre tokens con alpha (content-tertiary 0.55, borders 0.05/0.08, placeholder 0.3): un rgba no tiene ratio hasta componerse sobre una superficie opaca concreta. Debe operar sobre pares (token-alpha x superficie). Falta definir texto-grande, forced-colors, daltonismo (1.4.1) y valvula de excepcion auditada; borders 0.08 fallan 1.4.11 salvo marcarlos decorativos. Fuente WCAG 2.2 1.4.3/1.4.11.",
+      "lens_technical": "VERIFICADO OK el patron TW v4 (@theme inline + var scopeada -> override runtime) y el freeze (tokens.css:335-340) -> Fase 0 solida. PERO Fase 2 el generador regenera la copia del dashboard CONTRADICE em-ui (ADR-007:14,28 pull consumer-driven; la fuente no conoce rutas de consumidor); el drift es de distribucion, no de autoria.",
+      "lens_override": "AA es propiedad del PAR fg-bg, no del token; el doc valida set resuelto por-token y nunca define la matriz de adyacencia fg-bg -> un satelite que pisa solo --surface-primary rompe AA con el content heredado (kill-criterion #1 sin cubrir). Ademas logica invertida en no-override=recibe-cambio; falta marcar tokens norma-vs-estetico.",
+      "completeness": "Falta el artefacto de primera clase que unifica todo: una MATRIZ DE COMPOSICION/PARES (que content sobre que surface + que token-alpha compuesto sobre que superficie), por tema y por marca. Sin ella ni el gate AA es computable ni el override verificable. Falta tambien texto-grande, valvula de excepcion auditada (ADR) y separar autoria de distribucion."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-07-03T17:25:37Z",
+      "check_passed": true
+    },
+    "validated": {
+      "done": true,
+      "timestamp": "2026-07-03T17:26:31Z",
+      "case": "Aplicar el gate recomendado (componer alpha Porter-Duff sobre la superficie y medir el ratio del par fg-bg) al token real content-tertiary rgba(28,28,28,0.55) sobre surface-primary #fff",
+      "method": "Prototipo en node: composicion c=a*fg+(1-a)*bg -> rgb(130,130,130); luminancia relativa sRGB; ratio WCAG (L1+0.05)/(L2+0.05)",
+      "outcome": "pass",
+      "evidence_ref": "design-system/tokens/tokens.css:236 (content-tertiary) -> ratio 3.84:1 < 4.5 (FALLA AA texto normal; coincide con los 3.82 de ECO-123). Naive por-token no da ratio sin la superficie."
+    },
+    "presented": {
+      "done": true,
+      "timestamp": "2026-07-03T17:26:57Z",
+      "presented_to": "operador"
+    }
+  },
+  "steps_schema": [
+    "scaffolded",
+    "researched",
+    "proposed",
+    "critiqued",
+    "checked",
+    "validated",
+    "presented",
+    "approved"
+  ]
+}
