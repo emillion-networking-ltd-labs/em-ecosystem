@@ -6,7 +6,7 @@ const meta = {
   title: "Layout/Section",
   component: Section,
   tags: ["autodocs"],
-  args: { spacing: "lg", surface: "secondary" },
+  args: { spacing: "md", surface: "secondary" },
   argTypes: {
     spacing: { control: "inline-radio", options: ["none", "sm", "md", "lg", "xl"] },
     surface: { control: "inline-radio", options: ["none", "primary", "secondary", "subtle", "inverse"] },
@@ -16,12 +16,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Spacing (tallest → shortest), with the padding-block value. lg is the default.
+// Spacing (tallest → shortest), with the padding-block value. md (the marketing band) is the default.
 const SPACING = [
   { spacing: "xl", px: "112–176" },
-  { spacing: "lg", px: "96–112" },
-  { spacing: "md", px: "64–80" },
-  { spacing: "sm", px: "48" },
+  { spacing: "lg", px: "96–128" },
+  { spacing: "md", px: "80–96" },
+  { spacing: "sm", px: "64–80" },
   { spacing: "none", px: "0" },
 ] as const;
 
@@ -65,7 +65,7 @@ export const Spacing: Story = {
       {SPACING.map(({ spacing, px }) => (
         <div key={spacing}>
           <span className="text-caption text-content-secondary font-mono">
-            {spacing} · {px}px{spacing === "lg" ? " (default)" : ""}
+            {spacing} · {px}px{spacing === "md" ? " (default)" : ""}
           </span>
           <Section spacing={spacing} surface="secondary" className="mt-1.5 rounded-lg border border-border-default">
             <Container>

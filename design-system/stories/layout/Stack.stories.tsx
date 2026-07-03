@@ -5,10 +5,11 @@ const meta = {
   title: "Layout/Stack",
   component: Stack,
   tags: ["autodocs"],
-  args: { gap: "md", align: "start" },
+  args: { gap: "sm", align: "start" },
   argTypes: {
-    gap: { control: "inline-radio", options: ["xs", "sm", "md", "lg", "xl"] },
-    align: { control: "inline-radio", options: ["start", "center", "end"] },
+    gap: { control: "inline-radio", options: ["none", "xs", "sm", "md", "lg", "xl", "2xl"] },
+    align: { control: "inline-radio", options: ["start", "center", "end", "stretch"] },
+    justify: { control: "inline-radio", options: ["start", "center", "between", "end"] },
   },
 } satisfies Meta<typeof Stack>;
 
@@ -40,11 +41,11 @@ export const Aligns: Story = {
   render: () => (
     <div className="space-y-8">
       {ALIGNS.map((align) => (
-        <div key={align} className="space-y-1.5">
+        <div key={align} className="space-y-2">
           <span className="text-caption text-content-secondary font-mono">
             align=&quot;{align}&quot;{align === "start" ? " (default)" : ""}
           </span>
-          <Stack align={align} className="w-full">
+          <Stack align={align} className="w-full rounded-lg border border-border-default p-6">
             <Sample />
           </Stack>
         </div>
