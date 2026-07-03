@@ -49,7 +49,8 @@ export default function QrCodeCard({
           // eslint-disable-next-line @next/next/no-img-element
           <img src={qrDataUrl} alt="QR Code" className="h-48 w-48" />
         ) : (
-          <div className="flex h-48 w-48 items-center justify-center text-caption text-content-primary/50">
+          // select-none: placeholder transitorio, no es texto a copiar (ECO-115).
+          <div className="flex h-48 w-48 select-none items-center justify-center text-caption text-content-primary/50">
             Loading...
           </div>
         )}

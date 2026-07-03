@@ -13,43 +13,23 @@ const tokensCss = readFileSync(
   "utf8",
 );
 
-const CONTROL_SELECTORS = [
-  "button",
-  '[role="button"]',
-  "summary",
-  '[role="checkbox"]',
-  '[role="switch"]',
-  '[role="radio"]',
-  '[role="tab"]',
-  '[role="option"]',
-  '[role="menuitem"]',
-  '[role="menuitemradio"]',
-];
-
-// ECO-115 — norma definitiva de selección de texto. El texto es seleccionable POR DEFECTO (modelo del
-// dashboard); sólo los controles llevan user-select:none. El bug: el modelo viejo (body select-none global +
-// opt-in por selector) dejaba SIN seleccionar el texto puesto en un <div> (p.ej. AlertBox). Estos tests
-// FALLABAN con el modelo viejo y son el guardián de regresión permanente.
+// ECO-115 (refina ECO-99/107) — norma definitiva: el caret sólo sobre TEXTO (nada seleccionable por defecto,
+// opt-in del texto) y TODO el texto seleccionable, incluido el puesto en un <div> (AlertBox) vía `select-text`.
+// El bug: AlertBox ponía su mensaje en un <div> sin select-text → no era copiable. Estos tests son el guardián.
 describe("Modelo de selección (ECO-115)", () => {
-  it("tokens.css NO reintroduce el select-none global (el texto es seleccionable por defecto)", () => {
-    // El anti-patrón que rompía AlertBox: nada seleccionable salvo lo del opt-in.
-    expect(tokensCss).not.toMatch(/body\s*\{[^}]*user-select:\s*none/);
-    expect(tokensCss).not.toMatch(/user-select:\s*text/);
+  it("tokens.css mantiene el modelo: nada seleccionable por defecto + opt-in del texto", () => {
+    // body no seleccionable → sin caret sobre cajas/layout/no-texto.
+    expect(tokensCss).toMatch(/body\s*\{[^}]*user-select:\s*none/s);
+    // opt-in de selección para el texto.
+    expect(tokensCss).toMatch(/user-select:\s*text/);
+    // los descendientes de un control no reactivan el caret.
+    expect(tokensCss).toMatch(/button\s*\*[^{]*\{[^}]*user-select:\s*none/s);
   });
 
-  it("tokens.css marca los controles user-select:none (sin caret al pulsarlos)", () => {
-    expect(tokensCss).toMatch(
-      /button\s*,[\s\S]*?\[role="button"\][\s\S]*?\{[^}]*user-select:\s*none/,
-    );
-  });
-
-  it("AlertBox pone su texto en un elemento NO-control → seleccionable por defecto", () => {
+  it("AlertBox marca su contenedor de texto select-text → el mensaje es seleccionable", () => {
     render(createElement(AlertBox, { variant: "info" }, "Texto copiable"));
     const text = screen.getByText("Texto copiable");
-    // El texto no debe vivir en un control ni descender de uno (heredaría user-select:none).
-    for (const sel of CONTROL_SELECTORS) {
-      expect(text.matches(sel)).toBe(false);
-      expect(text.closest(sel)).toBeNull();
-    }
+    // El texto vive en un <div> (fuera del opt-in de tags); debe reabrir la selección con select-text.
+    expect(text.className).toContain("select-text");
   });
 });

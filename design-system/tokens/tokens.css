@@ -51,17 +51,14 @@
    satélites, catálogo Storybook), por eso vive aquí (fuente única) y no solo en el globals del
    dashboard (ECO-91). Las utilidades cursor-not-allowed/cursor-default lo sobreescriben (mayor capa). */
 @layer base {
-  /* SELECCIÓN DE TEXTO — NORMA DEFINITIVA (ECO-115). Modelo del dashboard: el TEXTO es seleccionable por
-     DEFECTO (comportamiento nativo del navegador). NO hay `user-select: none` global ni opt-in por selector.
-     Sólo las SUPERFICIES de control interactivas se marcan `user-select: none` (evita el caret/efecto
-     "editable" al pulsarlas) y muestran cursor pointer. Como `user-select` es HEREDADO, el texto DENTRO de
-     un control hereda `none` → nunca aparece el I-beam sobre un botón, sin necesidad de `button *`. Un
-     primitivo que necesite texto copiable dentro de un control lo reabre con `select-text` (clase, gana).
-     Reemplaza el modelo global "nada seleccionable + opt-in por selector" de ECO-99/107, que dejaba SIN
-     seleccionar el texto puesto en un <div> (p.ej. AlertBox: <div role=alert><div>{texto}</div></div> — su
-     texto no era copiable y el guard no lo cazaba). Un enlace-botón (Button `as="a"`, sin role=button) se
-     marca `select-none` en el propio primitivo. El catálogo Storybook importa este core; el dashboard ya
-     funcionaba así (era la referencia de uso correcto). Decisión y trade-offs en ADR-024. */
+  /* SELECCIÓN DE TEXTO — NORMA DEFINITIVA (ECO-115, refina ECO-99/107). Objetivo del operador: el caret/I-beam
+     aparece SÓLO sobre TEXTO — nunca sobre elementos no-texto (cards, layout, chrome, decorativos). Por eso el
+     modelo es "nada seleccionable por defecto + opt-in del texto": `body` no seleccionable → clicar un card,
+     una caja o el fondo NO deja caret; sólo el contenido de TEXTO (y los editables) reactiva la selección, así
+     el texto sigue siendo copiable. El defecto que corrige ECO-115: el texto puesto en un <div> (no en la lista
+     de opt-in de tags, p.ej. AlertBox) quedaba SIN seleccionar → ese componente reabre la selección con la
+     clase `select-text` sobre su contenedor de texto (arreglo integral, no invertir el modelo). El guard
+     check-selection-model obliga a cada <div> con clase de texto a declarar `select-text`/`select-none`. */
   button,
   [role="button"],
   summary,
@@ -72,7 +69,6 @@
   [role="option"],
   [role="menuitem"],
   [role="menuitemradio"] {
-    -webkit-user-select: none;
     user-select: none;
   }
   button:not(:disabled),
@@ -85,6 +81,40 @@
   [role="menuitem"],
   [role="menuitemradio"] {
     cursor: pointer;
+  }
+
+  /* MODELO DE SELECCIÓN (ECO-99): por defecto NADA es seleccionable → ningún caret de texto dentro de
+     cards, cajas, layout ni elementos no-texto (el problema que el catálogo destapaba: clicar un card
+     metía un caret). Solo el contenido de TEXTO —y los campos editables— reactiva la selección. */
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* Opt-in de selección del TEXTO. `a` NO va aquí (ECO-107): un enlace queda en `user-select: auto`, que
+     hereda el COMPORTAMIENTO del contexto → seleccionable dentro de prose (sus padres p/li son `text`) pero
+     NO suelto (en un div hereda `none` de body). El texto que un componente ponga en un <div> se reabre con
+     la clase `select-text` sobre ese contenedor (ECO-115) — no se añade `div` aquí para no reactivar el caret
+     sobre divs de layout. */
+  p, h1, h2, h3, h4, h5, h6,
+  span, li, code, pre, kbd, samp,
+  blockquote, q, cite, em, strong, b, i, u, s, small, mark, sub, sup,
+  abbr, dfn, time, label, dt, dd, figcaption, caption, th, td, address {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  input, textarea, [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  /* DESCENDIENTES DE CONTROL (ECO-107): el opt-in de texto (span/…) NO debe reactivar la selección DENTRO de
+     un control. Va DESPUÉS del opt-in y gana → el texto de un botón nunca muestra el caret I-beam. Un enlace-
+     botón (Button `as="a"`, sin role) se cubre con `select-none` en el propio primitivo (su <span> es opt-in).
+     Un primitivo que necesite texto copiable dentro de un control lo reabre con `select-text` explícito. */
+  button *, [role="button"] *, summary *,
+  [role="checkbox"] *, [role="switch"] *, [role="radio"] *,
+  [role="tab"] *, [role="option"] *, [role="menuitem"] *, [role="menuitemradio"] * {
+    -webkit-user-select: none;
+    user-select: none;
   }
 }
 

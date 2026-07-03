@@ -1,72 +1,87 @@
 #!/usr/bin/env node
-// check-selection-model — guard de regresión de la NORMA DEFINITIVA de selección (ECO-115).
+// check-selection-model — guard de la NORMA DEFINITIVA de selección (ECO-115, refina ECO-99/107).
 //
-// Modelo: el TEXTO es seleccionable por DEFECTO (como el navegador / el dashboard). NO hay select-none
-// global ni opt-in por selector. SÓLO las superficies de control (button, [role="button"], …) llevan
-// user-select:none; como user-select es HEREDADO, el texto dentro de un control hereda `none` sin necesidad
-// de `button *`. Reemplaza el modelo "nada seleccionable + opt-in" de ECO-99/107, que dejaba SIN seleccionar
-// el texto puesto en un <div> (p.ej. AlertBox) — y que este guard, en su versión vieja, NO cazaba.
+// Norma: el caret/I-beam aparece SÓLO sobre TEXTO — nunca sobre elementos no-texto (cards, layout, chrome).
+// Modelo: en tokens.css, `body { user-select: none }` (nada seleccionable por defecto → sin caret en cajas) +
+// un opt-in `user-select: text` para las etiquetas de texto y los editables; los controles y sus descendientes
+// son user-select:none. El texto que un componente ponga en un <div> (fuera de la lista de tags) NO hereda el
+// opt-in → debe reabrir la selección con la clase `select-text` sobre ese contenedor (y `select-none` si es un
+// contenedor de texto que NO debe seleccionarse, p.ej. un placeholder). El fallo que destapó ECO-115: AlertBox
+// ponía su mensaje en un <div> sin `select-text` → no era copiable, y el guard viejo NO lo cazaba.
 //
-// El guard es estático (regex sobre tokens.css), así que no computa la cascada; en su lugar protege el
-// modelo por su ESTRUCTURA: (a) los controles deben ser select-none, y (b) el anti-patrón que rompía la
-// selección de texto —`body { user-select: none }` global y el opt-in `user-select: text`— NO debe volver.
-// El test de regresión a nivel de comportamiento vive en tests/selection-model.test.ts.
+// Este guard hace dos cosas:
+//  (1) verifica que tokens.css mantiene el modelo (body none + opt-in text + descendientes de control none);
+//  (2) escanea components/ y sections/ y EXIGE que todo <div> con una clase de TAMAÑO de texto declare su
+//      intención de selección (`select-text` o `select-none`) — así no vuelve a colarse un texto-en-div mudo.
+//      Los contenedores de icono usan `text-content-*` (sólo color, sin tamaño) → no se marcan.
 //
 // Uso: node scripts/check-selection-model.mjs   (cwd = design-system/)
 
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const css = readFileSync(join(ds, "tokens", "tokens.css"), "utf8");
 
-// DEBE existir: los controles se marcan user-select:none (sin caret al pulsarlos; el texto interno hereda none).
-const mustHave = [
-  [
-    /button\s*,[\s\S]*?\[role="button"\][\s\S]*?\{[^}]*user-select:\s*none/,
-    'los controles (`button`, `[role="button"]`, …) deben declarar user-select: none — así no muestran el caret al pulsarlos y su texto interno hereda `none`',
-  ],
-  [
-    /\[role="button"\][^{]*\{[^}]*cursor:\s*pointer/,
-    "los controles deben mostrar cursor: pointer (Tailwind v4 no lo pone en <button>)",
-  ],
-];
-
-// NO debe existir: el anti-patrón del modelo viejo (ECO-99/107) que dejaba el texto puesto en un <div> sin
-// seleccionar. Si vuelve, AlertBox y compañía vuelven a no ser copiables → regresión que el guard viejo no veía.
-const mustNotHave = [
-  [
-    /body\s*\{[^}]*user-select:\s*none/,
-    "`body { user-select: none }` global — es el anti-patrón que hacía NO seleccionable todo el texto que no estuviera en la lista de opt-in (p.ej. el texto en un <div> como AlertBox). El texto debe ser seleccionable por defecto (ECO-115)",
-  ],
-  [
-    /user-select:\s*text/,
-    "opt-in `user-select: text` por selector — pertenece al modelo viejo (ECO-99). Con la norma definitiva el texto ya es seleccionable por defecto; reintroducirlo señala que el select-none global ha vuelto",
-  ],
-];
-
 let failed = 0;
-for (const [re, msg] of mustHave) {
+
+// (1) Modelo en tokens.css.
+const cssChecks = [
+  [/body\s*\{[^}]*user-select:\s*none/s, "`body` debe declarar user-select: none (nada seleccionable por defecto → sin caret en cajas/layout/no-texto)"],
+  [/user-select:\s*text/, "debe existir un opt-in user-select: text para el texto (copiable)"],
+  [/input,\s*textarea[^{]*\{[^}]*user-select:\s*text/s, "input/textarea deben reactivar user-select: text"],
+  [/button\s*\*[^{]*\{[^}]*user-select:\s*none/s, "los descendientes de un control (`button *`, `[role] *`) deben ser user-select: none — el opt-in de texto NO debe reactivar el caret dentro de un botón"],
+];
+for (const [re, msg] of cssChecks) {
   if (!re.test(css)) {
-    console.error(`✗ selection-model (falta): ${msg}`);
+    console.error(`✗ selection-model (tokens.css): ${msg}`);
     failed++;
   }
 }
-for (const [re, msg] of mustNotHave) {
-  if (re.test(css)) {
-    console.error(`✗ selection-model (anti-patrón presente): ${msg}`);
-    failed++;
+
+// (2) Escaneo de componentes/secciones: todo <div> con clase de TAMAÑO de texto declara select-text/select-none.
+const TEXT_SIZE = /\btext-(?:body|caption|h[1-3]|display|xs|sm|base|lg|xl|[0-9]xl)\b/;
+const SELECT_DECL = /\bselect-(?:text|none|all)\b/;
+const DIV_OPEN = /<div\b[^>]*>/g; // etiqueta de apertura hasta el primer '>' (className rara vez contiene '>')
+
+function tsxFiles(dir) {
+  return readdirSync(dir, { withFileTypes: true })
+    .filter((e) => e.isFile() && e.name.endsWith(".tsx"))
+    .map((e) => join(dir, e.name));
+}
+
+const violations = [];
+for (const dir of [join(ds, "components"), join(ds, "sections")]) {
+  for (const file of tsxFiles(dir)) {
+    const src = readFileSync(file, "utf8");
+    for (const m of src.matchAll(DIV_OPEN)) {
+      const tag = m[0];
+      if (TEXT_SIZE.test(tag) && !SELECT_DECL.test(tag)) {
+        const line = src.slice(0, m.index).split("\n").length;
+        violations.push(`${file.replace(ds + "/", "")}:${line}`);
+      }
+    }
   }
+}
+if (violations.length) {
+  console.error(
+    "✗ selection-model: hay <div> con clase de tamaño de texto SIN declarar select-text/select-none (texto que no se podría seleccionar, como AlertBox):",
+  );
+  for (const v of violations) console.error(`    - ${v}`);
+  console.error(
+    "  Añade `select-text` si su texto debe ser copiable, o `select-none` si es un contenedor que no debe seleccionarse.",
+  );
+  failed++;
 }
 
 if (failed) {
   console.error(
-    "\n✗ selection-model FALLA — la norma definitiva (ECO-115) no se cumple: el texto debe ser seleccionable por defecto y sólo los controles user-select:none.",
+    '\n✗ selection-model FALLA — la norma "el caret sólo sobre texto; todo el texto seleccionable" (ECO-115) no se cumple.',
   );
   process.exit(1);
 } else {
   console.log(
-    "✓ selection-model OK — texto seleccionable por defecto; sólo los controles user-select:none (norma ECO-115).",
+    "✓ selection-model OK — modelo en tokens.css + todo <div> de texto declara su selección (norma ECO-115).",
   );
 }
