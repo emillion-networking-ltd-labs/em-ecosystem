@@ -8,6 +8,8 @@ import Select from "@/components/ui/Select";
 import FormField from "@/components/ui/FormField";
 import Checkbox from "@/components/ui/Checkbox";
 import Textarea from "@/components/ui/Textarea";
+import { Section } from "@/components/ui/Section";
+import { Container } from "@/components/ui/Container";
 
 // Sección CONTACTO del design-system — RECONSTRUIDA ECO-93 siguiendo la página /contacto del sat: 2 columnas
 // — MÉTODOS directos (enlaces que SIEMPRE funcionan, sin backend → no engañan) + un FORMULARIO con primitivos
@@ -225,8 +227,10 @@ export default function Contact({
 }: ContactProps) {
   const hasMethods = !!methods && methods.length > 0;
   return (
-    <section className="bg-surface-primary">
-      <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
+    // ECO-120 — Section (banda + surface + ritmo `md`) + Container (ancho canónico `xl`). La rejilla interna
+    // form+métodos es asimétrica (col-span 3/2, condicional) → se mantiene custom (Grid modela rejillas uniformes).
+    <Section surface="primary">
+      <Container size="xl">
         <div className="mb-12 flex flex-col items-center gap-2 text-center">
           {eyebrow ? (
             <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">
@@ -272,7 +276,7 @@ export default function Contact({
             />
           </div>
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

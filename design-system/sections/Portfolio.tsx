@@ -6,6 +6,9 @@ import { ChevronLeft, ChevronRight, X } from "lucide-react";
 import Button from "@/components/ui/Button";
 import IconButton from "@/components/ui/IconButton";
 import { useReveal } from "@/hooks/useReveal";
+import { Section } from "@/components/ui/Section";
+import { Container } from "@/components/ui/Container";
+import { Grid } from "@/components/ui/Grid";
 
 // Sección PORTFOLIO del design-system (ECO-55; REFINADA ECO-93: lenguaje NEUTRO + variante `gallery`). Muestra
 // trabajos/fotos REALES del cliente (del brief — nunca inventados; sin items, se omite). Variantes:
@@ -37,9 +40,13 @@ function Header({ eyebrow, title }: { eyebrow?: string; title: string }) {
   return (
     <div className="flex flex-col items-center gap-2 text-center">
       {eyebrow ? (
-        <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
+        <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">
+          {eyebrow}
+        </p>
       ) : null}
-      <h2 className="font-display text-display-2 font-bold text-content-primary">{title}</h2>
+      <h2 className="font-display text-display-2 font-bold text-content-primary">
+        {title}
+      </h2>
     </div>
   );
 }
@@ -55,7 +62,15 @@ function ViewAll({ text, href }: { text?: string; href?: string }) {
   );
 }
 
-function PortfolioCard({ item, index, featured }: { item: PortfolioItem; index: number; featured: boolean }) {
+function PortfolioCard({
+  item,
+  index,
+  featured,
+}: {
+  item: PortfolioItem;
+  index: number;
+  featured: boolean;
+}) {
   const { ref, style } = useReveal<HTMLElement>({ delay: (index % 3) * 90 });
   const hasImg = !!item.imageSrc;
   const big = featured && index === 0;
@@ -66,23 +81,39 @@ function PortfolioCard({ item, index, featured }: { item: PortfolioItem; index: 
         {...(item.href ? { href: item.href } : {})}
         className="group block overflow-hidden rounded-2xl border border-border-default bg-surface-primary transition-colors hover:border-border-strong"
       >
-        <div className={`relative ${big ? "aspect-[2/1]" : "aspect-[4/3]"} ${hasImg ? "" : "flex items-end bg-surface-secondary"}`}>
+        <div
+          className={`relative ${big ? "aspect-[2/1]" : "aspect-[4/3]"} ${hasImg ? "" : "flex items-end bg-surface-secondary"}`}
+        >
           {hasImg ? (
             <Image
               src={item.imageSrc!}
               alt={item.title || ""}
               fill
-              sizes={big ? "(min-width: 1024px) 56rem, 100vw" : "(min-width: 1024px) 22rem, (min-width: 640px) 50vw, 100vw"}
+              sizes={
+                big
+                  ? "(min-width: 1024px) 56rem, 100vw"
+                  : "(min-width: 1024px) 22rem, (min-width: 640px) 50vw, 100vw"
+              }
               className="object-cover transition-transform duration-300 group-hover:scale-105"
             />
           ) : item.title ? (
-            <span className="p-5 text-h3 font-semibold text-content-primary">{item.title}</span>
+            <span className="p-5 text-h3 font-semibold text-content-primary">
+              {item.title}
+            </span>
           ) : null}
         </div>
         {item.title || item.description ? (
           <div className="p-5">
-            {item.title ? <h3 className="text-h3 font-semibold text-content-primary">{item.title}</h3> : null}
-            {item.description ? <p className="mt-1 text-body leading-relaxed text-content-secondary">{item.description}</p> : null}
+            {item.title ? (
+              <h3 className="text-h3 font-semibold text-content-primary">
+                {item.title}
+              </h3>
+            ) : null}
+            {item.description ? (
+              <p className="mt-1 text-body leading-relaxed text-content-secondary">
+                {item.description}
+              </p>
+            ) : null}
           </div>
         ) : null}
       </Wrapper>
@@ -90,8 +121,18 @@ function PortfolioCard({ item, index, featured }: { item: PortfolioItem; index: 
   );
 }
 
-function GalleryTile({ image, index, onOpen }: { image: GalleryImage; index: number; onOpen: () => void }) {
-  const { ref, style } = useReveal<HTMLButtonElement>({ delay: (index % 4) * 90 });
+function GalleryTile({
+  image,
+  index,
+  onOpen,
+}: {
+  image: GalleryImage;
+  index: number;
+  onOpen: () => void;
+}) {
+  const { ref, style } = useReveal<HTMLButtonElement>({
+    delay: (index % 4) * 90,
+  });
   return (
     <button
       ref={ref}
@@ -109,7 +150,9 @@ function GalleryTile({ image, index, onOpen }: { image: GalleryImage; index: num
       />
       {image.caption ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
-          <p className="text-caption font-semibold uppercase tracking-wider text-white">{image.caption}</p>
+          <p className="text-caption font-semibold uppercase tracking-wider text-white">
+            {image.caption}
+          </p>
         </div>
       ) : null}
     </button>
@@ -251,12 +294,31 @@ function Lightbox({
           setIsDragging(true);
         }}
         onDragStart={(e) => e.preventDefault()}
-        style={isDragging ? { transform: `translateX(${dragX * DRAG_DAMPING}px)`, transition: "none" } : undefined}
+        style={
+          isDragging
+            ? {
+                transform: `translateX(${dragX * DRAG_DAMPING}px)`,
+                transition: "none",
+              }
+            : undefined
+        }
       >
-        <Image src={image.imageSrc} alt={image.caption || ""} fill priority draggable={false} sizes="90vw" className="pointer-events-none object-contain" />
+        <Image
+          src={image.imageSrc}
+          alt={image.caption || ""}
+          fill
+          priority
+          draggable={false}
+          sizes="90vw"
+          className="pointer-events-none object-contain"
+        />
       </div>
       <div className="pointer-events-none absolute inset-x-0 bottom-4 flex flex-col items-center gap-1 px-4 text-center sm:bottom-6">
-        {image.caption ? <p className="text-caption font-semibold uppercase tracking-wider text-white">{image.caption}</p> : null}
+        {image.caption ? (
+          <p className="text-caption font-semibold uppercase tracking-wider text-white">
+            {image.caption}
+          </p>
+        ) : null}
         <p className="text-caption text-white/60">
           {index + 1} / {total}
         </p>
@@ -265,47 +327,91 @@ function Lightbox({
   );
 }
 
-function Gallery({ eyebrow, title, items, viewAllText, viewAllHref }: Omit<PortfolioProps, "variant">) {
-  const images: GalleryImage[] = items.filter((i) => i.imageSrc).map((i) => ({ imageSrc: i.imageSrc!, caption: i.title }));
+function Gallery({
+  eyebrow,
+  title,
+  items,
+  viewAllText,
+  viewAllHref,
+}: Omit<PortfolioProps, "variant">) {
+  const images: GalleryImage[] = items
+    .filter((i) => i.imageSrc)
+    .map((i) => ({ imageSrc: i.imageSrc!, caption: i.title }));
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const total = images.length;
   const close = () => setLightboxIndex(null);
-  const prev = () => setLightboxIndex((i) => (i === null ? null : (i - 1 + total) % total));
-  const next = () => setLightboxIndex((i) => (i === null ? null : (i + 1) % total));
+  const prev = () =>
+    setLightboxIndex((i) => (i === null ? null : (i - 1 + total) % total));
+  const next = () =>
+    setLightboxIndex((i) => (i === null ? null : (i + 1) % total));
   return (
-    <section className="bg-surface-primary">
-      <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
+    // ECO-120 — Section + Container `xl` (canónico) + Grid. gap `sm`(16): el gap-3 (12) del original no existe
+    // en la escala unificada de ECO-131; `sm` es el más cercano cómodo (revisar si se quiere más apretado: xs=8).
+    <Section surface="primary">
+      <Container size="xl">
         <Header eyebrow={eyebrow} title={title} />
-        <div className="mt-12 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+        <Grid cols={{ base: 2, sm: 3, lg: 4 }} gap="sm" className="mt-12">
           {images.map((img, i) => (
-            <GalleryTile key={img.imageSrc + i} image={img} index={i} onOpen={() => setLightboxIndex(i)} />
+            <GalleryTile
+              key={img.imageSrc + i}
+              image={img}
+              index={i}
+              onOpen={() => setLightboxIndex(i)}
+            />
           ))}
-        </div>
+        </Grid>
         <ViewAll text={viewAllText} href={viewAllHref} />
-      </div>
+      </Container>
       {lightboxIndex !== null ? (
-        <Lightbox images={images} index={lightboxIndex} onClose={close} onPrev={prev} onNext={next} />
+        <Lightbox
+          images={images}
+          index={lightboxIndex}
+          onClose={close}
+          onPrev={prev}
+          onNext={next}
+        />
       ) : null}
-    </section>
+    </Section>
   );
 }
 
-export default function Portfolio({ eyebrow, title, items, viewAllText, viewAllHref, variant = "grid" }: PortfolioProps) {
+export default function Portfolio({
+  eyebrow,
+  title,
+  items,
+  viewAllText,
+  viewAllHref,
+  variant = "grid",
+}: PortfolioProps) {
   if (variant === "gallery") {
-    return <Gallery eyebrow={eyebrow} title={title} items={items} viewAllText={viewAllText} viewAllHref={viewAllHref} />;
+    return (
+      <Gallery
+        eyebrow={eyebrow}
+        title={title}
+        items={items}
+        viewAllText={viewAllText}
+        viewAllHref={viewAllHref}
+      />
+    );
   }
   const featured = variant === "featured";
   return (
-    <section className="bg-surface-primary">
-      <div className="mx-auto max-w-6xl px-6 py-20 sm:py-24">
+    // ECO-120 — Section + Container `xl` (canónico 1280; el original 6xl=1152 se unifica al canónico) + Grid.
+    <Section surface="primary">
+      <Container size="xl">
         <Header eyebrow={eyebrow} title={title} />
-        <div className="mt-12 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <Grid cols={{ base: 1, sm: 2, lg: 3 }} gap="md" className="mt-12">
           {items.map((item, i) => (
-            <PortfolioCard key={`${item.title}-${i}`} item={item} index={i} featured={featured} />
+            <PortfolioCard
+              key={`${item.title}-${i}`}
+              item={item}
+              index={i}
+              featured={featured}
+            />
           ))}
-        </div>
+        </Grid>
         <ViewAll text={viewAllText} href={viewAllHref} />
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

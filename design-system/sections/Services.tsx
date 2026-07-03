@@ -4,6 +4,8 @@ import { Check } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 import Accordion from "@/components/ui/Accordion";
 import { useReveal } from "@/hooks/useReveal";
+import { Section } from "@/components/ui/Section";
+import { Container } from "@/components/ui/Container";
 
 // Sección SERVICIOS del design-system — REFINADA ECO-93 replicando la ESTRUCTURA EXACTA de la PÁGINA de
 // servicios (/servicios) de sat-cristian-garcia (NO el teaser de la home), con lenguaje NEUTRO (tokens).
@@ -30,21 +32,37 @@ export interface ServicesProps {
   featuresTitle?: string;
 }
 
-function ServiceCard({ service, index, featuresTitle }: { service: ServiceItem; index: number; featuresTitle: string }) {
-  const { ref, style } = useReveal<HTMLDivElement>({ delay: (index % 3) * 120 });
+function ServiceCard({
+  service,
+  index,
+  featuresTitle,
+}: {
+  service: ServiceItem;
+  index: number;
+  featuresTitle: string;
+}) {
+  const { ref, style } = useReveal<HTMLDivElement>({
+    delay: (index % 3) * 120,
+  });
   return (
     <div ref={ref} style={style}>
       <div className="card-flat scroll-mt-24 transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-components hover:shadow-[var(--shadow-card)]">
         <div className="flex items-start gap-5">
-          <span className="text-3xl font-black text-content-primary">{String(index + 1).padStart(2, "0")}</span>
+          <span className="text-3xl font-black text-content-primary">
+            {String(index + 1).padStart(2, "0")}
+          </span>
           <div className="flex-1">
             <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:gap-3">
-              <h2 className="text-h2 font-semibold text-content-primary">{service.title}</h2>
+              <h2 className="text-h2 font-semibold text-content-primary">
+                {service.title}
+              </h2>
               <Badge variant="default" size="sm">
                 {service.label}
               </Badge>
             </div>
-            <p className="mt-2 text-body leading-relaxed text-content-secondary">{service.fullDesc}</p>
+            <p className="mt-2 text-body leading-relaxed text-content-secondary">
+              {service.fullDesc}
+            </p>
             {service.features && service.features.length ? (
               <div className="mt-4">
                 <Accordion
@@ -54,8 +72,15 @@ function ServiceCard({ service, index, featuresTitle }: { service: ServiceItem; 
                       children: (
                         <ul className="space-y-1">
                           {service.features.map((f) => (
-                            <li key={f} className="flex items-start gap-2 text-body text-content-secondary">
-                              <Check size={18} aria-hidden className="mt-0.5 shrink-0 text-content-primary" />
+                            <li
+                              key={f}
+                              className="flex items-start gap-2 text-body text-content-secondary"
+                            >
+                              <Check
+                                size={18}
+                                aria-hidden
+                                className="mt-0.5 shrink-0 text-content-primary"
+                              />
                               {f}
                             </li>
                           ))}
@@ -73,23 +98,44 @@ function ServiceCard({ service, index, featuresTitle }: { service: ServiceItem; 
   );
 }
 
-export default function Services({ eyebrow, title, subtitle, services, featuresTitle = "What's included" }: ServicesProps) {
+export default function Services({
+  eyebrow,
+  title,
+  subtitle,
+  services,
+  featuresTitle = "What's included",
+}: ServicesProps) {
   return (
-    <section className="bg-surface-secondary py-20">
-      <div className="mx-auto max-w-7xl px-6">
+    // ECO-120 — Section (banda + surface + ritmo `md`=80→96, antes py-20 plano sin escalar) + Container `md`
+    // (=896, la medida de la lista) → un único ancho gobernado, sin el max-w-4xl interno ad-hoc.
+    <Section surface="secondary">
+      <Container size="md">
         <div className="mb-12 text-center">
           {eyebrow ? (
-            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
+            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">
+              {eyebrow}
+            </p>
           ) : null}
-          <h2 className="mt-2 font-display text-display-2 font-bold text-content-primary">{title}</h2>
-          {subtitle ? <p className="mx-auto mt-3 max-w-xl text-body text-content-secondary">{subtitle}</p> : null}
+          <h2 className="mt-2 font-display text-display-2 font-bold text-content-primary">
+            {title}
+          </h2>
+          {subtitle ? (
+            <p className="mx-auto mt-3 max-w-xl text-body text-content-secondary">
+              {subtitle}
+            </p>
+          ) : null}
         </div>
-        <div className="mx-auto max-w-4xl space-y-6">
+        <div className="space-y-6">
           {services.map((s, i) => (
-            <ServiceCard key={s.label} service={s} index={i} featuresTitle={featuresTitle} />
+            <ServiceCard
+              key={s.label}
+              service={s}
+              index={i}
+              featuresTitle={featuresTitle}
+            />
           ))}
         </div>
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }
