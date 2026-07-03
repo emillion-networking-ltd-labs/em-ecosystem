@@ -4,6 +4,9 @@ import { Star } from "lucide-react";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 import { useReveal } from "@/hooks/useReveal";
+import { Section } from "@/components/ui/Section";
+import { Container } from "@/components/ui/Container";
+import { Grid } from "@/components/ui/Grid";
 
 // Sección TESTIMONIOS del design-system — RECONSTRUIDA ECO-93 replicando la PÁGINA /testimonios de
 // sat-cristian-garcia (no el teaser): cabecera + bloque de RATING AGREGADO opcional (número grande + estrellas
@@ -38,13 +41,21 @@ export interface TestimonialsProps {
 
 function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
-    <div className="flex items-center gap-0.5" role="img" aria-label={`${rating} out of 5 stars`}>
+    <div
+      className="flex items-center gap-0.5"
+      role="img"
+      aria-label={`${rating} out of 5 stars`}
+    >
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
           size={size}
           aria-hidden
-          className={n <= rating ? "fill-amber-400 text-amber-400" : "fill-border-strong text-border-strong"}
+          className={
+            n <= rating
+              ? "fill-amber-400 text-amber-400"
+              : "fill-border-strong text-border-strong"
+          }
         />
       ))}
     </div>
@@ -64,8 +75,12 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
       <div className="flex items-center gap-3">
         <Avatar src={t.avatarSrc} name={t.name} size="md" />
         <div className="flex-1">
-          <figcaption className="text-body font-semibold text-content-primary">{t.name}</figcaption>
-          {t.role ? <p className="text-caption text-content-tertiary">{t.role}</p> : null}
+          <figcaption className="text-body font-semibold text-content-primary">
+            {t.name}
+          </figcaption>
+          {t.role ? (
+            <p className="text-caption text-content-tertiary">{t.role}</p>
+          ) : null}
         </div>
       </div>
       {t.rating ? (
@@ -73,13 +88,21 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
           <StarRating rating={t.rating} />
         </div>
       ) : null}
-      <blockquote className="mt-3 flex-1 text-body leading-relaxed text-content-secondary">{t.quote}</blockquote>
+      <blockquote className="mt-3 flex-1 text-body leading-relaxed text-content-secondary">
+        {t.quote}
+      </blockquote>
     </>
   );
   return (
     <figure ref={ref} style={style} className="h-full">
       {interactive ? (
-        <a href={t.href} target="_blank" rel="noopener noreferrer" aria-label={`Read ${t.name}'s full review`} className={cls}>
+        <a
+          href={t.href}
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label={`Read ${t.name}'s full review`}
+          className={cls}
+        >
           {inner}
         </a>
       ) : (
@@ -100,35 +123,53 @@ export default function Testimonials({
   viewAllHref,
 }: TestimonialsProps) {
   return (
-    <section className="bg-surface-secondary">
-      <div className="mx-auto max-w-7xl px-6 py-20 sm:py-24">
+    // ECO-120 — Section (banda + surface + ritmo `md`) + Container (ancho canónico `xl`) + Grid.
+    <Section surface="secondary">
+      <Container size="xl">
         <div className="mb-10 flex flex-col items-center gap-2 text-center">
           {eyebrow ? (
-            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">{eyebrow}</p>
+            <p className="text-caption font-semibold uppercase tracking-wider text-content-secondary">
+              {eyebrow}
+            </p>
           ) : null}
-          <h2 className="font-display text-display-2 font-bold text-content-primary">{title}</h2>
-          {subtitle ? <p className="mx-auto mt-1 max-w-xl text-body text-content-secondary">{subtitle}</p> : null}
+          <h2 className="font-display text-display-2 font-bold text-content-primary">
+            {title}
+          </h2>
+          {subtitle ? (
+            <p className="mx-auto mt-1 max-w-xl text-body text-content-secondary">
+              {subtitle}
+            </p>
+          ) : null}
         </div>
         {rating ? (
           <div className="mx-auto mb-10 flex max-w-md flex-col items-center gap-3 text-center">
-            <p className="font-display text-display-2 font-black leading-none text-content-primary">{rating.toFixed(1)}</p>
+            <p className="font-display text-display-2 font-black leading-none text-content-primary">
+              {rating.toFixed(1)}
+            </p>
             <StarRating rating={Math.round(rating)} size={20} />
-            {ratingCount ? <p className="text-body text-content-secondary">{ratingCount}</p> : null}
+            {ratingCount ? (
+              <p className="text-body text-content-secondary">{ratingCount}</p>
+            ) : null}
           </div>
         ) : null}
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Grid cols={{ base: 1, md: 2, lg: 3 }} gap="md">
           {items.map((t, i) => (
             <TestimonialCard key={`${t.name}-${i}`} t={t} index={i} />
           ))}
-        </div>
+        </Grid>
         {viewAllText && viewAllHref ? (
           <div className="mt-10 text-center">
-            <Button as="a" href={viewAllHref} variant="link-underline" size="md">
+            <Button
+              as="a"
+              href={viewAllHref}
+              variant="link-underline"
+              size="md"
+            >
               {viewAllText}
             </Button>
           </div>
         ) : null}
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }

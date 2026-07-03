@@ -39,7 +39,13 @@ export interface HeroProps {
   stats?: HeroStat[];
 }
 
-function HeroStatCard({ stat, variant }: { stat: HeroStat; variant: "desktop" | "mobile" }) {
+function HeroStatCard({
+  stat,
+  variant,
+}: {
+  stat: HeroStat;
+  variant: "desktop" | "mobile";
+}) {
   const onMedia = variant === "desktop";
   return (
     <div
@@ -49,7 +55,9 @@ function HeroStatCard({ stat, variant }: { stat: HeroStat; variant: "desktop" | 
           : "card-flat py-8 text-center"
       }
     >
-      <p className={`text-h1 font-black ${onMedia ? "text-white" : "text-content-primary"}`}>
+      <p
+        className={`text-h1 font-black ${onMedia ? "text-white" : "text-content-primary"}`}
+      >
         {stat.prefix}
         <NumberTicker
           value={stat.value}
@@ -58,19 +66,42 @@ function HeroStatCard({ stat, variant }: { stat: HeroStat; variant: "desktop" | 
         />
         {stat.suffix}
       </p>
-      <p className={`mt-2 ${onMedia ? "text-caption text-white/60" : "text-body text-content-secondary"}`}>{stat.label}</p>
+      <p
+        className={`mt-2 ${onMedia ? "text-caption text-white/60" : "text-body text-content-secondary"}`}
+      >
+        {stat.label}
+      </p>
     </div>
   );
 }
 
-export default function Hero({ title, ctaText, ctaHref = "/contact", imageSrc, imageAlt, stats }: HeroProps) {
+// ECO-120 — Hero se dejó FUERA del refactor a primitivas de layout A PROPÓSITO: es un patrón `Cover`
+// (altura de viewport 50/60vh + media a sangre con overlay + contenido anclado abajo + padding propio) que
+// las primitivas actuales NO modelan (Section=py-bandas; Container=medida centrada; Grid fuerza display:grid y
+// rompería el `hidden lg:grid` de las stats). Forzarlas quedaría peor. Se migrará cuando exista la primitiva
+// `Cover` (diferida en ECO-131/ADR-025). Seguimiento: ECO-132. NO refactorizar a mano hasta entonces.
+export default function Hero({
+  title,
+  ctaText,
+  ctaHref = "/contact",
+  imageSrc,
+  imageAlt,
+  stats,
+}: HeroProps) {
   const hasStats = !!stats && stats.length > 0;
   return (
     <>
       <section className="relative z-20 flex h-[50vh] flex-col landscape:max-lg:min-h-[440px] lg:h-[60vh]">
         {/* Media + overlay contenidos (no se desbordan del hero) */}
         <div className="absolute inset-0 overflow-hidden">
-          <Image src={imageSrc} alt={imageAlt || title} fill priority sizes="100vw" className="h-full w-full object-cover" />
+          <Image
+            src={imageSrc}
+            alt={imageAlt || title}
+            fill
+            priority
+            sizes="100vw"
+            className="h-full w-full object-cover"
+          />
           <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
         </div>
 
@@ -79,7 +110,9 @@ export default function Hero({ title, ctaText, ctaHref = "/contact", imageSrc, i
           <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between">
             {/* Izquierda: título + CTA */}
             <div>
-              <h1 className="max-w-2xl font-display text-display-1 font-bold text-white">{title}</h1>
+              <h1 className="max-w-2xl font-display text-display-1 font-bold text-white">
+                {title}
+              </h1>
               {ctaText ? (
                 <div className="mt-10 flex">
                   <Link

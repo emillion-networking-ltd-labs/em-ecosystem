@@ -2,6 +2,8 @@
 
 import Button from "@/components/ui/Button";
 import { useReveal } from "@/hooks/useReveal";
+import { Section } from "@/components/ui/Section";
+import { Container } from "@/components/ui/Container";
 
 // Sección CTA del design-system — REFINADA ECO-93 siguiendo el sat (CTASection): banda de CIERRE a ancho
 // completo, forzada a tema OSCURO (clase `dark`, como el footer) para máximo contraste — titular display +
@@ -29,26 +31,39 @@ export default function CTA({
 }: CTAProps) {
   const { ref, style } = useReveal<HTMLDivElement>();
   return (
-    // `dark` fuerza los tokens de tema oscuro en los descendientes → banda siempre oscura (como el footer), sin
-    // importar el tema del usuario. Neutro: el oscuro es surface/content, no un color de marca.
-    <section className="dark bg-surface-primary py-24 sm:py-28">
-      <div ref={ref} style={style} className="mx-auto max-w-3xl px-6 text-center">
-        <h2 className="mx-auto max-w-2xl font-display text-display-2 font-bold text-content-primary">{title}</h2>
-        {description ? (
-          <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-content-secondary">{description}</p>
-        ) : null}
-        <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
-          <Button as="a" href={primaryCtaHref} variant="primary" size="lg">
-            {primaryCtaText}
-          </Button>
-          {secondaryCtaText && secondaryCtaHref ? (
-            <Button as="a" href={secondaryCtaHref} variant="outline" size="lg">
-              {secondaryCtaText}
+    // ECO-120 — compuesta con primitivas: `Section surface="inverse"` abre el scope de tema OSCURO (ECO-131) →
+    // banda siempre oscura con los tokens hijos invertidos, sin `.dark` a mano. Container da la medida centrada.
+    <Section surface="inverse" spacing="lg">
+      <Container size="sm">
+        <div ref={ref} style={style} className="text-center">
+          <h2 className="mx-auto max-w-2xl font-display text-display-2 font-bold text-content-primary">
+            {title}
+          </h2>
+          {description ? (
+            <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-content-secondary">
+              {description}
+            </p>
+          ) : null}
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button as="a" href={primaryCtaHref} variant="primary" size="lg">
+              {primaryCtaText}
             </Button>
+            {secondaryCtaText && secondaryCtaHref ? (
+              <Button
+                as="a"
+                href={secondaryCtaHref}
+                variant="outline"
+                size="lg"
+              >
+                {secondaryCtaText}
+              </Button>
+            ) : null}
+          </div>
+          {note ? (
+            <p className="mt-6 text-caption text-content-tertiary">{note}</p>
           ) : null}
         </div>
-        {note ? <p className="mt-6 text-caption text-content-tertiary">{note}</p> : null}
-      </div>
-    </section>
+      </Container>
+    </Section>
   );
 }
