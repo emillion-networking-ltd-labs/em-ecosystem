@@ -143,6 +143,16 @@
       "internalDependencies": []
     },
     {
+      "name": "Cluster",
+      "type": "registry:ui",
+      "file": "components/Cluster.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [
+        "lib/layout.ts",
+        "lib/utils.ts"
+      ]
+    },
+    {
       "name": "ConfirmModal",
       "type": "registry:ui",
       "file": "components/ConfirmModal.tsx",
@@ -168,7 +178,9 @@
       "registryDependencies": [
         "Tooltip"
       ],
-      "internalDependencies": []
+      "internalDependencies": [
+        "hooks/useIsTruncated.ts"
+      ]
     },
     {
       "name": "CountdownTimer",
@@ -222,9 +234,12 @@
       "file": "components/EmailSelector.tsx",
       "registryDependencies": [
         "Avatar",
-        "Button"
+        "Button",
+        "Tooltip"
       ],
-      "internalDependencies": []
+      "internalDependencies": [
+        "hooks/useIsTruncated.ts"
+      ]
     },
     {
       "name": "EmptyState",
@@ -266,6 +281,7 @@
       "file": "components/Grid.tsx",
       "registryDependencies": [],
       "internalDependencies": [
+        "lib/layout.ts",
         "lib/utils.ts"
       ]
     },
@@ -535,6 +551,7 @@
       "file": "components/Split.tsx",
       "registryDependencies": [],
       "internalDependencies": [
+        "lib/layout.ts",
         "lib/utils.ts"
       ]
     },
@@ -553,6 +570,7 @@
       "file": "components/Stack.tsx",
       "registryDependencies": [],
       "internalDependencies": [
+        "lib/layout.ts",
         "lib/utils.ts"
       ]
     },

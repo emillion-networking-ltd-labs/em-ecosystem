@@ -119,6 +119,12 @@
 }
 
 @theme {
+  /* ANCHO CANÓNICO DE CONTENIDO (ECO-131): fuente única del ancho máximo de las secciones/páginas de
+     marketing. 80rem = 1280px = punto `xl` de Container (Container consume este token). Superficies que
+     quieran el mismo ancho (satélites, catálogo) lo referencian en vez de repetir el literal. El shell del
+     dashboard usa su propio ancho de app (1200px) a propósito — es otra superficie, no consume este token. */
+  --content-max: 80rem;
+
   --font-sans:
     -apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial,
     sans-serif;
