@@ -70,7 +70,7 @@ export const ShimmerButton = React.forwardRef<
         {/* Highlight */}
         <div
           className={cn(
-            "absolute inset-0 size-full",
+            "absolute inset-0 size-full select-none",
 
             "rounded-[inherit] px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#ffffff1f]",
 

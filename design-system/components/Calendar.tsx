@@ -270,7 +270,7 @@ export default function Calendar({
           {WEEKDAYS.map((day) => (
             <div
               key={day}
-              className="text-center text-caption font-normal text-content-primary py-1"
+              className="select-text text-center text-caption font-normal text-content-primary py-1"
               role="columnheader"
             >
               {day}
