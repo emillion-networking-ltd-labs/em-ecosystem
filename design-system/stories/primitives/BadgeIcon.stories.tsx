@@ -25,7 +25,7 @@ const meta = {
   title: "Primitives/BadgeIcon",
   component: IconBadge,
   tags: ["autodocs"],
-  args: { variant: "default", size: "md" },
+  args: { variant: "default", size: "sm" },
   argTypes: {
     variant: {
       control: "inline-radio",
@@ -35,7 +35,7 @@ const meta = {
   },
   render: (args) => (
     <DemoCard>
-      <IconBadge {...args}>{renderIcon(args.variant ?? "default", args.size ?? "md")}</IconBadge>
+      <IconBadge {...args}>{renderIcon(args.variant ?? "default", args.size ?? "sm")}</IconBadge>
     </DemoCard>
   ),
 } satisfies Meta<typeof IconBadge>;
@@ -66,7 +66,7 @@ export const AllSizes: Story = {
   render: () => (
     <Sizes
       items={SIZES.map(({ key, box }) => ({
-        label: `${key} · ${box}px · ${ICON_PX[key]}px${key === "md" ? " (default)" : ""}`,
+        label: `${key} · ${box}px · ${ICON_PX[key]}px${key === "sm" ? " (default)" : ""}`,
         node: <IconBadge size={key}>{renderIcon("default", key)}</IconBadge>,
       }))}
     />
@@ -79,7 +79,7 @@ export const AllVariants: Story = {
     <Variants
       items={VARIANTS.map((v) => ({
         label: cap(v),
-        node: <IconBadge variant={v}>{renderIcon(v, "md")}</IconBadge>,
+        node: <IconBadge variant={v}>{renderIcon(v, "sm")}</IconBadge>,
       }))}
     />
   ),

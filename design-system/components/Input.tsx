@@ -31,7 +31,7 @@ export const inputSpecs = {
     sm: "h-10 px-3 text-body (40px — compact contexts)",
     "md (default)": "h-12 px-4 text-body (48px — forms, auth)",
   },
-  label: "text-body font-semibold leading-[22px]",
+  label: "text-body font-semibold",
   input:
     "min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary outline-hidden placeholder:text-content-placeholder",
   states: {
@@ -88,7 +88,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       {label && (
         <label
           htmlFor={inputId}
-          className={`text-body font-semibold leading-[22px] ${isErrorState ? "text-error/75" : "text-content-primary"}`}
+          className={`text-body font-semibold ${isErrorState ? "text-error/75" : "text-content-primary"}`}
         >
           {label}
         </label>

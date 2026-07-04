@@ -50,7 +50,7 @@ interface CalendarDay {
 export const calendarSpecs = {
   container: {
     shared:
-      "w-[300px] bg-surface-primary border border-border-components rounded-xl p-6 gap-5 shadow-card",
+      "w-[300px] bg-surface-primary border border-border-strong rounded-xl p-6 gap-5 shadow-card",
   },
   navigation: {
     button: "w-6 h-6 rounded-full bg-surface-subtle hover:bg-surface-subtle",
@@ -68,7 +68,7 @@ export const calendarSpecs = {
       "bg-surface-inverse text-content-inverse font-normal rounded-full",
     today: "bg-surface-subtle text-content-primary font-normal rounded-full",
     default: "text-content-primary hover:bg-surface-subtle rounded-full",
-    "other month": "text-content-primary/50",
+    "other month": "text-content-tertiary",
     disabled: "opacity-30 cursor-not-allowed",
   },
   weekday: "text-caption font-normal text-content-primary text-center",
@@ -232,7 +232,7 @@ export default function Calendar({
 
   return (
     <div
-      className={`w-[300px] bg-surface-primary border border-border-components rounded-xl p-6 flex flex-col gap-5 shadow-card ${className}`}
+      className={`w-[300px] bg-surface-primary border border-border-strong rounded-xl p-6 flex flex-col gap-5 shadow-card ${className}`}
     >
       {/* Navigation */}
       <div className="flex items-center justify-between">
@@ -291,7 +291,7 @@ export default function Calendar({
                     ? "bg-surface-subtle text-content-primary font-normal"
                     : day.isCurrentMonth
                       ? "text-content-primary hover:bg-surface-subtle"
-                      : "text-content-primary/50"
+                      : "text-content-tertiary"
               } ${day.isDisabled ? "opacity-30 cursor-not-allowed" : "cursor-pointer"}`}
             >
               {day.day}

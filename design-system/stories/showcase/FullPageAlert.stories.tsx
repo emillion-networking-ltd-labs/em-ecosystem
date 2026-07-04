@@ -12,17 +12,27 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
   const isError = type === "error";
   return (
     <div
-      className="w-[280px] cursor-pointer overflow-hidden rounded-3xl border border-border-strong bg-surface-secondary shadow-card"
+      className="w-[280px] cursor-pointer overflow-hidden rounded-3xl border border-border-default bg-surface-secondary shadow-card"
       onMouseEnter={() => setAnimKey((k) => k + 1)}
     >
-      <div className="flex min-h-[200px] flex-col justify-center gap-2 border-b border-border-strong bg-surface-primary p-6">
+      <div className="flex min-h-[200px] flex-col justify-center gap-2 border-b border-border-default bg-surface-primary p-6">
         <div className="flex flex-col items-center gap-2">
           {isError ? (
-            <CircleX key={`error-${animKey}`} size={48} strokeWidth={1.5} className="icon-error text-error" />
+            <CircleX
+              key={`error-${animKey}`}
+              size={48}
+              strokeWidth={1.5}
+              className="icon-error text-error"
+            />
           ) : (
-            <CircleCheck key={`success-${animKey}`} size={48} strokeWidth={1.5} className="icon-success text-success" />
+            <CircleCheck
+              key={`success-${animKey}`}
+              size={48}
+              strokeWidth={1.5}
+              className="icon-success text-success"
+            />
           )}
-          <p className="text-center text-body text-content-tertiary">
+          <p className="text-center text-body text-content-secondary">
             {isError ? (
               <>
                 Something went wrong!

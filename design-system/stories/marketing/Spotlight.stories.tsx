@@ -3,7 +3,7 @@ import { Spotlight } from "@/components/ui/Spotlight";
 import { DemoCard } from "../_kit";
 
 // Aceternity UI (MIT), adopted verbatim in ECO-88. Decorative SVG spotlight; needs a bounded, relative parent.
-// A single Default (fill="white"). The accent-driven "themed" variant is dropped — accent is a placeholder
+// A single Default (fill=content-inverse, a neutral light). The accent-driven "themed" variant is dropped — accent is a placeholder
 // brand colour, not real; theming happens per satellite, not as a showcased variant. So no AllVariants.
 const meta = {
   title: "Marketing/Spotlight",
@@ -27,7 +27,7 @@ const Tile = ({ fill, label, height = "h-72" }: { fill: string; label: string; h
 export const Default: Story = {
   render: () => (
     <DemoCard block className="overflow-hidden">
-      <Tile fill="white" label="In the spotlight" />
+      <Tile fill="var(--color-content-inverse)" label="In the spotlight" />
     </DemoCard>
   ),
 };

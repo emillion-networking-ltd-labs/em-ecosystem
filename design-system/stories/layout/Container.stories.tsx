@@ -23,7 +23,7 @@ const SIZES = [
 ] as const;
 
 const Box = ({ label }: { label: string }) => (
-  <div className="rounded-lg border border-border-default bg-surface-secondary px-4 py-3 text-content-secondary">
+  <div className="rounded-lg border border-border-strong bg-surface-secondary px-4 py-3 text-content-secondary">
     {label}
   </div>
 );

@@ -1,6 +1,6 @@
 // InteractiveHoverButton — Magic UI (MIT, © Magic UI), adoptado (ECO-106, fase 1 / ADR-019). CTA cuyo
 // punto crece en hover hasta cubrir el botón y revela el texto + flecha deslizándose. Estructura/animación
-// VERBATIM; únicos cambios: colores crudos → tokens (bg-background→surface-primary, border→border-components,
+// VERBATIM; únicos cambios: colores crudos → tokens (bg-background→surface-primary, border→border-strong,
 // bg-primary→surface-inverse, text-primary-foreground→content-inverse, texto base→content-primary), la
 // flecha lucide acotada a `size-4`, y la forma `rounded-full` → `rounded-md` (la redondez del Button del
 // sistema; no introducimos una redondez huérfana — ECO-106). `lucide-react` ya presente.
@@ -16,7 +16,7 @@ export function InteractiveHoverButton({
   return (
     <button
       className={cn(
-        "group relative w-auto cursor-pointer overflow-hidden rounded-md border border-border-components bg-surface-primary p-2 px-6 text-center text-body font-semibold text-content-primary",
+        "group relative w-auto cursor-pointer overflow-hidden rounded-md border border-border-strong bg-surface-primary p-2 px-6 text-center text-body font-normal text-content-primary",
         className,
       )}
       {...props}

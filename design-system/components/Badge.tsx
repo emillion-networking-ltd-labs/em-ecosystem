@@ -17,14 +17,14 @@ interface BadgeProps {
 export const baseClass = "inline-flex items-center font-normal rounded-md";
 
 export const variantClasses = {
-  default: "bg-surface-subtle text-content-secondary",
+  default: "bg-surface-subtle text-content-primary",
   success: "bg-success-bg text-success",
   warning: "bg-warning-bg text-warning",
   error: "bg-error-bg text-error",
   info: "bg-info-bg text-info",
   kbd: "bg-surface-tertiary text-content-primary font-mono",
   overlay:
-    "bg-surface-inverse text-content-inverse border border-border-components backdrop-blur-xs",
+    "bg-surface-inverse text-content-inverse border border-border-strong backdrop-blur-xs",
 };
 
 export const sizeClasses = {

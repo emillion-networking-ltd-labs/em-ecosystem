@@ -20,7 +20,7 @@ type Story = StoryObj<typeof meta>;
 
 function ContentCard() {
   return (
-    <div className="mx-4 mb-4 mt-3 space-y-3 rounded-xl border border-border-strong bg-surface-primary p-4 text-caption text-content-secondary">
+    <div className="mx-4 mb-4 mt-3 space-y-3 rounded-xl border border-border-default bg-surface-primary p-4 text-caption text-content-secondary">
       {Array.from({ length: 8 }, (_, i) => (
         <p key={i}>
           Filler paragraph {i + 1} — scroll to see the card stick while the content scrolls

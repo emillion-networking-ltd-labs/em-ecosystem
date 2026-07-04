@@ -8,18 +8,54 @@ type SpeedometerSize = "sm" | "md" | "lg";
 // and h = arc height + 2·margin. The earlier values left a large empty band above the gauge.
 const speedoSizes = {
   sm: {
-    w: 180, h: 118, cx: 90, cy: 67, R: 55, progressW: 12, trackW: 10, dashR: 38,
-    needleLen: 34, needleBase: 4, hub: 6, hubInner: 2, fontSize: 12, labelOffset: 16,
+    w: 180,
+    h: 118,
+    cx: 90,
+    cy: 67,
+    R: 55,
+    progressW: 12,
+    trackW: 10,
+    dashR: 38,
+    needleLen: 34,
+    needleBase: 4,
+    hub: 6,
+    hubInner: 2,
+    fontSize: 12,
+    labelOffset: 16,
     textClass: "text-body",
   },
   md: {
-    w: 230, h: 151, cx: 115, cy: 86, R: 72, progressW: 16, trackW: 14, dashR: 50,
-    needleLen: 48, needleBase: 5, hub: 8, hubInner: 3, fontSize: 12, labelOffset: 20,
+    w: 230,
+    h: 151,
+    cx: 115,
+    cy: 86,
+    R: 72,
+    progressW: 16,
+    trackW: 14,
+    dashR: 50,
+    needleLen: 48,
+    needleBase: 5,
+    hub: 8,
+    hubInner: 3,
+    fontSize: 12,
+    labelOffset: 20,
     textClass: "text-h3",
   },
   lg: {
-    w: 260, h: 175, cx: 130, cy: 100, R: 85, progressW: 18, trackW: 16, dashR: 60,
-    needleLen: 55, needleBase: 6, hub: 10, hubInner: 4, fontSize: 12, labelOffset: 22,
+    w: 260,
+    h: 175,
+    cx: 130,
+    cy: 100,
+    R: 85,
+    progressW: 18,
+    trackW: 16,
+    dashR: 60,
+    needleLen: 55,
+    needleBase: 6,
+    hub: 10,
+    hubInner: 4,
+    fontSize: 12,
+    labelOffset: 22,
     textClass: "text-h1",
   },
 } as const;
@@ -32,8 +68,21 @@ export default function SpeedometerChart({
   size?: SpeedometerSize;
 }) {
   const {
-    w, h, cx, cy, R, progressW, trackW, dashR, needleLen, needleBase, hub, hubInner,
-    fontSize, labelOffset, textClass,
+    w,
+    h,
+    cx,
+    cy,
+    R,
+    progressW,
+    trackW,
+    dashR,
+    needleLen,
+    needleBase,
+    hub,
+    hubInner,
+    fontSize,
+    labelOffset,
+    textClass,
   } = speedoSizes[size];
 
   const toRad = (d: number) => (d * Math.PI) / 180;
@@ -47,7 +96,12 @@ export default function SpeedometerChart({
   const arcEnd = 45;
   const totalSweep = 270;
 
-  const makeArc = (r: number, fromDeg: number, toDeg: number, sweepLarger180: boolean) => {
+  const makeArc = (
+    r: number,
+    fromDeg: number,
+    toDeg: number,
+    sweepLarger180: boolean,
+  ) => {
     const s = ptAt(r, fromDeg);
     const e = ptAt(r, toDeg);
     const large = sweepLarger180 ? 1 : 0;
@@ -104,7 +158,7 @@ export default function SpeedometerChart({
           y={ptAt(dashR - labelOffset, arcStart).y + 5}
           fontSize={fontSize}
           textAnchor="middle"
-          className="fill-content-primary/50"
+          className="fill-content-tertiary"
         >
           00
         </text>
@@ -113,12 +167,14 @@ export default function SpeedometerChart({
           y={ptAt(dashR - labelOffset, arcEnd).y + 5}
           fontSize={fontSize}
           textAnchor="middle"
-          className="fill-content-primary/50"
+          className="fill-content-tertiary"
         >
           100
         </text>
       </svg>
-      <p className={`${textClass} font-semibold leading-none text-content-primary -mt-3`}>
+      <p
+        className={`${textClass} font-normal leading-none text-content-primary -mt-3`}
+      >
         {value}%
       </p>
     </div>

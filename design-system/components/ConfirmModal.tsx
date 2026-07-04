@@ -24,7 +24,7 @@ export const confirmModalSpecs = {
     radius: "rounded-xl (card inner)",
     overlay: "bg-(--overlay) — click does NOT close (Escape + X only)",
     topSection:
-      "bg-surface-primary p-6 sm:p-6 p-4 border-b border-border-strong",
+      "bg-surface-primary p-6 sm:p-6 p-4 border-b border-border-default",
     bottomSection: "bg-surface-secondary px-6 py-3",
   },
   accessibility: {
@@ -192,7 +192,7 @@ export default function ConfirmModal({
         className={`group w-full ${sizeClasses[size]} mx-4 max-h-[90vh] overflow-y-auto rounded-xl border border-border-strong bg-surface-secondary shadow-card`}
       >
         {/* Top section */}
-        <div className="relative rounded-t-xl border-b border-border-strong bg-surface-primary p-4 sm:p-6">
+        <div className="relative rounded-t-xl border-b border-border-default bg-surface-primary p-4 sm:p-6">
           {/* Close — top-right CORNER (less inset than the content padding so it sits above-right of
               the title, not crowding it). Appears on hover over the modal (or keyboard focus). */}
           <IconButton

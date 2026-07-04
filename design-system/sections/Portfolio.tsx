@@ -110,7 +110,7 @@ function PortfolioCard({
               </h3>
             ) : null}
             {item.description ? (
-              <p className="mt-1 text-body leading-relaxed text-content-secondary">
+              <p className="mt-1 text-body text-content-secondary">
                 {item.description}
               </p>
             ) : null}

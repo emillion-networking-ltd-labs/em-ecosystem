@@ -39,7 +39,9 @@ export default function DoughnutChart({
   return (
     <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
       <div className="mb-4">
-        <h3 className="text-body font-semibold text-content-primary">{title}</h3>
+        <h3 className="text-h3 font-semibold text-content-primary">
+          {title}
+        </h3>
       </div>
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
         <div className="h-[120px] w-[120px] shrink-0">
@@ -65,11 +67,13 @@ export default function DoughnutChart({
                   if (!active || !payload?.length) return null;
                   const item = payload[0];
                   return (
-                    <div className="whitespace-nowrap rounded-lg border border-border-components bg-surface-primary px-4 py-3 shadow-card">
+                    <div className="whitespace-nowrap rounded-lg border border-border-default bg-surface-primary px-4 py-3 shadow-card">
                       <div className="flex items-center gap-1.5">
                         <span
                           className="h-2 w-2 shrink-0 rounded-sm"
-                          style={{ background: item.payload?.fill || item.color }}
+                          style={{
+                            background: item.payload?.fill || item.color,
+                          }}
                         />
                         <span className="text-caption font-normal text-content-primary">
                           {item.name}: {item.value}
@@ -85,9 +89,12 @@ export default function DoughnutChart({
         <div className="space-y-3">
           {chartData.map(({ name, value, fill }) => (
             <div key={name} className="flex items-center gap-2">
-              <span className="h-2 w-2 shrink-0 rounded-full" style={{ background: fill }} />
+              <span
+                className="h-2 w-2 shrink-0 rounded-full"
+                style={{ background: fill }}
+              />
               <span className="text-caption text-content-primary">{name}</span>
-              <span className="text-caption text-content-tertiary">
+              <span className="text-caption text-content-secondary">
                 {value} ({((value / total) * 100).toFixed(1)}%)
               </span>
             </div>

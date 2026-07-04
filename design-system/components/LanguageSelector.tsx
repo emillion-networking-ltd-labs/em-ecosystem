@@ -28,9 +28,9 @@ export const languageSelectorSpecs = {
   popover: {
     position: "absolute w-fit min-w-[200px]",
     container:
-      "rounded-xl border border-border-components bg-surface-primary p-2 shadow-card max-h-[240px] overflow-y-auto",
+      "rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card max-h-[240px] overflow-y-auto",
     search:
-      "h-12 rounded-lg border border-border-components bg-surface-primary px-4 shadow-card",
+      "Input variant=filled + shadow-card — el borde lo pone el primitivo Input (border-components)",
   },
   option: {
     selected: "bg-surface-tertiary text-content-primary",
@@ -176,9 +176,9 @@ export default function LanguageSelector({
             </div>
 
             {/* Results — appears second (stagger child 2) */}
-            <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-components bg-surface-primary p-2 shadow-card">
+            <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card">
               {filtered.length === 0 ? (
-                <p className="py-2 text-center text-body text-content-primary/50">
+                <p className="py-2 text-center text-body text-content-secondary">
                   No results
                 </p>
               ) : (

@@ -45,7 +45,7 @@ export const ShimmerButton = React.forwardRef<
           } as CSSProperties
         }
         className={cn(
-          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border border-content-inverse/10 px-6 py-3 whitespace-nowrap text-content-inverse [background:var(--bg)]",
+          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border border-border-strong px-6 py-3 whitespace-nowrap text-content-inverse [background:var(--bg)]",
           "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
           className,
         )}
@@ -72,16 +72,16 @@ export const ShimmerButton = React.forwardRef<
           className={cn(
             "absolute inset-0 size-full select-none",
 
-            "rounded-[inherit] px-4 py-1.5 text-sm font-medium shadow-[inset_0_-8px_10px_#ffffff1f]",
+            "rounded-[inherit] px-4 py-1.5 shadow-[inset_0_-8px_10px_color-mix(in_srgb,var(--color-content-inverse)_12%,transparent)]",
 
             // transition
             "transform-gpu transition-all duration-300 ease-in-out",
 
             // on hover
-            "group-hover:shadow-[inset_0_-6px_10px_#ffffff3f]",
+            "group-hover:shadow-[inset_0_-6px_10px_color-mix(in_srgb,var(--color-content-inverse)_25%,transparent)]",
 
             // on click
-            "group-active:shadow-[inset_0_-10px_10px_#ffffff3f]",
+            "group-active:shadow-[inset_0_-10px_10px_color-mix(in_srgb,var(--color-content-inverse)_25%,transparent)]",
           )}
         />
 

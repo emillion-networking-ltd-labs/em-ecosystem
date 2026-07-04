@@ -46,9 +46,9 @@ function ServiceCard({
   });
   return (
     <div ref={ref} style={style}>
-      <div className="card-flat scroll-mt-24 transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-components hover:shadow-[var(--shadow-card)]">
+      <div className="card-flat scroll-mt-24 transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-strong hover:shadow-[var(--shadow-card)]">
         <div className="flex items-start gap-5">
-          <span className="text-3xl font-black text-content-primary">
+          <span className="text-h1 font-black text-content-primary">
             {String(index + 1).padStart(2, "0")}
           </span>
           <div className="flex-1">
@@ -60,7 +60,7 @@ function ServiceCard({
                 {service.label}
               </Badge>
             </div>
-            <p className="mt-2 text-body leading-relaxed text-content-secondary">
+            <p className="mt-2 text-body text-content-secondary">
               {service.fullDesc}
             </p>
             {service.features && service.features.length ? (

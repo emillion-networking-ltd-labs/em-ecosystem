@@ -31,10 +31,23 @@ function Code({ children }: { children: string }) {
 }
 
 function Caption({ children }: { children: string }) {
-  return <span className="text-caption font-mono text-content-secondary">{children}</span>;
+  return (
+    <span className="text-caption font-mono text-content-secondary">
+      {children}
+    </span>
+  );
 }
 
-const SAMPLE: LucideIcon[] = [Search, Bell, Settings, User, Check, ArrowRight, ShieldCheck, Zap];
+const SAMPLE: LucideIcon[] = [
+  Search,
+  Bell,
+  Settings,
+  User,
+  Check,
+  ArrowRight,
+  ShieldCheck,
+  Zap,
+];
 
 type IconStyle = "ghost" | "boxed" | "pressed";
 
@@ -43,12 +56,14 @@ type IconStyle = "ghost" | "boxed" | "pressed";
 //   ghost   → bare glyph at 50% (the `default` variant rest)
 //   boxed   → glyph on a light surface (`bg-surface-tertiary`), with a transparent border so it matches the
 //             pressed box size
-//   pressed → boxed + the border in `border-components` (the ButtonIcon pressed ring colour). Rendered as a
+//   pressed → boxed + the border in `border-strong` (the ButtonIcon pressed ring colour; focus ring is the
+//             mandatory `border-components`). Rendered as a
 //             real border (not a Tailwind ring) so it actually paints on the static icon.
 const STYLE: Record<IconStyle, string> = {
   ghost: "text-content-primary/50",
   boxed: "bg-surface-tertiary text-content-primary border border-transparent",
-  pressed: "bg-surface-tertiary text-content-primary border border-border-components",
+  pressed:
+    "bg-surface-tertiary text-content-primary border border-border-strong",
 };
 
 function Row({ style }: { style: IconStyle }) {
@@ -72,9 +87,10 @@ export const Icons: Story = {
       <h1 className="text-display-3 font-display font-bold">Icons</h1>
       <p className="mt-3 max-w-2xl text-body text-content-secondary">
         The icon set is <Code>lucide-react</Code> — import each glyph directly:{" "}
-        <Code>{`import { Search } from "lucide-react"`}</Code>. Icons inherit <Code>currentColor</Code>, so
-        colour them with <Code>content-*</Code> tokens (never a hex). The default UI size is{" "}
-        <Code>16px</Code>; use <Code>24px</Code> for emphasis and <Code>48px</Code> for illustrations /
+        <Code>{`import { Search } from "lucide-react"`}</Code>. Icons inherit{" "}
+        <Code>currentColor</Code>, so colour them with <Code>content-*</Code>{" "}
+        tokens (never a hex). The default UI size is <Code>16px</Code>; use{" "}
+        <Code>24px</Code> for emphasis and <Code>48px</Code> for illustrations /
         empty states. Dense UI drops to <Code>12–14px</Code>.
       </p>
 
@@ -99,11 +115,17 @@ export const Icons: Story = {
         <Row style="ghost" />
       </Group>
 
-      <Group title="Boxed" description="The same glyphs on a surface — the boxed style.">
+      <Group
+        title="Boxed"
+        description="The same glyphs on a surface — the boxed style."
+      >
         <Row style="boxed" />
       </Group>
 
-      <Group title="Pressed" description="The boxed style in its active/pressed state — marked by a border in the ButtonIcon pressed colour (border-components).">
+      <Group
+        title="Pressed"
+        description="The boxed style in its active/pressed state — marked by a border in the ButtonIcon pressed colour (border-strong)."
+      >
         <Row style="pressed" />
       </Group>
 
@@ -113,12 +135,14 @@ export const Icons: Story = {
       >
         <ul className="ml-5 list-disc space-y-2 text-body text-content-secondary">
           <li>
-            <Code>ButtonIcon</Code> — an <strong>interactive</strong> icon button. Its variants are the
-            ghost / boxed states above, plus the pressed state; sizes sm / md. Use it for clickable actions.
+            <Code>ButtonIcon</Code> — an <strong>interactive</strong> icon
+            button. Its variants are the ghost / boxed states above, plus the
+            pressed state; sizes sm / md. Use it for clickable actions.
           </li>
           <li>
-            <Code>BadgeIcon</Code> — a <strong>non-interactive</strong> icon in a tinted box, for status /
-            feature marks; sizes sm / md / lg (32 / 40 / 56px).
+            <Code>BadgeIcon</Code> — a <strong>non-interactive</strong> icon in
+            a tinted box, for status / feature marks; sizes sm / md / lg (32 /
+            40 / 56px).
           </li>
         </ul>
       </Group>

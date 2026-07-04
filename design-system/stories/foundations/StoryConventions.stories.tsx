@@ -29,7 +29,7 @@ function Code({ children }: { children: ReactNode }) {
 
 function Snippet({ children }: { children: string }) {
   return (
-    <pre className="mt-3 overflow-x-auto rounded-lg border border-border-default bg-surface-secondary p-4 text-caption font-mono text-content-secondary">
+    <pre className="mt-3 overflow-x-auto rounded-lg border border-border-default bg-surface-primary p-4 text-caption font-mono text-content-secondary">
       {children}
     </pre>
   );
@@ -41,7 +41,7 @@ function Sample({ children, size = "md" }: { children: ReactNode; size?: "sm" | 
   const pad =
     size === "sm" ? "px-3 py-1.5 text-caption" : size === "lg" ? "px-7 py-3.5 text-h3" : "px-5 py-2.5 text-body";
   return (
-    <span className={`rounded-md bg-surface-inverse font-medium text-content-inverse ${pad}`}>{children}</span>
+    <span className={`rounded-md bg-surface-inverse font-normal text-content-inverse ${pad}`}>{children}</span>
   );
 }
 
@@ -153,6 +153,46 @@ export const StoryConventions: Story = {
           </Rule>
           <Rule>
             <strong>Charts</strong> → <Code>DemoCard</Code>; AllVariants = the real data states (data / empty).
+          </Rule>
+        </ul>
+      </Group>
+
+      <Group
+        title="Which border — frame vs element"
+        description="Every bordered thing in a story plays one of three roles. The border token follows the ROLE, never a hand-picked value — so a future colour change propagates cleanly to it."
+      >
+        <ul className="ml-5 list-disc space-y-2">
+          <Rule>
+            <strong>Frame drawn ON the container being demonstrated</strong> (the <Code>DemoCard</Code>; or a
+            layout primitive&apos;s own frame when the border sits on the container itself — a{" "}
+            <Code>Stack</Code>, a <Code>Cluster</Code>, a <Code>Section</Code> band showing its padding) →{" "}
+            <Code>border-default</Code> (the card token). DemoCard already <em>is</em> a <Code>Card</Code> ={" "}
+            <Code>border-default</Code>, so a hand-rolled frame matches it.
+          </Rule>
+          <Rule>
+            <strong>A discrete element / panel / marker drawn as the content</strong> (a placeholder box,{" "}
+            <Code>Split</Code>&apos;s media panel, <Code>Container</Code>&apos;s measure box, the content box
+            inside a padded band) → <Code>border-strong</Code> (the element token). Tell-tale: the container is
+            invisible and you border a <em>child</em> to reveal the structure.
+          </Rule>
+          <Rule>
+            <strong>Invisible layout wrapper</strong> (<Code>Container</Code>, <Code>Grid</Code>) →{" "}
+            <strong>no border</strong>. It only clamps width / lays out — it is not a surface.
+          </Rule>
+          <Rule>
+            <strong>Mandatory by the norm</strong>: an input&apos;s <em>border</em> →{" "}
+            <Code>border-components</Code> (WCAG 3:1, gate-enforced by <Code>check-contrast</Code>). Its{" "}
+            <em>focus ring</em> → <Code>content-primary</Code> (a stronger indicator than the resting
+            border). By design <strong>only inputs</strong> carry a custom focus ring — other controls keep
+            the browser default. A shadowed popup/dropdown uses <Code>border-strong</Code> (the shadow is the
+            indicator — the border is decorative).
+          </Rule>
+          <Rule>
+            The deciding question: is the border <strong>ON the container</strong> being demonstrated (→{" "}
+            <Code>border-default</Code>) or on a <strong>discrete element/panel</strong> shown as its content (→{" "}
+            <Code>border-strong</Code>)? Pick the <em>role</em> — <strong>never a raw value</strong> (a hex, an
+            <Code>rgba()</Code>, or a Tailwind palette colour like <Code>slate-500</Code>) that merely matches:
+            a non-token value cannot be re-themed and breaks propagation.
           </Rule>
         </ul>
       </Group>
