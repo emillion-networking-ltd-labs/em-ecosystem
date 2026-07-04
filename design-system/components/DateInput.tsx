@@ -113,7 +113,7 @@ export default function DateInput({
     >
       {label && (
         <label
-          className={`text-body font-semibold leading-[22px] ${hasError ? "text-error" : "text-content-primary"}`}
+          className={`text-body font-semibold ${hasError ? "text-error" : "text-content-primary"}`}
         >
           {label}
         </label>

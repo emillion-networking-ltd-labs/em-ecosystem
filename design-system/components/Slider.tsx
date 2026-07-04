@@ -17,15 +17,15 @@ interface SliderProps {
 export const sliderSpecs = {
   track: {
     background:
-      "bg-surface-primary border-2 border-border-components — 8px height, rounded-full",
-    fill: "bg-surface-inverse border-2 border-border-components — dynamic width via percentage",
+      "bg-surface-primary border border-border-components — 8px height, rounded-full",
+    fill: "bg-surface-inverse border border-border-components — dynamic width via percentage",
   },
   thumb: {
     size: "16×16px rounded-full",
-    style: "bg-white border-2 border-solid border-[rgba(0,0,0,0.08)]",
+    style: "bg-surface-primary border border-solid border-border-components — thumb knob; focus ring var(--color-border-components)",
   },
   label: "text-body font-normal text-content-primary",
-  value: "text-caption text-content-primary/50 tabular-nums",
+  value: "text-caption text-content-secondary tabular-nums",
 };
 
 export default function Slider({
@@ -66,7 +66,7 @@ export default function Slider({
             </label>
           )}
           {showValue && (
-            <span className="text-caption text-content-primary/50 tabular-nums">
+            <span className="text-caption text-content-secondary tabular-nums">
               {value}
             </span>
           )}
@@ -74,11 +74,11 @@ export default function Slider({
       )}
       <div className="relative flex items-center h-4">
         {/* Track background */}
-        <div className="absolute w-full h-2 rounded-full bg-surface-primary border-2 border-border-components" />
+        <div className="absolute w-full h-2 rounded-full bg-surface-primary border border-border-components" />
 
         {/* Progress fill */}
         <div
-          className="absolute h-2 rounded-full bg-surface-inverse border-2 border-border-components"
+          className="absolute h-2 rounded-full bg-surface-inverse border border-border-components"
           style={{ width: `${frac * 100}%` }}
         />
 
@@ -103,21 +103,21 @@ export default function Slider({
             [&::-webkit-slider-thumb]:w-4
             [&::-webkit-slider-thumb]:h-4
             [&::-webkit-slider-thumb]:rounded-full
-            [&::-webkit-slider-thumb]:bg-white
+            [&::-webkit-slider-thumb]:bg-surface-primary
             [&::-webkit-slider-thumb]:border
             [&::-webkit-slider-thumb]:border-solid
-            [&::-webkit-slider-thumb]:border-border-strong
+            [&::-webkit-slider-thumb]:border-border-components
             [&::-webkit-slider-thumb]:shadow-[0_1px_3px_rgba(0,0,0,0.25)]
-            focus-visible:[&::-webkit-slider-thumb]:shadow-[0_0_0_2px_var(--border-components),0_1px_3px_rgba(0,0,0,0.25)]
+            focus-visible:[&::-webkit-slider-thumb]:shadow-[0_0_0_2px_var(--color-border-components),0_1px_3px_rgba(0,0,0,0.25)]
             [&::-moz-range-thumb]:w-4
             [&::-moz-range-thumb]:h-4
             [&::-moz-range-thumb]:rounded-full
-            [&::-moz-range-thumb]:bg-white
+            [&::-moz-range-thumb]:bg-surface-primary
             [&::-moz-range-thumb]:border
             [&::-moz-range-thumb]:border-solid
-            [&::-moz-range-thumb]:border-border-strong
+            [&::-moz-range-thumb]:border-border-components
             [&::-moz-range-thumb]:shadow-[0_1px_3px_rgba(0,0,0,0.25)]
-            focus-visible:[&::-moz-range-thumb]:shadow-[0_0_0_2px_var(--border-components),0_1px_3px_rgba(0,0,0,0.25)]
+            focus-visible:[&::-moz-range-thumb]:shadow-[0_0_0_2px_var(--color-border-components),0_1px_3px_rgba(0,0,0,0.25)]
             ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         />
       </div>

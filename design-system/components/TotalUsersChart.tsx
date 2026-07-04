@@ -33,7 +33,7 @@ const COLORS = {
   line: "var(--color-content-primary)",
   compare: "var(--color-accent)",
   ticks: "var(--color-content-tertiary)",
-  grid: "var(--border-strong)",
+  grid: "var(--color-border-default)",
 };
 
 export default function TotalUsersChart() {
@@ -44,12 +44,12 @@ export default function TotalUsersChart() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-content-primary" />
-            <span className="text-caption text-content-tertiary">This year</span>
+            <span className="text-caption text-content-secondary">This year</span>
           </div>
           <span className="text-caption text-content-primary/20">|</span>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-accent" />
-            <span className="text-caption text-content-tertiary">Last year</span>
+            <span className="text-caption text-content-secondary">Last year</span>
           </div>
         </div>
       </div>
@@ -74,7 +74,7 @@ export default function TotalUsersChart() {
             content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
               return (
-                <div className="whitespace-nowrap rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card">
+                <div className="whitespace-nowrap rounded-lg border border-border-default bg-surface-primary px-4 py-3 shadow-card">
                   <p className="mb-1 text-caption font-semibold capitalize text-content-primary">
                     {String(label).toLowerCase()}
                   </p>
@@ -92,7 +92,7 @@ export default function TotalUsersChart() {
                 </div>
               );
             }}
-            cursor={{ stroke: "var(--border-strong)", strokeWidth: 1 }}
+            cursor={{ stroke: "var(--color-border-default)", strokeWidth: 1 }}
           />
           <Line
             type="monotone"

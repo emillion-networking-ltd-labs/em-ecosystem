@@ -30,7 +30,7 @@ export const Default: Story = {};
 export const InTopBar: Story = {
   render: (args) => (
     <DemoCard>
-      <div className="flex w-[420px] items-center justify-between rounded-md border border-border-components bg-surface-primary px-4 py-2">
+      <div className="flex w-[420px] items-center justify-between rounded-md border border-border-default bg-surface-primary px-4 py-2">
         <span className="text-body font-semibold text-content-primary">NexaCore</span>
         <SearchTrigger {...args} />
       </div>

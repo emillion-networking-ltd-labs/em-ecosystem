@@ -54,7 +54,7 @@ export const CardHoverEffect = ({
           </AnimatePresence>
           <Card
             size="md"
-            className="relative z-20 h-full transition-colors group-hover:border-border-components"
+            className="relative z-20 h-full transition-colors group-hover:border-border-strong"
           >
             <h4 className="text-h3 font-semibold text-content-primary">{item.title}</h4>
             <p className="mt-4 text-body text-content-secondary">

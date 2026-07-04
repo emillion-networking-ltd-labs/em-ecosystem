@@ -53,8 +53,8 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
           aria-hidden
           className={
             n <= rating
-              ? "fill-amber-400 text-amber-400"
-              : "fill-border-strong text-border-strong"
+              ? "fill-content-primary text-content-primary"
+              : "fill-content-primary/30 text-content-primary/30"
           }
         />
       ))}
@@ -67,7 +67,7 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
   const interactive = !!t.href;
   const cls = `card-flat flex h-full flex-col ${
     interactive
-      ? "transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-components hover:shadow-[var(--shadow-card)]"
+      ? "transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-strong hover:shadow-[var(--shadow-card)]"
       : ""
   }`;
   const inner = (
@@ -79,7 +79,7 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
             {t.name}
           </figcaption>
           {t.role ? (
-            <p className="text-caption text-content-tertiary">{t.role}</p>
+            <p className="text-caption font-semibold text-content-secondary">{t.role}</p>
           ) : null}
         </div>
       </div>
@@ -88,7 +88,7 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
           <StarRating rating={t.rating} />
         </div>
       ) : null}
-      <blockquote className="mt-3 flex-1 text-body leading-relaxed text-content-secondary">
+      <blockquote className="mt-3 flex-1 text-body text-content-secondary">
         {t.quote}
       </blockquote>
     </>

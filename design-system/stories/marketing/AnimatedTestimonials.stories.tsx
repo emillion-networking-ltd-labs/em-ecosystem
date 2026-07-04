@@ -13,7 +13,9 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// Local, network-free placeholder photo (initial on a neutral background).
+// Local, network-free placeholder photo (initial on a neutral background). The hex below is intentional
+// photo data: an inline SVG data-URI cannot read DS tokens, and a real deploy passes photo URLs. It is
+// exempt from the token rule (like a structural mask), not UI chrome.
 const photo = (initial: string, bg: string) =>
   `data:image/svg+xml,${encodeURIComponent(
     `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="500" height="500" fill="${bg}"/><text x="50%" y="50%" font-size="220" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="sans-serif">${initial}</text></svg>`,

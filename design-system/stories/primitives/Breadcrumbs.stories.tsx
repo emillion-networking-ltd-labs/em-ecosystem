@@ -54,16 +54,16 @@ export const Collapsed: Story = {
     ],
   },
   render: (args) => (
-    <DemoCard block>
-      <div className="flex flex-col gap-2">
-        <span className="text-caption text-content-secondary">
-          On a narrow width (e.g. mobile) the path collapses to Home / … / Last. Click “…” to expand and
-          navigate the hidden levels.
-        </span>
-        <div className="w-[300px] rounded-md border border-border-components bg-surface-primary p-3">
+    <div className="flex flex-col gap-3">
+      <p className="text-caption text-content-secondary font-mono">
+        On a narrow width (e.g. mobile) the path collapses to Home / … / Last. Click “…” to expand and
+        navigate the hidden levels.
+      </p>
+      <DemoCard block>
+        <div className="w-[300px] rounded-md border border-border-default bg-surface-primary p-3">
           <Breadcrumbs {...args} />
         </div>
-      </div>
-    </DemoCard>
+      </DemoCard>
+    </div>
   ),
 };

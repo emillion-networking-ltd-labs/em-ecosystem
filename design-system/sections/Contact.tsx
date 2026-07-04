@@ -52,7 +52,7 @@ function MethodCard({ method }: { method: ContactMethod }) {
         {method.icon}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-caption font-semibold uppercase tracking-widest text-content-tertiary">
+        <p className="text-caption font-semibold uppercase tracking-widest text-content-secondary">
           {method.label}
         </p>
         <p className="mt-1 break-words text-body text-content-primary">
@@ -68,7 +68,7 @@ function MethodCard({ method }: { method: ContactMethod }) {
         {...(method.external
           ? { target: "_blank", rel: "noopener noreferrer" }
           : {})}
-        className="card-flat block transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-components hover:shadow-[var(--shadow-card)]"
+        className="card-flat block transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-strong hover:shadow-[var(--shadow-card)]"
       >
         {inner}
       </a>
@@ -194,7 +194,7 @@ function ContactFormBlock({
           />
           <a
             href={privacyHref}
-            className="shrink-0 text-caption text-content-secondary underline decoration-dotted underline-offset-2 transition-colors hover:text-content-primary"
+            className="shrink-0 text-caption text-content-primary/75 underline decoration-dotted underline-offset-2 transition-colors hover:text-content-primary"
           >
             Read the privacy policy
           </a>

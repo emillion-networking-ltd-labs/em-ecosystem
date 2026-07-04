@@ -9,9 +9,18 @@ const meta = {
   tags: ["autodocs"],
   args: { gap: "sm", align: "center", justify: "start", wrap: true },
   argTypes: {
-    gap: { control: "inline-radio", options: ["none", "xs", "sm", "md", "lg", "xl", "2xl"] },
-    align: { control: "inline-radio", options: ["start", "center", "end", "baseline", "stretch"] },
-    justify: { control: "inline-radio", options: ["start", "center", "between", "end"] },
+    gap: {
+      control: "inline-radio",
+      options: ["none", "xs", "sm", "md", "lg", "xl", "2xl"],
+    },
+    align: {
+      control: "inline-radio",
+      options: ["start", "center", "end", "baseline", "stretch"],
+    },
+    justify: {
+      control: "inline-radio",
+      options: ["start", "center", "between", "end"],
+    },
     wrap: { control: "boolean" },
   },
 } satisfies Meta<typeof Cluster>;
@@ -20,7 +29,16 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // Real registered elements as the demo content (Badge tags, Button group) — no ad-hoc chips.
-const TAGS = ["Design", "Frontend", "Accessibility", "Tokens", "Motion", "Layout", "Testing", "Docs"];
+const TAGS = [
+  "Design",
+  "Frontend",
+  "Accessibility",
+  "Tokens",
+  "Motion",
+  "Layout",
+  "Testing",
+  "Docs",
+];
 const tags = () => TAGS.map((t) => <Badge key={t}>{t}</Badge>);
 
 // Playground — a horizontal row of items that wraps when it runs out of room. Here: a row of tag Badges.
@@ -50,13 +68,26 @@ export const Justify: Story = {
       {JUSTIFIES.map((justify) => (
         <div key={justify} className="space-y-1.5">
           <span className="text-caption text-content-secondary font-mono">
-            justify=&quot;{justify}&quot;{justify === "start" ? " (default)" : ""}
+            justify=&quot;{justify}&quot;
+            {justify === "start" ? " (default)" : ""}
           </span>
-          <Cluster justify={justify} className="w-full rounded-lg border border-border-default p-3">
-            <Button as="a" href="#" variant="primary" size="sm" fullWidth={false}>
+          <Cluster justify={justify} className="card-flat w-full">
+            <Button
+              as="a"
+              href="#"
+              variant="primary"
+              size="sm"
+              fullWidth={false}
+            >
               Get started
             </Button>
-            <Button as="a" href="#" variant="outline" size="sm" fullWidth={false}>
+            <Button
+              as="a"
+              href="#"
+              variant="outline"
+              size="sm"
+              fullWidth={false}
+            >
               Learn more
             </Button>
           </Cluster>

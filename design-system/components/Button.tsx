@@ -4,12 +4,7 @@ import React from "react";
 import SpinnerInfinity from "./SpinnerInfinity";
 
 export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "outline"
-  | "danger"
-  | "link"
-  | "link-underline";
+  "primary" | "secondary" | "outline" | "danger" | "link" | "link-underline";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -22,9 +17,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const variantClasses = {
   primary:
-    "bg-surface-inverse text-content-inverse border border-border-components transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50",
+    "bg-surface-inverse text-content-inverse border border-border-strong transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50",
   secondary:
-    "bg-surface-tertiary text-content-secondary border border-border-components transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
+    "bg-surface-tertiary text-content-secondary border border-border-strong transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   outline:
     "bg-transparent text-content-primary border border-border-components transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   danger:

@@ -40,7 +40,7 @@ export default function CTA({
             {title}
           </h2>
           {description ? (
-            <p className="mx-auto mt-4 max-w-xl text-lg leading-relaxed text-content-secondary">
+            <p className="mx-auto mt-4 max-w-xl text-body text-content-secondary">
               {description}
             </p>
           ) : null}
@@ -60,7 +60,7 @@ export default function CTA({
             ) : null}
           </div>
           {note ? (
-            <p className="mt-6 text-caption text-content-tertiary">{note}</p>
+            <p className="mt-6 text-caption text-content-secondary">{note}</p>
           ) : null}
         </div>
       </Container>

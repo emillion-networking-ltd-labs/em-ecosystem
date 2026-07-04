@@ -5,7 +5,7 @@ import { DemoCard, Variants, Sizes } from "../_kit";
 
 // Decoration/GridPattern — a tileable grid texture painted as an absolute background (currentColor), for an
 // editorial backdrop behind hero/CTA content. Color comes from a text token (text-border-subtle by default,
-// text-accent to theme it) — never a hex.
+// text-accent to theme it) — never a hex. (Los demos usan text-border-strong para que el patrón se vea a tamaño tile.)
 const meta = {
   title: "Decoration/GridPattern",
   component: GridPattern,
@@ -35,7 +35,7 @@ export const Default: Story = {
   render: (args) => (
     <DemoCard block className="overflow-hidden">
       <Tile h="h-72">
-        <GridPattern {...args} className="text-content-tertiary" />
+        <GridPattern {...args} className="text-border-strong" />
         <h2 className="text-display-3 font-display">Editorial grid</h2>
       </Tile>
     </DemoCard>
@@ -52,7 +52,7 @@ export const Strokes: Story = {
         block: true,
         node: (
           <Tile>
-            <GridPattern gap={28} stroke={stroke} className="text-content-tertiary" />
+            <GridPattern gap={28} stroke={stroke} className="text-border-strong" />
           </Tile>
         ),
       }))}
@@ -70,7 +70,7 @@ export const Gaps: Story = {
         block: true,
         node: (
           <Tile>
-            <GridPattern gap={gap} className="text-content-tertiary" />
+            <GridPattern gap={gap} className="text-border-strong" />
           </Tile>
         ),
       }))}

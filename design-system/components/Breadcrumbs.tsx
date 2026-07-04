@@ -81,7 +81,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
   }, [collapsed]);
 
   const linkClass =
-    "text-body font-normal text-content-tertiary transition-colors hover:text-content-primary";
+    "text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary";
   const activeClass = "text-body font-normal text-content-primary";
   const sepClass = "shrink-0 text-content-tertiary";
 
@@ -137,18 +137,18 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                 aria-expanded={menuOpen}
                 aria-haspopup="menu"
                 aria-label="Show hidden levels"
-                className="rounded px-2 py-1 text-body font-normal text-content-tertiary transition-colors hover:bg-surface-subtle hover:text-content-primary"
+                className="rounded px-2 py-1 text-body font-normal text-content-primary/75 transition-colors hover:bg-surface-subtle hover:text-content-primary"
               >
                 …
               </button>
               {menuOpen && (
                 // SAME classes as the Select popup (1:1 coherence): panel p-6 rounded-xl
-                // border-border-components bg-surface-primary shadow-card gap-0.5; items h-10 px-6
+                // border-border-strong bg-surface-primary shadow-card gap-0.5; items h-10 px-6
                 // py-2.5 rounded-md, text-content-primary hover:bg-surface-subtle. A leading chevron
                 // per item echoes the breadcrumb separator.
                 <ul
                   role="menu"
-                  className="absolute left-0 top-full z-50 mt-1 flex max-h-64 w-fit min-w-[160px] flex-col gap-0.5 overflow-auto rounded-xl border border-border-components bg-surface-primary p-6 shadow-card animate-dropdown-down"
+                  className="absolute left-0 top-full z-50 mt-1 flex max-h-64 w-fit min-w-[160px] flex-col gap-0.5 overflow-auto rounded-xl border border-border-strong bg-surface-primary p-6 shadow-card animate-dropdown-down"
                 >
                   {middleItems.map((item) => (
                     <li key={item.label} role="none">

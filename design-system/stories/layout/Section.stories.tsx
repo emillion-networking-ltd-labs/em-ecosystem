@@ -69,7 +69,7 @@ export const Spacing: Story = {
           </span>
           <Section spacing={spacing} surface="secondary" className="mt-1.5 rounded-lg border border-border-default">
             <Container>
-              <div className="rounded-md border border-border-default bg-surface-primary px-4 py-2 text-content-tertiary">
+              <div className="rounded-md border border-border-strong bg-surface-primary px-4 py-2 text-content-tertiary">
                 content
               </div>
             </Container>

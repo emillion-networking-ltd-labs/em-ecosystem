@@ -27,7 +27,7 @@ const RATIOS = [
   { ratio: "4-8", label: "content 4 / media 8" },
 ] as const;
 const Media = () => (
-  <div className="aspect-video w-full rounded-xl border border-border-default [background-image:var(--gradient-brand)] opacity-80" />
+  <div className="aspect-video w-full rounded-xl border border-border-strong [background-image:var(--gradient-brand)] opacity-80" />
 );
 
 const Content = () => (

@@ -22,7 +22,7 @@ export const paginationSpecs = {
     base: pageBase,
     active: pageActive,
     inactive: pageInactive,
-    ellipsis: "text-content-primary/50 (no hover, no border)",
+    ellipsis: "text-content-tertiary (no hover, no border)",
   },
   arrows: {
     shared: arrowBase,
@@ -59,7 +59,7 @@ export default function Pagination({
         page === "..." ? (
           <span
             key={`ellipsis-${i}`}
-            className="flex h-8 w-8 items-center justify-center text-caption font-normal text-content-primary/50"
+            className="flex h-8 w-8 items-center justify-center text-caption font-normal text-content-tertiary"
           >
             ...
           </span>

@@ -39,7 +39,7 @@ export const BentoGridItem = ({
   return (
     <div
       className={cn(
-        "group/bento card row-span-1 flex flex-col justify-between space-y-4 p-4 transition duration-200 hover:shadow-xl",
+        "group/bento card row-span-1 flex flex-col justify-between space-y-4 p-4 transition duration-200 hover:shadow-card-hover",
         className,
       )}
     >
@@ -49,7 +49,7 @@ export const BentoGridItem = ({
         <div className="select-text mt-2 mb-2 text-h3 font-semibold text-content-primary">
           {title}
         </div>
-        <div className="select-text text-caption font-normal text-content-secondary">
+        <div className="select-text text-body font-normal text-content-secondary">
           {description}
         </div>
       </div>

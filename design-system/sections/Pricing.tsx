@@ -46,9 +46,9 @@ function PricingCard({
   return (
     <div ref={ref} style={style} className="h-full">
       <div
-        className={`relative flex h-full flex-col rounded-2xl border bg-surface-primary p-6 transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-components hover:shadow-[var(--shadow-card)] ${
+        className={`relative flex h-full flex-col rounded-2xl border bg-surface-primary p-6 transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-strong hover:shadow-[var(--shadow-card)] ${
           plan.highlighted
-            ? "border-border-components shadow-[var(--shadow-card)]"
+            ? "border-border-strong shadow-[var(--shadow-card)]"
             : "border-border-default"
         }`}
       >
@@ -63,7 +63,7 @@ function PricingCard({
           {plan.name}
         </h3>
         <div className="mt-2 flex items-baseline gap-1">
-          <span className="text-3xl font-bold text-content-primary">
+          <span className="text-h1 font-bold text-content-primary">
             {plan.price}
           </span>
           {plan.period ? (

@@ -16,11 +16,17 @@ function MotionRow({ key_ }: { key_: string }) {
   const token = `--duration-${key_}`;
   const [ref, val] = useVar(token);
   return (
-    <div ref={ref} className="group flex cursor-pointer items-center gap-4 py-3">
-      <div className="relative h-10 flex-1 overflow-hidden rounded-md border border-border-subtle bg-surface-tertiary">
+    <div
+      ref={ref}
+      className="group flex cursor-pointer items-center gap-4 py-3"
+    >
+      <div className="relative h-10 flex-1 overflow-hidden rounded-md border border-border-strong bg-surface-tertiary">
         <div
           className="absolute left-1 top-1 h-8 w-8 rounded bg-content-primary transition-transform group-hover:translate-x-[300px]"
-          style={{ transitionDuration: `var(${token})`, transitionTimingFunction: "var(--ease-out-expo)" }}
+          style={{
+            transitionDuration: `var(${token})`,
+            transitionTimingFunction: "var(--ease-out-expo)",
+          }}
         />
       </div>
       <TokenMeta token={token} value={val} />
@@ -33,7 +39,7 @@ function ShadowCell({ token, label }: { token: string; label: string }) {
   return (
     <div ref={ref} className="flex flex-col gap-3">
       <div
-        className="h-20 w-full rounded-xl border border-border-subtle bg-surface-primary"
+        className="h-20 w-full rounded-xl border border-border-default bg-surface-primary"
         style={{ boxShadow: `var(${token})` }}
       />
       <TokenMeta token={token} value={val ? label : "—"} />
@@ -54,10 +60,15 @@ export const MotionElevation: Story = {
             <MotionRow key={k} key_={k} />
           ))}
         </div>
-        <p className="mt-2 text-caption font-mono text-content-secondary">--ease-out-expo</p>
+        <p className="mt-2 text-caption font-mono text-content-secondary">
+          --ease-out-expo
+        </p>
       </Group>
 
-      <Group title="Elevation" description="Card shadow (`--shadow-card`), the only shadow with real usage.">
+      <Group
+        title="Elevation"
+        description="Card shadow (`--shadow-card`), the only shadow with real usage."
+      >
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <ShadowCell token="--shadow-card" label="card elevation" />
         </div>

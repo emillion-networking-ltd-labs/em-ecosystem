@@ -19,7 +19,7 @@ function Field({
   return (
     <div className="flex flex-col gap-1.5">
       <span
-        className={`text-body font-semibold leading-[22px] ${
+        className={`text-body font-semibold ${
           error ? "text-error" : "text-content-primary"
         }`}
       >

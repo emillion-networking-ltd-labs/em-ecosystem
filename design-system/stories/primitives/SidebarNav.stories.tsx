@@ -24,17 +24,42 @@ function buildSections(active: string): SidebarNavSection[] {
     {
       label: "Main",
       items: [
-        { href: "#dashboard", label: "Dashboard", icon: LayoutDashboard, active: active === "#dashboard" },
-        { href: "#projects", label: "Projects", icon: FolderKanban, active: active === "#projects" },
-        { href: "#team", label: "Team", icon: Users, active: active === "#team" },
+        {
+          href: "#dashboard",
+          label: "Dashboard",
+          icon: LayoutDashboard,
+          active: active === "#dashboard",
+        },
+        {
+          href: "#projects",
+          label: "Projects",
+          icon: FolderKanban,
+          active: active === "#projects",
+        },
+        {
+          href: "#team",
+          label: "Team",
+          icon: Users,
+          active: active === "#team",
+        },
         {
           href: "#admin",
           label: "Admin",
           icon: Shield,
           active: active === "#admin",
           children: [
-            { href: "#audit", label: "Audit logs", icon: ScrollText, active: active === "#audit" },
-            { href: "#permissions", label: "Permissions", icon: Key, active: active === "#permissions" },
+            {
+              href: "#audit",
+              label: "Audit logs",
+              icon: ScrollText,
+              active: active === "#audit",
+            },
+            {
+              href: "#permissions",
+              label: "Permissions",
+              icon: Key,
+              active: active === "#permissions",
+            },
           ],
         },
       ],
@@ -42,8 +67,18 @@ function buildSections(active: string): SidebarNavSection[] {
     {
       label: "Account",
       items: [
-        { href: "#settings", label: "Settings", icon: Settings, active: active === "#settings" },
-        { href: "#docs", label: "Documentation", icon: FileText, active: active === "#docs" },
+        {
+          href: "#settings",
+          label: "Settings",
+          icon: Settings,
+          active: active === "#settings",
+        },
+        {
+          href: "#docs",
+          label: "Documentation",
+          icon: FileText,
+          active: active === "#docs",
+        },
       ],
     },
   ];
@@ -51,13 +86,17 @@ function buildSections(active: string): SidebarNavSection[] {
 
 // Full sidebar, composed exactly like the dashboard (header with logo + collapse toggle, nav, footer)
 // and fully interactive: toggle collapses/expands; clicking an item updates the active state.
-function InteractiveSidebar({ initialCollapsed = false }: { initialCollapsed?: boolean }) {
+function InteractiveSidebar({
+  initialCollapsed = false,
+}: {
+  initialCollapsed?: boolean;
+}) {
   const [collapsed, setCollapsed] = useState(initialCollapsed);
   const [active, setActive] = useState("#audit");
 
   const footer = (
     <div
-      className={`flex items-center gap-2 border-t border-border-strong px-3 py-3 ${
+      className={`flex items-center gap-2 border-t border-border-default px-3 py-3 ${
         collapsed ? "justify-center" : ""
       }`}
     >
@@ -65,8 +104,12 @@ function InteractiveSidebar({ initialCollapsed = false }: { initialCollapsed?: b
       {!collapsed && (
         <>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-body font-medium text-content-primary">Ana Perez</p>
-            <p className="truncate text-caption text-content-secondary">ana@company.com</p>
+            <p className="truncate text-body font-semibold text-content-primary">
+              Ana Perez
+            </p>
+            <p className="truncate text-caption text-content-secondary">
+              ana@company.com
+            </p>
           </div>
           <IconButton variant="default" size="sm" aria-label="Log out">
             <LogOut size={16} />
@@ -82,9 +125,11 @@ function InteractiveSidebar({ initialCollapsed = false }: { initialCollapsed?: b
         collapsed ? "w-[68px]" : "w-[300px]"
       }`}
     >
-      <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-dashed border-border-strong px-4">
+      <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-dashed border-border-default px-4">
         {!collapsed && (
-          <span className="text-h3 font-semibold text-content-primary">NexaCore</span>
+          <span className="text-h3 font-semibold text-content-primary">
+            NexaCore
+          </span>
         )}
         <IconButton
           variant="boxed"
@@ -95,7 +140,11 @@ function InteractiveSidebar({ initialCollapsed = false }: { initialCollapsed?: b
           className={collapsed ? "mx-auto" : ""}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
-          {collapsed ? <PanelLeftOpen size={16} /> : <PanelLeftClose size={16} />}
+          {collapsed ? (
+            <PanelLeftOpen size={16} />
+          ) : (
+            <PanelLeftClose size={16} />
+          )}
         </IconButton>
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto">

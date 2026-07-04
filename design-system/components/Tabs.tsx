@@ -37,7 +37,7 @@ const sizeClasses = {
 export const variantStyles = {
   subtle: {
     container:
-      "bg-surface-primary border border-border-components rounded-sm shadow-[6px_6px_50px_rgba(0,0,0,0.05)]",
+      "bg-surface-primary border border-border-components rounded-sm shadow-card",
     active:
       "bg-surface-secondary border border-border-components font-semibold text-content-primary",
     inactive: "font-semibold text-content-primary hover:bg-surface-subtle",

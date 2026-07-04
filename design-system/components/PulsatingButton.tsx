@@ -24,7 +24,7 @@ export const PulsatingButton = React.forwardRef<HTMLButtonElement, PulsatingButt
       <button
         ref={ref}
         className={cn(
-          "relative flex animate-button-pulse cursor-pointer items-center justify-center rounded-md border border-border-components bg-surface-inverse px-4 py-2 text-center text-body font-semibold text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50",
+          "relative flex animate-button-pulse cursor-pointer items-center justify-center rounded-md border border-border-strong bg-surface-inverse px-4 py-2 text-center text-body font-normal text-content-inverse transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50",
           className,
         )}
         style={

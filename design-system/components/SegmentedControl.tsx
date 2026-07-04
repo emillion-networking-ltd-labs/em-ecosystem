@@ -6,11 +6,11 @@ export type SegmentedVariant = "primary" | "secondary" | "outline";
 
 const activeClasses: Record<SegmentedVariant, string> = {
   primary:
-    "bg-surface-inverse text-content-inverse border border-border-components shadow-xs",
+    "bg-surface-inverse text-content-inverse border border-border-strong shadow-xs",
   secondary:
-    "bg-surface-tertiary text-content-primary border border-border-components shadow-xs",
+    "bg-surface-tertiary text-content-primary border border-border-strong shadow-xs",
   outline:
-    "bg-surface-primary text-content-primary border border-border-components shadow-xs",
+    "bg-surface-primary text-content-primary border border-border-strong shadow-xs",
 };
 
 export const sizeClasses = {
@@ -21,11 +21,11 @@ export const sizeClasses = {
 
 export const segmentedControlSpecs = {
   container:
-    "inline-flex rounded-lg border border-border-components bg-surface-subtle p-1",
+    "inline-flex rounded-lg border border-border-strong bg-surface-subtle p-1",
   option: {
     base: "flex items-center gap-1.5 rounded-md font-normal transition-all",
     inactive:
-      "border border-transparent text-content-primary/50 hover:text-content-primary",
+      "border border-transparent text-content-secondary hover:text-content-primary",
   },
   sizes: {
     "sm (default)": "h-8 px-4 text-caption (32px)",
@@ -34,11 +34,11 @@ export const segmentedControlSpecs = {
   },
   variants: {
     "primary (default)":
-      "bg-surface-inverse text-content-inverse border border-border-components shadow-xs",
+      "bg-surface-inverse text-content-inverse border border-border-strong shadow-xs",
     secondary:
-      "bg-surface-tertiary text-content-primary border border-border-components shadow-xs",
+      "bg-surface-tertiary text-content-primary border border-border-strong shadow-xs",
     outline:
-      "bg-surface-primary text-content-primary border border-border-components shadow-xs",
+      "bg-surface-primary text-content-primary border border-border-strong shadow-xs",
   },
 };
 
@@ -67,7 +67,7 @@ export default function SegmentedControl<T extends string>({
 }: SegmentedControlProps<T>) {
   return (
     <div
-      className={`inline-flex rounded-lg border border-border-components bg-surface-subtle p-1 ${className}`}
+      className={`inline-flex rounded-lg border border-border-strong bg-surface-subtle p-1 ${className}`}
     >
       {options.map((option) => (
         <button
@@ -77,7 +77,7 @@ export default function SegmentedControl<T extends string>({
           className={`flex items-center gap-1.5 rounded-md font-normal transition-all ${sizeClasses[size]} ${
             value === option.value
               ? activeClasses[variant]
-              : "border border-transparent text-content-primary/50 hover:text-content-primary"
+              : "border border-transparent text-content-secondary hover:text-content-primary"
           }`}
         >
           {option.icon}
