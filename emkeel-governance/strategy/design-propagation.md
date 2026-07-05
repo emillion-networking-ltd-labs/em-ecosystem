@@ -37,8 +37,11 @@ the Recommendation builds only the minimum that pays now and gates the rest behi
   gates enforce coverage/variants/norm — design-system/scripts/check-story-norm.mjs:2) → human approval in
   Storybook before it enters the registry. So for NEW work the self-describing property (registered identity +
   semantic tokens, no raw values) is guaranteed at authoring time — an element is either a *known component*
-  (identity from the registry) or an *explicitly-declared divergence*, never an anonymous raw blob. This is why
-  the answer is a construction contract, not "scan harder".
+  (identity from the registry) or an *explicitly-declared divergence*, never an anonymous raw blob. The
+  **construction contract** is NOT the approval flow — it is the *researched, written standard* for how an
+  element is correctly and organizedly built (which primitive/markup, which semantic token per role, canonical
+  class organization, minimal nesting, no genuine redundancy); the flow is only where that standard is applied
+  and checked. This is why the answer is a *defined* construction standard, not "scan harder".
 - **A pre-system LEGACY corpus already exists and escapes today's gates.** Many elements were built (by the AI)
   before this token/construction contract existed. ECO-136 had to re-sync the **stale dashboard** (135 drifted
   declarations) to the norm and migrate `sat-cristian-garcia` from its 648-line fork BY HAND
@@ -98,7 +101,7 @@ the Recommendation builds only the minimum that pays now and gates the rest behi
 |---|--------|--------|------|------|------|
 | 1 | **Evolve copy-governance in place** — keep pull/copy; extend the `@em-ui-adapted` valve file→element; add `check-raw-color`; run the existing drift checks as a full sweep; a fleet **report** (still blunt overwrite on update). No manifest, no base-store, DTCG stays deferred. | design-system/registry/cli.mjs:52, design-system/scripts/check-component-drift.mjs:60-66, https://github.com/MetaMask/eslint-plugin-design-tokens/blob/main/docs/rules/color-no-hex.md | Smallest build; pure continuity of ADR-006/007; every gate incremental & testable; honors design-tokens.md:89. | Blunt `update` STILL destroys satellite divergence on re-pull — the core scale bug survives; no controlled "update to vN"; no legacy census; manual/manuals propagation unaddressed. | med |
 | 2 | **Compiled DTCG + versioned package** — re-platform tokens to a DTCG source compiled by Style Dictionary/Terrazzo into per-brand CSS; ship components as a semver package / auth'd registry; propagate updates as version bumps; brand = a "mode". | https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/, https://www.alwaystwisted.com/articles/a-design-tokens-workflow-part-9, https://ui.shadcn.com/docs/registry/namespace, https://www.supernova.io/blog/8-examples-of-versioning-in-leading-design-systems | Industry-standard at 100 satellites; true compiled single-source; semver = controlled rollout; brand-as-mode is a first-class multi-brand pattern. | **Pulls design-tokens.md:89's deferred DTCG trigger EARLY** (defined revisit = ≥3-4 consumers; today = 2) → needs its own strategy/ADR; a compiled package removes the satellite's own-your-copy top layer; heavy re-platform = the exact YAGNI the kill-criteria warn against. | high |
-| 3 | **Hybrid, phased (RECOMMEND — minimum now, trigger-gated rest)** — keep pull/copy. **Now:** per-consumer `em-ui.manifest.json` pinning the DS **git-SHA per file** + **base-pinned assisted reconcile** (`git merge-file`, writes conflict markers, never auto-resolves) replacing blunt overwrite; `check-raw-color`; a **normalization census (report)** + hygiene lint that classifies the whole corpus and drives legacy to norm; existing drift as a full sweep; a **pull-only** fleet **reporter**. **Trigger-gated (≥N consumers):** element-level markers; a **per-known-component** token allow-list; census **auto-codemod** + structural advisory; `@layer` lock; manual-version propagation. DTCG stays deferred. | design-system/registry/cli.mjs:52, https://github.com/shadcn-ui/ui/discussions/790, emkeel-governance/adr/027-arquitectura-tokens-color.md:63, https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@layer | Fixes the real scale bug NOW; mechanizes ECO-136's manual reconcile (forward AND backward); stays inside the pull invariant (ADR-007); honest about static-catchable vs. design review. | Most moving parts overall → strictly phased & trigger-gated; base-store + `git merge-file` + the census classifier are the load-bearing new surface; the wrong-role case is NOT fully a gate. | med |
+| 3 | **Hybrid, phased (RECOMMEND — minimum now, trigger-gated rest)** — keep pull/copy. **Now:** per-consumer `em-ui.manifest.json` pinning the DS **git-SHA per file** + **base-pinned assisted reconcile** (`git merge-file`, writes conflict markers, never auto-resolves) replacing blunt overwrite; `check-raw-color`; a **normalization census (report)** that classifies the whole corpus against a defined construction standard and drives legacy to norm; existing drift as a full sweep; a **pull-only** fleet **reporter**. **Trigger-gated (≥N consumers):** element-level markers; a **per-known-component** token allow-list; census **auto-codemod** + structural advisory; `@layer` lock; manual-version propagation. DTCG stays deferred. | design-system/registry/cli.mjs:52, https://github.com/shadcn-ui/ui/discussions/790, emkeel-governance/adr/027-arquitectura-tokens-color.md:63, https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@layer | Fixes the real scale bug NOW; mechanizes ECO-136's manual reconcile (forward AND backward); stays inside the pull invariant (ADR-007); honest about static-catchable vs. design review. | Most moving parts overall → strictly phased & trigger-gated; base-store + `git merge-file` + the census classifier are the load-bearing new surface; the wrong-role case is NOT fully a gate. | med |
 
 ## Recommendation
 **Option 3, but calibrated: build the minimum now, gate the rest behind an explicit consumer-count trigger.**
@@ -117,14 +120,20 @@ and semantic detection as the failure mode at 2-3 consumers. So the recommendati
    (https://github.com/MetaMask/eslint-plugin-design-tokens/blob/main/docs/rules/color-no-hex.md); running the
    existing `check-drift`/`check-component-drift` UNCONDITIONALLY (not change-triggered) gives the "total
    coverage" sweep with no new semantic gate.
-3. **Normalization census (report mode) + construction-hygiene lint** — the mechanized, repeatable form of
-   ECO-136's manual reconciliation (emkeel-governance/adr/027-arquitectura-tokens-color.md:63). A **full-corpus**
-   pass (every element in the DS + every consumer, NOT change-triggered) classifies each element —
+3. **Construction standard + normalization census (report mode).** First the missing foundation: *research and
+   write the standard for how an element is correctly and organizedly built* — which registered primitive/markup,
+   which semantic token per role, canonical class organization, minimal nesting, no genuine redundancy. It
+   extends StoryConventions and is what makes "correct construction" checkable. Without it you cannot tell a
+   *canonical* pattern from a *redundant* one — e.g. `border border-border-components` is CORRECT (`border` =
+   width + `border-border-components` = the token color; 22 uses in the DS, `border border-border-strong` 51 —
+   design-system/tokens/tokens.css:155), yet a naive duplicate-class lint would false-positive on it. Then the
+   **normalization census** — the mechanized, repeatable form of ECO-136's manual reconciliation
+   (emkeel-governance/adr/027-arquitectura-tokens-color.md:63) — runs a **full-corpus** pass (every element in
+   the DS + every consumer, NOT change-triggered) and classifies each element AGAINST that standard:
    *conforms* / *raw value* (→ `check-raw-color`) / *wrong-but-valid token on a known component* /
-   *anonymous element that should be a registered primitive* / *tag bloat* — and emits a normalization worklist.
-   The **hygiene lint** catches the concrete bugs seen in review: duplicate, malformed or contradictory utility
-   classes (e.g. `border border-border-components`) and dead classes; redundant wrapper nesting is surfaced
-   advisory-only. Report-first is cheap and immediately useful; the auto-codemod is gated below.
+   *anonymous element that should be a registered primitive* / *disorganized construction* (real redundancy,
+   contradictory utilities, needless nesting — NOT a naive dedup). Report-first is cheap and immediately useful;
+   the auto-codemod is gated below.
 4. **Rollout safety** (completeness fix): a propagated update can BREAK a consumer, and satellite VRT is not a
    required check — so a consumer can **pin/hold** a version, the reporter **halts on first red**, and each
    consumer's own VRT runs before its update lands.
@@ -170,10 +179,13 @@ not pre-build it.
   ADR-027:36); the fleet layer stays pull-only (report + PR + trigger-own-update).
 - Re-platforming em-ui to a compiled npm package — the satellite keeps owning its copy (ADR-006/007).
 - **A static gate that infers element ROLE from JSX** — not feasible; the wrong-role case is design review, and
-  only the per-known-component allow-list + raw-value ban + hygiene lint are gates.
+  only the per-known-component allow-list + raw-value ban + construction-standard conformance are gates.
+- **A naive "duplicate class = bad" lint** — it would false-positive on canonical patterns like `border` +
+  `border-<token>` (width + color). The check enforces the *defined* construction standard (organized, canonical
+  token application; real redundancy / contradictory utilities / needless nesting), NOT string-level dedup, and
+  NOT cosmetic formatting (prettier's job).
 - The normalization census as a **one-off migration** — it is a *standing mode*, re-runnable whenever a norm
-  lands or a satellite is absorbed. The hygiene lint targets malformed/duplicate/contradictory/dead classes,
-  NOT cosmetic formatting (that is prettier's job).
+  lands or a satellite is absorbed.
 - Redesigning any brand palette (satellite-design / ECO-128) or the selection-model gate (ECO-141).
 - Auto-EDITING a satellite's brand-locked elements during an update — locked means SKIP + report, never rewrite
   a brand decision.
