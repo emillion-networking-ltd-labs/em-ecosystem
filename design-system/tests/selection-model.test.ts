@@ -5,6 +5,8 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createElement } from "react";
 import AlertBox from "../components/AlertBox";
+import Toggle from "../components/Toggle";
+import Checkbox from "../components/Checkbox";
 
 afterEach(cleanup);
 
@@ -31,5 +33,34 @@ describe("Modelo de selección (ECO-115)", () => {
     const text = screen.getByText("Texto copiable");
     // El texto vive en un <div> (fuera del opt-in de tags); debe reabrir la selección con select-text.
     expect(text.className).toContain("select-text");
+  });
+
+  // ECO-141 — el caret se colaba sobre los WIDGETS de control: los `<input type="checkbox|radio|…">` nativos
+  // heredaban `user-select: text` del selector `input` genérico, y la etiqueta del Toggle quedaba NO
+  // seleccionable (`select-none`). Norma del operador: el TEXTO de la etiqueta SÍ se selecciona (es texto); el
+  // WIDGET de control (la caja del checkbox/radio) NO.
+  it("los inputs de control (checkbox/radio/…) NO son seleccionables — el caret no aparece sobre el widget (ECO-141)", () => {
+    // (a) regla explícita: los inputs de control quedan en user-select:none.
+    expect(tokensCss).toMatch(/input\[type="checkbox"\][^{}]*\{[^}]*user-select:\s*none/s);
+    // (b) el opt-in de texto de `input` se estrecha para EXCLUIR el checkbox (sólo inputs de texto lo reciben).
+    const inputTextOptIn = tokensCss.match(/(?:^|\n)\s*input(?![\w-])[^{}]*\{[^}]*user-select:\s*text/s);
+    expect(inputTextOptIn?.[0] ?? "").toMatch(/:not\(\[type="checkbox"\]\)/);
+  });
+
+  it("la etiqueta <label> es TEXTO y SÍ se puede seleccionar (ECO-141)", () => {
+    // `label` permanece en el opt-in de texto.
+    expect(tokensCss).toMatch(/\blabel\b[^{}]*\{[^}]*user-select:\s*text/s);
+    // Toggle: su etiqueta NO debe llevar `select-none` (la anularía — contra la norma "la etiqueta se selecciona").
+    render(createElement(Toggle, { label: "Opción" }));
+    const toggleLabel = screen.getByText("Opción");
+    expect(toggleLabel.tagName).toBe("LABEL");
+    expect(toggleLabel.className).not.toContain("select-none");
+  });
+
+  it("Checkbox: su etiqueta es seleccionable (referencia correcta) — ECO-141", () => {
+    render(createElement(Checkbox, { label: "Acepto" }));
+    const cbLabel = screen.getByText("Acepto");
+    expect(cbLabel.tagName).toBe("LABEL");
+    expect(cbLabel.className).not.toContain("select-none");
   });
 });
