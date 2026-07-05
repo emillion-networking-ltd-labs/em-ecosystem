@@ -120,8 +120,9 @@ and semantic detection as the failure mode at 2-3 consumers. So the recommendati
    (https://github.com/MetaMask/eslint-plugin-design-tokens/blob/main/docs/rules/color-no-hex.md); running the
    existing `check-drift`/`check-component-drift` UNCONDITIONALLY (not change-triggered) gives the "total
    coverage" sweep with no new semantic gate.
-3. **Construction standard + normalization census (report mode).** First the missing foundation: *research and
-   write the standard for how an element is correctly and organizedly built* — which registered primitive/markup,
+3. **Construction standard + normalization census (report mode).** First the missing foundation, now researched
+   (see **Construction standard** section below): the standard for how an element is correctly and organizedly built —
+   which registered primitive/markup,
    which semantic token per role, canonical class organization, minimal nesting, no genuine redundancy. It
    extends StoryConventions and is what makes "correct construction" checkable. Without it you cannot tell a
    *canonical* pattern from a *redundant* one — e.g. `border border-border-components` is CORRECT (`border` =
@@ -171,6 +172,44 @@ paths. A central pusher would violate the HARD invariant (design-tokens.md:76, A
 Option 2's territory and would need its own ADR, not a fold-in here. Likewise DTCG stays a **deferred** non-goal
 behind its written ≥3-4-consumer trigger (design-tokens.md:89): this strategy records WHEN to revisit; it does
 not pre-build it.
+
+## Construction standard (researched — the norm the census classifies against)
+This is the "correct, organized construction" that build-now item 3 investigates and writes; the full text lands
+as a StoryConventions extension at implementation. It CODIFIES the DS's own already-consistent pattern (not a
+new invention), with the market convention noted where it confirms or extends it.
+
+**A. Class organization.** The DS convention is **orthogonal named-export maps** — `baseClass` + `variantClasses{}`
+ + `sizeClasses{}` as named exports (design-system/components/Button.tsx:18-45, design-system/components/Badge.tsx:11-28),
+already enforced by `check-story-norm`. Combine with `cn()` (clsx+tailwind-merge, design-system/lib/utils.ts:1-7,
+ADR-019) where a real merge/override happens (design-system/components/Card.tsx:8,26); put a consumer `${className}`
+**last** so it can override. Order utilities with `prettier-plugin-tailwindcss` (overrides sort last → redundant
+overrides become visible — https://tailwindcss.com/blog/automatic-class-sorting-with-prettier). *Market alternative,
+NOT adopted now:* `cva` / `tailwind-variants` (https://cva.style/docs/getting-started/variants) is the industry
+pattern shadcn uses; switching every primitive to it is a **separate deliberate decision**, not this standard —
+the named-map convention stays until that is decided.
+
+**B. Token application.** Border = `border` (width) + **exactly one** `border-<token>` (color) — canonical
+(design-system/components/Button.tsx:20-26, design-system/components/Input.tsx:98); two color tokens or a raw
+color is the violation. The token follows the element's **ROLE, never a value**: card/surface → `border-default`,
+discrete panel/widget → `border-strong`, input & unfilled control → `border-components` (WCAG 3:1, gate-blocked),
+invisible wrapper → no border ("identify by what the element IS" — design-system/stories/foundations/StoryConventions.stories.tsx:162-214).
+Vocabulary: `surface-*` / `content-*` / `border-*` / feedback trios (design-system/tokens/tokens.css:235-271).
+Never hex/`slate-*`/raw → `check-raw-color`.
+
+**C. Markup / composition (no wrapper soup).** Minimal nesting: a React Fragment `<>` over a wrapper `<div>`
+when only grouping — it adds no DOM node (https://react.dev/reference/react/Fragment); **every node must justify
+itself** (semantic, style, or real structure) or be collapsed. Use the semantic element that describes the data +
+proper roles/aria (design-system/components/Toggle.tsx:64-65, design-system/components/Input.tsx:114-115;
+https://developer.mozilla.org/en-US/docs/Glossary/Semantics). Compose polymorphically with the existing
+`as`/href pattern (design-system/components/Button.tsx:47-93) + `forwardRef` (design-system/components/Input.tsx:53).
+*Market, for later:* Radix `Slot`/`asChild` merges props onto the child instead of emitting a wrapper node
+(https://www.radix-ui.com/primitives/docs/utilities/slot) — available if wrapper-elimination is needed, not required now.
+
+**D. What "disorganized construction" means for the census** (the check is standard-aware, NOT a string dedup):
+one utility per CSS property, no contradictory utilities, no arbitrary value when a token exists (`p-4`, not
+`p-[16px]` — https://github.com/dcastil/tailwind-merge); do NOT re-type an exported base class literally in JSX
+(the real anti-pattern in Badge.tsx:11 vs :38) nor keep parallel `*Specs` doc-strings that desync from the real
+maps. Note: `border border-<token>` is width+color, **not** redundancy — a naive dedup would false-positive on it.
 
 ## Non-goals
 - Reviving the DTCG pipeline / a push generator NOW — deferred behind the ≥3-4-consumer trigger
