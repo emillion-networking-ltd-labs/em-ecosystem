@@ -105,7 +105,11 @@ export default function Accordion({
               }`}
             >
               <div className="overflow-hidden">
-                <div className="px-4 pt-3 pb-4">{item.children}</div>
+                {/* ECO-141: la respuesta es CONTENIDO copiable → select-text (si viniera como texto suelto en
+                    este <div> heredaría user-select:none del body). El trigger (button) sí es no-seleccionable. */}
+                <div className="select-text px-4 pt-3 pb-4">
+                  {item.children}
+                </div>
               </div>
             </div>
           </div>
@@ -150,7 +154,8 @@ export function SingleAccordion({
         }`}
       >
         <div className="overflow-hidden">
-          <div className="px-4 pt-3 pb-4">{children}</div>
+          {/* ECO-141: respuesta = CONTENIDO copiable → select-text. */}
+          <div className="select-text px-4 pt-3 pb-4">{children}</div>
         </div>
       </div>
     </div>

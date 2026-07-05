@@ -71,6 +71,10 @@ export default function Button({
 
   if (href) componentProps.href = href;
   if (Component === "button") componentProps.disabled = loading || disabled;
+  // ECO-141: las variantes `link`/`link-underline` son TEXTO navegable (copiable). Renderizadas como <a>, el
+  // drag nativo del enlace impediría seleccionar su texto → draggable=false lo habilita. El click sigue
+  // navegando. Las variantes de control (no-link) son select-none, así que no se ven afectadas.
+  if (isLink) componentProps.draggable = false;
 
   return React.createElement(
     Component,

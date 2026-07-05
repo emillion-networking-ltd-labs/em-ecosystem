@@ -41,7 +41,7 @@ function ContactMethodCard({
         <p className="text-caption font-semibold uppercase tracking-widest text-accent">
           {method.label}
         </p>
-        <p className="mt-1 wrap-break-word text-body text-content-primary">
+        <p className="mt-1 wrap-break-word text-body text-content-primary select-text">
           {method.value}
         </p>
       </div>
@@ -57,6 +57,10 @@ function ContactMethodCard({
         ref={ref as unknown as React.Ref<HTMLAnchorElement>}
         href={method.href}
         {...externalProps}
+        // ECO-141: la card es clicable (abre mail/tel) PERO su dato (email/tel) es copiable →
+        // draggable=false desactiva el drag-del-enlace para poder seleccionar el texto interior (el <p> del
+        // valor es select-text). El click sigue navegando; arrastrar selecciona.
+        draggable={false}
         style={style}
         className={`card-flat block transition-colors hover:border-border-components ${className}`}
       >

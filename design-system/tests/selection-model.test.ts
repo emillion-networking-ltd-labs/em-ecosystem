@@ -12,7 +12,12 @@ import Button from "../components/Button";
 afterEach(cleanup);
 
 const tokensCss = readFileSync(
-  resolve(dirname(fileURLToPath(import.meta.url)), "..", "tokens", "tokens.css"),
+  resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    "..",
+    "tokens",
+    "tokens.css",
+  ),
   "utf8",
 );
 
@@ -42,9 +47,13 @@ describe("Modelo de selección (ECO-115)", () => {
   // WIDGET de control (la caja del checkbox/radio) NO.
   it("los inputs de control (checkbox/radio/…) NO son seleccionables — el caret no aparece sobre el widget (ECO-141)", () => {
     // (a) regla explícita: los inputs de control quedan en user-select:none.
-    expect(tokensCss).toMatch(/input\[type="checkbox"\][^{}]*\{[^}]*user-select:\s*none/s);
+    expect(tokensCss).toMatch(
+      /input\[type="checkbox"\][^{}]*\{[^}]*user-select:\s*none/s,
+    );
     // (b) el opt-in de texto de `input` se estrecha para EXCLUIR el checkbox (sólo inputs de texto lo reciben).
-    const inputTextOptIn = tokensCss.match(/(?:^|\n)\s*input(?![\w-])[^{}]*\{[^}]*user-select:\s*text/s);
+    const inputTextOptIn = tokensCss.match(
+      /(?:^|\n)\s*input(?![\w-])[^{}]*\{[^}]*user-select:\s*text/s,
+    );
     expect(inputTextOptIn?.[0] ?? "").toMatch(/:not\(\[type="checkbox"\]\)/);
   });
 
@@ -75,6 +84,20 @@ describe("Modelo de selección (ECO-115)", () => {
     expect(cta).not.toBeNull();
     expect(cta!.className).toContain("select-none");
     // (b) el modelo propaga la no-selección al subárbol de un `select-none` (el <span> de texto del CTA).
-    expect(tokensCss).toMatch(/\.select-none\s*\*\s*\{[^}]*user-select:\s*none/s);
+    expect(tokensCss).toMatch(
+      /\.select-none\s*\*\s*\{[^}]*user-select:\s*none/s,
+    );
+  });
+
+  // ECO-141 — el enlace-TEXTO (variant link/link-underline) es texto navegable copiable: NO lleva select-none y,
+  // como <a>, desactiva el drag del enlace (draggable=false) para poder seleccionar su texto.
+  it("el enlace-texto (Button variant=link, as=a) es copiable: sin select-none + draggable=false", () => {
+    render(
+      createElement(Button, { as: "a", href: "/x", variant: "link" }, "Enlace"),
+    );
+    const link = screen.getByText("Enlace").closest("a");
+    expect(link).not.toBeNull();
+    expect(link!.className).not.toContain("select-none");
+    expect(link!.getAttribute("draggable")).toBe("false");
   });
 });
