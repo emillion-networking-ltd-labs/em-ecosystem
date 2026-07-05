@@ -83,6 +83,29 @@
     cursor: pointer;
   }
 
+  /* ECO-141: inputs de control NATIVOS (no-texto) — no seleccionables (sin caret/selección sobre el widget del
+     checkbox/radio); van aparte del opt-in de `input` de texto. Los clicables llevan cursor pointer. */
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="range"],
+  input[type="color"],
+  input[type="file"],
+  input[type="image"] {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="button"],
+  input[type="submit"],
+  input[type="reset"],
+  input[type="file"] {
+    cursor: pointer;
+  }
+
   /* MODELO DE SELECCIÓN (ECO-99): por defecto NADA es seleccionable → ningún caret de texto dentro de
      cards, cajas, layout ni elementos no-texto (el problema que el catálogo destapaba: clicar un card
      metía un caret). Solo el contenido de TEXTO —y los campos editables— reactiva la selección. */
@@ -102,7 +125,10 @@
     -webkit-user-select: text;
     user-select: text;
   }
-  input, textarea, [contenteditable="true"] {
+  /* ECO-141: SÓLO los inputs de TEXTO reciben el opt-in; los de control (checkbox/radio/button/range/…) NO —
+     quedan en user-select:none (regla de control abajo) para que el caret/selección no aparezca sobre el widget. */
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="image"]),
+  textarea, [contenteditable="true"] {
     -webkit-user-select: text;
     user-select: text;
   }
@@ -112,7 +138,11 @@
      Un primitivo que necesite texto copiable dentro de un control lo reabre con `select-text` explícito. */
   button *, [role="button"] *, summary *,
   [role="checkbox"] *, [role="switch"] *, [role="radio"] *,
-  [role="tab"] *, [role="option"] *, [role="menuitem"] *, [role="menuitemradio"] * {
+  [role="tab"] *, [role="option"] *, [role="menuitem"] *, [role="menuitemradio"] *,
+  /* ECO-141: un elemento marcado `select-none` propaga la no-selección a TODO su subárbol. Necesario para el
+     enlace-botón (Button `as="a"`, sin role): su <span> de texto es opt-in y `button *`/`[role] *` NO cubre al
+     <a>, así que sin esto el texto del CTA muestra el caret. Espejo de `button *` para el caso marcado. */
+  .select-none * {
     -webkit-user-select: none;
     user-select: none;
   }

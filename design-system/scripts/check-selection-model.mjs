@@ -1,5 +1,9 @@
 #!/usr/bin/env node
-// check-selection-model — guard de la NORMA DEFINITIVA de selección (ECO-115, refina ECO-99/107).
+// check-selection-model — guard de la NORMA DEFINITIVA de selección (ECO-115, refina ECO-99/107; ECO-141).
+//
+// ECO-141: el caret sólo sobre TEXTO también significa que el WIDGET de un control no lo lleva — los
+// `<input type="checkbox|radio|…">` nativos son user-select:none (no heredan el opt-in de `input`, que se
+// estrecha a inputs de texto). La ETIQUETA `<label>` sí es seleccionable (es texto), no se saca del opt-in.
 //
 // Norma: el caret/I-beam aparece SÓLO sobre TEXTO — nunca sobre elementos no-texto (cards, layout, chrome).
 // Modelo: en tokens.css, `body { user-select: none }` (nada seleccionable por defecto → sin caret en cajas) +
@@ -30,8 +34,17 @@ let failed = 0;
 const cssChecks = [
   [/body\s*\{[^}]*user-select:\s*none/s, "`body` debe declarar user-select: none (nada seleccionable por defecto → sin caret en cajas/layout/no-texto)"],
   [/user-select:\s*text/, "debe existir un opt-in user-select: text para el texto (copiable)"],
-  [/input,\s*textarea[^{]*\{[^}]*user-select:\s*text/s, "input/textarea deben reactivar user-select: text"],
+  // ECO-141: el opt-in de texto de `input` se estrecha para EXCLUIR los tipos de control (checkbox/radio/…),
+  // de modo que el caret/selección no aparezca sobre el WIDGET del control.
+  [/input:not\(\[type="checkbox"\]\)[^{]*\{[^}]*user-select:\s*text/s, "el opt-in de texto de `input` debe excluir los tipos de control (`input:not([type=\"checkbox\"])…`) — sólo los inputs de TEXTO reciben user-select: text (ECO-141)"],
+  // ECO-141: los inputs de control NATIVOS (no-texto) deben ser user-select: none (sin caret sobre el widget).
+  [/input\[type="checkbox"\][^{}]*\{[^}]*user-select:\s*none/s, "los inputs de control nativos (checkbox/radio/button/range/…) deben declarar user-select: none — el caret no debe aparecer sobre el widget (ECO-141)"],
+  // ECO-141: la etiqueta `label` permanece SELECCIONABLE (es texto) — no sale del opt-in.
+  [/\blabel\b[^{}]*\{[^}]*user-select:\s*text/s, "la etiqueta `label` debe permanecer en el opt-in de texto (seleccionable) — es texto, no chrome (ECO-141)"],
   [/button\s*\*[^{]*\{[^}]*user-select:\s*none/s, "los descendientes de un control (`button *`, `[role] *`) deben ser user-select: none — el opt-in de texto NO debe reactivar el caret dentro de un botón"],
+  // ECO-141: `.select-none` propaga la no-selección a su subárbol (el enlace-botón Button as="a" no es
+  // `button`/`[role]`; su <span> de texto es opt-in y sin esto mostraría el caret sobre el CTA).
+  [/\.select-none\s*\*\s*\{[^}]*user-select:\s*none/s, "`.select-none *` debe existir — un elemento marcado select-none propaga la no-selección al subárbol (enlace-botón: el <span> del CTA no debe mostrar caret) (ECO-141)"],
 ];
 for (const [re, msg] of cssChecks) {
   if (!re.test(css)) {

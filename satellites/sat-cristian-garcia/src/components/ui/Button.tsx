@@ -78,6 +78,9 @@ export default function Button({
 
   if (href) componentProps.href = href;
   if (Component === "button") componentProps.disabled = loading || disabled;
+  // ECO-141: variantes link = texto navegable copiable; draggable=false permite seleccionar su texto (el drag
+  // del <a> lo impediría). Espejo de la fuente em-ui.
+  if (isLink) componentProps.draggable = false;
 
   return React.createElement(
     Component,
