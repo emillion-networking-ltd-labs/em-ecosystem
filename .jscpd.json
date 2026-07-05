@@ -17,8 +17,11 @@
     "**/__tests__/**",
     "**/*.d.ts",
     "**/*.lock.json",
-    "**/package-lock.json"
+    "**/package-lock.json",
+    "**/nexacore-dashboard/src/components/ui/**",
+    "**/satellites/*/src/components/ui/**"
   ],
+  "_comment_emui": "Copias em-ui (components/ui de cada consumidor) son duplicación GOBERNADA e intencional del modelo de distribución por copia (ADR-006/007); su integridad la vigila check-component-drift (deben ser idénticas a la fuente), no jscpd. Excluirlas evita falsos positivos de duplicación fuente↔copia (ECO-136).",
   "format": ["typescript", "tsx"],
   "absolute": true,
   "gitignore": true

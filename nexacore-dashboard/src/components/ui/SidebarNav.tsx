@@ -44,7 +44,7 @@ export const sidebarNavSpecs = {
     expandedParent:
       "Accordion: click entire row → toggle children. Parent page added as explicit first child in config",
     collapsed:
-      "IconButton boxed + aria-pressed=true for active (ring-1 ring-border-components)",
+      "IconButton boxed + aria-pressed=true for active (ring-1 ring-border-strong)",
     collapsedWithChildren:
       "Flyout popover on hover (no Tooltip) — section label + child Links",
     tooltip:
@@ -59,11 +59,11 @@ export const sidebarNavSpecs = {
       "createPortal to body, fixed, left: icon.right + 8px, top: icon.top",
     delay: "200ms hover delay (same as Tooltip)",
     header:
-      "text-body font-normal text-content-tertiary px-3 py-1.5 (matches section label)",
+      "text-body font-normal text-content-secondary px-3 py-1.5 (matches section label)",
     item: "flex items-center gap-2 px-3 py-2 rounded-lg text-body hover:bg-surface-subtle",
   },
   section: {
-    label: "text-body font-normal text-content-tertiary px-2 mb-2",
+    label: "text-body font-normal text-content-secondary px-2 mb-2",
     gap: "flex-col gap-2",
   },
   container: {
@@ -135,7 +135,7 @@ function SidebarFlyout({
       onMouseEnter={startEnter}
       onMouseLeave={startLeave}
     >
-      <p className="px-3 py-1.5 text-body font-normal text-content-tertiary">
+      <p className="px-3 py-1.5 text-body font-normal text-content-secondary">
         {parentLabel}
       </p>
       {items.map((child) => {
@@ -197,7 +197,7 @@ function NavSectionComponent({
   return (
     <div className={className}>
       {label && (
-        <p className="mb-2 px-2 text-body font-normal leading-5 text-content-tertiary">
+        <p className="mb-2 px-2 text-body font-normal leading-5 text-content-secondary">
           {label}
         </p>
       )}

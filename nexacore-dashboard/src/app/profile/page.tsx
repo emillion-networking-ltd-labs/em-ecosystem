@@ -57,7 +57,7 @@ export default function ProfilePage() {
         </div>
         <div className="mt-6 card-flat">
           <Accordion
-            variant="section"
+            variant="uppercase"
             items={[
               {
                 title: "Security",

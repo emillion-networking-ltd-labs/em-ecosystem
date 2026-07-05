@@ -15,7 +15,7 @@ interface ToggleProps {
 export const toggleSpecs = {
   track: {
     on: "bg-surface-inverse border-surface-inverse",
-    off: "bg-surface-tertiary border-border-strong",
+    off: "bg-surface-tertiary border-border-components",
     disabled: "opacity-50 cursor-not-allowed",
   },
   circle: "bg-surface-primary shadow-sm rounded-full",
@@ -69,7 +69,7 @@ export default function Toggle({
         className={`relative inline-flex items-center rounded-full border transition-colors duration-200 shrink-0 ${trackSizes[size]} ${
           checked
             ? "bg-surface-inverse border-surface-inverse"
-            : "bg-surface-tertiary border-border-strong"
+            : "bg-surface-tertiary border-border-components"
         } ${disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
       >
         <span
@@ -81,7 +81,7 @@ export default function Toggle({
       {label && (
         <label
           htmlFor={id}
-          className={`text-body font-normal text-content-primary ${
+          className={`text-body font-normal text-content-primary select-none ${
             disabled ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
           }`}
         >

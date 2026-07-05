@@ -1,0 +1,59 @@
+/* em-ui — capa de override de marca por satélite ([data-brand]). ECO-136 / Fase 2 / ADR-027.
+   ────────────────────────────────────────────────────────────────────────────────────────
+   QUÉ ES: un satélite NO forkea tokens.css. Importa el baseline em-ui (la NORMA) y aquí solo
+   redefine, en el scope [data-brand], sus vars de MARCA (ESTÉTICO). Todo lo demás — surfaces,
+   content, borders y cada fix futuro de la fuente — lo HEREDA. Un cambio del baseline te llega
+   solo; tú solo posees tu delta de marca. (Reemplaza el fork inline; ADR-007.)
+
+   CÓMO SE USA:
+     1. Rellena los hex de tu marca (busca «REEMPLAZA»).
+     2. Impórtalo DESPUÉS del baseline:
+          @import "../styles/em-ui-tokens.css";
+          @import "../styles/em-ui-brand.css";
+     3. Marca el root, junto a la clase de tema:  <html data-brand="__BRAND__">  (+ class="dark").
+
+   POR QUÉ re-declaramos `--color-accent*`: `@theme` resuelve y CONGELA `--color-X` en :root; para
+   que el override viva en runtime hay que re-declarar el token en ESTE scope (mismo patrón que
+   .dark/.light en el baseline). NO borres esas líneas ni cambies sus nombres.
+
+   NORMA vs ESTÉTICO: aquí solo tocas ESTÉTICO (marca). Los tokens de NORMA (content/surface/border)
+   NO se redefinen desde aquí — y aunque lo hicieras, el gate de contraste por satélite valida tu
+   paleta RESUELTA y BLOQUEA si rompes WCAG AA. Libertad de marca, obligación de norma. */
+
+/* Marca — tema claro (por defecto). */
+[data-brand="__BRAND__"] {
+  /* Crudos de marca — la fuente única del valor en el satélite. REEMPLAZA los hex. */
+  --accent: #1b5e20;        /* REEMPLAZA — acento principal */
+  --accent-light: #2e7d32;  /* REEMPLAZA — acento claro (hovers, fills suaves) */
+  --accent-2: #2e7d32;      /* REEMPLAZA — 2º acento (gradientes multi-stop) */
+  --accent-dark: #1b5e20;   /* REEMPLAZA — acento oscuro (pressed, texto de marca sobre claro) */
+
+  /* Escape del freeze — NO EDITAR. Re-declara los tokens @theme en este scope para runtime. */
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-accent-2: var(--accent-2);
+  --color-accent-dark: var(--accent-dark);
+
+  /* OPCIONAL — solo si tu marca usa los gradientes multi-stop (`--gradient-brand*`, p.ej. Aurora).
+     OJO: NO se re-derivan solos. Se declaran en :root del baseline con var(--color-accent) y ahí se
+     COMPUTAN/CONGELAN con el acento base (var() en una custom property se substituye en el elemento
+     donde se declara y el valor computado se hereda). Para que tomen tu acento hay que re-declararlos
+     AQUÍ con la misma fórmula que tokens.css (mantener en sync). Si no usas gradientes de marca, borra. */
+  --gradient-brand: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%);
+  --gradient-brand-radial: radial-gradient(120% 120% at 50% 0%, var(--color-accent-2) 0%, var(--color-accent) 55%, transparent 100%);
+}
+
+/* Marca — tema oscuro. OPCIONAL: solo si tu acento se afina para fondo oscuro (legibilidad).
+   Si tu marca usa el mismo acento en ambos temas, BORRA este bloque y el oscuro hereda el de arriba. */
+.dark[data-brand="__BRAND__"] {
+  --accent: #2e7d32;        /* REEMPLAZA — acento en oscuro (o borra este bloque) */
+  --accent-light: #4caf50;  /* REEMPLAZA */
+
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+
+  /* Si re-declaraste los gradientes arriba y tu acento flipa por tema, re-declara también aquí
+     (se congelan con el acento del scope donde se declaran). Si no usas gradientes de marca, borra. */
+  --gradient-brand: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%);
+  --gradient-brand-radial: radial-gradient(120% 120% at 50% 0%, var(--color-accent-2) 0%, var(--color-accent) 55%, transparent 100%);
+}

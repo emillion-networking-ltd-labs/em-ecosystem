@@ -2,13 +2,7 @@
 
 interface BadgeProps {
   variant?:
-    | "default"
-    | "success"
-    | "warning"
-    | "error"
-    | "info"
-    | "kbd"
-    | "overlay";
+    "default" | "success" | "warning" | "error" | "info" | "kbd" | "overlay";
   size?: "sm" | "md" | "lg";
   children: React.ReactNode;
   className?: string;

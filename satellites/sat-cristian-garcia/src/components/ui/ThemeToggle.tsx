@@ -4,12 +4,17 @@ import { useState, useEffect } from "react";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import IconButton from "./IconButton";
+import type { TooltipPosition } from "./Tooltip";
 
 type ThemeToggleProps = {
   className?: string;
+  tooltipPosition?: TooltipPosition;
 };
 
-export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
+export default function ThemeToggle({
+  className = "",
+  tooltipPosition = "auto",
+}: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
@@ -23,15 +28,15 @@ export default function ThemeToggle({ className = "" }: ThemeToggleProps) {
 
   return (
     <IconButton
-      variant="default"
+      variant="boxed"
       size="sm"
       tooltip
-      tooltipPosition="left"
+      tooltipPosition={tooltipPosition}
       onClick={toggleTheme}
       className={className}
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
     >
-      {theme === "light" ? <Moon size={16} /> : <Sun size={16} />}
+      {theme === "light" ? <Sun size={16} /> : <Moon size={16} />}
     </IconButton>
   );
 }

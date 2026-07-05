@@ -89,7 +89,7 @@ export default function ActionDropdown({
       {open && (
         <div
           ref={menuRef}
-          className="fixed z-50 w-[241px] rounded-xl border border-border-components bg-surface-primary p-2 shadow-card"
+          className="fixed z-50 w-[241px] rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card"
           style={pos}
         >
           <Can permission="users:write">
@@ -115,7 +115,7 @@ export default function ActionDropdown({
             </button>
           </Can>
           <Can permission="users:delete">
-            <div className="my-2 h-px bg-border-strong" />
+            <div className="my-2 h-px bg-border-default" />
             <button
               onClick={() => {
                 setOpen(false);

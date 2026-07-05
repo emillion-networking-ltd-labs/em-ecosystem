@@ -1,0 +1,26 @@
+/* em-ui — capa de override de marca [data-brand="cristian-garcia"]. ECO-136 / Fase 2 / ADR-027.
+   Marca: ORO. Flipa por tema (oro oscuro en claro, oro claro en oscuro) para legibilidad — el gate
+   check-brand-contrast valida la paleta resuelta en AMBOS temas. Migrado del fork inline (ADR-007):
+   el baseline (surfaces/content/borders + fixes) llega por em-ui-tokens.css; aquí solo el delta de marca. */
+
+/* Marca — tema claro. */
+[data-brand="cristian-garcia"] {
+  --accent: #8b6914;
+  --accent-light: #d4a843;
+  --accent-2: #d4a843;
+  --accent-dark: #8b6914;
+
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-accent-2: var(--accent-2);
+  --color-accent-dark: var(--accent-dark);
+}
+
+/* Marca — tema oscuro (oro más claro para fondo oscuro). */
+.dark[data-brand="cristian-garcia"] {
+  --accent: #d4a843;
+  --accent-light: #e0bc6a;
+
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+}

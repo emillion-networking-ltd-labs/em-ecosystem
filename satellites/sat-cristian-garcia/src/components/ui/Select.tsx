@@ -1,3 +1,4 @@
+// @em-ui-adapted: fullWidth (modo form-input para ContactForm) + ariaLabel a11y — diverge de la fuente em-ui a propósito (ECO-136). Al re-pull, re-aplicar esta adaptación.
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useId } from "react";
@@ -38,11 +39,12 @@ export const selectSpecs = {
     disabled: "opacity-50 cursor-not-allowed",
   },
   dropdown: {
+    // ECO-117: estándar de menú/desplegable — contenedor rounded-xl + p-2; opción px-3 py-2 rounded-lg.
     container:
-      "rounded-xl border border-border-components bg-surface-primary p-6 shadow-card max-h-64 overflow-auto",
+      "rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card max-h-64 overflow-auto",
   },
   option: {
-    base: "flex h-10 items-center gap-2 whitespace-nowrap px-6 py-2.5 rounded-md text-body font-normal transition-colors",
+    base: "flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-body font-normal transition-colors",
     selected: "bg-surface-inverse text-content-inverse",
     default: "text-content-primary hover:bg-surface-subtle",
     danger: "text-error hover:bg-error-bg",
@@ -213,7 +215,7 @@ export default function Select({
           aria-activedescendant={
             focusedIndex >= 0 ? `${listboxId}-opt-${focusedIndex}` : undefined
           }
-          className={`absolute z-50 ${fullWidth ? "" : "w-fit min-w-[160px]"} bg-surface-primary border border-border-components rounded-xl p-6 shadow-card flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${dropdownAnchorClass}`}
+          className={`absolute z-50 ${fullWidth ? "" : "w-fit min-w-[160px]"} bg-surface-primary border border-border-strong rounded-xl p-2 shadow-card flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${dropdownAnchorClass}`}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;
@@ -231,7 +233,7 @@ export default function Select({
                   setOpen(false);
                 }}
                 onMouseEnter={() => setFocusedIndex(index)}
-                className={`flex h-10 items-center gap-2 whitespace-nowrap px-6 py-2.5 rounded-md text-body font-normal cursor-pointer transition-colors ${
+                className={`flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-body font-normal cursor-pointer transition-colors ${
                   isSelected
                     ? "bg-surface-inverse text-content-inverse"
                     : isDanger

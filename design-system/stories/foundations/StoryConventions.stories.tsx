@@ -188,6 +188,24 @@ export const StoryConventions: Story = {
             indicator — the border is decorative).
           </Rule>
           <Rule>
+            <strong>Identify by what the element IS, not the token it already has (ECO-136).</strong> A token can
+            be mis-coded — copied from another pattern. The test is visual: <em>if you saw it rendered, what is
+            it?</em> A <strong>card</strong> (a surface box holding content — <Code>bg-surface-*</Code> +{" "}
+            <Code>rounded-*</Code> + padding, that you don&apos;t fill or toggle) → <Code>border-default</Code>,
+            <em>even if it was coded with</em> <Code>border-components</Code>. A card wearing the input token{" "}
+            <strong>stands out for no reason</strong> — whole sections read as highlighted. Keep{" "}
+            <Code>border-components</Code> <strong>only</strong> for a real input/control the user fills or
+            toggles. Same visual role → same token: uniformity, nothing highlighted without cause.
+          </Rule>
+          <Rule>
+            <strong>Relleno vs sin-relleno decide en un control interactivo (ECO-136).</strong> Un botón/target
+            SIN relleno propio (fondo = la página — <Code>bg-surface-primary</Code> — o transparente), donde el
+            <em>borde es la ÚNICA afordancia</em>, lleva <Code>border-components</Code> aunque sea un botón: su
+            límite debe percibirse a WCAG 3:1 (ej. un botón de paginación inactivo, un botón <em>outline</em>). Un
+            botón CON relleno propio (<Code>bg-surface-inverse/tertiary/subtle</Code>, como Button primary /
+            secondary) → <Code>border-strong</Code>: el relleno es la afordancia, el borde es secundario.
+          </Rule>
+          <Rule>
             The deciding question: is the border <strong>ON the container</strong> being demonstrated (→{" "}
             <Code>border-default</Code>) or on a <strong>discrete element/panel</strong> shown as its content (→{" "}
             <Code>border-strong</Code>)? Pick the <em>role</em> — <strong>never a raw value</strong> (a hex, an

@@ -3,6 +3,7 @@
   "$comment": "Registry interno del design system NexaCore (ECO-23; grafo completo ECO-26). Fuente unica: design-system/. em-ui lee de aqui, NUNCA de nexacore-dashboard/. Generado por design-system/registry/build-registry.mjs.",
   "source": "design-system",
   "tokens": "tokens/tokens.css",
+  "brandTemplate": "tokens/brand.template.css",
   "aliasAssumed": "@/ -> <consumer>/src (igual que dashboard y satelites; sin reescritura de imports)",
   "items": [
     {
@@ -687,7 +688,9 @@
       "type": "registry:section",
       "file": "sections/CTA.tsx",
       "registryDependencies": [
-        "Button"
+        "Button",
+        "Container",
+        "Section"
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
@@ -700,8 +703,10 @@
       "registryDependencies": [
         "Button",
         "Checkbox",
+        "Container",
         "FormField",
         "Input",
+        "Section",
         "Select",
         "Textarea"
       ],
@@ -712,7 +717,9 @@
       "type": "registry:section",
       "file": "sections/FAQ.tsx",
       "registryDependencies": [
-        "Accordion"
+        "Accordion",
+        "Container",
+        "Section"
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
@@ -733,7 +740,10 @@
       "file": "sections/Portfolio.tsx",
       "registryDependencies": [
         "Button",
-        "IconButton"
+        "Container",
+        "Grid",
+        "IconButton",
+        "Section"
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
@@ -745,7 +755,10 @@
       "file": "sections/Pricing.tsx",
       "registryDependencies": [
         "Badge",
-        "Button"
+        "Button",
+        "Container",
+        "Grid",
+        "Section"
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
@@ -757,7 +770,9 @@
       "file": "sections/Services.tsx",
       "registryDependencies": [
         "Accordion",
-        "Badge"
+        "Badge",
+        "Container",
+        "Section"
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
@@ -769,7 +784,10 @@
       "file": "sections/Testimonials.tsx",
       "registryDependencies": [
         "Avatar",
-        "Button"
+        "Button",
+        "Container",
+        "Grid",
+        "Section"
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
