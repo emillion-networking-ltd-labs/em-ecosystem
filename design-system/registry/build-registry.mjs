@@ -64,6 +64,7 @@ export function buildRegistry() {
     $comment: "Registry interno del design system NexaCore (ECO-23; grafo completo ECO-26). Fuente unica: design-system/. em-ui lee de aqui, NUNCA de nexacore-dashboard/. Generado por design-system/registry/build-registry.mjs.",
     source: "design-system",
     tokens: "tokens/tokens.css",
+    brandTemplate: "tokens/brand.template.css",
     aliasAssumed: "@/ -> <consumer>/src (igual que dashboard y satelites; sin reescritura de imports)",
     items,
   };

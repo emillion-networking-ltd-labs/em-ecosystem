@@ -12,7 +12,7 @@ export const dividerSpecs = {
   },
   base: {
     color:
-      "bg-border-strong — rgba(0,0,0,0.08) light / rgba(255,255,255,0.12) dark",
+      "bg-border-default — rgba(0,0,0,0.08) light / rgba(255,255,255,0.12) dark",
     thickness: "1px",
     "label font": "text-caption text-content-secondary",
   },
@@ -29,26 +29,32 @@ export default function Divider({
         <div
           className={`flex flex-col items-center gap-2 self-stretch ${className}`}
         >
-          <div className="w-px flex-1 bg-border-strong" />
-          <span className="text-caption text-content-secondary">{label}</span>
-          <div className="w-px flex-1 bg-border-strong" />
+          <div className="w-px flex-1 bg-border-default" />
+          <span className="text-caption uppercase tracking-wide text-content-secondary">
+            {label}
+          </span>
+          <div className="w-px flex-1 bg-border-default" />
         </div>
       );
     }
     return (
-      <div className={`mx-1 w-px self-stretch bg-border-strong ${className}`} />
+      <div
+        className={`mx-1 w-px self-stretch bg-border-default ${className}`}
+      />
     );
   }
 
   if (label) {
     return (
       <div className={`flex items-center gap-4 ${className}`}>
-        <div className="h-px flex-1 bg-border-strong" />
-        <span className="text-caption text-content-secondary">{label}</span>
-        <div className="h-px flex-1 bg-border-strong" />
+        <div className="h-px flex-1 bg-border-default" />
+        <span className="text-caption uppercase tracking-wide text-content-secondary">
+          {label}
+        </span>
+        <div className="h-px flex-1 bg-border-default" />
       </div>
     );
   }
 
-  return <div className={`h-px w-full bg-border-strong ${className}`} />;
+  return <div className={`h-px w-full bg-border-default ${className}`} />;
 }

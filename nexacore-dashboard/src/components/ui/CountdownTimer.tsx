@@ -12,7 +12,7 @@
  */
 
 type CountdownVariant = "error" | "warning";
-type CountdownSize = "sm" | "lg";
+type CountdownSize = "sm" | "md" | "lg";
 
 const variantStyles: Record<
   CountdownVariant,
@@ -21,7 +21,7 @@ const variantStyles: Record<
   error: {
     digitBg: "bg-error-bg",
     digitText: "text-error",
-    sepText: "text-error/60",
+    sepText: "text-error/75",
   },
   warning: {
     digitBg: "bg-warning-bg",
@@ -35,13 +35,18 @@ const sizeStyles: Record<
   { digit: string; sep: string; gap: string }
 > = {
   sm: {
-    digit: "w-[1.25em] h-[1.5em] text-[11px] rounded-[3px]",
+    digit: "w-[1.25em] h-[1.5em] text-caption rounded-[3px]",
     sep: "text-caption mx-px",
     gap: "gap-px",
   },
+  md: {
+    digit: "w-6 h-8 text-h3 rounded-md",
+    sep: "text-h3 mx-0.5",
+    gap: "gap-0.5",
+  },
   lg: {
-    digit: "w-8 h-10 text-2xl rounded-lg",
-    sep: "text-2xl mx-1",
+    digit: "w-8 h-10 text-h1 rounded-lg",
+    sep: "text-h1 mx-1",
     gap: "gap-1",
   },
 };
@@ -49,7 +54,7 @@ const sizeStyles: Record<
 function DigitBox({ value, className }: { value: string; className: string }) {
   return (
     <span
-      className={`inline-flex items-center justify-center overflow-hidden font-semibold tabular-nums ${className}`}
+      className={`inline-flex items-center justify-center overflow-hidden font-normal tabular-nums ${className}`}
     >
       <span key={value} className="countdown-slide">
         {value}

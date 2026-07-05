@@ -25,9 +25,9 @@ interface TooltipProps {
 
 export const tooltipSpecs = {
   container:
-    "max-w-[241px] rounded-lg border border-border-components bg-surface-primary px-4 py-3",
+    "max-w-[241px] rounded-lg border border-border-strong bg-surface-primary px-4 py-3",
   text: "text-caption font-normal text-content-primary",
-  arrow: "h-2 w-2 rotate-45 border border-border-components bg-surface-primary",
+  arrow: "h-2 w-2 rotate-45 border border-border-strong bg-surface-primary",
   positions: {
     "top (default)": "above trigger, centered",
     bottom: "below trigger, centered",
@@ -159,6 +159,19 @@ export default function Tooltip({
     if (visible) updatePosition();
   }, [visible, updatePosition]);
 
+  // ECO-116: while open, re-anchor to the trigger on scroll/resize. The tooltip is position: fixed and
+  // computed its coords once on open, so scrolling (without moving the mouse) left it detached from the
+  // trigger. `capture: true` catches scroll on ANY ancestor (scrollable containers), not just the window.
+  useEffect(() => {
+    if (!visible) return;
+    window.addEventListener("scroll", updatePosition, true);
+    window.addEventListener("resize", updatePosition);
+    return () => {
+      window.removeEventListener("scroll", updatePosition, true);
+      window.removeEventListener("resize", updatePosition);
+    };
+  }, [visible, updatePosition]);
+
   const isTouchDevice =
     typeof window !== "undefined" &&
     window.matchMedia("(pointer: coarse)").matches;
@@ -181,24 +194,29 @@ export default function Tooltip({
         ref={tooltipRef}
         id={tooltipId}
         role="tooltip"
-        className="fixed z-9999 w-max rounded-lg border border-border-components bg-surface-primary px-4 py-3"
+        className="fixed z-9999 w-max rounded-lg border border-border-strong bg-surface-primary px-4 py-3"
         style={{ ...style, maxWidth }}
       >
         {typeof content === "string" ? (
-          <p className="text-caption font-normal text-content-primary">
+          <p className="break-words text-caption font-normal text-content-primary">
             {content}
           </p>
         ) : (
           content
         )}
         <div
-          className="absolute h-2 w-2 border border-border-components bg-surface-primary"
+          className="absolute h-2 w-2 border border-border-default bg-surface-primary"
           style={arrowStyles[resolved]}
         />
       </div>
     ) : null;
 
   if (!isValidElement(children)) return children;
+
+  // ECO-129: sin content no hay nada que mostrar → devuelve el hijo tal cual (sin comportamiento de
+  // tooltip). Permite el patrón "tooltip solo cuando el texto trunca": el consumidor pasa content=""
+  // cuando el valor cabe y el valor completo cuando está recortado.
+  if (content === "" || content == null) return children;
 
   // Inject ref + event handlers directly into the child — no wrapper div (Radix pattern)
   const child = cloneElement(children, {

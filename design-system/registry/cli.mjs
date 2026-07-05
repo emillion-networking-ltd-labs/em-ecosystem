@@ -73,8 +73,10 @@ if (cmd === "list") {
 } else if (cmd === "diff") {
   const name = process.argv[3];
   const target = arg("--target") || die("falta --target <fichero-del-consumidor>");
-  const item = byName[name] || die(`componente desconocido: ${name}`);
-  const sourceFile = join(DS, item.file);
+  // `tokens` es un nombre especial: diffea la capa de tokens (baseline em-ui init), no un componente.
+  // La copia del consumidor es literal (em-ui init) → cualquier diferencia es drift/tampering.
+  const srcRel = name === "tokens" ? REGISTRY.tokens : (byName[name] || die(`componente desconocido: ${name} (¿o querías "tokens"?)`)).file;
+  const sourceFile = join(DS, srcRel);
   const a = readFileSync(sourceFile, "utf8").split("\n");
   if (!existsSync(target)) die(`target no existe: ${target}`);
   const b = readFileSync(target, "utf8").split("\n");
@@ -85,7 +87,7 @@ if (cmd === "list") {
   if (!onlySource.length && !onlyTarget.length) {
     console.log(`em-ui diff ${name}: SIN DRIFT (idéntico a la fuente).`); process.exit(0);
   }
-  console.log(`em-ui diff ${name}: DRIFT detectado (fuente=${item.file} vs ${target})`);
+  console.log(`em-ui diff ${name}: DRIFT detectado (fuente=${srcRel} vs ${target})`);
   console.log(`  — en la FUENTE pero no en el consumidor (posible regresión si falta):`);
   onlySource.forEach((l) => console.log(`    - ${l.trim()}`));
   console.log(`  + en el CONSUMIDOR pero no en la fuente (divergencia per-cliente o drift):`);
@@ -99,6 +101,23 @@ if (cmd === "list") {
   console.log(`em-ui init: capa de tokens instalada → ${to}`);
   console.log(`  Impórtala desde tu CSS global del consumidor: @import "../styles/em-ui-tokens.css";`);
   console.log(`  (sin esto, los componentes referencian tokens inexistentes y renderizan rotos).`);
+} else if (cmd === "brand") {
+  // Capa de override de marca por satélite (ECO-136 / Fase 2). Copia el template [data-brand],
+  // scopeado al nombre de la marca, para que el satélite pise SOLO su acento sin forkear tokens.css.
+  const name = arg("--name") || die("falta --name <marca> (p.ej. cristian-garcia)");
+  const destSrc = resolve(arg("--dest") || die("falta --dest <consumer-src-dir>"));
+  if (!REGISTRY.brandTemplate) die("registry.json no declara brandTemplate");
+  const tpl = readFileSync(join(DS, REGISTRY.brandTemplate), "utf8").replaceAll("__BRAND__", name);
+  const to = join(destSrc, "styles", "em-ui-brand.css");
+  if (existsSync(to) && !process.argv.includes("--force")) {
+    die(`ya existe: ${to} — usa --force para regenerar (PERDERÁS tus valores de marca)`);
+  }
+  mkdirSync(dirname(to), { recursive: true });
+  writeFileSync(to, tpl);
+  console.log(`em-ui brand: capa de marca [data-brand="${name}"] instalada → ${to}`);
+  console.log(`  1. Rellena los hex de tu marca (busca «REEMPLAZA»).`);
+  console.log(`  2. Impórtala DESPUÉS del baseline: @import "../styles/em-ui-brand.css";`);
+  console.log(`  3. Marca el root: <html data-brand="${name}"> (junto a la clase de tema).`);
 } else {
   console.log(`em-ui — registry + CLI del design system (fuente: design-system/)
 uso:
@@ -106,6 +125,7 @@ uso:
   em-ui add <C> --dest <src>              copia C (+deps) al consumidor (no sobrescribe)
   em-ui update <C> --dest <src>           re-pull de C (+deps), reconciliando (sobrescribe)
   em-ui diff <C> --target <fichero>       muestra drift del consumidor vs la fuente
-  em-ui init --dest <src>                 instala la capa de tokens en el consumidor`);
+  em-ui init --dest <src>                 instala la capa de tokens (baseline) en el consumidor
+  em-ui brand --name <m> --dest <src>     instala la capa de override de marca [data-brand]`);
   if (cmd && cmd !== "help" && cmd !== "--help") process.exit(1);
 }

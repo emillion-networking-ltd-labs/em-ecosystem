@@ -44,3 +44,25 @@ Arquitectura decidida (estrategia design-tokens, Opción 2 + matriz de pares, po
   rediseñar la paleta de marca (satellite-design/ECO-128); APCA como gate; 1.4.1/forced-colors (deuda a11y aparte).
 - Validación real (estrategia): content-tertiary compuesto sobre surface-primary = 3.84:1 (< AA 4.5) — el gate
   por pares lo caza.
+
+## Implementación (Fase 2, ECO-136)
+
+- **Capa de override `[data-brand]`:** `design-system/tokens/brand.template.css` (template canónico) + comando
+  `em-ui brand --name <m> --dest <src>` (scaffold gobernado, como `em-ui init`). El satélite importa el baseline
+  (`em-ui-tokens.css`) + su marca (`em-ui-brand.css`) y marca `<html data-brand="…">`. Re-declara `--color-accent*`
+  en el scope para escapar el freeze de `@theme` (mismo patrón que `.dark`/`.light`). Los gradientes de marca NO
+  se re-derivan solos (se congelan en :root) → se re-declaran en la capa si se usan (documentado en el template).
+- **Gate de contraste POR satélite:** `check-brand-contrast.mjs` fusiona el override de cada satélite sobre el
+  baseline y corre la matriz de pares sobre la paleta RESUELTA (bloquea NORMA content/surface/border, informa el
+  accent decorativo). Núcleo reutilizable exportado de `check-contrast.mjs`.
+- **Gate de drift:** `em-ui diff` extendido para diffear la capa `tokens` (antes solo componentes) +
+  `check-drift.mjs` (cada copia de consumidor DEBE ser idéntica a la fuente; falla CI y obliga a re-pull). Ambos
+  cableados a `npm run coverage`.
+- **Marcado norma/estético:** comentarios de sección en `tokens.css` (content/surface/border/feedback = NORMA;
+  accent/gradientes = ESTÉTICO). El gate es la ENFORCEMENT; el marcado es la guía.
+- **Propagación aplicada:** el dashboard estaba **stale** (bordes por debajo de AA, accent congelado, tokens de
+  efectos ausentes — 135 declaraciones drifted) → re-sincronizado a la norma. `sat-cristian-garcia` migrado del
+  fork de 648 líneas a `[data-brand]` (oro), build verificado (14 páginas), gates verdes.
+- **Aclaración (refina el brand-fixed de Fase 1):** el accent del BASE es brand-fixed (placeholder). Un SATÉLITE
+  SÍ puede flipar su accent por tema (legibilidad real de marca en dark) — `check-brand-contrast` valida su
+  paleta resuelta en AMBOS temas, así que la libertad estética no puede romper la norma en silencio.

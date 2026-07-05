@@ -91,12 +91,12 @@ export default function UserRoleChart() {
     <ChartCard title="Users by Role">
       {loading && (
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
-          <div className="h-[120px] w-[120px] animate-pulse rounded-full bg-black/8 dark:bg-white/8" />
+          <div className="h-[120px] w-[120px] animate-pulse rounded-full bg-surface-subtle" />
           <div className="space-y-3">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-4 w-24 animate-pulse rounded bg-black/8 dark:bg-white/8"
+                className="h-4 w-24 animate-pulse rounded bg-surface-subtle"
               />
             ))}
           </div>

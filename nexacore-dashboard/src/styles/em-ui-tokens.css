@@ -5,14 +5,137 @@
 @import 'tailwindcss';
 @custom-variant dark (&:is(.dark *));
 
+/* Superficies de tarjeta (ECO-91): utilidades distribuidas del design-system (antes vivían solo en el
+   globals del dashboard → StickyCard/Card no se estilaban en el catálogo/satélites). Dos ejes:
+   elevación (con sombra `card`/`card-container` vs plana `*-flat`) y radio (12px vs 24px `*-container*`).
+   Tematizadas por token (surface-primary/border-default/shadow-card). */
+@utility card {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-card);
+  border-radius: 12px;
+  padding: 24px;
+}
+@utility card-container {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  box-shadow: var(--shadow-card);
+  border-radius: 24px;
+  padding: 24px;
+}
+@utility card-flat {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 12px;
+  padding: 24px;
+}
+@utility card-container-flat {
+  background: var(--surface-primary);
+  border: 1px solid var(--border-default);
+  border-radius: 24px;
+  padding: 24px;
+}
+
+/* scrollbar-hide (ECO-91): utilidad distribuida (antes solo en el globals del dashboard → en el
+   catálogo/satélites asomaba la barra nativa, p.ej. en los Tabs nav-horizontal con scroll). */
+@utility scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Tailwind v4 quitó el `cursor: pointer` implícito en <button>. Se restaura en la capa base para
+   que todo elemento clicable se vea clicable — necesidad COMPARTIDA de todo consumidor (dashboard,
+   satélites, catálogo Storybook), por eso vive aquí (fuente única) y no solo en el globals del
+   dashboard (ECO-91). Las utilidades cursor-not-allowed/cursor-default lo sobreescriben (mayor capa). */
+@layer base {
+  /* SELECCIÓN DE TEXTO — NORMA DEFINITIVA (ECO-115, refina ECO-99/107). Objetivo del operador: el caret/I-beam
+     aparece SÓLO sobre TEXTO — nunca sobre elementos no-texto (cards, layout, chrome, decorativos). Por eso el
+     modelo es "nada seleccionable por defecto + opt-in del texto": `body` no seleccionable → clicar un card,
+     una caja o el fondo NO deja caret; sólo el contenido de TEXTO (y los editables) reactiva la selección, así
+     el texto sigue siendo copiable. El defecto que corrige ECO-115: el texto puesto en un <div> (no en la lista
+     de opt-in de tags, p.ej. AlertBox) quedaba SIN seleccionar → ese componente reabre la selección con la
+     clase `select-text` sobre su contenedor de texto (arreglo integral, no invertir el modelo). El guard
+     check-selection-model obliga a cada <div> con clase de texto a declarar `select-text`/`select-none`. */
+  button,
+  [role="button"],
+  summary,
+  [role="checkbox"],
+  [role="switch"],
+  [role="radio"],
+  [role="tab"],
+  [role="option"],
+  [role="menuitem"],
+  [role="menuitemradio"] {
+    user-select: none;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [role="checkbox"],
+  [role="switch"],
+  [role="radio"],
+  [role="tab"],
+  [role="option"],
+  [role="menuitem"],
+  [role="menuitemradio"] {
+    cursor: pointer;
+  }
+
+  /* MODELO DE SELECCIÓN (ECO-99): por defecto NADA es seleccionable → ningún caret de texto dentro de
+     cards, cajas, layout ni elementos no-texto (el problema que el catálogo destapaba: clicar un card
+     metía un caret). Solo el contenido de TEXTO —y los campos editables— reactiva la selección. */
+  body {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  /* Opt-in de selección del TEXTO. `a` NO va aquí (ECO-107): un enlace queda en `user-select: auto`, que
+     hereda el COMPORTAMIENTO del contexto → seleccionable dentro de prose (sus padres p/li son `text`) pero
+     NO suelto (en un div hereda `none` de body). El texto que un componente ponga en un <div> se reabre con
+     la clase `select-text` sobre ese contenedor (ECO-115) — no se añade `div` aquí para no reactivar el caret
+     sobre divs de layout. */
+  p, h1, h2, h3, h4, h5, h6,
+  span, li, code, pre, kbd, samp,
+  blockquote, q, cite, em, strong, b, i, u, s, small, mark, sub, sup,
+  abbr, dfn, time, label, dt, dd, figcaption, caption, th, td, address {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  input, textarea, [contenteditable="true"] {
+    -webkit-user-select: text;
+    user-select: text;
+  }
+  /* DESCENDIENTES DE CONTROL (ECO-107): el opt-in de texto (span/…) NO debe reactivar la selección DENTRO de
+     un control. Va DESPUÉS del opt-in y gana → el texto de un botón nunca muestra el caret I-beam. Un enlace-
+     botón (Button `as="a"`, sin role) se cubre con `select-none` en el propio primitivo (su <span> es opt-in).
+     Un primitivo que necesite texto copiable dentro de un control lo reabre con `select-text` explícito. */
+  button *, [role="button"] *, summary *,
+  [role="checkbox"] *, [role="switch"] *, [role="radio"] *,
+  [role="tab"] *, [role="option"] *, [role="menuitem"] *, [role="menuitemradio"] * {
+    -webkit-user-select: none;
+    user-select: none;
+  }
+}
+
 @theme {
+  /* ANCHO CANÓNICO DE CONTENIDO (ECO-131): fuente única del ancho máximo de las secciones/páginas de
+     marketing. 80rem = 1280px = punto `xl` de Container (Container consume este token). Superficies que
+     quieran el mismo ancho (satélites, catálogo) lo referencian en vez de repetir el literal. El shell del
+     dashboard usa su propio ancho de app (1200px) a propósito — es otra superficie, no consume este token. */
+  --content-max: 80rem;
+
   --font-sans:
     -apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial,
     sans-serif;
 
-  --color-accent: #1b5e20;
-  --color-accent-light: #2e7d32;
-  --color-accent-dark: #1b5e20;
+  --color-accent: var(--accent);
+  --color-accent-light: var(--accent-light);
+  --color-accent-dark: var(--accent-dark);
+
+  /* QR: superficie SIEMPRE clara, theme-invariant a propósito (NO se re-declara por tema) — un QR
+     sobre fondo oscuro es inescaneable. Excepción consciente, no un freeze bug. */
+  --color-surface-qr: #ffffff;
 
   --color-surface-primary: var(--surface-primary);
   --color-surface-secondary: var(--surface-secondary);
@@ -76,6 +199,7 @@
   --text-caption--letter-spacing: 0.02em;
 
   --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.08); /* elevación en hover (BentoGrid, cards interactivas) */
 
   --radius-xs: 4px;
   --radius-sm: 5px;
@@ -101,34 +225,38 @@
 }
 
 @layer utilities {
-  /* ===== Design Tokens — Light Mode (Default) ===== */
+  /* ===== Design Tokens — Light Mode (Default) =====
+     NORMA vs ESTÉTICO (ECO-136, Fase 2): los tokens marcados NORMA son la a11y innegociable — un satélite
+     puede pisarlos (vía la válvula de excepción) pero el gate `check-brand-contrast` valida su PAR resuelto y
+     bloquea si rompe WCAG AA. Los marcados ESTÉTICO son marca/decorativos — un satélite los pisa libremente en
+     su capa [data-brand] (accent/gradientes/efectos). Ver tokens/brand.template.css. */
   :root {
-    /* Surface colors */
+    /* Surface colors — NORMA (fondo de los pares de contraste) */
     --surface-primary: #ffffff;
     --surface-secondary: #fbfbfb;
     --surface-tertiary: #f5f7f9;
     --surface-subtle: rgba(28, 28, 28, 0.05);
     --surface-inverse: #1c1c1c;
 
-    /* Content colors (RGB channels for legacy `rgb(var(--content-primary))`
+    /* Content colors — NORMA (texto de los pares). (RGB channels for legacy `rgb(var(--content-primary))`
        usages — utility classes go through `--color-*` overrides below). */
     --content-primary: 28 28 28;
     --content-secondary: rgba(28, 28, 28, 0.65);
-    --content-tertiary: rgba(28, 28, 28, 0.55);
+    --content-tertiary: rgba(28, 28, 28, 0.62);
     --content-disabled: #73787d;
     --content-placeholder: rgba(28, 28, 28, 0.3);
     --content-inverse: #ffffff;
 
-    /* Border colors */
-    --border-default: rgba(0, 0, 0, 0.05);
-    --border-strong: rgba(0, 0, 0, 0.08);
-    --border-components: rgba(0, 0, 0, 0.15);
+    /* Border colors — NORMA (border-components es gate-blocking 3:1) */
+    --border-default: rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.14);
+    --border-components: rgba(0, 0, 0, 0.42);
     --border-subtle: rgba(0, 0, 0, 0.03);
 
     /* Overlay */
     --overlay: rgba(0, 0, 0, 0.2);
 
-    /* Semantic feedback colors — proper rgb() form (TW3 used channels `138 17 17`
+    /* Semantic feedback colors — NORMA (texto sobre su -bg y sobre surface). proper rgb() form (TW3 used channels `138 17 17`
        for the `rgb(var() / <alpha-value>)` config pattern; TW4 utilities consume
        --color-error directly, so it must be a valid color value). */
     --color-error: rgb(138 17 17);
@@ -147,12 +275,15 @@
     /* Interactive */
     --hover-bg: rgba(251, 251, 251, 0.75);
 
-    /* Accent */
+    /* Accent — marca. Brand-fixed: UN valor por preset, NO flipa por tema (se overridea por satélite, Fase 2).
+       Fuente única: estos crudos son el único sitio del valor; los `--color-accent*` de @theme los leen con var(). */
+    /* ESTÉTICO — marca; pisable libremente por [data-brand] en el satélite. */
     --accent: #1b5e20;
     --accent-light: #2e7d32;
+    --accent-2: #2e7d32;
+    --accent-dark: #1b5e20;
 
     /* Input states */
-    --input-border-focus: #1c1c1c;
     --input-bg-disabled: #f5f5f5;
 
     /* Dashboard-specific accent colors (from Figma extraction) */
@@ -177,16 +308,16 @@
     --content-placeholder: rgba(245, 245, 245, 0.3);
     --content-inverse: #1a1a1a;
 
-    --border-default: rgba(255, 255, 255, 0.08);
-    --border-strong: rgba(255, 255, 255, 0.12);
-    --border-components: rgba(255, 255, 255, 0.2);
+    --border-default: rgba(255, 255, 255, 0.12);
+    --border-strong: rgba(255, 255, 255, 0.18);
+    --border-components: rgba(255, 255, 255, 0.35);
     --border-subtle: rgba(255, 255, 255, 0.04);
 
     /* Overlay */
     --overlay: rgba(0, 0, 0, 0.2);
 
     /* Semantic feedback colors */
-    --color-error: 239 68 68;
+    --color-error: 248 113 113;
     --color-error-bg: #451a1a;
     --color-error-border: #7f1d1d;
     --color-warning: #f59e0b;
@@ -201,10 +332,7 @@
 
     --hover-bg: rgba(255, 255, 255, 0.06);
 
-    --accent: #2e7d32;
-    --accent-light: #43a047;
-
-    --input-border-focus: #f5f5f5;
+    /* Accent NO se re-declara aquí: brand-fixed (mismo valor de marca en light y dark). */
     --input-bg-disabled: #2d2d2d;
 
     /* Dashboard-specific accent colors (dark variants) */
@@ -213,31 +341,32 @@
     --notification-purple: #2a2a3d;
     --notification-blue: #1e2d3d;
 
-    /* Tailwind 4 utility-variable overrides.
-       @theme declares `--color-X: var(--X)` at :root, which gets statically
-       resolved at :root's cascade and inherited as a FROZEN value to all
-       descendants. Overriding the raw `--X` inside `.dark` does NOT propagate
-       to `--color-X` (utilities consume `--color-X`). We must re-declare
-       `--color-X` directly here so the cascade re-resolves it for descendants. */
-    --color-surface-primary: #1a1a1a;
-    --color-surface-secondary: #242424;
-    --color-surface-tertiary: #2d2d2d;
-    --color-surface-subtle: rgba(255, 255, 255, 0.06);
-    --color-surface-inverse: #f5f5f5;
-    --color-content-primary: rgb(245 245 245);
-    --color-content-secondary: rgba(245, 245, 245, 0.75);
-    --color-content-tertiary: rgba(245, 245, 245, 0.55);
-    --color-content-disabled: #6b7280;
-    --color-content-placeholder: rgba(245, 245, 245, 0.3);
-    --color-content-inverse: #1a1a1a;
-    --color-border-default: rgba(255, 255, 255, 0.08);
-    --color-border-strong: rgba(255, 255, 255, 0.12);
-    --color-border-components: rgba(255, 255, 255, 0.2);
-    --color-border-subtle: rgba(255, 255, 255, 0.04);
-    --color-hover: rgba(255, 255, 255, 0.06);
+    /* Tailwind 4 utility-variable overrides (ECO-134, estrategia design-tokens).
+       @theme declara `--color-X: var(--X)` en :root y se RESUELVE/CONGELA ahí; sobrescribir el crudo `--X`
+       dentro de `.dark` NO propaga al `--color-X` congelado, así que hay que re-declarar `--color-X` en este
+       scope. FUENTE ÚNICA: se re-declara como `var(--X)` (no literal) → el ÚNICO valor vive en el crudo `--X`
+       de arriba; cambiarlo propaga al `--color-X` sin editar dos sitios. (Feedback queda como está: `--color-X`
+       directo con literales propios por tema. Accent SÍ tiene crudo `--accent*` gemelo pero es BRAND-FIXED:
+       un valor por preset, NO se re-declara por tema — por eso no aparece aquí.) */
+    --color-surface-primary: var(--surface-primary);
+    --color-surface-secondary: var(--surface-secondary);
+    --color-surface-tertiary: var(--surface-tertiary);
+    --color-surface-subtle: var(--surface-subtle);
+    --color-surface-inverse: var(--surface-inverse);
+    --color-content-primary: rgb(var(--content-primary));
+    --color-content-secondary: var(--content-secondary);
+    --color-content-tertiary: var(--content-tertiary);
+    --color-content-disabled: var(--content-disabled);
+    --color-content-placeholder: var(--content-placeholder);
+    --color-content-inverse: var(--content-inverse);
+    --color-border-default: var(--border-default);
+    --color-border-strong: var(--border-strong);
+    --color-border-components: var(--border-components);
+    --color-border-subtle: var(--border-subtle);
+    --color-hover: var(--hover-bg);
     /* `--color-error: 239 68 68` (channels) is declared above; override here with
        a proper rgb() color so the `text-error` / `bg-error` utilities resolve. */
-    --color-error: rgb(239 68 68);
+    --color-error: rgb(248 113 113);
     --color-error-bg: #451a1a;
     --color-error-border: #7f1d1d;
     --color-warning: #f59e0b;
@@ -249,6 +378,8 @@
     --color-success: #22c55e;
     --color-success-bg: #14261c;
     --color-success-border: #166534;
+    /* metric/notification quedan literales: no tienen crudo `--X` gemelo en .light (var() heredaría el valor
+       del tema ancestro al anidar). Tokens de nicho del dashboard, fuera del set de contraste. */
     --color-metric-purple: #2a2a3d;
     --color-metric-blue: #1e2d3d;
     --color-notification-purple: #2a2a3d;
@@ -264,13 +395,13 @@
     --surface-inverse: #1c1c1c;
     --content-primary: 28 28 28;
     --content-secondary: rgba(28, 28, 28, 0.65);
-    --content-tertiary: rgba(28, 28, 28, 0.55);
+    --content-tertiary: rgba(28, 28, 28, 0.62);
     --content-disabled: #73787d;
     --content-placeholder: rgba(28, 28, 28, 0.3);
     --content-inverse: #ffffff;
-    --border-default: rgba(0, 0, 0, 0.05);
-    --border-strong: rgba(0, 0, 0, 0.08);
-    --border-components: rgba(0, 0, 0, 0.15);
+    --border-default: rgba(0, 0, 0, 0.08);
+    --border-strong: rgba(0, 0, 0, 0.14);
+    --border-components: rgba(0, 0, 0, 0.42);
     --border-subtle: rgba(0, 0, 0, 0.03);
     --overlay: rgba(0, 0, 0, 0.2);
     --color-error: 138 17 17;
@@ -286,29 +417,29 @@
     --color-success-bg: #f0fdf4;
     --color-success-border: #bbf7d0;
     --hover-bg: rgba(251, 251, 251, 0.75);
-    --input-border-focus: #1c1c1c;
     --input-bg-disabled: #f5f5f5;
     color: rgb(var(--content-primary));
 
     /* Tailwind 4 utility-variable overrides — see .dark for rationale.
        Needed when a .light wrapper is nested inside .dark (or vice-versa),
        e.g. ComponentShowcase rendering light variants on the dark page. */
-    --color-surface-primary: #ffffff;
-    --color-surface-secondary: #fbfbfb;
-    --color-surface-tertiary: #f5f7f9;
-    --color-surface-subtle: rgba(28, 28, 28, 0.05);
-    --color-surface-inverse: #1c1c1c;
-    --color-content-primary: rgb(28 28 28);
-    --color-content-secondary: rgba(28, 28, 28, 0.65);
-    --color-content-tertiary: rgba(28, 28, 28, 0.55);
-    --color-content-disabled: #73787d;
-    --color-content-placeholder: rgba(28, 28, 28, 0.3);
-    --color-content-inverse: #ffffff;
-    --color-border-default: rgba(0, 0, 0, 0.05);
-    --color-border-strong: rgba(0, 0, 0, 0.08);
-    --color-border-components: rgba(0, 0, 0, 0.15);
-    --color-border-subtle: rgba(0, 0, 0, 0.03);
-    --color-hover: rgba(251, 251, 251, 0.75);
+    /* FUENTE ÚNICA (ECO-134): var(--X) → el valor vive sólo en el crudo `--X` de .light de arriba. */
+    --color-surface-primary: var(--surface-primary);
+    --color-surface-secondary: var(--surface-secondary);
+    --color-surface-tertiary: var(--surface-tertiary);
+    --color-surface-subtle: var(--surface-subtle);
+    --color-surface-inverse: var(--surface-inverse);
+    --color-content-primary: rgb(var(--content-primary));
+    --color-content-secondary: var(--content-secondary);
+    --color-content-tertiary: var(--content-tertiary);
+    --color-content-disabled: var(--content-disabled);
+    --color-content-placeholder: var(--content-placeholder);
+    --color-content-inverse: var(--content-inverse);
+    --color-border-default: var(--border-default);
+    --color-border-strong: var(--border-strong);
+    --color-border-components: var(--border-components);
+    --color-border-subtle: var(--border-subtle);
+    --color-hover: var(--hover-bg);
     /* Override channels form declared above with proper rgb() color. */
     --color-error: rgb(138 17 17);
     --color-error-bg: #fef2f2;
@@ -334,4 +465,186 @@
   }
 
   /* ===== Base Styles ===== */
+}
+
+/* ===== Marketing animations (ECO-82, fase 1 / ADR-019) — para componentes Magic UI adoptados =====
+   ADITIVO: tokens de animación + keyframes que consumen AnimatedGradientText / Marquee / ShimmerButton.
+   No altera ningún token existente; el dashboard no usa estas utilidades (Tailwind v4 emite on-demand). */
+@theme inline {
+  --animate-gradient: gradient 8s linear infinite;
+  --animate-marquee: marquee var(--duration) infinite linear;
+  --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
+}
+
+@keyframes gradient {
+  to { background-position: var(--bg-size, 300%) 0; }
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-100% - var(--gap))); }
+}
+@keyframes marquee-vertical {
+  from { transform: translateY(0); }
+  to { transform: translateY(calc(-100% - var(--gap))); }
+}
+@keyframes shimmer-slide {
+  to { transform: translate(calc(100cqw - 100%), 0); }
+}
+@keyframes spin-around {
+  0% { transform: translateZ(0) rotate(0); }
+  15%, 35% { transform: translateZ(0) rotate(90deg); }
+  65%, 85% { transform: translateZ(0) rotate(270deg); }
+  100% { transform: translateZ(0) rotate(360deg); }
+}
+
+/* ===== Marketing animations (ECO-88, fase 1 / ADR-019) — para componentes Aceternity-free adoptados =====
+   ADITIVO: tokens de animación + keyframes que consumen Meteors / AuroraBackground / Spotlight.
+   Definiciones VERBATIM de Aceternity (MIT). No altera ningún token existente. */
+@theme inline {
+  --animate-meteor-effect: meteor 5s linear infinite;
+  --animate-aurora: aurora 60s linear infinite;
+  --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
+}
+
+@keyframes meteor {
+  0% { transform: rotate(215deg) translateX(0); opacity: 1; }
+  70% { opacity: 1; }
+  100% { transform: rotate(215deg) translateX(-500px); opacity: 0; }
+}
+@keyframes aurora {
+  from { background-position: 50% 50%, 50% 50%; }
+  to { background-position: 350% 50%, 350% 50%; }
+}
+@keyframes spotlight {
+  0% { opacity: 0; transform: translate(-72%, -62%) scale(0.5); }
+  100% { opacity: 1; transform: translate(-50%, -40%) scale(1); }
+}
+
+/* InfinitySpinner (ECO-91): keyframes + clase distribuidas (antes vivían solo en el globals del
+   dashboard → el spinner no animaba en el catálogo/satélites). dashoffset 0 → 256.589 (dash+gap). */
+@keyframes infinity-spin {
+  0% { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: 256.589; }
+}
+.infinity-spinner {
+  animation: infinity-spin 2s linear infinite;
+}
+
+/* Animaciones de entrada de icono (ECO-91): keyframes + clases distribuidas (antes solo en el globals
+   del dashboard → las pantallas de feedback full-page no animaban el icono en el catálogo/satélites).
+   success = pop-in; error = pop-in + shake horizontal (comunica rechazo). */
+@keyframes icon-success {
+  0% { opacity: 0; transform: scale(0.3); }
+  50% { opacity: 1; transform: scale(1.08); }
+  70% { transform: scale(0.96); }
+  100% { opacity: 1; transform: scale(1); }
+}
+@keyframes icon-error {
+  0% { opacity: 0; transform: scale(0.5); }
+  40% { opacity: 1; transform: scale(1); }
+  50% { transform: translateX(-6px); }
+  60% { transform: translateX(5px); }
+  70% { transform: translateX(-4px); }
+  80% { transform: translateX(3px); }
+  90% { transform: translateX(-1px); }
+  100% { transform: translateX(0); }
+}
+.icon-success {
+  animation: icon-success 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+.icon-error {
+  animation: icon-error 600ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* ImageCropper (react-easy-crop): color del área de recorte por tokens del DS, no por los defaults de la
+   librería. Especificidad 2-clases para ganar al CSS base inyectado. `border-color` = anillo claro visible
+   sobre cualquier imagen; `color` pinta el scrim (box-shadow) que oscurece fuera del recorte. */
+.reactEasyCrop_CropArea.cropper-crop-area {
+  border-color: var(--color-content-inverse);
+  color: var(--overlay);
+}
+
+/* ===== Marketing design tokens (ECO-83, fase 1.3 / ADR-019) — cosechados del benchmark sat-cristian-garcia =====
+   ADITIVO: la escala base --text-h1..caption es de dashboard (24px tope); aquí va la tipografía DISPLAY
+   fluida de marketing, familias display/serif por sector, y un 2º acento para gradientes multi-stop
+   (hoy --color-accent == --color-accent-dark → gradiente plano). No altera ningún token existente.
+   El consumidor inyecta la CARA real de la fuente vía next/font (variable --font-display-face /
+   --font-serif-face); aquí va el token gobernado + los fallbacks de sistema. */
+@theme {
+  /* Familias (el consumidor provee la cara vía next/font como --font-*-face) */
+  --font-display: var(--font-display-face), -apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif;
+  --font-serif: var(--font-serif-face), Georgia, Cambria, "Times New Roman", Times, serif;
+
+  /* Escala DISPLAY fluida (clamp), tracking negativo + line-height ajustado (estilo .text-display del benchmark) */
+  --text-display-1: clamp(2.5rem, 1.4rem + 5.2vw, 5rem);
+  --text-display-1--line-height: 1;
+  --text-display-1--letter-spacing: -0.03em;
+  --text-display-2: clamp(2rem, 1.3rem + 3.4vw, 3.5rem);
+  --text-display-2--line-height: 1.05;
+  --text-display-2--letter-spacing: -0.02em;
+  --text-display-3: clamp(1.5rem, 1.1rem + 1.9vw, 2.25rem);
+  --text-display-3--line-height: 1.12;
+  --text-display-3--letter-spacing: -0.015em;
+
+  /* 2º acento — habilita gradientes de marca multi-stop NO planos; tematizable por satélite */
+  --color-accent-2: var(--accent-2);
+}
+
+/* Gradientes de marca multi-stop (atmósfera). Vars planas (no @theme → no generan utilidad de color);
+   se usan con [background-image:var(--gradient-brand)] o en CSS. Tematizables vía --color-accent/-2. */
+:root {
+  --gradient-brand: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%);
+  --gradient-brand-radial: radial-gradient(120% 120% at 50% 0%, var(--color-accent-2) 0%, var(--color-accent) 55%, transparent 100%);
+}
+
+/* Motion gobernado (ECO-93) — duración + easing para reveals/stagger/transiciones de las secciones, sin
+   números mágicos dispersos. `--ease-out-expo` genera la utilidad `ease-out-expo`; las duraciones se usan
+   vía `duration-[var(--duration-*)]`. Tematizables: el consumidor puede afinar el ritmo. */
+@theme {
+  --duration-fast: 150ms;
+  --duration-base: 300ms;
+  --duration-slow: 600ms;
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Cursor parpadeante de TypingAnimation (ECO-105, fase 1 / ADR-019) — token de animación + keyframe que
+   consume la utilidad `animate-blink-cursor`. Aditivo: no altera ningún token existente. */
+@theme inline {
+  --animate-blink-cursor: blink-cursor 1s step-end infinite;
+}
+@keyframes blink-cursor {
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Ripple (ECO-106, fase 1 / ADR-019) — fondo de círculos concéntricos que laten (escala) con stagger por
+   `--i`. Token de animación + keyframe que consume la utilidad `animate-ripple`. Aditivo. */
+@theme inline {
+  --animate-ripple: ripple var(--duration, 2s) ease calc(var(--i, 0) * 0.2s) infinite;
+}
+@keyframes ripple {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) scale(1);
+  }
+  50% {
+    transform: translate(-50%, -50%) scale(0.9);
+  }
+}
+
+/* PulsatingButton (ECO-106, fase 1 / ADR-019) — halo que late hacia fuera (box-shadow del color del botón,
+   expandiéndose y desvaneciéndose). Token de animación + keyframe que consume `animate-button-pulse`. Aditivo. */
+@theme inline {
+  --animate-button-pulse: button-pulse var(--duration, 1.5s) ease-out infinite;
+}
+@keyframes button-pulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--pulse-color);
+  }
+  100% {
+    box-shadow: 0 0 0 var(--distance, 8px) transparent;
+  }
 }

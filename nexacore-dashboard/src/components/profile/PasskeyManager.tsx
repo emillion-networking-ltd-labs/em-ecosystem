@@ -74,7 +74,7 @@ function PasskeyItem({
       animate="visible"
       exit="exit"
       transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-      className="flex items-center justify-between rounded-xl border border-border-components p-4"
+      className="flex items-center justify-between rounded-xl border border-border-default p-4"
     >
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-surface-tertiary">

@@ -1,15 +1,11 @@
+// @em-ui-adapted: Button auto-deriva <a> cuando hay href (CTAs usan href sin as="a") — diverge de la fuente em-ui a propósito (ECO-136). Al re-pull, re-aplicar esta adaptación.
 "use client";
 
 import React from "react";
-import InfinitySpinner from "./InfinitySpinner";
+import SpinnerInfinity from "./SpinnerInfinity";
 
 export type ButtonVariant =
-  | "primary"
-  | "secondary"
-  | "outline"
-  | "danger"
-  | "link"
-  | "link-underline";
+  "primary" | "secondary" | "outline" | "danger" | "link" | "link-underline";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -22,9 +18,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 export const variantClasses = {
   primary:
-    "bg-surface-inverse text-content-inverse border border-border-components transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50",
+    "bg-surface-inverse text-content-inverse border border-border-strong transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50",
   secondary:
-    "bg-surface-tertiary text-content-secondary border border-border-components transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
+    "bg-surface-tertiary text-content-secondary border border-border-strong transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   outline:
     "bg-transparent text-content-primary border border-border-components transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   danger:
@@ -61,16 +57,22 @@ export default function Button({
   href,
   ...props
 }: ButtonProps) {
-  // If `as` is not specified, default to "a" when href is provided so the
-  // button actually navigates. Otherwise default to "button" for click handlers.
-  // (`<button href="...">` is invalid HTML — browsers ignore the href.)
-  const Component = as ?? (href ? "a" : "button");
   const isLink = variant === "link" || variant === "link-underline";
   const sizes = isLink ? linkSizeClasses[size] : sizeClasses[size];
   const display = isLink ? "inline-flex" : fullWidth ? "flex" : "inline-flex";
 
+  // Adaptación del satélite (ECO-136): si no se pasa `as`, se rinde <a> cuando hay href.
+  // (`<button href="...">` es HTML inválido — el navegador ignora el href.) 8+ CTAs
+  // (HeroCTA, CTASection, precios, TestimonialsPreview, AppPreview, PublicNavbar…)
+  // usan <Button href="..."> SIN as="a" y dependen de esta derivación. NO tocar.
+  const Component = as ?? (href ? "a" : "button");
+
+  // ECO-115: las variantes no-link son SUPERFICIE DE CONTROL. Con `as="a"` se rinde un <a> SIN role=button
+  // (enlace-botón, p.ej. el CTA del Hero); su texto va en un <span>, que es opt-in de selección (tokens.css) y
+  // `button *`/`[role]*` NO cubre al <a> → mostraría el caret I-beam. Se marca `select-none` aquí para evitarlo.
+  // Las variantes link/link-underline son texto inline → seleccionables (no se marcan).
   const componentProps: Record<string, unknown> = {
-    className: `${display} ${baseClass} ${variantClasses[variant]} ${sizes} ${!isLink && fullWidth ? "w-full" : ""} ${className}`,
+    className: `${display} ${baseClass} ${variantClasses[variant]} ${sizes} ${!isLink ? "select-none" : ""} ${!isLink && fullWidth ? "w-full" : ""} ${className}`,
     ...props,
   };
 
@@ -92,7 +94,7 @@ export default function Button({
         aria-label="Loading"
         className="absolute inset-0 flex items-center justify-center"
       >
-        <InfinitySpinner size={size === "sm" ? "sm" : "md"} />
+        <SpinnerInfinity size={size === "lg" ? "lg" : "md"} />
       </span>
     ),
   );

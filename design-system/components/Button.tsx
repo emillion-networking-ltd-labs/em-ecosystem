@@ -87,7 +87,7 @@ export default function Button({
         aria-label="Loading"
         className="absolute inset-0 flex items-center justify-center"
       >
-        <SpinnerInfinity size={size === "sm" ? "sm" : "md"} />
+        <SpinnerInfinity size={size === "lg" ? "lg" : "md"} />
       </span>
     ),
   );

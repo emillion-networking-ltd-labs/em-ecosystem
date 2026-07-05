@@ -41,13 +41,13 @@ export default function VerifyEmailStatus() {
       {isSuccess ? (
         <CircleCheck
           size={48}
-          className="icon-success text-[#166534]"
+          className="icon-success text-success"
           strokeWidth={1.5}
         />
       ) : (
         <CircleX
           size={48}
-          className="icon-error text-[#8a1111]"
+          className="icon-error text-error"
           strokeWidth={1.5}
         />
       )}

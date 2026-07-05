@@ -8,7 +8,7 @@ export const emptyStateSpecs = {
   "icon (variant=default)": "48px text-content-primary/30 (default: Inbox)",
   "icon (variant=error)": "48px text-error (default: AlertTriangle)",
   title: "text-body font-semibold text-content-primary",
-  description: "text-caption text-content-primary/50 text-center",
+  description: "text-caption text-content-secondary text-center",
   action: "Optional ReactNode (Button, Link, etc.)",
 };
 
@@ -42,7 +42,7 @@ export default function EmptyState({
       <span className={iconColorClass}>{icon || defaultIcon}</span>
       <p className="text-body font-semibold text-content-primary">{title}</p>
       {description && (
-        <p className="text-caption text-content-primary/50 text-center">
+        <p className="text-caption text-content-secondary text-center">
           {description}
         </p>
       )}

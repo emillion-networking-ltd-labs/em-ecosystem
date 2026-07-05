@@ -7,7 +7,7 @@ export type IconBadgeVariant =
 
 export const iconBadgeSpecs = {
   variants: {
-    default: "bg-surface-subtle text-content-secondary",
+    default: "bg-surface-subtle text-content-primary",
     success: "bg-success-bg text-success",
     warning: "bg-warning-bg text-warning",
     error: "bg-error-bg text-error",
@@ -21,7 +21,7 @@ export const iconBadgeSpecs = {
 };
 
 const variantClasses: Record<IconBadgeVariant, string> = {
-  default: "bg-surface-subtle text-content-secondary",
+  default: "bg-surface-subtle text-content-primary",
   success: "bg-success-bg text-success",
   warning: "bg-warning-bg text-warning",
   error: "bg-error-bg text-error",
@@ -43,7 +43,7 @@ interface IconBadgeProps {
 
 export default function IconBadge({
   variant = "default",
-  size = "md",
+  size = "sm",
   className = "",
   children,
 }: IconBadgeProps) {

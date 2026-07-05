@@ -22,7 +22,8 @@ export const sliderSpecs = {
   },
   thumb: {
     size: "16×16px rounded-full",
-    style: "bg-surface-primary border border-solid border-border-components — thumb knob; focus ring var(--color-border-components)",
+    style:
+      "bg-surface-primary border border-solid border-border-components — thumb knob; focus ring var(--color-border-components)",
   },
   label: "text-body font-normal text-content-primary",
   value: "text-caption text-content-secondary tabular-nums",

@@ -202,9 +202,9 @@ function SpecsPanel({
 /* Hover classes derived from Button.tsx variantClasses — static simulation of hover state */
 const hoverClasses = {
   primary:
-    "bg-surface-inverse text-content-inverse border border-border-components opacity-90",
+    "bg-surface-inverse text-content-inverse border border-border-strong opacity-90",
   secondary:
-    "bg-surface-subtle text-content-secondary border border-border-components",
+    "bg-surface-subtle text-content-secondary border border-border-strong",
   outline:
     "bg-surface-subtle text-content-primary border border-border-components",
   danger: "bg-error-bg text-error border border-error-border",
@@ -1848,7 +1848,7 @@ function EmailSelectorCard({
         <div
           className={`absolute z-50 w-fit min-w-[200px] left-0 ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"}`}
         >
-          <div className="rounded-xl border border-border-components bg-surface-primary p-4 shadow-card whitespace-nowrap">
+          <div className="rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card whitespace-nowrap">
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -2135,7 +2135,7 @@ function ToastDemo() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: 40 }}
                   transition={{ duration: 0.3 }}
-                  className="group relative grid grid-cols-[14px_1fr_auto] items-start gap-x-2 rounded-3xl border border-border-components bg-surface-primary py-3 pl-5 pr-4"
+                  className="group relative grid grid-cols-[14px_1fr_auto] items-start gap-x-2 rounded-3xl border border-border-strong bg-surface-primary py-3 pl-5 pr-4"
                 >
                   <Icon
                     size={14}
@@ -2171,23 +2171,23 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
 
   return (
     <div
-      className="w-[280px] rounded-3xl border border-border-strong bg-surface-secondary shadow-card overflow-hidden cursor-pointer"
+      className="w-[280px] rounded-3xl border border-border-default bg-surface-secondary shadow-card overflow-hidden cursor-pointer"
       onMouseEnter={() => setAnimKey((k) => k + 1)}
     >
-      <div className="flex flex-col gap-2 border-b border-border-strong bg-surface-primary p-6 min-h-[200px] justify-center">
+      <div className="flex flex-col gap-2 border-b border-border-default bg-surface-primary p-6 min-h-[200px] justify-center">
         <div className="flex flex-col items-center gap-2">
           {isError ? (
             <CircleX
               key={`error-${animKey}`}
               size={48}
-              className="icon-error text-[#8a1111]"
+              className="icon-error text-error"
               strokeWidth={1.5}
             />
           ) : (
             <CircleCheck
               key={`success-${animKey}`}
               size={48}
-              className="icon-success text-[#166534]"
+              className="icon-success text-success"
               strokeWidth={1.5}
             />
           )}
@@ -2317,7 +2317,7 @@ function FeedbackShowcase() {
           },
           Toast: {
             container:
-              "rounded-full border border-border-components bg-surface-primary px-6 py-4",
+              "rounded-full border border-border-strong bg-surface-primary px-6 py-4",
             icons:
               "error: AlertTriangle, success: CircleCheck, warning: CircleAlert, info: Info — 16px",
             title:
@@ -2328,13 +2328,13 @@ function FeedbackShowcase() {
               "Framer Motion: enter (opacity+y), exit (opacity+x), auto-dismiss 5s",
           },
           "Full Page Card": {
-            card: "rounded-3xl border border-border-strong bg-surface-secondary shadow-card",
-            content: "bg-surface-primary p-6 border-b border-border-strong",
+            card: "rounded-3xl border border-border-default bg-surface-secondary shadow-card",
+            content: "bg-surface-primary p-6 border-b border-border-default",
             footer: "h-14 p-2 (auth-card narrow footer)",
             "error icon":
-              "CircleX 48px text-[#8a1111] strokeWidth-1.5 icon-error animation",
+              "CircleX 48px text-error strokeWidth-1.5 icon-error animation",
             "success icon":
-              "CircleCheck 48px text-[#166534] strokeWidth-1.5 icon-success animation",
+              "CircleCheck 48px text-success strokeWidth-1.5 icon-success animation",
             text: "text-body text-content-tertiary text-center",
             button:
               "h-10 w-full rounded-md border border-border-components bg-transparent text-h3 font-normal — outline-solid style",
@@ -2846,7 +2846,7 @@ function DoughnutChartMock({ isDark = false }: { isDark?: boolean }) {
                   if (!active || !payload?.length) return null;
                   const item = payload[0];
                   return (
-                    <div className="rounded-lg border border-border-components bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
+                    <div className="rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <span
                           className="h-2 w-2 shrink-0 rounded-sm"
@@ -2968,7 +2968,7 @@ function ChartsShowcase() {
             tooltip:
               "Custom HTML content via <Tooltip content={...} /> — native DOM positioning",
             "tooltip style":
-              "rounded-lg border-border-components bg-surface-primary px-4 py-3 shadow-card (no diamond — Recharts controls position)",
+              "rounded-lg border-border-strong bg-surface-primary px-4 py-3 shadow-card (no diamond — Recharts controls position)",
             "color dots": "h-2 w-2 rounded-sm with item.color",
             grid: "border-strong color, no x-grid, strokeDasharray 3 3",
             ticks: "text-caption (12px) via SVG, system font inherited",
@@ -3133,7 +3133,7 @@ function CardShowcase() {
         specs={{
           "Container (card-container)": {
             background: "bg-surface-primary (#ffffff light / #1a1a1a dark)",
-            border: "1px border-border-strong rgba(0,0,0,0.08)",
+            border: "1px border-border-default rgba(0,0,0,0.08)",
             shadow: "0 8px 32px rgba(0,0,0,0.04)",
             radius: "24px (rounded-3xl)",
             padding: "24px",
@@ -3141,7 +3141,7 @@ function CardShowcase() {
           },
           "Inner (card)": {
             background: "bg-surface-primary (#ffffff light / #1a1a1a dark)",
-            border: "1px border-border-strong rgba(0,0,0,0.08)",
+            border: "1px border-border-default rgba(0,0,0,0.08)",
             shadow: "0 8px 32px rgba(0,0,0,0.04)",
             radius: "12px (rounded-xl)",
             padding: "24px",
@@ -3150,7 +3150,7 @@ function CardShowcase() {
           },
           "Container Flat (card-container-flat)": {
             background: "bg-surface-primary",
-            border: "1px border-border-strong",
+            border: "1px border-border-default",
             shadow: "none",
             radius: "24px (rounded-3xl)",
             padding: "24px",
@@ -3158,7 +3158,7 @@ function CardShowcase() {
           },
           "Inner Flat (card-flat)": {
             background: "bg-surface-primary",
-            border: "1px border-border-strong",
+            border: "1px border-border-default",
             shadow: "none",
             radius: "12px (rounded-xl)",
             padding: "24px",
@@ -3535,7 +3535,7 @@ function EmptyStateShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   default
                 </p>
-                <div className="rounded-lg border border-border-strong">
+                <div className="rounded-lg border border-border-default">
                   <EmptyState
                     title="No users found"
                     description="Try adjusting your search or filters."
@@ -3546,7 +3546,7 @@ function EmptyStateShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   with action
                 </p>
-                <div className="rounded-lg border border-border-strong">
+                <div className="rounded-lg border border-border-default">
                   <EmptyState
                     title="No projects yet"
                     description="Create your first project to get started."
@@ -3562,7 +3562,7 @@ function EmptyStateShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   custom icon
                 </p>
-                <div className="rounded-lg border border-border-strong">
+                <div className="rounded-lg border border-border-default">
                   <EmptyState
                     icon={<Search size={48} />}
                     title="No results"
@@ -3574,7 +3574,7 @@ function EmptyStateShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   error variant
                 </p>
-                <div className="rounded-lg border border-border-strong">
+                <div className="rounded-lg border border-border-default">
                   <EmptyState
                     variant="error"
                     title="Couldn't load users"
@@ -3758,7 +3758,7 @@ function ImageCropperShowcase() {
             <p className="text-caption text-content-tertiary mb-3">
               Avatar sizes
             </p>
-            <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-border-components p-4">
+            <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-border-default p-4">
               {croppedUrl ? (
                 <div className="flex items-end gap-4">
                   {[
@@ -4043,7 +4043,7 @@ function StickyCardShowcase() {
           position:fixed against the page viewport and would hijack the page
           on scroll). Pure CSS illustration of the visual concept; the real
           component lives in this page's tab bar — scroll the page to see it. */}
-      <div className="h-64 overflow-y-auto rounded-xl border border-border-strong bg-surface-secondary">
+      <div className="h-64 overflow-y-auto rounded-xl border border-border-default bg-surface-secondary">
         <div className="px-4 pt-3 pb-2 text-caption text-content-tertiary text-center">
           ↓ Scroll inside this container to see the card stick to the top ↓
         </div>
@@ -4072,7 +4072,7 @@ function StickyCardShowcase() {
         </div>
       </div>
 
-      <div className="card-flat p-3! bg-surface-secondary/40 border border-dashed border-border-strong">
+      <div className="card-flat p-3! bg-surface-secondary/40 border border-dashed border-border-default">
         <p className="text-caption text-content-tertiary">
           <strong className="text-content-primary">Note:</strong> the demo above
           uses CSS <code>position: sticky</code> scoped to its own scroll
@@ -4096,7 +4096,7 @@ function ThemeToggleShowcase() {
         — renders nothing until hydration to avoid hydration mismatch. Consumes{" "}
         <code>ThemeContext</code>.
       </p>
-      <div className="flex items-center gap-4 p-4 border border-border-strong rounded-xl bg-surface-secondary">
+      <div className="flex items-center gap-4 p-4 border border-border-default rounded-xl bg-surface-secondary">
         <ThemeToggle tooltipPosition="right" />
         <span className="text-caption text-content-tertiary">
           Click to toggle the entire app between light and dark
@@ -4116,7 +4116,7 @@ function TurnstileWidgetShowcase() {
         <code>NEXT_PUBLIC_TURNSTILE_SITE_KEY</code>. Demo uses Cloudflare&apos;s
         official test site key (always passes verification).
       </p>
-      <div className="border border-border-strong rounded-xl p-4 bg-surface-secondary">
+      <div className="border border-border-default rounded-xl p-4 bg-surface-secondary">
         <p className="text-caption text-content-tertiary mb-3">
           Test site key (always passes):
         </p>

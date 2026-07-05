@@ -95,7 +95,7 @@ export default function MfaSetupStep() {
           <div className="flex flex-col items-center gap-2">
             <CircleX
               size={48}
-              className="icon-error text-[#8a1111]"
+              className="icon-error text-error"
               strokeWidth={1.5}
             />
 
@@ -146,7 +146,7 @@ export default function MfaSetupStep() {
           )}
 
           {qrCodeDataUrl && (
-            <div className="flex justify-center rounded-lg border border-border-components bg-white p-4">
+            <div className="flex justify-center rounded-lg border border-border-default bg-white p-4">
               {/* next/image cannot optimize data: URLs (qrcode.js output)
                   and the size is fixed at 48×48 client-side; raw <img>
                   is intentional. */}
@@ -164,7 +164,7 @@ export default function MfaSetupStep() {
             <span className="text-body text-content-secondary">
               Or enter this key manually:
             </span>
-            <div className="flex h-12 items-center gap-2 rounded-lg border border-border-components bg-surface-subtle px-4">
+            <div className="flex h-12 items-center gap-2 rounded-lg border border-border-default bg-surface-subtle px-4">
               <code className="flex-1 break-all font-mono text-body leading-6 text-content-primary">
                 {secret}
               </code>
@@ -174,7 +174,7 @@ export default function MfaSetupStep() {
                 aria-label="Copy secret key"
               >
                 {copiedSecret ? (
-                  <Check size={14} className="text-green-600" />
+                  <Check size={14} className="text-success" />
                 ) : (
                   <Copy size={14} />
                 )}
@@ -221,12 +221,12 @@ export default function MfaSetupStep() {
         </div>
 
         <div className="flex w-full flex-col gap-4 md:w-[348px]">
-          <div className="rounded-lg border border-border-components bg-surface-subtle p-4">
+          <div className="rounded-lg border border-border-default bg-surface-subtle p-4">
             <div className="grid grid-cols-2 gap-2">
               {recoveryCodes.map((c, i) => (
                 <code
                   key={i}
-                  className="rounded bg-white px-2 py-1 text-center font-mono text-body text-content-primary dark:bg-surface-inverse/10"
+                  className="rounded bg-surface-primary px-2 py-1 text-center font-mono text-body text-content-primary dark:bg-surface-inverse/10"
                 >
                   {c}
                 </code>
@@ -243,7 +243,7 @@ export default function MfaSetupStep() {
           >
             {copied ? (
               <>
-                <Check size={16} className="text-green-600" /> Copied!
+                <Check size={16} className="text-success" /> Copied!
               </>
             ) : (
               <>

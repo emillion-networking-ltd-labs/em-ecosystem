@@ -19,7 +19,7 @@ interface AvatarProps {
 }
 
 export const baseClass =
-  "inline-flex items-center justify-center rounded-full border border-border-components bg-surface-tertiary overflow-hidden shrink-0";
+  "inline-flex items-center justify-center rounded-full border border-border-strong bg-surface-tertiary overflow-hidden shrink-0";
 
 export const sizeClasses = {
   sm: "w-8 h-8 text-caption",
@@ -53,7 +53,7 @@ export default function Avatar({
 
   return (
     <div
-      className={`relative inline-flex items-center justify-center rounded-full border border-border-components bg-surface-tertiary overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
+      className={`relative inline-flex items-center justify-center rounded-full border border-border-strong bg-surface-tertiary overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
       aria-label={alt ?? name ?? "Avatar"}
       role="img"
     >

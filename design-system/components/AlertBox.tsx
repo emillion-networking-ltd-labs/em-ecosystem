@@ -67,7 +67,9 @@ export default function AlertBox({
       <Icon size={16} className={`mt-0.5 shrink-0 ${config.iconColor}`} />
       {/* select-text: el texto va en un <div> (no en la lista de opt-in de tags) → se reabre la selección
           para que el mensaje sea copiable, sin reactivar el caret sobre divs de layout (ECO-115). */}
-      <div className="select-text text-caption text-content-primary">{children}</div>
+      <div className="select-text text-caption text-content-primary">
+        {children}
+      </div>
     </div>
   );
 }

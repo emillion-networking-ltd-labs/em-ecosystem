@@ -1,3 +1,4 @@
+// @em-ui-adapted: prop imageStyle en ambos <Image> + transform translateZ(0) (fix GPU nitidez backdrop-blur) + aria-label ES + comentario carousel TransformationsPreview — diverge de la fuente em-ui a propósito (ECO-136). Al re-pull, re-aplicar esta adaptación.
 "use client";
 
 import { useState, useRef, useEffect } from "react";

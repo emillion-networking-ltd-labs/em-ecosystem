@@ -138,7 +138,7 @@ export default function ConnectedAccounts() {
 
   return (
     <>
-      <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
+      <div className="rounded-xl border border-border-default bg-surface-primary p-6">
         <h2
           id="connected-accounts"
           className="mb-6 text-h3 font-semibold uppercase tracking-wider text-content-primary"
@@ -159,7 +159,7 @@ export default function ConnectedAccounts() {
             return (
               <div
                 key={provider.id}
-                className="flex items-center justify-between rounded-xl border border-border-components p-4"
+                className="flex items-center justify-between rounded-xl border border-border-default p-4"
               >
                 <div className="flex items-center gap-3">
                   {provider.icon}

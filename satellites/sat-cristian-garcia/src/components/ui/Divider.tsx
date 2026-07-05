@@ -1,3 +1,4 @@
+// @em-ui-adapted: líneas en oro de marca (bg-accent #8B6914) en light — diverge de la fuente em-ui a propósito (ECO-136). Al re-pull, re-aplicar esta adaptación.
 type DividerProps = {
   className?: string;
   label?: string;
@@ -14,7 +15,7 @@ export const dividerSpecs = {
     color:
       "bg-accent dark:bg-border-strong — accent gold (#8B6914) light / rgba(255,255,255,0.12) dark",
     thickness: "1px",
-    "label font": "text-caption text-content-primary/50",
+    "label font": "text-caption text-content-secondary",
   },
 };
 
@@ -30,7 +31,9 @@ export default function Divider({
           className={`flex flex-col items-center gap-2 self-stretch ${className}`}
         >
           <div className="w-px flex-1 bg-accent dark:bg-border-strong" />
-          <span className="text-caption text-content-primary/50">{label}</span>
+          <span className="text-caption uppercase tracking-wide text-content-secondary">
+            {label}
+          </span>
           <div className="w-px flex-1 bg-accent dark:bg-border-strong" />
         </div>
       );
@@ -46,7 +49,9 @@ export default function Divider({
     return (
       <div className={`flex items-center gap-4 ${className}`}>
         <div className="h-px flex-1 bg-accent dark:bg-border-strong" />
-        <span className="text-caption text-content-primary/50">{label}</span>
+        <span className="text-caption uppercase tracking-wide text-content-secondary">
+          {label}
+        </span>
         <div className="h-px flex-1 bg-accent dark:bg-border-strong" />
       </div>
     );

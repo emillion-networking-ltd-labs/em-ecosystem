@@ -58,7 +58,7 @@ export default function NavBar({
   };
 
   return (
-    <header className="sticky top-0 z-20 flex h-[68px] items-center border-b border-border-strong bg-surface-primary">
+    <header className="sticky top-0 z-20 flex h-[68px] items-center border-b border-border-default bg-surface-primary">
       {/* Content area — after sidebar */}
       <div
         className={`flex flex-1 items-center justify-between px-4 lg:px-7 ${showSidebarButton ? "" : "lg:ml-[68px]"}`}
@@ -141,7 +141,7 @@ export default function NavBar({
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border-components bg-surface-primary p-2 shadow-card animate-dropdown-down">
+              <div className="absolute right-0 top-full mt-1 w-48 rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card animate-dropdown-down">
                 <Link
                   href="/profile"
                   onClick={() => setDropdownOpen(false)}
