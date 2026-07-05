@@ -10,8 +10,11 @@ consumer (dashboard + N satellites) with TOTAL element-level coverage, a per-ele
 (what a satellite may re-brand vs. what is normatively locked), detection of BOTH error classes (raw
 out-of-range value AND semantically-misused-but-valid token), and an organized "design update" rollout that
 scales toward ~100 satellites without breaking any brand — including propagating the strategy MANUALS
-themselves. **Calibration note:** the vision spans 100 satellites, but there are **2 consumers today**; the
-Recommendation builds only the minimum that pays now and gates the rest behind an explicit trigger.
+themselves. The mechanism must work in **both directions** and be **permanent**: *forward* (a new design update
+reaches every consumer, and new elements are born in-norm) AND *backward* (detect the ALREADY-BUILT corpus —
+elements the AI produced before this system existed — and bring it up to the norm). It is a standing regime, not
+a one-off migration. **Calibration note:** the vision spans 100 satellites, but there are **2 consumers today**;
+the Recommendation builds only the minimum that pays now and gates the rest behind an explicit trigger.
 
 ## Context
 <!-- grounded facts ONLY — cite file:line (repo) or a URL (market) for every claim -->
@@ -29,6 +32,20 @@ Recommendation builds only the minimum that pays now and gates the rest behind a
   ALREADY changed there, and run only in PRs touching those files (design-system/scripts/check-drift.mjs:50-56,
   design-system/scripts/check-component-drift.mjs:25-31). Nothing does a **full sweep of every element** of a
   consumer for a wrong-but-valid token.
+- **Reliability of detection is a CONSEQUENCE of how elements are constructed.** New elements are AUTHORED, not
+  hand-coded ad-hoc: build-against-the-contract → register in the design-system → a Storybook story (the story
+  gates enforce coverage/variants/norm — design-system/scripts/check-story-norm.mjs:2) → human approval in
+  Storybook before it enters the registry. So for NEW work the self-describing property (registered identity +
+  semantic tokens, no raw values) is guaranteed at authoring time — an element is either a *known component*
+  (identity from the registry) or an *explicitly-declared divergence*, never an anonymous raw blob. This is why
+  the answer is a construction contract, not "scan harder".
+- **A pre-system LEGACY corpus already exists and escapes today's gates.** Many elements were built (by the AI)
+  before this token/construction contract existed. ECO-136 had to re-sync the **stale dashboard** (135 drifted
+  declarations) to the norm and migrate `sat-cristian-garcia` from its 648-line fork BY HAND
+  (emkeel-governance/adr/027-arquitectura-tokens-color.md:63), and residual escapes remain (untokenized colors;
+  card-like elements wearing the wrong border). Because the gates are
+  change-triggered, an untouched legacy element is never flagged — so the mechanism needs a way to DETECT the
+  already-built and drive it to norm, not only to govern new work.
 - The divergence valve is **file-level and reason-less**: `check-component-drift` allows a drifted copy if the
   file contains the substring `@em-ui-adapted` anywhere; the advertised `<razón>` is never parsed
   (design-system/scripts/check-component-drift.mjs:60-66, design-system/scripts/check-component-drift.mjs:62).
@@ -36,6 +53,8 @@ Recommendation builds only the minimum that pays now and gates the rest behind a
 - The token layer is already single-source at runtime (TW v4: change the raw `--X`, it propagates intra-DS);
   brand override lands as a `[data-brand]` scope validated per-satellite by `check-brand-contrast`
   (emkeel-governance/adr/027-arquitectura-tokens-color.md:58, design-system/scripts/check-brand-contrast.mjs:50-51).
+  So brand is a **re-binding of aesthetic tokens** in a scope, not a per-element value — a norm update changes a
+  norm token and structurally CANNOT reach the brand scope.
 - **The design-tokens non-goal is TWO clauses, and they are NOT equal** (emkeel-governance/strategy/design-tokens.md:76,
   emkeel-governance/strategy/design-tokens.md:89): **(1)** the DTCG pipeline/generator is a **deferrable YAGNI**
   — "por ahora … revisitar con ≥3-4 consumidores"; **(2)** "un generador que empuje a consumidores violaría el
@@ -77,16 +96,15 @@ Recommendation builds only the minimum that pays now and gates the rest behind a
 <!-- at least 2 real options; EVERY row MUST cite a Source (file:line or URL). `emkeel strategy check` enforces it. -->
 | # | Option | Source | Pros | Cons | Risk |
 |---|--------|--------|------|------|------|
-| 1 | **Evolve copy-governance in place** — keep pull/copy; extend the `@em-ui-adapted` valve file→element; add `check-raw-color`; run the existing drift checks as a full sweep; a fleet **report** (still blunt overwrite on update). No manifest, no base-store, DTCG stays deferred. | design-system/registry/cli.mjs:52, design-system/scripts/check-component-drift.mjs:60-66, https://github.com/MetaMask/eslint-plugin-design-tokens/blob/main/docs/rules/color-no-hex.md | Smallest build; pure continuity of ADR-006/007; every gate incremental & testable; honors design-tokens.md:89. | Blunt `update` STILL destroys satellite divergence on re-pull — the core scale bug survives; no controlled "update to vN"; manual/manuals propagation unaddressed. | med |
+| 1 | **Evolve copy-governance in place** — keep pull/copy; extend the `@em-ui-adapted` valve file→element; add `check-raw-color`; run the existing drift checks as a full sweep; a fleet **report** (still blunt overwrite on update). No manifest, no base-store, DTCG stays deferred. | design-system/registry/cli.mjs:52, design-system/scripts/check-component-drift.mjs:60-66, https://github.com/MetaMask/eslint-plugin-design-tokens/blob/main/docs/rules/color-no-hex.md | Smallest build; pure continuity of ADR-006/007; every gate incremental & testable; honors design-tokens.md:89. | Blunt `update` STILL destroys satellite divergence on re-pull — the core scale bug survives; no controlled "update to vN"; no legacy census; manual/manuals propagation unaddressed. | med |
 | 2 | **Compiled DTCG + versioned package** — re-platform tokens to a DTCG source compiled by Style Dictionary/Terrazzo into per-brand CSS; ship components as a semver package / auth'd registry; propagate updates as version bumps; brand = a "mode". | https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/, https://www.alwaystwisted.com/articles/a-design-tokens-workflow-part-9, https://ui.shadcn.com/docs/registry/namespace, https://www.supernova.io/blog/8-examples-of-versioning-in-leading-design-systems | Industry-standard at 100 satellites; true compiled single-source; semver = controlled rollout; brand-as-mode is a first-class multi-brand pattern. | **Pulls design-tokens.md:89's deferred DTCG trigger EARLY** (defined revisit = ≥3-4 consumers; today = 2) → needs its own strategy/ADR; a compiled package removes the satellite's own-your-copy top layer; heavy re-platform = the exact YAGNI the kill-criteria warn against. | high |
-| 3 | **Hybrid, phased (RECOMMEND — minimum now, trigger-gated rest)** — keep pull/copy. **Now:** a per-consumer `em-ui.manifest.json` pinning the DS **git-SHA per file** + a **base-pinned assisted reconcile** (`git merge-file` vs. that base, writes conflict markers, never auto-resolves) replacing blunt overwrite; `check-raw-color`; run existing drift as a full sweep; a **pull-only** fleet **reporter** (reports drift, opens PRs / triggers each consumer's OWN update — never pushes bytes). **Trigger-gated (≥N consumers):** element-level markers; a **per-known-component** token allow-list; `@layer` lock (override must be lower-layered); manual-version propagation. DTCG stays deferred. | design-system/registry/cli.mjs:52, https://github.com/shadcn-ui/ui/discussions/790, https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@layer, https://polaris-react.shopify.com/tools/stylelint-polaris/rules/conventions-custom-property-allowed-list | Fixes the real scale bug NOW without re-platform; stays inside the pull invariant (ADR-007); honest about what is static-catchable (per-component allow-list) vs. design review (wrong-role); `@layer` gives a structural lock when correctly layered. | Most moving parts overall → strictly phased & trigger-gated; the base-store + `git merge-file` is the load-bearing new surface; the wrong-role case is NOT fully a gate (design review remains). | med |
+| 3 | **Hybrid, phased (RECOMMEND — minimum now, trigger-gated rest)** — keep pull/copy. **Now:** per-consumer `em-ui.manifest.json` pinning the DS **git-SHA per file** + **base-pinned assisted reconcile** (`git merge-file`, writes conflict markers, never auto-resolves) replacing blunt overwrite; `check-raw-color`; a **normalization census (report)** + hygiene lint that classifies the whole corpus and drives legacy to norm; existing drift as a full sweep; a **pull-only** fleet **reporter**. **Trigger-gated (≥N consumers):** element-level markers; a **per-known-component** token allow-list; census **auto-codemod** + structural advisory; `@layer` lock; manual-version propagation. DTCG stays deferred. | design-system/registry/cli.mjs:52, https://github.com/shadcn-ui/ui/discussions/790, emkeel-governance/adr/027-arquitectura-tokens-color.md:63, https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@layer | Fixes the real scale bug NOW; mechanizes ECO-136's manual reconcile (forward AND backward); stays inside the pull invariant (ADR-007); honest about static-catchable vs. design review. | Most moving parts overall → strictly phased & trigger-gated; base-store + `git merge-file` + the census classifier are the load-bearing new surface; the wrong-role case is NOT fully a gate. | med |
 
 ## Recommendation
 **Option 3, but calibrated: build the minimum now, gate the rest behind an explicit consumer-count trigger.**
 The critique was decisive on scope — there are **2 consumers today** (dashboard + sat-cristian-garcia), and this
 strategy's own kill-criteria (design-propagation.process.json:8) name the per-element model, per-element tagging
-and semantic detection as the failure mode at 2-3 consumers. So the recommendation is NOT "build all five phases
-now."
+and semantic detection as the failure mode at 2-3 consumers. So the recommendation is NOT "build everything now."
 
 **Build now (pays for itself at 2 consumers):**
 1. **Base-pinned manifest + assisted reconcile.** `em-ui.manifest.json` per consumer pins the DS **git-SHA per
@@ -99,23 +117,44 @@ now."
    (https://github.com/MetaMask/eslint-plugin-design-tokens/blob/main/docs/rules/color-no-hex.md); running the
    existing `check-drift`/`check-component-drift` UNCONDITIONALLY (not change-triggered) gives the "total
    coverage" sweep with no new semantic gate.
-3. **Rollout safety** (completeness fix): a propagated update can BREAK a consumer, and satellite VRT is not a
+3. **Normalization census (report mode) + construction-hygiene lint** — the mechanized, repeatable form of
+   ECO-136's manual reconciliation (emkeel-governance/adr/027-arquitectura-tokens-color.md:63). A **full-corpus**
+   pass (every element in the DS + every consumer, NOT change-triggered) classifies each element —
+   *conforms* / *raw value* (→ `check-raw-color`) / *wrong-but-valid token on a known component* /
+   *anonymous element that should be a registered primitive* / *tag bloat* — and emits a normalization worklist.
+   The **hygiene lint** catches the concrete bugs seen in review: duplicate, malformed or contradictory utility
+   classes (e.g. `border border-border-components`) and dead classes; redundant wrapper nesting is surfaced
+   advisory-only. Report-first is cheap and immediately useful; the auto-codemod is gated below.
+4. **Rollout safety** (completeness fix): a propagated update can BREAK a consumer, and satellite VRT is not a
    required check — so a consumer can **pin/hold** a version, the reporter **halts on first red**, and each
    consumer's own VRT runs before its update lands.
 
 **Gate behind a trigger (revisit at ≥N consumers — mirrors design-tokens.md's ≥3-4 rule):**
-4. **Element-level modifiability** — `@brand-locked` / `@ds-governed` / `@partial` extend the valve file→element;
+5. **Element-level modifiability** — `@brand-locked` / `@ds-governed` / `@partial` extend the valve file→element;
    at 2 consumers the file-level valve + the manifest already protect divergence.
-5. **Per-known-component token allow-list** — NOT role inference (not feasible, and its own kill-criterion). The
+6. **Per-known-component token allow-list** — NOT role inference (not feasible, and its own kill-criterion). The
    registry KNOWS a file's component identity (Button.tsx = Button), so allow-list the tokens each *registered
    component* may use. The residual "valid-but-wrong-role token on a card-like element" is **design review**, not
    a static gate — stated honestly, because Polaris/SLDS do NOT catch it
    (https://polaris-react.shopify.com/tools/stylelint-polaris/rules/conventions-custom-property-allowed-list).
-6. **`@layer` structural lock** — locked base tokens in a layer that out-ranks the satellite override BY LAYER
+7. **Census auto-codemod + structural advisory** — mechanical classes from the census (raw value→token, class
+   de-dup/normalize) applied as review-gated PRs; the "smells like a registered primitive" structural cases
+   surfaced as an advisory worklist for design review (never an auto-rewrite). Scale-gated: codemod safety and
+   false-positive tuning need the larger corpus.
+8. **`@layer` structural lock** — locked base tokens in a layer that out-ranks the satellite override BY LAYER
    ORDER; requires the override to be **itself layered** (unlayered styles beat any layer —
    https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@layer).
-7. **Manual-version propagation** — each strategy manual carries a version a consumer records; a gate flags a
+9. **Manual-version propagation** — each strategy manual carries a version a consumer records; a gate flags a
    consumer lagging a manual bump.
+
+**Two directions, one engine (the "forever + retrofit" answer):** *forward* = the authoring flow (contract →
+Storybook story → your approval → registry) + norm-token propagation + the base-pinned reconcile, so new work is
+born self-describing and updates reach everyone; *backward* = the normalization census classifies the existing
+corpus and drives it to norm. It is the **same classifier** run in both directions — which is why the mechanism
+is a standing regime, not a one-off: re-run the census whenever a new norm lands or a new satellite is absorbed,
+and the full-sweep gates + authoring flow keep everything in norm thereafter. Detection is reliable because
+construction makes every element self-describing (known component, or declared divergence, never a raw blob) —
+not because a scanner tries harder.
 
 **Governance boundary (the critique's hardest catch):** the fleet orchestrator is **pull-only** — it REPORTS
 fleet drift and OPENS PRs / triggers each consumer's own `em-ui update`; it never writes bytes into consumer
@@ -131,7 +170,10 @@ not pre-build it.
   ADR-027:36); the fleet layer stays pull-only (report + PR + trigger-own-update).
 - Re-platforming em-ui to a compiled npm package — the satellite keeps owning its copy (ADR-006/007).
 - **A static gate that infers element ROLE from JSX** — not feasible; the wrong-role case is design review, and
-  only the per-known-component allow-list + raw-value ban are gates.
+  only the per-known-component allow-list + raw-value ban + hygiene lint are gates.
+- The normalization census as a **one-off migration** — it is a *standing mode*, re-runnable whenever a norm
+  lands or a satellite is absorbed. The hygiene lint targets malformed/duplicate/contradictory/dead classes,
+  NOT cosmetic formatting (that is prettier's job).
 - Redesigning any brand palette (satellite-design / ECO-128) or the selection-model gate (ECO-141).
 - Auto-EDITING a satellite's brand-locked elements during an update — locked means SKIP + report, never rewrite
   a brand decision.
@@ -139,5 +181,5 @@ not pre-build it.
 ## Decisions
 <!-- optional: link the chosen decision as an ADR, e.g. emkeel-governance/adr/007-<slug>.md -->
 - On approval: record as an ADR in `emkeel-governance/adr/` extending ADR-006/007/027 to the propagation layer
-  (it does NOT supersede them; the pull invariant is preserved). Phase as separate ECO tickets: the three
-  "build now" items first; items 4-7 each gated behind the consumer-count trigger.
+  (it does NOT supersede them; the pull invariant is preserved). Phase as separate ECO tickets: the four
+  "build now" items (1-4) first; items 5-9 each gated behind the consumer-count trigger.
