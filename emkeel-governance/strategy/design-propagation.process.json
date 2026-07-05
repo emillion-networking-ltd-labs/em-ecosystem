@@ -1,0 +1,94 @@
+{
+  "process": "strategy",
+  "state": "presented",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-07-05T18:19:10Z",
+      "topic": "design-propagation",
+      "kill_criteria": "YAGNI a escala 2-3 consumidores el modelo por-elemento cuesta mas que el drift; el etiquetado por elemento no se mantiene; la deteccion semantica tiene demasiados falsos positivos a escala"
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-07-05T18:40:50Z",
+      "sources": [
+        "design-system/registry/cli.mjs:48",
+        "design-system/registry/cli.mjs:13",
+        "design-system/registry/cli.mjs:50",
+        "design-system/registry/cli.mjs:100",
+        "design-system/scripts/check-drift.mjs:50-56",
+        "design-system/scripts/check-component-drift.mjs:60-66",
+        "design-system/scripts/check-component-drift.mjs:62",
+        "design-system/scripts/check-brand-contrast.mjs:50-51",
+        "emkeel-governance/adr/006-satellite-component-reuse.md:22",
+        "emkeel-governance/adr/027-arquitectura-tokens-color.md:58",
+        "emkeel-governance/strategy/design-tokens.md:76",
+        "emkeel-governance/strategy/design-tokens.md:89",
+        "emkeel-governance/strategy/design-propagation.process.json:8",
+        "emkeel-governance/strategy/satellite-quality.md:57",
+        "emkeel-governance/strategy/satellite-design.md:71",
+        "https://martinfowler.com/articles/design-token-based-ui-architecture.html",
+        "https://styledictionary.com/info/tokens/",
+        "https://www.alwaystwisted.com/articles/a-design-tokens-workflow-part-9",
+        "https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/",
+        "https://ui.shadcn.com/docs/registry/getting-started",
+        "https://vercel.com/academy/shadcn-ui/updating-and-maintaining-components",
+        "https://github.com/shadcn-ui/ui/discussions/790",
+        "https://ui.shadcn.com/docs/registry/namespace",
+        "https://github.com/AndyOGo/stylelint-declaration-strict-value",
+        "https://github.com/MetaMask/eslint-plugin-design-tokens/blob/main/docs/rules/color-no-hex.md",
+        "https://developer.salesforce.com/docs/platform/slds-linter/guide/reference-rules.html",
+        "https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/@layer",
+        "https://polaris-react.shopify.com/tools/stylelint-polaris/rules/conventions-custom-property-allowed-list",
+        "https://www.supernova.io/blog/8-examples-of-versioning-in-leading-design-systems",
+        "https://stevekinney.com/courses/enterprise-ui/versioning-and-release-management"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-07-05T18:43:05Z",
+      "options": [
+        "evolve-copy-governance-in-place",
+        "compiled-dtcg-versioned-package",
+        "hybrid-phased-recommend"
+      ]
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-07-05T18:48:30Z",
+      "lens_source_fidelity": "Re-opened all 5 cited sources. 3 CONFIRMED (cli.mjs:52 blunt copyFileSync clobbers on update; check-component-drift.mjs:62 valve is a reason-less whole-file substring test; MDN @layer confirms precedence follows layer order). TWO defects: (a) the @layer claim is INCOMPLETE \u2014 MDN says UNLAYERED styles beat any layered rule, so a satellite override escapes the lock unless it is ITSELF layered; the doc must require the override be in a lower layer. (b) Polaris custom-property-allowed-list is a token-VALIDITY check, NOT a role-to-token map \u2014 it does NOT enforce 'the correct token', so the semantic-class citation is WRONG and must be replaced.",
+      "lens_calibration": "OVER-BUILT for the real case. Only 2 consumers exist today (dashboard + sat-cristian-garcia); the kill-criteria name 3 of Option 3's own pieces (per-element model, element tagging, semantic detection) AS the failure mode at 2-3 consumers. Goal+Recommendation are written at ~100 satellites and over-sell all 5 phases. Minimum that pays NOW: Phase 1 (manifest + non-destructive update, fixes the blunt-overwrite bug) + check-raw-color + running the EXISTING drift checks as a full unconditional sweep. Phases 2-5 must be DEFERRED behind an explicit consumer-count trigger.",
+      "lens_maintainability": "Both hard pieces need REFRAMING. (a) 3-way merge needs a BASE revision \u2014 a version STRING manifest cannot merge; must pin the DS git-SHA per file and run git merge-file, emitting CONFLICT MARKERS a human resolves (shadcn punted: only experimental diff + manual apply). Rename to 'base-pinned assisted reconcile'. (b) role-to-token inference from JSX is NOT feasible (permanently-yellow gate, its own kill-criterion); but component IDENTITY is KNOWN (Button.tsx=Button, registered) \u2014 honest gate is allow-list tokens per KNOWN COMPONENT + ban raw values; 'wrong-but-valid token on a card' stays DESIGN REVIEW, not a gate.",
+      "lens_governance": "The --fleet orchestrator as written ('rolls out', 'controlled cadence') is PUSH-shaped \u2014 a central actor knowing consumer paths \u2014 which design-tokens.md:76 + ADR-027:36 (accepted) forbid as a HARD invariant (distinct from the deferrable DTCG YAGNI). Manifest + non-destructive update + @layer + gates are INSIDE governance (complete ADR-006's 'reconciliacion'). FIX: constrain --fleet to per-consumer PULL \u2014 it REPORTS drift and OPENS a PR / triggers each consumer's own em-ui update; never writes bytes into consumer paths. 'machine-generated locked layer' is imprecise: @layer needs no generator.",
+      "completeness": "Missing dimension: ROLLBACK / failure semantics of a propagated update. A design update can BREAK a consumer (build, contrast gate, VRT \u2014 satellite VRT is NOT a required check, so a satellite could regress silently). The manifest pins versions but there is no story for a consumer HOLDING a version, the rollout HALTING on first red, or REVERTING a bad update across N satellites. Add a rollout-safety facet: pinned versions + halt-on-red + per-consumer VRT before the update lands."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-07-05T18:50:27Z",
+      "check_passed": true
+    },
+    "validated": {
+      "done": true,
+      "timestamp": "2026-07-05T18:52:03Z",
+      "case": "Real adapted pair: sat-cristian-garcia Button.tsx (auto-derives <a> for href CTAs, 8+ depend on it) vs design-system/components/Button.tsx source. Simulated a DS design update (rounded-md->rounded-lg, gap-2->gap-2.5) and reconciled it into the diverged satellite copy.",
+      "method": "Set base=current DS Button, mine=real satellite Button, theirs=DS+design-update; ran the two mechanisms in the scratchpad. TODAY's blunt copyFileSync (overwrite:true, cli.mjs:52) = plain cp of theirs over mine. RECOMMENDATION = git merge-file -p mine base theirs (base-pinned assisted reconcile).",
+      "outcome": "pass",
+      "evidence_ref": "satellites/sat-cristian-garcia/src/components/ui/Button.tsx:1"
+    },
+    "presented": {
+      "done": true,
+      "timestamp": "2026-07-05T18:52:45Z",
+      "presented_to": "operator"
+    }
+  },
+  "steps_schema": [
+    "scaffolded",
+    "researched",
+    "proposed",
+    "critiqued",
+    "checked",
+    "validated",
+    "presented",
+    "approved"
+  ]
+}
