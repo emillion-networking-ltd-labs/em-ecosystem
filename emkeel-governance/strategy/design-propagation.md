@@ -1,6 +1,6 @@
 # Strategy: design-propagation
 
-Status: DRAFT
+Status: APPROVED
 Strategy: design-propagation   <!-- feature specs reference this with a `Strategy: design-propagation` line -->
 Impact: high   <!-- low | medium | high — `low` lets a trivial strategy pass critiqued with 1 lens; absent = high (full ≥3-lens panel) -->
 
@@ -231,6 +231,8 @@ maps. Note: `border border-<token>` is width+color, **not** redundancy — a nai
 
 ## Decisions
 <!-- optional: link the chosen decision as an ADR, e.g. emkeel-governance/adr/007-<slug>.md -->
-- On approval: record as an ADR in `emkeel-governance/adr/` extending ADR-006/007/027 to the propagation layer
-  (it does NOT supersede them; the pull invariant is preserved). Phase as separate ECO tickets: the four
-  "build now" items (1-4) first; items 5-9 each gated behind the consumer-count trigger.
+- **APPROVED** by merge of PR #539 (operator's human gate). Recorded as
+  `emkeel-governance/adr/028-mecanismo-propagacion-gobernanza-diseno.md`, which extends ADR-006/007/027 to the
+  propagation layer (it does NOT supersede them; the pull invariant is preserved).
+- Phase as separate ECO tickets: the four "build now" items (1-4) first (Phase 1 = base-pinned reconcile); items
+  5-9 each gated behind the consumer-count trigger. Legacy debt to normalize is tracked in ECO-143.
