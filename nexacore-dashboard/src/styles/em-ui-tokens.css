@@ -138,7 +138,11 @@
      Un primitivo que necesite texto copiable dentro de un control lo reabre con `select-text` explícito. */
   button *, [role="button"] *, summary *,
   [role="checkbox"] *, [role="switch"] *, [role="radio"] *,
-  [role="tab"] *, [role="option"] *, [role="menuitem"] *, [role="menuitemradio"] * {
+  [role="tab"] *, [role="option"] *, [role="menuitem"] *, [role="menuitemradio"] *,
+  /* ECO-141: un elemento marcado `select-none` propaga la no-selección a TODO su subárbol. Necesario para el
+     enlace-botón (Button `as="a"`, sin role): su <span> de texto es opt-in y `button *`/`[role] *` NO cubre al
+     <a>, así que sin esto el texto del CTA muestra el caret. Espejo de `button *` para el caso marcado. */
+  .select-none * {
     -webkit-user-select: none;
     user-select: none;
   }

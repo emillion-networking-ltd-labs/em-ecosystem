@@ -7,6 +7,7 @@ import { createElement } from "react";
 import AlertBox from "../components/AlertBox";
 import Toggle from "../components/Toggle";
 import Checkbox from "../components/Checkbox";
+import Button from "../components/Button";
 
 afterEach(cleanup);
 
@@ -62,5 +63,18 @@ describe("Modelo de selección (ECO-115)", () => {
     const cbLabel = screen.getByText("Acepto");
     expect(cbLabel.tagName).toBe("LABEL");
     expect(cbLabel.className).not.toContain("select-none");
+  });
+
+  // ECO-141 (cont.) — el enlace-botón (Button as="a"/href) rinde un <a> SIN role; `button *`/`[role] *` no lo
+  // cubre, y su <span> de texto es opt-in → el caret se colaba sobre el CTA. Se marca `select-none` en el <a> Y
+  // el modelo propaga la no-selección al subárbol con `.select-none *`.
+  it("el enlace-botón (Button href) no muestra caret: <a> con select-none + `.select-none *` neutraliza el <span>", () => {
+    // (a) el primitivo marca el <a> del enlace-botón con select-none.
+    render(createElement(Button, { as: "a", href: "/x" }, "Comprar"));
+    const cta = screen.getByText("Comprar").closest("a");
+    expect(cta).not.toBeNull();
+    expect(cta!.className).toContain("select-none");
+    // (b) el modelo propaga la no-selección al subárbol de un `select-none` (el <span> de texto del CTA).
+    expect(tokensCss).toMatch(/\.select-none\s*\*\s*\{[^}]*user-select:\s*none/s);
   });
 });

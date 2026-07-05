@@ -42,6 +42,9 @@ const cssChecks = [
   // ECO-141: la etiqueta `label` permanece SELECCIONABLE (es texto) — no sale del opt-in.
   [/\blabel\b[^{}]*\{[^}]*user-select:\s*text/s, "la etiqueta `label` debe permanecer en el opt-in de texto (seleccionable) — es texto, no chrome (ECO-141)"],
   [/button\s*\*[^{]*\{[^}]*user-select:\s*none/s, "los descendientes de un control (`button *`, `[role] *`) deben ser user-select: none — el opt-in de texto NO debe reactivar el caret dentro de un botón"],
+  // ECO-141: `.select-none` propaga la no-selección a su subárbol (el enlace-botón Button as="a" no es
+  // `button`/`[role]`; su <span> de texto es opt-in y sin esto mostraría el caret sobre el CTA).
+  [/\.select-none\s*\*\s*\{[^}]*user-select:\s*none/s, "`.select-none *` debe existir — un elemento marcado select-none propaga la no-selección al subárbol (enlace-botón: el <span> del CTA no debe mostrar caret) (ECO-141)"],
 ];
 for (const [re, msg] of cssChecks) {
   if (!re.test(css)) {
