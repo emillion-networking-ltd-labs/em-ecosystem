@@ -10,7 +10,6 @@ import {
 } from "recharts";
 import ChartCard from "./ChartCard";
 import { apiClient } from "@/lib/api";
-import { useTheme } from "@/hooks/useTheme";
 import type { SafeUser, PaginatedResponse } from "@/lib/types";
 
 type RoleCounts = {
@@ -19,25 +18,21 @@ type RoleCounts = {
   SUPERADMIN: number;
 };
 
-function getRoleColors(isDark: boolean) {
-  return {
-    USER: "#a0bce8",
-    ADMIN: "#6be6d3",
-    SUPERADMIN: isDark ? "#f5f5f5" : "#1c1c1c",
-  } as Record<string, string>;
-}
+// ECO-145: color por serie vía tokens. USER/ADMIN = primitivos de chart (fijos); SUPERADMIN = content-primary
+// (theme-aware, ya flipa por el token) → sin lógica isDark.
+const ROLE_COLORS: Record<string, string> = {
+  USER: "var(--color-chart-1)",
+  ADMIN: "var(--color-chart-2)",
+  SUPERADMIN: "var(--color-content-primary)",
+};
 
-function getRoleBgClasses(isDark: boolean) {
-  return {
-    USER: "bg-[#a0bce8]",
-    ADMIN: "bg-[#6be6d3]",
-    SUPERADMIN: isDark ? "bg-[#f5f5f5]" : "bg-[#1c1c1c]",
-  } as Record<string, string>;
-}
+const ROLE_BG: Record<string, string> = {
+  USER: "bg-chart-1",
+  ADMIN: "bg-chart-2",
+  SUPERADMIN: "bg-content-primary",
+};
 
 export default function UserRoleChart() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
   const [counts, setCounts] = useState<RoleCounts | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -80,8 +75,8 @@ export default function UserRoleChart() {
 
   const roles = ["USER", "ADMIN", "SUPERADMIN"] as const;
   const total = counts ? counts.USER + counts.ADMIN + counts.SUPERADMIN : 0;
-  const roleColors = getRoleColors(isDark);
-  const roleBgClasses = getRoleBgClasses(isDark);
+  const roleColors = ROLE_COLORS;
+  const roleBgClasses = ROLE_BG;
 
   const pieData = counts
     ? roles.map((r) => ({ name: r, value: counts[r], fill: roleColors[r] }))

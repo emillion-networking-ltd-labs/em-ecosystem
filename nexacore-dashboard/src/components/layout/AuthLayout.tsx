@@ -52,7 +52,7 @@ export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
         className={`auth-card auth-card-enter overflow-hidden transition-[height] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] ${narrow ? "max-w-[350px]" : ""}`}
       >
         <div ref={contentRef} className="w-full">
-          {/* Container — Figma: fill #ffffff, stroke rgba(0,0,0,0.05) 1px INSIDE, p=24, gap=24 */}
+          {/* Container — Figma: fill surface-primary, stroke border-default 1px INSIDE, p=24, gap=24 */}
           <div
             className={`flex w-full flex-col gap-6 border-b border-border-strong bg-surface-primary p-6 ${narrow ? "rounded-none" : "rounded-t-3xl"}`}
           >

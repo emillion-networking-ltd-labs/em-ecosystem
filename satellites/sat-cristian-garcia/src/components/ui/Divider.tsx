@@ -13,7 +13,7 @@ export const dividerSpecs = {
   },
   base: {
     color:
-      "bg-accent dark:bg-border-strong — accent gold (#8B6914) light / rgba(255,255,255,0.12) dark",
+      "bg-accent dark:bg-border-strong — accent gold (#8B6914) light / rgba(255,255,255,0.12) dark", // raw-color-ok: doc-string de specs (documenta, no pinta)
     thickness: "1px",
     "label font": "text-caption text-content-secondary",
   },

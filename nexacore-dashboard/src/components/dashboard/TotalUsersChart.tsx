@@ -1,6 +1,5 @@
 "use client";
 
-import { useMemo } from "react";
 import {
   LineChart,
   Line,
@@ -11,7 +10,6 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import ChartCard from "./ChartCard";
-import { useTheme } from "@/hooks/useTheme";
 
 const chartData = [
   { month: "JAN", thisYear: 10000, lastYear: 8000 },
@@ -25,20 +23,16 @@ const chartData = [
 
 const formatYAxis = (v: number) => (v >= 1000 ? `${v / 1000}K` : String(v));
 
-function getColors(isDark: boolean) {
-  return {
-    line: isDark ? "#f5f5f5" : "rgb(28, 28, 28)",
-    ticks: isDark ? "rgba(245,245,245,0.5)" : "rgba(28, 28, 28, 0.5)",
-    grid: isDark ? "rgba(255,255,255,0.08)" : "rgba(28, 28, 28, 0.08)",
-  };
-}
+// ECO-145: color vía tokens theme-aware (content-primary + alpha). Sigue el tema por CSS (wrapper .dark/.light),
+// sin lógica isDark ni prop forceDark (ECO-113: el tema es global, no un flag por-instancia).
+const COLORS = {
+  line: "var(--color-content-primary)",
+  ticks: "rgb(var(--content-primary) / 0.5)",
+  grid: "rgb(var(--content-primary) / 0.08)",
+};
 
-export default function TotalUsersChart({
-  forceDark,
-}: { forceDark?: boolean } = {}) {
-  const { theme } = useTheme();
-  const isDark = forceDark ?? theme === "dark";
-  const colors = useMemo(() => getColors(isDark), [isDark]);
+export default function TotalUsersChart() {
+  const colors = COLORS;
 
   return (
     <ChartCard
@@ -53,7 +47,7 @@ export default function TotalUsersChart({
           </div>
           <span className="text-caption text-content-primary/20">|</span>
           <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-[#a0bce8]" />
+            <span className="h-2 w-2 rounded-full bg-chart-1" />
             <span className="text-caption text-content-tertiary">
               Last year
             </span>
@@ -124,11 +118,11 @@ export default function TotalUsersChart({
             type="monotone"
             dataKey="lastYear"
             name="Last year"
-            stroke="#a0bce8"
+            stroke="var(--color-chart-1)"
             strokeWidth={2}
             strokeDasharray="5 5"
             dot={false}
-            activeDot={{ r: 4, fill: "#a0bce8", strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: "var(--color-chart-1)", strokeWidth: 0 }}
           />
         </LineChart>
       </ResponsiveContainer>

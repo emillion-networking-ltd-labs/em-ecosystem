@@ -40,8 +40,8 @@ export const AuroraBackground = ({
               "--aurora-1": "var(--color-accent)",
               "--aurora-2": "var(--color-accent-light)",
               "--aurora-4": "var(--color-accent-2)",
-              "--black": "#000",
-              "--white": "#fff",
+              "--black": "var(--color-black)",
+              "--white": "var(--color-white)",
               "--transparent": "transparent",
             } as React.CSSProperties
           }

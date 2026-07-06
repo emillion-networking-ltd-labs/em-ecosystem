@@ -6,6 +6,15 @@
 @import "../styles/em-ui-tokens.css";
 @import "../styles/em-ui-brand.css";
 
+/* Primitivos LOCALES del satélite (ECO-145) — estética de periódico theme-independent (PortfolioPreview).
+   Fijos a propósito (no siguen el tema): la card es siempre papel crema + tinta + oro. Propios del satélite,
+   no van al DS compartido (one-off de marca). */
+:root {
+  --paper: #f0e9d6;
+  --paper-ink: #1c1c1c;
+  --paper-gold: #8b6914;
+}
+
 /*
   El default de color de borde cambió a `currentcolor` en Tailwind CSS v4; estos estilos de compat
   mantienen el look v3 (gray-200) para elementos que dependen del borde por defecto. Propio del satélite.
@@ -234,7 +243,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   position: fixed;
   inset: 0;
   z-index: 9999;
-  background: #000;
+  background: var(--color-black);
 }
 .intro-frame {
   position: absolute;
@@ -247,7 +256,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
   letter-spacing: -0.02em;
   line-height: 0.9;
   font-size: clamp(2.5rem, 1.5rem + 5vw, 4rem);
-  color: #fff;
+  color: var(--color-white);
   opacity: 0;
   text-align: center;
   white-space: nowrap;
