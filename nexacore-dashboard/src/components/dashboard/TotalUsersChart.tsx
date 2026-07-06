@@ -9,7 +9,7 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
-import ChartCard from "./ChartCard";
+import ChartCard from "@/components/ui/ChartCard";
 
 const chartData = [
   { month: "JAN", thisYear: 10000, lastYear: 8000 },
