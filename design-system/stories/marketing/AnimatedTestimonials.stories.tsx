@@ -18,7 +18,7 @@ type Story = StoryObj<typeof meta>;
 // exempt from the token rule (like a structural mask), not UI chrome.
 const photo = (initial: string, bg: string) =>
   `data:image/svg+xml,${encodeURIComponent(
-    `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="500" height="500" fill="${bg}"/><text x="50%" y="50%" font-size="220" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="sans-serif">${initial}</text></svg>`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="500" height="500"><rect width="500" height="500" fill="${bg}"/><text x="50%" y="50%" font-size="220" fill="#ffffff" text-anchor="middle" dominant-baseline="central" font-family="sans-serif">${initial}</text></svg>`, // raw-color-ok: fixture SVG placeholder (dato de story, no UI)
   )}`;
 
 const testimonials = [
@@ -27,21 +27,21 @@ const testimonials = [
       "They rebuilt our site in weeks and bookings went up almost immediately. The process was clear at every step.",
     name: "María López",
     designation: "Owner, Estudio Sur",
-    src: photo("M", "#6b7280"),
+    src: photo("M", "#6b7280"), // raw-color-ok: color de placeholder (fixture de story)
   },
   {
     quote:
       "A team that actually listens. The result feels like us, not a template, and it is fast on every device.",
     name: "Daniel Ruiz",
     designation: "Founder, Norte Clinic",
-    src: photo("D", "#475569"),
+    src: photo("D", "#475569"), // raw-color-ok: color de placeholder (fixture de story)
   },
   {
     quote:
       "Clean, professional and on time. We finally have a site we are proud to send to new clients.",
     name: "Carla Méndez",
     designation: "Director, Atlas Coworking",
-    src: photo("C", "#52525b"),
+    src: photo("C", "#52525b"), // raw-color-ok: color de placeholder (fixture de story)
   },
 ];
 

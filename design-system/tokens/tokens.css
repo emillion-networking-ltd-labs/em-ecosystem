@@ -167,6 +167,22 @@
      sobre fondo oscuro es inescaneable. Excepción consciente, no un freeze bug. */
   --color-surface-qr: #ffffff;
 
+  /* ── PRIMITIVOS — valores FIJOS con nombre (option tokens, ECO-145). No theme-aware: se definen UNA vez y
+     no se re-declaran por tema. Sirven para lo que NO es semántico (negro/blanco base, marca de terceros,
+     datos de chart). Objetivo: cero hex desnudo → todo referencia un token → un cambio desde la base propaga.
+     `check-raw-color` prohíbe el hex crudo fuera de este fichero. Cada token = UN significado (no reutilizar
+     uno semántico como `surface-qr` para un blanco genérico). ── */
+  --color-black: #000;
+  --color-white: #fff;
+  /* Marca de tercero — hex EXACTOS del proveedor (no son de nuestra paleta ni theme-aware). Reutilizables. */
+  --color-brand-google-blue: #4285f4;
+  --color-brand-google-green: #34a853;
+  --color-brand-google-yellow: #fbbc05;
+  --color-brand-google-red: #ea4335;
+  /* Datos de chart — color por serie (fijo). El rol SUPERADMIN usa `content-primary` (theme-aware), no primitivo. */
+  --color-chart-1: #a0bce8; /* USER */
+  --color-chart-2: #6be6d3; /* ADMIN */
+
   --color-surface-primary: var(--surface-primary);
   --color-surface-secondary: var(--surface-secondary);
   --color-surface-tertiary: var(--surface-tertiary);

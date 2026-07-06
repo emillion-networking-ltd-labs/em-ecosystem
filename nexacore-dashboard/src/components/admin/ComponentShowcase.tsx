@@ -2901,7 +2901,7 @@ function ChartsShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   Line Chart
                 </p>
-                <TotalUsersChart forceDark={mode === "dark"} />
+                <TotalUsersChart />
               </div>
               <div>
                 <p className="text-caption text-content-tertiary font-mono mb-2">

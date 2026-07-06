@@ -209,7 +209,7 @@ export const StoryConventions: Story = {
             The deciding question: is the border <strong>ON the container</strong> being demonstrated (→{" "}
             <Code>border-default</Code>) or on a <strong>discrete element/panel</strong> shown as its content (→{" "}
             <Code>border-strong</Code>)? Pick the <em>role</em> — <strong>never a raw value</strong> (a hex, an
-            <Code>rgba()</Code>, or a Tailwind palette colour like <Code>slate-500</Code>) that merely matches:
+            <Code>rgba()</Code>, or a Tailwind palette colour like <Code>slate-500</Code>) that merely matches: {/* raw-color-ok: prosa que ENSEÑA la norma (ejemplos en <Code>) */}
             a non-token value cannot be re-themed and breaks propagation.
           </Rule>
         </ul>

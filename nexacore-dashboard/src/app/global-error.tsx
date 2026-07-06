@@ -23,7 +23,7 @@ export default function GlobalError({
             height="48"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="#8a1111"
+            stroke="#8a1111" /* raw-color-ok: crash page self-contained */
             strokeWidth="1.5"
             className="global-error-icon"
             role="img"

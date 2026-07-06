@@ -12,7 +12,7 @@ export const dividerSpecs = {
   },
   base: {
     color:
-      "bg-border-default — rgba(0,0,0,0.08) light / rgba(255,255,255,0.12) dark",
+      "bg-border-default — rgba(0,0,0,0.08) light / rgba(255,255,255,0.12) dark", // raw-color-ok: doc-string de specs (documenta, no pinta)
     thickness: "1px",
     "label font": "text-caption text-content-secondary",
   },

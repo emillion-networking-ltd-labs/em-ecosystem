@@ -33,14 +33,14 @@
   /* Card container pattern */
   background: var(--surface-primary);
   border: 1px solid var(--border-strong);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 32px rgb(var(--color-black) / 0.04);
   border-radius: 24px;
   padding: 24px;
 }
 @utility card {
   background: var(--surface-primary);
   border: 1px solid var(--border-strong);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 32px rgb(var(--color-black) / 0.04);
   border-radius: 12px;
   padding: 24px;
 }
@@ -58,13 +58,13 @@
 }
 @utility auth-card {
   /* Auth card — Figma: Login Card / Register Card (Option A: Industry Standard)
-     Outer card = #fbfbfb (surface-secondary), single border on outer only.
+     Outer card = surface-secondary, single border on outer only.
      Container (inner white area) has NO border — avoids the visual "2px" double-border. */
   position: relative;
   z-index: 1;
   background: var(--surface-secondary);
   border: 1px solid var(--border-strong);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 8px 32px rgb(var(--color-black) / 0.04);
   border-radius: 24px;
   width: 100%;
   max-width: 750px;
@@ -305,8 +305,8 @@
       'Segoe UI',
       Roboto,
       sans-serif;
-    background-color: #ffffff;
-    color: #1c1c1c;
+    background-color: #ffffff; /* raw-color-ok: crash page (self-contained) */
+    color: #1c1c1c; /* raw-color-ok: crash page (self-contained) */
   }
 
   .global-error-container {
@@ -324,19 +324,19 @@
     font-size: 20px;
     font-weight: 600;
     margin: 0 0 8px;
-    color: #1c1c1c;
+    color: #1c1c1c; /* raw-color-ok: crash page (self-contained) */
   }
 
   .global-error-message {
     font-size: 14px;
-    color: rgba(28, 28, 28, 0.5);
+    color: rgba(28, 28, 28, 0.5); /* raw-color-ok: crash page (self-contained) */
     margin: 0 0 24px;
     line-height: 1.5;
   }
 
   .global-error-digest {
     font-size: 12px;
-    color: rgba(28, 28, 28, 0.4);
+    color: rgba(28, 28, 28, 0.4); /* raw-color-ok: crash page (self-contained) */
     margin: 0 0 24px;
   }
 
@@ -350,9 +350,9 @@
     padding: 10px 24px;
     font-size: 14px;
     font-weight: 500;
-    background-color: #1c1c1c;
-    color: #ffffff;
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    background-color: #1c1c1c; /* raw-color-ok: crash page (self-contained) */
+    color: #ffffff; /* raw-color-ok: crash page (self-contained) */
+    border: 1px solid rgba(0, 0, 0, 0.05); /* raw-color-ok: crash page (self-contained) */
     border-radius: 6px;
     cursor: pointer;
   }
@@ -361,9 +361,9 @@
     padding: 10px 24px;
     font-size: 14px;
     font-weight: 500;
-    background-color: #f2f2f2;
-    color: rgba(28, 28, 28, 0.5);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    background-color: #f2f2f2; /* raw-color-ok: crash page (self-contained) */
+    color: rgba(28, 28, 28, 0.5); /* raw-color-ok: crash page (self-contained) */
+    border: 1px solid rgba(0, 0, 0, 0.05); /* raw-color-ok: crash page (self-contained) */
     border-radius: 6px;
     text-decoration: none;
     display: inline-flex;

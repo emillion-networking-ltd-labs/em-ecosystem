@@ -29,7 +29,7 @@ function HeroStatCard({
       style={style}
     >
       <p
-        className={`text-h1 font-black ${variant === "desktop" ? "text-[#D4A843]!" : "text-accent"}`}
+        className={`text-h1 font-black ${variant === "desktop" ? "text-accent-light!" : "text-accent"}`}
       >
         {stat.value}
       </p>

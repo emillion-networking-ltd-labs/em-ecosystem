@@ -61,9 +61,9 @@ export default function PortfolioPreview() {
           <div
             className="relative z-10 -mt-6 w-full overflow-hidden rounded-xl border border-border-strong shadow-card md:-mt-8"
             style={{
-              backgroundColor: "#f0e9d6",
+              backgroundColor: "var(--paper)",
               backgroundImage:
-                "radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1px), radial-gradient(rgba(0,0,0,0.04) 1px, transparent 1px)",
+                "radial-gradient(rgb(var(--color-black) / 0.05) 1px, transparent 1px), radial-gradient(rgb(var(--color-black) / 0.04) 1px, transparent 1px)",
               backgroundSize: "4px 4px, 8px 8px",
               backgroundPosition: "0 0, 2px 2px",
             }}
@@ -74,7 +74,7 @@ export default function PortfolioPreview() {
             >
               {/* Headline — newspaper style */}
               <h3
-                className="text-[28px] font-bold leading-tight text-[#1c1c1c]"
+                className="text-[28px] font-bold leading-tight text-[var(--paper-ink)]"
                 style={{ fontFamily: "Georgia, 'Times New Roman', serif" }}
               >
                 Un granadino
@@ -83,7 +83,7 @@ export default function PortfolioPreview() {
 
               {/* Article body — newspaper style, 2 columns, drop cap */}
               <div
-                className="mt-4 columns-1 gap-8 text-[14px] leading-[1.6] text-[#1c1c1c]/85 text-justify md:columns-2 [&>p]:mb-3 [&>p:first-child:first-letter]:float-left [&>p:first-child:first-letter]:mr-1.5 [&>p:first-child:first-letter]:text-5xl [&>p:first-child:first-letter]:font-bold [&>p:first-child:first-letter]:leading-[0.9] [&>p:first-child:first-letter]:text-[#8B6914]"
+                className="mt-4 columns-1 gap-8 text-[14px] leading-[1.6] text-[var(--paper-ink)]/85 text-justify md:columns-2 [&>p]:mb-3 [&>p:first-child:first-letter]:float-left [&>p:first-child:first-letter]:mr-1.5 [&>p:first-child:first-letter]:text-5xl [&>p:first-child:first-letter]:font-bold [&>p:first-child:first-letter]:leading-[0.9] [&>p:first-child:first-letter]:text-[var(--paper-gold)]"
                 style={{ columnFill: "balance" }}
               >
                 <p>
@@ -102,7 +102,7 @@ export default function PortfolioPreview() {
                     href="https://www.granadahoy.com/deportes/granadino-grandes_0_581942036.html?utm_source=copilot.com"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-semibold text-[#8B6914] underline decoration-dotted underline-offset-2 hover:text-[#1c1c1c]"
+                    className="font-semibold text-[var(--paper-gold)] underline decoration-dotted underline-offset-2 hover:text-[var(--paper-ink)]"
                   >
                     Granada Hoy
                   </a>{" "}
