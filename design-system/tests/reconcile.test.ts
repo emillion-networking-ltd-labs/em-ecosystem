@@ -38,12 +38,14 @@ function runUpdate(dest: string, extra: string[] = []): { status: number; out: s
 }
 
 describe("_reconcile helpers (ECO-144)", () => {
-  it("isAdapted: reconoce el marcador SOLO en la cabecera (no substring global)", () => {
+  it("isAdapted: reconoce el marcador SOLO en el prólogo de comentarios (no substring global)", () => {
     expect(isAdapted("// @em-ui-adapted: x\nconst a = 1")).toBe(true);
-    expect(isAdapted("line1\nline2\n// @em-ui-adapted en la cabecera\nx")).toBe(true);
-    // un marcador MÁS ALLÁ de la cabecera (o incrustado en un conflicto) NO cuenta como declaración
-    const deep = Array(10).fill("x").join("\n") + "\n// @em-ui-adapted body";
-    expect(isAdapted(deep)).toBe(false);
+    // header de licencia multi-línea ENCIMA del marcador → sigue protegido (el fix del silent-clobber)
+    expect(isAdapted("// Copyright 2026\n// Licencia MIT\n//\n// @em-ui-adapted: x\nconst a = 1")).toBe(true);
+    expect(isAdapted("/* block header\n * @em-ui-adapted en bloque\n */\ncode()")).toBe(true);
+    // marcador TRAS la primera línea de código (o en el cuerpo / un conflicto) → NO cuenta
+    expect(isAdapted("const a = 1\n// @em-ui-adapted body")).toBe(false);
+    expect(isAdapted(Array(10).fill("x").join("\n") + "\n// @em-ui-adapted body")).toBe(false);
     expect(isAdapted("const a = 1")).toBe(false);
   });
 
