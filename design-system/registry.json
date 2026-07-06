@@ -406,6 +406,13 @@
       ]
     },
     {
+      "name": "MetricCard",
+      "type": "registry:ui",
+      "file": "components/MetricCard.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
       "name": "MfaDigitInput",
       "type": "registry:ui",
       "file": "components/MfaDigitInput.tsx",
