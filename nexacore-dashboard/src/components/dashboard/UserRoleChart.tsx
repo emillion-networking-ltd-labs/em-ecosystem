@@ -8,7 +8,7 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
-import ChartCard from "./ChartCard";
+import ChartCard from "@/components/ui/ChartCard";
 import { apiClient } from "@/lib/api";
 import type { SafeUser, PaginatedResponse } from "@/lib/types";
 

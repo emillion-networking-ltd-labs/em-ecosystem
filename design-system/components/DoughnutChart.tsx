@@ -7,6 +7,7 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
+import ChartCard from "./ChartCard";
 
 // DoughnutChart — recharts Pie (donut) with a legend. Slice colours are brand tokens resolved as CSS
 // variables (accent / accent-2 / content-primary), so the chart follows the theme purely via the CSS
@@ -37,12 +38,7 @@ export default function DoughnutChart({
   const total = chartData.reduce((sum, d) => sum + d.value, 0);
 
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      <div className="mb-4">
-        <h3 className="text-h3 font-semibold text-content-primary">
-          {title}
-        </h3>
-      </div>
+    <ChartCard title={title}>
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
         <div className="h-[120px] w-[120px] shrink-0">
           <ResponsiveContainer width="100%" height="100%">
@@ -101,6 +97,6 @@ export default function DoughnutChart({
           ))}
         </div>
       </div>
-    </div>
+    </ChartCard>
   );
 }

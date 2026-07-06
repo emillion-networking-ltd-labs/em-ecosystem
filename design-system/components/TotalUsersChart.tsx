@@ -9,6 +9,7 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
+import ChartCard from "./ChartCard";
 
 // TotalUsersChart — recharts line chart inside a ChartCard (this year vs last year). Colours are brand
 // tokens resolved as CSS variables (content-primary for the primary line, accent for the comparison,
@@ -38,9 +39,9 @@ const COLORS = {
 
 export default function TotalUsersChart() {
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-h3 font-semibold text-content-primary">Total Users</h3>
+    <ChartCard
+      title="Total Users"
+      action={
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-content-primary" />
@@ -52,7 +53,8 @@ export default function TotalUsersChart() {
             <span className="text-caption text-content-secondary">Last year</span>
           </div>
         </div>
-      </div>
+      }
+    >
       {/* React 19 + Recharts 3 ResponsiveContainer regression: height="100%" resolves to -1 on the
           first render. Pass a numeric height directly. */}
       <ResponsiveContainer width="100%" height={250}>
@@ -115,6 +117,6 @@ export default function TotalUsersChart() {
           />
         </LineChart>
       </ResponsiveContainer>
-    </div>
+    </ChartCard>
   );
 }

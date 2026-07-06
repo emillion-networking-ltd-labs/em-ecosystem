@@ -5,7 +5,7 @@ import { Users, ScrollText, Key, User, Settings } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import IconBadge from "@/components/ui/IconBadge";
-import ChartCard from "./ChartCard";
+import ChartCard from "@/components/ui/ChartCard";
 
 type QuickAction = {
   href: string;

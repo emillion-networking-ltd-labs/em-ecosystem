@@ -137,6 +137,13 @@
       ]
     },
     {
+      "name": "ChartCard",
+      "type": "registry:ui",
+      "file": "components/ChartCard.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
       "name": "Checkbox",
       "type": "registry:ui",
       "file": "components/Checkbox.tsx",
@@ -233,7 +240,9 @@
       "name": "DoughnutChart",
       "type": "registry:ui",
       "file": "components/DoughnutChart.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "ChartCard"
+      ],
       "internalDependencies": []
     },
     {
@@ -669,7 +678,9 @@
       "name": "TotalUsersChart",
       "type": "registry:ui",
       "file": "components/TotalUsersChart.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "ChartCard"
+      ],
       "internalDependencies": []
     },
     {
