@@ -9,7 +9,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { apiClient, SessionExpiredError } from "@/lib/api";
 import type { SafeUser, PaginatedResponse } from "@/lib/types";
 import MetricCard from "@/components/ui/MetricCard";
-import TotalUsersChart from "@/components/dashboard/TotalUsersChart";
+import TotalUsersChart from "@/components/ui/TotalUsersChart";
 import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
 import UserRoleChart from "@/components/dashboard/UserRoleChart";
 import QuickActionsCard from "@/components/dashboard/QuickActionsCard";

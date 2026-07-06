@@ -9,8 +9,13 @@ import {
   Tooltip as RechartsTooltip,
   ResponsiveContainer,
 } from "recharts";
-import ChartCard from "@/components/ui/ChartCard";
+import ChartCard from "./ChartCard";
 
+// TotalUsersChart — recharts line chart inside a ChartCard (this year vs last year). Colours are brand
+// tokens resolved as CSS variables (content-primary for the primary line, accent for the comparison,
+// content-tertiary / border-strong for ticks and grid), so the chart follows the theme purely via the
+// CSS cascade (the `.light` / `.dark` wrapper) — no useTheme, no per-instance flag. The catalog renders
+// light and dark side by side by wrapping each pane in a themed div, and both work with the same tokens.
 const chartData = [
   { month: "JAN", thisYear: 10000, lastYear: 8000 },
   { month: "FEB", thisYear: 14000, lastYear: 10000 },
@@ -23,17 +28,18 @@ const chartData = [
 
 const formatYAxis = (v: number) => (v >= 1000 ? `${v / 1000}K` : String(v));
 
-// ECO-145: color vía tokens theme-aware (content-primary + alpha). Sigue el tema por CSS (wrapper .dark/.light),
-// sin lógica isDark ni prop forceDark (ECO-113: el tema es global, no un flag por-instancia).
+// Token palette (CSS variables → theme-driven). recharts writes these straight to SVG stroke/fill
+// attributes, which resolve the variable from the surrounding themed wrapper. Data series use the
+// dedicated chart tokens (content-primary for the primary line, chart-1 for the comparison) — NOT
+// accent: accent is the brand colour, not a data-series colour (ECO-150 / design-propagation).
 const COLORS = {
   line: "var(--color-content-primary)",
-  ticks: "rgb(var(--content-primary) / 0.5)",
-  grid: "rgb(var(--content-primary) / 0.08)",
+  compare: "var(--color-chart-1)",
+  ticks: "var(--color-content-tertiary)",
+  grid: "var(--color-border-default)",
 };
 
 export default function TotalUsersChart() {
-  const colors = COLORS;
-
   return (
     <ChartCard
       title="Total Users"
@@ -41,43 +47,41 @@ export default function TotalUsersChart() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-content-primary" />
-            <span className="text-caption text-content-tertiary">
+            <span className="text-caption text-content-secondary">
               This year
             </span>
           </div>
           <span className="text-caption text-content-primary/20">|</span>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-chart-1" />
-            <span className="text-caption text-content-tertiary">
+            <span className="text-caption text-content-secondary">
               Last year
             </span>
           </div>
         </div>
       }
     >
-      {/* React 19 + Recharts 3 ResponsiveContainer regression: with
-          `height="100%"` the container resolves to -1 on first render
-          (parent measurement happens after RC mount). Pass numeric height
-          directly and drop the wrapper div. */}
+      {/* React 19 + Recharts 3 ResponsiveContainer regression: height="100%" resolves to -1 on the
+          first render. Pass a numeric height directly. */}
       <ResponsiveContainer width="100%" height={250}>
         <LineChart
           data={chartData}
           margin={{ top: 5, right: 5, bottom: 0, left: -10 }}
         >
           <CartesianGrid
-            stroke={colors.grid}
+            stroke={COLORS.grid}
             strokeDasharray="3 3"
             vertical={false}
           />
           <XAxis
             dataKey="month"
-            tick={{ fontSize: 12, fill: colors.ticks }}
+            tick={{ fontSize: 12, fill: COLORS.ticks }}
             axisLine={false}
             tickLine={false}
           />
           <YAxis
             tickFormatter={formatYAxis}
-            tick={{ fontSize: 12, fill: colors.ticks }}
+            tick={{ fontSize: 12, fill: COLORS.ticks }}
             axisLine={false}
             tickLine={false}
           />
@@ -85,8 +89,8 @@ export default function TotalUsersChart() {
             content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
               return (
-                <div className="rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
-                  <p className="text-caption font-semibold text-content-primary mb-1 capitalize">
+                <div className="whitespace-nowrap rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card">
+                  <p className="mb-1 text-caption font-semibold capitalize text-content-primary">
                     {String(label).toLowerCase()}
                   </p>
                   {payload.map((item, i) => (
@@ -103,26 +107,26 @@ export default function TotalUsersChart() {
                 </div>
               );
             }}
-            cursor={{ stroke: "var(--border-strong)", strokeWidth: 1 }}
+            cursor={{ stroke: "var(--color-border-default)", strokeWidth: 1 }}
           />
           <Line
             type="monotone"
             dataKey="thisYear"
             name="This year"
-            stroke={colors.line}
+            stroke={COLORS.line}
             strokeWidth={2}
             dot={false}
-            activeDot={{ r: 4, fill: colors.line, strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: COLORS.line, strokeWidth: 0 }}
           />
           <Line
             type="monotone"
             dataKey="lastYear"
             name="Last year"
-            stroke="var(--color-chart-1)"
+            stroke={COLORS.compare}
             strokeWidth={2}
             strokeDasharray="5 5"
             dot={false}
-            activeDot={{ r: 4, fill: "var(--color-chart-1)", strokeWidth: 0 }}
+            activeDot={{ r: 4, fill: COLORS.compare, strokeWidth: 0 }}
           />
         </LineChart>
       </ResponsiveContainer>
