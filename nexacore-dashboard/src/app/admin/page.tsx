@@ -18,7 +18,7 @@ import AlertBox from "@/components/ui/AlertBox";
 import { apiClient, SessionExpiredError } from "@/lib/api";
 import { useToast } from "@/hooks/useToast";
 import { ADMIN_TOAST } from "@/lib/toast-messages";
-import MetricCard from "@/components/dashboard/MetricCard";
+import MetricCard from "@/components/ui/MetricCard";
 import type {
   SafeUser,
   PaginatedResponse,

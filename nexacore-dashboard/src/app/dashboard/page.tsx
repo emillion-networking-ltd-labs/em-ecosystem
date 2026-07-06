@@ -8,7 +8,7 @@ import Divider from "@/components/ui/Divider";
 import { usePermissions } from "@/hooks/usePermissions";
 import { apiClient, SessionExpiredError } from "@/lib/api";
 import type { SafeUser, PaginatedResponse } from "@/lib/types";
-import MetricCard from "@/components/dashboard/MetricCard";
+import MetricCard from "@/components/ui/MetricCard";
 import TotalUsersChart from "@/components/dashboard/TotalUsersChart";
 import RecentActivityFeed from "@/components/dashboard/RecentActivityFeed";
 import UserRoleChart from "@/components/dashboard/UserRoleChart";
