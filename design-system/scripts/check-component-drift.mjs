@@ -18,6 +18,7 @@
 import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isAdapted, hasConflictMarkers } from "../registry/_reconcile.mjs";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repo = resolve(ds, "..");
@@ -54,12 +55,20 @@ for (const root of consumers) {
       const a = readFileSync(src, "utf8"), b = readFileSync(join(dir, f), "utf8");
       const rel = join(root, d, f).replace(repo + "/", "");
       if (a === b) continue;
+      // Marcadores de conflicto SIN resolver → falla SIEMPRE, ANTES del valve (el `@em-ui-adapted` NO los excusa;
+      // romperían el build del consumidor). El gate dedicado check-conflict-markers los caza en todo el árbol.
+      if (hasConflictMarkers(b)) {
+        drifted++;
+        console.error(`  [CONFLICTO] ${rel} — marcadores de conflicto git SIN resolver (resuélvelos)`);
+        continue;
+      }
       const al = a.split("\n"), bl = b.split("\n");
       const setA = new Set(al), setB = new Set(bl);
       const diff = al.filter((l) => l.trim() && !setB.has(l)).length + bl.filter((l) => l.trim() && !setA.has(l)).length;
-      // Válvula: una copia que diverge A PROPÓSITO (adaptación de app/marca) lo DECLARA con `@em-ui-adapted`.
-      // Sin ese marcador, divergir = drift stale (no hizo pull) → falla. Con él = adaptación consciente (se reporta).
-      if (b.includes("@em-ui-adapted")) {
+      // Válvula: una copia que diverge A PROPÓSITO (adaptación de app/marca) lo DECLARA con `@em-ui-adapted` EN LA
+      // CABECERA (isAdapted, estructurado — un marcador incrustado en el cuerpo NO cuenta). Sin él, divergir =
+      // drift stale (no hizo pull) → falla. Con él = adaptación consciente (se reporta).
+      if (isAdapted(b)) {
         adapted++;
         console.log(`  [adaptado] ${rel} — ${diff} línea(s) divergen (declarado @em-ui-adapted)`);
         continue;

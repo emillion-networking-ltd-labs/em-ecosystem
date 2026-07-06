@@ -1,0 +1,49 @@
+# ============================================================================
+# em-ui governance — drift + component-drift + conflict-markers (ECO-144, design-propagation Fase 1)
+# ============================================================================
+# Cierra la brecha del gate: los checks de gobernanza de em-ui (que la copia de cada consumidor es fiel a la
+# fuente + que ningún fichero lleva marcadores de conflicto) SOLO corrían en `design-system/**` (workflow del
+# Storybook). Un PR que toca SOLO un consumidor (satélite/dashboard) no los ejecutaba → una copia stale o un
+# merge a medias podía colarse. Este workflow los corre TAMBIÉN sobre las rutas de consumidor.
+#
+# Ligero: los 3 gates son node stdlib puro (+ registry/_reconcile.mjs), sin deps → no hace `npm ci` ni build.
+# Complementa (no reemplaza) al workflow del Storybook, que sigue corriendo la cadena `coverage` completa en
+# cambios del DS.
+# ============================================================================
+
+name: em-ui governance
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "satellites/**"
+      - "nexacore-dashboard/src/**"
+      - "nexacore-api/src/**"
+      - "design-system/registry/**"
+      - "design-system/scripts/check-drift.mjs"
+      - "design-system/scripts/check-component-drift.mjs"
+      - "design-system/scripts/check-conflict-markers.mjs"
+      - ".github/workflows/em-ui-governance.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  governance:
+    name: em-ui governance (drift + conflict-markers)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout PR / branch
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: em-ui governance gates (drift + component-drift + conflict-markers)
+        working-directory: design-system
+        run: npm run governance
