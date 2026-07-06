@@ -1,6 +1,6 @@
 # ============================================================================
-# em-ui governance — cadena `npm run governance` (drift + component-drift + manifest + conflict-markers +
-# raw-color) sobre rutas de consumidor (ECO-144, design-propagation Fase 1; +manifest E4a ECO-152)
+# em-ui governance — cadena `npm run governance` (drift + component-drift + manifest + fleet-report +
+# conflict-markers + raw-color) sobre rutas de consumidor (ECO-144; +manifest E4a ECO-152; +fleet-report E4b ECO-155)
 # ============================================================================
 # Cierra la brecha del gate: los checks de gobernanza de em-ui (que la copia de cada consumidor es fiel a la
 # fuente, que su manifest está completo/íntegro, y que ningún fichero lleva marcadores de conflicto) SOLO
@@ -27,6 +27,7 @@ on:
       - "design-system/scripts/check-drift.mjs"
       - "design-system/scripts/check-component-drift.mjs"
       - "design-system/scripts/check-manifest.mjs"
+      - "design-system/scripts/check-fleet-report.mjs"
       - "design-system/scripts/check-conflict-markers.mjs"
       - ".github/workflows/em-ui-governance.yml"
   workflow_dispatch:

@@ -15,11 +15,11 @@
 // Mapeo em-ui: DS components/<X>.tsx → consumer components/ui/<X>.tsx ; DS sections/<X>.tsx → consumer
 // components/sections/<X>.tsx. Uso, cwd = design-system/:  node scripts/check-component-drift.mjs
 
-import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isAdapted, hasConflictMarkers } from "../registry/_reconcile.mjs";
-import { isHeld, readManifest } from "../registry/_manifest.mjs";
+import { isHeld, readManifest, discoverConsumers } from "../registry/_manifest.mjs";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repo = resolve(ds, "..");
@@ -32,15 +32,9 @@ for (const srcDir of ["components", "sections"]) {
   for (const f of readdirSync(dir)) if (f.endsWith(".tsx")) dsSources.set(f, join(dir, f));
 }
 
-// Consumidores: dashboard + satélites. Cada uno copia a components/ui y components/sections.
-const consumers = [join(repo, "nexacore-dashboard")];
-const satRoot = join(repo, "satellites");
-if (existsSync(satRoot)) {
-  for (const s of readdirSync(satRoot)) {
-    const r = join(satRoot, s);
-    try { if (statSync(r).isDirectory()) consumers.push(r); } catch { /* ignore */ }
-  }
-}
+// Consumidores: dashboard + satélites — vía discoverConsumers (ECO-155), única fuente de verdad de la flota,
+// compartida con check-manifest y check-fleet-report. Cada uno copia a components/ui y components/sections.
+const consumers = discoverConsumers(repo);
 
 let drifted = 0, adapted = 0, held = 0, checked = 0, consumersWithCopies = 0;
 for (const root of consumers) {

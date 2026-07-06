@@ -15,29 +15,19 @@
 // sin deps → corre en la cadena `governance`/`coverage` sin `npm ci`. Uso, cwd = design-system/:
 //   node scripts/check-manifest.mjs
 
-import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
+import { readFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { governedSources, validateManifest, readManifest, manifestPath, MANIFEST_NAME } from "../registry/_manifest.mjs";
+import { governedSources, validateManifest, readManifest, manifestPath, MANIFEST_NAME, discoverConsumers } from "../registry/_manifest.mjs";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repo = resolve(ds, "..");
 const REGISTRY = JSON.parse(readFileSync(join(ds, "registry.json"), "utf8"));
 const sources = governedSources(REGISTRY);
 
-// Consumidores: dashboard + satélites (idéntico a check-component-drift → misma noción de "consumidor").
-const consumers = [join(repo, "nexacore-dashboard")];
-const satRoot = join(repo, "satellites");
-if (existsSync(satRoot)) {
-  for (const s of readdirSync(satRoot)) {
-    const r = join(satRoot, s);
-    try {
-      if (statSync(r).isDirectory()) consumers.push(r);
-    } catch {
-      /* ignore */
-    }
-  }
-}
+// Consumidores: dashboard + satélites — vía discoverConsumers (ECO-155), única fuente de verdad de la flota,
+// compartida con check-component-drift y check-fleet-report para que ninguno discrepe sobre el conjunto.
+const consumers = discoverConsumers(repo);
 
 let violations = 0;
 let consumersChecked = 0;
