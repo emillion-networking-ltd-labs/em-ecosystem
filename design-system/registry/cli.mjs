@@ -14,6 +14,9 @@ import {
   isHeld,
   manifestPath,
   TOKENS_DEST,
+  discoverConsumers,
+  fleetStatus,
+  STATUS,
 } from "./_manifest.mjs";
 
 // em-ui vive en design-system/registry/ → la fuente (design-system/) es el directorio padre.
@@ -231,6 +234,47 @@ if (cmd === "list") {
   writeManifest(destSrc, manifest);
   const acc = cmd === "pin" ? "fijada(s)" : cmd === "hold" ? "congelada(s)" : "descongelada(s)";
   console.log(`em-ui ${cmd} ${name}: ${targets.length} entrada(s) ${acc} → ${manifestPath(destSrc)}`);
+} else if (cmd === "report") {
+  // E4b (design-propagation): reporter de flota PULL-ONLY + halt-on-red. Solo LEE — jamás escribe en un
+  // consumidor (invariante ADR-006/007/027). Reporta TODOS los consumidores (norma run-all-then-fail del repo,
+  // NO para-en-el-1er-rojo → no ciega al operador sobre el consumidor #2) y sale ≠0 si ALGUNO está rojo.
+  const repo = resolve(DS, "..");
+  const sources = governedSources(REGISTRY);
+  const fleet = fleetStatus(sources, DS, discoverConsumers(repo));
+  const SYMBOL = {
+    [STATUS.UP_TO_DATE]: "✓",
+    [STATUS.STALE]: "↑",
+    [STATUS.DRIFTED]: "✗",
+    [STATUS.CONFLICT]: "✗",
+    [STATUS.ADAPTED]: "~",
+    [STATUS.HELD]: "⊙",
+  };
+  console.log(`em-ui report — estado de sync de la flota (${fleet.length} consumidor(es))\n`);
+  let redConsumers = 0;
+  const details = [];
+  for (const c of fleet) {
+    const name = c.root.replace(repo + "/", "");
+    const counts = {};
+    for (const e of c.entries) counts[e.status] = (counts[e.status] || 0) + 1;
+    const breakdown = Object.entries(counts).map(([s, n]) => `${n} ${s}`).join(", ");
+    const mark = c.red ? "✗" : SYMBOL[c.worst] || "✓";
+    console.log(`  ${mark} ${name.padEnd(28)} ${c.worst.padEnd(11)} (${c.entries.length} copia(s)${breakdown ? ": " + breakdown : ""})`);
+    if (c.red) redConsumers++;
+    const nonGreen = c.entries.filter((e) => e.status !== STATUS.UP_TO_DATE);
+    if (c.violations.length || nonGreen.length) details.push({ name, violations: c.violations, nonGreen });
+  }
+  for (const d of details) {
+    console.log(`\n  ${d.name}:`);
+    for (const v of d.violations) console.error(`    ! ${v}`);
+    for (const e of d.nonGreen) console.log(`    ${SYMBOL[e.status] || "?"} ${e.status.padEnd(10)} ${e.key}`);
+  }
+  console.log("");
+  if (redConsumers > 0) {
+    console.error(`✗ flota ROJA — ${redConsumers} consumidor(es) con drift no declarado, marcadores de conflicto o manifest corrupto.`);
+    console.error(`  Resuélvelo: em-ui update <C> --dest <consumer>/src (adopta el DS), back-portea al DS, o declara @em-ui-adapted / em-ui hold.`);
+    process.exit(1);
+  }
+  console.log(`✓ flota OK — ningún consumidor en rojo (stale = update disponible, no rojo; adapted/held = divergencia intencional).`);
 } else {
   console.log(`em-ui — registry + CLI del design system (fuente: design-system/)
 uso:
@@ -242,6 +286,7 @@ uso:
   em-ui brand --name <m> --dest <src>     instala la capa de override de marca [data-brand]
   em-ui pin <C|all> --dest <src>          fija la base (blob-sha del DS) en el manifest (all = re-baseline)
   em-ui hold <C> --dest <src>             congela la copia de C: update la salta, el drift-gate la exime
-  em-ui unhold <C> --dest <src>           descongela la copia de C`);
+  em-ui unhold <C> --dest <src>           descongela la copia de C
+  em-ui report                            estado de sync de la flota (pull-only); sale ≠0 si algún consumidor está rojo`);
   if (cmd && cmd !== "help" && cmd !== "--help") process.exit(1);
 }

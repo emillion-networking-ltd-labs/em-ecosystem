@@ -6,12 +6,17 @@
 // `hold` opcional (freeze de rollout).
 //
 // Ethos lib+shell, igual que _reconcile.mjs: el NÚCLEO es puro (blobSha, destRelFor, governedSources,
-// predicados); readManifest/writeManifest/validateManifest son los ÚNICOS helpers con IO, COMPARTIDOS por
-// cli.mjs y check-manifest.mjs para que el CLI y el gate NUNCA discrepen sobre la forma/clave/sha del manifest.
+// predicados); readManifest/writeManifest/validateManifest son los helpers con IO, COMPARTIDOS por cli.mjs y
+// check-manifest.mjs para que el CLI y el gate NUNCA discrepen sobre la forma/clave/sha del manifest.
+//
+// ECO-155 (E4b) añade el NÚCLEO DE ESTADO DE FLOTA (discoverConsumers, classifyEntry, statusForConsumer,
+// worstStatus, isRedStatus) — pull-only (solo lee) — que comparten el verbo `em-ui report` y el gate
+// check-fleet-report, para que reporter y gate tampoco discrepen sobre el estado de sync de la flota.
 
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join, basename } from "node:path";
+import { isAdapted, hasConflictMarkers } from "./_reconcile.mjs";
 
 export const MANIFEST_NAME = "em-ui.manifest.json";
 export const MANIFEST_VERSION = 1;
@@ -139,4 +144,112 @@ export function validateManifest(sources, destSrc, manifest) {
     }
   }
   return v;
+}
+
+// --- núcleo de estado de flota (ECO-155, E4b): el reporter pull-only + halt-on-red lo comparte con el gate ---
+// PULL-only: TODO aquí es de LECTURA — jamás escribe bytes en un consumidor (invariante ADR-006/007/027).
+
+// Descubre los consumidores del DS: dashboard + cada dir bajo satellites/ (orden determinista). Única fuente de
+// verdad de "qué es un consumidor" — la comparten el reporter, el gate de flota y (re-apuntados) los gates de
+// manifest/drift, para que ninguno discrepe sobre el conjunto de la flota.
+export function discoverConsumers(repo) {
+  const consumers = [join(repo, "nexacore-dashboard")];
+  const satRoot = join(repo, "satellites");
+  if (existsSync(satRoot)) {
+    for (const s of readdirSync(satRoot).sort()) {
+      const r = join(satRoot, s);
+      try {
+        if (statSync(r).isDirectory()) consumers.push(r);
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+  return consumers;
+}
+
+// blob-sha de la fuente del DS AHORA (para comparar contra la base registrada en el manifest). Lee bytes.
+export function currentShaFor(dsRoot, from) {
+  return blobSha(readFileSync(join(dsRoot, from)));
+}
+
+// Estados de sync de una copia gobernada. Rojos = corrupt/drifted (piden acción/rompen); stale = ámbar (update
+// disponible, la copia es fiel a su base y el DS avanzó); held/adapted = divergencia INTENCIONAL (nunca rojo).
+export const STATUS = Object.freeze({
+  UP_TO_DATE: "up-to-date",
+  STALE: "stale",
+  DRIFTED: "drifted",
+  ADAPTED: "adapted",
+  HELD: "held",
+  CONFLICT: "conflict",
+});
+export const RED_STATUSES = new Set([STATUS.CONFLICT, STATUS.DRIFTED]);
+export function isRedStatus(s) {
+  return RED_STATUSES.has(s);
+}
+// Severidad para el rollup "peor estado" del consumidor (mayor = más atención). stale (ámbar) por encima de las
+// divergencias intencionales; los rojos arriba.
+const SEVERITY = {
+  [STATUS.CONFLICT]: 5,
+  [STATUS.DRIFTED]: 4,
+  [STATUS.STALE]: 2,
+  [STATUS.ADAPTED]: 1,
+  [STATUS.HELD]: 1,
+  [STATUS.UP_TO_DATE]: 0,
+};
+export function worstStatus(statuses) {
+  let worst = STATUS.UP_TO_DATE;
+  for (const s of statuses) if ((SEVERITY[s] ?? 0) > (SEVERITY[worst] ?? 0)) worst = s;
+  return worst;
+}
+
+// Clasifica UNA copia contra su base (manifest) y la fuente actual del DS. El discriminador clave (lo que E4a
+// desbloqueó): `blobSha(copyBytes) === entry.sha` = la copia es FIEL A SU BASE → si además la base == DS actual
+// es up-to-date, si no es STALE (el DS avanzó, no es un edit del consumidor). Si NO casa la base → divergió: si
+// lo DECLARA (@em-ui-adapted) es adapted, si no es DRIFTED (edit no declarado, rojo). Los marcadores de
+// conflicto rompen el build → rojo ANTES de toda exención (igual que check-component-drift). Puro.
+export function classifyEntry(entry, currentDsSha, copyBytes) {
+  const copyStr = copyBytes.toString("utf8");
+  if (hasConflictMarkers(copyStr)) return STATUS.CONFLICT;
+  if (isHeld(entry)) return STATUS.HELD;
+  const copySha = blobSha(copyBytes);
+  if (copySha === entry.sha) {
+    return entry.sha === currentDsSha ? STATUS.UP_TO_DATE : STATUS.STALE;
+  }
+  return isAdapted(copyStr) ? STATUS.ADAPTED : STATUS.DRIFTED;
+}
+
+// Estado de sync de UN consumidor (pull-only, solo lee). Corre validateManifest (un manifest corrupto/incompleto
+// es rojo ANTES de calcular staleness) y clasifica cada copia gobernada PRESENTE con entrada. Devuelve
+// { violations, entries: [{key, from, status}], worst, red }. La comparten el verbo `em-ui report` y el gate
+// check-fleet-report para que CLI y gate NUNCA discrepen sobre el estado de la flota.
+export function statusForConsumer(sources, dsRoot, destSrc, manifest) {
+  const violations = validateManifest(sources, destSrc, manifest);
+  const entries = [];
+  for (const s of sources) {
+    const copyPath = join(destSrc, s.key);
+    if (!existsSync(copyPath)) continue; // no es una copia gobernada de este consumidor
+    const entry = manifest.files?.[s.key];
+    if (!entry) continue; // presente sin entrada → ya lo reporta validateManifest (INCOMPLETO)
+    const status = classifyEntry(entry, currentShaFor(dsRoot, s.from), readFileSync(copyPath));
+    entries.push({ key: s.key, from: s.from, status });
+  }
+  const worst = worstStatus(entries.map((e) => e.status));
+  const red = violations.length > 0 || entries.some((e) => isRedStatus(e.status));
+  return { violations, entries, worst, red };
+}
+
+// Estado de TODA la flota (pull-only). Recorre `consumers` (roots), calcula statusForConsumer de cada uno, y
+// devuelve el resultado de CADA consumidor con copias — SIEMPRE todos (norma run-all-then-fail: no para en el
+// 1er rojo, para no cegar al operador sobre el resto). El caller decide el exit code (rojo si `.some(c=>c.red)`).
+// Compartida por el verbo `em-ui report` y el gate check-fleet-report para que no discrepen.
+export function fleetStatus(sources, dsRoot, consumers) {
+  const out = [];
+  for (const root of consumers) {
+    const destSrc = join(root, "src");
+    const s = statusForConsumer(sources, dsRoot, destSrc, readManifest(destSrc));
+    if (s.entries.length === 0 && s.violations.length === 0) continue; // sin copias em-ui → no es un consumidor
+    out.push({ root, destSrc, ...s });
+  }
+  return out;
 }
