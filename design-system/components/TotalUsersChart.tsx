@@ -28,11 +28,13 @@ const chartData = [
 
 const formatYAxis = (v: number) => (v >= 1000 ? `${v / 1000}K` : String(v));
 
-// Brand-token palette (CSS variables → theme-driven). recharts writes these straight to SVG
-// stroke/fill attributes, which resolve the variable from the surrounding themed wrapper.
+// Token palette (CSS variables → theme-driven). recharts writes these straight to SVG stroke/fill
+// attributes, which resolve the variable from the surrounding themed wrapper. Data series use the
+// dedicated chart tokens (content-primary for the primary line, chart-1 for the comparison) — NOT
+// accent: accent is the brand colour, not a data-series colour (ECO-150 / design-propagation).
 const COLORS = {
   line: "var(--color-content-primary)",
-  compare: "var(--color-accent)",
+  compare: "var(--color-chart-1)",
   ticks: "var(--color-content-tertiary)",
   grid: "var(--color-border-default)",
 };
@@ -45,12 +47,16 @@ export default function TotalUsersChart() {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-content-primary" />
-            <span className="text-caption text-content-secondary">This year</span>
+            <span className="text-caption text-content-secondary">
+              This year
+            </span>
           </div>
           <span className="text-caption text-content-primary/20">|</span>
           <div className="flex items-center gap-1.5">
-            <span className="h-2 w-2 rounded-full bg-accent" />
-            <span className="text-caption text-content-secondary">Last year</span>
+            <span className="h-2 w-2 rounded-full bg-chart-1" />
+            <span className="text-caption text-content-secondary">
+              Last year
+            </span>
           </div>
         </div>
       }
@@ -58,8 +64,15 @@ export default function TotalUsersChart() {
       {/* React 19 + Recharts 3 ResponsiveContainer regression: height="100%" resolves to -1 on the
           first render. Pass a numeric height directly. */}
       <ResponsiveContainer width="100%" height={250}>
-        <LineChart data={chartData} margin={{ top: 5, right: 5, bottom: 0, left: -10 }}>
-          <CartesianGrid stroke={COLORS.grid} strokeDasharray="3 3" vertical={false} />
+        <LineChart
+          data={chartData}
+          margin={{ top: 5, right: 5, bottom: 0, left: -10 }}
+        >
+          <CartesianGrid
+            stroke={COLORS.grid}
+            strokeDasharray="3 3"
+            vertical={false}
+          />
           <XAxis
             dataKey="month"
             tick={{ fontSize: 12, fill: COLORS.ticks }}

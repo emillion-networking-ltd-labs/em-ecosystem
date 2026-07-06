@@ -36,7 +36,7 @@ import {
   FileText,
 } from "lucide-react";
 import CountdownTimer from "@/components/ui/CountdownTimer";
-import TotalUsersChart from "@/components/dashboard/TotalUsersChart";
+import TotalUsersChart from "@/components/ui/TotalUsersChart";
 import Button, {
   variantClasses as buttonVariants,
   sizeClasses as buttonSizes,

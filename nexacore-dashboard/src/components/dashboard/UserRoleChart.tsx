@@ -1,13 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  Tooltip as RechartsTooltip,
-  ResponsiveContainer,
-} from "recharts";
+import DoughnutChart, {
+  type DoughnutDatum,
+} from "@/components/ui/DoughnutChart";
 import ChartCard from "@/components/ui/ChartCard";
 import { apiClient } from "@/lib/api";
 import type { SafeUser, PaginatedResponse } from "@/lib/types";
@@ -18,18 +14,15 @@ type RoleCounts = {
   SUPERADMIN: number;
 };
 
-// ECO-145: color por serie vía tokens. USER/ADMIN = primitivos de chart (fijos); SUPERADMIN = content-primary
-// (theme-aware, ya flipa por el token) → sin lógica isDark.
-const ROLE_COLORS: Record<string, string> = {
+// ECO-150: la presentación del donut la posee el DoughnutChart del DS (una sola presentación, sin drift).
+// UserRoleChart es solo el envoltorio CONECTADO: hace el fetch de los conteos por rol y maneja los estados
+// de carga/error; en éxito delega en <DoughnutChart>. Color por serie con los tokens de chart dedicados
+// (USER/ADMIN = chart-1/chart-2; SUPERADMIN = content-primary, theme-aware) — NO accent (accent es marca,
+// no dato).
+const ROLE_FILL: Record<string, string> = {
   USER: "var(--color-chart-1)",
   ADMIN: "var(--color-chart-2)",
   SUPERADMIN: "var(--color-content-primary)",
-};
-
-const ROLE_BG: Record<string, string> = {
-  USER: "bg-chart-1",
-  ADMIN: "bg-chart-2",
-  SUPERADMIN: "bg-content-primary",
 };
 
 export default function UserRoleChart() {
@@ -73,18 +66,9 @@ export default function UserRoleChart() {
     return () => controller.abort();
   }, []);
 
-  const roles = ["USER", "ADMIN", "SUPERADMIN"] as const;
-  const total = counts ? counts.USER + counts.ADMIN + counts.SUPERADMIN : 0;
-  const roleColors = ROLE_COLORS;
-  const roleBgClasses = ROLE_BG;
-
-  const pieData = counts
-    ? roles.map((r) => ({ name: r, value: counts[r], fill: roleColors[r] }))
-    : [];
-
-  return (
-    <ChartCard title="Users by Role">
-      {loading && (
+  if (loading) {
+    return (
+      <ChartCard title="Users by Role">
         <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
           <div className="h-[120px] w-[120px] animate-pulse rounded-full bg-surface-subtle" />
           <div className="space-y-3">
@@ -96,82 +80,26 @@ export default function UserRoleChart() {
             ))}
           </div>
         </div>
-      )}
+      </ChartCard>
+    );
+  }
 
-      {error && (
+  if (error || !counts) {
+    return (
+      <ChartCard title="Users by Role">
         <p className="py-4 text-center text-body text-content-tertiary">
           Could not load user data
         </p>
-      )}
+      </ChartCard>
+    );
+  }
 
-      {!loading && !error && pieData.length > 0 && (
-        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-center sm:gap-6">
-          {/* React 19 + Recharts 3 ResponsiveContainer regression: pass
-              numeric width/height directly instead of "100%" — see
-              TotalUsersChart for the same pattern. */}
-          <div className="shrink-0">
-            <ResponsiveContainer width={120} height={120}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  dataKey="value"
-                  nameKey="name"
-                  cx="50%"
-                  cy="50%"
-                  innerRadius="60%"
-                  outerRadius="100%"
-                  paddingAngle={2}
-                  strokeWidth={0}
-                >
-                  {pieData.map((entry) => (
-                    <Cell key={entry.name} fill={entry.fill} />
-                  ))}
-                </Pie>
-                <RechartsTooltip
-                  content={({ active, payload }) => {
-                    if (!active || !payload?.length) return null;
-                    const item = payload[0];
-                    return (
-                      <div className="rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <span
-                            className="h-2 w-2 shrink-0 rounded-sm"
-                            style={{
-                              background: item.payload?.fill || item.color,
-                            }}
-                          />
-                          <span className="text-caption font-normal text-content-primary">
-                            {item.name}: {item.value}
-                          </span>
-                        </div>
-                      </div>
-                    );
-                  }}
-                />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-          <div className="space-y-3">
-            {roles.map((role) => {
-              const count = counts![role];
-              const pct = total > 0 ? ((count / total) * 100).toFixed(1) : "0";
-              return (
-                <div key={role} className="flex items-center gap-2">
-                  <span
-                    className={`h-2 w-2 shrink-0 rounded-full ${roleBgClasses[role]}`}
-                  />
-                  <span className="text-caption text-content-primary">
-                    {role}
-                  </span>
-                  <span className="text-caption text-content-tertiary">
-                    {count} ({pct}%)
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-    </ChartCard>
-  );
+  const roles = ["USER", "ADMIN", "SUPERADMIN"] as const;
+  const data: DoughnutDatum[] = roles.map((r) => ({
+    name: r,
+    value: counts[r],
+    fill: ROLE_FILL[r],
+  }));
+
+  return <DoughnutChart title="Users by Role" data={data} />;
 }
