@@ -19,7 +19,7 @@ import {
   Activity,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import ChartCard from "./ChartCard";
+import ChartCard from "@/components/ui/ChartCard";
 import IconBadge from "@/components/ui/IconBadge";
 import Badge from "@/components/ui/Badge";
 import { apiClient } from "@/lib/api";
