@@ -1,0 +1,234 @@
+{
+  "version": 1,
+  "source": "design-system",
+  "files": {
+    "components/ui/Accordion.tsx": {
+      "from": "components/Accordion.tsx",
+      "sha": "0a4e81d95fc88004153c99fbd8281957b4f529a5"
+    },
+    "components/ui/AlertBox.tsx": {
+      "from": "components/AlertBox.tsx",
+      "sha": "1049f55e7f4afb12a0064dad82acdee4871c972b"
+    },
+    "components/ui/Avatar.tsx": {
+      "from": "components/Avatar.tsx",
+      "sha": "07f258e354dd4da81623165d7d4c39780a475134"
+    },
+    "components/ui/Badge.tsx": {
+      "from": "components/Badge.tsx",
+      "sha": "eaa989ecdfb23f35abdff3eefc417a2d37896b17"
+    },
+    "components/ui/BeforeAfterSlider.tsx": {
+      "from": "components/BeforeAfterSlider.tsx",
+      "sha": "dd0e04ccc1c4746aea7f823c93072f810a535e30"
+    },
+    "components/ui/Breadcrumbs.tsx": {
+      "from": "components/Breadcrumbs.tsx",
+      "sha": "ca701fc5d3dbd740ebabbd50bcdc9f1a67b04eb9"
+    },
+    "components/ui/Button.tsx": {
+      "from": "components/Button.tsx",
+      "sha": "026bbfd912bce4c18eee9173ccb66dbbe4865237"
+    },
+    "components/ui/Calendar.tsx": {
+      "from": "components/Calendar.tsx",
+      "sha": "2e805aa0eebb34560a4b8da10385b35da5a8667f"
+    },
+    "components/ui/ChartCard.tsx": {
+      "from": "components/ChartCard.tsx",
+      "sha": "47fed9ee2539f67465a5a0e98c49364e500d1b63"
+    },
+    "components/ui/Checkbox.tsx": {
+      "from": "components/Checkbox.tsx",
+      "sha": "ad8cbeea3eb10468cecb0a37018d3a150b287e41"
+    },
+    "components/ui/ConfirmModal.tsx": {
+      "from": "components/ConfirmModal.tsx",
+      "sha": "df233253b832e3876761e30fe8c63c9437d8676c"
+    },
+    "components/ui/CopyCell.tsx": {
+      "from": "components/CopyCell.tsx",
+      "sha": "9a913dfd41de327a3d7f5e13ba9434feab3b009c"
+    },
+    "components/ui/CopyField.tsx": {
+      "from": "components/CopyField.tsx",
+      "sha": "f6066636163f9bacb74ad60dd2d69b3a107f3a9c"
+    },
+    "components/ui/CountdownTimer.tsx": {
+      "from": "components/CountdownTimer.tsx",
+      "sha": "99e83c110df7b2f7972cbdf0811fcd3b3b047c79"
+    },
+    "components/ui/DataTable.tsx": {
+      "from": "components/DataTable.tsx",
+      "sha": "ce948312d61427888f01b85db743464bb885ee09"
+    },
+    "components/ui/DateInput.tsx": {
+      "from": "components/DateInput.tsx",
+      "sha": "13a4e78aeef0ecb25d1ed6fbd5020abf5c198632"
+    },
+    "components/ui/Divider.tsx": {
+      "from": "components/Divider.tsx",
+      "sha": "9b5711ba51d723db92de10e5d073850ab103b6c4"
+    },
+    "components/ui/DoughnutChart.tsx": {
+      "from": "components/DoughnutChart.tsx",
+      "sha": "a7607d7f93785434a0dcca5624bba914eb6ed24d"
+    },
+    "components/ui/EmailSelector.tsx": {
+      "from": "components/EmailSelector.tsx",
+      "sha": "9e74a6f68f76f99f35a62355eee8c5d205e512e8"
+    },
+    "components/ui/EmptyState.tsx": {
+      "from": "components/EmptyState.tsx",
+      "sha": "80581a266bec64b9f84e27eb073d6c9883db9d56"
+    },
+    "components/ui/FormField.tsx": {
+      "from": "components/FormField.tsx",
+      "sha": "c4e4672a65081feb89eda47ba21cd045d9752ec1"
+    },
+    "components/ui/IconBadge.tsx": {
+      "from": "components/IconBadge.tsx",
+      "sha": "15a24ddc8b407488458c0c672d59c39906e71e3f"
+    },
+    "components/ui/IconButton.tsx": {
+      "from": "components/IconButton.tsx",
+      "sha": "d31342a035461b1028c2a40a30bdbff04de6cf33"
+    },
+    "components/ui/IdleWarningModal.tsx": {
+      "from": "components/IdleWarningModal.tsx",
+      "sha": "d4983c5fd78edf468482888e0047418ab5a54f70"
+    },
+    "components/ui/ImageCropper.tsx": {
+      "from": "components/ImageCropper.tsx",
+      "sha": "47cddbbbedb0a7611d18bf7168cf1d9a40a88591"
+    },
+    "components/ui/InlineError.tsx": {
+      "from": "components/InlineError.tsx",
+      "sha": "d3bc2ef420df991e53d8b0406e2dbcba0d61d7d1"
+    },
+    "components/ui/Input.tsx": {
+      "from": "components/Input.tsx",
+      "sha": "6e9e5acabcfbd9c476bdeadaebd124dbc8192300"
+    },
+    "components/ui/LanguageSelector.tsx": {
+      "from": "components/LanguageSelector.tsx",
+      "sha": "6052345cada1d19eacced7c473a24f66fc9ae327"
+    },
+    "components/ui/MetricCard.tsx": {
+      "from": "components/MetricCard.tsx",
+      "sha": "85a4e9780045924a4c8d9d9deda9f75487746532"
+    },
+    "components/ui/MfaDigitInput.tsx": {
+      "from": "components/MfaDigitInput.tsx",
+      "sha": "bde4cf546e497a93453e1868a17fdbde0d32dcde"
+    },
+    "components/ui/Pagination.tsx": {
+      "from": "components/Pagination.tsx",
+      "sha": "94474acc4c3c4f65bbb8572400384ddb680c785f"
+    },
+    "components/ui/QrCodeCard.tsx": {
+      "from": "components/QrCodeCard.tsx",
+      "sha": "bf0a86de456ac6f34f320e3946d8fcfb18c6b797"
+    },
+    "components/ui/RateLimitBanner.tsx": {
+      "from": "components/RateLimitBanner.tsx",
+      "sha": "6be793a1a428996d9f09580ff0288b910870a5a5"
+    },
+    "components/ui/RecoveryCodesGrid.tsx": {
+      "from": "components/RecoveryCodesGrid.tsx",
+      "sha": "ab20a74e90d272eb7999580ae85280b76fdf926f"
+    },
+    "components/ui/SearchTrigger.tsx": {
+      "from": "components/SearchTrigger.tsx",
+      "sha": "880399bb86cb330fb1215c0b61f6b2e05811131c"
+    },
+    "components/ui/SegmentedControl.tsx": {
+      "from": "components/SegmentedControl.tsx",
+      "sha": "051605224d9c8c3a9e58f2da961c3994e2366f79"
+    },
+    "components/ui/Select.tsx": {
+      "from": "components/Select.tsx",
+      "sha": "6b829694c1dd2caa44c1db8c54daa4f7d17b3289"
+    },
+    "components/ui/SettingRow.tsx": {
+      "from": "components/SettingRow.tsx",
+      "sha": "db06ccf9a9b4682b24a1ba30848d65397ce53c1e"
+    },
+    "components/ui/SidebarNav.tsx": {
+      "from": "components/SidebarNav.tsx",
+      "sha": "b7c76b2d79e3c3352ba31f59627ebb4669356192"
+    },
+    "components/ui/Slider.tsx": {
+      "from": "components/Slider.tsx",
+      "sha": "22c2c3707b65e12715321e4bb36813f4ad30d1ff"
+    },
+    "components/ui/SpinnerCircle.tsx": {
+      "from": "components/SpinnerCircle.tsx",
+      "sha": "8ab49b9a7903027191b7529062a02e912269dd23"
+    },
+    "components/ui/SpinnerInfinity.tsx": {
+      "from": "components/SpinnerInfinity.tsx",
+      "sha": "c5e539542012c9c05d0d6448e7c32fa8c845ca3c"
+    },
+    "components/ui/StickyCard.tsx": {
+      "from": "components/StickyCard.tsx",
+      "sha": "3ed2d691ab83d95630c25de0aaa6cbb66454e476"
+    },
+    "components/ui/Tabs.tsx": {
+      "from": "components/Tabs.tsx",
+      "sha": "8c3cb0a8b0952507c0e8b6f24140f60b116b4292"
+    },
+    "components/ui/ThemeToggle.tsx": {
+      "from": "components/ThemeToggle.tsx",
+      "sha": "c523959ff59407db6e0ee9d55905ff00565b8330"
+    },
+    "components/ui/Toast.tsx": {
+      "from": "components/Toast.tsx",
+      "sha": "99d516e8c2713210423701a2eabe76958aec5457"
+    },
+    "components/ui/ToastContainer.tsx": {
+      "from": "components/ToastContainer.tsx",
+      "sha": "4b56e54c32225e906bd696e0bf1390861fc4c2e0"
+    },
+    "components/ui/Toggle.tsx": {
+      "from": "components/Toggle.tsx",
+      "sha": "8e6f1581c23aa98d6c665a8bb499980ddbc744fb"
+    },
+    "components/ui/Tooltip.tsx": {
+      "from": "components/Tooltip.tsx",
+      "sha": "f43fb4a9bc938aca6288d81360ba0e1582354af4"
+    },
+    "components/ui/TotalUsersChart.tsx": {
+      "from": "components/TotalUsersChart.tsx",
+      "sha": "3aa8cb8417ba0f0877fb696d12a7e3ed3d9daa1c"
+    },
+    "components/ui/TurnstileWidget.tsx": {
+      "from": "components/TurnstileWidget.tsx",
+      "sha": "78c3235966b3f4f4ef6d0df4b95d8f0c17ac223d"
+    },
+    "hooks/useIsTruncated.ts": {
+      "from": "hooks/useIsTruncated.ts",
+      "sha": "4551bb54be16380e48df6cf3545572480f4224b2"
+    },
+    "hooks/useTheme.ts": {
+      "from": "hooks/useTheme.ts",
+      "sha": "e18e46c8c17c5bebcd3e4a1f917ccc33ede16611"
+    },
+    "lib/crop-image.ts": {
+      "from": "lib/crop-image.ts",
+      "sha": "d13f598cdaa0b1c033a3eaefb31809dcf1051e25"
+    },
+    "lib/types.ts": {
+      "from": "lib/types.ts",
+      "sha": "8e9e78fa679c6c526bc5ab9e895a8c873d49972d"
+    },
+    "lib/utils.ts": {
+      "from": "lib/utils.ts",
+      "sha": "cce20ecefc3af591ff8608dd564580fad54a2c60"
+    },
+    "styles/em-ui-tokens.css": {
+      "from": "tokens/tokens.css",
+      "sha": "27676e5a0de11fa79c5bf3f984d45928eacdf011"
+    }
+  }
+}

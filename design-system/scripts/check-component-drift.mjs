@@ -19,6 +19,7 @@ import { readFileSync, readdirSync, statSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isAdapted, hasConflictMarkers } from "../registry/_reconcile.mjs";
+import { isHeld, readManifest } from "../registry/_manifest.mjs";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repo = resolve(ds, "..");
@@ -41,9 +42,10 @@ if (existsSync(satRoot)) {
   }
 }
 
-let drifted = 0, adapted = 0, checked = 0, consumersWithCopies = 0;
+let drifted = 0, adapted = 0, held = 0, checked = 0, consumersWithCopies = 0;
 for (const root of consumers) {
   let any = false;
+  const manifest = readManifest(join(root, "src")); // E4a: fuente del `hold` (freeze declarado en el manifest)
   for (const d of ["src/components/ui", "src/components/sections"]) {
     const dir = join(root, d);
     if (!existsSync(dir)) continue;
@@ -55,11 +57,20 @@ for (const root of consumers) {
       const a = readFileSync(src, "utf8"), b = readFileSync(join(dir, f), "utf8");
       const rel = join(root, d, f).replace(repo + "/", "");
       if (a === b) continue;
-      // Marcadores de conflicto SIN resolver → falla SIEMPRE, ANTES del valve (el `@em-ui-adapted` NO los excusa;
-      // romperían el build del consumidor). El gate dedicado check-conflict-markers los caza en todo el árbol.
+      // Marcadores de conflicto SIN resolver → falla SIEMPRE, ANTES de cualquier exención (ni `@em-ui-adapted`
+      // ni `hold` los excusan; romperían el build). El gate dedicado check-conflict-markers los caza en el árbol.
       if (hasConflictMarkers(b)) {
         drifted++;
         console.error(`  [CONFLICTO] ${rel} — marcadores de conflicto git SIN resolver (resuélvelos)`);
+        continue;
+      }
+      // Exención por HOLD: una copia CONGELADA a propósito con `em-ui hold` (registrado en el manifest) queda
+      // exenta del drift, igual que `@em-ui-adapted` — es un freeze de rollout consciente (E4a). La clave del
+      // manifest es la ruta relativa al consumidor: <d sin "src/">/<fichero>.
+      const key = d.replace(/^src\//, "") + "/" + f;
+      if (isHeld(manifest.files[key])) {
+        held++;
+        console.log(`  [hold] ${rel} — congelado en el manifest (em-ui hold), drift exento`);
         continue;
       }
       const al = a.split("\n"), bl = b.split("\n");
@@ -80,7 +91,7 @@ for (const root of consumers) {
   if (any) consumersWithCopies++;
 }
 
-console.log(`\nem-ui component drift — ${checked} copia(s) revisada(s) en ${consumersWithCopies} consumidor(es); ${adapted} adaptada(s) declarada(s).`);
+console.log(`\nem-ui component drift — ${checked} copia(s) revisada(s) en ${consumersWithCopies} consumidor(es); ${adapted} adaptada(s) declarada(s), ${held} congelada(s) (hold).`);
 if (drifted) {
   console.error(`✗ check-component-drift FALLA — ${drifted} componente(s) con drift NO declarado.`);
   console.error(`  Re-pull: em-ui update <Componente> --dest <consumer>/src (adoptar la fuente),`);
