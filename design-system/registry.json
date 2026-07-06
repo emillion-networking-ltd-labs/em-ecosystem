@@ -173,6 +173,13 @@
       ]
     },
     {
+      "name": "CopyCell",
+      "type": "registry:ui",
+      "file": "components/CopyCell.tsx",
+      "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
       "name": "CopyField",
       "type": "registry:ui",
       "file": "components/CopyField.tsx",
@@ -489,6 +496,15 @@
       "type": "registry:ui",
       "file": "components/Select.tsx",
       "registryDependencies": [],
+      "internalDependencies": []
+    },
+    {
+      "name": "SettingRow",
+      "type": "registry:ui",
+      "file": "components/SettingRow.tsx",
+      "registryDependencies": [
+        "IconBadge"
+      ],
       "internalDependencies": []
     },
     {
