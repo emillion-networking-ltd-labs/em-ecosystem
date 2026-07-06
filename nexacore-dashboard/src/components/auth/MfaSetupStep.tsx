@@ -2,12 +2,13 @@
 
 import { useState, useRef, useEffect, useCallback } from "react";
 import { createPortal } from "react-dom";
-import { CircleX, Copy, Check } from "lucide-react";
+import { CircleX } from "lucide-react";
 import InfinitySpinner from "@/components/ui/InfinitySpinner";
 import AuthLayout from "@/components/layout/AuthLayout";
 import Button from "@/components/ui/Button";
 import InlineError from "@/components/ui/InlineError";
-import IconButton from "@/components/ui/IconButton";
+import QrCodeCard from "@/components/ui/QrCodeCard";
+import RecoveryCodesGrid from "@/components/ui/RecoveryCodesGrid";
 import MfaDigitInput from "@/components/ui/MfaDigitInput";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -21,8 +22,6 @@ export default function MfaSetupStep() {
   const [recoveryCodes, setRecoveryCodes] = useState<string[]>([]);
   const [code, setCode] = useState<string[]>(Array(6).fill(""));
   const [error, setError] = useState<string | null>(null);
-  const [copied, setCopied] = useState(false);
-  const [copiedSecret, setCopiedSecret] = useState(false);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const initRef = useRef(false);
 
@@ -61,18 +60,6 @@ export default function MfaSetupStep() {
     e.preventDefault();
     const full = code.join("");
     if (full.length === 6) handleVerify(full);
-  };
-
-  const copyRecoveryCodes = async () => {
-    await navigator.clipboard.writeText(recoveryCodes.join("\n"));
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const copySecret = async () => {
-    await navigator.clipboard.writeText(secret);
-    setCopiedSecret(true);
-    setTimeout(() => setCopiedSecret(false), 2000);
   };
 
   // Phase: Loading
@@ -146,41 +133,8 @@ export default function MfaSetupStep() {
           )}
 
           {qrCodeDataUrl && (
-            <div className="flex justify-center rounded-lg border border-border-default bg-white p-4">
-              {/* next/image cannot optimize data: URLs (qrcode.js output)
-                  and the size is fixed at 48×48 client-side; raw <img>
-                  is intentional. */}
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={qrCodeDataUrl}
-                alt="MFA QR Code"
-                className="h-48 w-48"
-              />
-            </div>
+            <QrCodeCard qrDataUrl={qrCodeDataUrl} secret={secret} />
           )}
-
-          {/* Manual entry fallback */}
-          <div className="flex flex-col gap-2">
-            <span className="text-body text-content-secondary">
-              Or enter this key manually:
-            </span>
-            <div className="flex h-12 items-center gap-2 rounded-lg border border-border-default bg-surface-subtle px-4">
-              <code className="flex-1 break-all font-mono text-body leading-6 text-content-primary">
-                {secret}
-              </code>
-              <IconButton
-                onClick={copySecret}
-                tooltip
-                aria-label="Copy secret key"
-              >
-                {copiedSecret ? (
-                  <Check size={14} className="text-success" />
-                ) : (
-                  <Copy size={14} />
-                )}
-              </IconButton>
-            </div>
-          </div>
 
           <div className="flex gap-2">
             <Button
@@ -221,36 +175,7 @@ export default function MfaSetupStep() {
         </div>
 
         <div className="flex w-full flex-col gap-4 md:w-[348px]">
-          <div className="rounded-lg border border-border-default bg-surface-subtle p-4">
-            <div className="grid grid-cols-2 gap-2">
-              {recoveryCodes.map((c, i) => (
-                <code
-                  key={i}
-                  className="rounded bg-surface-primary px-2 py-1 text-center font-mono text-body text-content-primary dark:bg-surface-inverse/10"
-                >
-                  {c}
-                </code>
-              ))}
-            </div>
-          </div>
-
-          <Button
-            type="button"
-            variant="outline"
-            onClick={copyRecoveryCodes}
-            fullWidth={false}
-            className="mx-auto"
-          >
-            {copied ? (
-              <>
-                <Check size={16} className="text-success" /> Copied!
-              </>
-            ) : (
-              <>
-                <Copy size={16} /> Copy all codes
-              </>
-            )}
-          </Button>
+          <RecoveryCodesGrid codes={recoveryCodes} />
 
           <div className="flex gap-2">
             <Button
