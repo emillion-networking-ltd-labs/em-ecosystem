@@ -4,6 +4,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync } from "node:fs";
 import { dirname, join, resolve, basename } from "node:path";
 import { fileURLToPath } from "node:url";
+import { isAdapted } from "./_reconcile.mjs";
 
 // em-ui vive en design-system/registry/ → la fuente (design-system/) es el directorio padre.
 const DS = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -38,22 +39,53 @@ function destPathFor(srcRel, destSrc) {
   die(`ruta de fuente no mapeable: ${srcRel}`);
 }
 
-function copyInto(name, destSrc, { overwrite }) {
+// add    → no sobrescribe (copia solo lo que falta).
+// update → RECONCILE por-fichero con guard (ECO-144, design-propagation Fase 1): reemplaza el `copyFileSync`
+//          ciego que destruía las adaptaciones declaradas del consumidor. NUNCA pisa un `@em-ui-adapted` sin
+//          `--force`; sí adopta el DS cuando el consumidor tiene drift SIN declarar (catch-up de stale).
+function copyInto(name, destSrc, { update, force }) {
   const closure = [...resolveClosure(name)];
   const written = [];
+  const seenDest = new Set(); // dedup por ruta DESTINO (lib/utils.ts llega desde varios items pero aterriza una vez)
+  let blocked = 0;
   for (const cname of closure) {
     const item = byName[cname];
     const files = [item.file, ...item.internalDependencies];
     for (const f of files) {
       const from = join(DS, f);
       const to = destPathFor(f, destSrc);
-      if (existsSync(to) && !overwrite) { written.push(`= ${to} (ya existe, sin tocar)`); continue; }
-      mkdirSync(dirname(to), { recursive: true });
-      copyFileSync(from, to);
-      written.push(`${overwrite ? "↻" : "+"} ${to}`);
+      if (seenDest.has(to)) continue;
+      seenDest.add(to);
+
+      if (!existsSync(to)) { // nuevo: escribe (add y update por igual)
+        mkdirSync(dirname(to), { recursive: true });
+        copyFileSync(from, to);
+        written.push(`+ ${to} (nuevo)`);
+        continue;
+      }
+      if (!update) { written.push(`= ${to} (ya existe, sin tocar)`); continue; }
+
+      // update: guard por-fichero (stateless: lee fuente + copia + marcador de cabecera).
+      const src = readFileSync(from, "utf8");
+      const mine = readFileSync(to, "utf8");
+      if (src === mine) {
+        written.push(`= ${to} (idéntico)`);
+      } else if (isAdapted(mine)) {
+        if (force) {
+          copyFileSync(from, to);
+          written.push(`↻ ${to} (--force: @em-ui-adapted DESCARTADO)`);
+        } else {
+          written.push(`⊘ ${to} (@em-ui-adapted: NO tocado — back-portea la mejora al DS, o --force para adoptarlo)`);
+          blocked++;
+        }
+      } else {
+        // divergencia SIN declarar → stale/accidental → catch-up: adopta el DS (propósito original de `update`).
+        copyFileSync(from, to);
+        written.push(`↻ ${to} (drift no declarado → adoptado del DS)`);
+      }
     }
   }
-  return written;
+  return { written, blocked };
 }
 
 const cmd = process.argv[2];
@@ -66,10 +98,16 @@ if (cmd === "list") {
 } else if (cmd === "add" || cmd === "update") {
   const name = process.argv[3];
   const destSrc = resolve(arg("--dest") || die("falta --dest <consumer-src-dir>"));
-  if (!name) die(`uso: em-ui ${cmd} <Componente> --dest <src>`);
-  const written = copyInto(name, destSrc, { overwrite: cmd === "update" });
+  if (!name) die(`uso: em-ui ${cmd} <Componente> --dest <src> [--force]`);
+  const force = process.argv.includes("--force");
+  const { written, blocked } = copyInto(name, destSrc, { update: cmd === "update", force });
   console.log(`em-ui ${cmd} ${name} (cierre: ${[...resolveClosure(name)].join(", ")})`);
   written.forEach((w) => console.log("  " + w));
+  if (blocked > 0) {
+    console.error(`\nem-ui update: ${blocked} fichero(s) @em-ui-adapted NO tocados (adaptación protegida).`);
+    console.error(`  Resuélvelos: back-portea la mejora del DS a la adaptación a mano, o corre con --force (PERDERÁS la adaptación).`);
+    process.exit(3);
+  }
 } else if (cmd === "diff") {
   const name = process.argv[3];
   const target = arg("--target") || die("falta --target <fichero-del-consumidor>");
@@ -123,7 +161,7 @@ if (cmd === "list") {
 uso:
   em-ui list                              lista componentes y sus deps
   em-ui add <C> --dest <src>              copia C (+deps) al consumidor (no sobrescribe)
-  em-ui update <C> --dest <src>           re-pull de C (+deps), reconciliando (sobrescribe)
+  em-ui update <C> --dest <src> [--force] re-pull de C (+deps), reconciliando: NO pisa @em-ui-adapted (salvo --force)
   em-ui diff <C> --target <fichero>       muestra drift del consumidor vs la fuente
   em-ui init --dest <src>                 instala la capa de tokens (baseline) en el consumidor
   em-ui brand --name <m> --dest <src>     instala la capa de override de marca [data-brand]`);
