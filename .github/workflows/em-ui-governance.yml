@@ -1,14 +1,16 @@
 # ============================================================================
-# em-ui governance — drift + component-drift + conflict-markers (ECO-144, design-propagation Fase 1)
+# em-ui governance — cadena `npm run governance` (drift + component-drift + manifest + conflict-markers +
+# raw-color) sobre rutas de consumidor (ECO-144, design-propagation Fase 1; +manifest E4a ECO-152)
 # ============================================================================
 # Cierra la brecha del gate: los checks de gobernanza de em-ui (que la copia de cada consumidor es fiel a la
-# fuente + que ningún fichero lleva marcadores de conflicto) SOLO corrían en `design-system/**` (workflow del
-# Storybook). Un PR que toca SOLO un consumidor (satélite/dashboard) no los ejecutaba → una copia stale o un
-# merge a medias podía colarse. Este workflow los corre TAMBIÉN sobre las rutas de consumidor.
+# fuente, que su manifest está completo/íntegro, y que ningún fichero lleva marcadores de conflicto) SOLO
+# corrían en `design-system/**` (workflow del Storybook). Un PR que toca SOLO un consumidor (satélite/dashboard)
+# no los ejecutaba → una copia stale, un manifest desincronizado o un merge a medias podía colarse. Este
+# workflow corre la cadena `governance` completa TAMBIÉN sobre las rutas de consumidor y el manifest.
 #
-# Ligero: los 3 gates son node stdlib puro (+ registry/_reconcile.mjs), sin deps → no hace `npm ci` ni build.
-# Complementa (no reemplaza) al workflow del Storybook, que sigue corriendo la cadena `coverage` completa en
-# cambios del DS.
+# Ligero: los gates son node stdlib puro (+ registry/_reconcile.mjs + registry/_manifest.mjs), sin deps → no
+# hace `npm ci` ni build. Complementa (no reemplaza) al workflow del Storybook, que sigue corriendo la cadena
+# `coverage` completa en cambios del DS.
 # ============================================================================
 
 name: em-ui governance
@@ -20,9 +22,11 @@ on:
       - "satellites/**"
       - "nexacore-dashboard/src/**"
       - "nexacore-api/src/**"
+      - "**/em-ui.manifest.json"
       - "design-system/registry/**"
       - "design-system/scripts/check-drift.mjs"
       - "design-system/scripts/check-component-drift.mjs"
+      - "design-system/scripts/check-manifest.mjs"
       - "design-system/scripts/check-conflict-markers.mjs"
       - ".github/workflows/em-ui-governance.yml"
   workflow_dispatch:
@@ -44,6 +48,6 @@ jobs:
         with:
           node-version: "22"
 
-      - name: em-ui governance gates (drift + component-drift + conflict-markers)
+      - name: em-ui governance gates (npm run governance — drift + component-drift + manifest + conflict-markers + raw-color)
         working-directory: design-system
         run: npm run governance
