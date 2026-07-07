@@ -268,9 +268,10 @@ jobs:
     name: Satellite visual regression
     runs-on: ubuntu-latest
     needs: [discover-satellites-vrt]
-    # ECO-38: corre solo si hay satélites Y el PR los toca (o es captura por dispatch);
-    # así no se malgastan runs en PRs ajenas. (No es required.)
-    if: ${{ needs.discover-satellites-vrt.outputs.satellites != '[]' && (needs.discover-satellites-vrt.outputs.changed == 'true' || github.event_name == 'workflow_dispatch') }}
+    # ECO-157 (E4c): el job corre SIEMPRE que haya satélites (para reportar en CADA PR → requerible vía el
+    # agregador `Satellite visual regression (all)`); los pasos PESADOS hacen green-skip cuando el PR no toca
+    # satélites (patrón ECO-38 del dashboard). Empty fleet → job skipped → el agregador lo trata como pass.
+    if: ${{ needs.discover-satellites-vrt.outputs.satellites != '[]' }}
     strategy:
       fail-fast: false
       matrix:
@@ -282,7 +283,10 @@ jobs:
         with:
           fetch-depth: 0
 
+      # ECO-157: los pasos pesados corren solo si el PR toca satélites (o es captura por dispatch); si no,
+      # green-skip → la pata del matrix termina SUCCESS y el agregador queda verde sin bloquear PRs ajenas.
       - name: Setup Node.js
+        if: ${{ (github.event_name == 'pull_request' && needs.discover-satellites-vrt.outputs.changed == 'true') || github.event_name == 'workflow_dispatch' }}
         uses: actions/setup-node@v6
         with:
           node-version: "22"
@@ -290,6 +294,7 @@ jobs:
           cache-dependency-path: ${{ matrix.satellite }}/package-lock.json
 
       - name: Resolve dev port
+        if: ${{ (github.event_name == 'pull_request' && needs.discover-satellites-vrt.outputs.changed == 'true') || github.event_name == 'workflow_dispatch' }}
         id: port
         working-directory: ${{ matrix.satellite }}
         run: |
@@ -300,10 +305,12 @@ jobs:
           echo "satellite ${{ matrix.satellite }} -> port $PORT"
 
       - name: Install dependencies
+        if: ${{ (github.event_name == 'pull_request' && needs.discover-satellites-vrt.outputs.changed == 'true') || github.event_name == 'workflow_dispatch' }}
         working-directory: ${{ matrix.satellite }}
         run: npm ci
 
       - name: Install Playwright + Chromium
+        if: ${{ (github.event_name == 'pull_request' && needs.discover-satellites-vrt.outputs.changed == 'true') || github.event_name == 'workflow_dispatch' }}
         working-directory: ${{ matrix.satellite }}
         run: npx playwright install chromium --with-deps
 
@@ -362,7 +369,7 @@ jobs:
           git push origin HEAD:${{ github.ref_name }}
 
       - name: Run VRT + a11y against committed baseline (PR)
-        if: github.event_name == 'pull_request'
+        if: ${{ github.event_name == 'pull_request' && needs.discover-satellites-vrt.outputs.changed == 'true' }}
         working-directory: ${{ matrix.satellite }}
         env:
           VRT: "1"
@@ -393,3 +400,27 @@ jobs:
           name: playwright-test-results-satellite-${{ github.event.pull_request.number }}
           path: ${{ matrix.satellite }}/test-results/
           retention-days: 14
+
+  # ==========================================================================
+  # ECO-157 (E4c): agregador de nombre ESTÁTICO del VRT de satélite — la guardia de propagación REQUIRED.
+  # Los nombres del matrix son DINÁMICOS (incluyen el dir del satélite) → no se pueden requerir directamente
+  # (un satélite nuevo mintaría un required-context ausente que bloquearía TODO PR). Este job de nombre fijo
+  # hace roll-up de TODAS las patas → UN context estático requerible que aparece en CADA PR. Modelo del
+  # Security Gate (All Checks), pero FAIL-ONLY: falla SOLO en failure/cancelled; pasa en success Y en skipped
+  # (fleet vacía → matrix skipped → NO bloquear). Copiarlo del `!= success` de security.yml brickearía main.
+  # ==========================================================================
+  satellite-vrt-gate:
+    name: Satellite visual regression (all)
+    runs-on: ubuntu-latest
+    needs: [visual-regression-satellite]
+    if: ${{ always() && github.event_name == 'pull_request' }}
+    steps:
+      - name: Roll up satellite VRT matrix (fail-only)
+        run: |
+          R="${{ needs.visual-regression-satellite.result }}"
+          echo "Satellite VRT matrix result: $R"
+          if [ "$R" = "failure" ] || [ "$R" = "cancelled" ]; then
+            echo "::error::Satellite visual regression falló en al menos un satélite (visual o a11y). Revisa las patas del matrix + los artefactos de diff."
+            exit 1
+          fi
+          echo "✓ Satellite VRT OK (result=$R: success o skipped — green-skip en PR ajeno / fleet vacía)."

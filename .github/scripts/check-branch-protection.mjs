@@ -22,11 +22,26 @@ import { execFileSync } from "node:child_process";
 //                                    capa en rojo → un solo required cubre las 5 capas y resiste renombres.
 //   - Dashboard visual regression  → visual-regression.yml, SIN paths-filter a propósito (ECO-38): corre
 //                                    siempre (verde por skip) → seguro de requerir.
+//   - Satellite visual regression (all) → visual-regression.yml (ECO-157/E4c): agregador de nombre ESTÁTICO
+//                                    del matrix por-satélite. Los nombres del matrix son DINÁMICOS (incluyen el
+//                                    dir del satélite) → NO requeribles directamente. needs:+result FAIL-ONLY
+//                                    (falla en failure/cancelled, pasa en success Y skipped) → un context cubre
+//                                    toda la flota, verde por green-skip en PRs ajenas. La guardia de propagación.
+//   - Conflict markers             → conflict-markers.yml (ECO-157/E4c): always-run, SIN paths-filter; el
+//                                    subconjunto DETERMINISTA-y-DURO (un marcador de conflicto git rompe el
+//                                    build) que complementa el reporter de flota advisory de E4b, para no
+//                                    endurecer solo la señal flaky (VRT) y dejar la fiable en advisory.
 // Storybook (design-system-storybook.yml) queda FUERA a propósito: tiene paths-filter `design-system/**` y
 // design-system NO está en dependabot.yml → requerirlo bloquearía justo los PRs de Dependabot.
 export const EXPECTED = {
   strict: true,
-  contexts: ["gates", "Security Gate (All Checks)", "Dashboard visual regression"],
+  contexts: [
+    "gates",
+    "Security Gate (All Checks)",
+    "Dashboard visual regression",
+    "Satellite visual regression (all)",
+    "Conflict markers",
+  ],
 };
 
 /** Normaliza los contexts de un objeto de protección de GitHub (soporta el shape viejo `contexts`
