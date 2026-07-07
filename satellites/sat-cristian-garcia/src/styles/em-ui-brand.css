@@ -3,12 +3,12 @@
    check-brand-contrast valida la paleta resuelta en AMBOS temas. Migrado del fork inline (ADR-007):
    el baseline (surfaces/content/borders + fixes) llega por em-ui-tokens.css; aquí solo el delta de marca. */
 
-/* Marca — tema claro. */
+/* Marca — tema claro. (ECO-153: oro claro #8b6914 -> #7d5e11 para AA >=4.5 sobre paper #f0e9d6, era 4.20.) */
 [data-brand="cristian-garcia"] {
-  --accent: #8b6914;
+  --accent: #7d5e11;
   --accent-light: #d4a843;
   --accent-2: #d4a843;
-  --accent-dark: #8b6914;
+  --accent-dark: #7d5e11;
 
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
@@ -16,10 +16,11 @@
   --color-accent-dark: var(--accent-dark);
 }
 
-/* Marca — tema oscuro (oro más claro para fondo oscuro). */
+/* Marca — tema oscuro (oro más claro para fondo oscuro). (ECO-153: --accent #d4a843 -> #e0bc6a para AA >=4.5
+   al ~75% de opacidad sobre #272727, era 4.46; --accent-light sube a #e8c674 para seguir por encima del accent.) */
 .dark[data-brand="cristian-garcia"] {
-  --accent: #d4a843;
-  --accent-light: #e0bc6a;
+  --accent: #e0bc6a;
+  --accent-light: #e8c674;
 
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
