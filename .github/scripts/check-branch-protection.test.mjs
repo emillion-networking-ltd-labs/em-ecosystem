@@ -36,7 +36,10 @@ test("falta Security Gate → deriva (esto es lo que dejó pasar #515/#516)", ()
   const drifted = {
     required_status_checks: {
       strict: true,
-      checks: [{ context: "gates" }, { context: "Dashboard visual regression" }],
+      // Todos los EXPECTED salvo Security Gate → solo ese debe faltar (robusto a añadir más contexts).
+      checks: EXPECTED.contexts
+        .filter((c) => c !== "Security Gate (All Checks)")
+        .map((context) => ({ context })),
     },
   };
   const problems = findDrift(drifted);
@@ -52,11 +55,11 @@ test("strict:false → deriva (permite mergear sobre base desactualizada)", () =
   assert.ok(problems.some((p) => /strict/.test(p)));
 });
 
-test("solo `gates` (la config REAL que teníamos) → deriva por Security Gate + Dashboard VRT", () => {
+test("solo `gates` (la config REAL que teníamos) → deriva por strict + todos los demás required", () => {
   const legacy = { required_status_checks: { strict: false, contexts: ["gates"] } };
   const problems = findDrift(legacy);
-  // strict + los 2 checks que faltan = 3 problemas.
-  assert.equal(problems.length, 3);
+  // strict:false (1) + los (EXPECTED.contexts - "gates") que faltan.
+  assert.equal(problems.length, 1 + (EXPECTED.contexts.length - 1));
 });
 
 test("sin required_status_checks → deriva", () => {

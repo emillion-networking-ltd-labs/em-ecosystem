@@ -1,0 +1,38 @@
+# ============================================================================
+# Conflict markers — gate REQUIRED always-run (ECO-157, design-propagation E4c).
+# ============================================================================
+# Endurece el subconjunto DETERMINISTA de la señal de propagación: un marcador de conflicto git sin resolver
+# (<<<<<<<, |||||||, =======, >>>>>>>) committeado en CUALQUIER árbol (DS o consumidor) rompe el build → debe
+# BLOQUEAR el merge, no solo avisar. El reporter de flota de E4b (check-fleet-report) es advisory; esto es su
+# complemento determinista-y-DURO, que corrige la inversión de fiabilidad de hacer required solo el VRT flaky
+# (E4c): la señal más fiable también bloquea.
+#
+# Corre en CADA PR a main (SIN paths-filter, a propósito) → aparece siempre → requerible en la branch
+# protection (check-branch-protection.mjs EXPECTED.contexts). Node stdlib puro (+ registry/_reconcile.mjs),
+# sin `npm ci` ni build → barato (~20s). El escaneo es tree-wide, así que correrlo en todo PR es correcto.
+# ============================================================================
+name: Conflict markers
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  conflict-markers:
+    name: Conflict markers
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR / branch
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22"
+
+      - name: check-conflict-markers (todo el árbol — DS + consumidores)
+        working-directory: design-system
+        run: node scripts/check-conflict-markers.mjs
