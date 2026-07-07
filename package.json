@@ -5,7 +5,7 @@
   "description": "EM Ecosystem monorepo root — git hooks and workspace tooling",
   "scripts": {
     "prepare": "husky",
-    "lint:api": "cd nexacore-api && npx eslint \"{src}/**/*.ts\" --no-fix",
+    "lint:api": "cd nexacore-api && npx eslint \"src/**/*.ts\" --no-fix",
     "lint:dashboard": "cd nexacore-dashboard && npm run lint",
     "test:api": "cd nexacore-api && npm test",
     "test:dashboard": "cd nexacore-dashboard && npm test",
