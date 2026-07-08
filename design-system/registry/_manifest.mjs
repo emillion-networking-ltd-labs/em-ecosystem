@@ -14,12 +14,17 @@
 // check-fleet-report, para que reporter y gate tampoco discrepen sobre el estado de sync de la flota.
 
 import { createHash } from "node:crypto";
-import { readFileSync, writeFileSync, existsSync, readdirSync, statSync } from "node:fs";
-import { join, basename } from "node:path";
+import { readFileSync, writeFileSync, existsSync, readdirSync, statSync, mkdirSync } from "node:fs";
+import { join, basename, dirname } from "node:path";
 import { isAdapted, hasConflictMarkers } from "./_reconcile.mjs";
 
 export const MANIFEST_NAME = "em-ui.manifest.json";
 export const MANIFEST_VERSION = 1;
+// ECO-158 (reconcile): almacén de bases por-consumidor, content-addressed por git blob sha. Guarda los BYTES de
+// la versión del DS de la que salió cada copia (la BASE del merge a 3 bandas), que el manifest NO guarda (solo
+// el sha). Path FUERA de src/ → invisible a check-conflict-markers/check-component-drift (escanean por extensión
+// de código bajo src/). `git merge-file` necesita el CONTENIDO de la base, no solo su sha.
+export const BASE_STORE = ".em-ui/base";
 // La capa de tokens (em-ui init) no pasa por destRelFor: init la escribe a mano a styles/em-ui-tokens.css.
 export const TOKENS_DEST = "styles/em-ui-tokens.css";
 
@@ -96,12 +101,44 @@ export function writeManifest(destSrc, manifest) {
   writeFileSync(manifestPath(destSrc), JSON.stringify(out, null, 2) + "\n");
 }
 
-// Upsert de una entrada: registra `from` + el blob-sha de la fuente ACTUAL, preservando `hold` si estaba.
-// `absFrom` es la ruta absoluta a la fuente del DS. Lee bytes (Buffer) para el sha byte-exacto.
-export function recordEntry(manifest, key, srcRel, absFrom) {
-  const sha = blobSha(readFileSync(absFrom));
+// --- almacén de bases (ECO-158, reconcile) ---
+
+export function baseStorePath(destSrc, sha) {
+  return join(destSrc, BASE_STORE, sha);
+}
+
+// Persiste los bytes de la base bajo su sha (content-addressed → idempotente, auto-dedup). No hace IO si ya está.
+export function storeBase(destSrc, sha, buf) {
+  const p = baseStorePath(destSrc, sha);
+  if (existsSync(p)) return;
+  mkdirSync(dirname(p), { recursive: true });
+  writeFileSync(p, buf);
+}
+
+// Materializa los BYTES de la base para un merge a 3 bandas. Cadena: (1) store → (2) si la base sigue siendo la
+// fuente DS actual (`blobSha(DS)===sha`) usa el DS → (3) null (irrecuperable → el caller REHÚSA, degrada a SKIP;
+// nunca adivina una base). Pull-only, solo lee.
+export function materializeBase(destSrc, sha, absFrom) {
+  const p = baseStorePath(destSrc, sha);
+  if (existsSync(p)) return readFileSync(p);
+  if (absFrom && existsSync(absFrom) && blobSha(readFileSync(absFrom)) === sha) return readFileSync(absFrom);
+  return null;
+}
+
+// Upsert de una entrada: registra `from` + el blob-sha de la fuente ACTUAL, preservando `hold` si estaba, y
+// PERSISTE los bytes de la base en el store del consumidor (para el merge a 3 bandas de ECO-158). `absFrom` es
+// la ruta absoluta a la fuente del DS; `destSrc` es la raíz del consumidor (si se pasa, se puebla el store).
+export function recordEntry(manifest, key, srcRel, absFrom, destSrc) {
+  const buf = readFileSync(absFrom);
+  const sha = blobSha(buf);
   const prevHold = isHeld(manifest.files[key]);
   manifest.files[key] = prevHold ? { from: srcRel, sha, hold: true } : { from: srcRel, sha };
+  // Store la base SOLO para copias @em-ui-adapted — son las únicas que pueden ir a un merge a 3 bandas. Las
+  // no-adaptadas tienen base==DS (materializeBase las recupera del DS) → no gastar bytes duplicando la fuente.
+  if (destSrc && key) {
+    const copyPath = join(destSrc, key);
+    if (existsSync(copyPath) && isAdapted(readFileSync(copyPath, "utf8"))) storeBase(destSrc, sha, buf);
+  }
 }
 
 // Valida el manifest de UN consumidor contra las fuentes del DS. Devuelve una lista de violaciones (strings

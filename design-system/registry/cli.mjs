@@ -4,7 +4,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { isAdapted } from "./_reconcile.mjs";
+import { isAdapted, hasConflictMarkers } from "./_reconcile.mjs";
 import {
   destRelFor,
   governedSources,
@@ -17,7 +17,10 @@ import {
   discoverConsumers,
   fleetStatus,
   STATUS,
+  blobSha,
+  materializeBase,
 } from "./_manifest.mjs";
+import { reconcileMerge } from "./_merge.mjs";
 
 // em-ui vive en design-system/registry/ → la fuente (design-system/) es el directorio padre.
 const DS = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -55,7 +58,7 @@ function destPathFor(srcRel, destSrc) {
 // update → RECONCILE por-fichero con guard (ECO-144, design-propagation Fase 1): reemplaza el `copyFileSync`
 //          ciego que destruía las adaptaciones declaradas del consumidor. NUNCA pisa un `@em-ui-adapted` sin
 //          `--force`; sí adopta el DS cuando el consumidor tiene drift SIN declarar (catch-up de stale).
-function copyInto(name, destSrc, { update, force }) {
+function copyInto(name, destSrc, { update, force, merge }) {
   const closure = [...resolveClosure(name)];
   const written = [];
   const seenDest = new Set(); // dedup por ruta DESTINO (lib/utils.ts llega desde varios items pero aterriza una vez)
@@ -75,7 +78,7 @@ function copyInto(name, destSrc, { update, force }) {
         mkdirSync(dirname(to), { recursive: true });
         copyFileSync(from, to);
         written.push(`+ ${to} (nuevo)`);
-        recordEntry(manifest, key, f, from);
+        recordEntry(manifest, key, f, from, destSrc);
         continue;
       }
       if (!update) { written.push(`= ${to} (ya existe, sin tocar)`); continue; }
@@ -92,14 +95,44 @@ function copyInto(name, destSrc, { update, force }) {
       const mine = readFileSync(to, "utf8");
       if (src === mine) {
         written.push(`= ${to} (idéntico)`);
-        recordEntry(manifest, key, f, from); // base = DS actual (idéntico) → crea/refresca la entrada
+        recordEntry(manifest, key, f, from, destSrc); // base = DS actual (idéntico) → crea/refresca la entrada
       } else if (isAdapted(mine)) {
+        const entry = manifest.files[key];
         if (force) {
           copyFileSync(from, to);
           written.push(`↻ ${to} (--force: @em-ui-adapted DESCARTADO)`);
-          recordEntry(manifest, key, f, from);
+          recordEntry(manifest, key, f, from, destSrc);
+        } else if (merge) {
+          // ECO-158: reconcile a 3 bandas — conserva la adaptación Y aplica el delta del DS (base→ours).
+          if (hasConflictMarkers(mine)) {
+            // Marcadores sin resolver de un merge previo → NO re-mergear (anidaría). Resolver primero.
+            written.push(`⊘ ${to} (@em-ui-adapted con marcadores de conflicto SIN resolver — resuélvelos primero)`);
+            blocked++;
+          } else if (blobSha(Buffer.from(mine)) === entry?.sha) {
+            // La copia == su base (declarada adaptada, sin cambios reales) → nada que conservar → adopta el DS.
+            copyFileSync(from, to);
+            written.push(`↻ ${to} (@em-ui-adapted == base: sin cambios reales → adoptado del DS)`);
+            recordEntry(manifest, key, f, from, destSrc);
+          } else {
+            const baseBuf = materializeBase(destSrc, entry?.sha, from);
+            if (!baseBuf) {
+              // Base irrecuperable → REHÚSA (nunca adivina base ni 2-way silencioso): degrada a SKIP+bloqueo.
+              written.push(`⊘ ${to} (@em-ui-adapted, base irrecuperable → NO fusionado; re-pin al DS o --force)`);
+              blocked++;
+            } else {
+              const { clean, merged } = reconcileMerge(baseBuf.toString("utf8"), mine, src);
+              writeFileSync(to, merged);
+              if (clean) {
+                written.push(`⇄ ${to} (merge 3-way LIMPIO: adaptación conservada + DS aplicado)`);
+                recordEntry(manifest, key, f, from, destSrc); // avanza la base al DS nuevo (idempotente)
+              } else {
+                written.push(`⊘ ${to} (merge con CONFLICTO: marcadores escritos — resuélvelos y \`em-ui pin\`)`);
+                blocked++; // conflicto = bloqueo (exit 3); NO avanza la base hasta resolver
+              }
+            }
+          }
         } else {
-          written.push(`⊘ ${to} (@em-ui-adapted: NO tocado — back-portea la mejora al DS, o --force para adoptarlo)`);
+          written.push(`⊘ ${to} (@em-ui-adapted: NO tocado — --merge para reconciliar, back-portea al DS, o --force)`);
           blocked++;
           // NO se registra: no adoptamos la fuente → la base declarada no cambia.
         }
@@ -107,7 +140,7 @@ function copyInto(name, destSrc, { update, force }) {
         // divergencia SIN declarar → stale/accidental → catch-up: adopta el DS (propósito original de `update`).
         copyFileSync(from, to);
         written.push(`↻ ${to} (drift no declarado → adoptado del DS)`);
-        recordEntry(manifest, key, f, from);
+        recordEntry(manifest, key, f, from, destSrc);
       }
     }
   }
@@ -135,7 +168,8 @@ if (cmd === "list") {
   const destSrc = resolve(arg("--dest") || die("falta --dest <consumer-src-dir>"));
   if (!name) die(`uso: em-ui ${cmd} <Componente> --dest <src> [--force]`);
   const force = process.argv.includes("--force");
-  const { written, blocked } = copyInto(name, destSrc, { update: cmd === "update", force });
+  const merge = cmd === "update" && process.argv.includes("--merge");
+  const { written, blocked } = copyInto(name, destSrc, { update: cmd === "update", force, merge });
   console.log(`em-ui ${cmd} ${name} (cierre: ${[...resolveClosure(name)].join(", ")})`);
   written.forEach((w) => console.log("  " + w));
   if (blocked > 0) {
@@ -172,7 +206,7 @@ if (cmd === "list") {
   mkdirSync(dirname(to), { recursive: true });
   copyFileSync(join(DS, REGISTRY.tokens), to);
   const manifest = readManifest(destSrc); // E4a: registra la base de la capa de tokens
-  recordEntry(manifest, TOKENS_DEST, REGISTRY.tokens, join(DS, REGISTRY.tokens));
+  recordEntry(manifest, TOKENS_DEST, REGISTRY.tokens, join(DS, REGISTRY.tokens), destSrc);
   writeManifest(destSrc, manifest);
   console.log(`em-ui init: capa de tokens instalada → ${to}`);
   console.log(`  Impórtala desde tu CSS global del consumidor: @import "../styles/em-ui-tokens.css";`);
@@ -223,9 +257,9 @@ if (cmd === "list") {
 
   for (const t of targets) {
     if (cmd === "pin") {
-      recordEntry(manifest, t.key, t.srcRel, t.absFrom); // upsert de la base (no copia bytes)
+      recordEntry(manifest, t.key, t.srcRel, t.absFrom, destSrc); // upsert de la base (no copia bytes)
     } else if (cmd === "hold") {
-      if (!manifest.files[t.key]) recordEntry(manifest, t.key, t.srcRel, t.absFrom); // asegura la entrada
+      if (!manifest.files[t.key]) recordEntry(manifest, t.key, t.srcRel, t.absFrom, destSrc); // asegura la entrada
       manifest.files[t.key].hold = true;
     } else { // unhold
       if (manifest.files[t.key]) delete manifest.files[t.key].hold;
@@ -281,6 +315,7 @@ uso:
   em-ui list                              lista componentes y sus deps
   em-ui add <C> --dest <src>              copia C (+deps) al consumidor (no sobrescribe)
   em-ui update <C> --dest <src> [--force] re-pull de C (+deps), reconciliando: NO pisa @em-ui-adapted (salvo --force)
+  em-ui update <C> --dest <src> --merge   reconcilia @em-ui-adapted a 3 bandas: conserva la adaptación + aplica el DS
   em-ui diff <C> --target <fichero>       muestra drift del consumidor vs la fuente
   em-ui init --dest <src>                 instala la capa de tokens (baseline) en el consumidor
   em-ui brand --name <m> --dest <src>     instala la capa de override de marca [data-brand]

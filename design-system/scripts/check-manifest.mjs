@@ -18,7 +18,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { governedSources, validateManifest, readManifest, manifestPath, MANIFEST_NAME, discoverConsumers } from "../registry/_manifest.mjs";
+import { governedSources, validateManifest, readManifest, manifestPath, MANIFEST_NAME, discoverConsumers, materializeBase } from "../registry/_manifest.mjs";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const repo = resolve(ds, "..");
@@ -43,9 +43,22 @@ for (const root of consumers) {
     violations++;
     continue;
   }
-  const problems = validateManifest(sources, destSrc, readManifest(destSrc));
+  const manifest = readManifest(destSrc);
+  const problems = validateManifest(sources, destSrc, manifest);
   for (const p of problems) console.error(`  [${rel}] ${p}`);
   violations += problems.length;
+
+  // ECO-158: completitud del almacén de bases (SOFT — NO falla el gate; el merge a 3 bandas rehúsa con gracia si
+  // falta una base). Avisa si alguna entrada no puede materializar su base (ni en el store, ni el DS coincide):
+  // esa copia no podría reconciliarse con --merge (se saltaría). Se cura con `em-ui pin` al DS actual.
+  let missingBase = 0;
+  for (const [key, entry] of Object.entries(manifest.files || {})) {
+    const s = sources.find((x) => x.key === key);
+    if (!materializeBase(destSrc, entry.sha, s ? join(ds, s.from) : null)) missingBase++;
+  }
+  if (missingBase) {
+    console.warn(`  [aviso ${rel}] ${missingBase} base(s) no materializable(s) → esas copias no reconciliarían a 3 bandas (re-pin al DS para poblar el store).`);
+  }
 }
 
 console.log(`\nem-ui manifest — ${consumersChecked} consumidor(es) con copias gobernadas revisado(s).`);
