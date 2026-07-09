@@ -17,8 +17,9 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 // Las variantes de CONTROL (no-link) son una superficie de botón; las link son texto navegable.
-const CONTROL = ["primary", "secondary", "outline", "danger"] as const;
-const LINK = ["link", "link-underline"] as const;
+// Arrays MUTABLES (no `as const`): `compoundVariants.variant` de tailwind-variants espera un array mutable.
+const CONTROL: ButtonVariant[] = ["primary", "secondary", "outline", "danger"];
+const LINK: ButtonVariant[] = ["link", "link-underline"];
 
 // Clases por eje, definidas como constantes: fuente ÚNICA del contrato `tv` (abajo) Y de `buttonSpecs`
 // (el panel de documentación del catálogo). El estilo específico de cada variante:
