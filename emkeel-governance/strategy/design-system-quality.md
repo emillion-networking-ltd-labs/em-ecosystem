@@ -1,107 +1,130 @@
 # Strategy: design-system-quality
 
-Status: DRAFT
+Status: APPROVED
 Strategy: design-system-quality   <!-- feature specs reference this with a `Strategy: design-system-quality` line -->
 Impact: high   <!-- low | medium | high — `low` lets a trivial strategy pass critiqued with 1 lens; absent = high (full ≥3-lens panel) -->
 
 ## Goal
-Definir un estándar gobernado de **construcción y calidad del design-system (la FUENTE)** — cómo se construye y
-compone cada pieza para que el DS sea **sólido, compatible con la propagación y de calidad de mercado** — más la
-**reconciliación** del DS actual a ese estándar y una **batería de gates** que lo haga no-violable. Es el espejo de
-`satellite-quality` (que gobierna el RESULTADO/web) aplicado a la fuente.
+Definir, de forma profesional y escalable, el **modelo de construcción y COMPOSICIÓN del design-system**: cómo se
+construye correctamente cada pieza (primitivo), cómo se COMPONE por referencia dentro de otras (para que un cambio
+en la base se propague), y cómo se ETIQUETA qué se mantiene fijo y qué varía según el uso — con la mejor arquitectura
+moderna, **automatizado con gates**, con **auditoría** del corpus existente y **reconstrucción** a ese estándar.
+Apunta a la versión EXCELENTE y completa (sin parches); las decisiones previas que choquen con ella son DEBATIBLES
+(se re-abren, no se parchea alrededor).
 
 ## Context
 <!-- grounded facts ONLY — cite file:line (repo) or a URL (market) for every claim -->
 
-**El problema en la FUENTE — la familia card no compone el primitivo:**
-- `ChartCard` no importa ni renderiza `<Card>`: pinta un `<div>` crudo con `rounded-xl border border-border-strong bg-surface-primary p-6` — design-system/components/ChartCard.tsx:24.
-- `QrCodeCard` es la peor divergencia: superficie hardcodeada (con `qrCodeCardSpecs` documentado) que difiere en los 4 ejes (radio 8 vs 12, border-strong vs default, surface-qr vs surface-primary, padding 16 vs 24) — design-system/components/QrCodeCard.tsx:45.
-- De toda la familia, SOLO `CardHoverEffect` compone el primitivo (`<Card size="md">`); ChartCard/MetricCard/StickyCard-flotante/QrCodeCard re-implementan la superficie → un compositor y cuatro re-implementadores — design-system/components/CardHoverEffect.tsx:13.
-- MATIZ (panel de crítica): el defecto es la NO-COMPOSICIÓN, no el borde — el borde strong de ChartCard es NORMA-conforme (StoryConventions asigna panel/widget→border-strong; ChartCard es panel-de-card para widgets) y COINCIDE con el Card DESPLEGADO del dashboard; el borde canónico sigue SIN decidir (tokens.css default vs globals.css strong). ChartCard/MetricCard/QrCode-inner/StickyCard-flotante comparten la MISMA forma AST → separar bug de variante exige el ROL ([H]). Y MetricCard usa border-default y matchea card-flat en 3/4 ejes (el fix más fácil, no una divergencia) — design-system/components/MetricCard.tsx:24.
+**El modelo de composición YA existe y en gran parte funciona:**
+- Composición por referencia real pero PARCIAL: 24 de 83 componentes importan+renderizan a un hermano (ConfirmModal→Button+IconButton, Input→IconButton+SpinnerCircle, FormField→InlineError); los otros 59 son primitivos hoja correctos → el copy-en-vez-de-componer es un subconjunto PEQUEÑO y concreto, no el grueso — design-system/components/ConfirmModal.tsx:5.
+- El "compón para que un cambio en la base se propague" YA ocurre a profundidad 3 (QrCodeCard→CopyField→Tooltip; un cambio en Tooltip sube solo) y ConfirmModal es el hub que reusa cada diálogo → un cambio en Button reestiliza todas las acciones de diálogo gratis — design-system/components/QrCodeCard.tsx:58.
+- ECO-147 es prueba de dedup-por-composición: ChartCard se extrajo porque su markup vivía copiado e inlineado idéntico en 2 charts ("un solo sitio → un cambio propaga") — design-system/components/ChartCard.tsx:5.
 
-**Ningún gate lo caza (el hueco de composición):**
-- Ninguno de los 13 gates del DS obliga ESTRUCTURA/COMPOSICIÓN; grep de card/compose/primitive/hardcoded/structure en los gates solo da comentarios incidentales — design-system/scripts/check-selection-model.mjs:8.
-- El más cercano, check-component-drift, NO lo caza: solo compara ficheros con contraparte registrada en el DS y salta cualquier componente propio del consumidor sin contraparte — design-system/scripts/check-component-drift.mjs:49.
-- check-raw-color obliga VOCABULARIO de token, no composición: una card a mano con tokens correctos pasa — design-system/scripts/check-raw-color.mjs:50.
+**El registry YA declara el grafo (lo que pedías NO falta):**
+- Cada item lleva `registryDependencies` (hermanos que compone) + `internalDependencies`, AUTO-derivados de los imports reales por build-registry.mjs, con un test anti-drift que falla CI si el grafo commiteado ≠ el recalculado — design-system/registry/build-registry.mjs:30.
+- Solo se guardan aristas directas (1 salto); la clausura transitiva se computa on-demand (resolveClosure DFS) y YA la consume la propagación (`em-ui add|update` copia C + todo lo que compone) — design-system/registry/cli.mjs:61.
+- PERO el registry NO distingue primitivo vs composite (Card hoja y ConfirmModal composite llevan el mismo `type: registry:ui`); ese split solo vive en el título de Storybook, desacoplado → no hay campo máquina-legible — design-system/registry.json:120.
 
-**El enforcement es desigual (los gates existen pero casi no bloquean):**
-- Las 13 comprobaciones se encadenan en el npm script `coverage`, sin un estándar único — design-system/package.json:11.
-- Branch-protection tiene 5 contextos REQUERIDOS (gates de gobernanza, Security Gate, Dashboard VRT, Satellite VRT, Conflict markers); pero de los 13 gates de COVERAGE del DS solo conflict-markers tiene contrapartida requerida (su propio workflow always-run) — el resto corre en el workflow no-requerido de Storybook → **12 de 13 gates de coverage no bloquean el merge** — .github/scripts/check-branch-protection.mjs:36-44.
-- El drift llega al primitivo: el dashboard define las 4 utilidades card DOS veces (slice del DS con border-default + re-declaración en globals.css con border-strong) — nexacore-dashboard/src/app/globals.css:32-58.
-- No hay doc único de "cómo se construye un componente"; las normas están dispersas (README del DS, CONTRIBUTING, Story Conventions) — design-system/README.md:1-30, CONTRIBUTING.md:52-76.
+**Los problemas reales (dónde apuntar):**
+- Copy-en-vez-de-componer produce DRIFT de token vivo: ChartCard hardcodea border-strong vs el border-default del primitivo Card; MetricCard (llamado "Card") hardcodea su superficie y nunca importa Card → un cambio en Card no les llega — design-system/components/ChartCard.tsx:24.
+- La duplicación se concentra donde NO hay primitivo: el panel de dropdown copiado byte-a-byte en 5 controles (Select/EmailSelector/LanguageSelector/SidebarNav/Breadcrumbs, no hay Popover/Menu), el tooltip de chart idéntico en 2 charts, skeletons a mano ×2 → el fix es CREAR el primitivo, no un lint — design-system/components/Select.tsx:34.
+- "Lo fijo vs lo que varía por uso" está codificado de 4 formas INCOMPATIBLES (no hay cva/tailwind-variants; solo cn()): Button/Badge mapas+template-literal crudo; Card utilidades CSS+cn(); Input ternarios inline+specs-doc; IconButton mapas+cn() — design-system/components/Button.tsx:18.
+- El contrato es inconsistente incluso donde parece compartido: `size` significa un eje distinto por primitivo (Button=escala, Input=altura, Card=radio); el TYPE de variante se declara de 3 formas; override diverge (cn() dedup via twMerge vs template-literal que solo concatena). Un consumidor NO puede asumir que 2 primitivos comparten contrato — design-system/components/Card.tsx:13.
+- Governance solo estandariza PARCIAL: check-variant-coverage exige que SI hay matriz cada clave tenga story, pero NO obliga el idioma → Card e Input quedan exentos; ningún gate obliga un único estándar fixed-core-vs-variant — design-system/scripts/check-variant-coverage.mjs:2.
 
-**Prior-art a CONSUMIR/EXTENDER (no duplicar):**
-- Ya existe y está APROBADO un "estándar de construcción" (4 ejes: organización de clases, aplicación de token, markup/composición, construcción desorganizada) dentro de design-propagation, aterrizado como extensión de StoryConventions — emkeel-governance/strategy/design-propagation.md:176-179.
-- Reencuadre: el contrato de construcción NO es el flujo de aprobación — es el estándar ESCRITO de cómo se construye correctamente un elemento (qué primitivo/markup, qué token semántico por rol, organización canónica de clases, anidamiento mínimo, sin redundancia real) — emkeel-governance/strategy/design-propagation.md:41-44.
-- Guardarraíl: el censo es CONFORMIDAD-al-estándar, no dedup ingenuo (design-propagation.md:208-212); y un gate estático que INFIERA el ROL desde el JSX es NON-GOAL explícito, DECLARADO INVIABLE (rol-equivocado = revisión de diseño) → un gate mecánico de composición da falsos positivos — emkeel-governance/strategy/design-propagation.md:220-221.
-- ADR-028 (aceptado 2026-07-05) nombra y ratifica el estándar de construcción como build-now → la nueva estrategia lo CONSUME/EXTIENDE — emkeel-governance/adr/028-mecanismo-propagacion-gobernanza-diseno.md:1.
+**El etiquetado "adaptado vs propagado" hoy es de FICHERO entero, solo DS→consumidor:**
+- `@em-ui-adapted` no aparece en NINGÚN fichero fuente del DS; es un marcador por-fichero en la copia del consumidor, identidad = git blob SHA-1 del fichero entero → no hay forma hoy de etiquetar "esta parte fija vs esta varía" DENTRO de un componente — design-system/registry/_manifest.mjs:131.
 
-**Plantilla a imitar — satellite-quality (gobierna el RESULTADO; esta es su espejo para la FUENTE):**
-- Estándar VIVO y versionado, rúbrica en CI + contrato de migración cuando sube de versión — emkeel-governance/strategy/satellite-quality.md:7.
-- Cada requisito etiquetado [M] (máquina→gate) o [H] (humano→revisión) — satellite-quality.md:22.
-- Gate consciente de versión: cada consumidor registra a qué versión se construyó; falla/warn si queda >1 major atrás → deuda VISIBLE ticketeada + "no tocar sin migrar" — satellite-quality.md:60.
-- 'Verde ≠ conformidad': el gate se auto-rotula; la certificación real es un required-check HUMANO aparte — satellite-quality.md:61.
-- Baseline antes de imponer: el artefacto existente nace en deuda ticketeada (no rojo bloqueante) — satellite-quality.md:44.
+**Mercado — el patrón profesional/escalable exacto de lo que pediste:**
+- Convergencia en el contrato de variante: cva/tailwind-variants/Stitches/Panda codifican "fixed core + lo que varía" como UN objeto (base+variants+compoundVariants+defaultVariants) y derivan el tipo TS del literal de estilo (`VariantProps`) → la declaración de estilo ES la de tipo — https://cva.style/getting-started/variants/.
+- tailwind-variants añade SLOTS (multi-parte) — una Card con header/body/actions etiqueta cada parte — y es un superset NO-BUILD de cva sobre el Tailwind actual — https://www.tailwind-variants.org/docs/slots.
+- Compose-by-reference resuelto: Radix `asChild`/Slot fusiona props+comportamiento sobre TU hijo (sin nodo wrapper, a cualquier profundidad); coste: forward ref + spread props — https://www.radix-ui.com/primitives/docs/guides/composition.
+- Propagación a escala = grafo de token/dependencia, no copia: 3 capas de Brad Frost (primitive→semantic→component) + DTCG estable 2025.10 + Nx-affected/Bit-Ripple/Changesets — https://bradfrost.com/blog/post/the-many-faces-of-themeable-design-systems/.
+- AUTOMATIZABLE: dependency-cruiser (reglas `required`) + ESLint no-restricted-syntax fuerzan "compón el primitivo, no superficie cruda" en CI — Atlassian shippea 43+ reglas en producción. Techo: el lint ve imports/AST, no el LOOK (eso lo caza VRT + humano) — https://atlassian.design/components/eslint-plugin-design-system/.
+- Precedente escalable (Spectrum/Carbon/Primer/Polaris): SEPARAN comportamiento de visual y capan bottom-up desde tokens; regla EightShapes "haz configurable lo común, componible lo poco común" (props vs slots) — https://react-aria.adobe.com/blog/introducing-react-spectrum.
 
-**Mercado:**
-- DoD de componente de IBM Carbon: ≥80% cobertura unitaria, AVT en el default y cada estado complejo, ≥1 VRT (Percy) en la story default, verificación manual con lector de pantalla — automático no basta — https://carbondesignsystem.com/contributing/component-checklist/.
-- Regla de composición de atomic design: moléculas/organismos se construyen A PARTIR de átomos ya establecidos (responsabilidad única, reutilización) — justo lo que la familia card viola — https://atomicdesign.bradfrost.com/chapter-2/.
-- La respuesta de mercado al hand-roll es una API de COMPOSICIÓN, no un lint: Radix `asChild` compone comportamiento/a11y sobre TU elemento (coste: spread props + forwardRef); shadcn = "interfaz común y componible" — https://www.radix-ui.com/primitives/docs/guides/composition.
-- Frontera [M] vs [H]: ESLint no-restricted-syntax puede prohibir por AST "div crudo, usa `<Card>`" pero es SINTAXIS no semántica; axe-core caza ~57% de WCAG → composición-estructura es [M], pero "el primitivo/rol correcto" queda [H] — https://eslint.org/docs/latest/rules/no-restricted-syntax.
-- Precedente de versión-como-software: typescript-eslint versiona en semver (endurecer regla = MAJOR) y `ng update` de Angular se niega si el consumidor está >1 major atrás — https://typescript-eslint.io/users/versioning/.
+**Migración REVISABLE sin fatiga + higiene (cómo se reconstruye limpio, no un big-bang de 83):**
+- El repo YA emite evidencia visual por-PR: la VRT (Playwright toHaveScreenshot 0.2%) es required, salta solo en PRs afectados, y en fallo sube imágenes-diff + un HTML report → el humano revisa SOLO las capturas que cambiaron; el cambio deliberado se re-basea por un workflow_dispatch manual — .github/workflows/visual-regression.yml.
+- El estado de cada copia se deriva del git-blob SHA (up-to-date/stale/adapted/drifted/conflict/held) → una ETIQUETA no puede mentir sobre los bytes; check-component-drift exige byte-identidad a la fuente salvo @em-ui-adapted — design-system/registry/_manifest.mjs:213-257, design-system/scripts/check-component-drift.mjs:1-16.
+- El auto-merge del subconjunto seguro YA existe (Dependabot patch/minor vía `gh pr merge --auto`, solo dispara con los required en verde) → se extiende a los PRs de migración byte-mecánicos VRT-verde sin que nadie pulse merge — .github/workflows/dependabot-auto-merge.yml:1-33.
+- Codemods: se audita la REGLA + sus tests UNA vez, no miles de líneas idénticas; test-first con casos negativos, dry-run, y TODO-flags para lo que el transform no sabe (nunca reescribir en silencio) — https://martinfowler.com/articles/codemods-api-refactoring.html.
+- Ratchet / bulk-suppression: un baseline de deuda que CI solo deja DECRECER (surfacea toda violación si un fichero sucio sube), en formato por-línea/TSV para migradores en paralelo sin conflictos — https://eslint.org/blog/2025/04/introducing-bulk-suppressions/, https://www.notion.com/blog/how-we-evolved-our-code-notions-ratcheting-system-using-custom-eslint-rules.
+- LEAF-FIRST + PRs apilados de 50-200 líneas, un propósito por PR (mecánico O visual, nunca mezclados), revisados de abajo-arriba — https://www.skovhus.dev/blog/moving-linear-from-styled-components-to-stylex, https://graphite.com/guides/break-up-large-pull-requests, https://medium.com/airbnb-engineering/turbocharged-javascript-refactoring-with-codemods-b0cae8b326b9.
 
 ## Options
 <!-- at least 2 real options; EVERY row MUST cite a Source (file:line or URL). `emkeel strategy check` enforces it. -->
 | # | Option | Source | Pros | Cons | Risk |
 |---|--------|--------|------|------|------|
-| 1 | **Solo-doc**: promover/extender el estándar de construcción ya ratificado (ECO-142/ADR-028) como el contrato escrito "cómo se construye un componente", aplicado SOLO en revisión humana. | emkeel-governance/strategy/design-propagation.md:176-179 | El más barato; se apoya en prior-art APROBADO sin reinventar; cero falsos positivos; respeta el non-goal de no inferir rol. | Sin enforcement — la divergencia ChartCard/QrCodeCard YA ocurrió bajo revisión-humana-sola y reincidiría en silencio; verde no significa nada. | El problema que esta estrategia existe para resolver queda sin resolver en la práctica. |
-| 2 | **Estándar vivo + gate de conformidad en CI + consciente de versión** (espejo de satellite-quality): estándar versionado con cada requisito [M]/[H], gate que marca componentes >1 major atrás como deuda ticketeada, auto-rótulo verde≠conformidad. | emkeel-governance/strategy/satellite-quality.md:7 | Simétrico con el estándar del RESULTADO ya ratificado (ADR-017); hace el drift deuda VISIBLE; baseline-como-deuda no bloquea el DS vivo; CONSUME (no duplica) el estándar de ECO-142. | Coste de construcción; hay que definir un campo-versión que el DS hoy no tiene; requiere el required-check [H] o la "certificación" no existe. | Los gates [M] cazan vocabulario/estructura pero NO la elección de rol; sin un check estructural la divergencia-card cabecera queda solo-[H]. |
-| 3 | **Gate estructural de composición** (AST tipo no-restricted-syntax) sobre el estándar vivo: prohíbe por máquina "superficie card cruda / compuesto que no compone el primitivo", con escape de divergencia DECLARADA. | https://eslint.org/docs/latest/rules/no-restricted-syntax | Caza directamente la clase ChartCard/MetricCard/QrCodeCard que todos los gates actuales pierden; convierte la evidencia central en un gate rojo. | AST es sintaxis no semántica y ECO-142 hace el rol-inferido NON-GOAL; la divergencia 4-ejes de QrCode es INTENCIONAL → necesita allowlist de divergencia o da falsos positivos. | Sobre-ajuste/falsos positivos erosionan confianza; decidir qué divergencias son bug vs variante bendecida es en sí una decisión de diseño. |
-| 4 | **Pipeline de ciclo de vida completo** (nivel Polaris/Carbon): etapas de madurez (Alpha/Beta/Stable), suelo de cobertura 80–100%, AVT + baselines VRT cableados + lector de pantalla, y codemods por cada breaking change. | https://carbondesignsystem.com/contributing/component-checklist/ | El listón de mercado más alto; codemods + gate consciente-de-versión = contrato de migración real; por fin enchufa el baseline VRT hoy solo cableado. | Pesado para un DS interno de ~80 componentes de un equipo; codemods/etapas = escalado nombrado-no-construido en la estrategia hermana (YAGNI). | Sobre-ingeniería; gran coste de tooling cuyo retorno escala con muchos consumidores que el DS aún no tiene. |
+| A | **Unificar el modelo de construcción IN-PLACE** (sin re-plataformar): adoptar tailwind-variants (superset NO-BUILD de cva) como contrato único de variante+slots para todo primitivo; extraer los primitivos que faltan (Popover/Menu, Skeleton, ChartTooltip; MetricCard/ChartCard componen Card); convertir el grafo de dependencias ya-derivado del registry en la unidad de propagación forzada + gates dependency-cruiser/ESLint. | https://www.tailwind-variants.org/docs/slots | Se queda dentro del invariante pull/copia (no re-abre ADR-006/007); el registry YA trae el grafo + test anti-drift; tailwind-variants no añade build; colapsa los 4 idiomas en 1; gates probados (Atlassian 43+). Mata el drift-por-copia dando un primitivo a cada superficie duplicada. | Migra ~83 primitivos de 4 idiomas a 1 (churn); tailwind-variants sigue siendo string-builder, no single-source compilado; el tagging queda a nivel componente/slot, no diff-por-elemento; sin semver por-componente. | med |
+| B | **Plataforma completa** (el extremo máximo-escalable): re-plataformar tokens a DTCG compilado por Style Dictionary (marca=modo); componentes sobre Panda slot-recipes (build-time) sobre el grafo 3-tier; SEPARAR comportamiento de visual con capa headless (Radix/React Aria); shippear el DS como paquete semver/registry con Changesets + Nx-affected reconstruyendo cada consumidor; lifecycle de madurez tipo Primer. | https://panda-css.com/docs/concepts/recipes | El modelo estándar-industria más escalable a muchos satélites; single-source compilado real; semver=rollout controlado; marca-como-modo multi-brand; a11y/i18n resuelto una vez; DTCG ya es estable (2025.10). | Un paquete compilado quita la capa "posee-tu-copia" del satélite → contradice ADR-006/007/027/028; dispara el DTCG EARLY (design-tokens lo difiere a ≥3-4 consumidores; hoy=2); re-plataforma pesada + build step. | high |
+| C | **RECOMENDADA — el mejor modelo de composición YA, y debatir los candados de DISTRIBUCIÓN en carril aparte** (no dejar que lo capen): contrato de variante tipado+slots, extraer todo primitivo que falta, grafo 3-tier de tokens, capa headless donde la a11y pesa, el grafo del registry como unidad de propagación forzada (VRT de clausura afectada + gates), y un CENSO de todo el corpus que clasifica cada elemento contra el estándar (forward+backward = auditoría+reconstrucción). RE-ABRIR explícitamente los locks copy-by-value/DTCG/fase-del-gate como debate de estrategia propio, sin bloquear el rebuild en ellos. | emkeel-governance/strategy/design-propagation.md:181 | Entrega "la mejor versión" sin apostar toda la re-plataforma de distribución en un paso; el contrato+grafo+extracción valen bajo CUALQUIER modelo de distribución; NOMBRA los candados a debatir en vez de parchear alrededor (honra "re-abrir, no parchear"); el censo da auditoría + reconstrucción repetible. | Dos carriles coordinados (rebuild + debate de distribución); el tagging por-parte queda diferido salvo que el debate re-abra la fase; riesgo de que el modelo se adelante a la decisión de distribución. | med |
+| D | **FOIL / mínimo (lo que el operador RECHAZA)**: estándar de construcción escrito (extensión de StoryConventions) + barrido de auditoría + censo en modo REPORT; sin lib de variantes, sin extraer primitivos, sin re-abrir ADRs. | emkeel-governance/strategy/design-propagation.md:176 | El más barato; sin dependencia nueva; sin re-abrir ADRs; la auditoría es útil ya. | Es el MÍNIMO que el operador rechaza: sobreviven los 4 idiomas, sin contrato único, sin primitivo para los clusters de duplicación, tagging whole-file, y el drift-por-copia solo se REPORTA, nunca se previene. No entrega "lo mejor/escalable". | low |
 
 ## Recommendation
-**Reencuadrada tras el panel adversarial (6 lentes, todos must-fix).** La recomendación original (Opción 2+3:
-estándar vivo + gate estructural build-now + consciente de versión) NO sobrevive la crítica:
-- **El gate AST de composición (Opción 3) es INVIABLE:** casa tipos de nodo, no valores de className, y no ve
-  `TemplateLiteral` ni `cn()`/`clsx` — así está escrito ChartCard.tsx:24 y el propio `Card` (cn()); perdería la
-  evidencia central + 264 sitios con la utilidad opaca `card`, y daría ~90% falsos positivos sobre ~110 paneles
-  no-card (Tooltip/ConfirmModal/dropdowns/DataTable/Avatar) — https://eslint.org/docs/latest/rules/no-restricted-syntax.
-- **Separar "bug" de "variante" exige el ROL** (card vs panel/widget), que ADR-028 ya declaró INVIABLE por máquina
-  y reservó a revisión [H] scale-gated (design-propagation.md:220-221) → un gate build-now bloqueante RE-DECIDE la
-  fase de ADR-028 (necesitaría un ADR que enmiende, no "consume/extend").
-- **La maquinaria consciente-de-versión (Opción 2) es un ESPEJO FALSO:** `satellite-quality` la justifica por una
-  flota federada; el DS es 1 repo/1 equipo/1 build, sin flota que versionar, y la version-awareness ya existe una
-  capa abajo (`em-ui.manifest.json`, SHAs por fichero) → YAGNI, lo dispara el propio kill-criterion.
+**Reencuadrada tras el panel adversarial (6 lentes, 5 must-fix).** El panel prueba que la "Opción C limpia"
+(composición ahora, distribución en carril aparte) NO se sostiene, y que faltaba el listón de calidad. La
+recomendación honesta es **C-ACOPLADA**: un programa de 3 pilares coordinados, sin diferir lo que pediste.
 
-**Recomendación calibrada — lo defendible que de verdad mueve la aguja:**
-1. **Decidir PRIMERO la superficie canónica de card** (borde default vs strong; roles card vs panel/widget) — es
-   decisión de diseño [H] (coordinar con `design-tokens` + StoryConventions), porque "componer `<Card>`" está
-   INDEFINIDO hasta decidirla (tokens.css=default vs globals.css=strong; ChartCard border-strong es norma-conforme).
-   Desbloquea la deuda de la familia card.
-2. **CONSUMIR el estándar de construcción ya ratificado** (ECO-142/ADR-028) como el contrato ESCRITO [H] (rol,
-   composición, organización de clases) — sin re-decidir su fase (design-propagation.md:176-179).
-3. **Arreglar el ENFORCEMENT (la palanca real y barata):** subir a contextos REQUERIDOS los gates [M] FACTIBLES
-   que ya existen y hoy corren en el workflow no-requerido de Storybook (raw-color, story-norm, coverage, selección,
-   contraste). NO re-litiga ADR-028 (obligan vocabulario/story/selección, no rol) — check-branch-protection.mjs:36-44.
-4. **Añadir el required-check HUMANO [H] de certificación de la FUENTE** — el innegociable de `satellite-quality`
-   (:61): sin su propio check, la certificación "en la práctica no existe". Aquí vive el juicio rol/composición.
-5. **Reconciliar la familia card = el censo ECO-143 + revisión [H] ya trackeados** (design-propagation) — no un
-   baseline mecánico nuevo; la estrategia lo cita/coordina. Primer fix más fácil: MetricCard (ya border-default,
-   matchea card-flat 3/4 ejes).
-6. **Listón de calidad de mercado por componente**, incremental sobre lo que YA existe (stories/coverage/
-   no-raw-color/selección) + a11y AA + test de lógica + docs + **enchufar los baselines VRT** hoy solo cableados;
-   suelo de cobertura a decidir (Carbon 80% / Polaris 100%) — https://carbondesignsystem.com/contributing/component-checklist/.
+**Pilar 1 — Construcción y composición (build-now):**
+1. **Contrato de variante ÚNICO tipado** con **tailwind-variants** (base/variants/compoundVariants + `VariantProps`)
+   y **slots** multi-parte — colapsa los 4 idiomas (Button.tsx:18, Card.tsx:13). OJO: los slots son el eje de
+   ESTILO ("cómo se ve cada parte"), NO el de modificabilidad (ver la decisión de scope abajo).
+2. **Extraer los primitivos que faltan** (Popover/Menu para los 5 dropdowns, ChartTooltip, Skeleton) y que
+   MetricCard/ChartCard COMPONGAN Card → mata el drift-por-copia (Select.tsx:34, ChartCard.tsx:24).
+3. **Registry: campo primitivo/composite** máquina-legible (hoy solo en Storybook, registry.json:120).
+4. **CENSO = el DETECTOR** (auditoría): clasifica todo el corpus contra el estándar + produce el worklist de
+   reconstrucción (forward: autoría nueva conforme; backward: normaliza legacy) — tu "chequear lo hecho + reconstruir".
 
-**Se DIFIERE (escalado nombrado, no construido):** el gate estructural/censo auto-codemod de composición (queda
-[H]/scale-gated como en ADR-028), el campo-versión por componente y el estándar-como-semver — YAGNI a esta escala.
+**Pilar 2 — Listón de CALIDAD por componente (build-now — EL punto que faltaba; la estrategia se llama *quality*):**
+5. Definition-of-Done por componente: **a11y AA certificada** (axe + teclado/foco/ARIA), **tests**, **docs de
+   estados**, y **ENCHUFAR los baselines VRT** (hoy cableados-pero-APAGADOS → la red de seguridad del rebuild está
+   inerte) + un **required-check HUMANO [H]** de certificación (verde ≠ excelente).
+6. **Capa de comportamiento headless** (Radix/React Aria) donde la a11y pesa — separar comportamiento de visual
+   (como Spectrum/Carbon) → a11y/i18n una vez.
+
+**Pilar 3 — Distribución RE-ABIERTA (ACOPLADA, no carril aparte):**
+7. El panel lo probó por código: tailwind-variants y Radix meten **dependencias npm** en los primitivos, y em-ui
+   **solo copia ficheros** (no propaga npm) → el satélite recibiría un fichero que importa un paquete que no tiene =
+   build roto. Luego el mejor modelo de composición **EXIGE** cambiar la distribución. **RE-ABRIR ADR-006
+   (copy-by-value) + ADR-019 (acople shadcn/Tailwind)**: o se extiende em-ui para propagar deps npm, o se va a un
+   modelo de paquete. Prerequisito ACOPLADO, no "para luego".
+
+**Pilar 4 — Migración LIMPIA y REVISABLE ("las máquinas sudan, el humano juzga" — nunca big-bang, nunca revisar 83 de golpe):**
+- **Worklist del CENSO, no un doc extenso:** un panel-estado por componente (sobre `em-ui report` + gates) que es a la vez la lista y el progreso.
+- **3 carriles por carga humana:** (A) mecánico/uniforme → **codemod** (AST, test-first), VRT DEBE quedar verde; (B) cambio visual intencional → VRT roja, el humano mira SOLO los píxeles que cambiaron; (C) juicio/semántico → el humano diseña. Secuencia **LEAF-FIRST**, solo sobre primitivos STABLE.
+- **La máquina prueba lo mecánico** (VRT=se ve igual · tests=se comporta igual · byte-SHA=las etiquetas cuadran · gates=conforme) → el humano NO re-verifica eso: revisa (1) cada codemod UNA vez, (2) los deltas visuales del puñado que cambió, (3) los juicios del carril C.
+- **Auto-merge SOLO del subconjunto seguro** (carril A, VRT-verde + required en verde) vía `gh pr merge --auto` (extiende el wiring de Dependabot ya probado); el cambio-de-aspecto SIEMPRE va a revisión humana de solo los deltas.
+- **Ratchet:** baseline de deuda que CI solo deja DECRECER; el estándar nuevo corre NO-bloqueante hasta estabilizar, luego required → nunca "parar el mundo". PRs de 50-200 líneas, un propósito por PR (mecánico O visual, nunca mezclados), apilados y revisados de abajo-arriba.
+- **Definition-of-Done TODO-O-NADA** por componente: todos los sitios migrados (src/ Y tests/) + coverage + classify=up-to-date + VRT verde + huérfano borrado SIN borrado-a-ciegas (grep 0 usos + portar tests). Medio-migrado NO es "hecho" — esto es lo que impide el goteo de "20 tickets de parche".
+- **Higiene innegociable (con nombre propio):** censo-primero · DoD todo-o-nada · anti-drift atado a bytes (la etiqueta no miente) · VRT como guardia de cambio-accidental · gates required no-bypass · sin borrados a ciegas · codemod AST test-first (no search-replace) · mecánico/visual separados · árbol git limpio antes del codemod.
+
+**DECISIÓN DE SCOPE que fija el operador (no la decido yo):** el etiquetado por-ELEMENTO de MODIFICABILIDAD ("qué
+puede rebrandear un satélite vs qué está bloqueado" — marcadores @brand-locked/@ds-governed/@partial, hoy
+scale-gated en ADR-028) — ¿se construye YA (re-abriendo la fase de ADR-028) o es dominio de `design-propagation`?
+Tu directiva "no diferir" apunta a construirlo; es grande y entrelazado con distribución. **Tu llamada.**
+
+**El gate, HONESTO:** el CENSO detecta el drift; dependency-cruiser + ESLint son un **RATCHET post-rebuild** (una vez
+un componente compone el primitivo, prohíben quitar el import) — NO detectan la superficie card cruda (el grafo del
+registry está VACÍO donde vive el drift; la superficie está en template-literals hostiles al AST). Automatizado sí,
+como candado anti-regresión, no como el descubridor.
+
+**Descartadas:** **D** (el mínimo que rechazas); **B puro** (re-plataforma todo de golpe); **A/C-limpias** (fingen
+que distribución es separable — refutado por código). La recomendación es **C-acoplada**: los 3 pilares como
+programa coordinado que RE-ABRE los candados que de verdad bloquean (ADR-006/019; y ADR-028 si decides el etiquetado
+por-elemento ya).
 
 ## Non-goals
-- No construir un gate MECÁNICO de composición/rol build-now bloqueante — ADR-028 ya lo declaró inviable y lo reservó a revisión [H] scale-gated; forzarlo re-decidiría ADR-028 (requeriría un ADR que enmiende). Queda como escalado NOMBRADO.
-- No inventar un campo-versión por componente ni tratar el estándar como semver (>1 major atrás) — espejo FALSO de `satellite-quality` (no hay flota federada; `em-ui.manifest` ya da version-awareness una capa abajo). YAGNI.
-- No re-abrir ni duplicar el estándar de construcción de ADR-028 ni el censo ECO-143 — esta estrategia los CONSUME y coordina.
-- No inferir el ROL de un elemento desde el JSX (rol-equivocado = revisión de diseño humana, no gate) — non-goal heredado de ECO-142.
-- No pisar `satellite-design` (compone secciones en una web) ni `design-tokens` (capa de color/tokens; la decisión de superficie canónica se coordina CON ella) ni re-hacer la distribución de `design-propagation`.
-- No un pipeline DTCG / generador de tokens (ya descartado por `design-tokens`).
+- NO el mínimo (Opción D): no dejar los 4 idiomas, no solo-reportar el drift, no confundir "construido correctamente" con "excelente".
+- NO fingir que la distribución es un carril separable — el modelo de composición mete deps npm que la copia-por-valor no propaga; ADR-006/019 se RE-ABREN como prerequisito ACOPLADO.
+- NO vender el gate dependency-cruiser/ESLint como el DETECTOR del drift (es un RATCHET post-rebuild; el detector es el censo).
+- NO conflar los slots (eje de ESTILO) con el etiquetado de MODIFICABILIDAD por-elemento (permiso de rebrand) — son ejes distintos.
+- NO inferir el ROL desde el JSX (rol-equivocado = revisión humana).
+- NO tocar los VALORES de color/token (eso es `design-tokens`; la capa 3-tier se coordina).
 
 ## Decisions
 <!-- optional: link the chosen decision as an ADR, e.g. emkeel-governance/adr/007-<slug>.md -->
+APROBADA por el operador (merge de PR #556, Sprint 5). Reco = **C-acoplada** (4 pilares: construcción+composición /
+calidad / distribución RE-ABIERTA / migración limpia+revisable). Quedan ABIERTAS 2 decisiones de scope, a fijar al
+arrancar la ejecución (no bloquean la aprobación de la dirección): (1) re-abrir la distribución ADR-006/019 ahora;
+(2) el etiquetado por-elemento de modificabilidad — build-now (re-abrir fase ADR-028) vs dominio de design-propagation.
+Pendiente: registrar la decisión como ADR.
