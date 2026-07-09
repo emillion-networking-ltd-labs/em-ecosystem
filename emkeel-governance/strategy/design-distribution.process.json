@@ -1,0 +1,27 @@
+{
+  "process": "strategy",
+  "state": "scaffolded",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-07-09T15:33:23Z",
+      "topic": "design-distribution",
+      "kill_criteria": [
+        "Ni (a) ni (b) del mercado resuelven a la vez deps + portabilidad + personalizacion gobernada sin re-introducir el problema (p.ej. el paquete siempre exige eject=copiar al entregar)",
+        "El etiquetado por-elemento es tan caro o fragil de mantener que no compra la personalizacion que promete a la escala prevista",
+        "La copia-extendida-con-deps (a) tiene un fallo tecnico que la hace inviable y obliga al paquete pese a perder portabilidad",
+        "El mercado no distingue estos modelos y la eleccion a/b es indiferente en la practica"
+      ]
+    }
+  },
+  "steps_schema": [
+    "scaffolded",
+    "researched",
+    "proposed",
+    "critiqued",
+    "checked",
+    "validated",
+    "presented",
+    "approved"
+  ]
+}
