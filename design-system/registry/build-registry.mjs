@@ -13,6 +13,16 @@ const DS = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const COMP = join(DS, "components");
 const SECT = join(DS, "sections");   // nivel 2: secciones diseñadas que componen átomos (ECO-54)
 
+// Rango de versión declarado por el DS para cada paquete npm (fuente de verdad de las versiones a propagar).
+const DECLARED = JSON.parse(readFileSync(join(DS, "package.json"), "utf8")).dependencies || {};
+// Peers que el consumidor (una app Next.js: dashboard, satélites) YA provee → NO se propagan como deps del DS.
+const PEERS = new Set(["react", "react-dom", "next"]);
+
+// Nombre del paquete npm de un specifier de import: `@scope/pkg/sub`→`@scope/pkg`; `pkg/sub`→`pkg`; `pkg`→`pkg`.
+function pkgOf(spec) {
+  return spec.startsWith("@") ? spec.split("/").slice(0, 2).join("/") : spec.split("/")[0];
+}
+
 export function componentNames() {
   return readdirSync(COMP).filter((f) => f.endsWith(".tsx")).map((f) => f.slice(0, -4)).sort();
 }
@@ -49,15 +59,45 @@ export function directDeps(name, dir = COMP) {
   };
 }
 
+// Deps npm EXTERNAS de un item (ECO-164): paquetes que importa SU fichero + sus ficheros internos
+// (lib/hooks — p.ej. lib/utils.ts arrastra clsx + tailwind-merge). Excluye alias `@/`, relativos y peers.
+// La versión sale del package.json del DS (fuente única). Devuelve { pkg: rango } ordenado.
+// Las deps de los siblings (registryDependencies) NO se incluyen aquí: el cierre transitivo de cli.mjs
+// las une porque cada sibling ya carga su propio `dependencies`.
+export function externalDeps(name, dir = COMP, internalDependencies = []) {
+  const files = [join(dir, `${name}.tsx`), ...internalDependencies.map((rel) => join(DS, rel))];
+  const deps = {};
+  for (const file of files) {
+    if (!existsSync(file)) continue;
+    const src = readFileSync(file, "utf8");
+    const specs = [
+      ...[...src.matchAll(/from\s+["']([^"']+)["']/g)].map((m) => m[1]),   // import estático
+      ...[...src.matchAll(/import\(\s*["']([^"']+)["']/g)].map((m) => m[1]), // import dinámico (p.ej. qrcode)
+    ];
+    for (const spec of specs) {
+      if (spec.startsWith(".") || spec.startsWith("@/")) continue; // relativo / alias interno
+      const pkg = pkgOf(spec);
+      if (PEERS.has(pkg)) continue;
+      if (!DECLARED[pkg]) {
+        throw new Error(`${name}: importa "${pkg}" (via ${spec}) que NO está en design-system/package.json → añádelo o corrige el import`);
+      }
+      deps[pkg] = DECLARED[pkg];
+    }
+  }
+  return Object.fromEntries(Object.keys(deps).sort().map((k) => [k, deps[k]]));
+}
+
 export function buildRegistry() {
   const items = componentNames().map((name) => {
     const { registryDependencies, internalDependencies } = directDeps(name, COMP);
-    return { name, type: "registry:ui", file: `components/${name}.tsx`, registryDependencies, internalDependencies };
+    const dependencies = externalDeps(name, COMP, internalDependencies);
+    return { name, type: "registry:ui", file: `components/${name}.tsx`, registryDependencies, internalDependencies, dependencies };
   });
   // Secciones (nivel 2): componen átomos. `em-ui add <Section>` jala la sección + su cierre de átomos/hooks.
   for (const name of sectionNames()) {
     const { registryDependencies, internalDependencies } = directDeps(name, SECT);
-    items.push({ name, type: "registry:section", file: `sections/${name}.tsx`, registryDependencies, internalDependencies });
+    const dependencies = externalDeps(name, SECT, internalDependencies);
+    items.push({ name, type: "registry:section", file: `sections/${name}.tsx`, registryDependencies, internalDependencies, dependencies });
   }
   return {
     name: "em-ui",

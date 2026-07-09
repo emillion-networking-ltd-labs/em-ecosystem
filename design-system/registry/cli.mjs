@@ -2,6 +2,7 @@
 // em-ui — registry + CLI interno del design system NexaCore (ECO-23, estrategia satellites / ADR-006 + ADR-007).
 // Copia GOBERNADA con reconciliación. Fuente ÚNICA: design-system/ (jamás la app dashboard).
 import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync } from "node:fs";
+import { spawnSync } from "node:child_process";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isAdapted, hasConflictMarkers } from "./_reconcile.mjs";
@@ -156,6 +157,55 @@ function governedPresent(destSrc) {
     .map((s) => ({ key: s.key, srcRel: s.from, absFrom: join(DS, s.from) }));
 }
 
+// Gestor de paquetes del consumidor por su lockfile (npm por defecto).
+function detectPM(root) {
+  if (existsSync(join(root, "pnpm-lock.yaml"))) return "pnpm";
+  if (existsSync(join(root, "yarn.lock"))) return "yarn";
+  if (existsSync(join(root, "bun.lockb"))) return "bun";
+  return "npm";
+}
+
+// Propaga las deps npm del cierre al package.json del consumidor (ECO-164, design-distribution). Registro
+// DURABLE y determinista: fusiona las FALTANTES (nunca pisa un rango que el consumidor ya fijó; reporta si
+// difiere) y persiste el package.json. NO ejecuta el gestor salvo `--install` — seguro en CI/tests/bare-machine
+// (sin red sorpresa) y self-sufficient. El package.json vive en el padre de destSrc (destSrc = <consumer>/src).
+function propagateDeps(name, destSrc, { install }) {
+  const need = {};
+  for (const c of resolveClosure(name)) Object.assign(need, byName[c].dependencies || {});
+  const pkgs = Object.keys(need).sort();
+  if (!pkgs.length) return;
+
+  const root = dirname(destSrc);
+  const pkgJsonPath = join(root, "package.json");
+  if (!existsSync(pkgJsonPath)) {
+    console.error(`  ⚠ deps NO propagadas: no hay package.json en ${root} (${pkgs.join(", ")}) — créalo y reintenta`);
+    return;
+  }
+  const pkg = JSON.parse(readFileSync(pkgJsonPath, "utf8"));
+  pkg.dependencies = pkg.dependencies || {};
+  const added = [], mismatched = [];
+  for (const dep of pkgs) {
+    if (!(dep in pkg.dependencies)) { pkg.dependencies[dep] = need[dep]; added.push(`${dep}@${need[dep]}`); }
+    else if (pkg.dependencies[dep] !== need[dep]) mismatched.push(`${dep} (consumidor ${pkg.dependencies[dep]}, DS ${need[dep]})`);
+  }
+  if (added.length) {
+    writeFileSync(pkgJsonPath, JSON.stringify(pkg, null, 2) + "\n");
+    console.log(`  deps → package.json (${added.length}): ${added.join(", ")}`);
+  } else {
+    console.log(`  deps: las ${pkgs.length} del cierre ya están en package.json`);
+  }
+  if (mismatched.length) console.log(`  ⚠ deps con rango distinto (NO tocadas, decisión del consumidor): ${mismatched.join("; ")}`);
+
+  if (install) {
+    const pm = detectPM(root);
+    console.log(`  instalando con ${pm}…`);
+    const r = spawnSync(pm, ["install"], { cwd: root, stdio: "inherit" });
+    if (r.status !== 0) die(`el install (${pm}) falló (código ${r.status ?? "?"})`);
+  } else if (added.length) {
+    console.log(`  → corre 'npm install' en ${root} (o repite con --install)`);
+  }
+}
+
 const cmd = process.argv[2];
 
 if (cmd === "list") {
@@ -166,12 +216,14 @@ if (cmd === "list") {
 } else if (cmd === "add" || cmd === "update") {
   const name = process.argv[3];
   const destSrc = resolve(arg("--dest") || die("falta --dest <consumer-src-dir>"));
-  if (!name) die(`uso: em-ui ${cmd} <Componente> --dest <src> [--force]`);
+  if (!name) die(`uso: em-ui ${cmd} <Componente> --dest <src> [--force] [--merge] [--install]`);
   const force = process.argv.includes("--force");
   const merge = cmd === "update" && process.argv.includes("--merge");
   const { written, blocked } = copyInto(name, destSrc, { update: cmd === "update", force, merge });
   console.log(`em-ui ${cmd} ${name} (cierre: ${[...resolveClosure(name)].join(", ")})`);
   written.forEach((w) => console.log("  " + w));
+  // ECO-164: propaga las deps npm del cierre al package.json del consumidor (durable); instala solo con --install.
+  propagateDeps(name, destSrc, { install: process.argv.includes("--install") });
   if (blocked > 0) {
     console.error(`\nem-ui update: ${blocked} fichero(s) @em-ui-adapted NO tocados (adaptación protegida).`);
     console.error(`  Resuélvelos: back-portea la mejora del DS a la adaptación a mano, o corre con --force (PERDERÁS la adaptación).`);
