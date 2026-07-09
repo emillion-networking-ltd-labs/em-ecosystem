@@ -17,6 +17,7 @@
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { variantAxisKeys } from "./_variant-axes.mjs";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -40,25 +41,8 @@ const SIZE_ONLY = /^(xs|sm|md|lg|xl|2xl|3xl|small|medium|large)$/i;
 // nombres de las exports `export const X` en orden de aparición
 const storyExports = (src) => [...src.matchAll(/export const (\w+)\s*[:=]/g)].map((m) => m[1]);
 
-// claves de 1er nivel de `export const <name> = { ... }`
-function objectKeys(src, name) {
-  const start = src.indexOf(`export const ${name}`);
-  if (start === -1) return null;
-  const open = src.indexOf("{", start);
-  if (open === -1) return null;
-  let depth = 0, end = -1;
-  for (let i = open; i < src.length; i++) {
-    if (src[i] === "{") depth++;
-    else if (src[i] === "}") { depth--; if (depth === 0) { end = i; break; } }
-  }
-  if (end === -1) return null;
-  const keys = [];
-  for (const raw of src.slice(open + 1, end).split("\n")) {
-    const m = raw.trim().match(/^["']?([A-Za-z0-9_-]+)["']?\s*:/);
-    if (m) keys.push(m[1]);
-  }
-  return keys;
-}
+// Los ejes variant/size (legacy `variantClasses`/`sizeClasses` o contrato `tv()`) los extrae el módulo
+// compartido `_variant-axes.mjs` — así un componente migrado al contrato sigue sujeto a la norma de stories.
 
 // story canónica de un componente: 1º por NOMBRE de fichero (prioridad, para no confundir una COMPOSICIÓN
 // que importa el componente con su story canónica); 2º por CONTENIDO (qué story importa el componente).
@@ -138,21 +122,22 @@ for (const file of readdirSync(COMP)) {
   if (!file.endsWith(".tsx")) continue;
   const name = file.slice(0, -4);
   const csrc = readFileSync(join(COMP, file), "utf8");
+  const axes = variantAxisKeys(csrc);
 
-  if (/export const sizeClasses/.test(csrc)) {
+  if (axes.size.length) {
     const sf = storyFor(name);
     if (sf && !storyExports(readFileSync(sf, "utf8")).includes("AllSizes")) {
-      fail(`${name}: tiene eje de tamaño (sizeClasses) → su story (${sf.slice(ds.length + 1)}) debe incluir \`AllSizes\``);
+      fail(`${name}: tiene eje de tamaño → su story (${sf.slice(ds.length + 1)}) debe incluir \`AllSizes\``);
     }
   }
 
-  const variants = objectKeys(csrc, "variantClasses");
-  if (variants && variants.length >= 2) {
+  const variants = axes.variant;
+  if (variants.length >= 2) {
     const sf = storyFor(name);
     if (sf) {
       const story = readFileSync(sf, "utf8");
       if (!/export const AllVariants/.test(story)) {
-        fail(`${name}: declara ≥2 variantes (variantClasses) → su story debe incluir \`AllVariants\` que las agrupe`);
+        fail(`${name}: declara ≥2 variantes → su story debe incluir \`AllVariants\` que las agrupe`);
       }
       const avAt = story.indexOf("AllVariants");
       const before = avAt === -1 ? story : story.slice(0, avAt);
