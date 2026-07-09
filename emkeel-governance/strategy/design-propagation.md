@@ -142,6 +142,11 @@ and semantic detection as the failure mode at 2-3 consumers. So the recommendati
 **Gate behind a trigger (revisit at ≥N consumers — mirrors design-tokens.md's ≥3-4 rule):**
 5. **Element-level modifiability** — `@brand-locked` / `@ds-governed` / `@partial` extend the valve file→element;
    at 2 consumers the file-level valve + the manifest already protect divergence.
+   **→ DES-GATED a build-now por [ADR-030](../adr/030-marcadores-modificabilidad-por-elemento.md) (ECO-162):** el
+   operador decidió construirlo YA (no diferir por coste). Mecanismo = regiones por comentarios-sentinela
+   (`// @em-region:begin <policy> id=…`) + merge-policy por-MÁSCARA sobre `reconcileMerge` (ECO-158) + gate
+   `check-region-integrity` (anti-tamper + ds-governed token-only). Regiones planas, unidad = línea, sentinelas a
+   mano; AST (mid-line) = escalado posterior. Sustituye el gating de este item concreto (items 6-9 siguen gated).
 6. **Per-known-component token allow-list** — NOT role inference (not feasible, and its own kill-criterion). The
    registry KNOWS a file's component identity (Button.tsx = Button), so allow-list the tokens each *registered
    component* may use. The residual "valid-but-wrong-role token on a card-like element" is **design review**, not
