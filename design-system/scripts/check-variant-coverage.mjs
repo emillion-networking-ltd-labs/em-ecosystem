@@ -11,6 +11,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { variantAxisKeys } from "./_variant-axes.mjs";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -25,32 +26,8 @@ function fail(msg) {
   process.exitCode = 1;
 }
 
-// Extrae las claves de `export const <name> = { ... }` de un fuente TS (objeto plano de 1er nivel).
-function objectKeys(src, name) {
-  const start = src.indexOf(`export const ${name}`);
-  if (start === -1) return null;
-  const open = src.indexOf("{", start);
-  if (open === -1) return null;
-  let depth = 0, end = -1;
-  for (let i = open; i < src.length; i++) {
-    if (src[i] === "{") depth++;
-    else if (src[i] === "}") { depth--; if (depth === 0) { end = i; break; } }
-  }
-  if (end === -1) return null;
-  const body = src.slice(open + 1, end);
-  const keys = [];
-  // claves de 1er nivel: `name:` o `"name":` al inicio de línea (ignora anidados por depth)
-  let d = 0;
-  for (const raw of body.split("\n")) {
-    const line = raw.trim();
-    if (d === 0) {
-      const m = line.match(/^["']?([A-Za-z0-9_-]+)["']?\s*:/);
-      if (m) keys.push(m[1]);
-    }
-    d += (line.match(/{/g) || []).length - (line.match(/}/g) || []).length;
-  }
-  return keys;
-}
+// Las claves de los ejes variant/size (legacy `variantClasses`/`sizeClasses` o contrato `tv()`) las extrae
+// el módulo compartido `_variant-axes.mjs`, de modo que un componente migrado al contrato sigue cubierto.
 
 import { readdirSync } from "node:fs";
 
@@ -83,8 +60,8 @@ const components = readdirSync(COMP).filter((f) => f.endsWith(".tsx")).map((f) =
 let checked = 0, missing = 0;
 for (const name of components) {
   const src = readFileSync(join(COMP, `${name}.tsx`), "utf8");
-  const matrices = ["variantClasses", "sizeClasses"]
-    .map((m) => [m, objectKeys(src, m)])
+  const axes = variantAxisKeys(src);
+  const matrices = [["variant", axes.variant], ["size", axes.size]]
     .filter(([, k]) => k && k.length);
   if (!matrices.length) continue;
   const storyPath = storyFor(name);

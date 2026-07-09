@@ -33,7 +33,8 @@
     "react-easy-crop": "^5.5.7",
     "react-live": "^4.1.8",
     "recharts": "^3.9.1",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "tailwind-variants": "^3.2.2"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",

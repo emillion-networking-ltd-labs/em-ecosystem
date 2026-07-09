@@ -37,11 +37,7 @@ import {
 } from "lucide-react";
 import CountdownTimer from "@/components/ui/CountdownTimer";
 import TotalUsersChart from "@/components/ui/TotalUsersChart";
-import Button, {
-  variantClasses as buttonVariants,
-  sizeClasses as buttonSizes,
-  baseClass as buttonBase,
-} from "@/components/ui/Button";
+import Button, { buttonSpecs } from "@/components/ui/Button";
 import Input, { inputSpecs } from "@/components/ui/Input";
 import Badge, {
   variantClasses as badgeVariants,
@@ -537,9 +533,9 @@ function ButtonShowcase() {
 
       <SpecsPanel
         specs={{
-          Variants: buttonVariants,
-          Sizes: buttonSizes,
-          Base: { shared: buttonBase },
+          Variants: buttonSpecs.variants,
+          Sizes: buttonSpecs.sizes,
+          Base: { shared: buttonSpecs.base },
           Dimensions: {
             sm: "32px height · 12px font · 16/6px padding",
             "md (default)": "40px height · 14px font · 24/10px padding",

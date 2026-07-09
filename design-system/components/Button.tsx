@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { tv, type VariantProps } from "tailwind-variants";
 import SpinnerInfinity from "./SpinnerInfinity";
 
 export type ButtonVariant =
@@ -15,7 +16,14 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   href?: string;
 }
 
-export const variantClasses = {
+// Las variantes de CONTROL (no-link) son una superficie de botón; las link son texto navegable.
+// Arrays MUTABLES (no `as const`): `compoundVariants.variant` de tailwind-variants espera un array mutable.
+const CONTROL: ButtonVariant[] = ["primary", "secondary", "outline", "danger"];
+const LINK: ButtonVariant[] = ["link", "link-underline"];
+
+// Clases por eje, definidas como constantes: fuente ÚNICA del contrato `tv` (abajo) Y de `buttonSpecs`
+// (el panel de documentación del catálogo). El estilo específico de cada variante:
+const VARIANT_CLASSES = {
   primary:
     "bg-surface-inverse text-content-inverse border border-border-strong transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50",
   secondary:
@@ -27,22 +35,95 @@ export const variantClasses = {
   link: "bg-transparent text-content-primary/75 border-0 transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-50",
   "link-underline":
     "bg-transparent text-content-primary/75 border-0 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted disabled:pointer-events-none disabled:opacity-50",
-};
-
-export const baseClass =
-  "relative items-center justify-center gap-2 whitespace-nowrap";
-
-export const sizeClasses = {
-  sm: "px-4 py-1.5 text-caption font-normal rounded-md h-8",
-  md: "px-6 py-2.5 text-body font-normal rounded-md h-10",
-  lg: "px-8 py-3 text-h3 font-normal rounded-md h-12",
-};
-
-export const linkSizeClasses = {
+} as const;
+// El texto por tamaño (compartido por control y link):
+const SIZE_TEXT = {
   sm: "text-caption font-normal",
   md: "text-body font-normal",
   lg: "text-h3 font-normal",
-};
+} as const;
+// La caja del control por tamaño (padding + radio + alto) — SOLO variantes de control:
+const CONTROL_BOX = {
+  sm: "px-4 py-1.5 rounded-md h-8",
+  md: "px-6 py-2.5 rounded-md h-10",
+  lg: "px-8 py-3 rounded-md h-12",
+} as const;
+const ROOT_BASE =
+  "relative items-center justify-center gap-2 whitespace-nowrap";
+
+// Contrato de variante del DS (design-system-quality / ADR-029): tailwind-variants con slots.
+// Button es la pieza de REFERENCIA — todo primitivo/compuesto declara sus variantes con este contrato
+// (base + variants + compoundVariants + defaultVariants + slots), nunca con mapas sueltos ni ternarios ad-hoc.
+//
+// Slots (partes del DOM): root = la superficie del control · label = el contenido · spinner = overlay de carga.
+// El eje `size` lleva SOLO el texto (compartido por control y link); la caja del control (padding/alto/radio)
+// y el display se aplican por compoundVariant según la clase de variante — así las link no heredan la caja.
+export const button = tv({
+  slots: {
+    root: ROOT_BASE,
+    label: "inline-flex items-center gap-2",
+    spinner: "absolute inset-0 flex items-center justify-center",
+  },
+  variants: {
+    variant: {
+      primary: { root: VARIANT_CLASSES.primary },
+      secondary: { root: VARIANT_CLASSES.secondary },
+      outline: { root: VARIANT_CLASSES.outline },
+      danger: { root: VARIANT_CLASSES.danger },
+      link: { root: VARIANT_CLASSES.link },
+      "link-underline": { root: VARIANT_CLASSES["link-underline"] },
+    },
+    size: {
+      sm: { root: SIZE_TEXT.sm },
+      md: { root: SIZE_TEXT.md },
+      lg: { root: SIZE_TEXT.lg },
+    },
+    fullWidth: { true: {}, false: {} },
+    loading: { true: { label: "opacity-30" }, false: {} },
+  },
+  compoundVariants: [
+    // Caja del control (padding + radio + alto) por tamaño — SOLO para variantes de control (las link no).
+    { variant: CONTROL, size: "sm", class: { root: CONTROL_BOX.sm } },
+    { variant: CONTROL, size: "md", class: { root: CONTROL_BOX.md } },
+    { variant: CONTROL, size: "lg", class: { root: CONTROL_BOX.lg } },
+    // Display + selección para las variantes de control. ECO-115: son SUPERFICIE DE CONTROL → `select-none`
+    // (con `as="a"` se rinde un <a> sin role=button, p.ej. el CTA del Hero; `button *`/`[role]*` no lo cubre y
+    // mostraría el caret I-beam → se marca aquí). `fullWidth` (default true, para formularios) → flex + w-full.
+    {
+      variant: CONTROL,
+      fullWidth: true,
+      class: { root: "flex w-full select-none" },
+    },
+    {
+      variant: CONTROL,
+      fullWidth: false,
+      class: { root: "inline-flex select-none" },
+    },
+    // Las variantes link/link-underline son TEXTO inline navegable (seleccionable → sin select-none) y siempre
+    // inline-flex, ignorando fullWidth.
+    { variant: LINK, class: { root: "inline-flex" } },
+  ],
+  defaultVariants: {
+    variant: "primary",
+    size: "md",
+    fullWidth: true,
+    loading: false,
+  },
+});
+
+export type ButtonVariants = VariantProps<typeof button>;
+
+// Superficie de documentación del catálogo (convención `<name>Specs`, consumida por ComponentShowcase):
+// las clases del contrato por eje, derivadas de las MISMAS constantes que alimentan `button` (single-source).
+export const buttonSpecs = {
+  base: ROOT_BASE,
+  variants: VARIANT_CLASSES,
+  sizes: {
+    sm: `${CONTROL_BOX.sm} ${SIZE_TEXT.sm}`,
+    md: `${CONTROL_BOX.md} ${SIZE_TEXT.md}`,
+    lg: `${CONTROL_BOX.lg} ${SIZE_TEXT.lg}`,
+  },
+} as const;
 
 export default function Button({
   as: Component = "button",
@@ -51,37 +132,34 @@ export default function Button({
   loading = false,
   fullWidth = true,
   children,
-  className = "",
+  className,
   disabled,
   href,
   ...props
 }: ButtonProps) {
   const isLink = variant === "link" || variant === "link-underline";
-  const sizes = isLink ? linkSizeClasses[size] : sizeClasses[size];
-  const display = isLink ? "inline-flex" : fullWidth ? "flex" : "inline-flex";
+  const { root, label, spinner } = button({
+    variant,
+    size,
+    fullWidth,
+    loading,
+  });
 
-  // ECO-115: las variantes no-link son SUPERFICIE DE CONTROL. Con `as="a"` se rinde un <a> SIN role=button
-  // (enlace-botón, p.ej. el CTA del Hero); su texto va en un <span>, que es opt-in de selección (tokens.css) y
-  // `button *`/`[role]*` NO cubre al <a> → mostraría el caret I-beam. Se marca `select-none` aquí para evitarlo.
-  // Las variantes link/link-underline son texto inline → seleccionables (no se marcan).
   const componentProps: Record<string, unknown> = {
-    className: `${display} ${baseClass} ${variantClasses[variant]} ${sizes} ${!isLink ? "select-none" : ""} ${!isLink && fullWidth ? "w-full" : ""} ${className}`,
+    className: root({ className }),
     ...props,
   };
 
   if (href) componentProps.href = href;
   if (Component === "button") componentProps.disabled = loading || disabled;
-  // ECO-141: las variantes `link`/`link-underline` son TEXTO navegable (copiable). Renderizadas como <a>, el
-  // drag nativo del enlace impediría seleccionar su texto → draggable=false lo habilita. El click sigue
-  // navegando. Las variantes de control (no-link) son select-none, así que no se ven afectadas.
+  // ECO-141: las variantes link son TEXTO copiable renderizado como <a>; el drag nativo del enlace impediría
+  // seleccionar su texto → draggable=false lo habilita (el click sigue navegando). Las de control son select-none.
   if (isLink) componentProps.draggable = false;
 
   return React.createElement(
     Component,
     componentProps,
-    <span
-      className={`inline-flex items-center gap-2 ${loading ? "opacity-30" : ""}`}
-    >
+    <span key="label" className={label()}>
       {children}
     </span>,
     loading && (
@@ -89,7 +167,7 @@ export default function Button({
         key="spinner"
         role="status"
         aria-label="Loading"
-        className="absolute inset-0 flex items-center justify-center"
+        className={spinner()}
       >
         <SpinnerInfinity size={size === "lg" ? "lg" : "md"} />
       </span>
