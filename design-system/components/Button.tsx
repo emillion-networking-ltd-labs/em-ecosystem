@@ -64,14 +64,34 @@ export const button = tv({
   },
   compoundVariants: [
     // Caja del control (padding + radio + alto) por tamaño — SOLO para variantes de control (las link no).
-    { variant: CONTROL, size: "sm", class: { root: "px-4 py-1.5 rounded-md h-8" } },
-    { variant: CONTROL, size: "md", class: { root: "px-6 py-2.5 rounded-md h-10" } },
-    { variant: CONTROL, size: "lg", class: { root: "px-8 py-3 rounded-md h-12" } },
+    {
+      variant: CONTROL,
+      size: "sm",
+      class: { root: "px-4 py-1.5 rounded-md h-8" },
+    },
+    {
+      variant: CONTROL,
+      size: "md",
+      class: { root: "px-6 py-2.5 rounded-md h-10" },
+    },
+    {
+      variant: CONTROL,
+      size: "lg",
+      class: { root: "px-8 py-3 rounded-md h-12" },
+    },
     // Display + selección para las variantes de control. ECO-115: son SUPERFICIE DE CONTROL → `select-none`
     // (con `as="a"` se rinde un <a> sin role=button, p.ej. el CTA del Hero; `button *`/`[role]*` no lo cubre y
     // mostraría el caret I-beam → se marca aquí). `fullWidth` (default true, para formularios) → flex + w-full.
-    { variant: CONTROL, fullWidth: true, class: { root: "flex w-full select-none" } },
-    { variant: CONTROL, fullWidth: false, class: { root: "inline-flex select-none" } },
+    {
+      variant: CONTROL,
+      fullWidth: true,
+      class: { root: "flex w-full select-none" },
+    },
+    {
+      variant: CONTROL,
+      fullWidth: false,
+      class: { root: "inline-flex select-none" },
+    },
     // Las variantes link/link-underline son TEXTO inline navegable (seleccionable → sin select-none) y siempre
     // inline-flex, ignorando fullWidth.
     { variant: LINK, class: { root: "inline-flex" } },
@@ -99,7 +119,12 @@ export default function Button({
   ...props
 }: ButtonProps) {
   const isLink = variant === "link" || variant === "link-underline";
-  const { root, label, spinner } = button({ variant, size, fullWidth, loading });
+  const { root, label, spinner } = button({
+    variant,
+    size,
+    fullWidth,
+    loading,
+  });
 
   const componentProps: Record<string, unknown> = {
     className: root({ className }),
