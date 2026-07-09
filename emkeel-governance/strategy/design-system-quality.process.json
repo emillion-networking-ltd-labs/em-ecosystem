@@ -4,87 +4,91 @@
   "steps": {
     "scaffolded": {
       "done": true,
-      "timestamp": "2026-07-08T22:27:40Z",
+      "timestamp": "2026-07-09T11:46:56Z",
       "topic": "design-system-quality",
       "kill_criteria": [
-        "\"La composici\u00f3n forzada (componer-no-duplicar) no puede expresar las variaciones leg\u00edtimas del DS (QR con bg propio",
-        "MetricCard tile transparente) sin m\u00e1s indirecci\u00f3n/coste que el hand-roll \u2192 el est\u00e1ndar pelea con la realidad\"",
-        "\"El coste de la bater\u00eda de gates (mantenimiento + falsos positivos que frenan cada PR) supera el drift que previene a esta escala (~1 DS",
-        "2 consumidores) \u2192 over-governance\"",
-        "\"check-component-drift + disciplina de review ya bastan para cazar el drift de composici\u00f3n sin un est\u00e1ndar nuevo \u2192 YAGNI\"",
-        "\"Los problemas del DS eran incidentes puntuales ya cubiertos por satellite-quality + la revisi\u00f3n del cat\u00e1logo",
-        "no un hueco sist\u00e9mico \u2192 la premisa (falta gobernanza) es falsa\""
+        "El modelo primitivo->composicion-por-referencia->etiquetado-por-uso no escala (al crecer flota/componentes se vuelve mas fragil o mas caro de mantener que hoy)",
+        "Automatizar el modelo (gates de composicion/propagacion) es inviable o de tantos falsos positivos que nadie lo respeta",
+        "La mejor version exige re-abrir tantas decisiones previas que sale mas limpio rehacer el DS entero de cero",
+        "La industria tiene un patron claramente superior que deja obsoleto el modelo propuesto"
       ]
     },
     "researched": {
       "done": true,
-      "timestamp": "2026-07-08T22:55:10Z",
+      "timestamp": "2026-07-09T12:25:04Z",
       "sources": [
+        "design-system/components/ConfirmModal.tsx:5",
+        "design-system/components/QrCodeCard.tsx:58",
+        "design-system/components/ChartCard.tsx:5",
         "design-system/components/ChartCard.tsx:24",
-        "design-system/components/QrCodeCard.tsx:45",
-        "design-system/components/CardHoverEffect.tsx:13",
-        "design-system/scripts/check-selection-model.mjs:8",
-        "design-system/scripts/check-component-drift.mjs:49",
-        "design-system/scripts/check-raw-color.mjs:50",
-        "nexacore-dashboard/src/app/globals.css:32-58",
-        "design-system/package.json:11",
-        ".github/scripts/check-branch-protection.mjs:34",
-        "design-system/README.md:1-30",
-        "CONTRIBUTING.md:52-76",
-        "emkeel-governance/strategy/satellite-quality.md:7",
-        "emkeel-governance/strategy/satellite-quality.md:22",
-        "emkeel-governance/strategy/satellite-quality.md:60",
-        "emkeel-governance/strategy/satellite-quality.md:61",
-        "emkeel-governance/strategy/satellite-quality.md:44",
-        "emkeel-governance/strategy/design-propagation.md:176-179",
-        "emkeel-governance/strategy/design-propagation.md:41-44",
-        "emkeel-governance/strategy/design-propagation.md:208-212",
-        "emkeel-governance/adr/028-mecanismo-propagacion-gobernanza-diseno.md:1",
-        "https://carbondesignsystem.com/contributing/component-checklist/",
-        "https://atomicdesign.bradfrost.com/chapter-2/",
+        "design-system/components/Select.tsx:34",
+        "design-system/components/Button.tsx:18",
+        "design-system/components/Card.tsx:13",
+        "design-system/registry/build-registry.mjs:30",
+        "design-system/registry/cli.mjs:61",
+        "design-system/registry.json:120",
+        "design-system/scripts/check-variant-coverage.mjs:2",
+        "design-system/registry/_manifest.mjs:131",
+        "design-system/registry/_manifest.mjs:248",
+        "emkeel-governance/strategy/design-propagation.md:176",
+        "emkeel-governance/strategy/design-propagation.md:181",
+        "emkeel-governance/strategy/design-propagation.md:186",
+        "emkeel-governance/strategy/design-propagation.md:206",
+        "emkeel-governance/strategy/design-propagation.md:142",
+        "emkeel-governance/adr/006-satellite-component-reuse.md:32",
+        "emkeel-governance/adr/028-mecanismo-propagacion-gobernanza-diseno.md:29",
+        "emkeel-governance/adr/028-mecanismo-propagacion-gobernanza-diseno.md:42",
+        "emkeel-governance/adr/027-arquitectura-tokens-color.md:36",
+        "emkeel-governance/adr/019-design-system-upstream-shadcn.md:21",
+        "emkeel-governance/adr/007-design-system-source-location.md:30",
+        "https://cva.style/getting-started/variants/",
+        "https://www.tailwind-variants.org/docs/slots",
+        "https://panda-css.com/docs/concepts/recipes",
         "https://www.radix-ui.com/primitives/docs/guides/composition",
-        "https://eslint.org/docs/latest/rules/no-restricted-syntax",
-        "https://typescript-eslint.io/users/versioning/"
+        "https://bradfrost.com/blog/post/the-many-faces-of-themeable-design-systems/",
+        "https://atlassian.design/components/eslint-plugin-design-system/",
+        "https://react-aria.adobe.com/blog/introducing-react-spectrum",
+        "https://medium.com/eightshapes-llc/subcomponents-753ce9f6600a",
+        "https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/"
       ]
     },
     "proposed": {
       "done": true,
-      "timestamp": "2026-07-08T22:57:10Z",
+      "timestamp": "2026-07-09T12:26:36Z",
       "options": [
-        "solo-doc-norma-construccion",
-        "estandar-vivo+gate+version(espejo-satellite-quality)",
-        "gate-estructural-composicion-AST",
-        "pipeline-ciclo-vida-Polaris-Carbon"
+        "A-unificar-in-place(tailwind-variants+extraer-primitivos+gates-grafo)",
+        "B-plataforma-completa(DTCG-compilado+semver+headless)",
+        "C-RECOMENDADA-mejor-composicion-ya+re-abrir-candados-distribucion-en-carril",
+        "D-FOIL-minimo(solo-doc+censo-report)"
       ]
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-07-08T23:10:12Z",
-      "lens_calibration": "El gate estructural NO separa bug de variante sin inferir ROL: ChartCard/MetricCard/QrCode-inner/StickyCard-flotante son la MISMA forma AST; el allowlist ES la revision de dise\u00f1o (Opcion 1 disfrazada de gate). Ademas MetricCard esta mal clasificado (usa border-default, matchea card-flat 3/4 ejes, NO es tile transparente) y el borde canonico esta SIN decidir (tokens.css default vs globals.css strong): ChartCard border-strong coincide con el Card desplegado, no es defecto visual.",
-      "lens_overeng": "La maquinaria consciente-de-version es un ESPEJO FALSO: satellite-quality la justifica por una flota federada; el DS es 1 repo/1 equipo/1 build, sin flota que versionar, y la version-awareness ya existe una capa abajo (em-ui.manifest, SHAs por fichero). El problema son ~11 sitios enumerables. Minimo = gate estructural REQUERIDO + baseline estatico de los ~11 + consumir ECO-142; sin campo-version ni semver (YAGNI, kill-criterion propio).",
-      "lens_feasibility": "El gate AST no-restricted-syntax es INVIABLE: casa tipos de nodo AST no valores de className, y NO casa TemplateLiteral ni cn()/clsx, asi esta escrito el codigo ofensor (ChartCard.tsx:24 template-literal; Card usa cn()). Perderia la evidencia central + 264 sitios con la utilidad opaca card; ~90% falsos positivos (121 sitios triplet: Tooltip/ConfirmModal/dropdowns/DataTable/Avatar). La se\u00f1al distintiva ES el rol: colapsa en revision [H].",
-      "lens_sources": "Premisa FALSA: no es \"solo Conflict markers requerido\", hay 5 contextos requeridos (gates, Security Gate, Dashboard VRT, Satellite VRT, Conflict markers); gates y Security bloquean cada merge. Sobrevive el matiz \"12 de 13 gates de coverage no bloquean\". Corregir la cita. Y el non-goal de rol-inferido esta en design-propagation.md:220-221, no :208-212.",
-      "lens_boundary": "CONTRADICCION con el propio non-goal \"no re-abrir ADR-028\": promover el gate estructural a required BUILD-NOW re-decide la fase de ADR-028 (advisory scale-gated, >=N consumidores; declaro el gate-por-rol INVIABLE, :220): necesita ADR que enmiende, no consume/extend. Ademas ChartCard border-strong es NORMA-conforme (StoryConventions: panel/widget->border-strong; ChartCard es panel-de-card para widgets). La reconciliacion de la familia card ES el censo ECO-143 ya trackeado, sin citar.",
-      "completeness": "Falta el required-check HUMANO de certificacion [H] para la FUENTE, el innegociable de satellite-quality (:61 \"si certificacion no tiene su propio check, en la practica no existe\"). La estrategia solo pone el lado [M] y hasta reusa esa frase para justificar los gates [M], soltando el check humano que la fuente exige: el allowlist crea un vacio (una divergencia declarada se salta el gate [M] Y mergea verde sin check [H]) = la recurrencia ChartCard/QrCode bajo revision-humana-sola que decia rechazar."
+      "timestamp": "2026-07-09T13:47:38Z",
+      "lens_completeness": "C conflata 2 ejes bajo la frase del operador: SLOTS (estilo, C los construye bien) vs ETIQUETADO DE MODIFICABILIDAD por-elemento (que-puede-rebrandear-un-satelite vs bloqueado) que los slots NO dan (verificado: slots son puro estilo, sin API de lock). Ese eje es el marcador @brand-locked/@ds-governed/@partial de design-propagation SCALE-GATED en ADR-028. El Context plantea el hueco de modificabilidad y lo responde con slots (eje equivocado) y DIFIERE el fix real. Bajo no-diferir: re-abrir la fase y construir el etiquetado por-elemento YA, o sacarlo de scope honestamente, sin conflar.",
+      "lens_scalability": "El meta-argumento (paga a 2 consumidores independiente de distribucion) es CIERTO para item1 (contrato) e item6 (censo) pero FALSO para item3 (grafo=unidad de propagacion forzada): eso es COPY-especifico (resolveClosure copia la clausura + SHA por-fichero + base-store + merge 3-way); bajo paquete compilado se arranca. Para la parte que ESCALA, C es la Opcion A + hoja de parra.",
+      "lens_feasibility": "El gate estrella (dependency-cruiser + ESLint compone-el-primitivo) esta MAL ENCUADRADO y pasaria CI VERDE sobre el drift que ataca: dependency-cruiser casa PATHS + aristas de import (no ve que una superficie es card-shaped); el grafo del registry esta VACIO donde vive el drift (ChartCard/MetricCard tienen registryDependencies=[] pues no importan Card, el grafo REPORTA no fuerza la arista); la superficie cruda esta en template-literals (hostil al AST). El gate solo sirve como RATCHET post-rebuild, NO como detector. El detector es el CENSO.",
+      "lens_reopen": "C deja UN candado sin nombrar y es el que capa el modelo: em-ui NO propaga dependencias npm. Items 1 (tailwind-variants) y 5 (Radix/React Aria) meten deps npm EXTERNAS en los primitivos, pero em-ui copia FICHEROS SOLO (sin package.json, sin npm install) -> en cuanto un primitivo importe esos paquetes, em-ui add/update le da al satelite un fichero que importa un paquete que no tiene = BUILD ROTO. La composicion NO llega a los 2 consumidores sin cambiar la distribucion (refutado por codigo). Falta ADR-019 en la lista. La distribucion NO es carril aparte: esta ACOPLADA.",
+      "completeness": "Falta la dimension mas importante: el LISTON DE CALIDAD por componente (Definition-of-Done + certificacion). La estrategia se llama design-system-QUALITY pero los 6 items son GRAMATICA DE CONSTRUCCION (como componer), ninguno define calidad. Un componente puede ser contract-conforme y fallar AA/teclado, sin tests, sin docs, sin baseline visual. Huecos verificados: VRT cableado-pero-APAGADO (baselines nunca commiteados = red de seguridad inerte), sin certificacion a11y AA por componente, sin check humano [H]. C confunde construido-correcto con excelente."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-07-08T23:13:36Z",
+      "timestamp": "2026-07-09T13:50:12Z",
       "check_passed": true
     },
     "validated": {
       "done": true,
-      "timestamp": "2026-07-08T23:15:20Z",
-      "case": "la familia card del DS (ChartCard/MetricCard/QrCode/StickyCard-flotante), la deuda exacta que motivo la estrategia",
-      "method": "Apliqu\u00e9 la recomendacion calibrada al caso: (1) corri el se\u00f1alamiento AST/triplet que usaria el gate diferido y (2) intente reconciliar el miembro mas facil (MetricCard) componiendo <Card>",
+      "timestamp": "2026-07-09T13:50:44Z",
+      "case": "el mejor modelo de composicion aplicado al DS real (adoptar tailwind-variants/Radix + que MetricCard/ChartCard compongan Card)",
+      "method": "Verifique por codigo si em-ui propaga deps npm (copyInto) y si el registry conoce las aristas de composicion faltantes (registryDependencies de ChartCard/MetricCard)",
       "outcome": "mixed",
-      "evidence_ref": "design-system/components/MetricCard.tsx:24"
+      "evidence_ref": "design-system/registry/cli.mjs:79"
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-07-08T23:16:09Z",
+      "timestamp": "2026-07-09T13:50:56Z",
       "presented_to": "operator",
-      "proceed_justification": "El mixed es el hallazgo, no un fallo: la realidad CONFIRMA la recomendacion calibrada (el gate mecanico de composicion es inviable \u2014 ChartCard.tsx:24 es template-literal invisible al AST, 42 componentes template-literal + 27 cn(), el triplet dispara en Select/Tooltip/ConfirmModal/DataTable; MetricCard no es drop-in por superficie tintada). El valor esta en el reencuadre [H] + promover gates factibles a required + el check humano de la fuente, no en un gate que no funciona. La familia card queda como decision de dise\u00f1o [H] (superficie canonica) + censo ECO-143, no como gate build-now."
+      "proceed_justification": "El mixed es el hallazgo, no un fallo: la realidad CONFIRMA la recomendacion (em-ui usa copyFileSync solo, no propaga deps npm; el satelite no tiene tailwind-variants/radix; ChartCard/MetricCard registryDependencies=[] pues no importan Card, el grafo no puede forzar la arista y el censo es el detector). Eso DEMUESTRA que el mejor modelo EXIGE re-abrir la distribucion (ADR-006/019) acoplada, no diferible, y que hay una decision de scope (etiquetado por-elemento de modificabilidad) que es del operador. Proceder = adoptar el programa de 3 pilares (construccion+composicion / calidad / distribucion re-abierta) y llevar las re-aperturas + la decision de scope al gate humano."
     }
   },
   "steps_schema": [
