@@ -11,14 +11,20 @@
       "type": "registry:ui",
       "file": "components/Accordion.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "AlertBox",
       "type": "registry:ui",
       "file": "components/AlertBox.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "AnimatedGradientText",
@@ -27,7 +33,11 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "AnimatedTestimonials",
@@ -36,7 +46,11 @@
       "registryDependencies": [
         "IconButton"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0",
+        "motion": "^12.38.0"
+      }
     },
     {
       "name": "AuroraBackground",
@@ -45,28 +59,37 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "Avatar",
       "type": "registry:ui",
       "file": "components/Avatar.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Badge",
       "type": "registry:ui",
       "file": "components/Badge.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "BeforeAfterSlider",
       "type": "registry:ui",
       "file": "components/BeforeAfterSlider.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "BentoGrid",
@@ -75,7 +98,11 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "Blob",
@@ -84,21 +111,31 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "BlurFade",
       "type": "registry:ui",
       "file": "components/BlurFade.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "motion": "^12.38.0"
+      }
     },
     {
       "name": "Breadcrumbs",
       "type": "registry:ui",
       "file": "components/Breadcrumbs.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Button",
@@ -107,14 +144,18 @@
       "registryDependencies": [
         "SpinnerInfinity"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "Calendar",
       "type": "registry:ui",
       "file": "components/Calendar.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Card",
@@ -123,7 +164,11 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "CardHoverEffect",
@@ -134,21 +179,30 @@
       ],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "motion": "^12.38.0",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "ChartCard",
       "type": "registry:ui",
       "file": "components/ChartCard.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "Checkbox",
       "type": "registry:ui",
       "file": "components/Checkbox.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Cluster",
@@ -158,7 +212,11 @@
       "internalDependencies": [
         "lib/layout.ts",
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "ConfirmModal",
@@ -168,7 +226,10 @@
         "Button",
         "IconButton"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Container",
@@ -177,14 +238,19 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "CopyCell",
       "type": "registry:ui",
       "file": "components/CopyCell.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "CopyField",
@@ -195,21 +261,26 @@
       ],
       "internalDependencies": [
         "hooks/useIsTruncated.ts"
-      ]
+      ],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "CountdownTimer",
       "type": "registry:ui",
       "file": "components/CountdownTimer.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "DataTable",
       "type": "registry:ui",
       "file": "components/DataTable.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "DateInput",
@@ -218,14 +289,18 @@
       "registryDependencies": [
         "Calendar"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Divider",
       "type": "registry:ui",
       "file": "components/Divider.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "DotPattern",
@@ -234,7 +309,11 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "DoughnutChart",
@@ -243,7 +322,10 @@
       "registryDependencies": [
         "ChartCard"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "recharts": "^3.9.0"
+      }
     },
     {
       "name": "EmailSelector",
@@ -256,14 +338,20 @@
       ],
       "internalDependencies": [
         "hooks/useIsTruncated.ts"
-      ]
+      ],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "EmptyState",
       "type": "registry:ui",
       "file": "components/EmptyState.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "FlipWords",
@@ -272,7 +360,12 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "motion": "^12.38.0",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "FormField",
@@ -281,7 +374,8 @@
       "registryDependencies": [
         "InlineError"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "GradientBackdrop",
@@ -290,7 +384,11 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "Grid",
@@ -300,7 +398,11 @@
       "internalDependencies": [
         "lib/layout.ts",
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "GridPattern",
@@ -309,14 +411,19 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "IconBadge",
       "type": "registry:ui",
       "file": "components/IconBadge.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "IconButton",
@@ -327,7 +434,11 @@
       ],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "IdleWarningModal",
@@ -337,7 +448,8 @@
         "Button",
         "CountdownTimer"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "ImageCropper",
@@ -349,14 +461,20 @@
       ],
       "internalDependencies": [
         "lib/crop-image.ts"
-      ]
+      ],
+      "dependencies": {
+        "react-easy-crop": "^5.5.7"
+      }
     },
     {
       "name": "InlineError",
       "type": "registry:ui",
       "file": "components/InlineError.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Input",
@@ -366,7 +484,10 @@
         "IconButton",
         "SpinnerCircle"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "InteractiveHoverButton",
@@ -375,7 +496,12 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "lucide-react": "^1.14.0",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "LanguageSelector",
@@ -385,7 +511,10 @@
         "Avatar",
         "Input"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Marquee",
@@ -394,7 +523,11 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "Meteors",
@@ -403,21 +536,30 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "motion": "^12.38.0",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "MetricCard",
       "type": "registry:ui",
       "file": "components/MetricCard.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "MfaDigitInput",
       "type": "registry:ui",
       "file": "components/MfaDigitInput.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "NumberTicker",
@@ -426,14 +568,22 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "motion": "^12.38.0",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "Pagination",
       "type": "registry:ui",
       "file": "components/Pagination.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "PulsatingButton",
@@ -442,7 +592,11 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "QrCodeCard",
@@ -451,7 +605,10 @@
       "registryDependencies": [
         "CopyField"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "qrcode": "^1.5.4"
+      }
     },
     {
       "name": "RateLimitBanner",
@@ -462,7 +619,10 @@
       ],
       "internalDependencies": [
         "lib/types.ts"
-      ]
+      ],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "RecoveryCodesGrid",
@@ -471,7 +631,10 @@
       "registryDependencies": [
         "Button"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Ripple",
@@ -480,7 +643,11 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "SearchTrigger",
@@ -489,7 +656,10 @@
       "registryDependencies": [
         "Badge"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Section",
@@ -498,21 +668,29 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "SegmentedControl",
       "type": "registry:ui",
       "file": "components/SegmentedControl.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "Select",
       "type": "registry:ui",
       "file": "components/Select.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "SettingRow",
@@ -521,7 +699,10 @@
       "registryDependencies": [
         "IconBadge"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "ShimmerButton",
@@ -530,7 +711,11 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "SidebarNav",
@@ -541,42 +726,50 @@
         "Tabs",
         "Tooltip"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Slider",
       "type": "registry:ui",
       "file": "components/Slider.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "SpeedometerChart",
       "type": "registry:ui",
       "file": "components/SpeedometerChart.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "SpinnerCircle",
       "type": "registry:ui",
       "file": "components/SpinnerCircle.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "SpinnerInfinity",
       "type": "registry:ui",
       "file": "components/SpinnerInfinity.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "SpinnerRing",
       "type": "registry:ui",
       "file": "components/SpinnerRing.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "Split",
@@ -586,7 +779,11 @@
       "internalDependencies": [
         "lib/layout.ts",
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "Spotlight",
@@ -595,7 +792,11 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "Stack",
@@ -605,7 +806,11 @@
       "internalDependencies": [
         "lib/layout.ts",
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "StickyCard",
@@ -614,14 +819,20 @@
       "registryDependencies": [
         "IconButton"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Tabs",
       "type": "registry:ui",
       "file": "components/Tabs.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "TextGenerateEffect",
@@ -630,14 +841,20 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "motion": "^12.38.0",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "Textarea",
       "type": "registry:ui",
       "file": "components/Textarea.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "ThemeToggle",
@@ -649,14 +866,21 @@
       ],
       "internalDependencies": [
         "hooks/useTheme.ts"
-      ]
+      ],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Toast",
       "type": "registry:ui",
       "file": "components/Toast.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "framer-motion": "^12.38.0",
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "ToastContainer",
@@ -665,21 +889,26 @@
       "registryDependencies": [
         "Toast"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "framer-motion": "^12.38.0"
+      }
     },
     {
       "name": "Toggle",
       "type": "registry:ui",
       "file": "components/Toggle.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "Tooltip",
       "type": "registry:ui",
       "file": "components/Tooltip.tsx",
       "registryDependencies": [],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "TotalUsersChart",
@@ -688,7 +917,10 @@
       "registryDependencies": [
         "ChartCard"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "recharts": "^3.9.0"
+      }
     },
     {
       "name": "TurnstileWidget",
@@ -697,7 +929,10 @@
       "registryDependencies": [],
       "internalDependencies": [
         "hooks/useTheme.ts"
-      ]
+      ],
+      "dependencies": {
+        "@marsidev/react-turnstile": "^1.5.2"
+      }
     },
     {
       "name": "TypingAnimation",
@@ -706,7 +941,12 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "motion": "^12.38.0",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "WordRotate",
@@ -715,7 +955,12 @@
       "registryDependencies": [],
       "internalDependencies": [
         "lib/utils.ts"
-      ]
+      ],
+      "dependencies": {
+        "clsx": "^2.1.1",
+        "motion": "^12.38.0",
+        "tailwind-merge": "^3.6.0"
+      }
     },
     {
       "name": "CTA",
@@ -728,7 +973,8 @@
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
-      ]
+      ],
+      "dependencies": {}
     },
     {
       "name": "Contact",
@@ -744,7 +990,10 @@
         "Select",
         "Textarea"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "FAQ",
@@ -757,7 +1006,8 @@
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
-      ]
+      ],
+      "dependencies": {}
     },
     {
       "name": "Hero",
@@ -766,7 +1016,8 @@
       "registryDependencies": [
         "NumberTicker"
       ],
-      "internalDependencies": []
+      "internalDependencies": [],
+      "dependencies": {}
     },
     {
       "name": "Portfolio",
@@ -781,7 +1032,10 @@
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
-      ]
+      ],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Pricing",
@@ -796,7 +1050,10 @@
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
-      ]
+      ],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Services",
@@ -810,7 +1067,10 @@
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
-      ]
+      ],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "Testimonials",
@@ -825,7 +1085,10 @@
       ],
       "internalDependencies": [
         "hooks/useReveal.ts"
-      ]
+      ],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     }
   ]
 }

@@ -36,6 +36,10 @@ test("anti-drift: registry commiteado == grafo recomputado (47 componentes)", ()
       `${f.name}.registryDependencies desincronizado (commiteado ${JSON.stringify(c.registryDependencies)} vs real ${JSON.stringify(f.registryDependencies)})`);
     assert.deepEqual(c.internalDependencies, f.internalDependencies,
       `${f.name}.internalDependencies desincronizado`);
+    // ANTI-DRIFT deps npm (ECO-164): el mapa `dependencies` commiteado debe casar con el recomputado de los
+    // imports externos reales (excluidos peers). Añadir/quitar un import npm sin regenerar → este test lo caza.
+    assert.deepEqual(c.dependencies ?? {}, f.dependencies,
+      `${f.name}.dependencies desincronizado (commiteado ${JSON.stringify(c.dependencies)} vs real ${JSON.stringify(f.dependencies)})`);
   }
 });
 
