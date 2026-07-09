@@ -1,0 +1,100 @@
+{
+  "process": "strategy",
+  "state": "presented",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-07-08T22:27:40Z",
+      "topic": "design-system-quality",
+      "kill_criteria": [
+        "\"La composici\u00f3n forzada (componer-no-duplicar) no puede expresar las variaciones leg\u00edtimas del DS (QR con bg propio",
+        "MetricCard tile transparente) sin m\u00e1s indirecci\u00f3n/coste que el hand-roll \u2192 el est\u00e1ndar pelea con la realidad\"",
+        "\"El coste de la bater\u00eda de gates (mantenimiento + falsos positivos que frenan cada PR) supera el drift que previene a esta escala (~1 DS",
+        "2 consumidores) \u2192 over-governance\"",
+        "\"check-component-drift + disciplina de review ya bastan para cazar el drift de composici\u00f3n sin un est\u00e1ndar nuevo \u2192 YAGNI\"",
+        "\"Los problemas del DS eran incidentes puntuales ya cubiertos por satellite-quality + la revisi\u00f3n del cat\u00e1logo",
+        "no un hueco sist\u00e9mico \u2192 la premisa (falta gobernanza) es falsa\""
+      ]
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-07-08T22:55:10Z",
+      "sources": [
+        "design-system/components/ChartCard.tsx:24",
+        "design-system/components/QrCodeCard.tsx:45",
+        "design-system/components/CardHoverEffect.tsx:13",
+        "design-system/scripts/check-selection-model.mjs:8",
+        "design-system/scripts/check-component-drift.mjs:49",
+        "design-system/scripts/check-raw-color.mjs:50",
+        "nexacore-dashboard/src/app/globals.css:32-58",
+        "design-system/package.json:11",
+        ".github/scripts/check-branch-protection.mjs:34",
+        "design-system/README.md:1-30",
+        "CONTRIBUTING.md:52-76",
+        "emkeel-governance/strategy/satellite-quality.md:7",
+        "emkeel-governance/strategy/satellite-quality.md:22",
+        "emkeel-governance/strategy/satellite-quality.md:60",
+        "emkeel-governance/strategy/satellite-quality.md:61",
+        "emkeel-governance/strategy/satellite-quality.md:44",
+        "emkeel-governance/strategy/design-propagation.md:176-179",
+        "emkeel-governance/strategy/design-propagation.md:41-44",
+        "emkeel-governance/strategy/design-propagation.md:208-212",
+        "emkeel-governance/adr/028-mecanismo-propagacion-gobernanza-diseno.md:1",
+        "https://carbondesignsystem.com/contributing/component-checklist/",
+        "https://atomicdesign.bradfrost.com/chapter-2/",
+        "https://www.radix-ui.com/primitives/docs/guides/composition",
+        "https://eslint.org/docs/latest/rules/no-restricted-syntax",
+        "https://typescript-eslint.io/users/versioning/"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-07-08T22:57:10Z",
+      "options": [
+        "solo-doc-norma-construccion",
+        "estandar-vivo+gate+version(espejo-satellite-quality)",
+        "gate-estructural-composicion-AST",
+        "pipeline-ciclo-vida-Polaris-Carbon"
+      ]
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-07-08T23:10:12Z",
+      "lens_calibration": "El gate estructural NO separa bug de variante sin inferir ROL: ChartCard/MetricCard/QrCode-inner/StickyCard-flotante son la MISMA forma AST; el allowlist ES la revision de dise\u00f1o (Opcion 1 disfrazada de gate). Ademas MetricCard esta mal clasificado (usa border-default, matchea card-flat 3/4 ejes, NO es tile transparente) y el borde canonico esta SIN decidir (tokens.css default vs globals.css strong): ChartCard border-strong coincide con el Card desplegado, no es defecto visual.",
+      "lens_overeng": "La maquinaria consciente-de-version es un ESPEJO FALSO: satellite-quality la justifica por una flota federada; el DS es 1 repo/1 equipo/1 build, sin flota que versionar, y la version-awareness ya existe una capa abajo (em-ui.manifest, SHAs por fichero). El problema son ~11 sitios enumerables. Minimo = gate estructural REQUERIDO + baseline estatico de los ~11 + consumir ECO-142; sin campo-version ni semver (YAGNI, kill-criterion propio).",
+      "lens_feasibility": "El gate AST no-restricted-syntax es INVIABLE: casa tipos de nodo AST no valores de className, y NO casa TemplateLiteral ni cn()/clsx, asi esta escrito el codigo ofensor (ChartCard.tsx:24 template-literal; Card usa cn()). Perderia la evidencia central + 264 sitios con la utilidad opaca card; ~90% falsos positivos (121 sitios triplet: Tooltip/ConfirmModal/dropdowns/DataTable/Avatar). La se\u00f1al distintiva ES el rol: colapsa en revision [H].",
+      "lens_sources": "Premisa FALSA: no es \"solo Conflict markers requerido\", hay 5 contextos requeridos (gates, Security Gate, Dashboard VRT, Satellite VRT, Conflict markers); gates y Security bloquean cada merge. Sobrevive el matiz \"12 de 13 gates de coverage no bloquean\". Corregir la cita. Y el non-goal de rol-inferido esta en design-propagation.md:220-221, no :208-212.",
+      "lens_boundary": "CONTRADICCION con el propio non-goal \"no re-abrir ADR-028\": promover el gate estructural a required BUILD-NOW re-decide la fase de ADR-028 (advisory scale-gated, >=N consumidores; declaro el gate-por-rol INVIABLE, :220): necesita ADR que enmiende, no consume/extend. Ademas ChartCard border-strong es NORMA-conforme (StoryConventions: panel/widget->border-strong; ChartCard es panel-de-card para widgets). La reconciliacion de la familia card ES el censo ECO-143 ya trackeado, sin citar.",
+      "completeness": "Falta el required-check HUMANO de certificacion [H] para la FUENTE, el innegociable de satellite-quality (:61 \"si certificacion no tiene su propio check, en la practica no existe\"). La estrategia solo pone el lado [M] y hasta reusa esa frase para justificar los gates [M], soltando el check humano que la fuente exige: el allowlist crea un vacio (una divergencia declarada se salta el gate [M] Y mergea verde sin check [H]) = la recurrencia ChartCard/QrCode bajo revision-humana-sola que decia rechazar."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-07-08T23:13:36Z",
+      "check_passed": true
+    },
+    "validated": {
+      "done": true,
+      "timestamp": "2026-07-08T23:15:20Z",
+      "case": "la familia card del DS (ChartCard/MetricCard/QrCode/StickyCard-flotante), la deuda exacta que motivo la estrategia",
+      "method": "Apliqu\u00e9 la recomendacion calibrada al caso: (1) corri el se\u00f1alamiento AST/triplet que usaria el gate diferido y (2) intente reconciliar el miembro mas facil (MetricCard) componiendo <Card>",
+      "outcome": "mixed",
+      "evidence_ref": "design-system/components/MetricCard.tsx:24"
+    },
+    "presented": {
+      "done": true,
+      "timestamp": "2026-07-08T23:16:09Z",
+      "presented_to": "operator",
+      "proceed_justification": "El mixed es el hallazgo, no un fallo: la realidad CONFIRMA la recomendacion calibrada (el gate mecanico de composicion es inviable \u2014 ChartCard.tsx:24 es template-literal invisible al AST, 42 componentes template-literal + 27 cn(), el triplet dispara en Select/Tooltip/ConfirmModal/DataTable; MetricCard no es drop-in por superficie tintada). El valor esta en el reencuadre [H] + promover gates factibles a required + el check humano de la fuente, no en un gate que no funciona. La familia card queda como decision de dise\u00f1o [H] (superficie canonica) + censo ECO-143, no como gate build-now."
+    }
+  },
+  "steps_schema": [
+    "scaffolded",
+    "researched",
+    "proposed",
+    "critiqued",
+    "checked",
+    "validated",
+    "presented",
+    "approved"
+  ]
+}
