@@ -1,0 +1,91 @@
+{
+  "process": "strategy",
+  "state": "presented",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-07-09T15:33:23Z",
+      "topic": "design-distribution",
+      "kill_criteria": [
+        "Ni (a) ni (b) del mercado resuelven a la vez deps + portabilidad + personalizacion gobernada sin re-introducir el problema (p.ej. el paquete siempre exige eject=copiar al entregar)",
+        "El etiquetado por-elemento es tan caro o fragil de mantener que no compra la personalizacion que promete a la escala prevista",
+        "La copia-extendida-con-deps (a) tiene un fallo tecnico que la hace inviable y obliga al paquete pese a perder portabilidad",
+        "El mercado no distingue estos modelos y la eleccion a/b es indiferente en la practica"
+      ]
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-07-09T16:12:24Z",
+      "sources": [
+        "https://ui.shadcn.com/docs/registry",
+        "https://ui.shadcn.com/docs/registry/registry-item-json",
+        "https://ui.shadcn.com/docs/cli",
+        "https://ui.shadcn.com/docs/registry/namespace",
+        "https://ui.shadcn.com/docs/registry/faq",
+        "https://vercel.com/academy/shadcn-ui/updating-and-maintaining-components",
+        "https://docs.npmjs.com/about-private-packages",
+        "https://mui.com/material-ui/customization/theme-components/",
+        "https://mantine.dev/styles/styles-api/",
+        "https://sebhastian.com/create-react-app-eject/",
+        "https://www.webmastered.com/blog/white-label-design-system-debt-theming-customization/",
+        "https://developer.salesforce.com/docs/platform/lwc/guide/create-components-css-custom-properties.html",
+        "https://www.w3.org/TR/css-shadow-parts-1/",
+        "https://designsystemproblems.com/token-management/token-tier-system/",
+        "https://bradfrost.com/blog/post/the-many-faces-of-themeable-design-systems/",
+        "design-system/registry.json",
+        "design-system/registry/cli.mjs:79",
+        "satellites/sat-cristian-garcia/package.json:13-21",
+        "emkeel-governance/adr/006-satellite-component-reuse.md:30",
+        "emkeel-governance/adr/028-mecanismo-propagacion-gobernanza-diseno.md:37"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-07-09T16:13:28Z",
+      "options": [
+        "a-extender-copia-con-install-deps(shadcn-isomorphic)",
+        "b-paquete-compartido+contrato",
+        "c-HIBRIDA-copia+propiedad+contrato-gobernado-RECOMENDADA"
+      ]
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-07-09T16:28:41Z",
+      "lens_marker_feasibility": "El mecanismo citado (::part / SLDS-hooks) NO mapea: ::part exige shadow-DOM (nuestros componentes son React+Tailwind light-DOM, cero shadow) y los slds-c son superficie de OVERRIDE (lo contrario a un lock) = el theming de tokens que ya tenemos. Y como el codigo se COPIA y lo posee el consumidor, un marcador dentro del .tsx es editable = advisory salvo que algo FUERA lo fuerce al pull. Mecanismo real: atributo data-em-lock (brand-locked/ds-governed/partial) + politica de merge POR-REGION en la reconciliacion ECO-158 + gate de direccion de token. SLDS/::part son PRECEDENTE, no implementacion. Opcion c sigue en pie.",
+      "lens_deps_install": "Hueco real pero 5 gaps: el DS importa DOS nombres de la MISMA libreria (motion/react x8 + framer-motion x2, package.json trae ambos) -> version-soup de fabrica; hay que normalizar el import de animacion (acoplado a design-system-quality) + un resolver especificador->paquete. Contradiccion pin-vs-rango: el doc dice pin exacto pero shadcn usa rangos ^; falta declarar la FUENTE de version (build-registry lee .tsx sin versiones). Direccionalmente bien pero medio-hecho como esta redactado.",
+      "lens_coherence": "MUST-FIX: design-distribution invade dos estrategias. Los marcadores @brand-locked/@ds-governed/@partial son de design-propagation (item 5) y su fase esta RATIFICADA por ADR-028 (gated por n\u00ba de consumidores). Reclamarlos aqui Y des-gatearlos = duplicacion + re-decision unilateral de un ADR aceptado con Decisions vacia (design-propagation.md:143 sigue diciendo gated = corpus contradictorio). FIX: design-distribution posee la FORMA; los marcadores vuelven a design-propagation y des-gatearlos se hace como ADR que ENMIENDA ADR-028 en ese carril, coordinado.",
+      "lens_extractability": "La invariante de extraibilidad es correcta y VERIFICADA casi-cierta hoy (satelite auto-contenido: sin tsconfig extends, turbopack.root pinneado, su lockfile, sin workspaces, cero imports que escapen; git subtree split funciona con los 32 commits). Aparcar el tooling es defendible. PERO falta ENFORCEMENT: un GATE que mantenga el satelite auto-contenido (ningun import escapa del dir).",
+      "lens_sources": "4 de 5 fuentes cuadran exactas. UNA no: el claim shadcn-CLI-INSTALA-las-deps no esta en las 3 paginas citadas (documentan el SCHEMA del campo dependencies, no el mecanico install). El install es cierto de hecho pero hay que citar una pagina que lo documente o suavizar el verbo.",
+      "completeness": "Falta la dimension LEGAL/IP + licencia/atribucion en el hand-off. Toda la opcion c pende de la propiedad/portabilidad del cliente pero NO hay LICENSE en ningun sitio Y defecto de compliance: el CLI copia codigo MIT adoptado (cn, Marquee, Meteors) SIN el aviso MIT requerido (el NOTICE vive solo en design-system que el CLI nunca envia; ya pasa en sat-cristian utils.ts). Build-now: el CLI escribe LICENSE/THIRD-PARTY-NOTICES por-satelite al add/init + decidir la licencia SALIENTE al cliente."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-07-09T16:31:25Z",
+      "check_passed": true
+    },
+    "validated": {
+      "done": true,
+      "timestamp": "2026-07-09T16:31:25Z",
+      "case": "el satelite real sat-cristian-garcia + el hueco de deps/legal/mecanismo del DS",
+      "method": "Verifique por codigo: (1) el satelite es auto-contenido (git subtree split funciona con su historia) pero le faltan deps del DS; (2) cli.mjs solo copyFileSync, ni instala deps ni envia el NOTICE MIT (sat-cristian utils.ts tiene cn sin aviso); (3) el mecanismo ::part no existe en nuestro light-DOM (cero shadow-DOM) -> el marcador real es data-em-lock + merge-policy por-region en ECO-158",
+      "outcome": "mixed",
+      "evidence_ref": "design-system/registry/cli.mjs:79"
+    },
+    "presented": {
+      "done": true,
+      "timestamp": "2026-07-09T16:31:46Z",
+      "presented_to": "operator",
+      "proceed_justification": "El mixed es honesto: la direccion (c hibrida) se valida (hueco de deps real, satelite extraible verificado, defecto de compliance MIT real) pero el panel reencuadro (6 must-fix): esta estrategia posee la FORMA (deps+extraibilidad+legal), los marcadores por-elemento VUELVEN a design-propagation (des-gatearlos = ADR que enmienda ADR-028 en ese carril), y el mecanismo real es data-em-lock + merge-policy por-region en ECO-158, no ::part. Proceder = adoptar la FORMA + coordinar los marcadores en design-propagation."
+    }
+  },
+  "steps_schema": [
+    "scaffolded",
+    "researched",
+    "proposed",
+    "critiqued",
+    "checked",
+    "validated",
+    "presented",
+    "approved"
+  ]
+}
