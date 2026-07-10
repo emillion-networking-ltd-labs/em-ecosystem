@@ -54,33 +54,58 @@ export const LinkUnderline: Story = {
   args: { variant: "link-underline", children: "See more" },
 };
 
-// ── ESTADOS — situación runtime del componente (NO son variantes) ──
-export const Loading: Story = { args: { loading: true } };
-export const Disabled: Story = { args: { disabled: true } };
-
-// ── CONTENIDO — qué lleva DENTRO (children); ortogonal a las variantes, cualquier variante lo admite ──
-// Icono + texto (Button añade el gap automáticamente).
-export const WithIcon: Story = {
-  args: {
-    children: (
-      <>
-        <Settings size={16} />
-        Settings
-      </>
-    ),
-  },
+// ── ESTADOS — situación runtime (NO variantes) · overview agrupado, un card por estado ──
+export const States: Story = {
+  render: () => (
+    <Variants
+      items={[
+        {
+          label: "loading",
+          node: (
+            <Button variant="primary" fullWidth={false} loading>
+              Continue
+            </Button>
+          ),
+        },
+        {
+          label: "disabled",
+          node: (
+            <Button variant="primary" fullWidth={false} disabled>
+              Continue
+            </Button>
+          ),
+        },
+      ]}
+    />
+  ),
 };
-// link-underline con un icono delante (p.ej. un back link) — como en el dashboard.
-export const LinkUnderlineWithIcon: Story = {
-  args: {
-    variant: "link-underline",
-    children: (
-      <>
-        <ArrowLeft size={16} />
-        Back
-      </>
-    ),
-  },
+
+// ── CONTENIDO — qué lleva DENTRO (children); ortogonal a las variantes · overview agrupado ──
+export const Content: Story = {
+  render: () => (
+    <Variants
+      items={[
+        {
+          label: "icono + texto",
+          node: (
+            <Button variant="primary" fullWidth={false}>
+              <Settings size={16} />
+              Settings
+            </Button>
+          ),
+        },
+        {
+          label: "link con icono",
+          node: (
+            <Button variant="link-underline" fullWidth={false}>
+              <ArrowLeft size={16} />
+              Back
+            </Button>
+          ),
+        },
+      ]}
+    />
+  ),
 };
 
 // ── EJES DE FORMA / TAMAÑO — overviews de cada eje ortogonal al estilo; `AllSizes` penúltima ──
@@ -148,8 +173,8 @@ const VARIANT_CARDS = [
 ] as const;
 
 // ── OVERVIEW (siempre la ÚLTIMA) ──
-// AllVariants — agrupa las VARIANTES (tamaño default). Estados (Loading/Disabled), contenido (WithIcon) y
-// forma (Shape) tienen su propio cajón/story — NO van aquí (no se mezclan ejes distintos).
+// AllVariants — agrupa las VARIANTES (tamaño default). Cada otro cajón tiene su propio overview: `States`,
+// `Content`, `Shape`, `AllSizes` — NO van aquí (no se mezclan ejes/cajones distintos).
 export const AllVariants: Story = {
   render: () => (
     <Variants

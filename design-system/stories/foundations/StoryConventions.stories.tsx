@@ -96,13 +96,15 @@ export const StoryConventions: Story = {
             size.
           </Rule>
           <Rule>
-            <strong>State</strong> (disabled / loading / hover / pressed) → its
-            own named story. Runtime state, not a variant.
+            <strong>State</strong> (disabled / loading / hover / pressed) → a{" "}
+            <Code>States</Code> overview (grouped — one card per state, like
+            AllVariants). Runtime state, not a variant.
           </Rule>
           <Rule>
             <strong>Content</strong> (an icon in the children, a back-link
-            arrow…) → its own named story. It is <em>what goes inside</em> —
-            orthogonal to every axis; any variant accepts it.
+            arrow…) → a <Code>Content</Code> overview (grouped). It is{" "}
+            <em>what goes inside</em> — orthogonal to every axis; any variant
+            accepts it.
           </Rule>
         </ul>
         <p className="mt-3 text-body text-content-secondary">
