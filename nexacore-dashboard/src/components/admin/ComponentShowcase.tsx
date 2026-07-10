@@ -52,10 +52,7 @@ import InfinitySpinner, {
   infinitySpinnerSpecs,
 } from "@/components/ui/InfinitySpinner";
 import RingSpinner, { ringSpinnerSpecs } from "@/components/ui/RingSpinner";
-import Avatar, {
-  sizeClasses as avatarSizes,
-  baseClass as avatarBase,
-} from "@/components/ui/Avatar";
+import Avatar, { avatarSpecs } from "@/components/ui/Avatar";
 import Toggle, { toggleSpecs } from "@/components/ui/Toggle";
 import Checkbox, { checkboxSpecs } from "@/components/ui/Checkbox";
 import Tooltip, { tooltipSpecs } from "@/components/ui/Tooltip";
@@ -954,8 +951,8 @@ function AvatarShowcase() {
 
       <SpecsPanel
         specs={{
-          Sizes: avatarSizes,
-          Base: { shared: avatarBase },
+          Sizes: avatarSpecs.sizes,
+          Base: { shared: avatarSpecs.base },
           Dimensions: {
             sm: "32px · 12px font · 14px icon",
             "md (default)": "40px · 14px font · 18px icon",

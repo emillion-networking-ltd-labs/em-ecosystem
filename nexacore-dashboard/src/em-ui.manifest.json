@@ -12,7 +12,7 @@
     },
     "components/ui/Avatar.tsx": {
       "from": "components/Avatar.tsx",
-      "sha": "07f258e354dd4da81623165d7d4c39780a475134"
+      "sha": "738d69fe5a562f63fe9693307b4e9ac0e8d0944d"
     },
     "components/ui/Badge.tsx": {
       "from": "components/Badge.tsx",

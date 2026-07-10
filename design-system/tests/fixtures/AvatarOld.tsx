@@ -1,12 +1,14 @@
 "use client";
 
+// Fixture de fidelidad ECO-170: copia FIEL del Avatar previo (raw concat + mapas), tomada de `main`.
+// Verifica que la versión tv produce los MISMOS atributos. Se retira al cerrar la pieza.
+
 import { useState } from "react";
-import { tv } from "tailwind-variants";
 import { User } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
-export function resolveAvatarSrc(src: string): string {
+function resolveAvatarSrc(src: string): string {
   if (src.startsWith("/uploads/")) return `${API_URL}${src}`;
   return src;
 }
@@ -19,37 +21,13 @@ interface AvatarProps {
   className?: string;
 }
 
-const ROOT_BASE =
-  "relative inline-flex items-center justify-center rounded-full border border-border-strong bg-surface-tertiary overflow-hidden shrink-0";
-
-const SIZE_CLASSES = {
+const sizeClasses = {
   sm: "w-8 h-8 text-caption",
   md: "w-10 h-10 text-body",
   lg: "w-16 h-16 text-h2",
-} as const;
-
-// Solo eje `size` (Avatar no tiene variante de estilo). Raw-concat previo → twMerge:false (misma convención
-// que Button/Badge: no colapsar los text-* de color con los de tamaño). La base incluye `relative` — lo que
-// el componente RENDERIZA de verdad; unifica el antiguo `baseClass` exportado que lo omitía (desajuste latente).
-export const avatar = tv(
-  {
-    base: ROOT_BASE,
-    variants: {
-      size: { sm: SIZE_CLASSES.sm, md: SIZE_CLASSES.md, lg: SIZE_CLASSES.lg },
-    },
-    defaultVariants: { size: "md" },
-  },
-  { twMerge: false },
-);
-
-// Superficie de docs (single-source): reemplaza los mapas exportados.
-export const avatarSpecs = { base: ROOT_BASE, sizes: SIZE_CLASSES } as const;
-
-const iconSizes = {
-  sm: 14,
-  md: 18,
-  lg: 28,
 };
+
+const iconSizes = { sm: 14, md: 18, lg: 28 };
 
 function getInitials(name?: string): string {
   if (!name) return "";
@@ -58,7 +36,7 @@ function getInitials(name?: string): string {
   return parts[0][0]?.toUpperCase() ?? "";
 }
 
-export default function Avatar({
+export default function AvatarOld({
   src,
   name,
   size = "md",
@@ -71,14 +49,11 @@ export default function Avatar({
 
   return (
     <div
-      className={avatar({ size, className })}
+      className={`relative inline-flex items-center justify-center rounded-full border border-border-strong bg-surface-tertiary overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
       aria-label={alt ?? name ?? "Avatar"}
       role="img"
     >
       {showImage ? (
-        // next/image is unsuitable here: avatar src is a runtime user-supplied
-        // URL or data URL (no fixed remote pattern allowlist), and its
-        // dimensions are container-driven (object-cover w-full h-full).
         // eslint-disable-next-line @next/next/no-img-element
         <img
           src={resolveAvatarSrc(src)}
