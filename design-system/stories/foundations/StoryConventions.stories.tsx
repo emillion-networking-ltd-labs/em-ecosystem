@@ -114,6 +114,15 @@ export const StoryConventions: Story = {
           one overview. Order in the file: Variant → State → Content →
           Size/Shape overviews → <Code>AllVariants</Code> last.
         </p>
+        <p className="mt-3 text-body text-content-secondary">
+          These are the <strong>known</strong> buckets — the set is{" "}
+          <strong>open</strong>. When a component reveals a category that fits
+          none (a new axis, a domain state), do not force it into an existing
+          bucket: <strong>identify it as a new bucket</strong>, give it its own
+          grouped overview, and register it here. A bucket is a category that is{" "}
+          <em>orthogonal</em> to the others — it composes with them, it does not
+          replace them.
+        </p>
       </Group>
 
       <Group
