@@ -176,7 +176,7 @@
     },
     "components/ui/Tabs.tsx": {
       "from": "components/Tabs.tsx",
-      "sha": "8c3cb0a8b0952507c0e8b6f24140f60b116b4292"
+      "sha": "dfce7b5f53ca1fa3e63a7ad46e64a81c10d9efe5"
     },
     "components/ui/ThemeToggle.tsx": {
       "from": "components/ThemeToggle.tsx",
