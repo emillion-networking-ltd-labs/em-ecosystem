@@ -42,7 +42,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// One story per variant (the design axis), before AllVariants groups them.
+// ── VARIANTES (eje `variant`) — una story por variante; las agrupa `AllVariants` al final ──
 export const Primary: Story = {};
 export const Secondary: Story = { args: { variant: "secondary" } };
 export const Outline: Story = { args: { variant: "outline" } };
@@ -53,7 +53,24 @@ export const Link: Story = { args: { variant: "link", children: "See more" } };
 export const LinkUnderline: Story = {
   args: { variant: "link-underline", children: "See more" },
 };
-// link-underline with a leading icon (e.g. a back link) — as in the dashboard.
+
+// ── ESTADOS — situación runtime del componente (NO son variantes) ──
+export const Loading: Story = { args: { loading: true } };
+export const Disabled: Story = { args: { disabled: true } };
+
+// ── CONTENIDO — qué lleva DENTRO (children); ortogonal a las variantes, cualquier variante lo admite ──
+// Icono + texto (Button añade el gap automáticamente).
+export const WithIcon: Story = {
+  args: {
+    children: (
+      <>
+        <Settings size={16} />
+        Settings
+      </>
+    ),
+  },
+};
+// link-underline con un icono delante (p.ej. un back link) — como en el dashboard.
 export const LinkUnderlineWithIcon: Story = {
   args: {
     variant: "link-underline",
@@ -66,22 +83,7 @@ export const LinkUnderlineWithIcon: Story = {
   },
 };
 
-// States.
-export const Loading: Story = { args: { loading: true } };
-export const Disabled: Story = { args: { disabled: true } };
-
-// Icon + text (Button adds the gap automatically).
-export const WithIcon: Story = {
-  args: {
-    children: (
-      <>
-        <Settings size={16} />
-        Settings
-      </>
-    ),
-  },
-};
-
+// ── EJES DE FORMA / TAMAÑO — overviews de cada eje ortogonal al estilo; `AllSizes` penúltima ──
 // Shape — el eje de FORMA (default vs circle), ortogonal al color y al tamaño (se compone con ellos). ECO-166.
 // `circle` = redondo/pill auto-width (redondo para texto corto como "15", pill para largo). SOLO con texto:
 // el botón circular con SOLO icono es IconButton (primitivo aparte). Antes era un hack de `className`.
@@ -145,8 +147,9 @@ const VARIANT_CARDS = [
   { v: "link-underline", label: "LinkUnderline", children: "See more" },
 ] as const;
 
-// AllVariants — ALWAYS last: every variant (default size), grouping the variant stories above. States
-// (Loading/Disabled), icons and Circular each have their own story — they do not belong here.
+// ── OVERVIEW (siempre la ÚLTIMA) ──
+// AllVariants — agrupa las VARIANTES (tamaño default). Estados (Loading/Disabled), contenido (WithIcon) y
+// forma (Shape) tienen su propio cajón/story — NO van aquí (no se mezclan ejes distintos).
 export const AllVariants: Story = {
   render: () => (
     <Variants
