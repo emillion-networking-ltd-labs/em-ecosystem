@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { tv } from "tailwind-variants";
 import { User } from "lucide-react";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
@@ -18,14 +19,31 @@ interface AvatarProps {
   className?: string;
 }
 
-export const baseClass =
-  "inline-flex items-center justify-center rounded-full border border-border-strong bg-surface-tertiary overflow-hidden shrink-0";
+const ROOT_BASE =
+  "relative inline-flex items-center justify-center rounded-full border border-border-strong bg-surface-tertiary overflow-hidden shrink-0";
 
-export const sizeClasses = {
+const SIZE_CLASSES = {
   sm: "w-8 h-8 text-caption",
   md: "w-10 h-10 text-body",
   lg: "w-16 h-16 text-h2",
-};
+} as const;
+
+// Solo eje `size` (Avatar no tiene variante de estilo). Raw-concat previo → twMerge:false (misma convención
+// que Button/Badge: no colapsar los text-* de color con los de tamaño). La base incluye `relative` — lo que
+// el componente RENDERIZA de verdad; unifica el antiguo `baseClass` exportado que lo omitía (desajuste latente).
+export const avatar = tv(
+  {
+    base: ROOT_BASE,
+    variants: {
+      size: { sm: SIZE_CLASSES.sm, md: SIZE_CLASSES.md, lg: SIZE_CLASSES.lg },
+    },
+    defaultVariants: { size: "md" },
+  },
+  { twMerge: false },
+);
+
+// Superficie de docs (single-source): reemplaza los mapas exportados.
+export const avatarSpecs = { base: ROOT_BASE, sizes: SIZE_CLASSES } as const;
 
 const iconSizes = {
   sm: 14,
@@ -53,7 +71,7 @@ export default function Avatar({
 
   return (
     <div
-      className={`relative inline-flex items-center justify-center rounded-full border border-border-strong bg-surface-tertiary overflow-hidden shrink-0 ${sizeClasses[size]} ${className}`}
+      className={avatar({ size, className })}
       aria-label={alt ?? name ?? "Avatar"}
       role="img"
     >

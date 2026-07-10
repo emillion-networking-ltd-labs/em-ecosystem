@@ -44,7 +44,8 @@ const STATES = [
 // Default — playground: use the size control (name → initials).
 export const Default: Story = {};
 
-// Fallbacks — the fallback chain (image → initials → icon), a state axis (not a design variant).
+// ── CONTENT — what renders INSIDE (the fallback chain image → initials → icon) · grouped overview ──
+// It is a content axis, not a design variant: which child shows depends on the props present, not on style.
 export const Fallbacks: Story = {
   render: () => (
     <Variants
@@ -56,6 +57,7 @@ export const Fallbacks: Story = {
   ),
 };
 
+// ── OVERVIEW (ALWAYS last) — the grouped overview above (Content) sits right before this ──
 // AllSizes — the 3 sizes (initials), with px. Last (no AllVariants: Avatar has no design-variant axis).
 export const AllSizes: Story = {
   render: () => (
