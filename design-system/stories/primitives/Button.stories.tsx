@@ -89,40 +89,26 @@ const CIRCLE_VARIANTS = ["primary", "secondary", "outline", "danger"] as const;
 
 export const Shape: Story = {
   render: () => (
-    <DemoCard>
-      <div className="flex flex-col items-center gap-6">
-        <div className="flex items-end gap-8">
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-caption text-content-secondary font-mono">
-              default
-            </p>
+    <Variants
+      items={[
+        {
+          label: "default",
+          node: (
             <Button variant="primary" fullWidth={false}>
               Continue
             </Button>
-          </div>
-          <div className="flex flex-col items-center gap-2">
-            <p className="text-caption text-content-secondary font-mono">
-              circle
-            </p>
-            <Button variant="primary" fullWidth={false} shape="circle">
+          ),
+        },
+        ...CIRCLE_VARIANTS.map((v) => ({
+          label: `circle · ${v}`,
+          node: (
+            <Button variant={v} fullWidth={false} shape="circle">
               15
             </Button>
-          </div>
-        </div>
-        <div>
-          <p className="mb-2 text-caption text-content-secondary font-mono">
-            circle · compone con cada variante de color
-          </p>
-          <div className="flex flex-wrap items-center gap-3">
-            {CIRCLE_VARIANTS.map((v) => (
-              <Button key={v} variant={v} fullWidth={false} shape="circle">
-                15
-              </Button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </DemoCard>
+          ),
+        })),
+      ]}
+    />
   ),
 };
 
