@@ -37,12 +37,12 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// ----- One story per variant (color axis), before AllVariants groups them -----
+// ── VARIANTS (the `variant` axis) — one story per variant; grouped by `AllVariants` at the end ──
 
 // Default — boxed: filled surface (surface-tertiary). The default of the catalog, the most used. (variant="boxed")
 export const Default: Story = {};
 
-// Boxed-hover — transparent; gains a surface on hover. (variant="boxed-hover")
+// BoxedHover — transparent; gains a surface on hover. (variant="boxed-hover")
 export const BoxedHover: Story = {
   args: { variant: "boxed-hover", "aria-label": "Notifications", children: <Bell size={16} /> },
 };
@@ -57,13 +57,41 @@ export const Danger: Story = {
   args: { variant: "danger", "aria-label": "Delete", children: <Trash2 size={16} /> },
 };
 
-// ----- Shape (orthogonal to color) -----
-
-// Circle — rounded-full instead of rounded-md. Combines with any variant (e.g. the testimonial arrows
-// use boxed + circle). The form only reads on variants with a surface, so it's shown on `boxed`.
-export const Circle: Story = {
-  args: { shape: "circle", "aria-label": "Settings" },
+// ── STATES — runtime state (NOT variants) · grouped overview, one card per state ──
+export const States: Story = {
+  render: () => (
+    <Variants
+      items={[
+        {
+          label: "Loading",
+          node: (
+            <IconButton variant="boxed" loading aria-label="Loading">
+              <Settings size={16} />
+            </IconButton>
+          ),
+        },
+        {
+          label: "Disabled",
+          node: (
+            <IconButton variant="boxed" disabled aria-label="Disabled">
+              <Settings size={16} />
+            </IconButton>
+          ),
+        },
+        {
+          label: "Pressed (aria-pressed)",
+          node: (
+            <IconButton variant="boxed" aria-pressed="true" aria-label="Pressed">
+              <Settings size={16} />
+            </IconButton>
+          ),
+        },
+      ]}
+    />
+  ),
 };
+
+// ── CONTENT / BEHAVIOR — how the icon reacts on hover · interactive, so kept as dedicated stories ──
 
 // SpinOnHover — the icon rotates on hover (cw / ccw), e.g. carousel arrows. Hover each button.
 export const SpinOnHover: Story = {
@@ -81,25 +109,39 @@ export const SpinOnHover: Story = {
   ),
 };
 
-// ----- States -----
-
-// Loading — spinner replaces the icon; the button is disabled.
-export const Loading: Story = { args: { loading: true } };
-
-// Disabled — non-interactive (opacity-50).
-export const Disabled: Story = { args: { disabled: true } };
-
-// Pressed — boxed with aria-pressed → ring (active state, e.g. a collapsed SidebarNav toggle).
-export const Pressed: Story = {
-  args: { "aria-pressed": "true", "aria-label": "Active" },
-};
-
 // WithTooltip — tooltip on hover (uses aria-label when tooltip=true, or a custom string).
 export const WithTooltip: Story = {
   args: { variant: "default", tooltip: "Copy", "aria-label": "Copy", children: <Copy size={16} /> },
 };
 
-// ----- Sizes -----
+// ── SHAPE / SIZE AXES — an overview per axis orthogonal to style; `AllSizes` is penultimate ──
+
+// Shape — the FORM axis (square vs circle), orthogonal to colour and size (composes with them).
+// The form only reads on variants with a surface, so it's shown on `boxed`.
+export const Shape: Story = {
+  render: () => (
+    <Variants
+      items={[
+        {
+          label: "square (default)",
+          node: (
+            <IconButton variant="boxed" shape="square" aria-label="Square">
+              <Settings size={16} />
+            </IconButton>
+          ),
+        },
+        {
+          label: "circle",
+          node: (
+            <IconButton variant="boxed" shape="circle" aria-label="Circle">
+              <Settings size={16} />
+            </IconButton>
+          ),
+        },
+      ]}
+    />
+  ),
+};
 
 // The 2 sizes (largest → smallest), with px (icon 16 + padding). sm is the default.
 const SIZES = [
@@ -123,10 +165,9 @@ export const AllSizes: Story = {
   ),
 };
 
-// ----- AllVariants — ALWAYS last -----
-
-// The 4 variants (default size), labelled by their story name. Shape, spinOnHover, states and tooltip
-// each have their own story — they do not belong here.
+// ── OVERVIEW (ALWAYS last) ──
+// AllVariants — groups the VARIANTS (default size). Every other bucket has its own overview: `States`,
+// `Shape`, `AllSizes` — they do NOT belong here (never mix different axes/buckets).
 const VARIANT_CARDS: { v: IconButtonVariant; icon: LucideIcon; label: string }[] = [
   { v: "boxed", icon: Settings, label: "Default" },
   { v: "boxed-hover", icon: Bell, label: "BoxedHover" },

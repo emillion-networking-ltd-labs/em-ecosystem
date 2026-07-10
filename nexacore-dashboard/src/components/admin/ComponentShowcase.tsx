@@ -79,9 +79,7 @@ import RecoveryCodesGrid, {
   recoveryCodesGridSpecs,
 } from "@/components/ui/RecoveryCodesGrid";
 import IconButton, {
-  variantClasses as iconBtnVariants,
-  sizeClasses as iconBtnSizes,
-  baseClass as iconBtnBase,
+  iconButtonSpecs,
   usage as iconBtnUsage,
 } from "@/components/ui/IconButton";
 import SegmentedControl, {
@@ -541,9 +539,9 @@ function ButtonShowcase() {
           },
           "Link Variants": linkSpecs.variants,
           "Link Base": { shared: linkSpecs.base },
-          "Icon Button Base": { shared: iconBtnBase },
-          "Icon Button Variants": iconBtnVariants,
-          "Icon Button Sizes": iconBtnSizes,
+          "Icon Button Base": { shared: iconButtonSpecs.base },
+          "Icon Button Variants": iconButtonSpecs.variants,
+          "Icon Button Sizes": iconButtonSpecs.sizes,
           "Icon Button Usage": iconBtnUsage,
         }}
       />
