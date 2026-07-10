@@ -10,6 +10,7 @@ export type ButtonVariant =
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: "sm" | "md" | "lg";
+  shape?: "default" | "circle";
   loading?: boolean;
   fullWidth?: boolean;
   as?: React.ElementType;
@@ -50,6 +51,9 @@ const CONTROL_BOX = {
 } as const;
 const ROOT_BASE =
   "relative items-center justify-center gap-2 whitespace-nowrap";
+// Forma circular (redondo/pill auto-width): override con `!important` sobre la caja de control — convención
+// del DS para overrides (ECO-166). Promueve el hack de `className` a eje `shape` de primera clase.
+const CIRCLE_SHAPE = "h-9! w-9! min-w-0! rounded-full! px-0!";
 
 // Contrato de variante del DS (design-system-quality / ADR-029): tailwind-variants con slots.
 // Button es la pieza de REFERENCIA — todo primitivo/compuesto declara sus variantes con este contrato
@@ -81,6 +85,9 @@ export const button = tv(
       },
       fullWidth: { true: {}, false: {} },
       loading: { true: { label: "opacity-30" }, false: {} },
+      // Forma: eje ORTOGONAL al color y al tamaño (se compone con ellos). `circle` = redondo/pill auto-width,
+      // funciona con texto o icono. Fidelidad: mismas clases que el hack `className` previo.
+      shape: { default: {}, circle: { root: CIRCLE_SHAPE } },
     },
     compoundVariants: [
       // Caja del control (padding + radio + alto) por tamaño — SOLO para variantes de control (las link no).
@@ -107,6 +114,7 @@ export const button = tv(
     defaultVariants: {
       variant: "primary",
       size: "md",
+      shape: "default",
       fullWidth: true,
       loading: false,
     },
@@ -131,12 +139,14 @@ export const buttonSpecs = {
     md: `${CONTROL_BOX.md} ${SIZE_TEXT.md}`,
     lg: `${CONTROL_BOX.lg} ${SIZE_TEXT.lg}`,
   },
+  shapes: { default: "", circle: CIRCLE_SHAPE },
 } as const;
 
 export default function Button({
   as: Component = "button",
   variant = "primary",
   size = "md",
+  shape = "default",
   loading = false,
   fullWidth = true,
   children,
@@ -149,6 +159,7 @@ export default function Button({
   const { root, label, spinner } = button({
     variant,
     size,
+    shape,
     fullWidth,
     loading,
   });

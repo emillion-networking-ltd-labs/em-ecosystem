@@ -66,8 +66,7 @@ export const WithIcon: Story = {
   },
 };
 
-// Round button: override rounded-full + 36px square + no padding (same as the dashboard).
-const CIRCLE = "h-9! w-9! min-w-0! rounded-full! px-0!";
+// Circular: eje de forma de primera clase `shape="circle"` (ECO-166) — antes era un hack de `className`.
 const CIRCLE_VARIANTS = ["primary", "secondary", "outline", "danger"] as const;
 
 // Circular — two forms: with text and with icon.
@@ -79,7 +78,7 @@ export const Circular: Story = {
         <p className="mb-2 text-caption text-content-secondary font-mono">with text</p>
         <div className="flex flex-wrap items-center gap-3">
           {CIRCLE_VARIANTS.map((v) => (
-            <Button key={v} variant={v} fullWidth={false} className={CIRCLE}>
+            <Button key={v} variant={v} fullWidth={false} shape="circle">
               15
             </Button>
           ))}
@@ -94,7 +93,7 @@ export const Circular: Story = {
               variant={v}
               fullWidth={false}
               aria-label="Settings"
-              className={CIRCLE}
+              shape="circle"
             >
               <Settings size={16} />
             </Button>

@@ -15,14 +15,20 @@ const SIZES = ["sm", "md", "lg"] as const;
 const CIRCLE = "h-9! w-9! min-w-0! rounded-full! px-0!";
 
 type Props = Record<string, unknown>;
-const cases: { name: string; props: Props }[] = [];
+// `props` = cómo se invocaba en el VIEJO; `newProps` (opcional) = cómo en el NUEVO cuando la API cambió.
+// Para el circular: viejo = hack `className`, nuevo = eje `shape="circle"` (ECO-166) — deben dar lo mismo.
+const cases: { name: string; props: Props; newProps?: Props }[] = [];
 for (const variant of VARIANTS)
   for (const size of SIZES)
     for (const fullWidth of [true, false])
       for (const loading of [false, true])
         cases.push({ name: `${variant} · ${size} · fw=${fullWidth} · loading=${loading}`, props: { variant, size, fullWidth, loading } });
 for (const variant of ["primary", "secondary", "outline", "danger"] as const)
-  cases.push({ name: `circular · ${variant}`, props: { variant, fullWidth: false, className: CIRCLE } });
+  cases.push({
+    name: `circular · ${variant}`,
+    props: { variant, fullWidth: false, className: CIRCLE },
+    newProps: { variant, fullWidth: false, shape: "circle" },
+  });
 cases.push({ name: `link como <a> (href)`, props: { variant: "link-underline", as: "a", href: "/x" } });
 cases.push({ name: `control como <a> (href)`, props: { variant: "primary", as: "a", href: "/x" } });
 cases.push({ name: `disabled`, props: { variant: "primary", disabled: true } });
@@ -54,7 +60,7 @@ describe("Button — fidelidad de atributos (viejo mapas vs nuevo tv), por caso"
       const oldR = render(<ButtonOld {...c.props}>X</ButtonOld>);
       const old = extract(oldR.container);
       oldR.unmount();
-      const newR = render(<Button {...c.props}>X</Button>);
+      const newR = render(<Button {...(c.newProps ?? c.props)}>X</Button>);
       const neu = extract(newR.container);
       newR.unmount();
 
