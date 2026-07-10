@@ -35,7 +35,7 @@ const SIZES = [
 // photos), so for the logo we force `object-contain` + padding on the <img> via an arbitrary variant
 // so it shows whole and centered inside the circle.
 const LOGO_FIT = "[&_img]:object-contain [&_img]:p-1.5";
-const STATES = [
+const CONTENT = [
   { key: "image", label: "Image", props: { name: "Ada Lovelace", src: AVATAR_IMG, className: LOGO_FIT } },
   { key: "initials", label: "Initials", props: { name: "Ada Lovelace" } },
   { key: "icon", label: "Icon", props: {} },
@@ -46,12 +46,13 @@ export const Default: Story = {};
 
 // ── CONTENT — what renders INSIDE (the fallback chain image → initials → icon) · grouped overview ──
 // It is a content axis, not a design variant: which child shows depends on the props present, not on style.
-export const Fallbacks: Story = {
+// Shown at the DEFAULT size (md) — a non-size overview always uses the default size; sizes live in AllSizes.
+export const Content: Story = {
   render: () => (
     <Variants
-      items={STATES.map(({ label, props }) => ({
+      items={CONTENT.map(({ label, props }) => ({
         label,
-        node: <Avatar size="lg" {...props} />,
+        node: <Avatar {...props} />,
       }))}
     />
   ),
