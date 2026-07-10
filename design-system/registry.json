@@ -682,7 +682,9 @@
       "file": "components/SegmentedControl.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
-      "dependencies": {}
+      "dependencies": {
+        "tailwind-variants": "^3.2.2"
+      }
     },
     {
       "name": "Select",
