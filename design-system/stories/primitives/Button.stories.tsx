@@ -9,13 +9,14 @@ const meta = {
   tags: ["autodocs"],
   // fullWidth:false in the catalog so buttons render at their own size (the component defaults to
   // true, intended for forms — toggleable via the control).
-  args: { children: "Continue", variant: "primary", size: "md", fullWidth: false },
+  args: { children: "Continue", variant: "primary", size: "md", shape: "default", fullWidth: false },
   argTypes: {
     variant: {
       control: "select",
       options: ["primary", "secondary", "outline", "danger", "link", "link-underline"],
     },
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
+    shape: { control: "inline-radio", options: ["default", "circle"] },
     fullWidth: { control: "boolean" },
   },
   render: (args) => (
