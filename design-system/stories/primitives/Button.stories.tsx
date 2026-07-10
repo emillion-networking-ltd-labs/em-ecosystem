@@ -9,11 +9,24 @@ const meta = {
   tags: ["autodocs"],
   // fullWidth:false in the catalog so buttons render at their own size (the component defaults to
   // true, intended for forms — toggleable via the control).
-  args: { children: "Continue", variant: "primary", size: "md", shape: "default", fullWidth: false },
+  args: {
+    children: "Continue",
+    variant: "primary",
+    size: "md",
+    shape: "default",
+    fullWidth: false,
+  },
   argTypes: {
     variant: {
       control: "select",
-      options: ["primary", "secondary", "outline", "danger", "link", "link-underline"],
+      options: [
+        "primary",
+        "secondary",
+        "outline",
+        "danger",
+        "link",
+        "link-underline",
+      ],
     },
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
     shape: { control: "inline-radio", options: ["default", "circle"] },
@@ -33,7 +46,9 @@ type Story = StoryObj<typeof meta>;
 export const Primary: Story = {};
 export const Secondary: Story = { args: { variant: "secondary" } };
 export const Outline: Story = { args: { variant: "outline" } };
-export const Danger: Story = { args: { variant: "danger", children: "Delete" } };
+export const Danger: Story = {
+  args: { variant: "danger", children: "Delete" },
+};
 export const Link: Story = { args: { variant: "link", children: "See more" } };
 export const LinkUnderline: Story = {
   args: { variant: "link-underline", children: "See more" },
@@ -67,82 +82,47 @@ export const WithIcon: Story = {
   },
 };
 
-// Circular: eje de forma de primera clase `shape="circle"` (ECO-166) — antes era un hack de `className`.
+// Shape — el eje de FORMA (default vs circle), ortogonal al color y al tamaño (se compone con ellos). ECO-166.
+// `circle` = redondo/pill auto-width (redondo para texto corto como "15", pill para largo). SOLO con texto:
+// el botón circular con SOLO icono es IconButton (primitivo aparte). Antes era un hack de `className`.
 const CIRCLE_VARIANTS = ["primary", "secondary", "outline", "danger"] as const;
 
-// Circular — two forms: with text and with icon.
-export const Circular: Story = {
-  render: () => (
-    <DemoCard>
-      <div className="flex flex-col items-center gap-4">
-        <div>
-        <p className="mb-2 text-caption text-content-secondary font-mono">with text</p>
-        <div className="flex flex-wrap items-center gap-3">
-          {CIRCLE_VARIANTS.map((v) => (
-            <Button key={v} variant={v} fullWidth={false} shape="circle">
-              15
-            </Button>
-          ))}
-        </div>
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-secondary font-mono">with icon</p>
-        <div className="flex flex-wrap items-center gap-3">
-          {CIRCLE_VARIANTS.map((v) => (
-            <Button
-              key={v}
-              variant={v}
-              fullWidth={false}
-              aria-label="Settings"
-              shape="circle"
-            >
-              <Settings size={16} />
-            </Button>
-          ))}
-        </div>
-      </div>
-      </div>
-    </DemoCard>
-  ),
-};
-
-// Shape — el eje de FORMA (default vs circle), ortogonal al color y al tamaño (se compone con ellos). ECO-166.
-// `circle` = redondo/pill auto-width (redondo para texto corto como "15", pill para largo); con texto o icono.
 export const Shape: Story = {
   render: () => (
-    <Variants
-      items={[
-        {
-          label: "default",
-          node: (
+    <DemoCard>
+      <div className="flex flex-col items-center gap-6">
+        <div className="flex items-end gap-8">
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-caption text-content-secondary font-mono">
+              default
+            </p>
             <Button variant="primary" fullWidth={false}>
               Continue
             </Button>
-          ),
-        },
-        {
-          label: "circle · text",
-          node: (
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-caption text-content-secondary font-mono">
+              circle
+            </p>
             <Button variant="primary" fullWidth={false} shape="circle">
               15
             </Button>
-          ),
-        },
-        {
-          label: "circle · icon",
-          node: (
-            <Button
-              variant="primary"
-              fullWidth={false}
-              shape="circle"
-              aria-label="Settings"
-            >
-              <Settings size={16} />
-            </Button>
-          ),
-        },
-      ]}
-    />
+          </div>
+        </div>
+        <div>
+          <p className="mb-2 text-caption text-content-secondary font-mono">
+            circle · compone con cada variante de color
+          </p>
+          <div className="flex flex-wrap items-center gap-3">
+            {CIRCLE_VARIANTS.map((v) => (
+              <Button key={v} variant={v} fullWidth={false} shape="circle">
+                15
+              </Button>
+            ))}
+          </div>
+        </div>
+      </div>
+    </DemoCard>
   ),
 };
 

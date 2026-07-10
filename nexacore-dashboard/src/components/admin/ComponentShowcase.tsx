@@ -248,11 +248,7 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
           </button>
         ) : row.state === "Circle" ? (
           <div className="flex justify-center">
-            <Button
-              variant={v}
-              fullWidth={false}
-              className="rounded-full! px-0! w-9! h-9! min-w-0!"
-            >
+            <Button variant={v} fullWidth={false} shape="circle">
               15
             </Button>
           </div>
