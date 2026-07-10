@@ -296,7 +296,7 @@ export const StoryConventions: Story = {
             <strong>discrete element/panel</strong> shown as its content (→{" "}
             <Code>border-strong</Code>)? Pick the <em>role</em> —{" "}
             <strong>never a raw value</strong> (a hex, an{" "}
-            <Code>rgba()</Code>, or a Tailwind palette colour) that merely matches — {/* raw-color-ok: prosa que ENSEÑA la norma */}
+            <Code>rgba()</Code>, or a Tailwind palette colour) that merely matches — {/* raw-color-ok: prose that TEACHES the norm */}
             a non-token value cannot be re-themed and breaks propagation.
           </Rule>
         </ul>

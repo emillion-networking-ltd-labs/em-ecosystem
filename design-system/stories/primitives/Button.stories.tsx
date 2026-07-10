@@ -42,7 +42,7 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// ── VARIANTES (eje `variant`) — una story por variante; las agrupa `AllVariants` al final ──
+// ── VARIANTS (the `variant` axis) — one story per variant; grouped by `AllVariants` at the end ──
 export const Primary: Story = {};
 export const Secondary: Story = { args: { variant: "secondary" } };
 export const Outline: Story = { args: { variant: "outline" } };
@@ -54,7 +54,7 @@ export const LinkUnderline: Story = {
   args: { variant: "link-underline", children: "See more" },
 };
 
-// ── ESTADOS — situación runtime (NO variantes) · overview agrupado, un card por estado ──
+// ── STATES — runtime state (NOT variants) · grouped overview, one card per state ──
 export const States: Story = {
   render: () => (
     <Variants
@@ -80,13 +80,13 @@ export const States: Story = {
   ),
 };
 
-// ── CONTENIDO — qué lleva DENTRO (children); ortogonal a las variantes · overview agrupado ──
+// ── CONTENT — what goes INSIDE (children); orthogonal to variants · grouped overview ──
 export const Content: Story = {
   render: () => (
     <Variants
       items={[
         {
-          label: "icono + texto",
+          label: "icon + text",
           node: (
             <Button variant="primary" fullWidth={false}>
               <Settings size={16} />
@@ -95,7 +95,7 @@ export const Content: Story = {
           ),
         },
         {
-          label: "link con icono",
+          label: "link with icon",
           node: (
             <Button variant="link-underline" fullWidth={false}>
               <ArrowLeft size={16} />
@@ -108,10 +108,10 @@ export const Content: Story = {
   ),
 };
 
-// ── EJES DE FORMA / TAMAÑO — overviews de cada eje ortogonal al estilo; `AllSizes` penúltima ──
-// Shape — el eje de FORMA (default vs circle), ortogonal al color y al tamaño (se compone con ellos). ECO-166.
-// `circle` = redondo/pill auto-width (redondo para texto corto como "15", pill para largo). SOLO con texto:
-// el botón circular con SOLO icono es IconButton (primitivo aparte). Antes era un hack de `className`.
+// ── SHAPE / SIZE AXES — an overview per axis orthogonal to style; `AllSizes` is penultimate ──
+// Shape — the FORM axis (default vs circle), orthogonal to colour and size (composes with them). ECO-166.
+// `circle` = round/pill auto-width (round for short text like "15", pill for long). TEXT only:
+// the icon-only circular button is IconButton (a separate primitive). Was a `className` hack before.
 const CIRCLE_VARIANTS = ["primary", "secondary", "outline", "danger"] as const;
 
 export const Shape: Story = {
@@ -172,9 +172,9 @@ const VARIANT_CARDS = [
   { v: "link-underline", label: "LinkUnderline", children: "See more" },
 ] as const;
 
-// ── OVERVIEW (siempre la ÚLTIMA) ──
-// AllVariants — agrupa las VARIANTES (tamaño default). Cada otro cajón tiene su propio overview: `States`,
-// `Content`, `Shape`, `AllSizes` — NO van aquí (no se mezclan ejes/cajones distintos).
+// ── OVERVIEW (ALWAYS last) ──
+// AllVariants — groups the VARIANTS (default size). Every other bucket has its own overview: `States`,
+// `Content`, `Shape`, `AllSizes` — they do NOT belong here (never mix different axes/buckets).
 export const AllVariants: Story = {
   render: () => (
     <Variants
