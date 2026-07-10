@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
+import { writeFileSync } from "node:fs";
 import Badge from "@/components/ui/Badge";
 import BadgeOld from "./fixtures/BadgeOld";
 
@@ -17,6 +18,8 @@ function extract(container: HTMLElement) {
   const root = container.firstElementChild as Element;
   return { tag: root.tagName.toLowerCase(), root: classSet(root) };
 }
+
+const rows: { name: string; ok: boolean; old: ReturnType<typeof extract>; neu: ReturnType<typeof extract> }[] = [];
 
 describe("Badge — fidelidad de atributos (viejo mapas vs nuevo tv), por caso", () => {
   for (const variant of VARIANTS) {
@@ -37,9 +40,18 @@ describe("Badge — fidelidad de atributos (viejo mapas vs nuevo tv), por caso",
         const neu = extract(newR.container);
         newR.unmount();
 
+        const ok = neu.tag === old.tag && JSON.stringify(neu.root) === JSON.stringify(old.root);
+        rows.push({ name: `${variant} · ${size}`, ok, old, neu });
+
         expect(neu.tag).toBe(old.tag);
         expect(neu.root).toEqual(old.root);
       });
     }
   }
+
+  it("emite la tabla viejo-vs-nuevo (JSON) para revisión", () => {
+    const mism = rows.filter((r) => !r.ok);
+    writeFileSync("/tmp/badge-fidelity.json", JSON.stringify({ total: rows.length, mismatches: mism.length, rows }, null, 2));
+    expect(mism.length).toBe(0);
+  });
 });
