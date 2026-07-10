@@ -9,13 +9,27 @@ const meta = {
   tags: ["autodocs"],
   // fullWidth:false in the catalog so buttons render at their own size (the component defaults to
   // true, intended for forms — toggleable via the control).
-  args: { children: "Continue", variant: "primary", size: "md", fullWidth: false },
+  args: {
+    children: "Continue",
+    variant: "primary",
+    size: "md",
+    shape: "default",
+    fullWidth: false,
+  },
   argTypes: {
     variant: {
       control: "select",
-      options: ["primary", "secondary", "outline", "danger", "link", "link-underline"],
+      options: [
+        "primary",
+        "secondary",
+        "outline",
+        "danger",
+        "link",
+        "link-underline",
+      ],
     },
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
+    shape: { control: "inline-radio", options: ["default", "circle"] },
     fullWidth: { control: "boolean" },
   },
   render: (args) => (
@@ -28,81 +42,100 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-// One story per variant (the design axis), before AllVariants groups them.
+// ── VARIANTS (the `variant` axis) — one story per variant; grouped by `AllVariants` at the end ──
 export const Primary: Story = {};
 export const Secondary: Story = { args: { variant: "secondary" } };
 export const Outline: Story = { args: { variant: "outline" } };
-export const Danger: Story = { args: { variant: "danger", children: "Delete" } };
+export const Danger: Story = {
+  args: { variant: "danger", children: "Delete" },
+};
 export const Link: Story = { args: { variant: "link", children: "See more" } };
 export const LinkUnderline: Story = {
   args: { variant: "link-underline", children: "See more" },
 };
-// link-underline with a leading icon (e.g. a back link) — as in the dashboard.
-export const LinkUnderlineWithIcon: Story = {
-  args: {
-    variant: "link-underline",
-    children: (
-      <>
-        <ArrowLeft size={16} />
-        Back
-      </>
-    ),
-  },
+
+// ── STATES — runtime state (NOT variants) · grouped overview, one card per state ──
+export const States: Story = {
+  render: () => (
+    <Variants
+      items={[
+        {
+          label: "loading",
+          node: (
+            <Button variant="primary" fullWidth={false} loading>
+              Continue
+            </Button>
+          ),
+        },
+        {
+          label: "disabled",
+          node: (
+            <Button variant="primary" fullWidth={false} disabled>
+              Continue
+            </Button>
+          ),
+        },
+      ]}
+    />
+  ),
 };
 
-// States.
-export const Loading: Story = { args: { loading: true } };
-export const Disabled: Story = { args: { disabled: true } };
-
-// Icon + text (Button adds the gap automatically).
-export const WithIcon: Story = {
-  args: {
-    children: (
-      <>
-        <Settings size={16} />
-        Settings
-      </>
-    ),
-  },
+// ── CONTENT — what goes INSIDE (children); orthogonal to variants · grouped overview ──
+export const Content: Story = {
+  render: () => (
+    <Variants
+      items={[
+        {
+          label: "icon + text",
+          node: (
+            <Button variant="primary" fullWidth={false}>
+              <Settings size={16} />
+              Settings
+            </Button>
+          ),
+        },
+        {
+          label: "link with icon",
+          node: (
+            <Button variant="link-underline" fullWidth={false}>
+              <ArrowLeft size={16} />
+              Back
+            </Button>
+          ),
+        },
+      ]}
+    />
+  ),
 };
 
-// Round button: override rounded-full + 36px square + no padding (same as the dashboard).
-const CIRCLE = "h-9! w-9! min-w-0! rounded-full! px-0!";
+// ── SHAPE / SIZE AXES — an overview per axis orthogonal to style; `AllSizes` is penultimate ──
+// Shape — the FORM axis (default vs circle), orthogonal to colour and size (composes with them). ECO-166.
+// `circle` = round/pill auto-width (round for short text like "15", pill for long). TEXT only:
+// the icon-only circular button is IconButton (a separate primitive). Was a `className` hack before.
 const CIRCLE_VARIANTS = ["primary", "secondary", "outline", "danger"] as const;
 
-// Circular — two forms: with text and with icon.
-export const Circular: Story = {
+export const Shape: Story = {
   render: () => (
-    <DemoCard>
-      <div className="flex flex-col items-center gap-4">
-        <div>
-        <p className="mb-2 text-caption text-content-secondary font-mono">with text</p>
-        <div className="flex flex-wrap items-center gap-3">
-          {CIRCLE_VARIANTS.map((v) => (
-            <Button key={v} variant={v} fullWidth={false} className={CIRCLE}>
+    <Variants
+      items={[
+        {
+          label: "default",
+          node: (
+            <Button variant="primary" fullWidth={false}>
+              Continue
+            </Button>
+          ),
+        },
+        ...CIRCLE_VARIANTS.map((v) => ({
+          label: `circle · ${v}`,
+          node: (
+            <Button variant={v} fullWidth={false} shape="circle">
               15
             </Button>
-          ))}
-        </div>
-      </div>
-      <div>
-        <p className="mb-2 text-caption text-content-secondary font-mono">with icon</p>
-        <div className="flex flex-wrap items-center gap-3">
-          {CIRCLE_VARIANTS.map((v) => (
-            <Button
-              key={v}
-              variant={v}
-              fullWidth={false}
-              aria-label="Settings"
-              className={CIRCLE}
-            >
-              <Settings size={16} />
-            </Button>
-          ))}
-        </div>
-      </div>
-      </div>
-    </DemoCard>
+          ),
+        })),
+      ]}
+    />
   ),
 };
 
@@ -139,8 +172,9 @@ const VARIANT_CARDS = [
   { v: "link-underline", label: "LinkUnderline", children: "See more" },
 ] as const;
 
-// AllVariants — ALWAYS last: every variant (default size), grouping the variant stories above. States
-// (Loading/Disabled), icons and Circular each have their own story — they do not belong here.
+// ── OVERVIEW (ALWAYS last) ──
+// AllVariants — groups the VARIANTS (default size). Every other bucket has its own overview: `States`,
+// `Content`, `Shape`, `AllSizes` — they do NOT belong here (never mix different axes/buckets).
 export const AllVariants: Story = {
   render: () => (
     <Variants
