@@ -91,32 +91,7 @@ export const States: Story = {
   ),
 };
 
-// ── CONTENT / BEHAVIOR — how the icon reacts on hover · interactive, so kept as dedicated stories ──
-
-// SpinOnHover — the icon rotates on hover (cw / ccw), e.g. carousel arrows. Hover each button.
-export const SpinOnHover: Story = {
-  render: () => (
-    <DemoCard>
-      <div className="flex items-end gap-4">
-        <IconButton variant="boxed" shape="circle" spinOnHover="cw" aria-label="Spin clockwise">
-          <ArrowLeft size={16} />
-        </IconButton>
-        <IconButton variant="boxed" shape="circle" spinOnHover="ccw" aria-label="Spin counter-clockwise">
-          <ArrowRight size={16} />
-        </IconButton>
-      </div>
-    </DemoCard>
-  ),
-};
-
-// WithTooltip — tooltip on hover (uses aria-label when tooltip=true, or a custom string).
-export const WithTooltip: Story = {
-  args: { variant: "default", tooltip: "Copy", "aria-label": "Copy", children: <Copy size={16} /> },
-};
-
-// ── SHAPE / SIZE AXES — an overview per axis orthogonal to style; `AllSizes` is penultimate ──
-
-// Shape — the FORM axis (square vs circle), orthogonal to colour and size (composes with them).
+// ── SHAPE — the FORM axis (square vs circle), orthogonal to colour and size · grouped overview ──
 // The form only reads on variants with a surface, so it's shown on `boxed`.
 export const Shape: Story = {
   render: () => (
@@ -143,6 +118,45 @@ export const Shape: Story = {
   ),
 };
 
+// ── BEHAVIOR — affordances triggered by interaction (hover), NOT style/state · grouped overview ──
+// Hover each card: the icon spins (spinOnHover cw/ccw), or a tooltip appears (tooltip). Opt-in props
+// orthogonal to variant/size/shape — a component gets this bucket only if it has hover affordances.
+export const Behavior: Story = {
+  render: () => (
+    <Variants
+      items={[
+        {
+          label: "spinOnHover cw (hover)",
+          node: (
+            <IconButton variant="boxed" shape="circle" spinOnHover="cw" aria-label="Spin clockwise">
+              <ArrowLeft size={16} />
+            </IconButton>
+          ),
+        },
+        {
+          label: "spinOnHover ccw (hover)",
+          node: (
+            <IconButton variant="boxed" shape="circle" spinOnHover="ccw" aria-label="Spin counter-clockwise">
+              <ArrowRight size={16} />
+            </IconButton>
+          ),
+        },
+        {
+          label: "tooltip (hover)",
+          node: (
+            <IconButton variant="default" tooltip="Copy" aria-label="Copy">
+              <Copy size={16} />
+            </IconButton>
+          ),
+        },
+      ]}
+    />
+  ),
+};
+
+// ── OVERVIEWS (ALWAYS last) — `AllSizes` penultimate, `AllVariants` last. Every other bucket has its own
+//    grouped overview ABOVE (States, Shape, Behavior); never mix axes in these two. ──
+
 // The 2 sizes (largest → smallest), with px (icon 16 + padding). sm is the default.
 const SIZES = [
   { key: "md", px: "40" },
@@ -165,9 +179,8 @@ export const AllSizes: Story = {
   ),
 };
 
-// ── OVERVIEW (ALWAYS last) ──
-// AllVariants — groups the VARIANTS (default size). Every other bucket has its own overview: `States`,
-// `Shape`, `AllSizes` — they do NOT belong here (never mix different axes/buckets).
+// AllVariants — ALWAYS last: groups the VARIANTS (default size). The other buckets each have their own
+// grouped overview above (States, Shape, Behavior, AllSizes); never mix different axes/buckets here.
 const VARIANT_CARDS: { v: IconButtonVariant; icon: LucideIcon; label: string }[] = [
   { v: "boxed", icon: Settings, label: "Default" },
   { v: "boxed-hover", icon: Bell, label: "BoxedHover" },
