@@ -106,6 +106,46 @@ export const Circular: Story = {
   ),
 };
 
+// Shape — el eje de FORMA (default vs circle), ortogonal al color y al tamaño (se compone con ellos). ECO-166.
+// `circle` = redondo/pill auto-width (redondo para texto corto como "15", pill para largo); con texto o icono.
+export const Shape: Story = {
+  render: () => (
+    <Variants
+      items={[
+        {
+          label: "default",
+          node: (
+            <Button variant="primary" fullWidth={false}>
+              Continue
+            </Button>
+          ),
+        },
+        {
+          label: "circle · text",
+          node: (
+            <Button variant="primary" fullWidth={false} shape="circle">
+              15
+            </Button>
+          ),
+        },
+        {
+          label: "circle · icon",
+          node: (
+            <Button
+              variant="primary"
+              fullWidth={false}
+              shape="circle"
+              aria-label="Settings"
+            >
+              <Settings size={16} />
+            </Button>
+          ),
+        },
+      ]}
+    />
+  ),
+};
+
 // The 3 sizes (primary variant), with their height in px.
 const SIZES = [
   { key: "lg", px: "48" },
