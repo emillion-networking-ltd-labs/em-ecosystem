@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, forwardRef, type ReactNode } from "react";
+import { tv } from "tailwind-variants";
 import { Eye, EyeOff, TriangleAlert } from "lucide-react";
 import SpinnerCircle from "./SpinnerCircle";
 import IconButton from "./IconButton";
@@ -19,21 +20,63 @@ interface InputProps extends Omit<
   variant?: "default" | "filled";
 }
 
-const sizeClasses = {
+const BOX_BASE =
+  "flex items-center gap-2 rounded-lg border border-border-components transition-colors";
+const SIZE_CLASSES = {
   sm: "h-10 px-3 text-body",
   md: "h-12 px-4 text-body",
-};
+} as const;
+const INPUT_EL =
+  "min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary outline-hidden placeholder:text-content-placeholder";
 
+// Contrato tv (raw-concat previo → twMerge:false). La CAJA del input (la superficie con estilo): variant
+// (default con outline / filled con relleno) × size × estado (error, disabled). El outline SOLO aplica a la
+// variante `default` (filled lo oculta) → compoundVariants. Reproduce EXACTAMENTE la composición imperativa previa.
+export const inputBox = tv(
+  {
+    base: BOX_BASE,
+    variants: {
+      variant: {
+        default: "bg-transparent outline-solid outline-2 outline-offset-2",
+        filled: "bg-surface-primary outline-hidden",
+      },
+      size: { sm: SIZE_CLASSES.sm, md: SIZE_CLASSES.md },
+      error: { true: "", false: "" },
+      disabled: {
+        true: "cursor-not-allowed opacity-60",
+        false: "cursor-text",
+      },
+    },
+    compoundVariants: [
+      // El outline es SOLO de la variante default (filled va sin él).
+      { variant: "default", error: true, class: "outline-error/75" },
+      {
+        variant: "default",
+        error: false,
+        class:
+          "outline-transparent hover:outline-content-primary/75 focus-within:outline-content-primary/75",
+      },
+    ],
+    defaultVariants: {
+      variant: "default",
+      size: "md",
+      error: false,
+      disabled: false,
+    },
+  },
+  { twMerge: false },
+);
+
+// Superficie de docs (consumida por ComponentShowcase). Las clases reales single-source desde los consts;
+// las descripciones de estados/iconos se conservan.
 export const inputSpecs = {
-  container:
-    "flex items-center gap-2 rounded-lg border border-border-components bg-transparent outline-solid outline-2 outline-offset-2 transition-colors",
+  container: `${BOX_BASE} bg-transparent outline-solid outline-2 outline-offset-2`,
   sizes: {
     sm: "h-10 px-3 text-body (40px — compact contexts)",
     "md (default)": "h-12 px-4 text-body (48px — forms, auth)",
   },
   label: "text-body font-semibold",
-  input:
-    "min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary outline-hidden placeholder:text-content-placeholder",
+  input: INPUT_EL,
   states: {
     default: "outline-transparent",
     hover: "hover:outline-content-primary/75",
@@ -73,15 +116,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
   const inputRef = (ref as React.RefObject<HTMLInputElement>) || internalRef;
   const inputId = id || props.name;
   const isPassword = type === "password";
-
-  /* Outline states */
   const isErrorState = !!(error || hasError);
-  const isFilled = variant === "filled";
-  const outlineClass = isFilled
-    ? "outline-hidden"
-    : isErrorState
-      ? "outline-error/75"
-      : "outline-transparent hover:outline-content-primary/75 focus-within:outline-content-primary/75";
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
@@ -94,14 +129,12 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         </label>
       )}
       <div
-        className={`
-          flex items-center gap-2 rounded-lg border border-border-components
-          ${isFilled ? "bg-surface-primary" : "bg-transparent outline-solid outline-2 outline-offset-2"}
-          transition-colors
-          ${sizeClasses[size]}
-          ${outlineClass}
-          ${disabled ? "cursor-not-allowed opacity-60" : "cursor-text"}
-        `}
+        className={inputBox({
+          variant,
+          size,
+          error: isErrorState,
+          disabled: !!disabled,
+        })}
         onClick={() => inputRef.current?.focus()}
       >
         {leftIcon && (
@@ -114,7 +147,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           aria-invalid={!!error}
           aria-describedby={error ? `${inputId}-error` : undefined}
           ref={inputRef}
-          className="min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary outline-hidden placeholder:text-content-placeholder"
+          className={INPUT_EL}
           {...props}
         />
         {isPassword && !loading && (
