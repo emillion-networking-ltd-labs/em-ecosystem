@@ -16,6 +16,7 @@ import { ThemeContext } from "./mocks/context/ThemeContext";
 import { PRESETS, DEFAULT_PRESET } from "./presets";
 import registry from "../registry.json";
 import Card from "../components/Card";
+import { splitDeps } from "../registry/_deps-class.mjs";
 
 // Dark mode REAL (ECO-90): el design-system conmuta por CLASE (`@custom-variant dark (&:is(.dark *))`
 // + bloque `.dark { --color-* }`). El fondo de Storybook solo pintaba el canvas; los componentes no
@@ -85,13 +86,19 @@ const withTheme: Decorator = (Story, context) => {
 const withComposedOf: Decorator = (Story, context) => {
   const title = context.title ?? "";
   const name = title.split("/").pop();
-  const item = /^Composite\//.test(title)
+  const item = /^(Simple|Composite)\//.test(title)
     ? registry.items?.find((i) => i.name === name)
     : undefined;
-  const deps: string[] = item?.registryDependencies ?? [];
+  // "Composed of" = solo la composición ESTRUCTURAL (la esencia) de un COMPUESTO, filtrando los helpers
+  // transversales (Icon/spinners). No hay banner "Uses" blanket: mostraría una parte de lo que la pieza usa
+  // (p.ej. Input usa también IconButton) → engañoso. El reuso de un icono concreto, si acaso, se anota en la
+  // descripción de la story que lo usa (contextual), no como etiqueta global.
+  const composedOf = /^Composite\//.test(title)
+    ? splitDeps(item?.registryDependencies ?? []).structural
+    : [];
   return (
     <>
-      {deps.length > 0 && (
+      {composedOf.length > 0 && (
         <div
           style={{
             display: "flex",
@@ -99,13 +106,11 @@ const withComposedOf: Decorator = (Story, context) => {
             marginBottom: "1.5rem",
           }}
         >
-          {/* Nuestro Card (elevado = con sombra) + la tipografía de las notas del catálogo
-              (text-caption font-mono text-content-secondary), el primitivo en content-primary. */}
           <Card elevated className="inline-flex items-center gap-2 px-3 py-1.5">
             <span className="text-caption font-mono text-content-secondary">
               Composed of
             </span>
-            {deps.map((d) => (
+            {composedOf.map((d) => (
               <span
                 key={d}
                 className="text-caption font-mono text-content-primary"

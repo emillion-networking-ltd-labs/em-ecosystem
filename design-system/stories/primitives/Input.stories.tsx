@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Search } from "lucide-react";
 import Input from "@/components/ui/Input";
+import Icon from "@/components/ui/Icon";
 import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
@@ -44,7 +45,6 @@ export const Filled: Story = {
     label: "Search",
     variant: "filled",
     placeholder: "Type to search…",
-    leftIcon: <Search size={16} />,
   },
 };
 
@@ -62,7 +62,7 @@ export const States: Story = {
           ),
         },
         {
-          label: "Loading",
+          label: "Loading · uses SpinnerCircle",
           node: (
             <Field>
               <Input label="Search" loading placeholder="Loading…" />
@@ -88,7 +88,7 @@ export const Content: Story = {
     <Variants
       items={[
         {
-          label: "Password (eye toggle)",
+          label: "Password · uses eye toggle",
           node: (
             <Field>
               <Input
@@ -100,13 +100,13 @@ export const Content: Story = {
           ),
         },
         {
-          label: "Left icon",
+          label: "Left icon · uses search icon",
           node: (
             <Field>
               <Input
                 label="Search"
                 placeholder="Search…"
-                leftIcon={<Search size={16} />}
+                leftIcon={<Icon icon={Search} size="md" />}
               />
             </Field>
           ),
