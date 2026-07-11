@@ -100,22 +100,20 @@ function PasskeyItem({
         <IconButton
           size="sm"
           tooltip
+          icon={Pencil}
           disabled={isRateLimited}
           onClick={() => onRename(passkey)}
           aria-label={`Rename ${passkey.name || "passkey"}`}
-        >
-          <Pencil size={16} />
-        </IconButton>
+        />
         <IconButton
           variant="danger"
           size="sm"
           tooltip
+          icon={Trash2}
           disabled={isRateLimited}
           onClick={() => onDelete(passkey)}
           aria-label={`Delete ${passkey.name || "passkey"}`}
-        >
-          <Trash2 size={16} />
-        </IconButton>
+        />
       </div>
     </motion.div>
   );
