@@ -11,6 +11,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { Group } from "./_helpers";
+import { ICON_SIZES, type IconSize } from "@/components/ui/Icon";
 
 // Foundations/Icons — the icon convention: the set (lucide-react), how we size and colour them, and the three
 // presentations (ghost / boxed / pressed) inspired by the ButtonIcon primitive. Documents the catalog; registers nothing.
@@ -89,22 +90,25 @@ export const Icons: Story = {
         The icon set is <Code>lucide-react</Code> — import each glyph directly:{" "}
         <Code>{`import { Search } from "lucide-react"`}</Code>. Icons inherit{" "}
         <Code>currentColor</Code>, so colour them with <Code>content-*</Code>{" "}
-        tokens (never a hex). The default UI size is <Code>16px</Code>; use{" "}
-        <Code>24px</Code> for emphasis and <Code>48px</Code> for illustrations /
-        empty states. Dense UI drops to <Code>12–14px</Code>.
+        tokens (never a hex). Size comes from the REGISTERED scale below via the{" "}
+        <Code>Icon</Code> primitive (
+        <Code>{`<Icon icon={Search} size="md" />`}</Code>) — never a hand-typed{" "}
+        <Code>px</Code>. <Code>md</Code> (16px) is the default.
       </p>
 
       <Group
         title="Sizes"
-        description="The size prop, in px — the real measures used across the product (16 is the default)."
+        description="The REGISTERED scale — the single source (ICON_SIZES). Semantic names, not hand-typed px; `<Icon size='md'>` applies it. Changing a value here propagates to every Icon. md (16) is the default."
       >
         <div className="flex flex-wrap items-end gap-8">
-          {[14, 16, 24, 32, 48].map((px) => (
-            <div key={px} className="flex flex-col items-center gap-2">
-              <Search size={px} />
-              <Caption>{`${px}px${px === 16 ? " (default)" : ""}`}</Caption>
-            </div>
-          ))}
+          {(Object.entries(ICON_SIZES) as [IconSize, number][]).map(
+            ([name, px]) => (
+              <div key={name} className="flex flex-col items-center gap-2">
+                <Search size={px} />
+                <Caption>{`${name} · ${px}px${name === "md" ? " (default)" : ""}`}</Caption>
+              </div>
+            ),
+          )}
         </div>
       </Group>
 
