@@ -415,13 +415,16 @@ function ButtonShowcase() {
             render: (row) => (
               <div className="flex justify-center">
                 {row.hover ? (
-                  <IconButton className="pointer-events-none hover:bg-surface-tertiary text-content-primary">
-                    <Copy size={16} />
-                  </IconButton>
+                  <IconButton
+                    icon={Copy}
+                    className="pointer-events-none hover:bg-surface-tertiary text-content-primary"
+                  />
                 ) : (
-                  <IconButton variant="default" aria-label="Default">
-                    <Copy size={16} />
-                  </IconButton>
+                  <IconButton
+                    variant="default"
+                    icon={Copy}
+                    aria-label="Default"
+                  />
                 )}
               </div>
             ),
@@ -435,14 +438,15 @@ function ButtonShowcase() {
                 {row.hover ? (
                   <IconButton
                     variant="danger"
+                    icon={Trash2}
                     className="pointer-events-none bg-error-bg"
-                  >
-                    <Trash2 size={16} />
-                  </IconButton>
+                  />
                 ) : (
-                  <IconButton variant="danger" aria-label="Danger">
-                    <Trash2 size={16} />
-                  </IconButton>
+                  <IconButton
+                    variant="danger"
+                    icon={Trash2}
+                    aria-label="Danger"
+                  />
                 )}
               </div>
             ),
@@ -454,13 +458,17 @@ function ButtonShowcase() {
             render: (row) => (
               <div className="flex justify-center">
                 {row.hover ? (
-                  <IconButton variant="boxed" className="pointer-events-none">
-                    <Settings size={16} />
-                  </IconButton>
+                  <IconButton
+                    variant="boxed"
+                    icon={Settings}
+                    className="pointer-events-none"
+                  />
                 ) : (
-                  <IconButton variant="boxed" aria-label="Boxed">
-                    <Settings size={16} />
-                  </IconButton>
+                  <IconButton
+                    variant="boxed"
+                    icon={Settings}
+                    aria-label="Boxed"
+                  />
                 )}
               </div>
             ),
@@ -473,11 +481,10 @@ function ButtonShowcase() {
               <div className="flex justify-center">
                 <IconButton
                   variant="boxed"
+                  icon={Settings}
                   aria-label="Boxed Active"
                   aria-pressed="true"
-                >
-                  <Settings size={16} />
-                </IconButton>
+                />
               </div>
             ),
           },
@@ -490,14 +497,15 @@ function ButtonShowcase() {
                 {row.hover ? (
                   <IconButton
                     variant="boxed-hover"
+                    icon={Bell}
                     className="pointer-events-none bg-surface-tertiary text-content-primary"
-                  >
-                    <Bell size={16} />
-                  </IconButton>
+                  />
                 ) : (
-                  <IconButton variant="boxed-hover" aria-label="Boxed Hover">
-                    <Bell size={16} />
-                  </IconButton>
+                  <IconButton
+                    variant="boxed-hover"
+                    icon={Bell}
+                    aria-label="Boxed Hover"
+                  />
                 )}
               </div>
             ),

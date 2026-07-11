@@ -102,15 +102,22 @@ export const Icons: Story = {
             <span className="w-40 text-caption font-mono text-content-secondary">
               IconButton — a BUTTON
             </span>
-            <IconButton variant="default" aria-label="Settings">
-              <Icon icon={Settings} size="md" />
-            </IconButton>
-            <IconButton variant="boxed" aria-label="Notifications">
-              <Icon icon={Bell} size="md" />
-            </IconButton>
-            <IconButton variant="boxed" aria-pressed="true" aria-label="Active">
-              <Icon icon={Check} size="md" />
-            </IconButton>
+            <IconButton
+              variant="default"
+              icon={Settings}
+              aria-label="Settings"
+            />
+            <IconButton
+              variant="boxed"
+              icon={Bell}
+              aria-label="Notifications"
+            />
+            <IconButton
+              variant="boxed"
+              aria-pressed="true"
+              icon={Check}
+              aria-label="Active"
+            />
             <Caption>interactive · clickable actions</Caption>
           </div>
           <div className="flex flex-wrap items-center gap-3">

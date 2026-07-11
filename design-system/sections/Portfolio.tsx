@@ -248,39 +248,36 @@ function Lightbox({
       <IconButton
         variant="boxed"
         size="sm"
+        icon={X}
         onClick={(e) => {
           e.stopPropagation();
           onClose();
         }}
         aria-label="Close"
         className="absolute right-4 top-4 z-10 h-8 w-8 sm:right-8 sm:top-8"
-      >
-        <X size={16} />
-      </IconButton>
+      />
       <IconButton
         variant="boxed"
         size="sm"
+        icon={ChevronLeft}
         onClick={(e) => {
           e.stopPropagation();
           onPrev();
         }}
         aria-label="Previous image"
         className="absolute left-3 top-1/2 z-10 h-8 w-8 -translate-y-1/2 sm:left-8"
-      >
-        <ChevronLeft size={16} />
-      </IconButton>
+      />
       <IconButton
         variant="boxed"
         size="sm"
+        icon={ChevronRight}
         onClick={(e) => {
           e.stopPropagation();
           onNext();
         }}
         aria-label="Next image"
         className="absolute right-3 top-1/2 z-10 h-8 w-8 -translate-y-1/2 sm:right-8"
-      >
-        <ChevronRight size={16} />
-      </IconButton>
+      />
       <div
         className={`relative h-[85vh] w-[90vw] touch-none select-none ${isDragging ? "cursor-grabbing" : "cursor-grab"}`}
         onClick={(e) => e.stopPropagation()}

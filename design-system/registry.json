@@ -447,6 +447,7 @@
       "type": "registry:ui",
       "file": "components/IconButton.tsx",
       "registryDependencies": [
+        "Icon",
         "Tooltip"
       ],
       "internalDependencies": [
@@ -454,6 +455,7 @@
       ],
       "dependencies": {
         "clsx": "^2.1.1",
+        "lucide-react": "^1.14.0",
         "tailwind-merge": "^3.6.0",
         "tailwind-variants": "^3.2.2"
       }

@@ -13,6 +13,7 @@ import { DemoCard, Variants, Sizes } from "../_kit";
 
 // Title "ButtonIcon" so it sits right after "Button" in the sidebar (Button family).
 // Icon-only → always pass aria-label. The playground defaults to `boxed`, the most used in the project.
+// El glyph se pasa con el prop `icon` (el contenedor le impone el tamaño desde la escala: 16px); nunca a mano.
 const meta = {
   title: "Simple/ButtonIcon",
   component: IconButton,
@@ -21,7 +22,7 @@ const meta = {
     variant: "boxed",
     size: "sm",
     "aria-label": "Settings",
-    children: <Settings size={16} />,
+    icon: Settings,
   },
   argTypes: {
     variant: {
@@ -54,7 +55,7 @@ export const BoxedHover: Story = {
   args: {
     variant: "boxed-hover",
     "aria-label": "Notifications",
-    children: <Bell size={16} />,
+    icon: Bell,
   },
 };
 
@@ -63,7 +64,7 @@ export const Ghost: Story = {
   args: {
     variant: "default",
     "aria-label": "Copy",
-    children: <Copy size={16} />,
+    icon: Copy,
   },
 };
 
@@ -72,7 +73,7 @@ export const Danger: Story = {
   args: {
     variant: "danger",
     "aria-label": "Delete",
-    children: <Trash2 size={16} />,
+    icon: Trash2,
   },
 };
 
@@ -84,17 +85,23 @@ export const States: Story = {
         {
           label: "Loading",
           node: (
-            <IconButton variant="boxed" loading aria-label="Loading">
-              <Settings size={16} />
-            </IconButton>
+            <IconButton
+              variant="boxed"
+              loading
+              icon={Settings}
+              aria-label="Loading"
+            />
           ),
         },
         {
           label: "Disabled",
           node: (
-            <IconButton variant="boxed" disabled aria-label="Disabled">
-              <Settings size={16} />
-            </IconButton>
+            <IconButton
+              variant="boxed"
+              disabled
+              icon={Settings}
+              aria-label="Disabled"
+            />
           ),
         },
         {
@@ -103,10 +110,9 @@ export const States: Story = {
             <IconButton
               variant="boxed"
               aria-pressed="true"
+              icon={Settings}
               aria-label="Pressed"
-            >
-              <Settings size={16} />
-            </IconButton>
+            />
           ),
         },
       ]}
@@ -123,17 +129,23 @@ export const Shape: Story = {
         {
           label: "square (default)",
           node: (
-            <IconButton variant="boxed" shape="square" aria-label="Square">
-              <Settings size={16} />
-            </IconButton>
+            <IconButton
+              variant="boxed"
+              shape="square"
+              icon={Settings}
+              aria-label="Square"
+            />
           ),
         },
         {
           label: "circle",
           node: (
-            <IconButton variant="boxed" shape="circle" aria-label="Circle">
-              <Settings size={16} />
-            </IconButton>
+            <IconButton
+              variant="boxed"
+              shape="circle"
+              icon={Settings}
+              aria-label="Circle"
+            />
           ),
         },
       ]}
@@ -155,10 +167,9 @@ export const Behavior: Story = {
               variant="boxed"
               shape="circle"
               spinOnHover="cw"
+              icon={ArrowLeft}
               aria-label="Spin clockwise"
-            >
-              <ArrowLeft size={16} />
-            </IconButton>
+            />
           ),
         },
         {
@@ -168,18 +179,20 @@ export const Behavior: Story = {
               variant="boxed"
               shape="circle"
               spinOnHover="ccw"
+              icon={ArrowRight}
               aria-label="Spin counter-clockwise"
-            >
-              <ArrowRight size={16} />
-            </IconButton>
+            />
           ),
         },
         {
           label: "tooltip (hover)",
           node: (
-            <IconButton variant="default" tooltip="Copy" aria-label="Copy">
-              <Copy size={16} />
-            </IconButton>
+            <IconButton
+              variant="default"
+              tooltip="Copy"
+              icon={Copy}
+              aria-label="Copy"
+            />
           ),
         },
       ]}
@@ -203,9 +216,12 @@ export const AllSizes: Story = {
       items={SIZES.map(({ key, px }) => ({
         label: `${key} · ${px}px${key === "sm" ? " (default)" : ""}`,
         node: (
-          <IconButton size={key} variant="boxed" aria-label={`Size ${key}`}>
-            <Settings size={16} />
-          </IconButton>
+          <IconButton
+            size={key}
+            variant="boxed"
+            icon={Settings}
+            aria-label={`Size ${key}`}
+          />
         ),
       }))}
     />
@@ -229,13 +245,9 @@ const VARIANT_CARDS: {
 export const AllVariants: Story = {
   render: () => (
     <Variants
-      items={VARIANT_CARDS.map(({ v, icon: Icon, label }) => ({
+      items={VARIANT_CARDS.map(({ v, icon, label }) => ({
         label,
-        node: (
-          <IconButton variant={v} aria-label={label}>
-            <Icon size={16} />
-          </IconButton>
-        ),
+        node: <IconButton variant={v} icon={icon} aria-label={label} />,
       }))}
     />
   ),

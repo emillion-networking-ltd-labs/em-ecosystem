@@ -79,11 +79,10 @@ export default function ActionDropdown({
           variant="boxed"
           size="sm"
           tooltip={!open}
+          icon={MoreHorizontal}
           onClick={() => (open ? setOpen(false) : openDropdown())}
           aria-label="Actions"
-        >
-          <MoreHorizontal size={16} />
-        </IconButton>
+        />
       </div>
 
       {open && (

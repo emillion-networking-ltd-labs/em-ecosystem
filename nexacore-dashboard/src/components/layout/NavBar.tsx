@@ -71,12 +71,11 @@ export default function NavBar({
               size="sm"
               tooltip
               tooltipPosition="right"
+              icon={PanelLeftOpen}
               onClick={onMenuClick}
               className="lg:hidden"
               aria-label="Toggle sidebar"
-            >
-              <PanelLeftOpen size={16} />
-            </IconButton>
+            />
           )}
           <Link href="/dashboard">
             <Image
@@ -102,12 +101,11 @@ export default function NavBar({
                 variant="boxed"
                 size="sm"
                 tooltip="Search (Ctrl+K)"
+                icon={Search}
                 onClick={onCommandPaletteOpen}
                 aria-label="Search"
                 className="lg:hidden"
-              >
-                <Search size={16} />
-              </IconButton>
+              />
             </>
           )}
 
@@ -119,11 +117,10 @@ export default function NavBar({
               variant="boxed"
               size="sm"
               tooltip
+              icon={Bell}
               onClick={onRightPanelToggle}
               aria-label="Notifications"
-            >
-              <Bell size={16} />
-            </IconButton>
+            />
           )}
 
           {/* User dropdown */}

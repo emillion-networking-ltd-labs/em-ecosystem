@@ -111,9 +111,12 @@ function InteractiveSidebar({
               ana@company.com
             </p>
           </div>
-          <IconButton variant="default" size="sm" aria-label="Log out">
-            <LogOut size={16} />
-          </IconButton>
+          <IconButton
+            variant="default"
+            size="sm"
+            icon={LogOut}
+            aria-label="Log out"
+          />
         </>
       )}
     </div>
@@ -136,16 +139,11 @@ function InteractiveSidebar({
           size="sm"
           tooltip
           tooltipPosition={collapsed ? "right" : "left"}
+          icon={collapsed ? PanelLeftOpen : PanelLeftClose}
           onClick={() => setCollapsed((c) => !c)}
           className={collapsed ? "mx-auto" : ""}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed ? (
-            <PanelLeftOpen size={16} />
-          ) : (
-            <PanelLeftClose size={16} />
-          )}
-        </IconButton>
+        />
       </div>
       <div className="flex flex-1 flex-col overflow-y-auto">
         <SidebarNav
