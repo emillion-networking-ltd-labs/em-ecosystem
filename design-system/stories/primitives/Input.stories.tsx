@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { Search } from "lucide-react";
 import Input from "@/components/ui/Input";
+import Icon from "@/components/ui/Icon";
 import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
@@ -44,7 +45,7 @@ export const Filled: Story = {
     label: "Search",
     variant: "filled",
     placeholder: "Type to search…",
-    leftIcon: <Search size={16} />,
+    leftIcon: <Icon icon={Search} size="md" />,
   },
 };
 
@@ -100,13 +101,13 @@ export const Content: Story = {
           ),
         },
         {
-          label: "Left icon",
+          label: "Left icon · uses Search",
           node: (
             <Field>
               <Input
                 label="Search"
                 placeholder="Search…"
-                leftIcon={<Search size={16} />}
+                leftIcon={<Icon icon={Search} size="md" />}
               />
             </Field>
           ),

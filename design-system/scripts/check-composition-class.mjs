@@ -17,6 +17,7 @@
 import { readFileSync, readdirSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { splitDeps } from "../registry/_deps-class.mjs";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const registry = JSON.parse(readFileSync(join(ds, "registry.json"), "utf8"));
@@ -47,10 +48,12 @@ for (const f of walk(join(ds, "stories"))) {
     );
     continue;
   }
-  const deps = item.registryDependencies ?? [];
-  if (deps.length === 0)
+  // ECO-181: "compuesto" = compone primitivos ESTRUCTURALES, no basta con helpers (Icon/spinners) — casi
+  // cualquier pieza usa un icono sin por ello ser compuesta.
+  const { structural, helper } = splitDeps(item.registryDependencies ?? []);
+  if (structural.length === 0)
     errors.push(
-      `${title}: está en Composite/ pero registryDependencies está VACÍO (no compone ningún primitivo) → debería ir a Simple/, o compone algo y falta declararlo.`,
+      `${title}: está en Composite/ pero no compone ningún primitivo ESTRUCTURAL${helper.length ? ` (solo usa helpers: ${helper.join(", ")})` : " (registryDependencies vacío)"} → debería ir a Simple/, o compone algo estructural y falta declararlo.`,
     );
 }
 
