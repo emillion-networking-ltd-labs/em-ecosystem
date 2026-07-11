@@ -350,6 +350,7 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
                       variant="danger"
                       size="sm"
                       tooltip
+                      icon={Trash2}
                       disabled={
                         revoking === session.id || rateLimitInfo.isRateLimited
                       }
@@ -360,9 +361,7 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
                         setRevokeTarget(session);
                       }}
                       aria-label="Revoke session"
-                    >
-                      <Trash2 size={16} />
-                    </IconButton>
+                    />
                   )}
                 </div>
               );
