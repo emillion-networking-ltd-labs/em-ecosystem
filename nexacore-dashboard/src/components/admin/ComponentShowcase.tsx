@@ -39,11 +39,7 @@ import CountdownTimer from "@/components/ui/CountdownTimer";
 import TotalUsersChart from "@/components/ui/TotalUsersChart";
 import Button, { buttonSpecs } from "@/components/ui/Button";
 import Input, { inputSpecs } from "@/components/ui/Input";
-import Badge, {
-  variantClasses as badgeVariants,
-  sizeClasses as badgeSizes,
-  baseClass as badgeBase,
-} from "@/components/ui/Badge";
+import Badge, { badgeSpecs } from "@/components/ui/Badge";
 import BeforeAfterSlider, {
   beforeAfterSliderSpecs,
 } from "@/components/ui/BeforeAfterSlider";
@@ -807,9 +803,9 @@ function BadgeShowcase() {
 
       <SpecsPanel
         specs={{
-          Variants: badgeVariants,
-          Sizes: badgeSizes,
-          Base: { shared: badgeBase },
+          Variants: badgeSpecs.variants,
+          Sizes: badgeSpecs.sizes,
+          Base: { shared: badgeSpecs.base },
           Dimensions: {
             sm: "12px font · 8/2px padding",
             "md (default)": "14px font · 10/4px padding",

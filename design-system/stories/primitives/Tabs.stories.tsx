@@ -129,6 +129,10 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// ── VARIANTS (the `variant` axis) — one story per variant; grouped by `AllVariants` at the end ──
+// Only nav (vertical) and nav-horizontal (top bar) are documented; the `subtle` selector is covered by
+// SegmentedControl. No AllSizes: `size` only affects `subtle`, so it isn't meaningful for the nav variants.
+
 // variant=nav — vertical navigation (sidebar). Active: bg-surface-subtle; inactive shows a
 // ChevronRight + optional icon (16px).
 export const Nav: Story = {
@@ -174,6 +178,7 @@ function TabsDemo({
   );
 }
 
+// ── OVERVIEW (ALWAYS last) ──
 // AllVariants — ALWAYS last: the two presentation variants (nav · nav-horizontal). No AllSizes: the size
 // prop doesn't change the tabs' look meaningfully.
 export const AllVariants: Story = {

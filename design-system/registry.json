@@ -82,7 +82,9 @@
       "file": "components/Badge.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
-      "dependencies": {}
+      "dependencies": {
+        "tailwind-variants": "^3.2.2"
+      }
     },
     {
       "name": "BeforeAfterSlider",
@@ -684,7 +686,9 @@
       "file": "components/SegmentedControl.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
-      "dependencies": {}
+      "dependencies": {
+        "tailwind-variants": "^3.2.2"
+      }
     },
     {
       "name": "Select",
@@ -835,7 +839,8 @@
       "registryDependencies": [],
       "internalDependencies": [],
       "dependencies": {
-        "lucide-react": "^1.14.0"
+        "lucide-react": "^1.14.0",
+        "tailwind-variants": "^3.2.2"
       }
     },
     {
