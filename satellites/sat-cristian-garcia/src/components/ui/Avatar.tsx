@@ -46,12 +46,13 @@ export const avatar = tv(
 // Superficie de docs (single-source): reemplaza los mapas exportados.
 export const avatarSpecs = { base: ROOT_BASE, sizes: SIZE_CLASSES } as const;
 
-// El User fallback escala con el avatar (~40% del diámetro), pero desde la escala REGISTRADA de icono, no con
-// px a pelo: 14/18/28 (fuera de escala) → sm/md/xl = 14/16/24 (permitidos, mismo ~40% en 32/40/64px).
+// El User fallback escala con el avatar (~40% del diámetro), desde la escala REGISTRADA de icono: sm/md/lg =
+// 14/16/24 (mismo ~40% en 32/40/64px). `lg` apunta a "lg" (24) — antes "xl", que con la escala regular de
+// ECO-184 pasó a 32; se mantiene el 24 de render remapeando el nombre.
 const iconSize: Record<"sm" | "md" | "lg", IconSize> = {
   sm: "sm",
   md: "md",
-  lg: "xl",
+  lg: "lg",
 };
 
 function getInitials(name?: string): string {
