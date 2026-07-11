@@ -5,7 +5,13 @@ import { tv, type VariantProps } from "tailwind-variants";
 import SpinnerInfinity from "./SpinnerInfinity";
 
 export type ButtonVariant =
-  "primary" | "secondary" | "outline" | "danger" | "link" | "link-underline";
+  | "primary"
+  | "secondary"
+  | "outline"
+  | "danger"
+  | "ghost"
+  | "link"
+  | "link-underline";
 
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
@@ -19,7 +25,13 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 
 // Las variantes de CONTROL (no-link) son una superficie de botón; las link son texto navegable.
 // Arrays MUTABLES (no `as const`): `compoundVariants.variant` de tailwind-variants espera un array mutable.
-const CONTROL: ButtonVariant[] = ["primary", "secondary", "outline", "danger"];
+const CONTROL: ButtonVariant[] = [
+  "primary",
+  "secondary",
+  "outline",
+  "danger",
+  "ghost",
+];
 const LINK: ButtonVariant[] = ["link", "link-underline"];
 
 // Clases por eje, definidas como constantes: fuente ÚNICA del contrato `tv` (abajo) Y de `buttonSpecs`
@@ -33,6 +45,11 @@ const VARIANT_CLASSES = {
     "bg-transparent text-content-primary border border-border-components transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   danger:
     "bg-transparent text-error border border-error-border transition-colors hover:bg-error-bg disabled:pointer-events-none disabled:opacity-50",
+  // ghost: superficie de control (lleva la caja) pero SIN relleno ni borde visible — texto quieto que gana
+  // fondo al hover. `border border-transparent` conserva la geometría de las variantes con borde (alinea en un
+  // grupo). Para toolbars, el segmento inactivo de SegmentedControl, o el look "ghost" que IconButton hace a mano.
+  ghost:
+    "bg-transparent text-content-secondary border border-transparent transition-colors hover:bg-surface-subtle hover:text-content-primary disabled:pointer-events-none disabled:opacity-50",
   link: "bg-transparent text-content-primary/75 border-0 transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-50",
   "link-underline":
     "bg-transparent text-content-primary/75 border-0 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted disabled:pointer-events-none disabled:opacity-50",
@@ -75,6 +92,7 @@ export const button = tv(
         secondary: { root: VARIANT_CLASSES.secondary },
         outline: { root: VARIANT_CLASSES.outline },
         danger: { root: VARIANT_CLASSES.danger },
+        ghost: { root: VARIANT_CLASSES.ghost },
         link: { root: VARIANT_CLASSES.link },
         "link-underline": { root: VARIANT_CLASSES["link-underline"] },
       },
