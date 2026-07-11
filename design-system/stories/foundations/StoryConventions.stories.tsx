@@ -69,16 +69,17 @@ export const StoryConventions: Story = {
       <p className="mt-3 max-w-2xl text-body text-content-secondary">
         Every story in the catalog follows the same shape, in{" "}
         <strong>all</strong> sections. One principle drives it —{" "}
-        <strong>five buckets</strong> (three axes: variant / size / shape, plus
-        state and content) — and a gate keeps it honest (
+        <strong>a small, open set of buckets</strong> (three axes: variant /
+        size / shape, plus state, content and behavior) — and a gate keeps it
+        honest (
         <Code>npm run coverage</Code>). All copy is in English, all colour comes
         from tokens, and stories never change a registered component — they only
         present it.
       </p>
 
       <Group
-        title="The five buckets"
-        description="Every story falls into one of five buckets, each with a FIXED home — they never mix or repeat. The three AXES (variant / size / shape) change how it LOOKS and compose with each other; State and Content are orthogonal to all of them."
+        title="The buckets (an open set)"
+        description="Every story falls into a bucket, each with a FIXED home — they never mix or repeat. The three AXES (variant / size / shape) change how it LOOKS and compose with each other; State, Content and Behavior are orthogonal to all of them. The set is OPEN — a component can reveal a new one."
       >
         <ul className="ml-5 list-disc space-y-2">
           <Rule>
@@ -106,13 +107,24 @@ export const StoryConventions: Story = {
             <em>what goes inside</em> — orthogonal to every axis; any variant
             accepts it.
           </Rule>
+          <Rule>
+            <strong>Behavior</strong> (<Code>spinOnHover</Code>,{" "}
+            <Code>tooltip</Code>…) → a <Code>Behavior</Code> overview (grouped).
+            Opt-in affordances triggered by interaction (hover / focus), NOT
+            style or runtime state; a component gets this bucket only if it has
+            such affordances (e.g. IconButton).
+          </Rule>
         </ul>
         <p className="mt-3 text-body text-content-secondary">
           So <Code>AllVariants</Code> shows{" "}
           <strong>only the variant axis</strong>; sizes live in{" "}
           <Code>AllSizes</Code>, shape in its own story. Never mix two axes in
-          one overview. Order in the file: Variant → State → Content →
-          Size/Shape overviews → <Code>AllVariants</Code> last.
+          one overview. <strong>File order</strong>: the per-variant stories
+          first, then ALL the grouped overviews together (<Code>States</Code>,{" "}
+          <Code>Shape</Code>, <Code>Behavior</Code>…), and last of all{" "}
+          <Code>AllSizes</Code> (penultimate) → <Code>AllVariants</Code>. The
+          grouped overviews ALWAYS sit at the end, right before{" "}
+          <Code>AllSizes</Code> and <Code>AllVariants</Code>.
         </p>
         <p className="mt-3 text-body text-content-secondary">
           These are the <strong>known</strong> buckets — the set is{" "}
@@ -453,8 +465,10 @@ export const Default: Story = {
         <ul className="ml-5 list-disc space-y-2">
           <Rule>
             Order: <Code>Default</Code> (the playground, with <Code>args</Code>)
-            → one section per real variant/state → <Code>AllSizes</Code> (if any
-            — <strong>second-to-last</strong>, immediately before AllVariants) →{" "}
+            → one story per real variant → then the grouped overviews together (
+            <Code>States</Code>, <Code>Shape</Code>, <Code>Behavior</Code>…),
+            ALWAYS at the end just before the two closing overviews →{" "}
+            <Code>AllSizes</Code> (if any — <strong>second-to-last</strong>) →{" "}
             <Code>AllVariants</Code> last.
           </Rule>
           <Rule>

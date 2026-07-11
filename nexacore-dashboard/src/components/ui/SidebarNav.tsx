@@ -7,11 +7,7 @@ import { ChevronRight, ChevronDown } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import Tooltip from "./Tooltip";
 import Tabs, { variantStyles } from "./Tabs";
-import {
-  baseClass as iconBtnBase,
-  variantClasses as iconBtnVariants,
-  sizeClasses as iconBtnSizes,
-} from "./IconButton";
+import { iconButtonSpecs } from "./IconButton";
 
 // ─── Types ───
 
@@ -282,7 +278,7 @@ export default function SidebarNav({
                       >
                         <button
                           aria-pressed={itemActive ? "true" : undefined}
-                          className={`${iconBtnBase} ${iconBtnSizes.sm} ${iconBtnVariants.boxed}`}
+                          className={`${iconButtonSpecs.base} ${iconButtonSpecs.sizes.sm} ${iconButtonSpecs.variants.boxed}`}
                         >
                           <Icon size={16} className="shrink-0" />
                         </button>
@@ -297,7 +293,7 @@ export default function SidebarNav({
                         href={item.href}
                         onClick={(e) => onNavigate?.(item.href, e)}
                         aria-pressed={itemActive ? "true" : undefined}
-                        className={`${iconBtnBase} ${iconBtnSizes.sm} ${iconBtnVariants.boxed}`}
+                        className={`${iconButtonSpecs.base} ${iconButtonSpecs.sizes.sm} ${iconButtonSpecs.variants.boxed}`}
                       >
                         <Icon size={16} className="shrink-0" />
                       </Link>

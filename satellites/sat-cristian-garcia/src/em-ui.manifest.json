@@ -36,7 +36,7 @@
     },
     "components/ui/IconButton.tsx": {
       "from": "components/IconButton.tsx",
-      "sha": "d31342a035461b1028c2a40a30bdbff04de6cf33"
+      "sha": "2820f4ccca1ab490ddfed28407da76ed19f413d8"
     },
     "components/ui/InlineError.tsx": {
       "from": "components/InlineError.tsx",
