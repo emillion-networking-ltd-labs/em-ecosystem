@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { tv } from "tailwind-variants";
 import { User } from "lucide-react";
+import Icon, { type IconSize } from "./Icon";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
@@ -45,10 +46,12 @@ export const avatar = tv(
 // Superficie de docs (single-source): reemplaza los mapas exportados.
 export const avatarSpecs = { base: ROOT_BASE, sizes: SIZE_CLASSES } as const;
 
-const iconSizes = {
-  sm: 14,
-  md: 18,
-  lg: 28,
+// El User fallback escala con el avatar (~40% del diámetro), pero desde la escala REGISTRADA de icono, no con
+// px a pelo: 14/18/28 (fuera de escala) → sm/md/xl = 14/16/24 (permitidos, mismo ~40% en 32/40/64px).
+const iconSize: Record<"sm" | "md" | "lg", IconSize> = {
+  sm: "sm",
+  md: "md",
+  lg: "xl",
 };
 
 function getInitials(name?: string): string {
@@ -91,8 +94,9 @@ export default function Avatar({
           {initials}
         </span>
       ) : (
-        <User
-          size={iconSizes[size]}
+        <Icon
+          icon={User}
+          size={iconSize[size]}
           className="text-content-primary/50"
           aria-hidden="true"
         />
