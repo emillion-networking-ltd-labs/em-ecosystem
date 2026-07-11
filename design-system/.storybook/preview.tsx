@@ -14,6 +14,7 @@ import { ThemeContext } from "./mocks/context/ThemeContext";
 // familia tipográfica) sobre el ancestro de la story — igual que `.dark` reescribe los de tema — sin
 // tocar los semánticos. Demuestra el lienzo neutro tematizable (satellite-design, pilar B).
 import { PRESETS, DEFAULT_PRESET } from "./presets";
+import registry from "../registry.json";
 
 // Dark mode REAL (ECO-90): el design-system conmuta por CLASE (`@custom-variant dark (&:is(.dark *))`
 // + bloque `.dark { --color-* }`). El fondo de Storybook solo pintaba el canvas; los componentes no
@@ -76,8 +77,53 @@ const withTheme: Decorator = (Story, context) => {
   );
 };
 
+// ECO-176: "Composed of" — un compuesto (grupo `Composite/`) muestra de qué primitivos se compone, leído
+// del REGISTRY (`registryDependencies`), NO escrito a mano → nunca drifta. Refuerza el modelo de propagación:
+// SegmentedControl → Button significa "sigue a Button". Solo aparece cuando hay dependencias (los `Simple/`
+// son hojas, sin banner). El nombre del componente sale del último segmento del título (== nombre del registry).
+const withComposedOf: Decorator = (Story, context) => {
+  const title = context.title ?? "";
+  const name = title.split("/").pop();
+  const item = /^Composite\//.test(title)
+    ? registry.items?.find((i) => i.name === name)
+    : undefined;
+  const deps: string[] = item?.registryDependencies ?? [];
+  return (
+    <>
+      {deps.length > 0 && (
+        <div
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: "0.4rem",
+            marginBottom: "0.9rem",
+            padding: "0.25rem 0.6rem",
+            borderRadius: "0.4rem",
+            border: "1px solid var(--color-border-default)",
+            background: "var(--color-surface-subtle)",
+            color: "var(--color-content-secondary)",
+            fontFamily: "var(--font-mono, monospace)",
+            fontSize: "12px",
+          }}
+        >
+          <span style={{ opacity: 0.7 }}>Composed of:</span>
+          {deps.map((d) => (
+            <span
+              key={d}
+              style={{ color: "var(--color-content-primary)", fontWeight: 600 }}
+            >
+              {d}
+            </span>
+          ))}
+        </div>
+      )}
+      <Story />
+    </>
+  );
+};
+
 const preview: Preview = {
-  decorators: [withTheme],
+  decorators: [withTheme, withComposedOf],
   globalTypes: {
     theme: {
       description: "Theme (light/dark) — toggles the class like the dashboard",
