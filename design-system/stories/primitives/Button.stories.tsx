@@ -4,7 +4,7 @@ import Button from "@/components/ui/Button";
 import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
-  title: "Primitives/Button",
+  title: "Simple/Button",
   component: Button,
   tags: ["autodocs"],
   // fullWidth:false in the catalog so buttons render at their own size (the component defaults to

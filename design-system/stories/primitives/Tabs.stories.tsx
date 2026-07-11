@@ -71,7 +71,9 @@ function ScrollDotsWrapper({
     <>
       <div
         ref={scrollRef}
-        style={{ cursor: overflows ? (dragging ? "grabbing" : "grab") : undefined }}
+        style={{
+          cursor: overflows ? (dragging ? "grabbing" : "grab") : undefined,
+        }}
         className={`overflow-x-auto scrollbar-hide touch-pan-x select-none ${
           dragging ? "**:pointer-events-none" : ""
         }`}
@@ -89,9 +91,15 @@ function ScrollDotsWrapper({
                 onChange(tab.value);
                 const el = scrollRef.current;
                 if (!el) return;
-                const tabEl = el.querySelectorAll("[role='tab']")[i] as HTMLElement;
+                const tabEl = el.querySelectorAll("[role='tab']")[
+                  i
+                ] as HTMLElement;
                 if (tabEl)
-                  tabEl.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+                  tabEl.scrollIntoView({
+                    behavior: "smooth",
+                    block: "nearest",
+                    inline: "center",
+                  });
               }}
               className="cursor-pointer p-1"
               aria-label={`Go to ${tab.value}`}
@@ -112,7 +120,7 @@ function ScrollDotsWrapper({
 }
 
 const meta = {
-  title: "Primitives/Tabs",
+  title: "Simple/Tabs",
   component: Tabs,
   tags: ["autodocs"],
   argTypes: {
@@ -141,7 +149,12 @@ export const Nav: Story = {
     return (
       <DemoCard>
         <div className="w-[240px]">
-          <Tabs {...args} variant="nav" activeTab={active} onChange={setActive} />
+          <Tabs
+            {...args}
+            variant="nav"
+            activeTab={active}
+            onChange={setActive}
+          />
         </div>
       </DemoCard>
     );
@@ -157,8 +170,17 @@ export const NavHorizontal: Story = {
     const [active, setActive] = useState(args.activeTab);
     return (
       <DemoCard block>
-        <ScrollDotsWrapper tabs={navItems} activeTab={active} onChange={setActive}>
-          <Tabs {...args} variant="nav-horizontal" activeTab={active} onChange={setActive} />
+        <ScrollDotsWrapper
+          tabs={navItems}
+          activeTab={active}
+          onChange={setActive}
+        >
+          <Tabs
+            {...args}
+            variant="nav-horizontal"
+            activeTab={active}
+            onChange={setActive}
+          />
         </ScrollDotsWrapper>
       </DemoCard>
     );
@@ -174,7 +196,13 @@ function TabsDemo({
 }) {
   const [active, setActive] = useState("dashboard");
   return (
-    <Tabs tabs={navItems} variant={variant} size={size} activeTab={active} onChange={setActive} />
+    <Tabs
+      tabs={navItems}
+      variant={variant}
+      size={size}
+      activeTab={active}
+      onChange={setActive}
+    />
   );
 }
 
