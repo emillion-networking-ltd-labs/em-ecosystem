@@ -69,7 +69,9 @@
       "name": "Avatar",
       "type": "registry:ui",
       "file": "components/Avatar.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0",
