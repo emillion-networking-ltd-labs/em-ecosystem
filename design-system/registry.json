@@ -684,11 +684,11 @@
       "name": "SegmentedControl",
       "type": "registry:ui",
       "file": "components/SegmentedControl.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Button"
+      ],
       "internalDependencies": [],
-      "dependencies": {
-        "tailwind-variants": "^3.2.2"
-      }
+      "dependencies": {}
     },
     {
       "name": "Select",
