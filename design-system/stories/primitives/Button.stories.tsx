@@ -24,6 +24,7 @@ const meta = {
         "secondary",
         "outline",
         "danger",
+        "ghost",
         "link",
         "link-underline",
       ],
@@ -49,6 +50,9 @@ export const Outline: Story = { args: { variant: "outline" } };
 export const Danger: Story = {
   args: { variant: "danger", children: "Delete" },
 };
+// Ghost — control surface WITHOUT fill or visible border; quiet text that gains a background on hover.
+// For toolbars, a segmented control's inactive segment, or the "ghost" look IconButton does by hand.
+export const Ghost: Story = { args: { variant: "ghost", children: "Ghost" } };
 export const Link: Story = { args: { variant: "link", children: "See more" } };
 export const LinkUnderline: Story = {
   args: { variant: "link-underline", children: "See more" },
@@ -162,12 +166,13 @@ export const AllSizes: Story = {
   ),
 };
 
-// The 6 variants (default size), labelled by their story name.
+// The 7 variants (default size), labelled by their story name.
 const VARIANT_CARDS = [
   { v: "primary", label: "Primary", children: "Continue" },
   { v: "secondary", label: "Secondary", children: "Continue" },
   { v: "outline", label: "Outline", children: "Continue" },
   { v: "danger", label: "Danger", children: "Delete" },
+  { v: "ghost", label: "Ghost", children: "Ghost" },
   { v: "link", label: "Link", children: "See more" },
   { v: "link-underline", label: "LinkUnderline", children: "See more" },
 ] as const;
