@@ -45,7 +45,6 @@ export const Filled: Story = {
     label: "Search",
     variant: "filled",
     placeholder: "Type to search…",
-    leftIcon: <Icon icon={Search} size="md" />,
   },
 };
 
@@ -63,7 +62,7 @@ export const States: Story = {
           ),
         },
         {
-          label: "Loading",
+          label: "Loading · uses SpinnerCircle",
           node: (
             <Field>
               <Input label="Search" loading placeholder="Loading…" />
@@ -89,7 +88,7 @@ export const Content: Story = {
     <Variants
       items={[
         {
-          label: "Password (eye toggle)",
+          label: "Password · uses eye toggle",
           node: (
             <Field>
               <Input
