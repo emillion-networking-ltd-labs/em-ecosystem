@@ -3,10 +3,10 @@ import { useState } from "react";
 import SegmentedControl from "@/components/ui/SegmentedControl";
 import { DemoCard, Variants, Sizes } from "../_kit";
 
-const opciones = [
-  { value: "diario", label: "Diario" },
-  { value: "semanal", label: "Semanal" },
-  { value: "mensual", label: "Mensual" },
+const OPTIONS = [
+  { value: "daily", label: "Daily" },
+  { value: "weekly", label: "Weekly" },
+  { value: "monthly", label: "Monthly" },
 ];
 
 const meta = {
@@ -14,19 +14,22 @@ const meta = {
   component: SegmentedControl,
   tags: ["autodocs"],
   args: {
-    options: opciones,
-    value: "diario",
+    options: OPTIONS,
+    value: "daily",
     variant: "primary",
     size: "sm",
     onChange: () => {},
   },
   argTypes: {
-    variant: { control: "inline-radio", options: ["primary", "secondary", "outline"] },
+    variant: {
+      control: "inline-radio",
+      options: ["primary", "secondary", "outline"],
+    },
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
   },
   // Stateful wrapper so the control is interactive; `value` arg seeds the selection.
   render: (args) => {
-    const [value, setValue] = useState(args.value ?? "diario");
+    const [value, setValue] = useState(args.value ?? "daily");
     return (
       <DemoCard>
         <SegmentedControl {...args} value={value} onChange={setValue} />
@@ -40,12 +43,15 @@ type Story = StoryObj<typeof meta>;
 
 const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 
-// One story per variant (the design axis), before AllVariants groups them.
+// ── VARIANTS (the `variant` axis) — one story per variant; grouped by `AllVariants` at the end ──
+// The variant only paints the ACTIVE segment (inactive is a fixed style); default is `primary`.
 export const Default: Story = {};
 export const Secondary: Story = { args: { variant: "secondary" } };
 export const Outline: Story = { args: { variant: "outline" } };
 
-// Sizes (smallest → largest), with the control height. sm is the default.
+// ── OVERVIEWS (ALWAYS last) — `AllSizes` penultimate, `AllVariants` last ──
+
+// Sizes (largest → smallest), with the control height. sm is the default.
 const SIZES = [
   { size: "lg", px: "48" },
   { size: "md", px: "40" },
@@ -58,7 +64,14 @@ export const AllSizes: Story = {
     <Sizes
       items={SIZES.map(({ size, px }) => ({
         label: `${size} · ${px}px${size === "sm" ? " (default)" : ""}`,
-        node: <SegmentedControl options={opciones} size={size} value="diario" onChange={() => {}} />,
+        node: (
+          <SegmentedControl
+            options={OPTIONS}
+            size={size}
+            value="daily"
+            onChange={() => {}}
+          />
+        ),
       }))}
     />
   ),
@@ -72,7 +85,14 @@ export const AllVariants: Story = {
     <Variants
       items={VARIANTS.map((variant) => ({
         label: cap(variant),
-        node: <SegmentedControl options={opciones} variant={variant} value="diario" onChange={() => {}} />,
+        node: (
+          <SegmentedControl
+            options={OPTIONS}
+            variant={variant}
+            value="daily"
+            onChange={() => {}}
+          />
+        ),
       }))}
     />
   ),

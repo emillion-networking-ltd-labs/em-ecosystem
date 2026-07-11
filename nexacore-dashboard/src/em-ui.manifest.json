@@ -144,7 +144,7 @@
     },
     "components/ui/SegmentedControl.tsx": {
       "from": "components/SegmentedControl.tsx",
-      "sha": "051605224d9c8c3a9e58f2da961c3994e2366f79"
+      "sha": "8803915363e5f2b7294d1580313bbf62aee78867"
     },
     "components/ui/Select.tsx": {
       "from": "components/Select.tsx",
