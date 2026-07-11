@@ -296,6 +296,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
                   variant="danger"
                   size="sm"
                   tooltip
+                  icon={Trash2}
                   disabled={rateLimitInfo.isRateLimited}
                   onClick={() => {
                     setRevokePassword("");
@@ -303,9 +304,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
                     setRevokeTarget(device);
                   }}
                   aria-label={`Revoke trust for ${device.deviceName}`}
-                >
-                  <Trash2 size={16} />
-                </IconButton>
+                />
               </div>
             </motion.div>
           ))}
