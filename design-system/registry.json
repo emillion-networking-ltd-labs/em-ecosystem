@@ -423,6 +423,16 @@
       }
     },
     {
+      "name": "Icon",
+      "type": "registry:ui",
+      "file": "components/Icon.tsx",
+      "registryDependencies": [],
+      "internalDependencies": [],
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
+    },
+    {
       "name": "IconBadge",
       "type": "registry:ui",
       "file": "components/IconBadge.tsx",
