@@ -93,28 +93,43 @@ const withComposedOf: Decorator = (Story, context) => {
       {deps.length > 0 && (
         <div
           style={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: "0.4rem",
-            marginBottom: "0.9rem",
-            padding: "0.25rem 0.6rem",
-            borderRadius: "0.4rem",
-            border: "1px solid var(--color-border-default)",
-            background: "var(--color-surface-subtle)",
-            color: "var(--color-content-secondary)",
-            fontFamily: "var(--font-mono, monospace)",
-            fontSize: "12px",
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: "1.5rem",
           }}
         >
-          <span style={{ opacity: 0.7 }}>Composed of:</span>
-          {deps.map((d) => (
-            <span
-              key={d}
-              style={{ color: "var(--color-content-primary)", fontWeight: 600 }}
-            >
-              {d}
+          <span
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.45rem",
+              padding: "0.2rem 0.7rem 0.2rem 0.55rem",
+              borderRadius: "999px",
+              border: "1px solid var(--color-border-default)",
+              background: "var(--color-surface-primary)",
+              color: "var(--color-content-secondary)",
+              fontFamily: "var(--font-mono, monospace)",
+              fontSize: "11px",
+              lineHeight: 1.6,
+              boxShadow: "var(--shadow-xs, 0 1px 2px rgba(0,0,0,.04))",
+            }}
+          >
+            <span aria-hidden="true" style={{ opacity: 0.5 }}>
+              ▧
             </span>
-          ))}
+            <span style={{ opacity: 0.6 }}>Composed of</span>
+            {deps.map((d) => (
+              <span
+                key={d}
+                style={{
+                  color: "var(--color-content-primary)",
+                  fontWeight: 600,
+                }}
+              >
+                {d}
+              </span>
+            ))}
+          </span>
         </div>
       )}
       <Story />
@@ -123,7 +138,9 @@ const withComposedOf: Decorator = (Story, context) => {
 };
 
 const preview: Preview = {
-  decorators: [withTheme, withComposedOf],
+  // `withComposedOf` PRIMERO → queda INNER (dentro del div del tema de `withTheme`), así la píldora se pinta
+  // sobre el fondo del canvas (surface-secondary), no en una franja blanca fuera del tema.
+  decorators: [withComposedOf, withTheme],
   globalTypes: {
     theme: {
       description: "Theme (light/dark) — toggles the class like the dashboard",
