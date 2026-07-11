@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useCallback } from "react";
+import { tv } from "tailwind-variants";
 import { ChevronRight } from "lucide-react";
 
 interface Tab {
@@ -34,6 +35,8 @@ const sizeClasses = {
   lg: "px-6 py-3 text-h3 h-12",
 };
 
+// Single-source de clases por variante (container + active/inactive del item). Se EXPORTA porque SidebarNav
+// compone el look nav directamente (variantStyles.nav.inactive) sobre su fila de padre.
 export const variantStyles = {
   subtle: {
     container:
@@ -57,6 +60,89 @@ export const variantStyles = {
       "text-body font-normal text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
   },
 };
+
+// Contrato tv (raw-concat previo → twMerge:false). DOS superficies: el tablist (contenedor) y cada item.
+// El branching subtle/nav (isNav), el estado active/inactive y size (subtle only) se modelan con
+// compoundVariants — reproduce EXACTAMENTE el conjunto de clases que producía la composición imperativa.
+// (El `border-r` entre items es POSICIONAL — no es una variante; se pasa por className en el render.)
+export const tabsContainer = tv(
+  {
+    base: "flex",
+    variants: {
+      variant: {
+        subtle: `items-center ${variantStyles.subtle.container}`,
+        nav: variantStyles.nav.container,
+        "nav-horizontal": variantStyles["nav-horizontal"].container,
+      },
+      fullWidth: { true: "", false: "" },
+      wrap: { true: "", false: "" },
+    },
+    compoundVariants: [
+      // subtle desborda o envuelve; nav no toca overflow/wrap.
+      { variant: "subtle", wrap: true, class: "flex-wrap" },
+      {
+        variant: "subtle",
+        wrap: false,
+        class: "overflow-x-auto scrollbar-hide touch-pan-x",
+      },
+      { variant: "subtle", fullWidth: true, class: "w-full" },
+      { variant: "subtle", fullWidth: false, class: "inline-flex" },
+    ],
+    defaultVariants: { variant: "nav", fullWidth: false, wrap: false },
+  },
+  { twMerge: false },
+);
+
+export const tabsItem = tv(
+  {
+    base: "whitespace-nowrap shrink-0",
+    variants: {
+      variant: {
+        subtle: "text-center",
+        nav: "flex items-center gap-1 px-2 py-2 text-body h-9 text-left w-full",
+        "nav-horizontal":
+          "flex items-center gap-1 px-2 py-2 text-body h-9 text-left",
+      },
+      // size y active/inactive dependen de la variante → se resuelven en compoundVariants.
+      size: { sm: "", md: "", lg: "" },
+      active: { true: "", false: "" },
+      fullWidth: { true: "", false: "" },
+    },
+    compoundVariants: [
+      // El tamaño solo aplica a `subtle` (nav usa h-9 fijo).
+      { variant: "subtle", size: "sm", class: sizeClasses.sm },
+      { variant: "subtle", size: "md", class: sizeClasses.md },
+      { variant: "subtle", size: "lg", class: sizeClasses.lg },
+      { variant: "subtle", fullWidth: true, class: "flex-1" },
+      // Estado active/inactive por variante.
+      { variant: "subtle", active: true, class: variantStyles.subtle.active },
+      {
+        variant: "subtle",
+        active: false,
+        class: variantStyles.subtle.inactive,
+      },
+      { variant: "nav", active: true, class: variantStyles.nav.active },
+      { variant: "nav", active: false, class: variantStyles.nav.inactive },
+      {
+        variant: "nav-horizontal",
+        active: true,
+        class: variantStyles["nav-horizontal"].active,
+      },
+      {
+        variant: "nav-horizontal",
+        active: false,
+        class: variantStyles["nav-horizontal"].inactive,
+      },
+    ],
+    defaultVariants: {
+      variant: "nav",
+      size: "md",
+      active: false,
+      fullWidth: false,
+    },
+  },
+  { twMerge: false },
+);
 
 export const tabsSpecs = {
   variants: {
@@ -102,7 +188,6 @@ export default function Tabs({
   className = "",
   renderTab,
 }: TabsProps) {
-  const styles = variantStyles[variant];
   const tabsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   const handleKeyDown = useCallback(
@@ -133,18 +218,21 @@ export default function Tabs({
   return (
     <div
       role="tablist"
-      className={`flex ${isNav ? "" : "items-center"} ${styles.container} ${
-        !isNav &&
-        (wrap ? "flex-wrap" : "overflow-x-auto scrollbar-hide touch-pan-x")
-      } ${!isNav && fullWidth ? "w-full" : !isNav ? "inline-flex" : ""} ${className}`}
+      className={tabsContainer({ variant, fullWidth, wrap, className })}
     >
       {tabs.map((tab, index) => {
         const isActive = tab.value === activeTab;
-        const itemClassName = `whitespace-nowrap shrink-0 ${
-          isNav
-            ? `flex items-center gap-1 px-2 py-2 text-body h-9 text-left ${variant === "nav" ? "w-full" : ""} ${isActive ? styles.active : styles.inactive}`
-            : `text-center ${sizeClasses[size]} ${fullWidth ? "flex-1" : ""} ${index < tabs.length - 1 ? "border-r border-border-default" : ""} ${isActive ? styles.active : styles.inactive}`
-        }`;
+        const itemClassName = tabsItem({
+          variant,
+          size,
+          active: isActive,
+          fullWidth,
+          // El borde entre items es posicional (no la última), solo en subtle.
+          className:
+            !isNav && index < tabs.length - 1
+              ? "border-r border-border-default"
+              : undefined,
+        });
 
         if (renderTab) {
           return (
