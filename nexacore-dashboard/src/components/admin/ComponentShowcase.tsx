@@ -39,11 +39,7 @@ import CountdownTimer from "@/components/ui/CountdownTimer";
 import TotalUsersChart from "@/components/ui/TotalUsersChart";
 import Button, { buttonSpecs } from "@/components/ui/Button";
 import Input, { inputSpecs } from "@/components/ui/Input";
-import Badge, {
-  variantClasses as badgeVariants,
-  sizeClasses as badgeSizes,
-  baseClass as badgeBase,
-} from "@/components/ui/Badge";
+import Badge, { badgeSpecs } from "@/components/ui/Badge";
 import BeforeAfterSlider, {
   beforeAfterSliderSpecs,
 } from "@/components/ui/BeforeAfterSlider";
@@ -79,9 +75,7 @@ import RecoveryCodesGrid, {
   recoveryCodesGridSpecs,
 } from "@/components/ui/RecoveryCodesGrid";
 import IconButton, {
-  variantClasses as iconBtnVariants,
-  sizeClasses as iconBtnSizes,
-  baseClass as iconBtnBase,
+  iconButtonSpecs,
   usage as iconBtnUsage,
 } from "@/components/ui/IconButton";
 import SegmentedControl, {
@@ -541,9 +535,9 @@ function ButtonShowcase() {
           },
           "Link Variants": linkSpecs.variants,
           "Link Base": { shared: linkSpecs.base },
-          "Icon Button Base": { shared: iconBtnBase },
-          "Icon Button Variants": iconBtnVariants,
-          "Icon Button Sizes": iconBtnSizes,
+          "Icon Button Base": { shared: iconButtonSpecs.base },
+          "Icon Button Variants": iconButtonSpecs.variants,
+          "Icon Button Sizes": iconButtonSpecs.sizes,
           "Icon Button Usage": iconBtnUsage,
         }}
       />
@@ -812,9 +806,9 @@ function BadgeShowcase() {
 
       <SpecsPanel
         specs={{
-          Variants: badgeVariants,
-          Sizes: badgeSizes,
-          Base: { shared: badgeBase },
+          Variants: badgeSpecs.variants,
+          Sizes: badgeSpecs.sizes,
+          Base: { shared: badgeSpecs.base },
           Dimensions: {
             sm: "12px font · 8/2px padding",
             "md (default)": "14px font · 10/4px padding",

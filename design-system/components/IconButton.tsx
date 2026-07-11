@@ -1,15 +1,16 @@
 "use client";
 
 import React, { forwardRef } from "react";
+import { tv } from "tailwind-variants";
 import Tooltip, { type TooltipPosition } from "./Tooltip";
 import { cn } from "@/lib/utils";
 
 export type IconButtonVariant = "default" | "danger" | "boxed" | "boxed-hover";
 
-export const baseClass =
+const ROOT_BASE =
   "inline-flex items-center justify-center shrink-0 p-2 rounded-md cursor-pointer disabled:pointer-events-none disabled:opacity-50";
 
-export const variantClasses: Record<string, string> = {
+const VARIANT_CLASSES = {
   default:
     "text-content-primary/50 transition-colors hover:text-content-primary",
   "inside input":
@@ -19,12 +20,37 @@ export const variantClasses: Record<string, string> = {
     "bg-surface-tertiary text-content-primary hover:bg-surface-subtle focus-visible:ring-1 focus-visible:ring-border-components aria-pressed:ring-1 aria-pressed:ring-border-strong",
   "boxed-hover":
     "text-content-primary/50 transition-colors hover:bg-surface-tertiary hover:text-content-primary",
-};
+} as const;
 
-export const sizeClasses = {
-  sm: "p-2 rounded-md",
-  md: "p-3 rounded-md",
-};
+const SIZE_CLASSES = { sm: "p-2 rounded-md", md: "p-3 rounded-md" } as const;
+const SHAPE_CLASSES = { square: "", circle: "rounded-full" } as const;
+
+// A diferencia de Button/Badge (raw concat → twMerge:false), IconButton usaba cn()/twMerge: su tv va con
+// twMerge ON (default) para IGUALAR ese comportamiento — shape=circle exige que rounded-full pise a rounded-md
+// (lo resuelve twMerge) y NO hay text-size, así que el drop de color que motiva twMerge:false aquí no aplica.
+export const iconButton = tv({
+  base: ROOT_BASE,
+  variants: {
+    variant: {
+      default: VARIANT_CLASSES.default,
+      "inside input": VARIANT_CLASSES["inside input"],
+      danger: VARIANT_CLASSES.danger,
+      boxed: VARIANT_CLASSES.boxed,
+      "boxed-hover": VARIANT_CLASSES["boxed-hover"],
+    },
+    size: { sm: SIZE_CLASSES.sm, md: SIZE_CLASSES.md },
+    shape: { square: SHAPE_CLASSES.square, circle: SHAPE_CLASSES.circle },
+  },
+  defaultVariants: { variant: "default", size: "sm", shape: "square" },
+});
+
+// Superficie de docs (single-source): reemplaza los mapas exportados. Los consumidores leen esto.
+export const iconButtonSpecs = {
+  base: ROOT_BASE,
+  variants: VARIANT_CLASSES,
+  sizes: SIZE_CLASSES,
+  shapes: SHAPE_CLASSES,
+} as const;
 
 export const usage = {
   "theme toggle": "AuthLayout — Moon/SunDim 16px (default)",
@@ -86,14 +112,12 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       <button
         ref={ref}
         type="button"
-        className={cn(
-          baseClass,
-          variantClasses[variant],
-          sizeClasses[size],
-          shape === "circle" && "rounded-full",
-          spinOnHover && "group/icon-btn",
-          className,
-        )}
+        className={iconButton({
+          variant,
+          size,
+          shape,
+          className: cn(spinOnHover && "group/icon-btn", className),
+        })}
         disabled={loading || disabled}
         {...props}
       >
