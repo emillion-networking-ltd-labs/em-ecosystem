@@ -294,11 +294,10 @@ export default function ProfileForm() {
             size="sm"
             tooltip
             tooltipPosition="left"
+            icon={Pencil}
             aria-label="Change banner"
             className="absolute right-4 top-4 sm:opacity-0 transition-opacity sm:group-hover/banner:opacity-100"
-          >
-            <Pencil size={16} />
-          </IconButton>
+          />
         </div>
 
         <div className="px-6 pb-6">
@@ -313,6 +312,7 @@ export default function ProfileForm() {
                       variant="boxed"
                       size="sm"
                       tooltip
+                      icon={Pencil}
                       onClick={() => {
                         const src = user.avatarOriginalUrl
                           ? resolveAvatarSrc(user.avatarOriginalUrl)
@@ -322,30 +322,26 @@ export default function ProfileForm() {
                         setCropperOpen(true);
                       }}
                       aria-label="Edit photo"
-                    >
-                      <Pencil size={16} />
-                    </IconButton>
+                    />
                     <IconButton
                       variant="danger"
                       size="sm"
                       tooltip
                       tooltipPosition="bottom"
+                      icon={Trash2}
                       onClick={() => setRemoveAvatarOpen(true)}
                       aria-label="Remove photo"
-                    >
-                      <Trash2 size={16} />
-                    </IconButton>
+                    />
                   </>
                 ) : (
                   <IconButton
                     variant="boxed"
                     size="sm"
                     tooltip
+                    icon={Camera}
                     onClick={() => fileInputRef.current?.click()}
                     aria-label="Upload photo"
-                  >
-                    <Camera size={16} />
-                  </IconButton>
+                  />
                 )}
               </div>
             </div>
@@ -370,12 +366,11 @@ export default function ProfileForm() {
                   variant="boxed"
                   size="sm"
                   tooltip
+                  icon={Pencil}
                   onClick={openEdit}
                   aria-label="Edit name"
                   className="sm:opacity-0 transition-opacity sm:group-hover/name:opacity-100"
-                >
-                  <Pencil size={16} />
-                </IconButton>
+                />
               </div>
               <p className="mt-1 text-body text-content-secondary">
                 {user.email}

@@ -71,15 +71,10 @@ export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
               <div className="flex flex-1 items-center justify-end p-2.5">
                 <IconButton
                   tooltip
+                  icon={isDark ? SunDim : Moon}
                   onClick={toggleTheme}
                   aria-label="Toggle theme"
-                >
-                  {isDark ? (
-                    <SunDim size={16} strokeWidth={2} />
-                  ) : (
-                    <Moon size={16} strokeWidth={2} />
-                  )}
-                </IconButton>
+                />
               </div>
             </div>
 

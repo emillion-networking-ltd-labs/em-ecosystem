@@ -206,9 +206,12 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
               placeholder="Type a command or search..."
               className="min-w-0 flex-1 bg-transparent text-body leading-6 text-content-primary placeholder:text-content-placeholder outline-hidden"
             />
-            <IconButton size="sm" onClick={onClose} aria-label="Close search">
-              <X size={16} />
-            </IconButton>
+            <IconButton
+              size="sm"
+              icon={X}
+              onClick={onClose}
+              aria-label="Close search"
+            />
           </div>
 
           {/* Results */}

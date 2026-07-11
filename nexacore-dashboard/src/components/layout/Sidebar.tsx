@@ -174,16 +174,11 @@ export default function Sidebar({
           size="sm"
           tooltip
           tooltipPosition={collapsed ? "right" : "left"}
+          icon={collapsed && !isMobileMode ? PanelLeftOpen : PanelLeftClose}
           onClick={onToggle}
           className={collapsed && !isMobileMode ? "mx-auto" : ""}
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-        >
-          {collapsed && !isMobileMode ? (
-            <PanelLeftOpen size={16} />
-          ) : (
-            <PanelLeftClose size={16} />
-          )}
-        </IconButton>
+        />
       </div>
 
       <div className="flex-1 overflow-y-auto">

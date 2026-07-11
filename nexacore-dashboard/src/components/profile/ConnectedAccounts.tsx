@@ -196,10 +196,9 @@ export default function ConnectedAccounts() {
                         <IconButton
                           variant="default"
                           size="md"
+                          icon={Info}
                           aria-label="GitHub info"
-                        >
-                          <Info size={16} />
-                        </IconButton>
+                        />
                       </Tooltip>
                     )}
                     <Button

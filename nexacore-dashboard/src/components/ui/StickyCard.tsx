@@ -98,15 +98,10 @@ function StickyCardBottom({
               <IconButton
                 variant="default"
                 size="sm"
+                icon={mobileExpanded ? ChevronDown : ChevronUp}
                 onClick={() => setMobileExpanded((prev) => !prev)}
                 aria-label={mobileExpanded ? "Collapse" : "Expand"}
-              >
-                {mobileExpanded ? (
-                  <ChevronDown size={16} />
-                ) : (
-                  <ChevronUp size={16} />
-                )}
-              </IconButton>
+              />
             </div>
           </div>
 
@@ -194,15 +189,10 @@ function StickyCardTop({
               <IconButton
                 variant="default"
                 size="sm"
+                icon={mobileExpanded ? ChevronUp : ChevronDown}
                 onClick={() => setMobileExpanded((prev) => !prev)}
                 aria-label={mobileExpanded ? "Collapse" : "Expand"}
-              >
-                {mobileExpanded ? (
-                  <ChevronUp size={16} />
-                ) : (
-                  <ChevronDown size={16} />
-                )}
-              </IconButton>
+              />
             </div>
             {mobileExpanded && (
               <div className={`px-6 pb-4 ${className}`}>{children}</div>

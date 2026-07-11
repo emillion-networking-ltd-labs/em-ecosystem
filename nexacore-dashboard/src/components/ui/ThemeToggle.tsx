@@ -32,11 +32,10 @@ export default function ThemeToggle({
       size="sm"
       tooltip
       tooltipPosition={tooltipPosition}
+      icon={theme === "light" ? Sun : Moon}
       onClick={toggleTheme}
       className={className}
       aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
-    >
-      {theme === "light" ? <Sun size={16} /> : <Moon size={16} />}
-    </IconButton>
+    />
   );
 }

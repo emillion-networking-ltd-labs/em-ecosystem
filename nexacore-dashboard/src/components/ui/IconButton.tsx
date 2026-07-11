@@ -2,7 +2,9 @@
 
 import React, { forwardRef } from "react";
 import { tv } from "tailwind-variants";
+import type { LucideIcon } from "lucide-react";
 import Tooltip, { type TooltipPosition } from "./Tooltip";
+import Icon from "./Icon";
 import { cn } from "@/lib/utils";
 
 export type IconButtonVariant = "default" | "danger" | "boxed" | "boxed-hover";
@@ -63,6 +65,12 @@ export const usage = {
 interface IconButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: IconButtonVariant;
   size?: "sm" | "md";
+  /**
+   * Glyph de lucide. El contenedor le impone el tamaño desde la escala registrada (`<Icon size="md">` = 16px)
+   * y el color desde la variante → el consumidor NO pasa size ni color a mano. Para contenido no-glyph
+   * (texto/custom) usa `children` en su lugar.
+   */
+  icon?: LucideIcon;
   /** Forma: "square" (rounded-md, default) o "circle" (rounded-full). @default "square" */
   shape?: "square" | "circle";
   /** Gira el icono al hover del botón: "cw" (horario) / "ccw" (antihorario). @default none */
@@ -80,6 +88,7 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
       variant = "default",
       size = "sm",
       shape = "square",
+      icon: Glyph,
       spinOnHover,
       loading = false,
       tooltip,
@@ -91,6 +100,8 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     },
     ref,
   ) {
+    // El contenedor impone tamaño (escala: md=16px) y deja el color a la variante. `children` para no-glyph.
+    const glyph = Glyph ? <Icon icon={Glyph} size="md" /> : children;
     const content = loading ? (
       <div className="h-4 w-4 animate-spin rounded-full border-2 border-current/20 border-t-current" />
     ) : spinOnHover ? (
@@ -102,10 +113,10 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
             : "group-hover/icon-btn:rotate-12",
         )}
       >
-        {children}
+        {glyph}
       </span>
     ) : (
-      children
+      glyph
     );
 
     const button = (

@@ -198,12 +198,11 @@ export default function ConfirmModal({
           <IconButton
             variant="default"
             size="sm"
+            icon={X}
             className="absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100 focus-visible:opacity-100 sm:right-4 sm:top-4"
             aria-label="Close"
             onClick={onClose}
-          >
-            <X size={16} />
-          </IconButton>
+          />
           <h2
             id="confirm-modal-title"
             className="pr-8 text-h2 font-semibold text-content-primary"

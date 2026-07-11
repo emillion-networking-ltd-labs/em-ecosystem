@@ -155,15 +155,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
         {isPassword && !loading && (
           <IconButton
             size="sm"
+            icon={showPassword ? EyeOff : Eye}
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? "Hide password" : "Show password"}
-          >
-            {showPassword ? (
-              <Icon icon={EyeOff} size="md" />
-            ) : (
-              <Icon icon={Eye} size="md" />
-            )}
-          </IconButton>
+          />
         )}
         {rightIcon && !isPassword && !loading && (
           <span className="shrink-0">{rightIcon}</span>

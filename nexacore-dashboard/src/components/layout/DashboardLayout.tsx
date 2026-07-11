@@ -122,11 +122,10 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             <IconButton
               variant="boxed"
               size="sm"
+              icon={X}
               onClick={() => setRightPanelOpen(false)}
               aria-label="Close panel"
-            >
-              <X size={16} />
-            </IconButton>
+            />
           </div>
           <div className="flex-1 overflow-y-auto">
             <RightPanel />
