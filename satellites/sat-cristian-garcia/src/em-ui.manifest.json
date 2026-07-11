@@ -38,6 +38,10 @@
       "from": "components/Icon.tsx",
       "sha": "9d00f3c6fb1c66f5475eb118ed5647e3dc81d43b"
     },
+    "components/ui/IconBadge.tsx": {
+      "from": "components/IconBadge.tsx",
+      "sha": "2453db1ba851811b18c49f9bac22221311a5c8cb"
+    },
     "components/ui/IconButton.tsx": {
       "from": "components/IconButton.tsx",
       "sha": "48e6c5b4a8cba609be587922cc69dfa54fe8d3ca"
@@ -53,6 +57,10 @@
     "components/ui/Select.tsx": {
       "from": "components/Select.tsx",
       "sha": "6b829694c1dd2caa44c1db8c54daa4f7d17b3289"
+    },
+    "components/ui/SettingRow.tsx": {
+      "from": "components/SettingRow.tsx",
+      "sha": "dc288405d1d98e3d9b9b0b61a20941425a53dd2a"
     },
     "components/ui/SpinnerCircle.tsx": {
       "from": "components/SpinnerCircle.tsx",

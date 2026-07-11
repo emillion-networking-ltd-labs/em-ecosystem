@@ -438,9 +438,13 @@
       "name": "IconBadge",
       "type": "registry:ui",
       "file": "components/IconBadge.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
-      "dependencies": {}
+      "dependencies": {
+        "lucide-react": "^1.14.0"
+      }
     },
     {
       "name": "IconButton",

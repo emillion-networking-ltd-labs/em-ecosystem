@@ -24,9 +24,7 @@ export default function SettingRow({
       {/* Mobile: icon + action top, text below */}
       <div className="sm:hidden">
         <div className="flex items-center justify-between gap-4">
-          <IconBadge size="md">
-            <Icon size={24} />
-          </IconBadge>
+          <IconBadge size="md" icon={Icon} />
           <div className="shrink-0">{children}</div>
         </div>
         <div className="mt-2">
@@ -37,9 +35,7 @@ export default function SettingRow({
       {/* Desktop: original layout */}
       <div className="hidden sm:flex sm:items-center sm:justify-between sm:gap-4">
         <div className="flex items-center gap-3">
-          <IconBadge size="md">
-            <Icon size={24} />
-          </IconBadge>
+          <IconBadge size="md" icon={Icon} />
           <div>
             <p className="text-body font-normal text-content-primary">
               {label}

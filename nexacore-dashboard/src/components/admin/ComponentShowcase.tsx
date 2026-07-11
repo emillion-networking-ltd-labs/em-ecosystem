@@ -35,6 +35,7 @@ import {
   Palette,
   FileText,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import CountdownTimer from "@/components/ui/CountdownTimer";
 import TotalUsersChart from "@/components/ui/TotalUsersChart";
 import Button, { buttonSpecs } from "@/components/ui/Button";
@@ -736,28 +737,14 @@ function BadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
 function IconBadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
   const variants = ["default", "success", "warning", "error", "info"] as const;
   const sizes = ["lg", "md", "sm"] as const;
-  const icons: Record<string, Record<number, React.ReactNode>> = {
-    default: {
-      16: <Settings size={16} />,
-      24: <Settings size={24} />,
-      32: <Settings size={32} />,
-    },
-    success: {
-      16: <Check size={16} />,
-      24: <Check size={24} />,
-      32: <Check size={32} />,
-    },
-    warning: {
-      16: <AlertTriangle size={16} />,
-      24: <AlertTriangle size={24} />,
-      32: <AlertTriangle size={32} />,
-    },
-    error: { 16: <X size={16} />, 24: <X size={24} />, 32: <X size={32} /> },
-    info: {
-      16: <Info size={16} />,
-      24: <Info size={24} />,
-      32: <Info size={32} />,
-    },
+  // El contenedor (IconBadge) impone el tamaño del icono desde la escala → mapa de COMPONENTES, no elementos
+  // pre-dimensionados a mano (que además tenían un 32px ya obsoleto: lg reconciliado a 24 en ECO-183).
+  const icons: Record<string, LucideIcon> = {
+    default: Settings,
+    success: Check,
+    warning: AlertTriangle,
+    error: X,
+    info: Info,
   };
   return (
     <div
@@ -768,7 +755,6 @@ function IconBadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
       </p>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {sizes.map((size) => {
-          const iconSize = size === "sm" ? 16 : size === "md" ? 24 : 32;
           return (
             <div key={size} className="card-flat p-4!">
               <p className="text-caption text-content-tertiary font-mono mb-3">
@@ -778,9 +764,7 @@ function IconBadgeSizeGrid({ mode }: { mode: "light" | "dark" }) {
               <div className="flex flex-wrap items-center gap-3">
                 {variants.map((v) => (
                   <div key={v} className="flex flex-col items-center gap-1">
-                    <IconBadge variant={v} size={size}>
-                      {icons[v][iconSize]}
-                    </IconBadge>
+                    <IconBadge variant={v} size={size} icon={icons[v]} />
                     <span className="text-caption text-content-tertiary font-mono">
                       {v}
                     </span>

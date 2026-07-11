@@ -203,9 +203,7 @@ export default function RecentActivityFeed() {
                 key={log.id}
                 className="flex items-center gap-3 rounded-xl p-2"
               >
-                <IconBadge size="md">
-                  <Icon size={24} />
-                </IconBadge>
+                <IconBadge size="md" icon={Icon} />
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <span className="truncate text-body font-semibold text-content-primary">
