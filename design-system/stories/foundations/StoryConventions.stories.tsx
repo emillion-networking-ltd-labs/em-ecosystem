@@ -472,6 +472,22 @@ export const Default: Story = {
             <Code>AllVariants</Code> last.
           </Rule>
           <Rule>
+            <strong>Examples use the DEFAULT size and variant.</strong> Every
+            story except the axis overviews shows the component at its default
+            size (e.g. <Code>md</Code>) and default variant — only{" "}
+            <Code>AllSizes</Code> sweeps the size axis, only{" "}
+            <Code>AllVariants</Code> the style axis. A <Code>States</Code>,{" "}
+            <Code>Content</Code> or <Code>Behavior</Code> overview must NOT pick
+            a bigger size to &quot;read better&quot;: it uses the default, so
+            every story matches and the axis stays isolated to its own overview.
+          </Rule>
+          <Rule>
+            <strong>An overview&apos;s export name is its BUCKET</strong> —{" "}
+            <Code>Content</Code>, <Code>States</Code>, <Code>Shape</Code>,{" "}
+            <Code>Behavior</Code> — not a synonym (<Code>Fallbacks</Code>,{" "}
+            <Code>Modes</Code>…), so the sidebar reads by the taxonomy.
+          </Rule>
+          <Rule>
             The size axis is named <Code>AllSizes</Code> (never a bare{" "}
             <Code>Sizes</Code>).
           </Rule>
