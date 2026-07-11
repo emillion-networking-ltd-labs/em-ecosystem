@@ -14,6 +14,8 @@ import { ThemeContext } from "./mocks/context/ThemeContext";
 // familia tipográfica) sobre el ancestro de la story — igual que `.dark` reescribe los de tema — sin
 // tocar los semánticos. Demuestra el lienzo neutro tematizable (satellite-design, pilar B).
 import { PRESETS, DEFAULT_PRESET } from "./presets";
+import registry from "../registry.json";
+import Card from "../components/Card";
 
 // Dark mode REAL (ECO-90): el design-system conmuta por CLASE (`@custom-variant dark (&:is(.dark *))`
 // + bloque `.dark { --color-* }`). El fondo de Storybook solo pintaba el canvas; los componentes no
@@ -76,8 +78,53 @@ const withTheme: Decorator = (Story, context) => {
   );
 };
 
+// ECO-176: "Composed of" — un compuesto (grupo `Composite/`) muestra de qué primitivos se compone, leído
+// del REGISTRY (`registryDependencies`), NO escrito a mano → nunca drifta. Refuerza el modelo de propagación:
+// SegmentedControl → Button significa "sigue a Button". Solo aparece cuando hay dependencias (los `Simple/`
+// son hojas, sin banner). El nombre del componente sale del último segmento del título (== nombre del registry).
+const withComposedOf: Decorator = (Story, context) => {
+  const title = context.title ?? "";
+  const name = title.split("/").pop();
+  const item = /^Composite\//.test(title)
+    ? registry.items?.find((i) => i.name === name)
+    : undefined;
+  const deps: string[] = item?.registryDependencies ?? [];
+  return (
+    <>
+      {deps.length > 0 && (
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            marginBottom: "1.5rem",
+          }}
+        >
+          {/* Nuestro Card (elevado = con sombra) + la tipografía de las notas del catálogo
+              (text-caption font-mono text-content-secondary), el primitivo en content-primary. */}
+          <Card elevated className="inline-flex items-center gap-2 px-3 py-1.5">
+            <span className="text-caption font-mono text-content-secondary">
+              Composed of
+            </span>
+            {deps.map((d) => (
+              <span
+                key={d}
+                className="text-caption font-mono text-content-primary"
+              >
+                {d}
+              </span>
+            ))}
+          </Card>
+        </div>
+      )}
+      <Story />
+    </>
+  );
+};
+
 const preview: Preview = {
-  decorators: [withTheme],
+  // `withComposedOf` PRIMERO → queda INNER (dentro del div del tema de `withTheme`), así la píldora se pinta
+  // sobre el fondo del canvas (surface-secondary), no en una franja blanca fuera del tema.
+  decorators: [withComposedOf, withTheme],
   globalTypes: {
     theme: {
       description: "Theme (light/dark) — toggles the class like the dashboard",
