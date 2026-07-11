@@ -15,6 +15,7 @@ import { ThemeContext } from "./mocks/context/ThemeContext";
 // tocar los semánticos. Demuestra el lienzo neutro tematizable (satellite-design, pilar B).
 import { PRESETS, DEFAULT_PRESET } from "./presets";
 import registry from "../registry.json";
+import Card from "../components/Card";
 
 // Dark mode REAL (ECO-90): el design-system conmuta por CLASE (`@custom-variant dark (&:is(.dark *))`
 // + bloque `.dark { --color-* }`). El fondo de Storybook solo pintaba el canvas; los componentes no
@@ -98,38 +99,21 @@ const withComposedOf: Decorator = (Story, context) => {
             marginBottom: "1.5rem",
           }}
         >
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.45rem",
-              padding: "0.2rem 0.7rem 0.2rem 0.55rem",
-              borderRadius: "999px",
-              border: "1px solid var(--color-border-default)",
-              background: "var(--color-surface-primary)",
-              color: "var(--color-content-secondary)",
-              fontFamily: "var(--font-mono, monospace)",
-              fontSize: "11px",
-              lineHeight: 1.6,
-              boxShadow: "var(--shadow-xs, 0 1px 2px rgba(0,0,0,.04))",
-            }}
-          >
-            <span aria-hidden="true" style={{ opacity: 0.5 }}>
-              ▧
+          {/* Nuestro Card (elevado = con sombra) + la tipografía de las notas del catálogo
+              (text-caption font-mono text-content-secondary), el primitivo en content-primary. */}
+          <Card elevated className="inline-flex items-center gap-2 px-3 py-1.5">
+            <span className="text-caption font-mono text-content-secondary">
+              Composed of
             </span>
-            <span style={{ opacity: 0.6 }}>Composed of</span>
             {deps.map((d) => (
               <span
                 key={d}
-                style={{
-                  color: "var(--color-content-primary)",
-                  fontWeight: 600,
-                }}
+                className="text-caption font-mono text-content-primary"
               >
                 {d}
               </span>
             ))}
-          </span>
+          </Card>
         </div>
       )}
       <Story />
