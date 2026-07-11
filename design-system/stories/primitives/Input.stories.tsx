@@ -100,7 +100,7 @@ export const Content: Story = {
           ),
         },
         {
-          label: "Left icon · uses Search",
+          label: "Left icon · uses search icon",
           node: (
             <Field>
               <Input
