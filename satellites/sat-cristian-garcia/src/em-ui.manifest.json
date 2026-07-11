@@ -8,7 +8,7 @@
     },
     "components/ui/Avatar.tsx": {
       "from": "components/Avatar.tsx",
-      "sha": "f8e1dbe81ab01a83073a55c99d0a4b60a72d6bcb"
+      "sha": "e5fdc7763a858bb37088c1b390c78d2fda1a4130"
     },
     "components/ui/Badge.tsx": {
       "from": "components/Badge.tsx",
@@ -36,7 +36,7 @@
     },
     "components/ui/Icon.tsx": {
       "from": "components/Icon.tsx",
-      "sha": "32953e12d07bb5da7acee455159f2444cce8b59d"
+      "sha": "9d00f3c6fb1c66f5475eb118ed5647e3dc81d43b"
     },
     "components/ui/IconButton.tsx": {
       "from": "components/IconButton.tsx",
