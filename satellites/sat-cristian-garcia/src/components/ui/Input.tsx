@@ -3,6 +3,7 @@
 import { useState, useRef, forwardRef, type ReactNode } from "react";
 import { tv } from "tailwind-variants";
 import { Eye, EyeOff, TriangleAlert } from "lucide-react";
+import Icon from "./Icon";
 import SpinnerCircle from "./SpinnerCircle";
 import IconButton from "./IconButton";
 
@@ -89,7 +90,8 @@ export const inputSpecs = {
     left: "shrink-0 text-content-secondary (16px)",
     right: "shrink-0 (custom ReactNode)",
     password: "IconButton size=sm default variant (32px hit area, 16px icon)",
-    error: "shrink-0 text-error (TriangleAlert 16px)",
+    error:
+      "shrink-0 text-error (TriangleAlert, Icon size=sm/14px — proporcional al texto caption)",
   },
 };
 
@@ -156,7 +158,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
-            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            {showPassword ? (
+              <Icon icon={EyeOff} size="md" />
+            ) : (
+              <Icon icon={Eye} size="md" />
+            )}
           </IconButton>
         )}
         {rightIcon && !isPassword && !loading && (
@@ -174,7 +180,11 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           className="flex items-center gap-2"
           role="alert"
         >
-          <TriangleAlert size={16} className="shrink-0 text-error" />
+          <Icon
+            icon={TriangleAlert}
+            size="sm"
+            className="shrink-0 text-error"
+          />
           <p className="flex-1 text-caption leading-6 text-error">{error}</p>
         </div>
       )}
