@@ -107,13 +107,16 @@ const preview: Preview = {
     },
   },
   parameters: {
-    // Orden del sidebar: ALFABÉTICO por componente. `method: "alphabetical"` con `includeNames`
-    // por defecto (false) ordena los grupos/componentes pero NO las stories hoja → dentro de cada
-    // componente se conserva el orden de export (Default primero → AllVariants último).
-    // Sin esto, Storybook usa el orden de carga del glob (no alfabético) y el listado sale revuelto
-    // (los SpinnerCircle/Infinity/Ring caían al final en vez de en su sitio entre Slider y StickyCard).
+    // Orden del sidebar: grupos top-level por `order` (progreso de la migración visible), ALFABÉTICO dentro.
+    // `Simple`/`Composite` = piezas ya migradas por clase (ECO-175); `Primitives` = las pendientes (se vacía a
+    // medida que migran). `"*"` = el resto (Layout/Marketing/Sections/Charts/Decoration/Showcase), alfabético.
+    // `method: "alphabetical"` mantiene componentes alfabéticos y conserva el orden de export de las stories
+    // hoja (Default primero → AllVariants último).
     options: {
-      storySort: { method: "alphabetical" },
+      storySort: {
+        method: "alphabetical",
+        order: ["Foundations", "Simple", "Composite", "Primitives", "*"],
+      },
     },
     // El decorator de tema pinta la página completa (100vh); fullscreen evita el centrado/padding
     // del canvas para que el fondo del tema cubra todo. Las stories controlan su propio layout interno.

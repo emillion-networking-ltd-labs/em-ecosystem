@@ -1,5 +1,12 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Bell, Trash2, Copy, Settings, ArrowLeft, ArrowRight } from "lucide-react";
+import {
+  Bell,
+  Trash2,
+  Copy,
+  Settings,
+  ArrowLeft,
+  ArrowRight,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import IconButton, { type IconButtonVariant } from "@/components/ui/IconButton";
 import { DemoCard, Variants, Sizes } from "../_kit";
@@ -7,7 +14,7 @@ import { DemoCard, Variants, Sizes } from "../_kit";
 // Title "ButtonIcon" so it sits right after "Button" in the sidebar (Button family).
 // Icon-only → always pass aria-label. The playground defaults to `boxed`, the most used in the project.
 const meta = {
-  title: "Primitives/ButtonIcon",
+  title: "Simple/ButtonIcon",
   component: IconButton,
   tags: ["autodocs"],
   args: {
@@ -44,17 +51,29 @@ export const Default: Story = {};
 
 // BoxedHover — transparent; gains a surface on hover. (variant="boxed-hover")
 export const BoxedHover: Story = {
-  args: { variant: "boxed-hover", "aria-label": "Notifications", children: <Bell size={16} /> },
+  args: {
+    variant: "boxed-hover",
+    "aria-label": "Notifications",
+    children: <Bell size={16} />,
+  },
 };
 
 // Ghost — transparent, no surface, icon at 50% opacity → discreet inline actions. (variant="default")
 export const Ghost: Story = {
-  args: { variant: "default", "aria-label": "Copy", children: <Copy size={16} /> },
+  args: {
+    variant: "default",
+    "aria-label": "Copy",
+    children: <Copy size={16} />,
+  },
 };
 
 // Danger — error color; error background on hover. (variant="danger")
 export const Danger: Story = {
-  args: { variant: "danger", "aria-label": "Delete", children: <Trash2 size={16} /> },
+  args: {
+    variant: "danger",
+    "aria-label": "Delete",
+    children: <Trash2 size={16} />,
+  },
 };
 
 // ── STATES — runtime state (NOT variants) · grouped overview, one card per state ──
@@ -81,7 +100,11 @@ export const States: Story = {
         {
           label: "Pressed (aria-pressed)",
           node: (
-            <IconButton variant="boxed" aria-pressed="true" aria-label="Pressed">
+            <IconButton
+              variant="boxed"
+              aria-pressed="true"
+              aria-label="Pressed"
+            >
               <Settings size={16} />
             </IconButton>
           ),
@@ -128,7 +151,12 @@ export const Behavior: Story = {
         {
           label: "spinOnHover cw (hover)",
           node: (
-            <IconButton variant="boxed" shape="circle" spinOnHover="cw" aria-label="Spin clockwise">
+            <IconButton
+              variant="boxed"
+              shape="circle"
+              spinOnHover="cw"
+              aria-label="Spin clockwise"
+            >
               <ArrowLeft size={16} />
             </IconButton>
           ),
@@ -136,7 +164,12 @@ export const Behavior: Story = {
         {
           label: "spinOnHover ccw (hover)",
           node: (
-            <IconButton variant="boxed" shape="circle" spinOnHover="ccw" aria-label="Spin counter-clockwise">
+            <IconButton
+              variant="boxed"
+              shape="circle"
+              spinOnHover="ccw"
+              aria-label="Spin counter-clockwise"
+            >
               <ArrowRight size={16} />
             </IconButton>
           ),
@@ -181,7 +214,11 @@ export const AllSizes: Story = {
 
 // AllVariants — ALWAYS last: groups the VARIANTS (default size). The other buckets each have their own
 // grouped overview above (States, Shape, Behavior, AllSizes); never mix different axes/buckets here.
-const VARIANT_CARDS: { v: IconButtonVariant; icon: LucideIcon; label: string }[] = [
+const VARIANT_CARDS: {
+  v: IconButtonVariant;
+  icon: LucideIcon;
+  label: string;
+}[] = [
   { v: "boxed", icon: Settings, label: "Default" },
   { v: "boxed-hover", icon: Bell, label: "BoxedHover" },
   { v: "default", icon: Copy, label: "Ghost" },
