@@ -92,7 +92,7 @@
     },
     "components/ui/IconBadge.tsx": {
       "from": "components/IconBadge.tsx",
-      "sha": "15a24ddc8b407488458c0c672d59c39906e71e3f"
+      "sha": "2453db1ba851811b18c49f9bac22221311a5c8cb"
     },
     "components/ui/IconButton.tsx": {
       "from": "components/IconButton.tsx",
@@ -156,7 +156,7 @@
     },
     "components/ui/SettingRow.tsx": {
       "from": "components/SettingRow.tsx",
-      "sha": "db06ccf9a9b4682b24a1ba30848d65397ce53c1e"
+      "sha": "dc288405d1d98e3d9b9b0b61a20941425a53dd2a"
     },
     "components/ui/SidebarNav.tsx": {
       "from": "components/SidebarNav.tsx",

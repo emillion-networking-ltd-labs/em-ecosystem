@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Settings, Check, AlertTriangle, X, Info as InfoIcon } from "lucide-react";
+import {
+  Settings,
+  Check,
+  AlertTriangle,
+  X,
+  Info as InfoIcon,
+} from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import IconBadge, { type IconBadgeVariant } from "@/components/ui/IconBadge";
 import { DemoCard, Variants, Sizes } from "../_kit";
@@ -13,13 +19,9 @@ const ICONS: Record<IconBadgeVariant, LucideIcon> = {
   error: X,
   info: InfoIcon,
 };
-// box → icon: sm 32px→16 · md 40px→24 · lg 56px→32 (iconBadgeSpecs).
+// El contenedor impone el tamaño del icono desde la escala; box → icono: sm 32px→16 · md 40px→24 · lg 56px→32
+// (lg = 32, xl, legítimo con la escala regular de ECO-184). ICON_PX se conserva solo para la etiqueta de AllSizes.
 const ICON_PX = { sm: 16, md: 24, lg: 32 } as const;
-
-const renderIcon = (variant: IconBadgeVariant, size: "sm" | "md" | "lg") => {
-  const Icon = ICONS[variant];
-  return <Icon size={ICON_PX[size]} />;
-};
 
 const meta = {
   title: "Primitives/BadgeIcon",
@@ -35,7 +37,7 @@ const meta = {
   },
   render: (args) => (
     <DemoCard>
-      <IconBadge {...args}>{renderIcon(args.variant ?? "default", args.size ?? "sm")}</IconBadge>
+      <IconBadge {...args} icon={ICONS[args.variant ?? "default"]} />
     </DemoCard>
   ),
 } satisfies Meta<typeof IconBadge>;
@@ -67,7 +69,7 @@ export const AllSizes: Story = {
     <Sizes
       items={SIZES.map(({ key, box }) => ({
         label: `${key} · ${box}px · ${ICON_PX[key]}px${key === "sm" ? " (default)" : ""}`,
-        node: <IconBadge size={key}>{renderIcon("default", key)}</IconBadge>,
+        node: <IconBadge size={key} icon={ICONS.default} />,
       }))}
     />
   ),
@@ -79,7 +81,7 @@ export const AllVariants: Story = {
     <Variants
       items={VARIANTS.map((v) => ({
         label: cap(v),
-        node: <IconBadge variant={v}>{renderIcon(v, "sm")}</IconBadge>,
+        node: <IconBadge variant={v} icon={ICONS[v]} />,
       }))}
     />
   ),

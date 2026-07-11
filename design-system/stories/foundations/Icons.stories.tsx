@@ -124,15 +124,9 @@ export const Icons: Story = {
             <span className="w-40 text-caption font-mono text-content-secondary">
               BadgeIcon — a LABEL
             </span>
-            <IconBadge variant="default">
-              <Icon icon={User} size="md" />
-            </IconBadge>
-            <IconBadge variant="success">
-              <Icon icon={ShieldCheck} size="md" />
-            </IconBadge>
-            <IconBadge variant="error">
-              <Icon icon={Zap} size="md" />
-            </IconBadge>
+            <IconBadge variant="default" icon={User} />
+            <IconBadge variant="success" icon={ShieldCheck} />
+            <IconBadge variant="error" icon={Zap} />
             <Caption>non-interactive · status / feature marks</Caption>
           </div>
         </div>
