@@ -16,7 +16,7 @@
     },
     "components/ui/Badge.tsx": {
       "from": "components/Badge.tsx",
-      "sha": "eaa989ecdfb23f35abdff3eefc417a2d37896b17"
+      "sha": "7cec5f77f64acde805b0945a3ab7dd47c5eba341"
     },
     "components/ui/BeforeAfterSlider.tsx": {
       "from": "components/BeforeAfterSlider.tsx",
@@ -92,7 +92,7 @@
     },
     "components/ui/IconButton.tsx": {
       "from": "components/IconButton.tsx",
-      "sha": "d31342a035461b1028c2a40a30bdbff04de6cf33"
+      "sha": "2820f4ccca1ab490ddfed28407da76ed19f413d8"
     },
     "components/ui/IdleWarningModal.tsx": {
       "from": "components/IdleWarningModal.tsx",
@@ -156,7 +156,7 @@
     },
     "components/ui/SidebarNav.tsx": {
       "from": "components/SidebarNav.tsx",
-      "sha": "b7c76b2d79e3c3352ba31f59627ebb4669356192"
+      "sha": "30c7cc041406b5d73b346348880b035bbd68e4a4"
     },
     "components/ui/Slider.tsx": {
       "from": "components/Slider.tsx",
@@ -176,7 +176,7 @@
     },
     "components/ui/Tabs.tsx": {
       "from": "components/Tabs.tsx",
-      "sha": "8c3cb0a8b0952507c0e8b6f24140f60b116b4292"
+      "sha": "dfce7b5f53ca1fa3e63a7ad46e64a81c10d9efe5"
     },
     "components/ui/ThemeToggle.tsx": {
       "from": "components/ThemeToggle.tsx",

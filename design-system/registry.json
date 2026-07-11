@@ -81,7 +81,9 @@
       "file": "components/Badge.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
-      "dependencies": {}
+      "dependencies": {
+        "tailwind-variants": "^3.2.2"
+      }
     },
     {
       "name": "BeforeAfterSlider",
@@ -439,7 +441,8 @@
       ],
       "dependencies": {
         "clsx": "^2.1.1",
-        "tailwind-merge": "^3.6.0"
+        "tailwind-merge": "^3.6.0",
+        "tailwind-variants": "^3.2.2"
       }
     },
     {
@@ -835,7 +838,8 @@
       "registryDependencies": [],
       "internalDependencies": [],
       "dependencies": {
-        "lucide-react": "^1.14.0"
+        "lucide-react": "^1.14.0",
+        "tailwind-variants": "^3.2.2"
       }
     },
     {

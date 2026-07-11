@@ -10,7 +10,15 @@ const meta = {
   argTypes: {
     variant: {
       control: "inline-radio",
-      options: ["default", "success", "warning", "error", "info", "kbd", "overlay"],
+      options: [
+        "default",
+        "success",
+        "warning",
+        "error",
+        "info",
+        "kbd",
+        "overlay",
+      ],
     },
     size: { control: "inline-radio", options: ["sm", "md", "lg"] },
   },
@@ -24,7 +32,15 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
-const VARIANTS = ["default", "success", "warning", "error", "info", "kbd", "overlay"] as const;
+const VARIANTS = [
+  "default",
+  "success",
+  "warning",
+  "error",
+  "info",
+  "kbd",
+  "overlay",
+] as const;
 const SIZES = [
   { key: "lg", px: "16" },
   { key: "md", px: "14" },
@@ -35,17 +51,23 @@ const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 // kbd shows a key combo as its content; the rest show their name.
 const content = (v: (typeof VARIANTS)[number]) => (v === "kbd" ? "⌘K" : cap(v));
 
+// ── VARIANTS (the `variant` axis) — one story per variant; grouped by `AllVariants` at the end ──
 // Default — playground: try variant and size from the controls.
 export const Default: Story = {};
-
-// One story per variant (the design axis), before AllVariants groups them.
-export const Success: Story = { args: { variant: "success", children: "Success" } };
-export const Warning: Story = { args: { variant: "warning", children: "Warning" } };
+export const Success: Story = {
+  args: { variant: "success", children: "Success" },
+};
+export const Warning: Story = {
+  args: { variant: "warning", children: "Warning" },
+};
 export const Error: Story = { args: { variant: "error", children: "Error" } };
 export const Info: Story = { args: { variant: "info", children: "Info" } };
 export const Kbd: Story = { args: { variant: "kbd", children: "⌘K" } };
-export const Overlay: Story = { args: { variant: "overlay", children: "Overlay" } };
+export const Overlay: Story = {
+  args: { variant: "overlay", children: "Overlay" },
+};
 
+// ── SIZE AXIS — overview of the size axis ──
 // AllSizes — the 3 sizes (default variant), with px.
 export const AllSizes: Story = {
   render: () => (
@@ -62,7 +84,8 @@ export const AllSizes: Story = {
   ),
 };
 
-// AllVariants — ALWAYS last: every variant (default size), grouping the stories above.
+// ── OVERVIEW (ALWAYS last) ──
+// AllVariants — every variant (default size), grouping the variant stories above.
 export const AllVariants: Story = {
   render: () => (
     <Variants
