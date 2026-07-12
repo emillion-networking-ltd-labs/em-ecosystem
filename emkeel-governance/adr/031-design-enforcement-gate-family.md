@@ -1,9 +1,12 @@
 # ADR-031 — Superficie de enforcement del DS: familia de gates + manifiesto + capas
 
-Status: Accepted
-Date: 2026-07-12
-Strategy: design-enforcement (bajo design-system-quality / ADR-029)
-Ticket: ECO-189
+- Status: accepted
+- Date: 2026-07-12
+- Ticket: [ECO-189](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-189)
+- Strategy: design-enforcement
+- Deciders: Operador (human gate = aprobación + merge del PR)
+- Contexto de gobierno: bajo **design-system-quality** (ADR-029); es la capa de enforcement que hace
+  no-eludibles las decisiones ya tomadas (tokens, contrato de variante, composición). No reabre el contrato.
 
 ## Contexto
 
