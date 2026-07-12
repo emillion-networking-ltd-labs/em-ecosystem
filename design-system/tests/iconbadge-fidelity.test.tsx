@@ -1,7 +1,47 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
 import { Star } from "lucide-react";
-import IconBadge from "@/components/ui/IconBadge";
+import IconBadge, { type IconBadgeVariant } from "@/components/ui/IconBadge";
+
+// ECO-187 — FIDELIDAD de la migración a tailwind-variants: el conjunto de clases del <div> debe ser IDÉNTICO
+// viejo (concat de strings + mapas) vs nuevo (tv, twMerge:false), para cada variant×size. Se retira al cerrar
+// la pieza (cuando ya no queda el concat viejo con qué comparar).
+const OLD_ROOT = "inline-flex shrink-0 items-center justify-center";
+const OLD_VARIANT: Record<IconBadgeVariant, string> = {
+  default: "bg-surface-subtle text-content-primary",
+  success: "bg-success-bg text-success",
+  warning: "bg-warning-bg text-warning",
+  error: "bg-error-bg text-error",
+  info: "bg-info-bg text-info",
+};
+const OLD_SIZE = {
+  sm: "h-8 w-8 rounded-md",
+  md: "h-10 w-10 rounded-md",
+  lg: "h-14 w-14 rounded-md",
+} as const;
+const VARIANTS = ["default", "success", "warning", "error", "info"] as const;
+const SIZES = ["sm", "md", "lg"] as const;
+const classSet = (el: Element | null) =>
+  el
+    ? (el.getAttribute("class") || "").split(/\s+/).filter(Boolean).sort()
+    : [];
+
+describe("IconBadge — fidelidad de la caja (viejo concat vs nuevo tv), por caso", () => {
+  for (const variant of VARIANTS) {
+    for (const size of SIZES) {
+      it(`${variant} · ${size}`, () => {
+        const oldSet = `${OLD_ROOT} ${OLD_VARIANT[variant]} ${OLD_SIZE[size]}`
+          .split(/\s+/)
+          .filter(Boolean)
+          .sort();
+        const r = render(<IconBadge variant={variant} size={size} />);
+        const neu = classSet(r.container.querySelector("div"));
+        r.unmount();
+        expect(neu).toEqual(oldSet);
+      });
+    }
+  }
+});
 
 // ECO-183 — FIDELIDAD del prop `icon` de IconBadge: el contenedor impone el tamaño desde la escala
 // (sm→md 16, md→lg 24, lg→xl 32). El SVG de `<IconBadge icon={Glyph} size=.../>` debe equivaler al viejo

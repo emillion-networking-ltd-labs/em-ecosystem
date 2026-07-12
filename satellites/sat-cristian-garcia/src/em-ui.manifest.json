@@ -40,7 +40,7 @@
     },
     "components/ui/IconBadge.tsx": {
       "from": "components/IconBadge.tsx",
-      "sha": "2453db1ba851811b18c49f9bac22221311a5c8cb"
+      "sha": "b4f576b4c3ef4d89d0f20db807c6cf30a22ec65e"
     },
     "components/ui/IconButton.tsx": {
       "from": "components/IconButton.tsx",
