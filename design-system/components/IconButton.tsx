@@ -5,6 +5,7 @@ import { tv } from "tailwind-variants";
 import type { LucideIcon } from "lucide-react";
 import Tooltip, { type TooltipPosition } from "./Tooltip";
 import Icon from "./Icon";
+import SpinnerCircle from "./SpinnerCircle";
 import { cn } from "@/lib/utils";
 
 export type IconButtonVariant = "default" | "danger" | "boxed" | "boxed-hover";
@@ -103,7 +104,7 @@ const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(
     // El contenedor impone tamaño (escala: md=16px) y deja el color a la variante. `children` para no-glyph.
     const glyph = Glyph ? <Icon icon={Glyph} size="md" /> : children;
     const content = loading ? (
-      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current/20 border-t-current" />
+      <SpinnerCircle size="sm" tone="current" />
     ) : spinOnHover ? (
       <span
         className={cn(
