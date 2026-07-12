@@ -2,6 +2,7 @@
 
 import { Search } from "lucide-react";
 import Badge from "./Badge";
+import Icon from "./Icon";
 
 export const searchTriggerSpecs = {
   container: {
@@ -38,7 +39,7 @@ export default function SearchTrigger({
       onClick={onClick}
       className={`inline-flex items-center gap-2 rounded-md border border-border-components bg-transparent px-4 py-1.5 text-caption text-content-primary transition-colors hover:bg-surface-subtle h-8 ${className}`}
     >
-      <Search size={16} className="shrink-0" />
+      <Icon icon={Search} size="md" className="shrink-0" />
       <span>Search...</span>
       <Badge variant="kbd" size="sm">
         {isMac ? "⌘K" : "Ctrl+K"}

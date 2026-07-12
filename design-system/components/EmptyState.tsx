@@ -2,6 +2,7 @@
 
 import { AlertTriangle, Inbox } from "lucide-react";
 import type { ReactNode } from "react";
+import Icon from "./Icon";
 
 export const emptyStateSpecs = {
   container: "flex flex-col items-center gap-3 py-12",
@@ -31,9 +32,9 @@ export default function EmptyState({
 }: EmptyStateProps) {
   const isError = variant === "error";
   const defaultIcon = isError ? (
-    <AlertTriangle size={48} />
+    <Icon icon={AlertTriangle} size="2xl" />
   ) : (
-    <Inbox size={48} />
+    <Icon icon={Inbox} size="2xl" />
   );
   const iconColorClass = isError ? "text-error" : "text-content-primary/30";
 

@@ -3,6 +3,7 @@
 import { useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
 import { TriangleAlert, CircleCheck, CircleAlert, Info, X } from "lucide-react";
+import Icon from "./Icon";
 
 type ToastVariant = "error" | "success" | "warning" | "info";
 
@@ -32,7 +33,7 @@ export default function Toast({
   duration,
   onClose,
 }: ToastProps) {
-  const { icon: Icon, className: variantClass } = VARIANT_CONFIG[variant];
+  const { icon: Glyph, className: variantClass } = VARIANT_CONFIG[variant];
 
   const dismiss = useCallback(() => {
     onClose(id);
@@ -55,7 +56,11 @@ export default function Toast({
       className="pointer-events-auto group grid w-fit max-w-[550px] grid-cols-[14px_1fr_auto] items-start gap-x-2 rounded-3xl border border-border-strong bg-surface-primary py-3 pl-5 pr-4"
     >
       {/* Col 1: icon — vertically centered with the title (row 1) */}
-      <Icon size={14} className={`self-center shrink-0 ${variantClass}`} />
+      <Icon
+        icon={Glyph}
+        size="sm"
+        className={`self-center shrink-0 ${variantClass}`}
+      />
       {/* Col 2: title */}
       <p className="min-w-0 text-caption font-semibold leading-4 text-content-primary">
         {title}
@@ -66,7 +71,7 @@ export default function Toast({
         className="row-span-2 mt-[-7px] mr-[-7px] self-start shrink-0 rounded-md p-1 text-content-tertiary opacity-0 transition-all hover:text-content-primary group-hover:opacity-100"
         aria-label="Close notification"
       >
-        <X size={12} />
+        <Icon icon={X} size="xs" />
       </button>
       {/* Col 2 row 2: description */}
       {description && (

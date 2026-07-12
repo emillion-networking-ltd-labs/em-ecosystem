@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { CalendarDays } from "lucide-react";
 import Calendar from "./Calendar";
+import Icon from "./Icon";
 
 interface DateInputProps {
   label?: string;
@@ -137,7 +138,11 @@ export default function DateInput({
         >
           {value ? formatDisplay(value) : placeholder}
         </span>
-        <CalendarDays size={16} className="shrink-0 text-content-primary/50" />
+        <Icon
+          icon={CalendarDays}
+          size="md"
+          className="shrink-0 text-content-primary/50"
+        />
       </button>
 
       {open && (

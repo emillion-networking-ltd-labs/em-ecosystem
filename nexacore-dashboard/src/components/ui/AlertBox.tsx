@@ -1,6 +1,7 @@
 "use client";
 
 import { AlertTriangle, CircleX, Info, CircleCheck } from "lucide-react";
+import Icon from "./Icon";
 
 type AlertBoxVariant = "warning" | "error" | "info" | "success";
 
@@ -57,14 +58,18 @@ export default function AlertBox({
   className = "",
 }: AlertBoxProps) {
   const config = variantConfig[variant];
-  const Icon = config.icon;
+  const Glyph = config.icon;
 
   return (
     <div
       className={`inline-flex items-start gap-2 rounded-lg border ${config.border} ${config.bg} p-3 ${className}`}
       role="alert"
     >
-      <Icon size={16} className={`mt-0.5 shrink-0 ${config.iconColor}`} />
+      <Icon
+        icon={Glyph}
+        size="md"
+        className={`mt-0.5 shrink-0 ${config.iconColor}`}
+      />
       {/* select-text: el texto va en un <div> (no en la lista de opt-in de tags) → se reabre la selección
           para que el mensaje sea copiable, sin reactivar el caret sobre divs de layout (ECO-115). */}
       <div className="select-text text-caption text-content-primary">

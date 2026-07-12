@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import Button from "./Button";
+import Icon from "./Icon";
 
 export const recoveryCodesGridSpecs = {
   container: "rounded-lg border border-border-strong bg-surface-subtle p-4",
@@ -51,11 +52,11 @@ export default function RecoveryCodesGrid({
       >
         {copied ? (
           <>
-            <Check size={16} className="text-success" /> Copied!
+            <Icon icon={Check} size="md" className="text-success" /> Copied!
           </>
         ) : (
           <>
-            <Copy size={16} /> Copy all codes
+            <Icon icon={Copy} size="md" /> Copy all codes
           </>
         )}
       </Button>

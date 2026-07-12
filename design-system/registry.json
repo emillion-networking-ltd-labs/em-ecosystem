@@ -10,7 +10,9 @@
       "name": "Accordion",
       "type": "registry:ui",
       "file": "components/Accordion.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0"
@@ -20,7 +22,9 @@
       "name": "AlertBox",
       "type": "registry:ui",
       "file": "components/AlertBox.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0"
@@ -136,7 +140,9 @@
       "name": "Breadcrumbs",
       "type": "registry:ui",
       "file": "components/Breadcrumbs.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0"
@@ -158,7 +164,9 @@
       "name": "Calendar",
       "type": "registry:ui",
       "file": "components/Calendar.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0"
@@ -264,6 +272,7 @@
       "type": "registry:ui",
       "file": "components/CopyField.tsx",
       "registryDependencies": [
+        "Icon",
         "Tooltip"
       ],
       "internalDependencies": [
@@ -294,7 +303,8 @@
       "type": "registry:ui",
       "file": "components/DateInput.tsx",
       "registryDependencies": [
-        "Calendar"
+        "Calendar",
+        "Icon"
       ],
       "internalDependencies": [],
       "dependencies": {
@@ -341,6 +351,7 @@
       "registryDependencies": [
         "Avatar",
         "Button",
+        "Icon",
         "Tooltip"
       ],
       "internalDependencies": [
@@ -354,7 +365,9 @@
       "name": "EmptyState",
       "type": "registry:ui",
       "file": "components/EmptyState.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0"
@@ -494,7 +507,9 @@
       "name": "InlineError",
       "type": "registry:ui",
       "file": "components/InlineError.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0"
@@ -535,6 +550,7 @@
       "file": "components/LanguageSelector.tsx",
       "registryDependencies": [
         "Avatar",
+        "Icon",
         "Input"
       ],
       "internalDependencies": [],
@@ -573,7 +589,9 @@
       "name": "MetricCard",
       "type": "registry:ui",
       "file": "components/MetricCard.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0"
@@ -605,7 +623,9 @@
       "name": "Pagination",
       "type": "registry:ui",
       "file": "components/Pagination.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0"
@@ -641,7 +661,8 @@
       "type": "registry:ui",
       "file": "components/RateLimitBanner.tsx",
       "registryDependencies": [
-        "CountdownTimer"
+        "CountdownTimer",
+        "Icon"
       ],
       "internalDependencies": [
         "lib/types.ts"
@@ -655,7 +676,8 @@
       "type": "registry:ui",
       "file": "components/RecoveryCodesGrid.tsx",
       "registryDependencies": [
-        "Button"
+        "Button",
+        "Icon"
       ],
       "internalDependencies": [],
       "dependencies": {
@@ -680,7 +702,8 @@
       "type": "registry:ui",
       "file": "components/SearchTrigger.tsx",
       "registryDependencies": [
-        "Badge"
+        "Badge",
+        "Icon"
       ],
       "internalDependencies": [],
       "dependencies": {
@@ -714,7 +737,9 @@
       "name": "Select",
       "type": "registry:ui",
       "file": "components/Select.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0"
@@ -750,6 +775,7 @@
       "type": "registry:ui",
       "file": "components/SidebarNav.tsx",
       "registryDependencies": [
+        "Icon",
         "IconButton",
         "Tabs",
         "Tooltip"
@@ -856,7 +882,9 @@
       "name": "Tabs",
       "type": "registry:ui",
       "file": "components/Tabs.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0",
@@ -904,7 +932,9 @@
       "name": "Toast",
       "type": "registry:ui",
       "file": "components/Toast.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "framer-motion": "^12.38.0",

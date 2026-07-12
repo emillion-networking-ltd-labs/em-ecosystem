@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 import Avatar from "./Avatar";
 import Input from "./Input";
+import Icon from "./Icon";
 
 interface Language {
   code: string;
@@ -137,8 +138,9 @@ export default function LanguageSelector({
         style={triggerStyle}
       >
         <span className="whitespace-nowrap">{selected.name}</span>
-        <ChevronDown
-          size={16}
+        <Icon
+          icon={ChevronDown}
+          size="md"
           className={`shrink-0 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
         />
       </button>
@@ -158,7 +160,7 @@ export default function LanguageSelector({
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search language..."
-                leftIcon={<Search size={16} strokeWidth={2} />}
+                leftIcon={<Icon icon={Search} size="md" />}
                 rightIcon={
                   search ? (
                     <button
@@ -166,7 +168,7 @@ export default function LanguageSelector({
                       onClick={() => setSearch("")}
                       className="text-content-primary/50 hover:text-content-primary"
                     >
-                      <X size={12} strokeWidth={2} />
+                      <Icon icon={X} size="xs" />
                     </button>
                   ) : undefined
                 }
