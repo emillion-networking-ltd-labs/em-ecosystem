@@ -40,6 +40,16 @@
       "mode": "ratchet",
       "ceiling": null,
       "note": "Prohibe button/input/select/textarea crudos en el codigo de PRODUCTO (dashboard+satelites, excluyendo components/ui/ = copias de primitivos). Scope INVERSO al de icono. Baseline=24 en ratchet-baseline.json (deuda existente); migrar a <Button>/<Input> baja el baseline con --update. Escapes: crash page, demos de hover."
+    },
+    {
+      "dimension": "typography",
+      "piece": "tokens text-body/caption/h1/h2/h3/display",
+      "gate": "check-typography-tokens.mjs",
+      "scope": "fleet",
+      "escape": "type-ok",
+      "mode": "ratchet",
+      "ceiling": null,
+      "note": "Token-por-propiedad: prohibe text-[Npx|rem|em] (tamano de fuente arbitrario). NO toca text-[var(--)] ni text-[#hex] (color=raw-color). DS limpio (0); baseline=38 en consumidores (satelites/dashboard). Excluye stories/ (demos)."
     }
   ]
 }
