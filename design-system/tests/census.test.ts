@@ -1,15 +1,16 @@
 import { describe, it, expect } from "vitest";
 import { execFileSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 import { resolve, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-// @ts-expect-error — script .mjs sin tipos
+// @ts-expect-error — .mjs script has no types
 import { classify } from "../scripts/census.mjs";
 
-// ECO-196 — censo del corpus: clasificación mecánica (on-tv/Specs/axes) para el worklist de Fase 1.
+// ECO-196 — corpus census: mechanical classification (on-tv/Specs/axes) for the Phase-1 worklist.
 const DS = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
 describe("census (ECO-196)", () => {
-  it("detecta el idioma tv y los <name>Specs", () => {
+  it("detects the tv idiom and <name>Specs", () => {
     expect(classify("X", `import { tv } from "tailwind-variants";`).onTv).toBe(
       true,
     );
@@ -17,27 +18,43 @@ describe("census (ECO-196)", () => {
     expect(classify("X", `export const xSpecs = {};`).hasSpecs).toBe(true);
   });
 
-  it("detecta los ejes (variant/size/shape) declarados como prop", () => {
+  it("detects the axes (variant/size/shape) declared as props", () => {
     expect(classify("X", `  size?: "sm" | "md";`).axes).toEqual(["size"]);
     expect(classify("X", `  variant?: "a";\n  size?: "sm";`).axes).toEqual([
       "variant",
       "size",
     ]);
-    expect(classify("X", `const size = 4;`).axes).toEqual([]); // no es prop
+    expect(classify("X", `const size = 4;`).axes).toEqual([]); // not a prop
   });
 
-  it("marca tvCandidate = tiene ejes y NO está en tv", () => {
+  it("flags tvCandidate = has axes and is NOT on tv", () => {
     expect(classify("X", `  size?: "sm";`).tvCandidate).toBe(true);
     expect(
       classify("X", `import { tv } from "tailwind-variants";\n  size?: "sm";`)
         .tvCandidate,
-    ).toBe(false); // ya en tv
-    expect(classify("X", `const x = 1;`).tvCandidate).toBe(false); // sin ejes
+    ).toBe(false); // already on tv
+    expect(classify("X", `const x = 1;`).tvCandidate).toBe(false); // no axes
   });
 
-  it("el censo corre sin lanzar (detector repetible)", () => {
+  it("runs without throwing (repeatable detector)", () => {
     expect(() =>
       execFileSync("node", [join(DS, "scripts", "census.mjs")], { cwd: DS }),
     ).not.toThrow();
+  });
+
+  it("detects the declared role (@ds-role)", () => {
+    expect(classify("X", `// @ds-role: primitive\n`).role).toBe("primitive");
+    expect(classify("X", `// @ds-role: composite\n`).role).toBe("composite");
+    expect(classify("X", `const x = 1;`).role).toBe(null);
+  });
+
+  it("census.json is fresh (== census --json) — never stale", () => {
+    const onDisk = JSON.parse(readFileSync(join(DS, "census.json"), "utf8"));
+    const fresh = JSON.parse(
+      execFileSync("node", [join(DS, "scripts", "census.mjs"), "--json"], {
+        cwd: DS,
+      }).toString(),
+    );
+    expect(onDisk).toEqual(fresh);
   });
 });

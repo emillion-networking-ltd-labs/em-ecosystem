@@ -59,6 +59,16 @@ export function directDeps(name, dir = COMP) {
   };
 }
 
+// Rol de construcción DECLARADO por el componente: `// @ds-role: primitive|composite` (ADR-029 / eje B, ECO-197).
+// Es JUICIO, no inferible del grafo (Button compone SpinnerInfinity y es primitive) → se declara en el fichero.
+// Devuelve null si no está anotado (lo caza check-classification en ratchet).
+export function roleOf(name, dir = COMP) {
+  const m = readFileSync(join(dir, `${name}.tsx`), "utf8").match(
+    /@ds-role:\s*(primitive|composite)\b/,
+  );
+  return m ? m[1] : null;
+}
+
 // Deps npm EXTERNAS de un item (ECO-164): paquetes que importa SU fichero + sus ficheros internos
 // (lib/hooks — p.ej. lib/utils.ts arrastra clsx + tailwind-merge). Excluye alias `@/`, relativos y peers.
 // La versión sale del package.json del DS (fuente única). Devuelve { pkg: rango } ordenado.
@@ -91,7 +101,8 @@ export function buildRegistry() {
   const items = componentNames().map((name) => {
     const { registryDependencies, internalDependencies } = directDeps(name, COMP);
     const dependencies = externalDeps(name, COMP, internalDependencies);
-    return { name, type: "registry:ui", file: `components/${name}.tsx`, registryDependencies, internalDependencies, dependencies };
+    const role = roleOf(name, COMP); // eje B (ADR-029): primitive|composite declarado, o null si sin anotar
+    return { name, type: "registry:ui", ...(role ? { role } : {}), file: `components/${name}.tsx`, registryDependencies, internalDependencies, dependencies };
   });
   // Secciones (nivel 2): componen átomos. `em-ui add <Section>` jala la sección + su cierre de átomos/hooks.
   for (const name of sectionNames()) {

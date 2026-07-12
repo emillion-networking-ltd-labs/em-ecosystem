@@ -3,7 +3,7 @@ import Badge from "@/components/ui/Badge";
 import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
-  title: "Simple/Badge",
+  title: "Primitives/Badge",
   component: Badge,
   tags: ["autodocs"],
   args: { children: "Label", variant: "default", size: "md" },
