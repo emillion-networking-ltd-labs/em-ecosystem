@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Birdhouse, ChevronRight } from "lucide-react";
+import Icon from "./Icon";
 
 type BreadcrumbItem = {
   label: string;
@@ -97,13 +98,13 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
           href="/dashboard"
           className="flex shrink-0 items-center justify-center text-content-tertiary transition-colors hover:text-content-primary"
         >
-          <Birdhouse size={16} />
+          <Icon icon={Birdhouse} size="md" />
         </Link>
         {items.map((item, index) => {
           const isLast = index === items.length - 1;
           return (
             <div key={item.label} className="flex items-center gap-1">
-              <ChevronRight size={16} className={sepClass} />
+              <Icon icon={ChevronRight} size="md" className={sepClass} />
               {isLast || !item.href ? (
                 <span className={activeClass}>{item.label}</span>
               ) : (
@@ -126,11 +127,11 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
             href="/dashboard"
             className="flex shrink-0 items-center justify-center text-content-tertiary transition-colors hover:text-content-primary"
           >
-            <Birdhouse size={16} />
+            <Icon icon={Birdhouse} size="md" />
           </Link>
           {middleItems.length > 0 && (
             <div ref={menuRef} className="relative flex items-center gap-1">
-              <ChevronRight size={16} className={sepClass} />
+              <Icon icon={ChevronRight} size="md" className={sepClass} />
               <button
                 type="button"
                 onClick={() => setMenuOpen((o) => !o)}
@@ -159,7 +160,11 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                           onClick={() => setMenuOpen(false)}
                           className="flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-6 py-2.5 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
                         >
-                          <ChevronRight size={16} className={sepClass} />
+                          <Icon
+                            icon={ChevronRight}
+                            size="md"
+                            className={sepClass}
+                          />
                           {item.label}
                         </Link>
                       ) : (
@@ -167,7 +172,11 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                           role="menuitem"
                           className="flex h-10 items-center gap-2 whitespace-nowrap rounded-md px-6 py-2.5 text-body font-normal text-content-tertiary"
                         >
-                          <ChevronRight size={16} className={sepClass} />
+                          <Icon
+                            icon={ChevronRight}
+                            size="md"
+                            className={sepClass}
+                          />
                           {item.label}
                         </span>
                       )}
@@ -178,7 +187,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
             </div>
           )}
           <div className="flex items-center gap-1">
-            <ChevronRight size={16} className={sepClass} />
+            <Icon icon={ChevronRight} size="md" className={sepClass} />
             <span className={activeClass}>{lastItem.label}</span>
           </div>
         </nav>

@@ -1,6 +1,7 @@
 "use client";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Icon from "./Icon";
 
 type PaginationProps = {
   currentPage: number;
@@ -52,7 +53,7 @@ export default function Pagination({
         className={arrowBase}
         aria-label="Previous page"
       >
-        <ChevronLeft size={16} />
+        <Icon icon={ChevronLeft} size="md" />
       </button>
 
       {pages.map((page, i) =>
@@ -80,7 +81,7 @@ export default function Pagination({
         className={arrowBase}
         aria-label="Next page"
       >
-        <ChevronRight size={16} />
+        <Icon icon={ChevronRight} size="md" />
       </button>
     </nav>
   );

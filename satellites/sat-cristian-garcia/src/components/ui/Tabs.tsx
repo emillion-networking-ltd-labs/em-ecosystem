@@ -3,6 +3,7 @@
 import { useRef, useCallback } from "react";
 import { tv } from "tailwind-variants";
 import { ChevronRight } from "lucide-react";
+import Icon from "./Icon";
 
 interface Tab {
   label: string;
@@ -261,8 +262,9 @@ export default function Tabs({
             className={itemClassName}
           >
             {isNav && !isActive && (
-              <ChevronRight
-                size={16}
+              <Icon
+                icon={ChevronRight}
+                size="md"
                 className="shrink-0 text-content-primary/75"
               />
             )}

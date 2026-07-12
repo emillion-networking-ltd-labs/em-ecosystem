@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AlertTriangle, Lock } from "lucide-react";
+import Icon from "./Icon";
 import CountdownTimer from "./CountdownTimer";
 import type { RateLimitKind } from "@/lib/types";
 
@@ -44,11 +45,11 @@ export default function RateLimitBanner({
     return () => clearInterval(timer);
   }, [secondsLeft, onExpired]);
 
-  const Icon = kind === "lockout" ? Lock : AlertTriangle;
+  const Glyph = kind === "lockout" ? Lock : AlertTriangle;
 
   return (
     <div role="alert" className="flex items-start gap-2">
-      <Icon size={16} className="mt-1 shrink-0 text-error" />
+      <Icon icon={Glyph} size="md" className="mt-1 shrink-0 text-error" />
       <div className="flex flex-1 flex-wrap items-center gap-x-2 gap-y-1">
         <span className="text-caption leading-6 text-error">{message}</span>
         {secondsLeft > 0 && <CountdownTimer seconds={secondsLeft} />}

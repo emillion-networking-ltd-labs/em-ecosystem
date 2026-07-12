@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import Icon from "./Icon";
 
 interface CalendarProps {
   value?: Date;
@@ -243,7 +244,7 @@ export default function Calendar({
           aria-label="Previous"
           className="w-6 h-6 flex items-center justify-center rounded-full bg-surface-subtle hover:bg-surface-subtle transition-colors disabled:opacity-50"
         >
-          <ChevronLeft size={16} className="text-content-primary" />
+          <Icon icon={ChevronLeft} size="md" className="text-content-primary" />
         </button>
         <button
           type="button"
@@ -260,7 +261,11 @@ export default function Calendar({
           aria-label="Next"
           className="w-6 h-6 flex items-center justify-center rounded-full bg-surface-subtle hover:bg-surface-subtle transition-colors disabled:opacity-50"
         >
-          <ChevronRight size={16} className="text-content-primary" />
+          <Icon
+            icon={ChevronRight}
+            size="md"
+            className="text-content-primary"
+          />
         </button>
       </div>
 

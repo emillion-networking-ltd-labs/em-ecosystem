@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ChevronRight, ChevronDown } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import Icon from "./Icon";
 import Tooltip from "./Tooltip";
 import Tabs, { variantStyles } from "./Tabs";
 import { iconButtonSpecs } from "./IconButton";
@@ -135,7 +136,7 @@ function SidebarFlyout({
         {parentLabel}
       </p>
       {items.map((child) => {
-        const ChildIcon = child.icon;
+        const ChildGlyph = child.icon;
         return (
           <Link
             key={child.href}
@@ -146,7 +147,7 @@ function SidebarFlyout({
             }}
             className="flex items-center gap-2 rounded-lg px-3 py-2 text-body text-content-primary hover:bg-surface-subtle"
           >
-            <ChildIcon size={16} className="shrink-0" />
+            <Icon icon={ChildGlyph} size="md" className="shrink-0" />
             <span>{child.label}</span>
           </Link>
         );
@@ -242,7 +243,7 @@ export default function SidebarNav({
         const tabs = section.items.map((item) => ({
           label: item.label,
           value: item.href,
-          icon: <item.icon size={16} className="shrink-0" />,
+          icon: <Icon icon={item.icon} size="md" className="shrink-0" />,
         }));
 
         return (
@@ -259,7 +260,7 @@ export default function SidebarNav({
               renderTab={({ tab, isActive, className: tabClassName }) => {
                 const item = section.items.find((it) => it.href === tab.value);
                 if (!item) return null;
-                const Icon = item.icon;
+                const Glyph = item.icon;
                 const hasChildren = Array.isArray(item.children);
 
                 // ─── Collapsed ───
@@ -280,7 +281,7 @@ export default function SidebarNav({
                           aria-pressed={itemActive ? "true" : undefined}
                           className={`${iconButtonSpecs.base} ${iconButtonSpecs.sizes.sm} ${iconButtonSpecs.variants.boxed}`}
                         >
-                          <Icon size={16} className="shrink-0" />
+                          <Icon icon={Glyph} size="md" className="shrink-0" />
                         </button>
                       </SidebarFlyout>
                     );
@@ -295,7 +296,7 @@ export default function SidebarNav({
                         aria-pressed={itemActive ? "true" : undefined}
                         className={`${iconButtonSpecs.base} ${iconButtonSpecs.sizes.sm} ${iconButtonSpecs.variants.boxed}`}
                       >
-                        <Icon size={16} className="shrink-0" />
+                        <Icon icon={Glyph} size="md" className="shrink-0" />
                       </Link>
                     </Tooltip>
                   );
@@ -309,7 +310,9 @@ export default function SidebarNav({
                   const childTabs = item.children!.map((child) => ({
                     label: child.label,
                     value: child.href,
-                    icon: <child.icon size={16} className="shrink-0" />,
+                    icon: (
+                      <Icon icon={child.icon} size="md" className="shrink-0" />
+                    ),
                   }));
 
                   // Parent row is NEVER active — only children can be
@@ -322,17 +325,19 @@ export default function SidebarNav({
                         className={parentClassName}
                       >
                         {open ? (
-                          <ChevronDown
-                            size={16}
+                          <Icon
+                            icon={ChevronDown}
+                            size="md"
                             className="shrink-0 text-content-primary/75"
                           />
                         ) : (
-                          <ChevronRight
-                            size={16}
+                          <Icon
+                            icon={ChevronRight}
+                            size="md"
                             className="shrink-0 text-content-primary/75"
                           />
                         )}
-                        <Icon size={16} className="shrink-0" />
+                        <Icon icon={Glyph} size="md" className="shrink-0" />
                         <span>{item.label}</span>
                       </button>
                       {open && (
@@ -351,7 +356,7 @@ export default function SidebarNav({
                               (c) => c.href === childTab.value,
                             );
                             if (!child) return null;
-                            const ChildIcon = child.icon;
+                            const ChildGlyph = child.icon;
                             return (
                               <Link
                                 href={child.href}
@@ -359,12 +364,17 @@ export default function SidebarNav({
                                 className={childClassName}
                               >
                                 {!childIsActive && (
-                                  <ChevronRight
-                                    size={16}
+                                  <Icon
+                                    icon={ChevronRight}
+                                    size="md"
                                     className="shrink-0 text-content-primary/75"
                                   />
                                 )}
-                                <ChildIcon size={16} className="shrink-0" />
+                                <Icon
+                                  icon={ChildGlyph}
+                                  size="md"
+                                  className="shrink-0"
+                                />
                                 <span>{child.label}</span>
                               </Link>
                             );
@@ -383,12 +393,13 @@ export default function SidebarNav({
                     className={tabClassName}
                   >
                     {!isActive && (
-                      <ChevronRight
-                        size={16}
+                      <Icon
+                        icon={ChevronRight}
+                        size="md"
                         className="shrink-0 text-content-primary/75"
                       />
                     )}
-                    <Icon size={16} className="shrink-0" />
+                    <Icon icon={Glyph} size="md" className="shrink-0" />
                     <span>{item.label}</span>
                   </Link>
                 );

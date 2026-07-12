@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect, useCallback, useId } from "react";
 import { ChevronDown } from "lucide-react";
+import Icon from "./Icon";
 
 interface SelectOption {
   label: string;
@@ -174,8 +175,9 @@ export default function Select({
         } ${open ? "bg-surface-subtle text-content-primary" : "bg-transparent text-content-primary/75"}`}
       >
         <span>{selectedOption?.label ?? placeholder}</span>
-        <ChevronDown
-          size={16}
+        <Icon
+          icon={ChevronDown}
+          size="md"
           className={`text-content-primary/50 transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden="true"
         />

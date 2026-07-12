@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown, Plus } from "lucide-react";
+import Icon from "./Icon";
 
 interface AccordionItem {
   title: string;
@@ -88,13 +89,15 @@ export default function Accordion({
             >
               {item.title}
               {indicator === "plus" ? (
-                <Plus
-                  size={16}
+                <Icon
+                  icon={Plus}
+                  size="md"
                   className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}
                 />
               ) : (
-                <ChevronDown
-                  size={16}
+                <Icon
+                  icon={ChevronDown}
+                  size="md"
                   className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
                 />
               )}
@@ -143,8 +146,9 @@ export function SingleAccordion({
         className="flex w-full items-center justify-between px-4 py-3 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
       >
         {title}
-        <ChevronDown
-          size={16}
+        <Icon
+          icon={ChevronDown}
+          size="md"
           className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>

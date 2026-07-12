@@ -1,6 +1,7 @@
 "use client";
 
 import { TrendingUp, TrendingDown } from "lucide-react";
+import Icon from "./Icon";
 
 type MetricCardProps = {
   label: string;
@@ -41,9 +42,9 @@ export default function MetricCard({
                 {isPositive ? "+" : ""}
                 {trend.toFixed(2)}%
                 {isPositive ? (
-                  <TrendingUp size={16} />
+                  <Icon icon={TrendingUp} size="md" />
                 ) : (
-                  <TrendingDown size={16} />
+                  <Icon icon={TrendingDown} size="md" />
                 )}
               </span>
             )}

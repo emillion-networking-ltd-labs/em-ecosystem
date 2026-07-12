@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import Tooltip from "./Tooltip";
+import Icon from "./Icon";
 import { useIsTruncated } from "@/hooks/useIsTruncated";
 
 export const copyFieldSpecs = {
@@ -64,9 +65,9 @@ export default function CopyField({
           aria-label={copied ? "Copied" : "Copy to clipboard"}
         >
           {copied ? (
-            <Check size={14} className="text-success" />
+            <Icon icon={Check} size="sm" className="text-success" />
           ) : (
-            <Copy size={14} />
+            <Icon icon={Copy} size="sm" />
           )}
         </button>
       </div>

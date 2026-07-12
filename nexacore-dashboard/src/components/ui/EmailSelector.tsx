@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { ChevronDown } from "lucide-react";
+import Icon from "./Icon";
 import Avatar from "./Avatar";
 import Button from "./Button";
 import Tooltip from "./Tooltip";
@@ -64,8 +65,9 @@ export default function EmailSelector({
           <span ref={emailRef} className="max-w-[220px] truncate leading-none">
             {email}
           </span>
-          <ChevronDown
-            size={16}
+          <Icon
+            icon={ChevronDown}
+            size="md"
             className={`shrink-0 transition-transform ${open ? "rotate-180" : ""}`}
           />
         </button>
