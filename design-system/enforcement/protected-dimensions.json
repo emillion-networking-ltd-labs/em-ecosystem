@@ -1,0 +1,25 @@
+{
+  "_comment": "Manifiesto de DIMENSIONES PROTEGIDAS del design-system (estrategia design-enforcement / ADR-031). Cada dimension de fuente unica que NO debe escribirse a mano lleva aqui su { piece, gate, scope, escape, mode }. El meta-gate check-protected-dimensions.mjs verifica manifiesto <-> gates en ambos sentidos: no puedes anadir una dimension sin su gate vivo+cableado, ni un gate check-*-usage sin registrarlo aqui. Asi la meta-regla es mecanica, no aspiracional. SCOPE: ds (design-system/) | consumer-minus-primitives (dashboard+satelites, excluyendo **/components/ui/ y design-system/components/) | fleet (DS+dashboard+satelites). MODE: report (lista, no falla) | ratchet (baseline que solo decrece) | enforce (zero-tolerance).",
+  "dimensions": [
+    {
+      "dimension": "icon",
+      "piece": "<Icon> / ICON_SIZES",
+      "gate": "check-icon-usage.mjs",
+      "scope": "ds",
+      "escape": "icon-ok",
+      "mode": "enforce",
+      "ceiling": null,
+      "note": "Todo glyph de lucide via <Icon> (tamano desde la escala). Deuda de scope: falta extender a dashboard/satelites."
+    },
+    {
+      "dimension": "color",
+      "piece": "tokens content/surface/border/accent/feedback",
+      "gate": "check-raw-color.mjs",
+      "scope": "fleet",
+      "escape": "raw-color-ok",
+      "mode": "enforce",
+      "ceiling": null,
+      "note": "Prohibe hex/rgb/paleta cruda fuera de tokens. Unico gate de dimension con scope de flota completa hoy."
+    }
+  ]
+}
