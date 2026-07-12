@@ -45,6 +45,7 @@ export default function GlobalError({
           )}
 
           <div className="global-error-actions">
+            {/* html-ok: página de crash de Next.js — DS-independiente por diseño (el root layout falló; no debe depender de <Button> ni de providers). */}
             <button onClick={reset} className="global-error-btn-primary">
               Try again
             </button>

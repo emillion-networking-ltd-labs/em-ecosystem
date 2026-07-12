@@ -19,6 +19,10 @@ export function ratchetCheck(baseline, gateId, current) {
 
 /** El baseline SOLO decrece: el nuevo valor permitido es min(actual, previo). Puro, exportado para test. */
 export function nextBaseline(baseline, gateId, current) {
-  const allowed = baseline?.[gateId] ?? 0;
-  return { ...baseline, [gateId]: Math.min(current, allowed) };
+  // Sin baseline previo → INICIALIZA a `current` (captura la deuda actual). Con baseline previo → solo DECRECE.
+  const prev = baseline?.[gateId];
+  return {
+    ...baseline,
+    [gateId]: prev === undefined ? current : Math.min(current, prev),
+  };
 }
