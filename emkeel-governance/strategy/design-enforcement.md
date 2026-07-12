@@ -1,6 +1,6 @@
 # Strategy: design-enforcement
 
-Status: DRAFT
+Status: APPROVED
 Strategy: design-enforcement   <!-- feature specs reference this with a `Strategy: design-enforcement` line -->
 Impact: high   <!-- foundational: define cómo se hace cumplir TODO el estándar del DS; panel ≥3 lentes -->
 
@@ -56,4 +56,4 @@ medida que el DS crece — para cortar el ciclo de reconstrucción.
 
 ## Decisions
 <!-- optional: link the chosen decision as an ADR, e.g. emkeel-governance/adr/007-<slug>.md -->
-<pendiente: al aprobar, registrar como ADR bajo design-system-quality>
+- **ADR-031** (`emkeel-governance/adr/031-design-enforcement-gate-family.md`) — registra la decisión: superficie de enforcement = familia de gates `.mjs` (un solo mundo) + manifiesto de dimensiones protegidas + meta-gate + capas (piso/techo) + ratchet, bajo design-system-quality.
