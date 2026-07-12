@@ -1,0 +1,83 @@
+{
+  "process": "strategy",
+  "state": "presented",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-07-12T11:49:28Z",
+      "topic": "design-enforcement",
+      "kill_criteria": [
+        "un gate mecanico produce >10% falsos positivos en el corpus real (como composicion ~90%) \u2192 esa dimension NO es gateable y forzarla es un error",
+        "gestionar N gates + sus escapes cuesta mas friccion que la deuda de hand-rolling que previene",
+        "al adoptar una dimension NUEVA no se puede definir su gate no-hand-roll al nacer \u2192 la meta-regla forward-looking no se sostiene",
+        "los satelites generados necesitan escapes tan a menudo que el gate con scope-satelite queda vacio de sentido"
+      ]
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-07-12T11:55:58Z",
+      "sources": [
+        "design-system/scripts/check-icon-usage.mjs:64",
+        "design-system/scripts/check-raw-color.mjs:52-58",
+        "design-system/components/IconButton.tsx:106",
+        "design-system/scripts/check-composition-class.mjs:12-13",
+        "design-system/components/Tabs.tsx:41",
+        "design-system/package.json:9",
+        "https://atlassian.design/components/eslint-plugin-design-system/",
+        "https://eslint.org/docs/latest/rules/no-restricted-syntax",
+        "https://github.com/AndyOGo/stylelint-declaration-strict-value",
+        "https://github.com/sverweij/dependency-cruiser/blob/main/doc/rules-reference.md",
+        "https://eslint.org/blog/2025/04/introducing-bulk-suppressions/",
+        "https://www.notion.com/blog/how-we-evolved-our-code-notions-ratcheting-system-using-custom-eslint-rules",
+        "https://www.augmentcode.com/guides/visual-regression-testing-ai-generated-uis",
+        "https://blog.exceeds.ai/consistent-coding-standards-ai-generated/"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-07-12T11:55:58Z",
+      "options": [
+        "familia de gates .mjs bespoke por dimension",
+        "stack ESLint/stylelint de industria",
+        "capas + herramienta-por-dimension + meta-regla (RECOMENDADA)"
+      ]
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-07-12T12:04:38Z",
+      "lens_sources": "El doc atribuia reimplementacion inviable y 90pct falsos positivos a check-composition-class.mjs 12-13, pero la fuente dice que la deteccion se hace en el censo (aparte y mas fuerte), no que sea inviable; el 90pct viene de design-system-quality (caso SegmentedControl). Corregido en Context y Non-goals.",
+      "lens_calibration": "El tool-per-dimension (ESLint stylelint dep-cruiser) es sobre-ingenieria para equipo de uno mas IA: fragmenta 15 gates .mjs en 4 runtimes; el caso AST-dificil ya lo resuelve grep mas path-scope (check-icon-usage.mjs 34); el equipo ya rechazo un rule-pack AST por FP (eslint.config.mjs 20-46). Ajuste: mecanismo .mjs de un solo mundo mas arquitectura de capas y meta-regla; ESLint diferido.",
+      "lens_falsepositives": "HTML crudo a scope-DS seria 100pct FP (21 primitivos legitimos: Toggle switch, Pagination flecha) - va a scope consumidor-menos-primitivos. Arbitrary a token-por-propiedad con allowlist, no ban de sintaxis. Meta-regla en modo ratchet con baseline, no zero-tolerance al nacer. Scope y modo por-dimension en el manifiesto.",
+      "completeness": "Piso y meta-regla operativos via meta-gate del manifiesto. Faltaba el techo: el censo para reimplementacion no-gateable se nombraba sin cadencia. Cerrado: el manifiesto declara por-dimension si el residuo cae en VRT (required) o censo con cadencia."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-07-12T12:05:28Z",
+      "check_passed": true
+    },
+    "validated": {
+      "done": true,
+      "timestamp": "2026-07-12T12:06:41Z",
+      "case": "Prototipo del gate de la dimension spinner (mecanismo: extender la familia .mjs) corrido sobre design-system/components",
+      "method": "Script .mjs que prohibe animate-spin fuera de los primitivos Spinner*, con escape spinner-ok; probado en 2 versiones (regex naive y regex preciso)",
+      "outcome": "mixed",
+      "evidence_ref": "design-system/components/IconButton.tsx:106"
+    },
+    "presented": {
+      "done": true,
+      "timestamp": "2026-07-12T12:07:08Z",
+      "presented_to": "operator",
+      "proceed_justification": "El outcome mixed CONFIRMA el diseno de la estrategia, no lo refuta: el prototipo del gate de spinner cazo el hand-roll real (IconButton.tsx:106) y el unico falso positivo (ShimmerButton animate-spin-around) lo elimina la precision por-dimension que la estrategia prescribe. Es evidencia de por que el rule debe ser preciso por dimension + escape/ratchet, no un argumento en contra."
+    }
+  },
+  "steps_schema": [
+    "scaffolded",
+    "researched",
+    "proposed",
+    "critiqued",
+    "checked",
+    "validated",
+    "presented",
+    "approved"
+  ]
+}
