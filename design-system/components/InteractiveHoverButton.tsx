@@ -5,6 +5,7 @@
 // flecha lucide acotada a `size-4`, y la forma `rounded-full` → `rounded-md` (la redondez del Button del
 // sistema; no introducimos una redondez huérfana — ECO-106). `lucide-react` ya presente.
 import { ArrowRight } from "lucide-react";
+import Icon from "./Icon";
 
 import { cn } from "@/lib/utils";
 
@@ -29,7 +30,7 @@ export function InteractiveHoverButton({
       </div>
       <div className="absolute top-0 z-10 flex h-full w-full translate-x-12 items-center justify-center gap-2 text-content-inverse opacity-0 transition-all duration-300 group-hover:-translate-x-5 group-hover:opacity-100">
         <span>{children}</span>
-        <ArrowRight className="size-4" />
+        <Icon icon={ArrowRight} size="md" />
       </div>
     </button>
   );

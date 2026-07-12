@@ -2,6 +2,7 @@
 
 import { useId, useRef, useEffect } from "react";
 import { Check, Minus } from "lucide-react";
+import Icon, { type IconSize } from "./Icon";
 
 interface CheckboxProps {
   checked?: boolean;
@@ -20,10 +21,11 @@ const boxSizes = {
   lg: "w-6 h-6 rounded-md",
 };
 
-const iconSizes = {
-  sm: 12,
-  md: 14,
-  lg: 16,
+// El check/minus escala con la caja, desde la escala registrada: sm/md/lg = xs/sm/md (12/14/16, exactos).
+const iconSize: Record<"sm" | "md" | "lg", IconSize> = {
+  sm: "xs",
+  md: "sm",
+  lg: "md",
 };
 
 export const checkboxSpecs = {
@@ -86,15 +88,15 @@ export default function Checkbox({
           aria-hidden="true"
         >
           {indeterminate ? (
-            <Minus
-              size={iconSizes[size]}
-              strokeWidth={2}
+            <Icon
+              icon={Minus}
+              size={iconSize[size]}
               className="text-content-inverse"
             />
           ) : checked ? (
-            <Check
-              size={iconSizes[size]}
-              strokeWidth={2}
+            <Icon
+              icon={Check}
+              size={iconSize[size]}
               className="text-content-inverse"
             />
           ) : null}

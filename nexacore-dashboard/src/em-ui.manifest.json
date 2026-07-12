@@ -40,7 +40,7 @@
     },
     "components/ui/Checkbox.tsx": {
       "from": "components/Checkbox.tsx",
-      "sha": "ad8cbeea3eb10468cecb0a37018d3a150b287e41"
+      "sha": "0161dc0a49b8b187e06b56116055b948c1562d6c"
     },
     "components/ui/ConfirmModal.tsx": {
       "from": "components/ConfirmModal.tsx",

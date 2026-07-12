@@ -1,6 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
+import Icon from "@/components/ui/Icon";
 import { useReveal } from "@/hooks/useReveal";
 import Badge from "@/components/ui/Badge";
 import Button from "@/components/ui/Button";
@@ -84,8 +85,9 @@ function PricingCard({
                 key={i}
                 className="flex items-start gap-2 text-body text-content-secondary"
               >
-                <Check
-                  size={18}
+                <Icon
+                  icon={Check}
+                  size="md"
                   aria-hidden
                   className="mt-0.5 shrink-0 text-content-primary"
                 />

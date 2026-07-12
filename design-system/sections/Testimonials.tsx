@@ -1,6 +1,7 @@
 "use client";
 
 import { Star } from "lucide-react";
+import Icon, { type IconSize } from "@/components/ui/Icon";
 import Avatar from "@/components/ui/Avatar";
 import Button from "@/components/ui/Button";
 import { useReveal } from "@/hooks/useReveal";
@@ -39,7 +40,13 @@ export interface TestimonialsProps {
   viewAllHref?: string;
 }
 
-function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
+function StarRating({
+  rating,
+  size = "sm",
+}: {
+  rating: number;
+  size?: IconSize;
+}) {
   return (
     <div
       className="flex items-center gap-0.5"
@@ -47,7 +54,8 @@ function StarRating({ rating, size = 14 }: { rating: number; size?: number }) {
       aria-label={`${rating} out of 5 stars`}
     >
       {[1, 2, 3, 4, 5].map((n) => (
-        <Star
+        <Icon
+          icon={Star}
           key={n}
           size={size}
           aria-hidden
@@ -79,7 +87,9 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
             {t.name}
           </figcaption>
           {t.role ? (
-            <p className="text-caption font-semibold text-content-secondary">{t.role}</p>
+            <p className="text-caption font-semibold text-content-secondary">
+              {t.role}
+            </p>
           ) : null}
         </div>
       </div>
@@ -146,7 +156,7 @@ export default function Testimonials({
             <p className="font-display text-display-2 font-black leading-none text-content-primary">
               {rating.toFixed(1)}
             </p>
-            <StarRating rating={Math.round(rating)} size={20} />
+            <StarRating rating={Math.round(rating)} size="lg" />
             {ratingCount ? (
               <p className="text-body text-content-secondary">{ratingCount}</p>
             ) : null}
