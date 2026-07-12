@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback, useId } from "react";
+import { tv } from "tailwind-variants";
 import { ChevronDown } from "lucide-react";
 import Icon from "./Icon";
 
@@ -62,6 +63,27 @@ const triggerSizeClasses = {
   sm: "h-10",
   md: "h-12",
 };
+
+// Eje visual de la OPCIÓN extraído a tv (antes cadena de ternarios inline). El estado es EXCLUYENTE con la
+// misma prioridad del original: selected → danger → focused → default. `danger` es el color de la opción
+// `variant="danger"` cuando no está seleccionada ni enfocada. Raw-concat previo → twMerge:false (conjunto fiel).
+const OPTION_BASE =
+  "flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-body font-normal cursor-pointer transition-colors";
+export const selectOption = tv(
+  {
+    base: OPTION_BASE,
+    variants: {
+      state: {
+        selected: "bg-surface-inverse text-content-inverse",
+        danger: "text-error hover:bg-error-bg",
+        focused: "bg-surface-subtle text-content-primary",
+        default: "text-content-primary hover:bg-surface-subtle",
+      },
+    },
+    defaultVariants: { state: "default" },
+  },
+  { twMerge: false },
+);
 
 export default function Select({
   options,
@@ -223,6 +245,13 @@ export default function Select({
             const isSelected = option.value === value;
             const isFocused = index === focusedIndex;
             const isDanger = option.variant === "danger";
+            const optionState = isSelected
+              ? "selected"
+              : isDanger
+                ? "danger"
+                : isFocused
+                  ? "focused"
+                  : "default";
 
             return (
               <li
@@ -235,15 +264,7 @@ export default function Select({
                   setOpen(false);
                 }}
                 onMouseEnter={() => setFocusedIndex(index)}
-                className={`flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-body font-normal cursor-pointer transition-colors ${
-                  isSelected
-                    ? "bg-surface-inverse text-content-inverse"
-                    : isDanger
-                      ? "text-error hover:bg-error-bg"
-                      : isFocused
-                        ? "bg-surface-subtle text-content-primary"
-                        : "text-content-primary hover:bg-surface-subtle"
-                }`}
+                className={selectOption({ state: optionState })}
               >
                 {option.icon && (
                   <span className="shrink-0 w-4 h-4">{option.icon}</span>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { tv } from "tailwind-variants";
 import { ChevronDown, Plus } from "lucide-react";
 import Icon from "./Icon";
 
@@ -44,11 +45,24 @@ export const accordionSpecs = {
   },
 };
 
-const triggerStyles = {
-  default: "text-body font-normal text-content-primary",
-  // `uppercase`: IDENTICAL to default (same type, weight and size) — the ONLY difference is UPPERCASE.
-  uppercase: "text-body font-normal uppercase text-content-primary",
-};
+// Eje de variante del trigger extraído a tv (antes concat inline con `triggerStyles[variant]`). El color/tipografía
+// del trigger no colisiona con el layout base → twMerge:false conserva el conjunto de clases fiel (convención DS).
+// `uppercase`: IDÉNTICO a default (misma tipografía, peso y tamaño) — la ÚNICA diferencia es UPPERCASE.
+const TRIGGER_BASE =
+  "flex w-full items-center justify-between px-4 py-3 transition-colors hover:bg-surface-subtle";
+export const accordionTrigger = tv(
+  {
+    base: TRIGGER_BASE,
+    variants: {
+      variant: {
+        default: "text-body font-normal text-content-primary",
+        uppercase: "text-body font-normal uppercase text-content-primary",
+      },
+    },
+    defaultVariants: { variant: "default" },
+  },
+  { twMerge: false },
+);
 
 export default function Accordion({
   items,
@@ -85,7 +99,7 @@ export default function Accordion({
           <div key={i} className={itemClass} style={itemStyle?.(i)}>
             <button
               onClick={() => toggle(i)}
-              className={`flex w-full items-center justify-between px-4 py-3 ${triggerStyles[variant]} transition-colors hover:bg-surface-subtle`}
+              className={accordionTrigger({ variant })}
             >
               {item.title}
               {indicator === "plus" ? (

@@ -2,6 +2,7 @@
 
 import { useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
+import { tv } from "tailwind-variants";
 import { TriangleAlert, CircleCheck, CircleAlert, Info, X } from "lucide-react";
 import Icon from "./Icon";
 
@@ -16,11 +17,39 @@ type ToastProps = {
   onClose: (id: number) => void;
 };
 
-const VARIANT_CONFIG = {
-  error: { icon: TriangleAlert, className: "text-error" },
-  success: { icon: CircleCheck, className: "text-success" },
-  warning: { icon: CircleAlert, className: "text-warning" },
-  info: { icon: Info, className: "text-info" },
+// Glyph por variante — dato NO-clase (icono lucide): vive fuera del tv (el tv sólo maneja las clases CSS).
+const VARIANT_ICON = {
+  error: TriangleAlert,
+  success: CircleCheck,
+  warning: CircleAlert,
+  info: Info,
+} as const;
+
+// Un solo elemento con variantes (el color del icono) → `base`. Raw-concat previo → twMerge:false (conserva
+// el conjunto de clases idéntico: no reordena ni dedupe).
+export const toast = tv(
+  {
+    base: "self-center shrink-0",
+    variants: {
+      variant: {
+        error: "text-error",
+        success: "text-success",
+        warning: "text-warning",
+        info: "text-info",
+      },
+    },
+  },
+  { twMerge: false },
+);
+
+// Superficie de docs (single-source): variante → glyph + color (las clases viven en el tv).
+export const toastSpecs = {
+  variants: {
+    error: "TriangleAlert — text-error",
+    success: "CircleCheck — text-success",
+    warning: "CircleAlert — text-warning",
+    info: "Info — text-info",
+  },
 } as const;
 
 const DEFAULT_DURATION = 5000;
@@ -33,7 +62,7 @@ export default function Toast({
   duration,
   onClose,
 }: ToastProps) {
-  const { icon: Glyph, className: variantClass } = VARIANT_CONFIG[variant];
+  const Glyph = VARIANT_ICON[variant];
 
   const dismiss = useCallback(() => {
     onClose(id);
@@ -56,11 +85,7 @@ export default function Toast({
       className="pointer-events-auto group grid w-fit max-w-[550px] grid-cols-[14px_1fr_auto] items-start gap-x-2 rounded-3xl border border-border-strong bg-surface-primary py-3 pl-5 pr-4"
     >
       {/* Col 1: icon — vertically centered with the title (row 1) */}
-      <Icon
-        icon={Glyph}
-        size="sm"
-        className={`self-center shrink-0 ${variantClass}`}
-      />
+      <Icon icon={Glyph} size="sm" className={toast({ variant })} />
       {/* Col 2: title */}
       <p className="min-w-0 text-caption font-semibold leading-4 text-content-primary">
         {title}

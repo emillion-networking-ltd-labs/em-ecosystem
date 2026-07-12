@@ -15,7 +15,8 @@
       ],
       "internalDependencies": [],
       "dependencies": {
-        "lucide-react": "^1.14.0"
+        "lucide-react": "^1.14.0",
+        "tailwind-variants": "^3.2.2"
       }
     },
     {
@@ -27,7 +28,8 @@
       ],
       "internalDependencies": [],
       "dependencies": {
-        "lucide-react": "^1.14.0"
+        "lucide-react": "^1.14.0",
+        "tailwind-variants": "^3.2.2"
       }
     },
     {
@@ -290,7 +292,9 @@
       "file": "components/CountdownTimer.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
-      "dependencies": {}
+      "dependencies": {
+        "tailwind-variants": "^3.2.2"
+      }
     },
     {
       "name": "DataTable",
@@ -372,7 +376,8 @@
       ],
       "internalDependencies": [],
       "dependencies": {
-        "lucide-react": "^1.14.0"
+        "lucide-react": "^1.14.0",
+        "tailwind-variants": "^3.2.2"
       }
     },
     {
@@ -404,12 +409,9 @@
       "type": "registry:ui",
       "file": "components/GradientBackdrop.tsx",
       "registryDependencies": [],
-      "internalDependencies": [
-        "lib/utils.ts"
-      ],
+      "internalDependencies": [],
       "dependencies": {
-        "clsx": "^2.1.1",
-        "tailwind-merge": "^3.6.0"
+        "tailwind-variants": "^3.2.2"
       }
     },
     {
@@ -747,7 +749,8 @@
       ],
       "internalDependencies": [],
       "dependencies": {
-        "lucide-react": "^1.14.0"
+        "lucide-react": "^1.14.0",
+        "tailwind-variants": "^3.2.2"
       }
     },
     {
@@ -943,7 +946,8 @@
       "internalDependencies": [],
       "dependencies": {
         "framer-motion": "^12.38.0",
-        "lucide-react": "^1.14.0"
+        "lucide-react": "^1.14.0",
+        "tailwind-variants": "^3.2.2"
       }
     },
     {
