@@ -213,7 +213,9 @@
       "name": "Checkbox",
       "type": "registry:ui",
       "file": "components/Checkbox.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [],
       "dependencies": {
         "lucide-react": "^1.14.0"
@@ -534,7 +536,9 @@
       "name": "InteractiveHoverButton",
       "type": "registry:ui",
       "file": "components/InteractiveHoverButton.tsx",
-      "registryDependencies": [],
+      "registryDependencies": [
+        "Icon"
+      ],
       "internalDependencies": [
         "lib/utils.ts"
       ],
@@ -1044,6 +1048,7 @@
         "Checkbox",
         "Container",
         "FormField",
+        "Icon",
         "Input",
         "Section",
         "Select",
@@ -1105,6 +1110,7 @@
         "Button",
         "Container",
         "Grid",
+        "Icon",
         "Section"
       ],
       "internalDependencies": [
@@ -1122,6 +1128,7 @@
         "Accordion",
         "Badge",
         "Container",
+        "Icon",
         "Section"
       ],
       "internalDependencies": [
@@ -1140,6 +1147,7 @@
         "Button",
         "Container",
         "Grid",
+        "Icon",
         "Section"
       ],
       "internalDependencies": [

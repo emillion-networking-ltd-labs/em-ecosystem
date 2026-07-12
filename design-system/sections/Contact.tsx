@@ -2,6 +2,7 @@
 
 import { useState, type ReactNode } from "react";
 import { Check } from "lucide-react";
+import Icon from "@/components/ui/Icon";
 import Button from "@/components/ui/Button";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
@@ -116,7 +117,7 @@ function ContactFormBlock({
     return (
       <div className="card-flat py-10 text-center">
         <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-surface-tertiary text-content-primary">
-          <Check size={24} />
+          <Icon icon={Check} size="lg" />
         </div>
         <h3 className="mt-3 text-h2 font-semibold text-content-primary">
           Message sent

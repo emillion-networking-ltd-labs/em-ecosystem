@@ -1,6 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
+import Icon from "@/components/ui/Icon";
 import Badge from "@/components/ui/Badge";
 import Accordion from "@/components/ui/Accordion";
 import { useReveal } from "@/hooks/useReveal";
@@ -76,8 +77,9 @@ function ServiceCard({
                               key={f}
                               className="flex items-start gap-2 text-body text-content-secondary"
                             >
-                              <Check
-                                size={18}
+                              <Icon
+                                icon={Check}
+                                size="md"
                                 aria-hidden
                                 className="mt-0.5 shrink-0 text-content-primary"
                               />
