@@ -4,7 +4,7 @@
   "files": {
     "components/ui/Accordion.tsx": {
       "from": "components/Accordion.tsx",
-      "sha": "510b5893c21f1bd78d705ece4a472cc49713c54b"
+      "sha": "61709009253543ebfc4afa36d6c078b64289675c"
     },
     "components/ui/Avatar.tsx": {
       "from": "components/Avatar.tsx",
@@ -56,7 +56,7 @@
     },
     "components/ui/Select.tsx": {
       "from": "components/Select.tsx",
-      "sha": "70edba4cf54242e15d778321a63216102eb3571c"
+      "sha": "b59f67924444cff383d5273c33969939b9cad46d"
     },
     "components/ui/SettingRow.tsx": {
       "from": "components/SettingRow.tsx",

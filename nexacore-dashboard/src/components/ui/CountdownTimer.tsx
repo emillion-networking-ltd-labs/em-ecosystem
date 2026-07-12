@@ -10,52 +10,59 @@
  * Usage: <CountdownTimer seconds={120} />
  * Usage: <CountdownTimer seconds={120} variant="warning" size="lg" />
  */
+import { tv } from "tailwind-variants";
 
 type CountdownVariant = "error" | "warning";
 type CountdownSize = "sm" | "md" | "lg";
 
-const variantStyles: Record<
-  CountdownVariant,
-  { digitBg: string; digitText: string; sepText: string }
-> = {
-  error: {
-    digitBg: "bg-error-bg",
-    digitText: "text-error",
-    sepText: "text-error/75",
+// Multi-slot (root / digit / sep). variant → color; size → dimensiones + separación. Raw-concat previo →
+// twMerge:false (convención Button/Badge/Avatar; conserva el conjunto de clases fiel).
+export const countdownTimer = tv(
+  {
+    slots: {
+      root: "inline-flex shrink-0 items-center",
+      digit:
+        "inline-flex items-center justify-center overflow-hidden font-normal tabular-nums",
+      sep: "font-semibold",
+    },
+    variants: {
+      variant: {
+        error: { digit: "bg-error-bg text-error", sep: "text-error/75" },
+        warning: { digit: "bg-warning-bg text-warning", sep: "text-warning" },
+      },
+      size: {
+        sm: {
+          root: "gap-px",
+          digit: "w-[1.25em] h-[1.5em] text-caption rounded-[3px]",
+          sep: "text-caption mx-px",
+        },
+        md: {
+          root: "gap-0.5",
+          digit: "w-6 h-8 text-h3 rounded-md",
+          sep: "text-h3 mx-0.5",
+        },
+        lg: {
+          root: "gap-1",
+          digit: "w-8 h-10 text-h1 rounded-lg",
+          sep: "text-h1 mx-1",
+        },
+      },
+    },
+    defaultVariants: { variant: "error", size: "sm" },
   },
-  warning: {
-    digitBg: "bg-warning-bg",
-    digitText: "text-warning",
-    sepText: "text-warning",
-  },
-};
+  { twMerge: false },
+);
 
-const sizeStyles: Record<
-  CountdownSize,
-  { digit: string; sep: string; gap: string }
-> = {
-  sm: {
-    digit: "w-[1.25em] h-[1.5em] text-caption rounded-[3px]",
-    sep: "text-caption mx-px",
-    gap: "gap-px",
-  },
-  md: {
-    digit: "w-6 h-8 text-h3 rounded-md",
-    sep: "text-h3 mx-0.5",
-    gap: "gap-0.5",
-  },
-  lg: {
-    digit: "w-8 h-10 text-h1 rounded-lg",
-    sep: "text-h1 mx-1",
-    gap: "gap-1",
-  },
-};
+// Superficie de docs (single-source): reemplaza los mapas; enumera slots + ejes (las clases viven en el tv).
+export const countdownTimerSpecs = {
+  slots: ["root", "digit", "sep"],
+  variants: ["error", "warning"],
+  sizes: ["sm", "md", "lg"],
+} as const;
 
 function DigitBox({ value, className }: { value: string; className: string }) {
   return (
-    <span
-      className={`inline-flex items-center justify-center overflow-hidden font-normal tabular-nums ${className}`}
-    >
+    <span className={className}>
       <span key={value} className="countdown-slide">
         {value}
       </span>
@@ -77,13 +84,12 @@ export default function CountdownTimer({
   const minStr = String(mins).padStart(2, "0");
   const secStr = String(secs).padStart(2, "0");
 
-  const v = variantStyles[variant];
-  const s = sizeStyles[size];
-  const digitClass = `${v.digitBg} ${v.digitText} ${s.digit}`;
-  const sepClass = `${v.sepText} ${s.sep} font-semibold`;
+  const { root, digit, sep } = countdownTimer({ variant, size });
+  const digitClass = digit();
+  const sepClass = sep();
 
   return (
-    <span className={`inline-flex shrink-0 items-center ${s.gap}`}>
+    <span className={root()}>
       {mins > 0 && (
         <>
           <DigitBox value={minStr[0]} className={digitClass} />

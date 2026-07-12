@@ -1,37 +1,55 @@
 "use client";
 
+import { tv } from "tailwind-variants";
 import { AlertTriangle, CircleX, Info, CircleCheck } from "lucide-react";
 import Icon from "./Icon";
 
 type AlertBoxVariant = "warning" | "error" | "info" | "success";
 
-const variantConfig = {
-  warning: {
-    border: "border-warning-border",
-    bg: "bg-warning-bg",
-    icon: AlertTriangle,
-    iconColor: "text-warning",
-  },
-  error: {
-    border: "border-error-border",
-    bg: "bg-error-bg",
-    icon: CircleX,
-    iconColor: "text-error",
-  },
-  info: {
-    border: "border-info-border",
-    bg: "bg-info-bg",
-    icon: Info,
-    iconColor: "text-info",
-  },
-  success: {
-    border: "border-success-border",
-    bg: "bg-success-bg",
-    icon: CircleCheck,
-    iconColor: "text-success",
-  },
-};
+// Glyph por variante — dato NO-clase (icono lucide): vive fuera del tv (el tv sólo maneja las clases CSS).
+const VARIANT_ICON = {
+  warning: AlertTriangle,
+  error: CircleX,
+  info: Info,
+  success: CircleCheck,
+} as const;
 
+// Varios elementos varían (contenedor color/borde + icono color) → `slots`. `text` es estático pero se declara
+// slot para documentar la composición. Raw-concat previo → twMerge:false (conserva el conjunto de clases fiel).
+export const alertBox = tv(
+  {
+    slots: {
+      container: "inline-flex items-start gap-2 rounded-lg border p-3",
+      icon: "mt-0.5 shrink-0",
+      // select-text: el texto va en un <div> (no en la lista de opt-in de tags) → se reabre la selección
+      // para que el mensaje sea copiable, sin reactivar el caret sobre divs de layout (ECO-115).
+      text: "select-text text-caption text-content-primary",
+    },
+    variants: {
+      variant: {
+        warning: {
+          container: "border-warning-border bg-warning-bg",
+          icon: "text-warning",
+        },
+        error: {
+          container: "border-error-border bg-error-bg",
+          icon: "text-error",
+        },
+        info: {
+          container: "border-info-border bg-info-bg",
+          icon: "text-info",
+        },
+        success: {
+          container: "border-success-border bg-success-bg",
+          icon: "text-success",
+        },
+      },
+    },
+  },
+  { twMerge: false },
+);
+
+// Superficie de docs (single-source): slots + variante → borde/bg + glyph/color (las clases viven en el tv).
 export const alertBoxSpecs = {
   variants: {
     warning: "border-warning-border bg-warning-bg — AlertTriangle text-warning",
@@ -41,10 +59,10 @@ export const alertBoxSpecs = {
   },
   layout: {
     container: "rounded-lg border p-3 flex items-start gap-2",
-    icon: "mt-0.5 shrink-0 16px — color matches variant (text-warning/error/info/success)",
+    icon: "mt-0.5 shrink-0 md (16px) — color matches variant (text-warning/error/info/success)",
     text: "text-caption text-content-primary",
   },
-};
+} as const;
 
 interface AlertBoxProps {
   variant: AlertBoxVariant;
@@ -57,24 +75,13 @@ export default function AlertBox({
   children,
   className = "",
 }: AlertBoxProps) {
-  const config = variantConfig[variant];
-  const Glyph = config.icon;
+  const Glyph = VARIANT_ICON[variant];
+  const { container, icon, text } = alertBox({ variant });
 
   return (
-    <div
-      className={`inline-flex items-start gap-2 rounded-lg border ${config.border} ${config.bg} p-3 ${className}`}
-      role="alert"
-    >
-      <Icon
-        icon={Glyph}
-        size="md"
-        className={`mt-0.5 shrink-0 ${config.iconColor}`}
-      />
-      {/* select-text: el texto va en un <div> (no en la lista de opt-in de tags) → se reabre la selección
-          para que el mensaje sea copiable, sin reactivar el caret sobre divs de layout (ECO-115). */}
-      <div className="select-text text-caption text-content-primary">
-        {children}
-      </div>
+    <div className={container({ className })} role="alert">
+      <Icon icon={Glyph} size="md" className={icon()} />
+      <div className={text()}>{children}</div>
     </div>
   );
 }
