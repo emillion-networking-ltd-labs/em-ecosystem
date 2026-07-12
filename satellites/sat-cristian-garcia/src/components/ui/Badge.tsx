@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-role: primitive — leaf (a single <span>), composes no siblings.
 import { tv, type VariantProps } from "tailwind-variants";
 
 interface BadgeProps {
@@ -10,7 +11,7 @@ interface BadgeProps {
   className?: string;
 }
 
-// Clases por eje, constantes: fuente ÚNICA del contrato `tv` y de `badgeSpecs` (doc del catálogo). ECO-168.
+// Per-axis class constants: the SINGLE source of the `tv` contract and of `badgeSpecs` (catalog doc). ECO-168.
 const VARIANT_CLASSES = {
   default: "bg-surface-subtle text-content-primary",
   success: "bg-success-bg text-success",
@@ -28,10 +29,10 @@ const SIZE_CLASSES = {
 } as const;
 const ROOT_BASE = "inline-flex items-center font-normal rounded-md";
 
-// Contrato de variante del DS (design-system-quality / ADR-029): tailwind-variants. Badge es un único
-// elemento (span) → sin slots. twMerge OFF: el DS resuelve overrides con `!important`, no con merge — que
-// colapsaría los tokens custom `text-*` (dropea `text-success`/`text-error` de color al convivir con
-// `text-body`/`text-caption` de tamaño). Sin merge concatena, fiel a la versión previa de mapas.
+// DS variant contract (design-system-quality / ADR-029): tailwind-variants. Badge is a single element
+// (span) → no slots. twMerge OFF: the DS resolves overrides with `!important`, not with merge — which
+// would collapse the custom `text-*` tokens (it drops the `text-success`/`text-error` color when it sits
+// next to `text-body`/`text-caption` sizing). Without merge it concatenates, faithful to the previous maps.
 export const badge = tv(
   {
     base: ROOT_BASE,
@@ -58,7 +59,7 @@ export const badge = tv(
 
 export type BadgeVariants = VariantProps<typeof badge>;
 
-// Superficie de documentación del catálogo (convención `<name>Specs`), single-source desde las mismas consts.
+// Catalog documentation surface (the `<name>Specs` convention), single-source from the same consts.
 export const badgeSpecs = {
   base: ROOT_BASE,
   variants: VARIANT_CLASSES,

@@ -1,22 +1,22 @@
 #!/usr/bin/env node
-// census — DETECTOR del corpus del DS (design-system-quality Pilar 1.4, ECO-196).
+// census — DETECTOR of the DS corpus (design-system-quality Pillar 1.4, ECO-196).
 //
-// REPORT-mode (no bloquea): clasifica cada componente del DS contra el estándar de construcción y produce el
-// WORKLIST de reconstrucción (Fase 1). Repetible — re-córrelo cuando quieras el estado del corpus, para que NO
-// dependa de que alguien lo recuerde.
+// REPORT-mode (non-blocking): classifies every DS component against the construction standard and produces the
+// reconstruction WORKLIST (Phase 1). Repeatable — re-run it whenever you want the corpus state, so it does NOT
+// depend on anyone remembering it.
 //
-// Clasifica MECÁNICAMENTE lo que es determinable:
-//   - idioma A (variante): ¿importa `tailwind-variants`? ¿exporta `<name>Specs`?
-//   - ejes: ¿declara props variant/size/shape? (si tiene ejes y NO está en tv → candidato a migrar)
-//   - composición: `registryDependencies` = hermanos que renderiza (factual, del registry)
-//   - primitivos que faltan: Popover/Menu/Skeleton/ChartTooltip
-// Lo que NINGUNA máquina caza fiable (la panel: ~90% falsos positivos) queda como REVISIÓN MANUAL, no veredicto:
-//   - primitive vs composite (Button compone SpinnerInfinity y es primitivo → es JUICIO, el campo de Fase 1)
-//   - copiar-en-vez-de-componer (superficie hardcodeada) → lista de sospechas conocidas, no auto-detección
+// Classifies MECHANICALLY what is determinable:
+//   - axis A (variant): does it import `tailwind-variants`? does it export `<name>Specs`?
+//   - axes: does it declare variant/size/shape props? (has axes and NOT on tv → migration candidate)
+//   - composition: `registryDependencies` = siblings it renders (factual, from the registry)
+//   - missing primitives: Popover/Menu/Skeleton/ChartTooltip
+// What NO machine catches reliably (the panel: ~90% false positives) stays MANUAL REVIEW, not a verdict:
+//   - primitive vs composite (Button composes SpinnerInfinity yet is a primitive → JUDGMENT, the Phase-1 field)
+//   - copy-instead-of-compose (hardcoded surface) → a list of known suspects, not auto-detection
 //
-// Uso, cwd = design-system/:  node scripts/census.mjs   [--json]
+// Usage, cwd = design-system/:  node scripts/census.mjs   [--json | --write]
 
-import { readFileSync, readdirSync } from "node:fs";
+import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -33,24 +33,26 @@ const regDeps = new Map(
 const TV_RE = /from "tailwind-variants"/;
 const SPECS_RE = /export const \w+Specs\b/;
 
-// Primitivos que la estrategia (design-system-quality.md:72) nombra como FALTANTES (clusters de duplicación).
+// Primitives the strategy (design-system-quality.md:72) names as MISSING (duplication clusters).
 const EXPECTED_PRIMITIVES = ["Popover", "Menu", "Skeleton", "ChartTooltip"];
-// Sospechas conocidas de copiar-en-vez-de-componer (design-system-quality.md:29-30) — REVISIÓN MANUAL, no auto.
+// Known copy-instead-of-compose suspects (design-system-quality.md:29-30) — MANUAL REVIEW, not auto-detection.
 const COMPOSE_SUSPECTS = ["ChartCard", "MetricCard"];
 
 export function classify(name, src) {
   const onTv = TV_RE.test(src);
   const hasSpecs = SPECS_RE.test(src);
+  const roleM = src.match(/@ds-role:\s*(primitive|composite)\b/);
   const axes = ["variant", "size", "shape"].filter((a) =>
     new RegExp(`^\\s*${a}\\?:`, "m").test(src),
   );
   return {
     name,
+    role: roleM ? roleM[1] : null,
     onTv,
     hasSpecs,
     axes,
     composes: regDeps.get(name) || [],
-    // candidato a migrar a tv: tiene ejes y NO está en tv (el humano decide si de verdad lo necesita)
+    // tv migration candidate: has axes and is NOT on tv (the human decides whether it truly needs it)
     tvCandidate: axes.length > 0 && !onTv,
   };
 }
@@ -70,21 +72,25 @@ function run() {
   const tvCandidates = rows.filter((r) => r.tvCandidate);
   const existing = new Set(files.map((f) => f.replace(/\.tsx$/, "")));
   const missingPrimitives = EXPECTED_PRIMITIVES.filter((p) => !existing.has(p));
+  const data = {
+    total: rows.length,
+    onIdiom: onIdiom.length,
+    classified: rows.filter((r) => r.role).length,
+    tvCandidates,
+    missingPrimitives,
+    rows,
+  };
 
   if (process.argv.includes("--json")) {
-    console.log(
-      JSON.stringify(
-        {
-          total: rows.length,
-          onIdiom: onIdiom.length,
-          tvCandidates,
-          missingPrimitives,
-          rows,
-        },
-        null,
-        2,
-      ),
+    console.log(JSON.stringify(data, null, 2));
+    return;
+  }
+  if (process.argv.includes("--write")) {
+    writeFileSync(
+      join(ds, "census.json"),
+      JSON.stringify(data, null, 2) + "\n",
     );
+    console.log("census.json escrito (dashboard de Storybook).");
     return;
   }
 

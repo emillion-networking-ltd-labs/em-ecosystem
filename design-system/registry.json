@@ -87,6 +87,7 @@
     {
       "name": "Badge",
       "type": "registry:ui",
+      "role": "primitive",
       "file": "components/Badge.tsx",
       "registryDependencies": [],
       "internalDependencies": [],

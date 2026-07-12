@@ -1,0 +1,1105 @@
+{
+  "total": 84,
+  "onIdiom": 14,
+  "classified": 1,
+  "tvCandidates": [
+    {
+      "name": "Blob",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "BlurFade",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "variant"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "Card",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "Checkbox",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": true
+    },
+    {
+      "name": "ConfirmModal",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size"
+      ],
+      "composes": [
+        "Button",
+        "IconButton"
+      ],
+      "tvCandidate": true
+    },
+    {
+      "name": "Container",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "CopyField",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [
+        "Icon",
+        "Tooltip"
+      ],
+      "tvCandidate": true
+    },
+    {
+      "name": "DateInput",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [
+        "Calendar",
+        "Icon"
+      ],
+      "tvCandidate": true
+    },
+    {
+      "name": "Icon",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "SegmentedControl",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size"
+      ],
+      "composes": [
+        "Button"
+      ],
+      "tvCandidate": true
+    },
+    {
+      "name": "SpeedometerChart",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "SpinnerCircle",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "SpinnerInfinity",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "Toggle",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    }
+  ],
+  "missingPrimitives": [
+    "Popover",
+    "Menu",
+    "Skeleton",
+    "ChartTooltip"
+  ],
+  "rows": [
+    {
+      "name": "Accordion",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant"
+      ],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "AlertBox",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "AnimatedGradientText",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "AnimatedTestimonials",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "IconButton"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "AuroraBackground",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "Avatar",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Badge",
+      "role": "primitive",
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "BeforeAfterSlider",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "BentoGrid",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "Blob",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "BlurFade",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "variant"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "Breadcrumbs",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Button",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size",
+        "shape"
+      ],
+      "composes": [
+        "SpinnerInfinity"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Calendar",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Card",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "CardHoverEffect",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "Card"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "ChartCard",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "Checkbox",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": true
+    },
+    {
+      "name": "Cluster",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "ConfirmModal",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size"
+      ],
+      "composes": [
+        "Button",
+        "IconButton"
+      ],
+      "tvCandidate": true
+    },
+    {
+      "name": "Container",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "CopyCell",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "CopyField",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [
+        "Icon",
+        "Tooltip"
+      ],
+      "tvCandidate": true
+    },
+    {
+      "name": "CountdownTimer",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "DataTable",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "DateInput",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [
+        "Calendar",
+        "Icon"
+      ],
+      "tvCandidate": true
+    },
+    {
+      "name": "Divider",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "DotPattern",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "DoughnutChart",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "ChartCard"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "EmailSelector",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Avatar",
+        "Button",
+        "Icon",
+        "Tooltip"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "EmptyState",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant"
+      ],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "FlipWords",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "FormField",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "InlineError"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "GradientBackdrop",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant"
+      ],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "Grid",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "GridPattern",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "Icon",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "IconBadge",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size"
+      ],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "IconButton",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size",
+        "shape"
+      ],
+      "composes": [
+        "Icon",
+        "SpinnerCircle",
+        "Tooltip"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "IdleWarningModal",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "Button",
+        "CountdownTimer"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "ImageCropper",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "ConfirmModal",
+        "Slider"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "InlineError",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Input",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size"
+      ],
+      "composes": [
+        "Icon",
+        "IconButton",
+        "SpinnerCircle"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "InteractiveHoverButton",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "LanguageSelector",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Avatar",
+        "Icon",
+        "Input"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Marquee",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "Meteors",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "MetricCard",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "MfaDigitInput",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "NumberTicker",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "Pagination",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "PulsatingButton",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "QrCodeCard",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "CopyField"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "RateLimitBanner",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "CountdownTimer",
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "RecoveryCodesGrid",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Button",
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Ripple",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "SearchTrigger",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Badge",
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Section",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "SegmentedControl",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size"
+      ],
+      "composes": [
+        "Button"
+      ],
+      "tvCandidate": true
+    },
+    {
+      "name": "Select",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size"
+      ],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "SettingRow",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "IconBadge"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "ShimmerButton",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "SidebarNav",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Icon",
+        "IconButton",
+        "Tabs",
+        "Tooltip"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Slider",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "SpeedometerChart",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "SpinnerCircle",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "SpinnerInfinity",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "SpinnerRing",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "Split",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "Spotlight",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "Stack",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "StickyCard",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "IconButton"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Tabs",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [
+        "variant",
+        "size"
+      ],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Textarea",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "TextGenerateEffect",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "ThemeToggle",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "IconButton",
+        "Tooltip"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Toast",
+      "role": null,
+      "onTv": true,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [
+        "Icon"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "ToastContainer",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "Toast"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "Toggle",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [
+        "size"
+      ],
+      "composes": [],
+      "tvCandidate": true
+    },
+    {
+      "name": "Tooltip",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": true,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "TotalUsersChart",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [
+        "ChartCard"
+      ],
+      "tvCandidate": false
+    },
+    {
+      "name": "TurnstileWidget",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "TypingAnimation",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    },
+    {
+      "name": "WordRotate",
+      "role": null,
+      "onTv": false,
+      "hasSpecs": false,
+      "axes": [],
+      "composes": [],
+      "tvCandidate": false
+    }
+  ]
+}
