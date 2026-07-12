@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useCallback } from "react";
-import { motion } from "framer-motion";
+import { motion } from "motion/react";
 import { tv } from "tailwind-variants";
 import { TriangleAlert, CircleCheck, CircleAlert, Info, X } from "lucide-react";
 import Icon from "./Icon";

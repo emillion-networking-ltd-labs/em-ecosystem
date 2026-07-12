@@ -946,8 +946,8 @@
       ],
       "internalDependencies": [],
       "dependencies": {
-        "framer-motion": "^12.38.0",
         "lucide-react": "^1.14.0",
+        "motion": "^12.38.0",
         "tailwind-variants": "^3.2.2"
       }
     },
@@ -960,7 +960,7 @@
       ],
       "internalDependencies": [],
       "dependencies": {
-        "framer-motion": "^12.38.0"
+        "motion": "^12.38.0"
       }
     },
     {

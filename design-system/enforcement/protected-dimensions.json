@@ -60,6 +60,16 @@
       "mode": "enforce",
       "ceiling": null,
       "note": "Prohibe duration-[Nms|Ns] arbitrario. NO toca duration-[var(--)] ni duration-200 (escala). El [--duration:40s] de Marquee es def de var local (no matchea). Flota limpia (0) -> lock preventivo."
+    },
+    {
+      "dimension": "animation",
+      "piece": "motion/react (paquete motion)",
+      "gate": "check-animation-import.mjs",
+      "scope": "fleet",
+      "escape": "animation-ok",
+      "mode": "enforce",
+      "ceiling": null,
+      "note": "Import de animacion por el nombre canonico motion/react, no el alias legacy framer-motion (misma lib, dos nombres = version-soup; el registry auto-deriva la dep del import). Caza `from \"framer-motion\"` (no menciones en string). Flota a 0 tras ECO-195 -> lock preventivo."
     }
   ]
 }

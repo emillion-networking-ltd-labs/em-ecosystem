@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence } from "motion/react";
 import {
   PieChart,
   Pie,
@@ -3421,8 +3421,8 @@ function MotionPatternsShowcase() {
 
       <SpecsPanel
         specs={{
-          "Framer Motion": {
-            dep: "framer-motion (~30KB gzipped)",
+          Motion: {
+            dep: "motion (~30KB gzipped)",
             components: "AnimatePresence, motion.div",
             usage: "List enter/exit (TrustedDevices, Passkeys, Toast)",
             duration: "0.35s ease [0.4, 0, 0.2, 1] (Material Design)",
