@@ -235,6 +235,7 @@ function ButtonStateTable({ mode }: { mode: "light" | "dark" }) {
       align: "center" as const,
       render: (row: ButtonRow) =>
         row.hover ? (
+          // html-ok: demo estático de los estados HOVER del botón en la tabla del showcase — <Button> no permite forzar :hover.
           <button className={`${baseButtonClass} ${hoverClasses[v]}`}>
             Button
           </button>

@@ -107,6 +107,7 @@ describe("_ratchet — el baseline solo decrece", () => {
   });
 
   it("nextBaseline: nunca sube (min de actual y previo)", () => {
+    expect(nextBaseline({}, "nuevo", 5).nuevo).toBe(5); // sin baseline previo → INICIALIZA a current
     expect(nextBaseline({ g: 3 }, "g", 1).g).toBe(1); // baja al arreglar
     expect(nextBaseline({ g: 3 }, "g", 5).g).toBe(3); // no sube aunque current sea mayor
   });

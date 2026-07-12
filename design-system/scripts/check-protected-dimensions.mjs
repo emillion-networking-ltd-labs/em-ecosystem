@@ -23,9 +23,9 @@ const REQUIRED = ["dimension", "piece", "gate", "scope", "escape", "mode"];
 
 // Pura (lib): valida el manifiesto contra la realidad. Devuelve lista de errores (vacía = OK). Exportada para test.
 //   gateFiles      = nombres de ficheros en scripts/ (p.ej. ["check-icon-usage.mjs", ...])
-//   coverageStr    = el valor del script `coverage` de package.json (para comprobar cableado)
+//   wiringStr      = coverage + governance de package.json concatenados (un gate está cableado si aparece en cualquiera)
 //   usageGateNames = gates que siguen la convención de dimensión (`check-*-usage.mjs`) → deben estar en el manifiesto
-export function checkManifest(manifest, gateFiles, coverageStr) {
+export function checkManifest(manifest, gateFiles, wiringStr) {
   const errors = [];
   const dims = manifest?.dimensions;
   if (!Array.isArray(dims)) return ["manifiesto sin array `dimensions`"];
@@ -46,14 +46,14 @@ export function checkManifest(manifest, gateFiles, coverageStr) {
       );
     if (d?.gate) {
       registered.add(d.gate);
-      // FORWARD: el gate existe + está cableado en coverage.
+      // FORWARD: el gate existe + está cableado en una cadena de CI (coverage=DS-scope o governance=consumidor).
       if (!gateFiles.includes(d.gate))
         errors.push(
           `dimensión '${id}': su gate '${d.gate}' no existe en scripts/`,
         );
-      else if (!coverageStr.includes(d.gate))
+      else if (!wiringStr.includes(d.gate))
         errors.push(
-          `dimensión '${id}': su gate '${d.gate}' no está cableado en el script 'coverage'`,
+          `dimensión '${id}': su gate '${d.gate}' no está cableado en 'coverage' ni 'governance'`,
         );
     }
   }
@@ -76,9 +76,10 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
     f.endsWith(".mjs"),
   );
   const pkg = JSON.parse(readFileSync(join(ds, "package.json"), "utf8"));
-  const coverageStr = pkg.scripts?.coverage ?? "";
+  const wiringStr =
+    (pkg.scripts?.coverage ?? "") + " " + (pkg.scripts?.governance ?? "");
 
-  const errors = checkManifest(manifest, gateFiles, coverageStr);
+  const errors = checkManifest(manifest, gateFiles, wiringStr);
   if (errors.length) {
     console.error("✗ check-protected-dimensions:\n  " + errors.join("\n  "));
     process.exit(1);

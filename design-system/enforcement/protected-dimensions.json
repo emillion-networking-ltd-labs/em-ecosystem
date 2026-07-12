@@ -30,6 +30,16 @@
       "mode": "enforce",
       "ceiling": null,
       "note": "Loading circular via SpinnerCircle (tone=current hereda el color del boton). Regex preciso animate-spin(?![-\\w]) — no caza animate-spin-around (ShimmerButton, otra animacion)."
+    },
+    {
+      "dimension": "html-primitives",
+      "piece": "<Button> / <Input> / <Select> / <Textarea>",
+      "gate": "check-html-primitives.mjs",
+      "scope": "consumer-minus-primitives",
+      "escape": "html-ok",
+      "mode": "ratchet",
+      "ceiling": null,
+      "note": "Prohibe button/input/select/textarea crudos en el codigo de PRODUCTO (dashboard+satelites, excluyendo components/ui/ = copias de primitivos). Scope INVERSO al de icono. Baseline=24 en ratchet-baseline.json (deuda existente); migrar a <Button>/<Input> baja el baseline con --update. Escapes: crash page, demos de hover."
     }
   ]
 }
