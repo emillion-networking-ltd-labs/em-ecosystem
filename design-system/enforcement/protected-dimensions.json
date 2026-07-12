@@ -50,6 +50,16 @@
       "mode": "ratchet",
       "ceiling": null,
       "note": "Token-por-propiedad: prohibe text-[Npx|rem|em] (tamano de fuente arbitrario). NO toca text-[var(--)] ni text-[#hex] (color=raw-color). DS limpio (0); baseline=38 en consumidores (satelites/dashboard). Excluye stories/ (demos)."
+    },
+    {
+      "dimension": "motion",
+      "piece": "tokens --duration-fast/base/slow (o la escala Tailwind duration-200)",
+      "gate": "check-motion-tokens.mjs",
+      "scope": "fleet",
+      "escape": "motion-ok",
+      "mode": "enforce",
+      "ceiling": null,
+      "note": "Prohibe duration-[Nms|Ns] arbitrario. NO toca duration-[var(--)] ni duration-200 (escala). El [--duration:40s] de Marquee es def de var local (no matchea). Flota limpia (0) -> lock preventivo."
     }
   ]
 }
