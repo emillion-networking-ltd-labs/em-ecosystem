@@ -470,6 +470,7 @@
       "file": "components/IconButton.tsx",
       "registryDependencies": [
         "Icon",
+        "SpinnerCircle",
         "Tooltip"
       ],
       "internalDependencies": [

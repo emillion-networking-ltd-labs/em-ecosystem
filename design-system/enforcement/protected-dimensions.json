@@ -20,6 +20,16 @@
       "mode": "enforce",
       "ceiling": null,
       "note": "Prohibe hex/rgb/paleta cruda fuera de tokens. Unico gate de dimension con scope de flota completa hoy."
+    },
+    {
+      "dimension": "spinner",
+      "piece": "SpinnerCircle / SpinnerRing / SpinnerInfinity",
+      "gate": "check-spinner-usage.mjs",
+      "scope": "ds",
+      "escape": "spinner-ok",
+      "mode": "enforce",
+      "ceiling": null,
+      "note": "Loading circular via SpinnerCircle (tone=current hereda el color del boton). Regex preciso animate-spin(?![-\\w]) — no caza animate-spin-around (ShimmerButton, otra animacion)."
     }
   ]
 }
