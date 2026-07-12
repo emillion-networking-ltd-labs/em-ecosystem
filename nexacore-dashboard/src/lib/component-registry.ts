@@ -250,8 +250,8 @@ export const componentRegistry: ComponentEntry[] = [
     name: "Motion Patterns",
     category: "molecule",
     description:
-      "Animation decision guide — Framer Motion vs CSS @keyframes vs Tailwind animate-*",
-    files: ["framer-motion", "globals.css"],
+      "Animation decision guide — Motion vs CSS @keyframes vs Tailwind animate-*",
+    files: ["motion", "globals.css"],
   },
 ];
 
