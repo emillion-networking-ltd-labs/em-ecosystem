@@ -3,7 +3,7 @@ import CopyCell from "@/components/ui/CopyCell";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/CopyCell",
+  title: "Migration/CopyCell",
   component: CopyCell,
   tags: ["autodocs"],
   args: {

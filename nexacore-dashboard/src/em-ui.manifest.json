@@ -4,7 +4,7 @@
   "files": {
     "components/ui/Accordion.tsx": {
       "from": "components/Accordion.tsx",
-      "sha": "61709009253543ebfc4afa36d6c078b64289675c"
+      "sha": "cb19b8bba25e341e9acd1db2d0deb9b6e204d793"
     },
     "components/ui/AlertBox.tsx": {
       "from": "components/AlertBox.tsx",

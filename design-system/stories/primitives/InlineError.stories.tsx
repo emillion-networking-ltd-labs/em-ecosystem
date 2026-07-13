@@ -3,7 +3,7 @@ import InlineError from "@/components/ui/InlineError";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/InlineError",
+  title: "Migration/InlineError",
   component: InlineError,
   tags: ["autodocs"],
   args: {

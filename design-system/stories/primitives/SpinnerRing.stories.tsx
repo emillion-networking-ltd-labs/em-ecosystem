@@ -3,7 +3,7 @@ import SpinnerRing from "@/components/ui/SpinnerRing";
 import { DemoCard, Sizes } from "../_kit";
 
 const meta = {
-  title: "Primitives/SpinnerRing",
+  title: "Migration/SpinnerRing",
   component: SpinnerRing,
   tags: ["autodocs"],
   args: { size: "md" },

@@ -4,7 +4,7 @@ import Calendar from "@/components/ui/Calendar";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/Calendar",
+  title: "Migration/Calendar",
   component: Calendar,
   tags: ["autodocs"],
   args: {

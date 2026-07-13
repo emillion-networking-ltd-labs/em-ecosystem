@@ -19,6 +19,8 @@
 import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+// DoD por-paso + colocación — MISMA fuente que el gate check-piece-complete (una sola verdad).
+import { stepStatus, placements } from "./check-piece-complete.mjs";
 
 const ds = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const componentsDir = join(ds, "components");
@@ -67,6 +69,16 @@ function run() {
   );
   rows.sort((a, b) => a.name.localeCompare(b.name));
 
+  // Enriquece cada fila con su COLOCACIÓN (Model B) + estado por-paso de la DoD (A/B/F/Q), para el dashboard.
+  const place = placements();
+  for (const r of rows) {
+    r.placement = place[r.name] || null; // Migration | Primitives | Composite | Layout | …
+    const s = stepStatus(r.name);
+    r.dod = { A: s.A, B: s.B, F: s.F, Q: s.Q, O: s.O }; // C (census) es meta: el propio censo lo garantiza al escribirse
+    r.certified = r.placement === "Primitives" || r.placement === "Composite";
+    r.certifiable = s.A && s.B && s.F && s.Q && s.O; // listo para promocionar (a falta de tu [H])
+  }
+
   const onIdiom = rows.filter((r) => r.onTv);
   const specsOldIdiom = rows.filter((r) => !r.onTv && r.hasSpecs);
   const tvCandidates = rows.filter((r) => r.tvCandidate);
@@ -76,6 +88,10 @@ function run() {
     total: rows.length,
     onIdiom: onIdiom.length,
     classified: rows.filter((r) => r.role).length,
+    // Model B: cuántas en Migration/ (WIP) vs certificadas, y cuántas ya listas para promocionar (a falta del [H]).
+    inMigration: rows.filter((r) => r.placement === "Migration").length,
+    certified: rows.filter((r) => r.certified).length,
+    readyToPromote: rows.filter((r) => r.placement === "Migration" && r.certifiable).length,
     tvCandidates,
     missingPrimitives,
     rows,

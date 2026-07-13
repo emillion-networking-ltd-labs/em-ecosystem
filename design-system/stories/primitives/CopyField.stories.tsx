@@ -3,7 +3,7 @@ import CopyField from "@/components/ui/CopyField";
 import { DemoCard, Sizes } from "../_kit";
 
 const meta = {
-  title: "Primitives/CopyField",
+  title: "Migration/CopyField",
   component: CopyField,
   tags: ["autodocs"],
   args: {

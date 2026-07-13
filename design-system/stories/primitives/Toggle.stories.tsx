@@ -4,7 +4,7 @@ import Toggle from "@/components/ui/Toggle";
 import { DemoCard, Sizes } from "../_kit";
 
 const meta = {
-  title: "Primitives/Toggle",
+  title: "Migration/Toggle",
   component: Toggle,
   tags: ["autodocs"],
   args: { label: "Notifications", size: "md", checked: true },

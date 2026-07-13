@@ -3,7 +3,7 @@ import MetricCard from "@/components/ui/MetricCard";
 import { DemoCard, Variants } from "../_kit";
 
 const meta = {
-  title: "Primitives/MetricCard",
+  title: "Migration/MetricCard",
   component: MetricCard,
   tags: ["autodocs"],
   args: {

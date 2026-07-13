@@ -9,6 +9,7 @@
     {
       "name": "Accordion",
       "type": "registry:ui",
+      "role": "primitive",
       "file": "components/Accordion.tsx",
       "registryDependencies": [
         "Icon"

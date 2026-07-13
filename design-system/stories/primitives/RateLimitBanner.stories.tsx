@@ -3,7 +3,7 @@ import RateLimitBanner from "@/components/ui/RateLimitBanner";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/RateLimitBanner",
+  title: "Migration/RateLimitBanner",
   component: RateLimitBanner,
   tags: ["autodocs"],
   args: {

@@ -8,7 +8,7 @@ import sampleImg from "../assets/sample-after.jpg";
 const sampleImage = typeof sampleImg === "string" ? sampleImg : sampleImg.src;
 
 const meta = {
-  title: "Primitives/ImageCropper",
+  title: "Migration/ImageCropper",
   component: ImageCropper,
   tags: ["autodocs"],
   args: {

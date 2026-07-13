@@ -4,7 +4,7 @@ import DateInput from "@/components/ui/DateInput";
 import { DemoCard, Sizes } from "../_kit";
 
 const meta = {
-  title: "Primitives/DateInput",
+  title: "Migration/DateInput",
   component: DateInput,
   tags: ["autodocs"],
   args: {

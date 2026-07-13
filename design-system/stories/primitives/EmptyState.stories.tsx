@@ -4,7 +4,7 @@ import Button from "@/components/ui/Button";
 import { DemoCard, Variants } from "../_kit";
 
 const meta = {
-  title: "Primitives/EmptyState",
+  title: "Migration/EmptyState",
   component: EmptyState,
   tags: ["autodocs"],
   args: {

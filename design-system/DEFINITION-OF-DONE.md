@@ -1,64 +1,77 @@
-# Definition-of-Done por pieza del design-system
+# Definition-of-Done por pieza + PASOS a seguir
 
-> **Por qué este archivo existe:** el DoD vivía troceado (design-system-quality Pilares 1-4 + design-propagation
-> ADR-030) y en la cabeza de quien programaba → piezas salían a medias sin que nadie lo detectara (14 migradas a
-> `tv` sin su etiqueta de clasificación ni sus marcadores). Aquí está **la estructura completa, en un solo sitio**.
-> Y no basta escribirla: **cada parte la hace cumplir un gate** — una pieza no puede quedar "registrada/hecha" sin
-> todas sus partes (ver "Completitud" abajo). Nace en ECO-197 (design-system-quality, Fase 1).
+> **Por qué existe:** el DoD vivía troceado (DSQ Pilares 1-4 + ADR-030) y en la cabeza → piezas salían a medias sin
+> que nadie lo detectara. Aquí están **los pasos a seguir + verificar en CADA ticket**, en un solo sitio, para no
+> repetirlos pieza a pieza. Cada parte la hace cumplir un gate. Nace en ECO-197, ampliado en ECO-198.
 
-## Una pieza está HECHA solo con TODO esto
+## PASOS por pieza — SÍGUELOS EN ORDEN, en cada ticket
+
+1. **Idioma** — el **código y los comentarios en INGLÉS** (solo código; las docs de gobernanza / especs / ADRs se
+   quedan como estén). El copy de Storybook también en inglés (StoryConventions).
+2. **Contrato (A)** — `tailwind-variants` + `<name>Specs`.
+3. **Tokens semánticos por rol** — sin valores crudos (color / tipografía / motion).
+4. **Clasificar (B)** — `// @ds-role: primitive|composite` en el componente → `role` en el registry.
+5. **Compone primitivos** — no copia la superficie de otra pieza.
+6. **Modificabilidad (C)** — conforme a la NORMA (color modificable / estructura bloqueada) o excepción declarada.
+7. **Story — ANALIZA la pieza y ORGANÍZALA por ejes.** Identifica cada eje ortogonal de la pieza; **cada eje →
+   su propio bucket + su overview**, sin mezclar: variant→`AllVariants` (última), size→`AllSizes` (penúltima),
+   y **cada eje ENUM propio** (surface, indicator, shape, direction, orientation…) → un overview `<Axis>` con su
+   nombre. Un eje NUEVO → un bucket nuevo (el catálogo es extensible). Los booleanos/estados (borderless,
+   loading…) → su story/overview dedicado. **Nunca mezclar ejes en un overview.** Mientras se verifica la pieza
+   vive en `Migration/<Pieza>`; al promocionar, su título pasa a `Primitives/<Pieza>` **o** `Composite/<Pieza>`
+   según su `@ds-role` (ver "Colocación Model B"). Gates: `check-story-norm` (variant/size) + `check-piece-complete`
+   (un overview `<Axis>` por cada eje enum propio — un eje sin su bucket bloquea la promoción).
+8. **VERIFICACIÓN — fidelidad viejo-vs-nuevo (TEST verídico, no una página)** — reconstruye el componente VIEJO en
+   `tests/fixtures/<Name>Old.tsx` (desde git, pre-migración) y en `tests/<name>-fidelity.test.tsx` renderiza
+   **viejo-vs-nuevo por CADA variación**, extrae los atributos del DOM (tag / clases / disabled / href…) y exige
+   **`old = new`**. Es la verificación REAL (máquina): **la que caza la mala migración** — Button se migró mal y
+   este test fue lo que lo cazó. La versión DÉBIL (comparar solo un string de clases inline, **sin fixture, sin
+   render**) NO cuenta. No hace falta página: **el test lo garantiza**.
+9. **Calidad** — a11y AA (axe + teclado/foco/ARIA) + docs de estados. (VRT = interruptor GLOBAL, se enciende aparte.)
+10. **Reconciliar copias em-ui** — `em-ui update <Pieza> --dest <consumer>/src` (NUNCA editar la copia a mano →
+    `check-fleet-report` rojo).
+11. **Actualizar Corpus Status** — `node scripts/census.mjs --write` → la pieza aparece al día en el dashboard.
+12. **Verde** — gates + tests + `npm run governance` (incluye `check-fleet-report`, que el pre-push NO corre).
+
+**Medio-hecha NO es hecha.** Esto corta el goteo de "20 tickets de parche".
+
+## Las 9 partes y su gate (el "qué" que cada paso satisface)
 
 | # | Parte | Cómo se comprueba |
 |---|-------|-------------------|
 | 1 | **Contrato de variante (A)** — `tailwind-variants` + `<name>Specs` | `check-contract-tv` (Fase 1) |
-| 2 | **Tokens semánticos por rol** — sin valores crudos (color/tipografía/motion) | `check-raw-color`, `check-typography-tokens`, `check-motion-tokens` |
-| 3 | **Clasificada (B)** — `role` (primitive/composite) + contrato, máquina-legible en el registry | `check-classification` (Fase 1) |
-| 4 | **Compone primitivos** — no copia la superficie de otra pieza | `check-composition-class` |
-| 5 | **Modificabilidad (C)** — conforme a la NORMA ↓ o excepción declarada | `check-region-integrity` (Fase 1/2) |
-| 6 | **Calidad** — a11y AA (axe + teclado/foco/ARIA) + tests + docs de estados + VRT baseline ON | listón de calidad + `[H]` humano |
-| 7 | **Story** — según la norma de stories | `check-story-norm`, `check-story-coverage` |
-| 8 | **Fidelidad** — el render viejo y el nuevo pintan las MISMAS clases (test permanente) | test `<name>-fidelity` |
-| 9 | **Registrada + self-contained** — en el registry, con sus deps npm declaradas | `check-component-drift`, `check-manifest` |
+| 2 | **Tokens semánticos por rol** — sin valores crudos | `check-raw-color`, `check-typography-tokens`, `check-motion-tokens` |
+| 3 | **Clasificada (B)** — `role` máquina-legible en el registry | `check-classification` |
+| 4 | **Compone primitivos** — no copia superficie | `check-composition-class` |
+| 5 | **Modificabilidad (C)** — norma ↓ o excepción declarada | `check-region-integrity` (Fase 2) |
+| 6 | **Calidad** — a11y AA + tests + docs + VRT | listón de calidad + `[H]` humano |
+| 7 | **Story** — según la norma + título por role | `check-story-norm`, `check-story-coverage` |
+| 8 | **Fidelidad viejo-vs-nuevo** — fixture `<Name>Old` + render viejo-vs-nuevo + atributos `old = new` | `<name>-fidelity` (al estándar) |
+| 9 | **Registrada + self-contained** — registry + deps npm | `check-component-drift`, `check-manifest` |
 
-**Medio-hecha NO es hecha.** Esto es lo que corta el goteo de "20 tickets de parche".
+## Colocación en Storybook (Model B) — la carpeta ES la declaración de estado
 
-**Idioma:** todo el **código, comentarios y copy de Storybook en inglés** (CONTRIBUTING.md:7 · StoryConventions:75).
-Las piezas con comentarios en español se traducen **al tocarlas** en el lote (no big-bang). *(El estándar de las
-propias páginas Foundation — título/intro/márgenes uniformes — es un ticket aparte: sección en StoryConventions +
-shell compartido, alinea las ~7 Foundation.)*
+- **`Migration/<Pieza>` = WIP.** Toda pieza no certificada vive aquí. La carpeta dice "en migración, aún no fiable".
+- **`Primitives/<Pieza>` / `Composite/<Pieza>` = CERTIFICADA.** Una pieza solo llega aquí cuando pasa **los 11 pasos**
+  con evidencia **+ la aprobación final del humano [H]**. Si está aquí, está terminada.
+- **Promoción = mover el título** `Migration/` → `Primitives/` o `Composite/` **según su `@ds-role`** (no todo es
+  primitive). Es el acto que el gate `check-piece-complete` bloquea si falta un paso — imposible promocionar a medias.
 
 ## Norma C — modificabilidad (por defecto, SIN marcar zona por zona)
 
-La pregunta "¿qué parte es gobernada vs modificable?" **no se decide pieza a pieza** — la decide esta norma:
-
-- **Modificable:** el/los **token(s) de color / marca**. Un satélite los re-apunta en su scope (`[data-brand]`),
-  para toda su marca, en un solo sitio. El color es la firma de marca legítima.
+- **Modificable:** el/los **token(s) de color / marca**. Un satélite los re-apunta en su scope (`[data-brand]`).
 - **Bloqueado (el DS lo gobierna):** **todo lo estructural** — forma, geometría de borde, sombra, radio, grosor,
   espaciado, markup, ARIA. La estructura es el idioma del DS; no se rebrandea.
-- **Excepción por-satélite:** para el satélite X que de verdad quiere un rasgo estructural como firma (p.ej. un
-  radio distinto) → se **declara**, deliberada y visible, solo para esa pieza/ese satélite. Por defecto bloqueado;
-  abrir es un acto consciente, nunca un descuido.
+- **Excepción por-satélite:** se **declara**, deliberada y visible, solo para esa pieza/ese satélite.
 
-**Se hace cumplir al PULL, no en runtime** (`check-region-integrity`, token-only de ADR-030): cuando un satélite
-actualiza, lo único que sobrevive de su cambio es un **re-apunte de token de color**; si tocó estructura, el gate
-lo caza. Así la propagación es **segura por construcción** — una pieza self-describing (identidad registrada +
-tokens semánticos + esta norma) no le rompe la marca a nadie al actualizar.
-
-Empezamos con esta regla **general** aplicada a todo (barato, sin marcar 84 piezas) y se **refina** por-pieza o
-por-satélite donde la realidad lo pida (iterativo, no de golpe).
+**Se hace cumplir al PULL** (`check-region-integrity`, token-only de ADR-030): lo único que sobrevive del cambio de
+un satélite es un re-apunte de token de color; tocar estructura lo caza el gate. Propagación **segura por
+construcción**. Regla general primero; se refina por-pieza/por-satélite donde la realidad lo pida.
 
 ## Completitud — por qué no se vuelve a olvidar
 
-Un gate de **completitud de pieza** verifica que toda pieza registrada tiene sus 9 partes (es el meta-gate, pero
-sobre la pieza entera, no solo sobre las dimensiones). El **censo** (`scripts/census.mjs`) reporta los huecos; el
-gate de completitud impide huecos nuevos. Estructura escrita **+ gateada** = no depende de que nadie la recuerde.
-
-## Cómo se construye una pieza (carriles, LEAF-FIRST — DSQ Pilar 4)
-
-- **Ya migradas (idioma + clasificación ciertos)** → **lotes**: solo se añaden etiquetas (B + C) + se cierran huecos
-  de calidad. No cambia el aspecto → riesgo bajo.
-- **Migración de idioma (a `tv`)** → **una a una / lotes pequeños**: cambia el idioma → cada una con su fidelidad +
-  VRT verde.
-- **Primitivos que faltan** (Popover/Menu/Skeleton/ChartTooltip) → **una a una**: construcción + diseño.
-- La máquina prueba lo mecánico (VRT/tests/fidelidad/gates); el humano juzga (marcadores, primitive/composite,
-  deltas visuales) y aprueba en Storybook.
+El gate **`check-piece-complete`** (required, no-bypass) hace cumplir esto por la **colocación**: una pieza en
+`Primitives/`/`Composite/` (promocionada) DEBE tener evidencia de los 11 pasos —incluida la **fidelidad al
+estándar**— o el gate va **rojo y bloquea el merge**; las de `Migration/` están exentas (WIP). El **censo**
+(`scripts/census.mjs`, visible en `Foundations/Corpus Status`) muestra el estado **por-paso** de cada pieza.
+Estructura escrita **+ gateada** = no depende de que nadie la recuerde, y **promocionar a medias es imposible**.

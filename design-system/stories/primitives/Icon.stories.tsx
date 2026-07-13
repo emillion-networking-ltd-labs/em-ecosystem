@@ -6,7 +6,7 @@ import { DemoCard, Sizes } from "../_kit";
 // Icon — aplica la escala REGISTRADA de tamaño (Foundations › Icons) por nombre semántico, en vez del `size={16}`
 // mágico. El color se hereda (currentColor → tokens text-*). Cambiar la escala propaga a todos los <Icon>.
 const meta = {
-  title: "Simple/Icon",
+  title: "Migration/Icon",
   component: Icon,
   tags: ["autodocs"],
   args: { icon: Search, size: "md" },

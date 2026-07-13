@@ -31,7 +31,7 @@ function Field({
 }
 
 const meta = {
-  title: "Primitives/MfaDigitInput",
+  title: "Migration/MfaDigitInput",
   component: MfaDigitInput,
   tags: ["autodocs"],
   args: {

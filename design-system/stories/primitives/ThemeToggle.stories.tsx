@@ -6,7 +6,7 @@ import { DemoCard } from "../_kit";
 // ThemeContext (see .storybook/mocks/context). The icon follows the active theme (flip it with the
 // catalog's theme toolbar). Making the click itself toggle+apply the theme is tracked in ECO-119.
 const meta = {
-  title: "Primitives/ThemeToggle",
+  title: "Migration/ThemeToggle",
   component: ThemeToggle,
   tags: ["autodocs"],
   // In the catalog the toggle sits at the top-left, so show the tooltip on the right (it would clip

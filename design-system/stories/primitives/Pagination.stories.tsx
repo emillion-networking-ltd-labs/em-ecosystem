@@ -4,7 +4,7 @@ import Pagination from "@/components/ui/Pagination";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/Pagination",
+  title: "Migration/Pagination",
   component: Pagination,
   tags: ["autodocs"],
   args: {

@@ -32,6 +32,8 @@ const faqItems = [
 ];
 
 const meta = {
+  // Model B: CERTIFIED primitive (ECO-198) — passed every DoD step (contract / role / fidelity 35/35 / a11y /
+  // organization / census) + the human [H], so it earned its place in Primitives/ (out of Migration/).
   title: "Primitives/Accordion",
   component: Accordion,
   tags: ["autodocs"],
@@ -43,7 +45,6 @@ const meta = {
     defaultOpen: { control: "number" },
   },
   args: {
-    defaultOpen: 0,
     items: faqItems,
   },
   render: (args) => (
@@ -56,9 +57,53 @@ const meta = {
 export default meta;
 type Story = StoryObj<typeof meta>;
 
+// ── VARIANTS (the `variant` axis) — one story per variant; grouped by `AllVariants` at the end ──
 // Default — grouped + chevron (the base look).
 export const Default: Story = {};
+// variant=uppercase — identical to default (same type/weight/size); the only difference is UPPERCASE.
+export const Uppercase: Story = { args: { variant: "uppercase" } };
 
+// ── SURFACE (the `surface` axis) — overview; orthogonal to variant ──
+// grouped = a single divided box; separated = each item in its own card. Both keep the open animation.
+export const Surface: Story = {
+  render: () => (
+    <Variants
+      items={[
+        { label: "grouped (default)", block: true, node: <Accordion items={faqItems} /> },
+        {
+          label: "separated",
+          block: true,
+          node: <Accordion items={faqItems} surface="separated" />,
+        },
+      ]}
+    />
+  ),
+};
+
+// ── INDICATOR (the `indicator` axis) — overview (closed, the base state) ──
+// chevron = ▾ (rotates 180° on open); plus = a `+` (rotates 45° into a `×` on open).
+export const Indicator: Story = {
+  render: () => (
+    <Variants
+      items={[
+        { label: "chevron (default)", block: true, node: <Accordion items={faqItems} /> },
+        {
+          label: "plus → × on open",
+          block: true,
+          node: <Accordion items={faqItems} indicator="plus" />,
+        },
+      ]}
+    />
+  ),
+};
+
+// ── MODIFIERS / STATE ──
+// borderless — no border but KEEPS the rounded-md (same radius as the others). grouped only.
+export const Borderless: Story = { args: { borderless: true } };
+// defaultOpen — opens a panel on mount (the first, index 0); the closed base is `Default`.
+export const DefaultOpen: Story = { args: { defaultOpen: 0 } };
+
+// ── COMPOSITION ──
 // SingleAccordion — standalone single-panel variant (boolean defaultOpen).
 export const Single: Story = {
   render: () => (
@@ -72,38 +117,20 @@ export const Single: Story = {
   ),
 };
 
-// variant=uppercase — identical to default (same type/weight/size); the only difference is UPPERCASE.
-export const Uppercase: Story = { args: { variant: "uppercase", defaultOpen: undefined } };
-
-// borderless — no border but KEEPS the rounded-md (same radius as the others).
-export const Borderless: Story = { args: { borderless: true, defaultOpen: undefined } };
-
-// defaultOpen — opens a specific panel on mount (index 1).
-export const DefaultOpen: Story = { args: { defaultOpen: 1 } };
-
-// surface=separated — each item in its own card, with separation between them; keeps the open animation.
-export const Separated: Story = { args: { surface: "separated", defaultOpen: undefined } };
-
-// indicator=plus — a `+` that rotates 45° into a `×` on open (the FAQ-style toggle), on the bordered layout.
-export const PlusIndicator: Story = { args: { indicator: "plus", defaultOpen: undefined } };
-
-// AllVariants — ALWAYS last: the distinct designs, grouping the stories above.
-const VARIANT_CARDS = [
-  { label: "Default", props: {} },
-  { label: "Separated", props: { surface: "separated" as const } },
-  { label: "PlusIndicator", props: { indicator: "plus" as const } },
-  { label: "Borderless", props: { borderless: true } },
-  { label: "Uppercase", props: { variant: "uppercase" as const } },
-];
-
+// ── OVERVIEW (ALWAYS last) ──
+// AllVariants — groups the VARIANTS (the `variant` axis only). Surface / Indicator have their OWN overview above;
+// they do NOT belong here (never mix different axes/buckets).
 export const AllVariants: Story = {
   render: () => (
     <Variants
-      items={VARIANT_CARDS.map(({ label, props }) => ({
-        label,
-        block: true,
-        node: <Accordion items={faqItems} {...props} />,
-      }))}
+      items={[
+        { label: "Default", block: true, node: <Accordion items={faqItems} /> },
+        {
+          label: "Uppercase",
+          block: true,
+          node: <Accordion items={faqItems} variant="uppercase" />,
+        },
+      ]}
     />
   ),
 };

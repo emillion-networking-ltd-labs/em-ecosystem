@@ -4,7 +4,7 @@ import Badge from "@/components/ui/Badge";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/SearchTrigger",
+  title: "Migration/SearchTrigger",
   component: SearchTrigger,
   tags: ["autodocs"],
   args: {

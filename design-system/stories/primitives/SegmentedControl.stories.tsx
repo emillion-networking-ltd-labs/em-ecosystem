@@ -10,7 +10,7 @@ const OPTIONS = [
 ];
 
 const meta = {
-  title: "Composite/SegmentedControl",
+  title: "Migration/SegmentedControl",
   component: SegmentedControl,
   tags: ["autodocs"],
   args: {

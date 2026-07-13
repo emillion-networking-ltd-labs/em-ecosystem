@@ -5,7 +5,7 @@ import { DemoCard } from "../_kit";
 // Primitives/ChartCard — a panel with a TITLE + an optional action slot, for wrapping charts, data panels and
 // dashboard widgets. Uses surface/border/content tokens, so it follows the theme (Storybook toolbar).
 const meta = {
-  title: "Primitives/ChartCard",
+  title: "Migration/ChartCard",
   component: ChartCard,
   tags: ["autodocs"],
   args: { title: "Total Users" },

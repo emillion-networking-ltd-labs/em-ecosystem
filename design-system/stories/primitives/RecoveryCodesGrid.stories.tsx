@@ -3,7 +3,7 @@ import RecoveryCodesGrid from "@/components/ui/RecoveryCodesGrid";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/RecoveryCodesGrid",
+  title: "Migration/RecoveryCodesGrid",
   component: RecoveryCodesGrid,
   tags: ["autodocs"],
   args: {

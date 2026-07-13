@@ -3,7 +3,7 @@ import QrCodeCard from "@/components/ui/QrCodeCard";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/QrCodeCard",
+  title: "Migration/QrCodeCard",
   component: QrCodeCard,
   tags: ["autodocs"],
   args: { secret: "JBSWY3DPEHPK3PXP" },

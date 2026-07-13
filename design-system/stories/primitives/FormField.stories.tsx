@@ -5,7 +5,7 @@ import EmailSelector from "@/components/ui/EmailSelector";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/FormField",
+  title: "Migration/FormField",
   component: FormField,
   tags: ["autodocs"],
   args: {

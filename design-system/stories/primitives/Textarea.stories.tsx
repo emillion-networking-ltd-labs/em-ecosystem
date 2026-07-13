@@ -3,7 +3,7 @@ import Textarea from "@/components/ui/Textarea";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/Textarea",
+  title: "Migration/Textarea",
   component: Textarea,
   tags: ["autodocs"],
   args: { placeholder: "Tell us about your project…", rows: 4 },

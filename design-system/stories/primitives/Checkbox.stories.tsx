@@ -4,7 +4,7 @@ import Checkbox from "@/components/ui/Checkbox";
 import { DemoCard, Sizes } from "../_kit";
 
 const meta = {
-  title: "Primitives/Checkbox",
+  title: "Migration/Checkbox",
   component: Checkbox,
   tags: ["autodocs"],
   args: { label: "I accept the terms", size: "md" },

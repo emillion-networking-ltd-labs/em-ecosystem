@@ -3,7 +3,7 @@ import SpinnerCircle from "@/components/ui/SpinnerCircle";
 import { DemoCard, Sizes } from "../_kit";
 
 const meta = {
-  title: "Primitives/SpinnerCircle",
+  title: "Migration/SpinnerCircle",
   component: SpinnerCircle,
   tags: ["autodocs"],
   args: { size: "md" },
