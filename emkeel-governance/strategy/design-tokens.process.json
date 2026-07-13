@@ -4,73 +4,70 @@
   "steps": {
     "scaffolded": {
       "done": true,
-      "timestamp": "2026-07-03T17:13:00Z",
+      "timestamp": "2026-07-13T21:27:51Z",
       "topic": "design-tokens",
       "kill_criteria": [
-        "No existe un mecanismo limpio que permita override de marca por satelite SIN romper el baseline AA (obligatorio y brandeable son irreconciliables)",
-        "El coste del pipeline (manifiesto+generador+gate) supera el ahorro de mantenimiento para un DS de ~90 componentes y pocos satelites (over-engineering)",
-        "El modelo @theme de Tailwind v4 impide un cableado de fuente unica robusto en la practica",
-        "La copia del dashboard no puede regenerarse desde la fuente sin romper su lane de re-sync"
+        "arbitrarios mayormente one-offs legitimos no deuda sistemica -> over-engineering",
+        "la linea estricto-vs-arbitrario no es maquina-checkable -> gate inviable cae a [H] que no escala a N satelites",
+        "tokenizar anade mas indireccion/coste que los magicos que quita",
+        "propagar las nuevas dimensiones exige generador/DTCG -> choca con ADR-027 YAGNI"
       ]
     },
     "researched": {
       "done": true,
-      "timestamp": "2026-07-03T17:17:39Z",
+      "timestamp": "2026-07-13T21:36:44Z",
       "sources": [
-        "design-system/tokens/tokens.css:335-340 (freeze @theme v4)",
-        "design-system/tokens/tokens.css:121-447 (capas @theme/:root/.dark/.light + duplicacion)",
-        "design-system/registry/cli.mjs:94-101 (em-ui init = copyFileSync sin transformar)",
-        "emkeel-governance/adr/007-design-system-source-location.md:35 (dos copias = deuda consciente)",
-        "satellites/sat-cristian-garcia/src/app/globals.css:167",
-        "214-215 (fork inline; solo --accent cambia)",
-        "nexacore-dashboard/src/styles/em-ui-tokens.css (copia stale)",
-        "https://styledictionary.com/",
-        "https://styledictionary.com/info/dtcg/",
-        "https://terrazzo.app/docs/guides/modes/",
-        "https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/",
-        "https://bradfrost.com/blog/post/the-many-faces-of-themeable-design-systems/",
-        "https://www.w3.org/WAI/WCAG22/Understanding/contrast-minimum",
-        "https://www.npmjs.com/package/wcag-contrast",
-        "https://colorjs.io/docs/contrast",
-        "https://tailwindcss.com/docs/theme",
-        "https://github.com/tailwindlabs/tailwindcss/discussions/18471"
+        "tokens.css:247-248 shadow solo 2 tokens",
+        "tokens.css:250-258 radius 9 tokens",
+        "tokens.css:289-293 atenuacion horneada en rgba sin escala opacidad",
+        "check-drift.mjs:65-67 copy-by-value exige identico",
+        "check-raw-color _rgba hole Slider.tsx:111",
+        "SpinnerCircle.tsx:13 border-1.5px sin token",
+        "Ripple.tsx:3 foreground no-token",
+        "https://www.radix-ui.com/colors/docs/palette-composition/understanding-the-scale",
+        "https://developer.android.com/develop/ui/compose/designsystems/material2-material3 M2-opacity-to-M3-token",
+        "https://tailwindcss.com/docs/adding-custom-styles escape-hatch",
+        "https://github.com/francoismassart/eslint-plugin-tailwindcss no-arbitrary all-or-nothing",
+        "https://github.com/carbon-design-system/stylelint-plugin-carbon-tokens per-property",
+        "https://styledictionary.com/info/dtcg DTCG overkill-2-consumers",
+        "https://www.browserlondon.com/blog/2025/06/03/how-to-break-your-design-system-rules 3-teams-to-feature"
       ]
     },
     "proposed": {
       "done": true,
-      "timestamp": "2026-07-03T17:19:29Z",
+      "timestamp": "2026-07-13T21:39:46Z",
       "options": [
-        "Arreglo minimo CSS a mano (wiring var(--x) + gate contraste)",
-        "Var-layering runtime patron TW v4 + gate + override por scope",
-        "Pipeline DTCG->generador (Style Dictionary/Terrazzo) emite DS+consumidores + gate"
+        "4 in-place tokens semanticos + gates propios scopeados por dimension + ratchet + escape-hatch (RECOMENDADA)",
+        "5 DTCG + Style Dictionary re-plataforma",
+        "6 FOIL solo-lint no-arbitrary todo-o-nada"
       ]
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-07-03T17:24:13Z",
-      "lens_calibration": "Fase 2 (manifiesto DTCG + Style Dictionary) es YAGNI para 2 consumidores de copia literal y roza la kill-criterion; el drift se cierra con un gate de CI sobre el em-ui diff existente (cli.mjs:85-93), sin generador ni migracion -> degradar Fase 2 a no-goal.",
-      "lens_legal": "El gate AA NO es computable sobre tokens con alpha (content-tertiary 0.55, borders 0.05/0.08, placeholder 0.3): un rgba no tiene ratio hasta componerse sobre una superficie opaca concreta. Debe operar sobre pares (token-alpha x superficie). Falta definir texto-grande, forced-colors, daltonismo (1.4.1) y valvula de excepcion auditada; borders 0.08 fallan 1.4.11 salvo marcarlos decorativos. Fuente WCAG 2.2 1.4.3/1.4.11.",
-      "lens_technical": "VERIFICADO OK el patron TW v4 (@theme inline + var scopeada -> override runtime) y el freeze (tokens.css:335-340) -> Fase 0 solida. PERO Fase 2 el generador regenera la copia del dashboard CONTRADICE em-ui (ADR-007:14,28 pull consumer-driven; la fuente no conoce rutas de consumidor); el drift es de distribucion, no de autoria.",
-      "lens_override": "AA es propiedad del PAR fg-bg, no del token; el doc valida set resuelto por-token y nunca define la matriz de adyacencia fg-bg -> un satelite que pisa solo --surface-primary rompe AA con el content heredado (kill-criterion #1 sin cubrir). Ademas logica invertida en no-override=recibe-cambio; falta marcar tokens norma-vs-estetico.",
-      "completeness": "Falta el artefacto de primera clase que unifica todo: una MATRIZ DE COMPOSICION/PARES (que content sobre que surface + que token-alpha compuesto sobre que superficie), por tema y por marca. Sin ella ni el gate AA es computable ni el override verificable. Falta tambien texto-grande, valvula de excepcion auditada (ADR) y separar autoria de distribucion."
+      "timestamp": "2026-07-13T21:50:46Z",
+      "lens_calibration": "Option 4 infra + atenuacion CALIBRADOS; border-width+shadow como escalas-token NUEVAS son OVER-REACH (2 valores en 1 componente c/u: SpinnerCircle border, Slider shadow; ADR-031 los enruta al techo VRT/censo) -> hand-fix + gate lock-at-0, NO escalas nuevas. Cita Browser London mal (no dice 3-equipos)",
+      "lens_enforceability": "La linea ES maquina-checkable (KC2 no dispara) PERO necesita PREREQUISITO: eje core-vs-decorativo maquina-legible (el @ds-role primitive|composite es el eje EQUIVOCADO + 82/84 vacio) + ratchet/escape para legit-en-primitivo (border-[1.5px] sin token). El juicio es O(piezas ~84) NO O(satelites) -> escala. Precedente: Carbon stylelint per-property",
+      "lens_propagation": "KC4 REFUTADO: nuevas dimensiones propagan gratis por copy-by-value entero + override por-var en [data-brand]; precedente en produccion typography(ECO-193)+motion(ECO-194) anadidas post-ADR-027 igual. ADR-027 se sostiene",
+      "completeness": "#1 CONTRADICE Norma C viva (ADR-030, DEFINITION-OF-DONE.md:63-68): shadow/radio/grosor/espaciado YA son estructura-BLOQUEADA (solo color satelite-overridable) -> reconciliar si los tokens nuevos son bloqueados u overridables. + atenuacion mal diagnosticada (/75,/50 SON content-secondary/tertiary, trampa cross-tema light 0.65 vs dark 0.75; 183 usos). + Recommendation prosa sigue solo-color incoherente con la tabla. + sizing/width su propio eje (0 tokens, 228 arbitrarios). + DTCG-solo-formato sin nombrar"
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-07-03T17:25:37Z",
+      "timestamp": "2026-07-13T22:00:24Z",
       "check_passed": true
     },
     "validated": {
       "done": true,
-      "timestamp": "2026-07-03T17:26:31Z",
-      "case": "Aplicar el gate recomendado (componer alpha Porter-Duff sobre la superficie y medir el ratio del par fg-bg) al token real content-tertiary rgba(28,28,28,0.55) sobre surface-primary #fff",
-      "method": "Prototipo en node: composicion c=a*fg+(1-a)*bg -> rgb(130,130,130); luminancia relativa sRGB; ratio WCAG (L1+0.05)/(L2+0.05)",
-      "outcome": "pass",
-      "evidence_ref": "design-system/tokens/tokens.css:236 (content-tertiary) -> ratio 3.84:1 < 4.5 (FALLA AA texto normal; coincide con los 3.82 de ECO-123). Naive por-token no da ratio sin la superficie."
+      "timestamp": "2026-07-13T22:00:24Z",
+      "case": "aplicar decision #1 (atenuacion -> token content semantico existente) a text-content-primary/75 en Breadcrumbs.tsx:21",
+      "method": "comparar el valor renderizado content-primary/75 vs el token content-secondary, en light y dark, con los valores reales de tokens.css",
+      "outcome": "mixed",
+      "evidence_ref": "tokens.css:290 (light secondary 0.65) vs tokens.css:351 (dark secondary 0.75); primary/75 = 0.75 exacto en dark, diverge en light"
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-07-03T17:26:57Z",
-      "presented_to": "operador"
+      "timestamp": "2026-07-13T22:00:54Z",
+      "presented_to": "operator",
+      "proceed_justification": "el outcome mixed CONFIRMA el caveat propio de la recomendacion (la atenuacion se mapea por ROL de uso, no por numero /75->secondary) \u2014 no refuta la estrategia, valida su matiz; la ejecucion ya lo contempla (por rol + ratchet, no swap ciego). El operador decide en el merge."
     }
   },
   "steps_schema": [
