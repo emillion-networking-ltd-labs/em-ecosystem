@@ -1,6 +1,6 @@
 # Strategy: design-tokens
 
-Status: DRAFT
+Status: APPROVED
 Strategy: design-tokens   <!-- feature specs reference this with a `Strategy: design-tokens` line -->
 Impact: high
 
