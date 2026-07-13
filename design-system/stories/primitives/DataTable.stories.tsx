@@ -41,7 +41,7 @@ const columns: ColumnDef<Row>[] = [
 ];
 
 const meta = {
-  title: "Primitives/DataTable",
+  title: "Migration/DataTable",
   component: DataTable,
   tags: ["autodocs"],
   args: {

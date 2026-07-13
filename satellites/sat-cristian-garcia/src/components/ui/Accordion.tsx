@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+// @ds-role: primitive — base disclosure control; composes only Icon (a helper).
+import { useId, useState } from "react";
 import { tv } from "tailwind-variants";
 import { ChevronDown, Plus } from "lucide-react";
 import Icon from "./Icon";
@@ -16,13 +17,13 @@ interface AccordionProps {
   defaultOpen?: number;
   variant?: "default" | "uppercase";
   borderless?: boolean;
-  /** Disposición: `grouped` (caja única dividida, default) o `separated` (cada item en su propia tarjeta,
-   *  con separación entre ellos). Ambas conservan la animación de apertura. */
+  /** Layout: `grouped` (single divided box, default) or `separated` (each item in its own card, with
+   *  spacing between them). Both keep the open animation. */
   surface?: "grouped" | "separated";
-  /** Indicador: `chevron` (▾ rota 180°, default) o `plus` (un `+` que rota 45° → `×` al abrir). */
+  /** Indicator: `chevron` (▾ rotates 180°, default) or `plus` (a `+` that rotates 45° → `×` on open). */
   indicator?: "chevron" | "plus";
-  /** Estilo por item (aplicado al card de cada item). Genérico; p.ej. para un revelado con delay
-   *  incremental (stagger) construido por la sección — el Accordion no conoce el "reveal". */
+  /** Per-item style (applied to each item's card). Generic; e.g. for an incremental-delay (stagger)
+   *  reveal built by the section — Accordion itself knows nothing about the "reveal". */
   itemStyle?: (index: number) => React.CSSProperties;
 }
 
@@ -45,9 +46,9 @@ export const accordionSpecs = {
   },
 };
 
-// Eje de variante del trigger extraído a tv (antes concat inline con `triggerStyles[variant]`). El color/tipografía
-// del trigger no colisiona con el layout base → twMerge:false conserva el conjunto de clases fiel (convención DS).
-// `uppercase`: IDÉNTICO a default (misma tipografía, peso y tamaño) — la ÚNICA diferencia es UPPERCASE.
+// Trigger variant axis extracted to tv (was inline concat with `triggerStyles[variant]`). The trigger
+// color/typography doesn't collide with the base layout → twMerge:false keeps the class set faithful (DS convention).
+// `uppercase`: IDENTICAL to default (same typography, weight and size) — the ONLY difference is UPPERCASE.
 const TRIGGER_BASE =
   "flex w-full items-center justify-between px-4 py-3 transition-colors hover:bg-surface-subtle";
 export const accordionTrigger = tv(
@@ -77,6 +78,8 @@ export default function Accordion({
   const [openIndex, setOpenIndex] = useState<number | null>(
     defaultOpen ?? null,
   );
+  // ECO-198: stable base for the disclosure ARIA wiring (trigger ↔ panel), unique per instance.
+  const baseId = useId();
 
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -98,8 +101,12 @@ export default function Accordion({
         return (
           <div key={i} className={itemClass} style={itemStyle?.(i)}>
             <button
+              type="button"
               onClick={() => toggle(i)}
               className={accordionTrigger({ variant })}
+              id={`${baseId}-trigger-${i}`}
+              aria-expanded={isOpen}
+              aria-controls={`${baseId}-panel-${i}`}
             >
               {item.title}
               {indicator === "plus" ? (
@@ -117,13 +124,16 @@ export default function Accordion({
               )}
             </button>
             <div
+              id={`${baseId}-panel-${i}`}
+              role="region"
+              aria-labelledby={`${baseId}-trigger-${i}`}
               className={`grid transition-[grid-template-rows] duration-200 ease-out ${
                 isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
               }`}
             >
               <div className="overflow-hidden">
-                {/* ECO-141: la respuesta es CONTENIDO copiable → select-text (si viniera como texto suelto en
-                    este <div> heredaría user-select:none del body). El trigger (button) sí es no-seleccionable. */}
+                {/* ECO-141: the answer is copyable CONTENT → select-text (a bare string in this <div> would
+                    inherit user-select:none from the body). The trigger (button) stays non-selectable. */}
                 <div className="select-text px-4 pt-3 pb-4">
                   {item.children}
                 </div>
@@ -150,14 +160,20 @@ export function SingleAccordion({
   defaultOpen = false,
 }: SingleAccordionProps) {
   const [open, setOpen] = useState(defaultOpen);
+  // ECO-198: stable base for the disclosure ARIA wiring (trigger ↔ panel), unique per instance.
+  const id = useId();
 
   return (
     <div
       className={`rounded-md border border-border-strong overflow-hidden bg-surface-primary ${className}`}
     >
       <button
+        type="button"
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between px-4 py-3 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
+        id={`${id}-trigger`}
+        aria-expanded={open}
+        aria-controls={`${id}-panel`}
       >
         {title}
         <Icon
@@ -167,12 +183,15 @@ export function SingleAccordion({
         />
       </button>
       <div
+        id={`${id}-panel`}
+        role="region"
+        aria-labelledby={`${id}-trigger`}
         className={`grid transition-[grid-template-rows] duration-200 ease-out ${
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >
         <div className="overflow-hidden">
-          {/* ECO-141: respuesta = CONTENIDO copiable → select-text. */}
+          {/* ECO-141: answer = copyable CONTENT → select-text. */}
           <div className="select-text px-4 pt-3 pb-4">{children}</div>
         </div>
       </div>

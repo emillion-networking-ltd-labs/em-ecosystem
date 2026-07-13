@@ -3,7 +3,7 @@ import Divider from "@/components/ui/Divider";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/Divider",
+  title: "Migration/Divider",
   component: Divider,
   tags: ["autodocs"],
   args: {},

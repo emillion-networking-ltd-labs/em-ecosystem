@@ -4,7 +4,7 @@ import ToastContainer from "@/components/ui/ToastContainer";
 // App-coupled: consumes useToast → @/context/ToastContext (mock in the catalog with sample
 // toasts; the real app's dashboard provides it). Renders the fixed toasts (top, fixed).
 const meta = {
-  title: "Primitives/ToastContainer",
+  title: "Migration/ToastContainer",
   component: ToastContainer,
   parameters: { layout: "fullscreen" },
   tags: ["autodocs"],

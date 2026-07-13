@@ -22,6 +22,11 @@ type Row = {
   axes: string[];
   composes: string[];
   tvCandidate: boolean;
+  // Model B (ECO-198): colocación + estado por-paso de la DoD.
+  placement: "Migration" | "Primitives" | "Composite" | "Layout" | null;
+  dod: { A: boolean; B: boolean; F: boolean; Q: boolean; O: boolean };
+  certified: boolean;
+  certifiable: boolean;
 };
 
 function Flag({ ok }: { ok: boolean }) {
@@ -55,28 +60,27 @@ export const Overview: Story = {
           <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
             <Stat label="components" value={census.total} />
             <Stat
-              label="classified (B)"
-              value={`${census.classified}/${census.total}`}
+              label="in Migration (WIP)"
+              value={`${census.inMigration}/${census.total}`}
             />
             <Stat
-              label="on tv (A)"
-              value={`${census.onIdiom}/${census.total}`}
+              label="certified (Primitives/Composite)"
+              value={census.certified}
             />
-            <Stat
-              label="missing primitives"
-              value={census.missingPrimitives.length}
-            />
+            <Stat label="ready to promote" value={census.readyToPromote} />
           </div>
           <Card size="lg" className="overflow-x-auto p-4">
             <table className="text-body w-full">
               <thead>
                 <tr className="border-border-strong text-caption text-content-tertiary border-b text-left">
                   <th className="py-2 pr-4 font-normal">Component</th>
-                  <th className="py-2 pr-4 font-normal">role (B)</th>
-                  <th className="py-2 pr-4 font-normal">tv (A)</th>
-                  <th className="py-2 pr-4 font-normal">Specs</th>
-                  <th className="py-2 pr-4 font-normal">axes</th>
-                  <th className="py-2 pr-4 font-normal">composes</th>
+                  <th className="py-2 pr-4 font-normal">placement</th>
+                  <th className="py-2 pr-4 font-normal">A · contract</th>
+                  <th className="py-2 pr-4 font-normal">B · role</th>
+                  <th className="py-2 pr-4 font-normal">F · fidelity</th>
+                  <th className="py-2 pr-4 font-normal">a11y</th>
+                  <th className="py-2 pr-4 font-normal">O · org</th>
+                  <th className="py-2 pr-4 font-normal">ready</th>
                 </tr>
               </thead>
               <tbody>
@@ -86,23 +90,40 @@ export const Overview: Story = {
                       {r.name}
                     </td>
                     <td className="py-1.5 pr-4">
-                      {r.role ? (
-                        <span className="text-content-secondary">{r.role}</span>
+                      {r.certified ? (
+                        <span className="text-success">{r.placement}</span>
+                      ) : r.placement === "Migration" ? (
+                        <span className="text-warning">Migration</span>
                       ) : (
-                        <span className="text-warning">unclassified</span>
+                        <span className="text-content-tertiary">
+                          {r.placement ?? "—"}
+                        </span>
                       )}
                     </td>
                     <td className="py-1.5 pr-4">
-                      <Flag ok={r.onTv} />
+                      <Flag ok={r.dod.A} />
                     </td>
                     <td className="py-1.5 pr-4">
-                      <Flag ok={r.hasSpecs} />
+                      <Flag ok={r.dod.B} />
                     </td>
-                    <td className="text-content-tertiary py-1.5 pr-4">
-                      {r.axes.join(", ") || "—"}
+                    <td className="py-1.5 pr-4">
+                      <Flag ok={r.dod.F} />
                     </td>
-                    <td className="text-content-tertiary py-1.5 pr-4">
-                      {r.composes.join(", ") || "—"}
+                    <td className="py-1.5 pr-4">
+                      <Flag ok={r.dod.Q} />
+                    </td>
+                    <td className="py-1.5 pr-4">
+                      <Flag ok={r.dod.O} />
+                    </td>
+                    <td className="py-1.5 pr-4">
+                      {/* certificada pero incompleta = fallo del gate check-piece-complete */}
+                      {r.certified && !r.certifiable ? (
+                        <span className="text-error">✗ gate</span>
+                      ) : r.certifiable ? (
+                        <span className="text-success">✓</span>
+                      ) : (
+                        <span className="text-content-tertiary">·</span>
+                      )}
                     </td>
                   </tr>
                 ))}

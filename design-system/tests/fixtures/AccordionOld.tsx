@@ -1,10 +1,11 @@
 "use client";
 
-// @ds-role: primitive — base disclosure control; composes only Icon (a helper).
-import { useId, useState } from "react";
-import { tv } from "tailwind-variants";
+// AccordionOld — the PRE-tv Accordion (git 5186968^, before ECO-188 migrated it to tailwind-variants).
+// Snapshot fixture for the fidelity guard: renders exactly as the old map/concat version did, so accordion-fidelity
+// can prove the tv migration preserved every class (old = new). Not shipped, not registered.
+import { useState } from "react";
 import { ChevronDown, Plus } from "lucide-react";
-import Icon from "./Icon";
+import Icon from "@/components/ui/Icon";
 
 interface AccordionItem {
   title: string;
@@ -17,55 +18,18 @@ interface AccordionProps {
   defaultOpen?: number;
   variant?: "default" | "uppercase";
   borderless?: boolean;
-  /** Layout: `grouped` (single divided box, default) or `separated` (each item in its own card, with
-   *  spacing between them). Both keep the open animation. */
   surface?: "grouped" | "separated";
-  /** Indicator: `chevron` (▾ rotates 180°, default) or `plus` (a `+` that rotates 45° → `×` on open). */
   indicator?: "chevron" | "plus";
-  /** Per-item style (applied to each item's card). Generic; e.g. for an incremental-delay (stagger)
-   *  reveal built by the section — Accordion itself knows nothing about the "reveal". */
   itemStyle?: (index: number) => React.CSSProperties;
 }
 
-export const accordionSpecs = {
-  trigger: {
-    shared: "w-full px-4 py-3 text-body font-normal text-content-primary",
-    hover: "hover:bg-surface-subtle transition-colors",
-  },
-  container: {
-    shared:
-      "rounded-md border border-border-strong overflow-hidden bg-surface-primary",
-    divider: "divide-y divide-border-default",
-  },
-  icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open (duration-200)",
-  content: "px-4 pt-3 pb-4",
-  animation: {
-    style: "CSS grid-template-rows 0fr/1fr transition (Radix UI pattern)",
-    duration: "200ms ease-out",
-    technique: "Content always mounted, height controlled by grid row sizing",
-  },
+// The old per-variant trigger classes, concatenated inline (the pre-tv "language").
+const triggerStyles = {
+  default: "text-body font-normal text-content-primary",
+  uppercase: "text-body font-normal uppercase text-content-primary",
 };
 
-// Trigger variant axis extracted to tv (was inline concat with `triggerStyles[variant]`). The trigger
-// color/typography doesn't collide with the base layout → twMerge:false keeps the class set faithful (DS convention).
-// `uppercase`: IDENTICAL to default (same typography, weight and size) — the ONLY difference is UPPERCASE.
-const TRIGGER_BASE =
-  "flex w-full items-center justify-between px-4 py-3 transition-colors hover:bg-surface-subtle";
-export const accordionTrigger = tv(
-  {
-    base: TRIGGER_BASE,
-    variants: {
-      variant: {
-        default: "text-body font-normal text-content-primary",
-        uppercase: "text-body font-normal uppercase text-content-primary",
-      },
-    },
-    defaultVariants: { variant: "default" },
-  },
-  { twMerge: false },
-);
-
-export default function Accordion({
+export default function AccordionOld({
   items,
   className = "",
   defaultOpen,
@@ -78,8 +42,6 @@ export default function Accordion({
   const [openIndex, setOpenIndex] = useState<number | null>(
     defaultOpen ?? null,
   );
-  // ECO-198: stable base for the disclosure ARIA wiring (trigger ↔ panel), unique per instance.
-  const baseId = useId();
 
   const toggle = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
@@ -101,12 +63,8 @@ export default function Accordion({
         return (
           <div key={i} className={itemClass} style={itemStyle?.(i)}>
             <button
-              type="button"
               onClick={() => toggle(i)}
-              className={accordionTrigger({ variant })}
-              id={`${baseId}-trigger-${i}`}
-              aria-expanded={isOpen}
-              aria-controls={`${baseId}-panel-${i}`}
+              className={`flex w-full items-center justify-between px-4 py-3 ${triggerStyles[variant]} transition-colors hover:bg-surface-subtle`}
             >
               {item.title}
               {indicator === "plus" ? (
@@ -124,19 +82,12 @@ export default function Accordion({
               )}
             </button>
             <div
-              id={`${baseId}-panel-${i}`}
-              role="region"
-              aria-labelledby={`${baseId}-trigger-${i}`}
               className={`grid transition-[grid-template-rows] duration-200 ease-out ${
                 isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
               }`}
             >
               <div className="overflow-hidden">
-                {/* ECO-141: the answer is copyable CONTENT → select-text (a bare string in this <div> would
-                    inherit user-select:none from the body). The trigger (button) stays non-selectable. */}
-                <div className="select-text px-4 pt-3 pb-4">
-                  {item.children}
-                </div>
+                <div className="select-text px-4 pt-3 pb-4">{item.children}</div>
               </div>
             </div>
           </div>
@@ -153,27 +104,21 @@ interface SingleAccordionProps {
   defaultOpen?: boolean;
 }
 
-export function SingleAccordion({
+export function SingleAccordionOld({
   title,
   children,
   className = "",
   defaultOpen = false,
 }: SingleAccordionProps) {
   const [open, setOpen] = useState(defaultOpen);
-  // ECO-198: stable base for the disclosure ARIA wiring (trigger ↔ panel), unique per instance.
-  const id = useId();
 
   return (
     <div
       className={`rounded-md border border-border-strong overflow-hidden bg-surface-primary ${className}`}
     >
       <button
-        type="button"
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between px-4 py-3 text-body font-normal text-content-primary transition-colors hover:bg-surface-subtle"
-        id={`${id}-trigger`}
-        aria-expanded={open}
-        aria-controls={`${id}-panel`}
       >
         {title}
         <Icon
@@ -183,15 +128,11 @@ export function SingleAccordion({
         />
       </button>
       <div
-        id={`${id}-panel`}
-        role="region"
-        aria-labelledby={`${id}-trigger`}
         className={`grid transition-[grid-template-rows] duration-200 ease-out ${
           open ? "grid-rows-[1fr]" : "grid-rows-[0fr]"
         }`}
       >
         <div className="overflow-hidden">
-          {/* ECO-141: answer = copyable CONTENT → select-text. */}
           <div className="select-text px-4 pt-3 pb-4">{children}</div>
         </div>
       </div>

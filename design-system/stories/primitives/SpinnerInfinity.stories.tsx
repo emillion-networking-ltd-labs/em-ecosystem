@@ -3,7 +3,7 @@ import SpinnerInfinity from "@/components/ui/SpinnerInfinity";
 import { DemoCard, Sizes } from "../_kit";
 
 const meta = {
-  title: "Primitives/SpinnerInfinity",
+  title: "Migration/SpinnerInfinity",
   component: SpinnerInfinity,
   tags: ["autodocs"],
   args: { size: "md" },

@@ -1,7 +1,10 @@
 {
   "total": 84,
   "onIdiom": 14,
-  "classified": 1,
+  "classified": 2,
+  "inMigration": 50,
+  "certified": 1,
+  "readyToPromote": 0,
   "tvCandidates": [
     {
       "name": "Blob",
@@ -12,7 +15,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Decoration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "BlurFade",
@@ -23,7 +36,17 @@
         "variant"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Card",
@@ -34,7 +57,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Checkbox",
@@ -47,7 +80,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "ConfirmModal",
@@ -62,7 +105,17 @@
         "Button",
         "IconButton"
       ],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Container",
@@ -73,7 +126,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Layout",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "CopyField",
@@ -87,7 +150,17 @@
         "Icon",
         "Tooltip"
       ],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "DateInput",
@@ -101,7 +174,17 @@
         "Calendar",
         "Icon"
       ],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Icon",
@@ -112,7 +195,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SegmentedControl",
@@ -126,7 +219,17 @@
       "composes": [
         "Button"
       ],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SpeedometerChart",
@@ -137,7 +240,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Charts",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SpinnerCircle",
@@ -148,7 +261,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SpinnerInfinity",
@@ -159,7 +282,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Toggle",
@@ -170,7 +303,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     }
   ],
   "missingPrimitives": [
@@ -182,7 +325,7 @@
   "rows": [
     {
       "name": "Accordion",
-      "role": null,
+      "role": "primitive",
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -191,7 +334,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Primitives",
+      "dod": {
+        "A": true,
+        "B": true,
+        "F": true,
+        "Q": true,
+        "O": true
+      },
+      "certified": true,
+      "certifiable": true
     },
     {
       "name": "AlertBox",
@@ -202,7 +355,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "AnimatedGradientText",
@@ -211,7 +374,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "AnimatedTestimonials",
@@ -222,7 +395,17 @@
       "composes": [
         "IconButton"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "AuroraBackground",
@@ -231,7 +414,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Avatar",
@@ -244,7 +437,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": true,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Badge",
@@ -256,7 +459,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": true,
+        "B": true,
+        "F": true,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "BeforeAfterSlider",
@@ -265,7 +478,17 @@
       "hasSpecs": true,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "BentoGrid",
@@ -274,7 +497,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Blob",
@@ -285,7 +518,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Decoration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "BlurFade",
@@ -296,7 +539,17 @@
         "variant"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Breadcrumbs",
@@ -307,7 +560,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Button",
@@ -322,7 +585,17 @@
       "composes": [
         "SpinnerInfinity"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": true,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Calendar",
@@ -333,7 +606,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Card",
@@ -344,7 +627,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "CardHoverEffect",
@@ -355,7 +648,17 @@
       "composes": [
         "Card"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "ChartCard",
@@ -364,7 +667,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Checkbox",
@@ -377,7 +690,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Cluster",
@@ -386,7 +709,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Layout",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "ConfirmModal",
@@ -401,7 +734,17 @@
         "Button",
         "IconButton"
       ],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Container",
@@ -412,7 +755,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Layout",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "CopyCell",
@@ -421,7 +774,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "CopyField",
@@ -435,7 +798,17 @@
         "Icon",
         "Tooltip"
       ],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "CountdownTimer",
@@ -447,7 +820,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "DataTable",
@@ -456,7 +839,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "DateInput",
@@ -470,7 +863,17 @@
         "Calendar",
         "Icon"
       ],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Divider",
@@ -479,7 +882,17 @@
       "hasSpecs": true,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "DotPattern",
@@ -488,7 +901,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Decoration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "DoughnutChart",
@@ -499,7 +922,17 @@
       "composes": [
         "ChartCard"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Charts",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "EmailSelector",
@@ -513,7 +946,17 @@
         "Icon",
         "Tooltip"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "EmptyState",
@@ -526,7 +969,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "FlipWords",
@@ -535,7 +988,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "FormField",
@@ -546,7 +1009,17 @@
       "composes": [
         "InlineError"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "GradientBackdrop",
@@ -557,7 +1030,17 @@
         "variant"
       ],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Decoration",
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Grid",
@@ -566,7 +1049,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Layout",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "GridPattern",
@@ -575,7 +1068,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Decoration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Icon",
@@ -586,7 +1089,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "IconBadge",
@@ -600,7 +1113,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": null,
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "IconButton",
@@ -617,7 +1140,17 @@
         "SpinnerCircle",
         "Tooltip"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": null,
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": true,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "IdleWarningModal",
@@ -629,7 +1162,17 @@
         "Button",
         "CountdownTimer"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "ImageCropper",
@@ -641,7 +1184,17 @@
         "ConfirmModal",
         "Slider"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "InlineError",
@@ -652,7 +1205,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Input",
@@ -668,7 +1231,17 @@
         "IconButton",
         "SpinnerCircle"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": true,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "InteractiveHoverButton",
@@ -679,7 +1252,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "LanguageSelector",
@@ -692,7 +1275,17 @@
         "Icon",
         "Input"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Marquee",
@@ -701,7 +1294,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Meteors",
@@ -710,7 +1313,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "MetricCard",
@@ -721,7 +1334,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "MfaDigitInput",
@@ -730,7 +1353,17 @@
       "hasSpecs": true,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "NumberTicker",
@@ -739,7 +1372,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Pagination",
@@ -750,7 +1393,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "PulsatingButton",
@@ -759,7 +1412,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "QrCodeCard",
@@ -770,7 +1433,17 @@
       "composes": [
         "CopyField"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "RateLimitBanner",
@@ -782,7 +1455,17 @@
         "CountdownTimer",
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "RecoveryCodesGrid",
@@ -794,7 +1477,17 @@
         "Button",
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Ripple",
@@ -803,7 +1496,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SearchTrigger",
@@ -815,7 +1518,17 @@
         "Badge",
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Section",
@@ -824,7 +1537,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Layout",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SegmentedControl",
@@ -838,7 +1561,17 @@
       "composes": [
         "Button"
       ],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Select",
@@ -852,7 +1585,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SettingRow",
@@ -863,7 +1606,17 @@
       "composes": [
         "IconBadge"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "ShimmerButton",
@@ -872,7 +1625,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SidebarNav",
@@ -886,7 +1649,17 @@
         "Tabs",
         "Tooltip"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Slider",
@@ -895,7 +1668,17 @@
       "hasSpecs": true,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SpeedometerChart",
@@ -906,7 +1689,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Charts",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SpinnerCircle",
@@ -917,7 +1710,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SpinnerInfinity",
@@ -928,7 +1731,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "SpinnerRing",
@@ -937,7 +1750,17 @@
       "hasSpecs": true,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Split",
@@ -946,7 +1769,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Layout",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Spotlight",
@@ -955,7 +1788,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Stack",
@@ -964,7 +1807,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Layout",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "StickyCard",
@@ -975,7 +1828,17 @@
       "composes": [
         "IconButton"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Tabs",
@@ -989,7 +1852,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": true,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Textarea",
@@ -998,7 +1871,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "TextGenerateEffect",
@@ -1007,7 +1890,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "ThemeToggle",
@@ -1019,7 +1912,17 @@
         "IconButton",
         "Tooltip"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Toast",
@@ -1030,7 +1933,17 @@
       "composes": [
         "Icon"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": true,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "ToastContainer",
@@ -1041,7 +1954,17 @@
       "composes": [
         "Toast"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Toggle",
@@ -1052,7 +1975,17 @@
         "size"
       ],
       "composes": [],
-      "tvCandidate": true
+      "tvCandidate": true,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "Tooltip",
@@ -1061,7 +1994,17 @@
       "hasSpecs": true,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "TotalUsersChart",
@@ -1072,7 +2015,17 @@
       "composes": [
         "ChartCard"
       ],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Charts",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "TurnstileWidget",
@@ -1081,7 +2034,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Migration",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "TypingAnimation",
@@ -1090,7 +2053,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": false
+      },
+      "certified": false,
+      "certifiable": false
     },
     {
       "name": "WordRotate",
@@ -1099,7 +2072,17 @@
       "hasSpecs": false,
       "axes": [],
       "composes": [],
-      "tvCandidate": false
+      "tvCandidate": false,
+      "placement": "Marketing",
+      "dod": {
+        "A": false,
+        "B": false,
+        "F": false,
+        "Q": false,
+        "O": true
+      },
+      "certified": false,
+      "certifiable": false
     }
   ]
 }

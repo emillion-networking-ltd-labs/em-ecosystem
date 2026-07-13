@@ -3,7 +3,7 @@ import LanguageSelector from "@/components/ui/LanguageSelector";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/LanguageSelector",
+  title: "Migration/LanguageSelector",
   component: LanguageSelector,
   tags: ["autodocs"],
   args: {},

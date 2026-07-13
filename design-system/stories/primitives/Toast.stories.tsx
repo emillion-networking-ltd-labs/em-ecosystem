@@ -8,7 +8,7 @@ import { DemoCard, Variants } from "../_kit";
 const STAY = 10_000_000;
 
 const meta = {
-  title: "Primitives/Toast",
+  title: "Migration/Toast",
   component: Toast,
   tags: ["autodocs"],
   args: {

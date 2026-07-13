@@ -3,7 +3,7 @@ import EmailSelector from "@/components/ui/EmailSelector";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/EmailSelector",
+  title: "Migration/EmailSelector",
   component: EmailSelector,
   tags: ["autodocs"],
   args: {

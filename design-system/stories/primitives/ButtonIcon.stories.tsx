@@ -15,7 +15,7 @@ import { DemoCard, Variants, Sizes } from "../_kit";
 // Icon-only → always pass aria-label. The playground defaults to `boxed`, the most used in the project.
 // El glyph se pasa con el prop `icon` (el contenedor le impone el tamaño desde la escala: 16px); nunca a mano.
 const meta = {
-  title: "Simple/ButtonIcon",
+  title: "Migration/ButtonIcon",
   component: IconButton,
   tags: ["autodocs"],
   args: {

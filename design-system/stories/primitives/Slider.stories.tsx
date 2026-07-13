@@ -4,7 +4,7 @@ import Slider from "@/components/ui/Slider";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/Slider",
+  title: "Migration/Slider",
   component: Slider,
   tags: ["autodocs"],
   args: {

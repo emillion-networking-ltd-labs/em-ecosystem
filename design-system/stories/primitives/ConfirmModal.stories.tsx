@@ -3,7 +3,7 @@ import ConfirmModal from "@/components/ui/ConfirmModal";
 import Input from "@/components/ui/Input";
 
 const meta = {
-  title: "Primitives/ConfirmModal",
+  title: "Migration/ConfirmModal",
   component: ConfirmModal,
   tags: ["autodocs"],
   // Default = primary (the component's default variant) — a standard confirmation.

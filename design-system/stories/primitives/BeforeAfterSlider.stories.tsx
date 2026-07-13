@@ -11,7 +11,7 @@ const beforeSrc = typeof beforeImg === "string" ? beforeImg : beforeImg.src;
 const afterSrc = typeof afterImg === "string" ? afterImg : afterImg.src;
 
 const meta = {
-  title: "Primitives/BeforeAfterSlider",
+  title: "Migration/BeforeAfterSlider",
   component: BeforeAfterSlider,
   tags: ["autodocs"],
   args: {

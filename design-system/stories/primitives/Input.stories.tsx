@@ -5,7 +5,7 @@ import Icon from "@/components/ui/Icon";
 import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
-  title: "Simple/Input",
+  title: "Migration/Input",
   component: Input,
   tags: ["autodocs"],
   args: {

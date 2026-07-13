@@ -12,7 +12,7 @@ const sample = (
 );
 
 const meta = {
-  title: "Primitives/Card",
+  title: "Migration/Card",
   component: Card,
   tags: ["autodocs"],
   args: { elevated: false, size: "md", children: sample },

@@ -3,7 +3,7 @@ import CountdownTimer from "@/components/ui/CountdownTimer";
 import { DemoCard, Variants, Sizes } from "../_kit";
 
 const meta = {
-  title: "Primitives/CountdownTimer",
+  title: "Migration/CountdownTimer",
   component: CountdownTimer,
   tags: ["autodocs"],
   args: { seconds: 120, variant: "error", size: "sm" },

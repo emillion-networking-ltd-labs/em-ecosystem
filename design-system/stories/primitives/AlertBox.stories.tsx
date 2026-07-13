@@ -3,7 +3,7 @@ import AlertBox from "@/components/ui/AlertBox";
 import { DemoCard, Variants } from "../_kit";
 
 const meta = {
-  title: "Primitives/AlertBox",
+  title: "Migration/AlertBox",
   component: AlertBox,
   tags: ["autodocs"],
   args: { variant: "info", children: "Your session expires in 5 minutes." },

@@ -10,7 +10,7 @@ import { DemoCard } from "../_kit";
 // real behavior: when stuck, the corners touching the edge go square (top → rounded-b only;
 // bottom → rounded-t only), detected with a sentinel + IntersectionObserver like the component.
 const meta = {
-  title: "Primitives/StickyCard",
+  title: "Migration/StickyCard",
   component: StickyCard,
   tags: ["autodocs"],
 } satisfies Meta<typeof StickyCard>;

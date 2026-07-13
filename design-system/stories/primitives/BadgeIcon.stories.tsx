@@ -24,7 +24,7 @@ const ICONS: Record<IconBadgeVariant, LucideIcon> = {
 const ICON_PX = { sm: 16, md: 24, lg: 32 } as const;
 
 const meta = {
-  title: "Primitives/BadgeIcon",
+  title: "Migration/BadgeIcon",
   component: IconBadge,
   tags: ["autodocs"],
   args: { variant: "default", size: "sm" },

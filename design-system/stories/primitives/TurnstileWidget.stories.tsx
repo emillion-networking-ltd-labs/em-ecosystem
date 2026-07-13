@@ -5,7 +5,7 @@ import { DemoCard } from "../_kit";
 // App-coupled: uses useTheme → @/context/ThemeContext (mock in the catalog). The real Cloudflare
 // Turnstile widget needs a site-key from the environment; here we catalog the container.
 const meta = {
-  title: "Primitives/TurnstileWidget",
+  title: "Migration/TurnstileWidget",
   component: TurnstileWidget,
   tags: ["autodocs"],
   args: { onToken: () => {} },

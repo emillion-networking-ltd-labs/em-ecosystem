@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import IdleWarningModal from "@/components/ui/IdleWarningModal";
 
 const meta = {
-  title: "Primitives/IdleWarningModal",
+  title: "Migration/IdleWarningModal",
   component: IdleWarningModal,
   tags: ["autodocs"],
   args: {

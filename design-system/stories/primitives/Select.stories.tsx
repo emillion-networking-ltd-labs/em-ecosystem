@@ -19,7 +19,7 @@ const optionsWithIcons = [
 ];
 
 const meta = {
-  title: "Primitives/Select",
+  title: "Migration/Select",
   component: Select,
   tags: ["autodocs"],
   args: {

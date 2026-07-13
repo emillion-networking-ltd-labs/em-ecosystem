@@ -9,7 +9,7 @@ import emIcon from "../assets/em-icon.png";
 const AVATAR_IMG = typeof emIcon === "string" ? emIcon : emIcon.src;
 
 const meta = {
-  title: "Simple/Avatar",
+  title: "Migration/Avatar",
   component: Avatar,
   tags: ["autodocs"],
   args: { name: "Ada Lovelace", size: "md" },

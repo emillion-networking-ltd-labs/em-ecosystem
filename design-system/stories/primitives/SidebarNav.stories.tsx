@@ -162,7 +162,7 @@ function InteractiveSidebar({
 }
 
 const meta = {
-  title: "Primitives/SidebarNav",
+  title: "Migration/SidebarNav",
   component: SidebarNav,
   tags: ["autodocs"],
   args: { sections: buildSections("#audit") },

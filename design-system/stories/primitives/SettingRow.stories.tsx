@@ -6,7 +6,7 @@ import Toggle from "@/components/ui/Toggle";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/SettingRow",
+  title: "Migration/SettingRow",
   component: SettingRow,
   tags: ["autodocs"],
   args: {

@@ -120,7 +120,7 @@ function ScrollDotsWrapper({
 }
 
 const meta = {
-  title: "Simple/Tabs",
+  title: "Migration/Tabs",
   component: Tabs,
   tags: ["autodocs"],
   argTypes: {

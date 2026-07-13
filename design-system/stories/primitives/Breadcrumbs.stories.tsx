@@ -3,7 +3,7 @@ import Breadcrumbs from "@/components/ui/Breadcrumbs";
 import { DemoCard } from "../_kit";
 
 const meta = {
-  title: "Primitives/Breadcrumbs",
+  title: "Migration/Breadcrumbs",
   component: Breadcrumbs,
   tags: ["autodocs"],
   args: {
