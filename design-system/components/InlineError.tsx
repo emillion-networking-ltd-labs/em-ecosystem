@@ -1,11 +1,11 @@
 "use client";
 
-import { AlertTriangle } from "lucide-react";
 import Icon from "./Icon";
+import { STATUS_ICONS } from "@/lib/statusIcons";
 
 export const inlineErrorSpecs = {
   container: "flex items-start gap-2",
-  icon: "AlertTriangle 16px shrink-0 mt-1 text-error (aligned to first line)",
+  icon: "CircleX 16px shrink-0 mt-1 text-error (aligned to first line)",
   text: "flex-1 text-caption leading-6 text-error",
 };
 
@@ -22,7 +22,7 @@ export default function InlineError({
   return (
     <div role="alert" className={`flex items-start gap-2 ${className}`}>
       <Icon
-        icon={AlertTriangle}
+        icon={STATUS_ICONS.error}
         size="md"
         className="mt-1 shrink-0 text-error"
       />

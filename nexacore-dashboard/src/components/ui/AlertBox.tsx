@@ -1,18 +1,10 @@
 "use client";
 
 import { tv } from "tailwind-variants";
-import { AlertTriangle, CircleX, Info, CircleCheck } from "lucide-react";
 import Icon from "./Icon";
+import { STATUS_ICONS } from "@/lib/statusIcons";
 
 type AlertBoxVariant = "warning" | "error" | "info" | "success";
-
-// Glyph por variante — dato NO-clase (icono lucide): vive fuera del tv (el tv sólo maneja las clases CSS).
-const VARIANT_ICON = {
-  warning: AlertTriangle,
-  error: CircleX,
-  info: Info,
-  success: CircleCheck,
-} as const;
 
 // Varios elementos varían (contenedor color/borde + icono color) → `slots`. `text` es estático pero se declara
 // slot para documentar la composición. Raw-concat previo → twMerge:false (conserva el conjunto de clases fiel).
@@ -52,7 +44,7 @@ export const alertBox = tv(
 // Superficie de docs (single-source): slots + variante → borde/bg + glyph/color (las clases viven en el tv).
 export const alertBoxSpecs = {
   variants: {
-    warning: "border-warning-border bg-warning-bg — AlertTriangle text-warning",
+    warning: "border-warning-border bg-warning-bg — TriangleAlert text-warning",
     error: "border-error-border bg-error-bg — CircleX text-error",
     info: "border-info-border bg-info-bg — Info text-info",
     success: "border-success-border bg-success-bg — CircleCheck text-success",
@@ -75,7 +67,7 @@ export default function AlertBox({
   children,
   className = "",
 }: AlertBoxProps) {
-  const Glyph = VARIANT_ICON[variant];
+  const Glyph = STATUS_ICONS[variant];
   const { container, icon, text } = alertBox({ variant });
 
   return (

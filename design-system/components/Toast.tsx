@@ -3,8 +3,9 @@
 import { useEffect, useCallback } from "react";
 import { motion } from "motion/react";
 import { tv } from "tailwind-variants";
-import { TriangleAlert, CircleCheck, CircleAlert, Info, X } from "lucide-react";
+import { X } from "lucide-react";
 import Icon from "./Icon";
+import { STATUS_ICONS } from "@/lib/statusIcons";
 
 type ToastVariant = "error" | "success" | "warning" | "info";
 
@@ -16,14 +17,6 @@ type ToastProps = {
   duration?: number;
   onClose: (id: number) => void;
 };
-
-// Glyph por variante — dato NO-clase (icono lucide): vive fuera del tv (el tv sólo maneja las clases CSS).
-const VARIANT_ICON = {
-  error: TriangleAlert,
-  success: CircleCheck,
-  warning: CircleAlert,
-  info: Info,
-} as const;
 
 // Un solo elemento con variantes (el color del icono) → `base`. Raw-concat previo → twMerge:false (conserva
 // el conjunto de clases idéntico: no reordena ni dedupe).
@@ -45,9 +38,9 @@ export const toast = tv(
 // Superficie de docs (single-source): variante → glyph + color (las clases viven en el tv).
 export const toastSpecs = {
   variants: {
-    error: "TriangleAlert — text-error",
+    error: "CircleX — text-error",
     success: "CircleCheck — text-success",
-    warning: "CircleAlert — text-warning",
+    warning: "TriangleAlert — text-warning",
     info: "Info — text-info",
   },
 } as const;
@@ -62,7 +55,7 @@ export default function Toast({
   duration,
   onClose,
 }: ToastProps) {
-  const Glyph = VARIANT_ICON[variant];
+  const Glyph = STATUS_ICONS[variant];
 
   const dismiss = useCallback(() => {
     onClose(id);

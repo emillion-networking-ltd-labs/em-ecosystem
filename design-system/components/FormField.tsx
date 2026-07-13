@@ -8,7 +8,7 @@ export const formFieldSpecs = {
   required: "ml-0.5 text-error (*)",
   children:
     "Any form control: Input, Select, EmailSelector, Toggle, Checkbox, etc.",
-  error: "InlineError component (AlertTriangle 16px + text-caption text-error)",
+  error: "InlineError component (CircleX 16px + text-caption text-error)",
 };
 
 interface FormFieldProps {

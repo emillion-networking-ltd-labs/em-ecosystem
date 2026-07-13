@@ -1,9 +1,10 @@
 "use client";
 
-import { AlertTriangle, Inbox } from "lucide-react";
+import { Inbox } from "lucide-react";
 import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";
 import Icon from "./Icon";
+import { STATUS_ICONS } from "@/lib/statusIcons";
 
 // Multi-slot (container / icon / title / description). El eje `variant` (antes ternario inline) sólo tiñe el
 // color del icono; el resto de slots es fijo. Raw-concat previo → twMerge:false (conserva el conjunto fiel).
@@ -32,7 +33,7 @@ export const emptyStateSpecs = {
   container: "flex flex-col items-center gap-3 py-12",
   "icon (variant=default)":
     "2xl (40px) text-content-primary/30 (default: Inbox)",
-  "icon (variant=error)": "2xl (40px) text-error (default: AlertTriangle)",
+  "icon (variant=error)": "2xl (40px) text-error (default: CircleX)",
   title: "text-body font-semibold text-content-primary",
   description: "text-caption text-content-secondary text-center",
   action: "Optional ReactNode (Button, Link, etc.)",
@@ -57,7 +58,7 @@ export default function EmptyState({
 }: EmptyStateProps) {
   const isError = variant === "error";
   const defaultIcon = isError ? (
-    <Icon icon={AlertTriangle} size="2xl" />
+    <Icon icon={STATUS_ICONS.error} size="2xl" />
   ) : (
     <Icon icon={Inbox} size="2xl" />
   );
