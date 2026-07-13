@@ -121,51 +121,62 @@ Por qué NO el pipeline ahora: sólo hay **2 consumidores** de copia literal (da
 generador DTCG→CSS emitiría un CSS byte-idéntico a un `cp` y su valor (propagación) ya lo dan el patrón TW v4
 (intra-DS) + el gate de drift (consumidores). Adoptarlo hoy es el over-engineering que prohíbe la kill-criterion.
 
-### AMPLIACIÓN ECO-200 — el sistema de tokens completo (conclusión tras el panel adversarial)
+### AMPLIACIÓN ECO-200 — el sistema de tokens completo + modelo de modificabilidad (conclusión: panel adversarial + refinamiento con el operador)
 
-**Recomendación: Opción 4 (in-place) AFINADA por el panel — quirúrgica, NO "tokeniza todo".** Los kill-criteria:
-KC1 no dispara (no es over-engineering en conjunto — los números son reales pero ~90% ya exentos por la línea);
-KC4 **refutado** (las nuevas dimensiones propagan gratis por copy-by-value; precedente en producción: typography
-ECO-193 + motion ECO-194 añadidas post-ADR-027 igual); KC2 no dispara (la línea es máquina-checkable) **con un
-prerequisito**; **KC3 dispara PARCIAL** (border-width y shadow como ESCALAS nuevas = over-reach). En concreto:
+**Recomendación: Opción 4 (in-place), AFINADA por el panel y REFINADA en revisión con el operador — quirúrgica, con
+un MODELO DE MODIFICABILIDAD DE 4 CATEGORÍAS que ENMIENDA la Norma C binaria (ADR-030).** Kill-criteria: KC1 no
+dispara; **KC4 refutado** (las dimensiones nuevas propagan gratis por copy-by-value; precedente typography ECO-193 +
+motion ECO-194 post-ADR-027); KC2 no dispara (con prerequisito); **KC3 re-encuadrado** (border/shadow no son deuda
+one-off a hand-fix, sino ejes de MARCA a futuro — ver categoría 1).
 
-1. **Atenuación → el token semántico que YA existe (EL barrido real).** Los ~180 `/NN` (`/75`×45, `/50`×15…) son
-   la deuda sistémica genuina (19 ficheros). **Diagnóstico corregido por el panel:** `/75` y `/50` NO faltan como
-   token — son `content-secondary`/`content-tertiary` re-derivados a mano (tokens.css:290-293). El arreglo = **usar
-   el token con nombre**, retirar el alpha ad-hoc. **Trampa cross-tema:** `content-secondary` = 0.75 en dark pero
-   0.65 en light → el mapeo NO es mecánico `/75→secondary`; se decide por rol de uso, no por número. Separar aparte
-   los **overlays/hairlines** (`bg-white/8`, `border-current/20`) — son otra clase (composición sobre superficie),
-   no atenuación de content. Nada de `/NN` sobre un token YA-alpha (alpha-sobre-alpha que el gate AA de la Fase 1
-   no puede razonar).
-2. **Arreglar el agujero `_rgba` de `check-raw-color`** (el `\b` no caza `_rgba(` → color crudo se cuela en shadows
+**El modelo — 4 categorías (enmienda la Norma C, que era binaria color/estructura):**
+
+| # | Categoría | Dimensiones | ¿Satélite re-apunta? | Tokenizado | Enforcement |
+|---|-----------|-------------|----------------------|------------|-------------|
+| 1 | **MARCA (firma)** | color, **radius, border-width, shadow** | **SÍ** (declarado, por-scope `[data-brand]`) | escalas | `check-brand-contrast` + `check-drift` |
+| 2 | **ESTRUCTURA-DS** | **spacing INTERIOR** de pieza, **medidas INTRÍNSECAS** de pieza (tamaños de diálogo/componente), atenuación (content-*), typography, motion | **NO** (el DS gobierna; cambia central y propaga por copia) | escalas | gate por dimensión + ratchet + escape |
+| 3 | **ESCAPE-HATCH** | layout/composición genuinamente one-off, spacing ENTRE piezas | n/a (arbitrario permitido, declarado) | no | no gateado (declarado legítimo) |
+| 4 | **ESTRUCTURA PURA** | markup, ARIA, lógica de layout | NO | n/a (no es token) | Norma C / `check-region-integrity` |
+
+**Por dimensión + los pasos concretos:**
+
+1. **Atenuación (TODO alpha ad-hoc, por ROL) → los tokens `content-*` que YA existen (EL barrido real).** Los ~183
+   `/NN` (`/75`×45, `/50`×15, y TODO el rango `/30 /20 /16 /14 /5 /4 /2 /1` — **no solo `/50,/75`**) son la deuda
+   sistémica grande (19+ ficheros). **Diagnóstico corregido:** NO faltan tokens — son `content-secondary`/`tertiary`/
+   `placeholder`/`disabled` re-derivados a mano (tokens.css:290-303). Arreglo = **usar el token de su ROL** (no swap
+   mecánico `/75→secondary`: trampa cross-tema light 0.65 / dark 0.75, VALIDADO en Breadcrumbs.tsx:21). Clases
+   APARTE: **overlays** (`bg-white/8`) y **hairlines** (`border-current/20`) — composición sobre superficie, no
+   atenuación de content (decisión menor: ¿escala de overlay tokenizada?). **El gate caza el PATRÓN** (`/NN` sobre
+   `content-*`), no valores concretos → cubre "y si hay más casos". Categoría 2.
+2. **Arreglar el agujero `_rgba` de `check-raw-color`** (el `\b` no caza `_rgba(` → color CRUDO se cuela en shadows
    arbitrarios, Slider.tsx:111; `color-mix()` tampoco). Bug ACTIVO — va primero.
-3. **border-width y shadow: NO escalas de token nuevas (over-reach, KC3).** Son constantes de UN componente
-   (SpinnerCircle `border-[1.5px/3px]`; Slider la sombra del thumb) — no gradúan a token de sistema (violarían la
-   propia regla "el repetido gradúa; el one-off se queda"). ADR-031 las enruta al **techo** (VRT/censo), no a un
-   gate. → **hand-fix** las constantes + **gate lock-at-0** preventivo (como motion/animation a baseline 0). No se
-   autora escala de shadow/border hasta el mismo listón ≥3-4 consumidores que difiere el pipeline.
-4. **La LÍNEA de enforcement, RECONCILIADA con la Norma C (ADR-030) — la corrección clave del panel.** Las
-   dimensiones estructurales (shadow/radio/grosor/espaciado) YA están gobernadas por Norma C como **estructura =
-   BLOQUEADA** (solo el color se re-apunta por satélite; DEFINITION-OF-DONE.md:63-68). Por tanto los tokens de
-   estas dimensiones son **fuente única BLOQUEADA que el DS gobierna** — un satélite NO los re-apunta (coherente
-   con Norma C, no la contradice). El gate por-dimensión caza arbitrario en dimensiones ESTRICTAS en piezas CORE,
-   en **ratchet + escape** (para el legit-en-primitivo sin token, p.ej. `border-[1.5px]`); marketing/decorativo
-   permitido.
-5. **Prerequisito de la línea: un eje "core vs decorativo" máquina-legible.** El panel probó que el gate no puede
-   distinguir `rounded-[3px]` (deuda core) de `rounded-[9999px]` (marketing legítimo) por regex — solo por QUÉ
-   componente. El `@ds-role: primitive|composite` es el eje EQUIVOCADO (+ 82/84 vacío). → declarar un eje
-   `core|decorative` (extender `@ds-role` o un `category` en el registry). El juicio es **O(84 piezas), una vez por
-   pieza, NO O(satélites)** → escala; los satélites consumen lo ya-etiquetado, no re-clasifican.
-6. **Sizing/width = su propio eje, escape-hatch DECLARADO.** Es la superficie arbitraria más grande (~228
-   `w-/h-/max-w-[px]`, 0 tokens) pero son layouts one-off legítimos → **NO tokenizar**; declararlo escape-hatch
-   explícito (no fundirlo en spacing, que sí tiene escala).
-7. **Ejecución (la ejecuta design-system-quality):** entra en el runbook `DEFINITION-OF-DONE.md` como paso de
-   tokenización + los gates nuevos; se barre en **tandas** (ratchet, no big-bang); **drena la deuda ratchet ya
-   existente** (typography 38, html-primitives 24 — misma clase de problema). La distribución NO cambia (copy-by-value).
+3. **radius, border-width, shadow = escalas de MARCA (categoría 1), satélite-modificables.** REFINADO en revisión:
+   NO son "sin escala / hand-fix" (mi versión post-panel) — son **firmas de marca plausibles** (redondo vs afilado;
+   bordes finos vs gruesos; estilos de elevación) que otros satélites querrán variar por diseño. → escalas pequeñas
+   (radius ya tiene 9; border-width `thin/base/thick`; shadow ~4-6 niveles) **re-apuntables por `[data-brand]`**,
+   como el color. Los valores actuales (SpinnerCircle `border-[1.5px]`, Slider shadow) usan la escala. *(El panel
+   las juzgó por deuda ACTUAL — 1 componente → over-engineering; el NORTE las juzga por eje de MARCA a futuro para
+   N satélites → gana el eje de marca. Reversa consciente del hallazgo del panel, con su motivo nombrado.)*
+4. **Spacing PARTIDO:** **interior de pieza** (`p-4`, gaps internos) = **estructura-DS, tokenizada + bloqueada**
+   (escala spacing) → propaga por copia; un `p-[13px]` interno = deuda. **Entre piezas** (márgenes/gaps de
+   layout/sección) = **escape-hatch** (composición, lo decide el consumidor).
+5. **Medidas INTRÍNSECAS de pieza = tokenizadas (estructura-DS).** REFINADO: los anchos que definen el TAMAÑO de una
+   pieza (diálogos: `ConfirmModal max-w-[390|480|600|720]` = una escala sm/md/lg/xl; tamaños de componente) → **a
+   token** (parte del diseño de la pieza, propaga, puede variar central). El escape-hatch se estrecha a **layout/
+   composición genuinamente one-off** (un contenedor puntual de una sección). El barrido clasifica por-caso al
+   reconstruir: ¿medida de pieza (→token) o layout one-off (→escape)?
+6. **Enforcement: gate por dimensión + ratchet + escape,** con el **eje `core|decorative` máquina-legible como
+   PREREQUISITO.** El gate no distingue `rounded-[3px]` (deuda core) de `rounded-[9999px]` (marketing legítimo) por
+   regex — solo por QUÉ componente. El `@ds-role: primitive|composite` es el eje EQUIVOCADO (+ 82/84 vacío). →
+   declarar `core|decorative` (extender `@ds-role` o `category` en el registry). Estricto en core, permisivo en
+   decorativo. Juicio **O(84 piezas), una vez por pieza, NO O(satélites)** → escala.
+7. **Ejecución (design-system-quality):** entra en el runbook `DEFINITION-OF-DONE.md` como paso de tokenización +
+   los gates; se barre en **tandas** (ratchet); **drena la deuda ratchet ya existente** (typography 38, html 24).
 
-**Camino medio futuro (nombrado, no ahora):** autorar los tokens como JSON **DTCG-shaped (solo formato, portable)**
-SIN montar el generador — evita el lock-in; el pipeline completo se difiere al mismo listón ≥3-4 consumidores /
-cross-platform que el resto.
+**Distribución: sin cambios** (copy-by-value; los tokens nuevos —incluidas las escalas de MARCA— propagan gratis y
+overridean por-var en `[data-brand]`, exactamente como el color; KC4 refutado). **Camino medio futuro (no ahora):**
+autorar los tokens como JSON DTCG-shaped (solo formato, portable) SIN generador; el pipeline se difiere a ≥3-4
+consumidores / cross-platform.
 
 ## Non-goals
 - No rediseñar la PALETA de marca ni elegir los colores de NexaCore (el accent sigue placeholder; eso es
@@ -177,26 +188,34 @@ cross-platform que el resto.
   Revisitar con ≥3-4 consumidores o si se necesita salida cross-platform.
 - No cubrir 1.4.1 (uso del color / daltonismo) ni forced-colors/High-Contrast en esta estrategia — quedan
   nombrados como deuda de accesibilidad aparte (el contraste AA no los cubre).
-- **(ECO-200) No autorar escalas de token nuevas de border-width ni shadow** — son constantes de un solo
-  componente (SpinnerCircle, Slider) → hand-fix + gate lock-at-0 (techo, ADR-031), NO una escala. Revisitar al
-  mismo listón ≥3-4 consumidores.
-- **(ECO-200) No tokenizar sizing/width** (~228 arbitrarios `w-/h-/max-w-[px]`) — son layouts one-off legítimos →
-  escape-hatch declarado (no fundir en spacing).
-- **(ECO-200) Las dimensiones estructurales nuevas NO son re-apuntables por satélite** (shadow/radio/grosor/
-  espaciado): Norma C (ADR-030) las mantiene BLOQUEADAS; solo el color se re-apunta.
+- **(ECO-200) NO re-plataformar** — sin DTCG/generador (Style Dictionary/Terrazzo); el formato-DTCG-JSON (solo
+  formato, sin pipeline) es opcional futuro a ≥3-4 consumidores / cross-platform.
+- **(ECO-200) NO tokenizar el layout/composición genuinamente one-off ni el spacing ENTRE piezas** — es la
+  categoría 3 (escape-hatch declarado); arbitrario permitido y legítimo ahí, no marcado como deuda.
+- **(ECO-200) NO tokenizar por tokenizar** — solo lo que es firma de MARCA (cat.1), estructura-DS que propaga
+  (cat.2: spacing interior, medidas de pieza, atenuación, typo, motion), o medida intrínseca de pieza. Lo
+  genuinamente one-off se queda arbitrario-declarado (evita el over-engineering que rechaza la kill-criterion).
 
 ## Decisions
 <!-- se registrará como ADR al aprobar (merge): emkeel-governance/adr/0XX-design-tokens-architecture.md -->
 
-**(ECO-200 — a FIJAR por el operador en el merge; enmienda ADR-027, coordina con ADR-030/ADR-031):**
+**(ECO-200 — a FIJAR por el operador en el merge; enmienda ADR-027, ENMIENDA Norma C/ADR-030, coordina con ADR-031):**
 - El norte `design-tokens` cubre **TODO el sistema de tokens**, no solo color; la **LÍNEA** estricto-token vs
   arbitrario-justificado es por **dimensión** + por **clase de componente** (core vs decorativo), gateada por ratchet.
-- **Reconciliación con Norma C (ADR-030) — la decisión de norte del operador:** los tokens de dimensión ESTRUCTURAL
-  (shadow/radio/grosor/espaciado) son fuente única **BLOQUEADA** (no satélite-overridable; solo el color se re-apunta).
-- **Prerequisito:** un eje `core|decorative` máquina-legible (extender `@ds-role` o `category` en el registry).
-- **Atenuación** = usar los tokens `content-*` semánticos que YA existen (no tokens de opacidad nuevos); separar
-  overlays/hairlines; cuidar la trampa cross-tema (0.65 light / 0.75 dark).
-- **border-width/shadow** = hand-fix + gate lock-at-0 (no escalas). **Sizing** = escape-hatch declarado.
+- **MODELO DE MODIFICABILIDAD DE 4 CATEGORÍAS (enmienda la Norma C binaria — decisión de norte del operador):**
+  - **1. MARCA** (el satélite re-apunta por `[data-brand]`, declarado): **color, radius, border-width, shadow**.
+  - **2. ESTRUCTURA-DS** (bloqueada, tokenizada, propaga por copia; el DS la gobierna): **spacing INTERIOR** de pieza,
+    **medidas INTRÍNSECAS** de pieza (tamaños de diálogo/componente), **atenuación** (`content-*`), typography, motion.
+  - **3. ESCAPE-HATCH** (arbitrario permitido y declarado): layout/composición one-off, spacing ENTRE piezas.
+  - **4. ESTRUCTURA PURA** (bloqueada, no-token): markup, ARIA (Norma C / `check-region-integrity`).
+- **Atenuación** (TODO alpha ad-hoc por ROL) = usar los tokens `content-*` que YA existen; overlays/hairlines aparte;
+  cuidar la trampa cross-tema (0.65 light / 0.75 dark); el gate caza el patrón `/NN`, no valores.
+- **radius / border-width / shadow** = **escalas pequeñas de MARCA** (satélite-modificables), NO hand-fix — son
+  firmas de marca a futuro para N satélites.
+- **Medidas intrínsecas de pieza** (diálogos, tamaños) = **tokenizar** (estructura-DS); el layout one-off = escape.
+- **Eje `core|decorative`** máquina-legible = PREREQUISITO del gate (el `@ds-role` actual es el eje equivocado).
 - **Arreglar el agujero `_rgba`** de `check-raw-color` (color crudo escapando en shadows arbitrarios).
-- **Distribución sin cambios** (copy-by-value; KC4 refutado); DTCG diferido, formato-DTCG opcional futuro.
-- **Ejecución** en `DEFINITION-OF-DONE.md` (design-system-quality), en tandas + ratchet, drenando la deuda existente.
+- **Distribución sin cambios** (copy-by-value; los tokens de MARCA overridean por-var como el color; KC4 refutado);
+  DTCG diferido, formato-DTCG opcional futuro.
+- **Ejecución** en `DEFINITION-OF-DONE.md` (design-system-quality), en tandas + ratchet, drenando la deuda existente
+  (typography 38, html 24).
