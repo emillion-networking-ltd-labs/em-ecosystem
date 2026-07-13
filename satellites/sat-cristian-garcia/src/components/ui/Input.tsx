@@ -2,8 +2,9 @@
 
 import { useState, useRef, forwardRef, type ReactNode } from "react";
 import { tv } from "tailwind-variants";
-import { Eye, EyeOff, TriangleAlert } from "lucide-react";
+import { Eye, EyeOff } from "lucide-react";
 import Icon from "./Icon";
+import { STATUS_ICONS } from "@/lib/statusIcons";
 import SpinnerCircle from "./SpinnerCircle";
 import IconButton from "./IconButton";
 
@@ -91,7 +92,7 @@ export const inputSpecs = {
     right: "shrink-0 (custom ReactNode)",
     password: "IconButton size=sm default variant (32px hit area, 16px icon)",
     error:
-      "shrink-0 text-error (TriangleAlert, Icon size=sm/14px — proporcional al texto caption)",
+      "shrink-0 text-error (CircleX, Icon size=sm/14px — proporcional al texto caption)",
   },
 };
 
@@ -176,7 +177,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           role="alert"
         >
           <Icon
-            icon={TriangleAlert}
+            icon={STATUS_ICONS.error}
             size="sm"
             className="shrink-0 text-error"
           />

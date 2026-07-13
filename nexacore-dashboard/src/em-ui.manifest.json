@@ -8,7 +8,7 @@
     },
     "components/ui/AlertBox.tsx": {
       "from": "components/AlertBox.tsx",
-      "sha": "362c0189e89ad75c923be5ecb8191492f3534d78"
+      "sha": "956b56888978c690caa109428c9fb60cdb3ed7af"
     },
     "components/ui/Avatar.tsx": {
       "from": "components/Avatar.tsx",
@@ -80,11 +80,11 @@
     },
     "components/ui/EmptyState.tsx": {
       "from": "components/EmptyState.tsx",
-      "sha": "0fce29ba3dbe858cdd34fbc6a026e889fc8171cd"
+      "sha": "b2ee9821acb20b2181cdf2d7cc6f39d374bcd418"
     },
     "components/ui/FormField.tsx": {
       "from": "components/FormField.tsx",
-      "sha": "c4e4672a65081feb89eda47ba21cd045d9752ec1"
+      "sha": "6b86eb524e7b7de432ee48e31b2a29335629f539"
     },
     "components/ui/Icon.tsx": {
       "from": "components/Icon.tsx",
@@ -108,11 +108,11 @@
     },
     "components/ui/InlineError.tsx": {
       "from": "components/InlineError.tsx",
-      "sha": "52e16803d20c7c8af3d56ed5a62d712ca46224e6"
+      "sha": "6715d6f17ca9ce218be3fcaefe55482415b74605"
     },
     "components/ui/Input.tsx": {
       "from": "components/Input.tsx",
-      "sha": "7023248ccb6ec22960640e4ddb5173cee1339088"
+      "sha": "d5f9fc419b346199b79f913cfb43249b018c8a78"
     },
     "components/ui/LanguageSelector.tsx": {
       "from": "components/LanguageSelector.tsx",
@@ -136,7 +136,7 @@
     },
     "components/ui/RateLimitBanner.tsx": {
       "from": "components/RateLimitBanner.tsx",
-      "sha": "9d38aca7310d71aad7fe5f6969e9879fc58ad0ff"
+      "sha": "0f9d92c5ecdfd2b5ea4da78949b9f5b7d895f3a2"
     },
     "components/ui/RecoveryCodesGrid.tsx": {
       "from": "components/RecoveryCodesGrid.tsx",
@@ -188,7 +188,7 @@
     },
     "components/ui/Toast.tsx": {
       "from": "components/Toast.tsx",
-      "sha": "c8bab026622368de6f01cf7d48c225f60f2354d8"
+      "sha": "bd35e54e711080d140b59bf3546a14e2975fe287"
     },
     "components/ui/ToastContainer.tsx": {
       "from": "components/ToastContainer.tsx",
@@ -221,6 +221,10 @@
     "lib/crop-image.ts": {
       "from": "lib/crop-image.ts",
       "sha": "d13f598cdaa0b1c033a3eaefb31809dcf1051e25"
+    },
+    "lib/statusIcons.ts": {
+      "from": "lib/statusIcons.ts",
+      "sha": "747d358800fbde7f3b3b22460de8d7be70c201a3"
     },
     "lib/types.ts": {
       "from": "lib/types.ts",

@@ -1,8 +1,9 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { AlertTriangle, Lock } from "lucide-react";
+import { Lock } from "lucide-react";
 import Icon from "./Icon";
+import { STATUS_ICONS } from "@/lib/statusIcons";
 import CountdownTimer from "./CountdownTimer";
 import type { RateLimitKind } from "@/lib/types";
 
@@ -45,7 +46,7 @@ export default function RateLimitBanner({
     return () => clearInterval(timer);
   }, [secondsLeft, onExpired]);
 
-  const Glyph = kind === "lockout" ? Lock : AlertTriangle;
+  const Glyph = kind === "lockout" ? Lock : STATUS_ICONS.warning;
 
   return (
     <div role="alert" className="flex items-start gap-2">

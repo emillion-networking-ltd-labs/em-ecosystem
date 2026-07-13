@@ -27,7 +27,9 @@
       "registryDependencies": [
         "Icon"
       ],
-      "internalDependencies": [],
+      "internalDependencies": [
+        "lib/statusIcons.ts"
+      ],
       "dependencies": {
         "lucide-react": "^1.14.0",
         "tailwind-variants": "^3.2.2"
@@ -376,7 +378,9 @@
       "registryDependencies": [
         "Icon"
       ],
-      "internalDependencies": [],
+      "internalDependencies": [
+        "lib/statusIcons.ts"
+      ],
       "dependencies": {
         "lucide-react": "^1.14.0",
         "tailwind-variants": "^3.2.2"
@@ -518,7 +522,9 @@
       "registryDependencies": [
         "Icon"
       ],
-      "internalDependencies": [],
+      "internalDependencies": [
+        "lib/statusIcons.ts"
+      ],
       "dependencies": {
         "lucide-react": "^1.14.0"
       }
@@ -532,7 +538,9 @@
         "IconButton",
         "SpinnerCircle"
       ],
-      "internalDependencies": [],
+      "internalDependencies": [
+        "lib/statusIcons.ts"
+      ],
       "dependencies": {
         "lucide-react": "^1.14.0",
         "tailwind-variants": "^3.2.2"
@@ -675,6 +683,7 @@
         "Icon"
       ],
       "internalDependencies": [
+        "lib/statusIcons.ts",
         "lib/types.ts"
       ],
       "dependencies": {
@@ -946,7 +955,9 @@
       "registryDependencies": [
         "Icon"
       ],
-      "internalDependencies": [],
+      "internalDependencies": [
+        "lib/statusIcons.ts"
+      ],
       "dependencies": {
         "lucide-react": "^1.14.0",
         "motion": "^12.38.0",
