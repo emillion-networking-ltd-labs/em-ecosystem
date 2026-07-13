@@ -1,3 +1,4 @@
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 // Section — layout primitive del design-system (ECO-86; niquelado en ECO-131).
 // Banda vertical semántica (`<section>`) con RITMO vertical gobernado (escala de spacing, rejilla 8pt) y
 // superficie por TOKEN (nunca hex). `isolateDecoration` la convierte en lienzo para los slots decorativos

@@ -4,6 +4,7 @@
 // El tamaño lo define el consumidor por className. Solo `motion` + `cn` (ya presentes).
 "use client";
 
+// @ds-tier: decorative — efecto cosechado — animación de volteo de palabras
 import React, { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 

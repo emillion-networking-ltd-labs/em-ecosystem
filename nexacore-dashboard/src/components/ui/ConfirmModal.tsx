@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useEffect, useRef, useCallback } from "react";
 import { X } from "lucide-react";
 import Button from "./Button";

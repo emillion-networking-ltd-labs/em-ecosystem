@@ -1,3 +1,4 @@
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 /**
  * SpinnerRing — ripple/sonar ring loading indicator.
  * Replicates DaisyUI `loading-ring` as inline SVG with SMIL animation.

@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { AnimatePresence } from "motion/react";
 import { useToast } from "@/context/ToastContext";
 import Toast from "@/components/ui/Toast";

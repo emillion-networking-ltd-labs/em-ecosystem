@@ -4,211 +4,211 @@
   "files": {
     "components/ui/Accordion.tsx": {
       "from": "components/Accordion.tsx",
-      "sha": "cb19b8bba25e341e9acd1db2d0deb9b6e204d793"
+      "sha": "7b5a60a3a779515940a5300692a7006deca5f49d"
     },
     "components/ui/AlertBox.tsx": {
       "from": "components/AlertBox.tsx",
-      "sha": "956b56888978c690caa109428c9fb60cdb3ed7af"
+      "sha": "6be9f551bb341c0890355b8ad0701021b8aaceab"
     },
     "components/ui/Avatar.tsx": {
       "from": "components/Avatar.tsx",
-      "sha": "e5fdc7763a858bb37088c1b390c78d2fda1a4130"
+      "sha": "4d322c91da28ee3cb075cb38f2b944462717f892"
     },
     "components/ui/Badge.tsx": {
       "from": "components/Badge.tsx",
-      "sha": "ea7679b2ccf64703c75b811e7d9a1b5990d102cc"
+      "sha": "0cedd1caa9927436936fa9d9c52ceca69721db8f"
     },
     "components/ui/BeforeAfterSlider.tsx": {
       "from": "components/BeforeAfterSlider.tsx",
-      "sha": "dd0e04ccc1c4746aea7f823c93072f810a535e30"
+      "sha": "2b37876a7ca901cd648f2eb7aaa5fe4e509853c9"
     },
     "components/ui/Breadcrumbs.tsx": {
       "from": "components/Breadcrumbs.tsx",
-      "sha": "8143cf50687baa909c3102c755640166eb0b7027"
+      "sha": "3a58c8af13bb3aff7da77aeaca43b3c0acd488d8"
     },
     "components/ui/Button.tsx": {
       "from": "components/Button.tsx",
-      "sha": "705720a4320fff634e20eb97f4e9bef73cdf365a"
+      "sha": "011c0fea02b3a375f2f80f0bdbdd9a12bd52747a"
     },
     "components/ui/Calendar.tsx": {
       "from": "components/Calendar.tsx",
-      "sha": "33f201d1f000a5e36e9b0113b8faf627baa3cf51"
+      "sha": "3cb11979d8a1cd1a3b36768beaf1d0429f24a079"
     },
     "components/ui/ChartCard.tsx": {
       "from": "components/ChartCard.tsx",
-      "sha": "47fed9ee2539f67465a5a0e98c49364e500d1b63"
+      "sha": "3d1396de44160d737b86603e6f968c319a5ff900"
     },
     "components/ui/Checkbox.tsx": {
       "from": "components/Checkbox.tsx",
-      "sha": "0161dc0a49b8b187e06b56116055b948c1562d6c"
+      "sha": "de0d52166c30be76da0af17f895e1b1aa90252f4"
     },
     "components/ui/ConfirmModal.tsx": {
       "from": "components/ConfirmModal.tsx",
-      "sha": "e0c5230b355dffd9e4ae78074791cba698d4d460"
+      "sha": "a92fb2eb96b42f3779fd5a877883fd57209c1ed8"
     },
     "components/ui/CopyCell.tsx": {
       "from": "components/CopyCell.tsx",
-      "sha": "9a913dfd41de327a3d7f5e13ba9434feab3b009c"
+      "sha": "f72b1519465bc749c2b9375316cbcc83ca93e079"
     },
     "components/ui/CopyField.tsx": {
       "from": "components/CopyField.tsx",
-      "sha": "f1b66d2cadde2ffd41b4b4fbd9aea816710a0e51"
+      "sha": "8116ad16caa32db63a5e8b52bf51b9777dbabd02"
     },
     "components/ui/CountdownTimer.tsx": {
       "from": "components/CountdownTimer.tsx",
-      "sha": "7a7a65873de16fb911f079c764f9464f4b26d2cf"
+      "sha": "3d0e1ed0bc7ddcf21388ee64baf662736d79f4b9"
     },
     "components/ui/DataTable.tsx": {
       "from": "components/DataTable.tsx",
-      "sha": "ce948312d61427888f01b85db743464bb885ee09"
+      "sha": "dcd6612b82ed3593a2bf7d8c1c5630f92a0b824f"
     },
     "components/ui/DateInput.tsx": {
       "from": "components/DateInput.tsx",
-      "sha": "261776bbe4cd6c68f0abe4ae3d54bb1079ce845e"
+      "sha": "0f38b1bf49f12436381b32158bf9f16a37e65be3"
     },
     "components/ui/Divider.tsx": {
       "from": "components/Divider.tsx",
-      "sha": "9b5711ba51d723db92de10e5d073850ab103b6c4"
+      "sha": "d28e447d7570b7dc4c49b7be6baf2d30e99debc4"
     },
     "components/ui/DoughnutChart.tsx": {
       "from": "components/DoughnutChart.tsx",
-      "sha": "a7607d7f93785434a0dcca5624bba914eb6ed24d"
+      "sha": "703299bd54aaff5914c05efeb3f11f3e17b20b41"
     },
     "components/ui/EmailSelector.tsx": {
       "from": "components/EmailSelector.tsx",
-      "sha": "c637934a3c4ef2dc6f22b928a1c4b3758d670d21"
+      "sha": "5f072af104dd46d93553c9950d23aa7197eadaeb"
     },
     "components/ui/EmptyState.tsx": {
       "from": "components/EmptyState.tsx",
-      "sha": "b2ee9821acb20b2181cdf2d7cc6f39d374bcd418"
+      "sha": "8a14b82b0fb8c1111c522b16c3bfc38b2bfaf2e4"
     },
     "components/ui/FormField.tsx": {
       "from": "components/FormField.tsx",
-      "sha": "6b86eb524e7b7de432ee48e31b2a29335629f539"
+      "sha": "369a8ed146d38fad7244c119c24b81b972993732"
     },
     "components/ui/Icon.tsx": {
       "from": "components/Icon.tsx",
-      "sha": "9d00f3c6fb1c66f5475eb118ed5647e3dc81d43b"
+      "sha": "f96299055c6ab3a05a1e610f0ad447fb571a1d7e"
     },
     "components/ui/IconBadge.tsx": {
       "from": "components/IconBadge.tsx",
-      "sha": "b4f576b4c3ef4d89d0f20db807c6cf30a22ec65e"
+      "sha": "6ff542e242c0f0956c23b52f31d354b46df6e6d1"
     },
     "components/ui/IconButton.tsx": {
       "from": "components/IconButton.tsx",
-      "sha": "4f643fd6a5cc1cb45687bad975d0ffcd86ae00e8"
+      "sha": "cc15e1eddac1630e8cea62b2cc600168d62bda03"
     },
     "components/ui/IdleWarningModal.tsx": {
       "from": "components/IdleWarningModal.tsx",
-      "sha": "d4983c5fd78edf468482888e0047418ab5a54f70"
+      "sha": "16916ee4bfbeeec0dd0d22aa0d5c6e41bea48a4e"
     },
     "components/ui/ImageCropper.tsx": {
       "from": "components/ImageCropper.tsx",
-      "sha": "47cddbbbedb0a7611d18bf7168cf1d9a40a88591"
+      "sha": "2e0fd4203b705e53e43669c44db88ed17fa444f2"
     },
     "components/ui/InlineError.tsx": {
       "from": "components/InlineError.tsx",
-      "sha": "6715d6f17ca9ce218be3fcaefe55482415b74605"
+      "sha": "78bac6a9c5c55836aed7325dcb1e358653e9a4f9"
     },
     "components/ui/Input.tsx": {
       "from": "components/Input.tsx",
-      "sha": "d5f9fc419b346199b79f913cfb43249b018c8a78"
+      "sha": "86e1afc96b5806aadbc34f8152f73d5767445b64"
     },
     "components/ui/LanguageSelector.tsx": {
       "from": "components/LanguageSelector.tsx",
-      "sha": "c463d214401e5563d97210060fb0b6a09aea1e8a"
+      "sha": "2bf2363f84be0194fb65c0b90560404625df6930"
     },
     "components/ui/MetricCard.tsx": {
       "from": "components/MetricCard.tsx",
-      "sha": "710987604432969fe272286e4a554830fed61fdb"
+      "sha": "a6f97494b2eb13ddab8b60ccaebdfbc4a780ed80"
     },
     "components/ui/MfaDigitInput.tsx": {
       "from": "components/MfaDigitInput.tsx",
-      "sha": "bde4cf546e497a93453e1868a17fdbde0d32dcde"
+      "sha": "d3bb920347ba2e8c748f92d1c65e9334b40b49b7"
     },
     "components/ui/Pagination.tsx": {
       "from": "components/Pagination.tsx",
-      "sha": "ba5d7f37616a9e8012c87272fc7b9e9e01b786a0"
+      "sha": "ecc9da3f01f3221a7e736db3339c7c6b01c0701f"
     },
     "components/ui/QrCodeCard.tsx": {
       "from": "components/QrCodeCard.tsx",
-      "sha": "bf0a86de456ac6f34f320e3946d8fcfb18c6b797"
+      "sha": "40f1f5d1938013a5e16ebe18fc4254a6ef45862d"
     },
     "components/ui/RateLimitBanner.tsx": {
       "from": "components/RateLimitBanner.tsx",
-      "sha": "0f9d92c5ecdfd2b5ea4da78949b9f5b7d895f3a2"
+      "sha": "353cf3acad2561ce0c6055b30a91903581f337d4"
     },
     "components/ui/RecoveryCodesGrid.tsx": {
       "from": "components/RecoveryCodesGrid.tsx",
-      "sha": "370a0501d51c906998d5a7c855bc179b89a1a50a"
+      "sha": "90da838c55efc9b815c7d85a050cb1ab565ca4bb"
     },
     "components/ui/SearchTrigger.tsx": {
       "from": "components/SearchTrigger.tsx",
-      "sha": "a7cf3310b4dd152223e61894b8e5bed9c413bc5d"
+      "sha": "1e5567e6c926273bc7d13e98768478de366f5f2a"
     },
     "components/ui/SegmentedControl.tsx": {
       "from": "components/SegmentedControl.tsx",
-      "sha": "99caf597bf288ff53692a0471100475a02d0647a"
+      "sha": "25ca27d15af1b7b236c60052502e4ea29f19ba3a"
     },
     "components/ui/Select.tsx": {
       "from": "components/Select.tsx",
-      "sha": "b59f67924444cff383d5273c33969939b9cad46d"
+      "sha": "3f1f8165c6227215205175c99c6fb38dede31c0c"
     },
     "components/ui/SettingRow.tsx": {
       "from": "components/SettingRow.tsx",
-      "sha": "dc288405d1d98e3d9b9b0b61a20941425a53dd2a"
+      "sha": "b708042167ca67fe4d68d007150c5d213b78e7f9"
     },
     "components/ui/SidebarNav.tsx": {
       "from": "components/SidebarNav.tsx",
-      "sha": "15771777216341b441fcbe9917220cac9d373d7e"
+      "sha": "66887920d3e827eade1504b30d2cd5f4b1270509"
     },
     "components/ui/Slider.tsx": {
       "from": "components/Slider.tsx",
-      "sha": "22c2c3707b65e12715321e4bb36813f4ad30d1ff"
+      "sha": "39da203a5c127ecccfdc72a99bf46ae6c093a65e"
     },
     "components/ui/SpinnerCircle.tsx": {
       "from": "components/SpinnerCircle.tsx",
-      "sha": "f93b265a7f6da2863901a1a5e207943ffd9c4c0d"
+      "sha": "b2e07b8f27c89aae5d9bf97e7761d2f8251cb905"
     },
     "components/ui/SpinnerInfinity.tsx": {
       "from": "components/SpinnerInfinity.tsx",
-      "sha": "c5e539542012c9c05d0d6448e7c32fa8c845ca3c"
+      "sha": "f03f2cf8e816f9479a84d61a6f245983a9209e5b"
     },
     "components/ui/StickyCard.tsx": {
       "from": "components/StickyCard.tsx",
-      "sha": "648c0e0b56725f433ddf6001d1b509e16b3d63d7"
+      "sha": "f4bf7f429f70c953aeb5e5aa6eaa46085c201796"
     },
     "components/ui/Tabs.tsx": {
       "from": "components/Tabs.tsx",
-      "sha": "749577c1316396bb0c9a7d89226d2ce7a992670a"
+      "sha": "4d76660d759d9064ab8d38f39333b8963db82a2a"
     },
     "components/ui/ThemeToggle.tsx": {
       "from": "components/ThemeToggle.tsx",
-      "sha": "2d06608dfa4f36c688647d6df0d66bbabf6b0ee2"
+      "sha": "a459e53d84ce17c51924fb4cf367c56583727dc5"
     },
     "components/ui/Toast.tsx": {
       "from": "components/Toast.tsx",
-      "sha": "bd35e54e711080d140b59bf3546a14e2975fe287"
+      "sha": "f88d6d5cd01688e60c624fd3a49d280128861cfe"
     },
     "components/ui/ToastContainer.tsx": {
       "from": "components/ToastContainer.tsx",
-      "sha": "78798b8801ce143b7b53e0c87d02ef9b5bf80195"
+      "sha": "082f8d154230b425873e01e0729e5e66b811df4d"
     },
     "components/ui/Toggle.tsx": {
       "from": "components/Toggle.tsx",
-      "sha": "8e6f1581c23aa98d6c665a8bb499980ddbc744fb"
+      "sha": "13f4adaf46eea0d48eab5dab307b085b024739c8"
     },
     "components/ui/Tooltip.tsx": {
       "from": "components/Tooltip.tsx",
-      "sha": "f43fb4a9bc938aca6288d81360ba0e1582354af4"
+      "sha": "7b17f9ab69557b8ba351c748c3f93a1941db7dff"
     },
     "components/ui/TotalUsersChart.tsx": {
       "from": "components/TotalUsersChart.tsx",
-      "sha": "3aa8cb8417ba0f0877fb696d12a7e3ed3d9daa1c"
+      "sha": "dfa6684b7a509ac4db355104380798fb76665213"
     },
     "components/ui/TurnstileWidget.tsx": {
       "from": "components/TurnstileWidget.tsx",
-      "sha": "78c3235966b3f4f4ef6d0df4b95d8f0c17ac223d"
+      "sha": "0e07d6b5c124aac6e31762ee3ffcc9639bb64999"
     },
     "hooks/useIsTruncated.ts": {
       "from": "hooks/useIsTruncated.ts",

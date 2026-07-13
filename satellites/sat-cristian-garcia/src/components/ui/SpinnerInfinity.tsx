@@ -1,3 +1,4 @@
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 /**
  * SpinnerInfinity — button loading indicator.
  * Replicates DaisyUI `loading-infinity` as inline SVG + CSS @keyframes.

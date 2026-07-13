@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useState, useRef, useEffect } from "react";
 import { CalendarDays } from "lucide-react";
 import Calendar from "./Calendar";

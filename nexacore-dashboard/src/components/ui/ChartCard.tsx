@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import type { ReactNode } from "react";
 
 // ChartCard (ECO-147, censo E3) — panel de card con TÍTULO + slot de acción opcional, para envolver charts,

@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — fondo de gradiente decorativo
 // GradientBackdrop — slot decorativo del design-system (ECO-86, fase 1 de satellite-design).
 // Atmósfera de marca: pinta el gradiente multi-stop (tokens `--gradient-brand[-radial]` de ECO-83)
 // como fondo posicionado DETRÁS del contenido. Es DECORACIÓN pura — `aria-hidden`, sin eventos,

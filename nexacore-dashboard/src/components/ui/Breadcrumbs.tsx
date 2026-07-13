@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Birdhouse, ChevronRight } from "lucide-react";

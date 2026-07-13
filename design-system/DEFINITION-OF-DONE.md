@@ -10,9 +10,13 @@
    quedan como estén). El copy de Storybook también en inglés (StoryConventions).
 2. **Contrato (A)** — `tailwind-variants` + `<name>Specs`.
 3. **Tokens semánticos por rol** — sin valores crudos (color / tipografía / motion).
-4. **Clasificar (B)** — `// @ds-role: primitive|composite` en el componente → `role` en el registry.
+4. **Clasificar (B + tier)** — `// @ds-role: primitive|composite` **y** `// @ds-tier: core|decorative` en el
+   componente → `role` + `tier` en el registry. El `@ds-tier` (eje de modificabilidad, ECO-202) se detecta en masa
+   y se **CONFIRMA aquí**, en la certificación: el `[H]` rectifica una detección dudosa (marcada "?" en el Corpus
+   Status). Gates: `check-classification` (role, ratchet) + `check-tier` (tier, presencia).
 5. **Compone primitivos** — no copia la superficie de otra pieza.
-6. **Modificabilidad (C)** — conforme a la NORMA (color modificable / estructura bloqueada) o excepción declarada.
+6. **Modificabilidad (C)** — conforme al **modelo de 4 categorías** (ADR-033, ver "Norma C" abajo); el gate estricto
+   por dimensión se apoya en el `@ds-tier` (core = estricto/usa el token; decorative = arbitrario a menudo legítimo).
 7. **Story — ANALIZA la pieza y ORGANÍZALA por ejes.** Identifica cada eje ortogonal de la pieza; **cada eje →
    su propio bucket + su overview**, sin mezclar: variant→`AllVariants` (última), size→`AllSizes` (penúltima),
    y **cada eje ENUM propio** (surface, indicator, shape, direction, orientation…) → un overview `<Axis>` con su
@@ -41,9 +45,9 @@
 |---|-------|-------------------|
 | 1 | **Contrato de variante (A)** — `tailwind-variants` + `<name>Specs` | `check-contract-tv` (Fase 1) |
 | 2 | **Tokens semánticos por rol** — sin valores crudos | `check-raw-color`, `check-typography-tokens`, `check-motion-tokens` |
-| 3 | **Clasificada (B)** — `role` máquina-legible en el registry | `check-classification` |
+| 3 | **Clasificada (B + tier)** — `role` + `tier` (core/decorative) máquina-legibles en el registry | `check-classification` + `check-tier` |
 | 4 | **Compone primitivos** — no copia superficie | `check-composition-class` |
-| 5 | **Modificabilidad (C)** — norma ↓ o excepción declarada | `check-region-integrity` (Fase 2) |
+| 5 | **Modificabilidad (C)** — modelo de 4 categorías (ADR-033) ↓, *keyed on* `@ds-tier` | `check-region-integrity` + gates por dimensión (ruedan) |
 | 6 | **Calidad** — a11y AA + tests + docs + VRT | listón de calidad + `[H]` humano |
 | 7 | **Story** — según la norma + título por role | `check-story-norm`, `check-story-coverage` |
 | 8 | **Fidelidad viejo-vs-nuevo** — fixture `<Name>Old` + render viejo-vs-nuevo + atributos `old = new` | `<name>-fidelity` (al estándar) |
@@ -57,16 +61,27 @@
 - **Promoción = mover el título** `Migration/` → `Primitives/` o `Composite/` **según su `@ds-role`** (no todo es
   primitive). Es el acto que el gate `check-piece-complete` bloquea si falta un paso — imposible promocionar a medias.
 
-## Norma C — modificabilidad (por defecto, SIN marcar zona por zona)
+## Norma C — modificabilidad: modelo de 4 categorías (ADR-033, amplía el binario de ADR-030)
 
-- **Modificable:** el/los **token(s) de color / marca**. Un satélite los re-apunta en su scope (`[data-brand]`).
-- **Bloqueado (el DS lo gobierna):** **todo lo estructural** — forma, geometría de borde, sombra, radio, grosor,
-  espaciado, markup, ARIA. La estructura es el idioma del DS; no se rebrandea.
-- **Excepción por-satélite:** se **declara**, deliberada y visible, solo para esa pieza/ese satélite.
+La estrategia design-tokens ampliada (ECO-200) reemplaza el binario "color modificable / resto bloqueado" por
+**4 categorías** de modificabilidad. Qué categoría aplica se decide por DIMENSIÓN × `@ds-tier` de la pieza:
 
-**Se hace cumplir al PULL** (`check-region-integrity`, token-only de ADR-030): lo único que sobrevive del cambio de
-un satélite es un re-apunte de token de color; tocar estructura lo caza el gate. Propagación **segura por
-construcción**. Regla general primero; se refina por-pieza/por-satélite donde la realidad lo pida.
+1. **MARCA — modificable por satélite** (`[data-brand]` re-apunta el token): **color · radius · border-width ·
+   shadow**. Cada uno es una escala de tokens; el satélite la re-apunta como ya hace con `--accent`.
+2. **ESTRUCTURA-DS — bloqueada + tokenizada** (el DS la gobierna, NO satélite-modificable): **spacing interior ·
+   medidas de pieza** (tamaños de diálogo/popup) **· atenuación/alpha semántica · tipografía · motion**.
+3. **ESCAPE-HATCH — arbitrario legítimo** (no gateado): **layout one-off · spacing entre elementos** de una composición.
+4. **ESTRUCTURA PURA — nunca tokenizable:** **markup · ARIA**.
+
+**La LÍNEA estricto-vs-arbitrario** se apoya en `@ds-tier`: una pieza **core** es estricta (usa el token de su
+escala canónica); una **decorative** (efecto cosechado) admite valor arbitrario a menudo legítimo. **Sombra**: hay
+UNA sombra canónica (`--shadow-card`); un valor de sombra divergente en una core es deuda a reconciliar, no un
+token nuevo (regla general: escala canónica pequeña, se reutiliza).
+
+**Enforcement:** el eje `@ds-tier` (ECO-202) es el cimiento; el gate ESTRICTO por dimensión (radius/shadow/
+border/spacing/atenuación, *keyed on tier*) **rueda por dimensión** en los pasos siguientes de la ejecución
+design-tokens (no es big-bang). Excepción por-satélite: se **declara**, deliberada y visible. Propagación segura
+por construcción; regla general primero, refinada por-pieza donde la realidad lo pida.
 
 ## Completitud — por qué no se vuelve a olvidar
 

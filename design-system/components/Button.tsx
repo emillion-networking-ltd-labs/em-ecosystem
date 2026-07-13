@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import React from "react";
 import { tv, type VariantProps } from "tailwind-variants";
 import SpinnerInfinity from "./SpinnerInfinity";

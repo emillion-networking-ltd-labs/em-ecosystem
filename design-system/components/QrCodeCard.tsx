@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useState, useCallback, useEffect } from "react";
 import CopyField from "./CopyField";
 

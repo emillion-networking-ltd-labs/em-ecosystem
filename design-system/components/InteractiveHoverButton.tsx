@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — botón con efecto hover (marketing/CTA)
 // InteractiveHoverButton — Magic UI (MIT, © Magic UI), adoptado (ECO-106, fase 1 / ADR-019). CTA cuyo
 // punto crece en hover hasta cubrir el botón y revela el texto + flecha deslizándose. Estructura/animación
 // VERBATIM; únicos cambios: colores crudos → tokens (bg-background→surface-primary, border→border-strong,

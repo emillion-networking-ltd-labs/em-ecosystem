@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import React from "react";
 import type { LucideIcon } from "lucide-react";
 import IconBadge from "./IconBadge";

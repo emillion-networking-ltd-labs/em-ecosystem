@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — efecto ripple de fondo
 // Ripple — Magic UI (MIT, © Magic UI), adoptado (ECO-106, fase 1 / ADR-019). Fondo de círculos concéntricos
 // que laten (escala) con stagger; se desvanecen hacia el centro con una máscara. VERBATIM salvo: color crudo
 // `bg-foreground/25` + `var(--foreground)` → token `content-primary`; el latido usa el keyframe `ripple`

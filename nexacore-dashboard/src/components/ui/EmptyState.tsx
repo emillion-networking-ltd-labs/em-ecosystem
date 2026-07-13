@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { Inbox } from "lucide-react";
 import type { ReactNode } from "react";
 import { tv } from "tailwind-variants";

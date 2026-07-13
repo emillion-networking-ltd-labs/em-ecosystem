@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — botón shimmer (Magic UI)
 // ShimmerButton — Magic UI (MIT), adoptado (ECO-82; alineado en ECO-108: radio/color crudos → tokens del
 // sistema, base del Button primary — surface-inverse/content-inverse, rounded-md). Requiere keyframes
 // `shimmer-slide`/`spin-around` (tokens.css).

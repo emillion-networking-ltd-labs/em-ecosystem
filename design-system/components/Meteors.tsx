@@ -1,6 +1,7 @@
 // Meteors — Aceternity UI (MIT, © Manu Arora), adoptado verbatim (ECO-88, fase 1 / ADR-019).
 // Requiere el keyframe `meteor` + token --animate-meteor-effect (tokens.css). Decorativo.
 "use client";
+// @ds-tier: decorative — efecto cosechado — lluvia de meteoros de fondo (Magic UI)
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 import React from "react";

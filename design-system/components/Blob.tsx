@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — forma orgánica de fondo (SVG)
 // Blob — slot decorativo del design-system (ECO-86, fase 1 de satellite-design).
 // Mancha orgánica difuminada (halo de marca) como acento posicionado. DECORACIÓN pura
 // — `aria-hidden`, sin eventos. Usa el gradiente radial de marca (token `--gradient-brand-radial`)

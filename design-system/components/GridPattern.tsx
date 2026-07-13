@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — patrón de rejilla de fondo
 // GridPattern — slot decorativo del design-system (ECO-86, fase 1 de satellite-design).
 // Textura de rejilla (líneas, SVG `<pattern>`) como fondo posicionado. DECORACIÓN pura
 // — `aria-hidden`, sin eventos. Color por `currentColor` → tematizable con una clase de texto por

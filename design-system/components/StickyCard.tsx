@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: decorative — DUDOSA (confirmar en cert): efecto de scroll-stack; ya token-limpia
 import { useState, useEffect, useRef, useCallback } from "react";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import IconButton from "./IconButton";

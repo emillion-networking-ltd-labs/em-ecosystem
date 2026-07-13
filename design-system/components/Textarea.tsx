@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { type TextareaHTMLAttributes } from "react";
 
 // Primitivo TEXTAREA del design-system — campo multilínea CONSISTENTE con Input (mismo borde

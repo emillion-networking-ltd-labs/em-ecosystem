@@ -1,3 +1,4 @@
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 // Split — layout primitive del design-system (ECO-86; API ampliada en ECO-131).
 // Dos paneles (contenido + media) que APILAN en móvil y se reparten en escritorio con RATIO gobernado.
 // `stackAt` elige el breakpoint del reparto (un hero puede partir en `md` o aguantar apilado hasta `xl`).

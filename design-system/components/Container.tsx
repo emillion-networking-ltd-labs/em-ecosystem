@@ -1,3 +1,4 @@
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 // Container — layout primitive del design-system (ECO-86, fase 1 de satellite-design).
 // Restringe el ancho de la línea de medida y centra, con padding horizontal responsive
 // GOBERNADO por la escala (sin valores crudos). Es el riel horizontal sobre el que componen

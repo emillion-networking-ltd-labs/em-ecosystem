@@ -1,6 +1,7 @@
 // BlurFade — Magic UI (MIT), adoptado verbatim. Reveal con desenfoque. Requiere `motion` (npm) en el consumidor.
 "use client";
 
+// @ds-tier: decorative — efecto cosechado — reveal por scroll (animación)
 import { useRef } from "react";
 import {
   AnimatePresence,

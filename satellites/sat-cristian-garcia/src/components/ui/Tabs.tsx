@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useRef, useCallback } from "react";
 import { tv } from "tailwind-variants";
 import { ChevronRight } from "lucide-react";

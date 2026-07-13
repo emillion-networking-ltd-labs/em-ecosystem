@@ -1,6 +1,7 @@
 "use client";
 
 // @ds-role: primitive — leaf (a single <span>), composes no siblings.
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { tv, type VariantProps } from "tailwind-variants";
 
 interface BadgeProps {

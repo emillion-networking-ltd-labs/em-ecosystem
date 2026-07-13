@@ -1,6 +1,7 @@
 // AuroraBackground — Aceternity UI (MIT, © Manu Arora), adoptado verbatim (ECO-88, fase 1 / ADR-019).
 // Requiere el keyframe `aurora` + token --animate-aurora (tokens.css). Fondo decorativo animado.
 "use client";
+// @ds-tier: decorative — efecto cosechado — fondo aurora animado (Aceternity)
 import { cn } from "@/lib/utils";
 import React, { ReactNode } from "react";
 

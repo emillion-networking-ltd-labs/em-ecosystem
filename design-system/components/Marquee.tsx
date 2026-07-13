@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — marquesina de scroll infinito
 // Marquee — Magic UI (MIT), adoptado verbatim. Requiere keyframes `marquee`/`marquee-vertical` (tokens.css).
 import { type ComponentPropsWithoutRef } from "react";
 

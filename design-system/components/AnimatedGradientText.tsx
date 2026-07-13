@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — texto con gradiente animado
 // AnimatedGradientText — Magic UI (MIT), adoptado (ECO-82; alineado en ECO-108: defaults del gradiente →
 // colores de marca accent/accent-2, no naranja/morado genéricos). Requiere keyframe `gradient` (tokens.css).
 import { type ComponentPropsWithoutRef } from "react";

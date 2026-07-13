@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useRef, useState, useCallback, useEffect } from "react";
 
 export const mfaDigitInputSpecs = {

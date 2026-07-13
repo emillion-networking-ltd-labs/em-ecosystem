@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { tv } from "tailwind-variants";
 import Icon from "./Icon";
 import { STATUS_ICONS } from "@/lib/statusIcons";

@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 import Tooltip from "./Tooltip";

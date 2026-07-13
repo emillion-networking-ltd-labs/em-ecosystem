@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — efecto spotlight de fondo
 // Spotlight — Aceternity UI (MIT, © Manu Arora), adoptado verbatim (ECO-88, fase 1 / ADR-019).
 // Requiere el keyframe `spotlight` + token --animate-spotlight (tokens.css). Foco decorativo SVG.
 import React from "react";

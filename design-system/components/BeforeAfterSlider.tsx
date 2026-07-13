@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — DUDOSA (confirmar en cert): widget funcional reusable; si es one-off de marketing → decorative
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 

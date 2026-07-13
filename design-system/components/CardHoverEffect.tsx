@@ -6,6 +6,7 @@
 // Solo `motion` + `cn` (deps ya presentes).
 "use client";
 
+// @ds-tier: decorative — efecto cosechado — rejilla con hover-follow (Aceternity)
 import { useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 

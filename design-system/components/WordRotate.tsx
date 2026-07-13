@@ -3,6 +3,7 @@
 // className (sin color crudo ni line-height fijo). Solo `motion` + `cn` (ya presentes).
 "use client";
 
+// @ds-tier: decorative — efecto cosechado — rotación animada de palabras
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion, type MotionProps } from "motion/react";
 
