@@ -345,6 +345,13 @@
     /* Elevación de control pequeño (thumb del Slider, knob del Toggle) — canónica, reutilizada. */
     --shadow-control: 0 1px 3px rgba(0, 0, 0, 0.2);
 
+    /* Grosor de borde (ECO-205, border-width ∈ MARCA). Escala sm/md/lg para bordes/anillos GRUESOS (hoy el anillo
+       del spinner en sus 3 tamaños); el 1px base es el `border` default de Tailwind. Theme-invariante (el grosor no
+       cambia por tema), var normales que lee `border-[var(--…)]`, marca-modificables en [data-brand]. */
+    --border-width-sm: 1.5px;
+    --border-width-md: 2px;
+    --border-width-lg: 2.5px;
+
     /* Content colors — NORMA (texto de los pares). (RGB channels for legacy `rgb(var(--content-primary))`
        usages — utility classes go through `--color-*` overrides below). */
     --content-primary: 28 28 28;

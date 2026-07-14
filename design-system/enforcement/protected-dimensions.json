@@ -90,6 +90,16 @@
       "mode": "enforce",
       "ceiling": null,
       "note": "La sombra sale del token canonico (shadow-card/hover/control), no de la escala generica de Tailwind (shadow-sm/md/lg/xl/2xl/inner). TIER-AWARE: las piezas decorative (Ripple/Shimmer/Meteors) usan sombra propia del efecto -> exentas. El color crudo dentro de shadow-[...] lo caza check-raw-color (fleet; ECO-204 arreglo el hueco _rgba: `\\b` no separaba `_` de `rgba`). shadow = MARCA (ADR-033): --shadow-card es THEME-AWARE (custom @utility que lee var en runtime; en dark la separacion la da el SURFACE-LIFT --surface-elevated -la card es mas clara que el fondo, patron Material/GitHub- y la sombra queda como profundidad suave, sin hairline). El satelite re-apunta --shadow-card en [data-brand]. Core limpio (0) -> enforce/lock preventivo."
+    },
+    {
+      "dimension": "border-width",
+      "piece": "tokens --border-width-sm/md/lg (+ `border` 1px base default)",
+      "gate": "check-border-width-usage.mjs",
+      "scope": "ds",
+      "escape": "border-width-ok",
+      "mode": "enforce",
+      "ceiling": null,
+      "note": "El grosor de borde sale de token: `border` (1px base, default de Tailwind) o border-[var(--border-width-sm|md|lg)] para bordes/anillos gruesos. Prohibe border-[Npx] crudo + la escala generica border-2/4/8. TIER-AWARE: decorative exento. border-width = MARCA (ADR-033): el satelite re-apunta la escala en [data-brand]. La unica deuda era el anillo del SpinnerCircle (sm/md/lg = 1.5/2/2.5px, el operador prefirio lg=2.5); el 1px base de los 47 ficheros se queda como `border`. Core limpio (0) -> lock preventivo."
     }
   ]
 }

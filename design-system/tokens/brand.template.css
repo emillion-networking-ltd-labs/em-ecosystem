@@ -59,6 +59,12 @@
   /* --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.06); */
   /* --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.1); */
   /* --shadow-control: 0 1px 3px rgba(0, 0, 0, 0.2); */
+
+  /* OPCIONAL — GROSOR de borde de marca (ECO-205, border-width ∈ MARCA). Re-apunta la escala si tu marca quiere
+     bordes/anillos más gruesos o finos. El `border` de 1px base es el default de Tailwind (no está aquí). */
+  /* --border-width-sm: 1.5px; */
+  /* --border-width-md: 2px; */
+  /* --border-width-lg: 2.5px; */
 }
 
 /* Marca — tema oscuro. OPCIONAL: solo si tu acento se afina para fondo oscuro (legibilidad).
