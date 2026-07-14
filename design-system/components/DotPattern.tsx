@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — patrón de puntos de fondo
 // DotPattern — slot decorativo del design-system (ECO-86, fase 1 de satellite-design).
 // Textura de puntos (SVG `<pattern>`) como fondo posicionado. DECORACIÓN pura — `aria-hidden`,
 // sin eventos. El color hereda de `currentColor` → se tematiza con una clase de texto por TOKEN

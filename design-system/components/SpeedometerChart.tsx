@@ -1,3 +1,4 @@
+// @ds-tier: core — DUDOSA (confirmar en cert): data-viz de producto; color de serie exento
 // SpeedometerChart — pure-SVG gauge (no chart library). Theme-aware via Tailwind stroke/fill classes
 // (stroke-surface-inverse / stroke-surface-tertiary), so it adapts to the theme with no JS. The arc
 // sweeps 270° from bottom-left to bottom-right; a tapered needle points to the value.

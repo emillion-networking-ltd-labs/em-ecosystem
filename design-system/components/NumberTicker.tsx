@@ -4,6 +4,7 @@
 // Solo `motion` + `cn` (deps ya presentes).
 "use client";
 
+// @ds-tier: decorative — efecto cosechado — conteo animado (stats de marketing)
 import { useEffect, useRef, type ComponentPropsWithoutRef } from "react";
 import { useInView, useMotionValue, useSpring } from "motion/react";
 

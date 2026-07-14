@@ -1,3 +1,4 @@
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 // Card — superficie base del design-system (ECO-91). Envuelve las utilidades de card (distribuidas
 // en tokens.css). Dos ejes: `elevated` (con sombra) y `size` ("md" radio 12 / "lg" radio 24 = contenedor).
 // Por DEFECTO es PLANO (sin sombra) — la sombra se reserva para casos puntuales / ventanas externas

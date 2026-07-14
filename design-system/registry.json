@@ -10,6 +10,7 @@
       "name": "Accordion",
       "type": "registry:ui",
       "role": "primitive",
+      "tier": "core",
       "file": "components/Accordion.tsx",
       "registryDependencies": [
         "Icon"
@@ -23,6 +24,7 @@
     {
       "name": "AlertBox",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/AlertBox.tsx",
       "registryDependencies": [
         "Icon"
@@ -38,6 +40,7 @@
     {
       "name": "AnimatedGradientText",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/AnimatedGradientText.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -51,6 +54,7 @@
     {
       "name": "AnimatedTestimonials",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/AnimatedTestimonials.tsx",
       "registryDependencies": [
         "IconButton"
@@ -64,6 +68,7 @@
     {
       "name": "AuroraBackground",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/AuroraBackground.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -77,6 +82,7 @@
     {
       "name": "Avatar",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Avatar.tsx",
       "registryDependencies": [
         "Icon"
@@ -91,6 +97,7 @@
       "name": "Badge",
       "type": "registry:ui",
       "role": "primitive",
+      "tier": "core",
       "file": "components/Badge.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -101,6 +108,7 @@
     {
       "name": "BeforeAfterSlider",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/BeforeAfterSlider.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -109,6 +117,7 @@
     {
       "name": "BentoGrid",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/BentoGrid.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -122,6 +131,7 @@
     {
       "name": "Blob",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/Blob.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -135,6 +145,7 @@
     {
       "name": "BlurFade",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/BlurFade.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -145,6 +156,7 @@
     {
       "name": "Breadcrumbs",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Breadcrumbs.tsx",
       "registryDependencies": [
         "Icon"
@@ -157,6 +169,7 @@
     {
       "name": "Button",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Button.tsx",
       "registryDependencies": [
         "SpinnerInfinity"
@@ -169,6 +182,7 @@
     {
       "name": "Calendar",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Calendar.tsx",
       "registryDependencies": [
         "Icon"
@@ -181,6 +195,7 @@
     {
       "name": "Card",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Card.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -194,6 +209,7 @@
     {
       "name": "CardHoverEffect",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/CardHoverEffect.tsx",
       "registryDependencies": [
         "Card"
@@ -210,6 +226,7 @@
     {
       "name": "ChartCard",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/ChartCard.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -218,6 +235,7 @@
     {
       "name": "Checkbox",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Checkbox.tsx",
       "registryDependencies": [
         "Icon"
@@ -230,6 +248,7 @@
     {
       "name": "Cluster",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Cluster.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -244,6 +263,7 @@
     {
       "name": "ConfirmModal",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/ConfirmModal.tsx",
       "registryDependencies": [
         "Button",
@@ -257,6 +277,7 @@
     {
       "name": "Container",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Container.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -270,6 +291,7 @@
     {
       "name": "CopyCell",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/CopyCell.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -278,6 +300,7 @@
     {
       "name": "CopyField",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/CopyField.tsx",
       "registryDependencies": [
         "Icon",
@@ -293,6 +316,7 @@
     {
       "name": "CountdownTimer",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/CountdownTimer.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -303,6 +327,7 @@
     {
       "name": "DataTable",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/DataTable.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -311,6 +336,7 @@
     {
       "name": "DateInput",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/DateInput.tsx",
       "registryDependencies": [
         "Calendar",
@@ -324,6 +350,7 @@
     {
       "name": "Divider",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Divider.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -332,6 +359,7 @@
     {
       "name": "DotPattern",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/DotPattern.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -345,6 +373,7 @@
     {
       "name": "DoughnutChart",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/DoughnutChart.tsx",
       "registryDependencies": [
         "ChartCard"
@@ -357,6 +386,7 @@
     {
       "name": "EmailSelector",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/EmailSelector.tsx",
       "registryDependencies": [
         "Avatar",
@@ -374,6 +404,7 @@
     {
       "name": "EmptyState",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/EmptyState.tsx",
       "registryDependencies": [
         "Icon"
@@ -389,6 +420,7 @@
     {
       "name": "FlipWords",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/FlipWords.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -403,6 +435,7 @@
     {
       "name": "FormField",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/FormField.tsx",
       "registryDependencies": [
         "InlineError"
@@ -413,6 +446,7 @@
     {
       "name": "GradientBackdrop",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/GradientBackdrop.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -423,6 +457,7 @@
     {
       "name": "Grid",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Grid.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -437,6 +472,7 @@
     {
       "name": "GridPattern",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/GridPattern.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -450,6 +486,7 @@
     {
       "name": "Icon",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Icon.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -460,6 +497,7 @@
     {
       "name": "IconBadge",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/IconBadge.tsx",
       "registryDependencies": [
         "Icon"
@@ -473,6 +511,7 @@
     {
       "name": "IconButton",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/IconButton.tsx",
       "registryDependencies": [
         "Icon",
@@ -492,6 +531,7 @@
     {
       "name": "IdleWarningModal",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/IdleWarningModal.tsx",
       "registryDependencies": [
         "Button",
@@ -503,6 +543,7 @@
     {
       "name": "ImageCropper",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/ImageCropper.tsx",
       "registryDependencies": [
         "ConfirmModal",
@@ -518,6 +559,7 @@
     {
       "name": "InlineError",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/InlineError.tsx",
       "registryDependencies": [
         "Icon"
@@ -532,6 +574,7 @@
     {
       "name": "Input",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Input.tsx",
       "registryDependencies": [
         "Icon",
@@ -549,6 +592,7 @@
     {
       "name": "InteractiveHoverButton",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/InteractiveHoverButton.tsx",
       "registryDependencies": [
         "Icon"
@@ -565,6 +609,7 @@
     {
       "name": "LanguageSelector",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/LanguageSelector.tsx",
       "registryDependencies": [
         "Avatar",
@@ -579,6 +624,7 @@
     {
       "name": "Marquee",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/Marquee.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -592,6 +638,7 @@
     {
       "name": "Meteors",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/Meteors.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -606,6 +653,7 @@
     {
       "name": "MetricCard",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/MetricCard.tsx",
       "registryDependencies": [
         "Icon"
@@ -618,6 +666,7 @@
     {
       "name": "MfaDigitInput",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/MfaDigitInput.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -626,6 +675,7 @@
     {
       "name": "NumberTicker",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/NumberTicker.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -640,6 +690,7 @@
     {
       "name": "Pagination",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Pagination.tsx",
       "registryDependencies": [
         "Icon"
@@ -652,6 +703,7 @@
     {
       "name": "PulsatingButton",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/PulsatingButton.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -665,6 +717,7 @@
     {
       "name": "QrCodeCard",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/QrCodeCard.tsx",
       "registryDependencies": [
         "CopyField"
@@ -677,6 +730,7 @@
     {
       "name": "RateLimitBanner",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/RateLimitBanner.tsx",
       "registryDependencies": [
         "CountdownTimer",
@@ -693,6 +747,7 @@
     {
       "name": "RecoveryCodesGrid",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/RecoveryCodesGrid.tsx",
       "registryDependencies": [
         "Button",
@@ -706,6 +761,7 @@
     {
       "name": "Ripple",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/Ripple.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -719,6 +775,7 @@
     {
       "name": "SearchTrigger",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/SearchTrigger.tsx",
       "registryDependencies": [
         "Badge",
@@ -732,6 +789,7 @@
     {
       "name": "Section",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Section.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -745,6 +803,7 @@
     {
       "name": "SegmentedControl",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/SegmentedControl.tsx",
       "registryDependencies": [
         "Button"
@@ -755,6 +814,7 @@
     {
       "name": "Select",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Select.tsx",
       "registryDependencies": [
         "Icon"
@@ -768,6 +828,7 @@
     {
       "name": "SettingRow",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/SettingRow.tsx",
       "registryDependencies": [
         "IconBadge"
@@ -780,6 +841,7 @@
     {
       "name": "ShimmerButton",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/ShimmerButton.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -793,6 +855,7 @@
     {
       "name": "SidebarNav",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/SidebarNav.tsx",
       "registryDependencies": [
         "Icon",
@@ -808,6 +871,7 @@
     {
       "name": "Slider",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Slider.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -816,6 +880,7 @@
     {
       "name": "SpeedometerChart",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/SpeedometerChart.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -824,6 +889,7 @@
     {
       "name": "SpinnerCircle",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/SpinnerCircle.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -832,6 +898,7 @@
     {
       "name": "SpinnerInfinity",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/SpinnerInfinity.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -840,6 +907,7 @@
     {
       "name": "SpinnerRing",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/SpinnerRing.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -848,6 +916,7 @@
     {
       "name": "Split",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Split.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -862,6 +931,7 @@
     {
       "name": "Spotlight",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/Spotlight.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -875,6 +945,7 @@
     {
       "name": "Stack",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Stack.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -889,6 +960,7 @@
     {
       "name": "StickyCard",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/StickyCard.tsx",
       "registryDependencies": [
         "IconButton"
@@ -901,6 +973,7 @@
     {
       "name": "Tabs",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Tabs.tsx",
       "registryDependencies": [
         "Icon"
@@ -914,6 +987,7 @@
     {
       "name": "TextGenerateEffect",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/TextGenerateEffect.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -928,6 +1002,7 @@
     {
       "name": "Textarea",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Textarea.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -936,6 +1011,7 @@
     {
       "name": "ThemeToggle",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/ThemeToggle.tsx",
       "registryDependencies": [
         "IconButton",
@@ -951,6 +1027,7 @@
     {
       "name": "Toast",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Toast.tsx",
       "registryDependencies": [
         "Icon"
@@ -967,6 +1044,7 @@
     {
       "name": "ToastContainer",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/ToastContainer.tsx",
       "registryDependencies": [
         "Toast"
@@ -979,6 +1057,7 @@
     {
       "name": "Toggle",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Toggle.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -987,6 +1066,7 @@
     {
       "name": "Tooltip",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/Tooltip.tsx",
       "registryDependencies": [],
       "internalDependencies": [],
@@ -995,6 +1075,7 @@
     {
       "name": "TotalUsersChart",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/TotalUsersChart.tsx",
       "registryDependencies": [
         "ChartCard"
@@ -1007,6 +1088,7 @@
     {
       "name": "TurnstileWidget",
       "type": "registry:ui",
+      "tier": "core",
       "file": "components/TurnstileWidget.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -1019,6 +1101,7 @@
     {
       "name": "TypingAnimation",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/TypingAnimation.tsx",
       "registryDependencies": [],
       "internalDependencies": [
@@ -1033,6 +1116,7 @@
     {
       "name": "WordRotate",
       "type": "registry:ui",
+      "tier": "decorative",
       "file": "components/WordRotate.tsx",
       "registryDependencies": [],
       "internalDependencies": [

@@ -1,3 +1,4 @@
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 // Grid — layout primitive del design-system (ECO-86; API rehecha en ECO-131).
 // Rejilla con columnas y gap GOBERNADOS. `cols` acepta un número (curva mobile-first 1→2→N) o un objeto
 // responsive por breakpoint (`{ base, sm, md, lg, xl }`) para casos como 1→3 (Pricing) que la curva fija no

@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import Button from "./Button";
 import CountdownTimer from "./CountdownTimer";
 

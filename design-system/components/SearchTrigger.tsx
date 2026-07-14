@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { Search } from "lucide-react";
 import Badge from "./Badge";
 import Icon from "./Icon";

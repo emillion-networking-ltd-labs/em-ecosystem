@@ -1,3 +1,4 @@
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 // Stack — layout primitive del design-system (ECO-86; API ampliada en ECO-131).
 // Flujo VERTICAL con gap y alineación GOBERNADOS. El primitivo de composición más usado: agrupa
 // eyebrow + titular + claim + CTA con ritmo consistente. Para una fila horizontal con wrap usa `Cluster`.

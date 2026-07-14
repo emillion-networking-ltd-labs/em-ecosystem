@@ -9,6 +9,8 @@
     {
       "name": "Blob",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -30,6 +32,8 @@
     {
       "name": "BlurFade",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -51,6 +55,8 @@
     {
       "name": "Card",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -72,6 +78,8 @@
     {
       "name": "Checkbox",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -95,6 +103,8 @@
     {
       "name": "ConfirmModal",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -120,6 +130,8 @@
     {
       "name": "Container",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -141,6 +153,8 @@
     {
       "name": "CopyField",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -165,6 +179,8 @@
     {
       "name": "DateInput",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -189,6 +205,8 @@
     {
       "name": "Icon",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -210,6 +228,8 @@
     {
       "name": "SegmentedControl",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -234,6 +254,8 @@
     {
       "name": "SpeedometerChart",
       "role": null,
+      "tier": "core",
+      "tierDudosa": true,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -255,6 +277,8 @@
     {
       "name": "SpinnerCircle",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -276,6 +300,8 @@
     {
       "name": "SpinnerInfinity",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -297,6 +323,8 @@
     {
       "name": "Toggle",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -326,6 +354,8 @@
     {
       "name": "Accordion",
       "role": "primitive",
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -349,6 +379,8 @@
     {
       "name": "AlertBox",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [],
@@ -370,6 +402,8 @@
     {
       "name": "AnimatedGradientText",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -389,6 +423,8 @@
     {
       "name": "AnimatedTestimonials",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -410,6 +446,8 @@
     {
       "name": "AuroraBackground",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -429,6 +467,8 @@
     {
       "name": "Avatar",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -452,6 +492,8 @@
     {
       "name": "Badge",
       "role": "primitive",
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -474,6 +516,8 @@
     {
       "name": "BeforeAfterSlider",
       "role": null,
+      "tier": "core",
+      "tierDudosa": true,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -493,6 +537,8 @@
     {
       "name": "BentoGrid",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -512,6 +558,8 @@
     {
       "name": "Blob",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -533,6 +581,8 @@
     {
       "name": "BlurFade",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -554,6 +604,8 @@
     {
       "name": "Breadcrumbs",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -575,6 +627,8 @@
     {
       "name": "Button",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -600,6 +654,8 @@
     {
       "name": "Calendar",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -621,6 +677,8 @@
     {
       "name": "Card",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -642,6 +700,8 @@
     {
       "name": "CardHoverEffect",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -663,6 +723,8 @@
     {
       "name": "ChartCard",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -682,6 +744,8 @@
     {
       "name": "Checkbox",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -705,6 +769,8 @@
     {
       "name": "Cluster",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -724,6 +790,8 @@
     {
       "name": "ConfirmModal",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -749,6 +817,8 @@
     {
       "name": "Container",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -770,6 +840,8 @@
     {
       "name": "CopyCell",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -789,6 +861,8 @@
     {
       "name": "CopyField",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -813,6 +887,8 @@
     {
       "name": "CountdownTimer",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -835,6 +911,8 @@
     {
       "name": "DataTable",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -854,6 +932,8 @@
     {
       "name": "DateInput",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -878,6 +958,8 @@
     {
       "name": "Divider",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -897,6 +979,8 @@
     {
       "name": "DotPattern",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -916,6 +1000,8 @@
     {
       "name": "DoughnutChart",
       "role": null,
+      "tier": "core",
+      "tierDudosa": true,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -937,6 +1023,8 @@
     {
       "name": "EmailSelector",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -961,6 +1049,8 @@
     {
       "name": "EmptyState",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -984,6 +1074,8 @@
     {
       "name": "FlipWords",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1003,6 +1095,8 @@
     {
       "name": "FormField",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1024,6 +1118,8 @@
     {
       "name": "GradientBackdrop",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -1045,6 +1141,8 @@
     {
       "name": "Grid",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1064,6 +1162,8 @@
     {
       "name": "GridPattern",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1083,6 +1183,8 @@
     {
       "name": "Icon",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -1104,6 +1206,8 @@
     {
       "name": "IconBadge",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -1128,6 +1232,8 @@
     {
       "name": "IconButton",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -1155,6 +1261,8 @@
     {
       "name": "IdleWarningModal",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1177,6 +1285,8 @@
     {
       "name": "ImageCropper",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1199,6 +1309,8 @@
     {
       "name": "InlineError",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1220,6 +1332,8 @@
     {
       "name": "Input",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -1246,6 +1360,8 @@
     {
       "name": "InteractiveHoverButton",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1267,6 +1383,8 @@
     {
       "name": "LanguageSelector",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1290,6 +1408,8 @@
     {
       "name": "Marquee",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1309,6 +1429,8 @@
     {
       "name": "Meteors",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1328,6 +1450,8 @@
     {
       "name": "MetricCard",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1349,6 +1473,8 @@
     {
       "name": "MfaDigitInput",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1368,6 +1494,8 @@
     {
       "name": "NumberTicker",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1387,6 +1515,8 @@
     {
       "name": "Pagination",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1408,6 +1538,8 @@
     {
       "name": "PulsatingButton",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1427,6 +1559,8 @@
     {
       "name": "QrCodeCard",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1448,6 +1582,8 @@
     {
       "name": "RateLimitBanner",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1470,6 +1606,8 @@
     {
       "name": "RecoveryCodesGrid",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1492,6 +1630,8 @@
     {
       "name": "Ripple",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1511,6 +1651,8 @@
     {
       "name": "SearchTrigger",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1533,6 +1675,8 @@
     {
       "name": "Section",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1552,6 +1696,8 @@
     {
       "name": "SegmentedControl",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -1576,6 +1722,8 @@
     {
       "name": "Select",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -1600,6 +1748,8 @@
     {
       "name": "SettingRow",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1621,6 +1771,8 @@
     {
       "name": "ShimmerButton",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1640,6 +1792,8 @@
     {
       "name": "SidebarNav",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1664,6 +1818,8 @@
     {
       "name": "Slider",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1683,6 +1839,8 @@
     {
       "name": "SpeedometerChart",
       "role": null,
+      "tier": "core",
+      "tierDudosa": true,
       "onTv": false,
       "hasSpecs": false,
       "axes": [
@@ -1704,6 +1862,8 @@
     {
       "name": "SpinnerCircle",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -1725,6 +1885,8 @@
     {
       "name": "SpinnerInfinity",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -1746,6 +1908,8 @@
     {
       "name": "SpinnerRing",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -1765,6 +1929,8 @@
     {
       "name": "Split",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1784,6 +1950,8 @@
     {
       "name": "Spotlight",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1803,6 +1971,8 @@
     {
       "name": "Stack",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1822,6 +1992,8 @@
     {
       "name": "StickyCard",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": true,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1843,6 +2015,8 @@
     {
       "name": "Tabs",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [
@@ -1867,6 +2041,8 @@
     {
       "name": "Textarea",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1886,6 +2062,8 @@
     {
       "name": "TextGenerateEffect",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1905,6 +2083,8 @@
     {
       "name": "ThemeToggle",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1927,6 +2107,8 @@
     {
       "name": "Toast",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": true,
       "hasSpecs": true,
       "axes": [],
@@ -1948,6 +2130,8 @@
     {
       "name": "ToastContainer",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -1969,6 +2153,8 @@
     {
       "name": "Toggle",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [
@@ -1990,6 +2176,8 @@
     {
       "name": "Tooltip",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": true,
       "axes": [],
@@ -2009,6 +2197,8 @@
     {
       "name": "TotalUsersChart",
       "role": null,
+      "tier": "core",
+      "tierDudosa": true,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -2030,6 +2220,8 @@
     {
       "name": "TurnstileWidget",
       "role": null,
+      "tier": "core",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -2049,6 +2241,8 @@
     {
       "name": "TypingAnimation",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],
@@ -2068,6 +2262,8 @@
     {
       "name": "WordRotate",
       "role": null,
+      "tier": "decorative",
+      "tierDudosa": false,
       "onTv": false,
       "hasSpecs": false,
       "axes": [],

@@ -44,12 +44,16 @@ export function classify(name, src) {
   const onTv = TV_RE.test(src);
   const hasSpecs = SPECS_RE.test(src);
   const roleM = src.match(/@ds-role:\s*(primitive|composite)\b/);
+  const tierM = src.match(/@ds-tier:\s*(core|decorative)\b/); // eje de modificabilidad (ECO-202)
+  const tierDudosa = /@ds-tier:[^\n]*\bDUDOSA\b/.test(src); // detección de baja confianza → confirmar en cert
   const axes = ["variant", "size", "shape"].filter((a) =>
     new RegExp(`^\\s*${a}\\?:`, "m").test(src),
   );
   return {
     name,
     role: roleM ? roleM[1] : null,
+    tier: tierM ? tierM[1] : null,
+    tierDudosa,
     onTv,
     hasSpecs,
     axes,

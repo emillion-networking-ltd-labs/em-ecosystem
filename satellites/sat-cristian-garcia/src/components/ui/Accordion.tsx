@@ -1,6 +1,7 @@
 "use client";
 
 // @ds-role: primitive — base disclosure control; composes only Icon (a helper).
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useId, useState } from "react";
 import { tv } from "tailwind-variants";
 import { ChevronDown, Plus } from "lucide-react";

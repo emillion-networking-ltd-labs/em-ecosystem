@@ -1,3 +1,4 @@
+// @ds-tier: decorative — efecto cosechado — rejilla bento para destacar features (marketing)
 // BentoGrid / BentoGridItem — Aceternity UI (MIT, © Manu Arora), adoptado (ECO-88, fase 1 / ADR-019; alineado
 // en ECO-108: card cruda neutral/white/black → utilidad `card` + tokens content-*).
 // Layout bento (rejilla asimétrica) para destacar features. Sin deps externas (el @tabler/icons del

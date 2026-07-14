@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useState, useEffect } from "react";
 import { Sun, Moon } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";

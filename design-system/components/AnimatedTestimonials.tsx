@@ -6,6 +6,7 @@
 // (no `@tabler`). Carrusel de testimonios con foto + blur-in. Cero deps npm nuevas.
 "use client";
 
+// @ds-tier: decorative — efecto cosechado — carrusel de testimonios (marketing)
 import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight } from "lucide-react";

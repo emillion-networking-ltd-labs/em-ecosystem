@@ -2,6 +2,7 @@
 // ECO-108: color crudo text-black/dark:text-white → token content-primary).
 // Usa `motion/react` (useAnimate + stagger). Revela palabras con desenfoque progresivo.
 "use client";
+// @ds-tier: decorative — efecto cosechado — aparición animada de texto
 import { useEffect } from "react";
 import { motion, stagger, useAnimate } from "motion/react";
 import { cn } from "@/lib/utils";

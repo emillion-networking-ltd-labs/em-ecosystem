@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import React, { forwardRef } from "react";
 import { tv } from "tailwind-variants";
 import type { LucideIcon } from "lucide-react";

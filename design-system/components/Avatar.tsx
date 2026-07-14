@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useState } from "react";
 import { tv } from "tailwind-variants";
 import { User } from "lucide-react";

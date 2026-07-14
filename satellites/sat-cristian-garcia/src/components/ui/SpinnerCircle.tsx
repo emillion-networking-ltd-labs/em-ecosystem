@@ -1,3 +1,4 @@
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 type SpinnerProps = {
   size?: "sm" | "md" | "lg";
   /**

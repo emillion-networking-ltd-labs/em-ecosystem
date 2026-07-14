@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — DUDOSA (confirmar en cert): data-viz de producto; color de serie exento
 import {
   LineChart,
   Line,

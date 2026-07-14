@@ -5,6 +5,7 @@
 // original la variante `ripple` y el `useLayoutEffect` de sync `--bg` (innecesarios con color por token).
 "use client";
 
+// @ds-tier: decorative — efecto cosechado — botón CTA con pulso
 import React from "react";
 
 import { cn } from "@/lib/utils";

@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useId, useRef, useEffect } from "react";
 import { Check, Minus } from "lucide-react";
 import Icon, { type IconSize } from "./Icon";

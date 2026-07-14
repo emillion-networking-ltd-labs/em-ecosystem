@@ -69,6 +69,18 @@ export function roleOf(name, dir = COMP) {
   return m ? m[1] : null;
 }
 
+// Clase de MODIFICABILIDAD declarada: `// @ds-tier: core|decorative` (ECO-202, modelo de 4 categorías / design-tokens).
+// core = primitivo del sistema que propaga a N satélites → estricto (usa el token); decorative = efecto cosechado
+// (ShimmerButton, Meteors…) → valor arbitrario a menudo legítimo. Es la CLASE que necesitan los gates por dimensión
+// para ser estrictos-en-core y laxos-en-decorative. Detectado en masa + confirmado por-pieza en la certificación [H].
+// Devuelve null si no está anotado (lo caza check-tier).
+export function tierOf(name, dir = COMP) {
+  const m = readFileSync(join(dir, `${name}.tsx`), "utf8").match(
+    /@ds-tier:\s*(core|decorative)\b/,
+  );
+  return m ? m[1] : null;
+}
+
 // Deps npm EXTERNAS de un item (ECO-164): paquetes que importa SU fichero + sus ficheros internos
 // (lib/hooks — p.ej. lib/utils.ts arrastra clsx + tailwind-merge). Excluye alias `@/`, relativos y peers.
 // La versión sale del package.json del DS (fuente única). Devuelve { pkg: rango } ordenado.
@@ -102,7 +114,8 @@ export function buildRegistry() {
     const { registryDependencies, internalDependencies } = directDeps(name, COMP);
     const dependencies = externalDeps(name, COMP, internalDependencies);
     const role = roleOf(name, COMP); // eje B (ADR-029): primitive|composite declarado, o null si sin anotar
-    return { name, type: "registry:ui", ...(role ? { role } : {}), file: `components/${name}.tsx`, registryDependencies, internalDependencies, dependencies };
+    const tier = tierOf(name, COMP); // eje de modificabilidad (ECO-202): core|decorative declarado, o null si sin anotar
+    return { name, type: "registry:ui", ...(role ? { role } : {}), ...(tier ? { tier } : {}), file: `components/${name}.tsx`, registryDependencies, internalDependencies, dependencies };
   });
   // Secciones (nivel 2): componen átomos. `em-ui add <Section>` jala la sección + su cierre de átomos/hooks.
   for (const name of sectionNames()) {

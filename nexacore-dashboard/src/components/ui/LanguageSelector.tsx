@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import { useState, useRef, useEffect, useMemo } from "react";
 import { ChevronDown, Search, X } from "lucide-react";
 import Avatar from "./Avatar";

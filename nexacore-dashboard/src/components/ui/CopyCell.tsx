@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import React, { useState, useRef } from "react";
 
 // CopyCell — a truncated, click-to-copy table cell. Shows the (possibly truncated) value as a button;

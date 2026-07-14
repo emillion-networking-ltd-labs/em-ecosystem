@@ -1,5 +1,6 @@
 "use client";
 
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 import type { LucideIcon, LucideProps } from "lucide-react";
 
 // Escala ÚNICA de tamaño de icono — la FUENTE del sistema (registrada y documentada en `Foundations › Icons`).

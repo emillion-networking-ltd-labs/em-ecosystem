@@ -1,3 +1,4 @@
+// @ds-tier: core — primitivo/composite del sistema (propaga a satélites) → estricto
 // Cluster — layout primitive del design-system (ECO-131).
 // Fila HORIZONTAL que envuelve (flex-wrap) con gap GOBERNADO: el riel para grupos de chips/badges, filas de
 // botones (CTA doble), logos de clientes o metadatos — items que fluyen y bajan de línea en móvil sin romper.
