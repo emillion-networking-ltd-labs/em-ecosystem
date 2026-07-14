@@ -1,6 +1,13 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  rmSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -27,15 +34,25 @@ afterEach(() => {
 });
 function run(args: string[]): { status: number; out: string } {
   try {
-    return { status: 0, out: execFileSync("node", [CLI, ...args], { cwd: DS, encoding: "utf8" }) };
+    return {
+      status: 0,
+      out: execFileSync("node", [CLI, ...args], { cwd: DS, encoding: "utf8" }),
+    };
   } catch (e: unknown) {
     const err = e as { status?: number; stdout?: string; stderr?: string };
-    return { status: err.status ?? -1, out: (err.stdout ?? "") + (err.stderr ?? "") };
+    return {
+      status: err.status ?? -1,
+      out: (err.stdout ?? "") + (err.stderr ?? ""),
+    };
   }
 }
 
 // Monta un consumidor temporal con Button = `copyContent`, manifest fijado a `baseContent`, y el store poblado.
-function setup(baseContent: string, copyContent: string, { storeIt = true } = {}) {
+function setup(
+  baseContent: string,
+  copyContent: string,
+  { storeIt = true } = {},
+) {
   const c = newConsumer();
   const dest = join(c, KEY);
   mkdirSync(dirname(dest), { recursive: true });
@@ -44,7 +61,15 @@ function setup(baseContent: string, copyContent: string, { storeIt = true } = {}
   if (storeIt) storeBase(c, sha, Buffer.from(baseContent));
   writeFileSync(
     join(c, "em-ui.manifest.json"),
-    JSON.stringify({ version: 1, source: "design-system", files: { [KEY]: { from: "components/Button.tsx", sha } } }, null, 2) + "\n",
+    JSON.stringify(
+      {
+        version: 1,
+        source: "design-system",
+        files: { [KEY]: { from: "components/Button.tsx", sha } },
+      },
+      null,
+      2,
+    ) + "\n",
   );
   return { c, dest };
 }
@@ -74,12 +99,22 @@ describe("materializeBase (bytes de la base)", () => {
     const sha = blobSha(bytes);
     // (1) store
     storeBase(c, sha, bytes);
-    expect(materializeBase(c, sha, join(DS, "components", "Button.tsx"))?.toString()).toBe("BASE\n");
+    expect(
+      materializeBase(c, sha, join(DS, "components", "Button.tsx"))?.toString(),
+    ).toBe("BASE\n");
     // (2) DS-fallback: sin store, pero blobSha(DS)==sha
     const c2 = newConsumer();
-    expect(materializeBase(c2, blobSha(Buffer.from(DS_BUTTON)), join(DS, "components", "Button.tsx"))?.toString()).toBe(DS_BUTTON);
+    expect(
+      materializeBase(
+        c2,
+        blobSha(Buffer.from(DS_BUTTON)),
+        join(DS, "components", "Button.tsx"),
+      )?.toString(),
+    ).toBe(DS_BUTTON);
     // (3) refuse: ni store ni DS coinciden
-    expect(materializeBase(c2, "0".repeat(40), join(DS, "components", "Button.tsx"))).toBe(null);
+    expect(
+      materializeBase(c2, "0".repeat(40), join(DS, "components", "Button.tsx")),
+    ).toBe(null);
   });
 });
 
@@ -106,7 +141,8 @@ describe("em-ui update --merge (end-to-end, caso de referencia ADR-028)", () => 
   it("conflicto: la adaptación choca con el cambio del DS → marcadores, exit≠0, base NO avanza", () => {
     // base termina en X; el DS lo cambió a X-DS (ours); el consumidor lo adaptó a X-ADAPT (theirs) → choque.
     const base = DS_BUTTON + "const marker = 'X';\n";
-    const theirs = "// @em-ui-adapted: test\n" + DS_BUTTON + "const marker = 'X-ADAPT';\n";
+    const theirs =
+      "// @em-ui-adapted: test\n" + DS_BUTTON + "const marker = 'X-ADAPT';\n";
     const ours = DS_BUTTON; // NB: no exactamente igual a base; el delta base→ours quita la línea marker
     void ours;
     const { c, dest } = setup(base, theirs);
@@ -114,7 +150,9 @@ describe("em-ui update --merge (end-to-end, caso de referencia ADR-028)", () => 
     const before = readFileSync(dest, "utf8");
     const r = run(["update", "Button", "--dest", c, "--merge"]);
     const after = readFileSync(dest, "utf8");
-    const manifest = JSON.parse(readFileSync(join(c, "em-ui.manifest.json"), "utf8"));
+    const manifest = JSON.parse(
+      readFileSync(join(c, "em-ui.manifest.json"), "utf8"),
+    );
     if (!r.status) {
       // si git resolvió limpio, al menos la adaptación se conservó (no es un fallo del diseño)
       expect(after).toContain("@em-ui-adapted");
@@ -127,7 +165,9 @@ describe("em-ui update --merge (end-to-end, caso de referencia ADR-028)", () => 
 
   it("base irrecuperable (ni store ni DS-coincide) → REHÚSA, no clobbea, exit≠0", () => {
     const theirs = "// @em-ui-adapted: test\n" + DS_BUTTON + "// adaptado\n";
-    const { c, dest } = setup(DS_BUTTON + "// vieja\n", theirs, { storeIt: false }); // base NO en store
+    const { c, dest } = setup(DS_BUTTON + "// vieja\n", theirs, {
+      storeIt: false,
+    }); // base NO en store
     const r = run(["update", "Button", "--dest", c, "--merge"]);
     expect(r.status).not.toBe(0); // rehusado → bloqueado
     expect(readFileSync(dest, "utf8")).toBe(theirs); // NO clobbeado — la adaptación intacta
@@ -144,7 +184,15 @@ describe("em-ui update --merge (end-to-end, caso de referencia ADR-028)", () => 
     storeBase(c, sha, Buffer.from(base));
     writeFileSync(
       join(c, "em-ui.manifest.json"),
-      JSON.stringify({ version: 1, source: "design-system", files: { [KEY]: { from: "components/Button.tsx", sha, hold: true } } }, null, 2) + "\n",
+      JSON.stringify(
+        {
+          version: 1,
+          source: "design-system",
+          files: { [KEY]: { from: "components/Button.tsx", sha, hold: true } },
+        },
+        null,
+        2,
+      ) + "\n",
     );
     run(["update", "Button", "--dest", c, "--merge"]);
     expect(readFileSync(dest, "utf8")).toBe(theirs); // congelado → sin tocar

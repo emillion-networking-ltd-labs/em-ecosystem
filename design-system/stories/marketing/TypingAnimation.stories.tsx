@@ -28,7 +28,11 @@ export const Default: Story = {
 
 // Loop — cycles through several words (type → pause → delete → next).
 export const Loop: Story = {
-  args: { children: undefined, words: ["Design.", "Develop.", "Deliver."], loop: true },
+  args: {
+    children: undefined,
+    words: ["Design.", "Develop.", "Deliver."],
+    loop: true,
+  },
   render: (args) => (
     <DemoCard>
       <TypingAnimation {...args} />

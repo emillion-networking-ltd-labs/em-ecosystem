@@ -19,28 +19,42 @@ describe("check-animation-import (ECO-195)", () => {
   });
 
   it("NO caza una mención en string/array ni comentario (precisión: exige `from`)", () => {
-    expect(animationImportHits(`files: ["framer-motion", "globals.css"],`)).toHaveLength(0);
-    expect(animationImportHits(`dep: "framer-motion (~30KB gzipped)",`)).toHaveLength(0);
-    expect(animationImportHits(`// migrado desde framer-motion`)).toHaveLength(0);
+    expect(
+      animationImportHits(`files: ["framer-motion", "globals.css"],`),
+    ).toHaveLength(0);
+    expect(
+      animationImportHits(`dep: "framer-motion (~30KB gzipped)",`),
+    ).toHaveLength(0);
+    expect(animationImportHits(`// migrado desde framer-motion`)).toHaveLength(
+      0,
+    );
   });
 
   it("NO caza el import canónico `motion/react`", () => {
     expect(
-      animationImportHits(`import { motion, AnimatePresence } from "motion/react";`),
+      animationImportHits(
+        `import { motion, AnimatePresence } from "motion/react";`,
+      ),
     ).toHaveLength(0);
   });
 
   it("respeta `animation-ok` (línea o anterior)", () => {
     expect(
-      animationImportHits(`import x from "framer-motion"; // animation-ok: legacy`),
+      animationImportHits(
+        `import x from "framer-motion"; // animation-ok: legacy`,
+      ),
     ).toHaveLength(0);
   });
 
   it("la flota está LIMPIA de `framer-motion` (guard permanente, enforce)", () => {
     expect(() =>
-      execFileSync("node", [join(DS, "scripts", "check-animation-import.mjs")], {
-        cwd: DS,
-      }),
+      execFileSync(
+        "node",
+        [join(DS, "scripts", "check-animation-import.mjs")],
+        {
+          cwd: DS,
+        },
+      ),
     ).not.toThrow();
   });
 });

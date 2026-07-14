@@ -42,7 +42,9 @@ export const WithValue: Story = { args: { value: "2026-06-27" } };
 // On error the field outline AND the label turn red (general rule across inputs).
 export const WithError: Story = { args: { error: "Pick a valid date" } };
 
-export const Disabled: Story = { args: { value: "2026-06-27", label: "Not editable", disabled: true } };
+export const Disabled: Story = {
+  args: { value: "2026-06-27", label: "Not editable", disabled: true },
+};
 
 // The 2 sizes (largest to smallest), with px.
 const SIZES = [
@@ -58,7 +60,12 @@ export const AllSizes: Story = {
         label: `${key} · ${px}px${key === "md" ? " (default)" : ""}`,
         node: (
           <div className="w-80">
-            <DateInput size={key} label={`Size ${key}`} value="2026-06-27" onChange={() => {}} />
+            <DateInput
+              size={key}
+              label={`Size ${key}`}
+              value="2026-06-27"
+              onChange={() => {}}
+            />
           </div>
         ),
       }))}

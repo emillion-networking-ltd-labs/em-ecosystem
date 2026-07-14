@@ -43,7 +43,7 @@ function ServiceCard({ service, index }: { service: Service; index: number }) {
     >
       <div
         id={service.id}
-        className="card-flat transition-all hover:border-border-components scroll-mt-24"
+        className="card-flat transition-all hover:border-line-control scroll-mt-24"
       >
         <div className="flex items-start gap-5">
           <span className="text-3xl font-black text-accent">

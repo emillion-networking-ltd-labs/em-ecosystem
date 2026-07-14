@@ -11,10 +11,10 @@ import { useIsTruncated } from "@/hooks/useIsTruncated";
 
 export const emailSelectorSpecs = {
   trigger:
-    "flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap border border-border-components transition-colors",
+    "flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap border border-line-control transition-colors",
   // ECO-117: estándar de menú/desplegable — contenedor rounded-xl + p-2; opción px-3 py-2 rounded-lg.
   dropdown:
-    "rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card",
+    "rounded-xl border border-line-strong bg-surface-elevated p-2 shadow-card",
   option:
     "flex w-full items-center gap-2 rounded-lg bg-surface-subtle px-3 py-2 text-body font-normal text-content-primary",
 };
@@ -59,8 +59,8 @@ export default function EmailSelector({
           onClick={() => setOpen(!open)}
           className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap transition-colors ${
             open
-              ? "border border-border-components bg-surface-subtle text-content-primary"
-              : "border border-border-components bg-transparent text-content-primary hover:bg-surface-subtle"
+              ? "border border-line-control bg-surface-subtle text-content-primary"
+              : "border border-line-control bg-transparent text-content-primary hover:bg-surface-subtle"
           }`}
         >
           <span ref={emailRef} className="max-w-[220px] truncate leading-none">
@@ -76,7 +76,7 @@ export default function EmailSelector({
 
       {open && (
         <div className="absolute left-0 top-full z-50 mt-1 min-w-[var(--dropdown-min)] animate-dropdown-down">
-          <div className="rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card">
+          <div className="rounded-xl border border-line-strong bg-surface-elevated p-2 shadow-card">
             <button
               type="button"
               onClick={() => setOpen(false)}

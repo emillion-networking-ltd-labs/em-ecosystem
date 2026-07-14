@@ -37,7 +37,10 @@ export const SingleLevel: Story = {
 // Two levels: one intermediate link + the active one (last, no href).
 export const TwoLevels: Story = {
   args: {
-    items: [{ label: "Projects", href: "/dashboard/projects" }, { label: "Detail" }],
+    items: [
+      { label: "Projects", href: "/dashboard/projects" },
+      { label: "Detail" },
+    ],
   },
 };
 
@@ -56,11 +59,11 @@ export const Collapsed: Story = {
   render: (args) => (
     <div className="flex flex-col gap-3">
       <p className="text-caption text-content-secondary font-mono">
-        On a narrow width (e.g. mobile) the path collapses to Home / … / Last. Click “…” to expand and
-        navigate the hidden levels.
+        On a narrow width (e.g. mobile) the path collapses to Home / … / Last.
+        Click “…” to expand and navigate the hidden levels.
       </p>
       <DemoCard block>
-        <div className="w-[300px] rounded-md border border-border-default bg-surface-primary p-3">
+        <div className="w-[300px] rounded-md border border-line-default bg-surface-primary p-3">
           <Breadcrumbs {...args} />
         </div>
       </DemoCard>

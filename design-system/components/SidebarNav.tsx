@@ -52,7 +52,7 @@ export const sidebarNavSpecs = {
   },
   flyout: {
     container:
-      "rounded-xl border-border-strong bg-surface-elevated shadow-card p-2 min-w-[var(--dropdown-min)]",
+      "rounded-xl border-line-strong bg-surface-elevated shadow-card p-2 min-w-[var(--dropdown-min)]",
     position:
       "createPortal to body, fixed, left: icon.right + 8px, top: icon.top",
     delay: "200ms hover delay (same as Tooltip)",
@@ -68,7 +68,7 @@ export const sidebarNavSpecs = {
     collapsed: "w-[68px]",
     expanded: "w-[300px]",
     bg: "bg-surface-primary",
-    border: "rounded-r-xl border border-border-strong",
+    border: "rounded-r-xl border border-line-strong",
     shadow: "shadow-card",
   },
 };
@@ -128,7 +128,7 @@ function SidebarFlyout({
 
   const flyoutEl = visible ? (
     <div
-      className="fixed z-9999 rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card min-w-[var(--dropdown-min)]"
+      className="fixed z-9999 rounded-xl border border-line-strong bg-surface-elevated p-2 shadow-card min-w-[var(--dropdown-min)]"
       style={style}
       onMouseEnter={startEnter}
       onMouseLeave={startLeave}

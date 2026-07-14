@@ -2,10 +2,26 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import FAQ from "@/components/sections/FAQ";
 
 const ITEMS = [
-  { question: "How long does a project take?", answer: "Between 3 and 6 weeks depending on scope and the level of polish you need." },
-  { question: "Do you work remotely?", answer: "Yes, with teams across the world — async-friendly and on your timezone when it matters." },
-  { question: "Do you offer maintenance?", answer: "Yes, optional monthly plans to keep everything fast, secure and up to date." },
-  { question: "How do we get started?", answer: "A short discovery call, a clear proposal, and a kickoff within the week." },
+  {
+    question: "How long does a project take?",
+    answer:
+      "Between 3 and 6 weeks depending on scope and the level of polish you need.",
+  },
+  {
+    question: "Do you work remotely?",
+    answer:
+      "Yes, with teams across the world — async-friendly and on your timezone when it matters.",
+  },
+  {
+    question: "Do you offer maintenance?",
+    answer:
+      "Yes, optional monthly plans to keep everything fast, secure and up to date.",
+  },
+  {
+    question: "How do we get started?",
+    answer:
+      "A short discovery call, a clear proposal, and a kickoff within the week.",
+  },
 ];
 
 const meta = {

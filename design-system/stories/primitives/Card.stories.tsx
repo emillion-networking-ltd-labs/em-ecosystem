@@ -6,7 +6,8 @@ const sample = (
   <>
     <h3 className="text-h3 font-semibold text-content-primary">Card title</h3>
     <p className="mt-2 text-body text-content-secondary">
-      Base surface for grouping content: background, border, radius and padding from tokens.
+      Base surface for grouping content: background, border, radius and padding
+      from tokens.
     </p>
   </>
 );
@@ -42,7 +43,9 @@ export const Elevated: Story = { args: { elevated: true } };
 export const Container: Story = { args: { size: "lg" } };
 
 // card-container — elevated, radius 24.
-export const ContainerElevated: Story = { args: { elevated: true, size: "lg" } };
+export const ContainerElevated: Story = {
+  args: { elevated: true, size: "lg" },
+};
 
 // The 4 surfaces (elevation × radius), each with its own story.
 const TYPES = [

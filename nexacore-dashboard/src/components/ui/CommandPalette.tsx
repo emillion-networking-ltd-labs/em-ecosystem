@@ -29,13 +29,13 @@ export const commandPaletteSpecs = {
   dialog: {
     overlay: "bg-(--overlay) fixed inset-0",
     container:
-      "max-w-[550px] rounded-xl border-border-strong bg-surface-primary shadow-card",
+      "max-w-[550px] rounded-xl border-line-strong bg-surface-primary shadow-card",
     position:
       "mobile: pt-[68px] px-4 (below header) | desktop: pt-[20vh] (Linear/Vercel pattern)",
   },
   input: {
     style:
-      "h-12 text-body leading-6 placeholder:text-content-placeholder px-4 border-b border-border-strong (matches Input md)",
+      "h-12 text-body leading-6 placeholder:text-content-placeholder px-4 border-b border-line-strong (matches Input md)",
     icon: "Search 16px text-content-tertiary",
   },
   item: {
@@ -194,11 +194,11 @@ export default function CommandPalette({ open, onClose }: CommandPaletteProps) {
       {/* Dialog — mobile: below header (68px), desktop: 20vh from top */}
       <div className="fixed inset-0 flex items-start justify-center px-4 pt-[68px] lg:px-0 lg:pt-[20vh]">
         <Command
-          className="w-full max-w-[550px] overflow-hidden rounded-xl border border-border-strong bg-surface-primary shadow-card"
+          className="w-full max-w-[550px] overflow-hidden rounded-xl border border-line-strong bg-surface-primary shadow-card"
           shouldFilter={true}
         >
           {/* Input — matches Input md (h-12 px-4 text-body placeholder:text-content-placeholder) */}
-          <div className="flex h-12 items-center gap-2 border-b border-border-strong px-4">
+          <div className="flex h-12 items-center gap-2 border-b border-line-strong px-4">
             <Search size={16} className="shrink-0 text-content-tertiary" />
             <Command.Input
               value={search}

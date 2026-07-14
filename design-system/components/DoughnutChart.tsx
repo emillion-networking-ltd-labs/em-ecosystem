@@ -65,7 +65,7 @@ export default function DoughnutChart({
                   if (!active || !payload?.length) return null;
                   const item = payload[0];
                   return (
-                    <div className="whitespace-nowrap rounded-lg border border-border-strong bg-surface-elevated px-4 py-3 shadow-card">
+                    <div className="whitespace-nowrap rounded-lg border border-line-strong bg-surface-elevated px-4 py-3 shadow-card">
                       <div className="flex items-center gap-1.5">
                         <span
                           className="h-2 w-2 shrink-0 rounded-sm"

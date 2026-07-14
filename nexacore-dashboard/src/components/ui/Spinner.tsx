@@ -10,7 +10,7 @@ export const spinnerSpecs = {
     md: "24px (h-6 w-6 border-2) — section loading (tables, cards)",
     lg: "32px (h-8 w-8 border-[3px]) — large sections",
   },
-  base: "animate-spin rounded-full border-border-strong border-t-content-primary",
+  base: "animate-spin rounded-full border-line-strong border-t-content-primary",
   delayPattern:
     "300ms delay before showing — prevents flash on fast responses. Use showSpinner state with setTimeout.",
 };
@@ -24,7 +24,7 @@ const sizeClasses = {
 export default function Spinner({ size = "md", className = "" }: SpinnerProps) {
   return (
     <div
-      className={`animate-spin rounded-full border-border-strong border-t-content-primary ${sizeClasses[size]} ${className}`}
+      className={`animate-spin rounded-full border-line-strong border-t-content-primary ${sizeClasses[size]} ${className}`}
       role="status"
       aria-label="Loading"
     />

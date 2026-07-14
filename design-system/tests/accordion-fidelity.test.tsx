@@ -21,7 +21,9 @@ const SURFACES = ["grouped", "separated"] as const;
 const INDICATORS = ["chevron", "plus"] as const;
 
 const classSet = (el: Element | null | undefined) =>
-  el ? (el.getAttribute("class") || "").split(/\s+/).filter(Boolean).sort() : null;
+  el
+    ? (el.getAttribute("class") || "").split(/\s+/).filter(Boolean).sort()
+    : null;
 
 // The structural elements whose classes the tv migration must preserve.
 function extract(container: HTMLElement) {
@@ -71,7 +73,12 @@ describe("Accordion — class fidelity (old map/concat vs new tv), per variation
               const neu = extract(newR.container);
               newR.unmount();
 
-              rows.push({ name, ok: JSON.stringify(old) === JSON.stringify(neu), old, neu });
+              rows.push({
+                name,
+                ok: JSON.stringify(old) === JSON.stringify(neu),
+                old,
+                neu,
+              });
 
               expect(neu.triggerTag).toBe(old.triggerTag);
               expect(neu.container).toEqual(old.container);
@@ -127,7 +134,11 @@ describe("SingleAccordion — class fidelity (old vs new tv)", () => {
     const mism = rows.filter((r) => !r.ok);
     writeFileSync(
       "/tmp/accordion-fidelity.json",
-      JSON.stringify({ total: rows.length, mismatches: mism.length, rows }, null, 2),
+      JSON.stringify(
+        { total: rows.length, mismatches: mism.length, rows },
+        null,
+        2,
+      ),
     );
     expect(mism.length).toBe(0);
   });

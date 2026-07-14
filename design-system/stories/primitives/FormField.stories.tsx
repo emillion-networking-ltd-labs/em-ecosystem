@@ -47,7 +47,9 @@ export const WithError: Story = {
     label: "Email",
     error: "This field is required",
     htmlFor: "email-error",
-    children: <Input id="email-error" placeholder="name@company.com" hasError />,
+    children: (
+      <Input id="email-error" placeholder="name@company.com" hasError />
+    ),
   },
 };
 
@@ -64,9 +66,17 @@ export const Form: Story = {
           <EmailSelector email="user@example.com" onChangeEmail={() => {}} />
         </FormField>
         <FormField label="Password" htmlFor="f-pass" required>
-          <Input id="f-pass" type="password" placeholder="At least 8 characters" />
+          <Input
+            id="f-pass"
+            type="password"
+            placeholder="At least 8 characters"
+          />
         </FormField>
-        <FormField label="Confirm password" htmlFor="f-confirm" error="Passwords don't match">
+        <FormField
+          label="Confirm password"
+          htmlFor="f-confirm"
+          error="Passwords don't match"
+        >
           <Input id="f-confirm" type="password" hasError />
         </FormField>
       </div>

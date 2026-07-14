@@ -39,11 +39,11 @@ const LINK: ButtonVariant[] = ["link", "link-underline"];
 // (el panel de documentación del catálogo). El estilo específico de cada variante:
 const VARIANT_CLASSES = {
   primary:
-    "bg-surface-inverse text-content-inverse border border-border-strong transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50",
+    "bg-surface-inverse text-content-inverse border border-line-strong transition-opacity hover:opacity-90 disabled:pointer-events-none disabled:opacity-50",
   secondary:
-    "bg-surface-tertiary text-content-secondary border border-border-strong transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
+    "bg-surface-tertiary text-content-secondary border border-line-strong transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   outline:
-    "bg-transparent text-content-primary border border-border-components transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
+    "bg-transparent text-content-primary border border-line-control transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   danger:
     "bg-transparent text-error border border-error-border transition-colors hover:bg-error-bg disabled:pointer-events-none disabled:opacity-50",
   // ghost: superficie de control (lleva la caja) pero SIN relleno ni borde visible — texto quieto que gana

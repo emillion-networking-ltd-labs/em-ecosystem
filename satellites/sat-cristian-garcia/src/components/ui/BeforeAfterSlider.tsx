@@ -33,7 +33,7 @@ export const beforeAfterSliderSpecs = {
   divider:
     "absolute bg-border-components — 1px line. Horizontal: full width, top:position%. Vertical: full height, left:position%.",
   handle:
-    "40×40px rounded-full bg-surface-primary border border-border-components. Centered on divider.",
+    "40×40px rounded-full bg-surface-primary border border-line-control. Centered on divider.",
   arrows:
     "h-4 w-4 svg. Horizontal: vertical arrows (⇅). Vertical: horizontal arrows (⇄, via 90deg rotate).",
   clipPath: {
@@ -218,7 +218,7 @@ export default function BeforeAfterSlider({
         <button
           type="button"
           aria-label="Arrastra para comparar antes y después"
-          className={`pointer-events-auto absolute top-1/2 left-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-border-components bg-surface-primary touch-none select-none ${cursorClass}`}
+          className={`pointer-events-auto absolute top-1/2 left-1/2 flex h-10 w-10 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-line-control bg-surface-primary touch-none select-none ${cursorClass}`}
           onMouseDown={(e) => {
             e.preventDefault();
             updatePosition(e.clientX, e.clientY);

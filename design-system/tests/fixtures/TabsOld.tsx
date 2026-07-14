@@ -33,9 +33,9 @@ const sizeClasses = {
 const variantStyles = {
   subtle: {
     container:
-      "bg-surface-elevated border border-border-default rounded-sm shadow-card",
+      "bg-surface-elevated border border-line-default rounded-sm shadow-card",
     active:
-      "bg-surface-secondary border border-border-strong font-semibold text-content-primary",
+      "bg-surface-secondary border border-line-strong font-semibold text-content-primary",
     inactive: "font-semibold text-content-primary hover:bg-surface-subtle",
   },
   nav: {
@@ -98,7 +98,7 @@ export default function TabsOld({
         const itemClassName = `whitespace-nowrap shrink-0 ${
           isNav
             ? `flex items-center gap-1 px-2 py-2 text-body h-9 text-left ${variant === "nav" ? "w-full" : ""} ${isActive ? styles.active : styles.inactive}`
-            : `text-center ${sizeClasses[size]} ${fullWidth ? "flex-1" : ""} ${index < tabs.length - 1 ? "border-r border-border-default" : ""} ${isActive ? styles.active : styles.inactive}`
+            : `text-center ${sizeClasses[size]} ${fullWidth ? "flex-1" : ""} ${index < tabs.length - 1 ? "border-r border-line-default" : ""} ${isActive ? styles.active : styles.inactive}`
         }`;
 
         return (

@@ -129,8 +129,8 @@ export default function CodePlayground() {
       >
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
           {/* Editor */}
-          <div className="rounded-xl border border-border-strong overflow-hidden">
-            <div className="px-4 py-2 bg-surface-secondary border-b border-border-strong">
+          <div className="rounded-xl border border-line-strong overflow-hidden">
+            <div className="px-4 py-2 bg-surface-secondary border-b border-line-strong">
               <span className="text-caption font-semibold text-content-primary">
                 Editor
               </span>
@@ -142,8 +142,8 @@ export default function CodePlayground() {
           </div>
 
           {/* Preview */}
-          <div className="rounded-xl border border-border-strong overflow-hidden">
-            <div className="px-4 py-2 bg-surface-secondary border-b border-border-strong">
+          <div className="rounded-xl border border-line-strong overflow-hidden">
+            <div className="px-4 py-2 bg-surface-secondary border-b border-line-strong">
               <span className="text-caption font-semibold text-content-primary">
                 Preview
               </span>

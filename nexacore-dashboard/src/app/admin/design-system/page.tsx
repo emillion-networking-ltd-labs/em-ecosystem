@@ -245,7 +245,7 @@ export default function DesignSystemPage() {
                     <p className="text-caption text-content-tertiary">
                       {entry.description}
                     </p>
-                    <div className="pt-2 border-t border-border-strong flex flex-col gap-0.5">
+                    <div className="pt-2 border-t border-line-strong flex flex-col gap-0.5">
                       {entry.files.map((file) => (
                         <code
                           key={file}

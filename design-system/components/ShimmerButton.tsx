@@ -2,7 +2,10 @@
 // ShimmerButton — Magic UI (MIT), adoptado (ECO-82; alineado en ECO-108: radio/color crudos → tokens del
 // sistema, base del Button primary — surface-inverse/content-inverse, rounded-md). Requiere keyframes
 // `shimmer-slide`/`spin-around` (tokens.css).
-import React, { type ComponentPropsWithoutRef, type CSSProperties } from "react";
+import React, {
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -46,7 +49,7 @@ export const ShimmerButton = React.forwardRef<
           } as CSSProperties
         }
         className={cn(
-          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border border-border-strong px-6 py-3 whitespace-nowrap text-content-inverse [background:var(--bg)]",
+          "group relative z-0 flex cursor-pointer items-center justify-center overflow-hidden [border-radius:var(--radius)] border border-line-strong px-6 py-3 whitespace-nowrap text-content-inverse [background:var(--bg)]",
           "transform-gpu transition-transform duration-300 ease-in-out active:translate-y-px",
           className,
         )}

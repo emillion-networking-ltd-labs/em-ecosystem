@@ -23,7 +23,7 @@ function Family({
 }) {
   const [ref, val] = useVar(token);
   return (
-    <div ref={ref} className="border-b border-border-default py-4">
+    <div ref={ref} className="border-b border-line-default py-4">
       <p className={`${className} text-content-primary`}>{label}</p>
       <TokenMeta token={token} value={val} />
     </div>
@@ -43,7 +43,7 @@ function Size({
   return (
     <div
       ref={ref}
-      className="flex items-baseline justify-between gap-6 border-b border-border-default py-3"
+      className="flex items-baseline justify-between gap-6 border-b border-line-default py-3"
     >
       <span className={`${className} text-content-primary`}>
         The quick brown fox
@@ -147,7 +147,7 @@ function UsageRow({
   when: string;
 }) {
   return (
-    <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-border-default py-3">
+    <div className="flex flex-wrap items-baseline justify-between gap-x-6 gap-y-1 border-b border-line-default py-3">
       <div className="min-w-0 text-content-primary">{sample}</div>
       <div className="shrink-0 text-right">
         <code className="text-caption font-mono text-content-secondary">
@@ -300,7 +300,7 @@ function GuideTable({
             {["Role", "Class", "When"].map((h) => (
               <th
                 key={h}
-                className="border-b border-border-strong px-3 py-2 text-caption font-semibold uppercase tracking-wider text-content-secondary"
+                className="border-b border-line-strong px-3 py-2 text-caption font-semibold uppercase tracking-wider text-content-secondary"
               >
                 {h}
               </th>
@@ -310,15 +310,15 @@ function GuideTable({
         <tbody>
           {rows.map((r) => (
             <tr key={r.role} className="align-top">
-              <td className="border-b border-border-default px-3 py-2 text-body text-content-primary">
+              <td className="border-b border-line-default px-3 py-2 text-body text-content-primary">
                 {r.role}
               </td>
-              <td className="border-b border-border-default px-3 py-2">
+              <td className="border-b border-line-default px-3 py-2">
                 <code className="rounded bg-surface-secondary px-1.5 py-0.5 text-caption font-mono text-content-primary">
                   {r.cls}
                 </code>
               </td>
-              <td className="border-b border-border-default px-3 py-2 text-body text-content-secondary">
+              <td className="border-b border-line-default px-3 py-2 text-body text-content-secondary">
                 {r.when}
               </td>
             </tr>
@@ -330,49 +330,173 @@ function GuideTable({
 }
 
 const G_HEADINGS = [
-  { role: "Page / section heading (h2)", cls: "text-h2 font-semibold text-content-primary", when: "Dashboard page header, modal title, in-app section heading." },
-  { role: "Card / widget / subsection title (h3)", cls: "text-h3 font-semibold text-content-primary", when: "Canonical card/widget title (charts, portfolio cards, sidebar wordmark). Marketing sections deliberately scale it to h2." },
-  { role: "Marketing headline — hero (h1)", cls: "font-display text-display-1 font-bold text-content-inverse", when: "Hero headline over a dark / media surface (use text-content-primary over light)." },
-  { role: "Marketing headline — section (h2)", cls: "font-display text-display-2 font-bold text-content-primary", when: "Marketing section headings. Use text-content-inverse over dark." },
-  { role: "Marketing headline — demo (h3)", cls: "font-display text-display-3 font-bold text-content-primary", when: "Small display specimens / demos." },
+  {
+    role: "Page / section heading (h2)",
+    cls: "text-h2 font-semibold text-content-primary",
+    when: "Dashboard page header, modal title, in-app section heading.",
+  },
+  {
+    role: "Card / widget / subsection title (h3)",
+    cls: "text-h3 font-semibold text-content-primary",
+    when: "Canonical card/widget title (charts, portfolio cards, sidebar wordmark). Marketing sections deliberately scale it to h2.",
+  },
+  {
+    role: "Marketing headline — hero (h1)",
+    cls: "font-display text-display-1 font-bold text-content-inverse",
+    when: "Hero headline over a dark / media surface (use text-content-primary over light).",
+  },
+  {
+    role: "Marketing headline — section (h2)",
+    cls: "font-display text-display-2 font-bold text-content-primary",
+    when: "Marketing section headings. Use text-content-inverse over dark.",
+  },
+  {
+    role: "Marketing headline — demo (h3)",
+    cls: "font-display text-display-3 font-bold text-content-primary",
+    when: "Small display specimens / demos.",
+  },
 ] as const;
 
 const G_BODY = [
-  { role: "Body / paragraph (subtitle, description, lead)", cls: "text-body font-normal text-content-secondary", when: "Supporting copy under a title — subtitles, descriptions, leads. Muted by default." },
-  { role: "Label / strong body", cls: "text-body font-semibold text-content-primary", when: "Inline emphasis, author names, figcaptions. (font-medium is NOT a DS weight.)" },
-  { role: "Input label (above the field)", cls: "text-body font-semibold text-content-primary", when: "Form label above the control. Error: text-error/75. Inline labels beside a checkbox/toggle/slider stay font-normal." },
-  { role: "Eyebrow / kicker (uppercase)", cls: "text-caption font-semibold uppercase tracking-wider text-content-secondary", when: "Small uppercase kicker above a marketing heading." },
+  {
+    role: "Body / paragraph (subtitle, description, lead)",
+    cls: "text-body font-normal text-content-secondary",
+    when: "Supporting copy under a title — subtitles, descriptions, leads. Muted by default.",
+  },
+  {
+    role: "Label / strong body",
+    cls: "text-body font-semibold text-content-primary",
+    when: "Inline emphasis, author names, figcaptions. (font-medium is NOT a DS weight.)",
+  },
+  {
+    role: "Input label (above the field)",
+    cls: "text-body font-semibold text-content-primary",
+    when: "Form label above the control. Error: text-error/75. Inline labels beside a checkbox/toggle/slider stay font-normal.",
+  },
+  {
+    role: "Eyebrow / kicker (uppercase)",
+    cls: "text-caption font-semibold uppercase tracking-wider text-content-secondary",
+    when: "Small uppercase kicker above a marketing heading.",
+  },
 ] as const;
 
 const G_CONTROLS = [
-  { role: "Button label — primary", cls: "text-body font-normal text-content-inverse", when: "Primary button (dark fill). Size: sm→text-caption, md→text-body, lg→text-h3." },
-  { role: "Button label — secondary", cls: "text-body font-normal text-content-secondary", when: "Secondary button (bg-surface-tertiary)." },
-  { role: "Button label — outline", cls: "text-body font-normal text-content-primary", when: "Outline button, Cancel actions." },
-  { role: "Button label — danger", cls: "text-body font-normal text-error", when: "Destructive button (paired with border-error-border)." },
-  { role: "Inline link", cls: "text-body font-normal text-content-primary/75 hover:text-content-primary", when: "In-flow link. Inactive /75 → full primary on hover (the DS link idiom)." },
-  { role: "Nav link / item", cls: "text-body font-normal text-content-primary/75 hover:text-content-primary", when: "Tabs nav, breadcrumbs, sidebar leaves. Active item: text-content-primary." },
-  { role: "Input value", cls: "text-body font-normal text-content-primary", when: "The typed value — it IS the data, so primary." },
-  { role: "Placeholder", cls: "text-body text-content-placeholder", when: "Placeholder text. Use the dedicated token, not a faded gray." },
-  { role: "Helper / error text", cls: "text-caption font-normal text-error", when: "Field validation / inline error under a control." },
-  { role: "Code / mono value", cls: "font-mono text-body font-normal text-content-primary", when: "Copyable codes, recovery codes, MFA digits, QR value." },
+  {
+    role: "Button label — primary",
+    cls: "text-body font-normal text-content-inverse",
+    when: "Primary button (dark fill). Size: sm→text-caption, md→text-body, lg→text-h3.",
+  },
+  {
+    role: "Button label — secondary",
+    cls: "text-body font-normal text-content-secondary",
+    when: "Secondary button (bg-surface-tertiary).",
+  },
+  {
+    role: "Button label — outline",
+    cls: "text-body font-normal text-content-primary",
+    when: "Outline button, Cancel actions.",
+  },
+  {
+    role: "Button label — danger",
+    cls: "text-body font-normal text-error",
+    when: "Destructive button (paired with border-error-border).",
+  },
+  {
+    role: "Inline link",
+    cls: "text-body font-normal text-content-primary/75 hover:text-content-primary",
+    when: "In-flow link. Inactive /75 → full primary on hover (the DS link idiom).",
+  },
+  {
+    role: "Nav link / item",
+    cls: "text-body font-normal text-content-primary/75 hover:text-content-primary",
+    when: "Tabs nav, breadcrumbs, sidebar leaves. Active item: text-content-primary.",
+  },
+  {
+    role: "Input value",
+    cls: "text-body font-normal text-content-primary",
+    when: "The typed value — it IS the data, so primary.",
+  },
+  {
+    role: "Placeholder",
+    cls: "text-body text-content-placeholder",
+    when: "Placeholder text. Use the dedicated token, not a faded gray.",
+  },
+  {
+    role: "Helper / error text",
+    cls: "text-caption font-normal text-error",
+    when: "Field validation / inline error under a control.",
+  },
+  {
+    role: "Code / mono value",
+    cls: "font-mono text-body font-normal text-content-primary",
+    when: "Copyable codes, recovery codes, MFA digits, QR value.",
+  },
 ] as const;
 
 const G_DATA = [
-  { role: "Table header", cls: "text-caption font-semibold uppercase tracking-wider text-content-secondary", when: "The th of a data table." },
-  { role: "Table cell", cls: "text-body font-normal text-content-primary", when: "The td datum." },
-  { role: "Table empty message", cls: "text-body font-normal text-content-secondary", when: "No results / empty row." },
-  { role: "Badge text", cls: "text-caption font-normal text-content-primary", when: "Default badge (sm). md→text-body; overlay→text-content-inverse; kbd→font-mono; variants use their semantic colour." },
-  { role: "Caption / metadata", cls: "text-caption font-normal text-content-secondary", when: "Informational meta (rating counts, kit labels, emails). Overview / token labels may add font-mono." },
-  { role: "Stat / metric (dashboard)", cls: "text-h1 font-normal text-content-primary", when: "MetricCard number, NumberTicker base. Tabular figures via tabular-nums. No weight = normal." },
-  { role: "Stat / metric (marketing / hero)", cls: "text-h1 font-black text-content-primary", when: "Hero / marketing stat. Over media use text-content-inverse; a true hero may scale to text-display-*." },
+  {
+    role: "Table header",
+    cls: "text-caption font-semibold uppercase tracking-wider text-content-secondary",
+    when: "The th of a data table.",
+  },
+  {
+    role: "Table cell",
+    cls: "text-body font-normal text-content-primary",
+    when: "The td datum.",
+  },
+  {
+    role: "Table empty message",
+    cls: "text-body font-normal text-content-secondary",
+    when: "No results / empty row.",
+  },
+  {
+    role: "Badge text",
+    cls: "text-caption font-normal text-content-primary",
+    when: "Default badge (sm). md→text-body; overlay→text-content-inverse; kbd→font-mono; variants use their semantic colour.",
+  },
+  {
+    role: "Caption / metadata",
+    cls: "text-caption font-normal text-content-secondary",
+    when: "Informational meta (rating counts, kit labels, emails). Overview / token labels may add font-mono.",
+  },
+  {
+    role: "Stat / metric (dashboard)",
+    cls: "text-h1 font-normal text-content-primary",
+    when: "MetricCard number, NumberTicker base. Tabular figures via tabular-nums. No weight = normal.",
+  },
+  {
+    role: "Stat / metric (marketing / hero)",
+    cls: "text-h1 font-black text-content-primary",
+    when: "Hero / marketing stat. Over media use text-content-inverse; a true hero may scale to text-display-*.",
+  },
 ] as const;
 
 const G_FEEDBACK = [
-  { role: "Toast title", cls: "text-caption font-semibold text-content-primary", when: "Toast heading." },
-  { role: "Toast description", cls: "text-caption font-normal text-content-secondary", when: "Toast body." },
-  { role: "Tooltip", cls: "text-caption font-normal text-content-primary", when: "Tooltip content." },
-  { role: "Empty state title", cls: "text-body font-semibold text-content-primary", when: "EmptyState heading." },
-  { role: "Empty state description", cls: "text-caption font-normal text-content-secondary", when: "EmptyState body — canonical is content-secondary (matches the Toast / modal description pattern)." },
+  {
+    role: "Toast title",
+    cls: "text-caption font-semibold text-content-primary",
+    when: "Toast heading.",
+  },
+  {
+    role: "Toast description",
+    cls: "text-caption font-normal text-content-secondary",
+    when: "Toast body.",
+  },
+  {
+    role: "Tooltip",
+    cls: "text-caption font-normal text-content-primary",
+    when: "Tooltip content.",
+  },
+  {
+    role: "Empty state title",
+    cls: "text-body font-semibold text-content-primary",
+    when: "EmptyState heading.",
+  },
+  {
+    role: "Empty state description",
+    cls: "text-caption font-normal text-content-secondary",
+    when: "EmptyState body — canonical is content-secondary (matches the Toast / modal description pattern).",
+  },
 ] as const;
 
 // Usage guide — CANONICAL text pattern per role. ECO-102: don't invent a size/weight; find the role, copy the class.
@@ -380,13 +504,19 @@ export const UsageGuide: Story = {
   name: "Usage guide",
   render: () => (
     <div className="mx-auto max-w-4xl px-6 py-10 text-content-primary">
-      <h1 className="text-display-3 font-display font-bold">Typography — usage guide</h1>
+      <h1 className="text-display-3 font-display font-bold">
+        Typography — usage guide
+      </h1>
       <p className="mt-3 max-w-2xl text-body text-content-secondary">
         The canonical pattern for every text role in the catalog.{" "}
-        <span className="font-semibold text-content-primary">ECO-102 — never invent a size or weight</span>:
-        find the equivalent role below and copy its exact class. Loose Tailwind sizes (<Code>text-sm</Code>/
-        <Code>lg</Code>/<Code>2xl</Code>), <Code>text-[Npx]</Code> and arbitrary <Code>leading</Code>/
-        <Code>tracking</Code> are non-DS — line-height and letter-spacing already live inside each size token.
+        <span className="font-semibold text-content-primary">
+          ECO-102 — never invent a size or weight
+        </span>
+        : find the equivalent role below and copy its exact class. Loose
+        Tailwind sizes (<Code>text-sm</Code>/<Code>lg</Code>/<Code>2xl</Code>),{" "}
+        <Code>text-[Npx]</Code> and arbitrary <Code>leading</Code>/
+        <Code>tracking</Code> are non-DS — line-height and letter-spacing
+        already live inside each size token.
       </p>
 
       <Group title="Headings &amp; display">
@@ -405,32 +535,38 @@ export const UsageGuide: Story = {
         <GuideTable rows={G_FEEDBACK} />
       </Group>
 
-      <Group title="Intensity rule" description="Pick the colour by the text's job, not its size.">
+      <Group
+        title="Intensity rule"
+        description="Pick the colour by the text's job, not its size."
+      >
         <ul className="ml-5 list-disc space-y-2 text-body text-content-secondary">
           <li>
-            <Code>content-primary</Code> — the actual content: titles, input values, table cells, body being
-            read, dashboard metrics.
+            <Code>content-primary</Code> — the actual content: titles, input
+            values, table cells, body being read, dashboard metrics.
           </li>
           <li>
-            <Code>content-secondary</Code> — anything that labels, describes or accompanies: subtitles, leads,
-            descriptions, functional captions, chart legends, eyebrows, table headers, muted meta.
+            <Code>content-secondary</Code> — anything that labels, describes or
+            accompanies: subtitles, leads, descriptions, functional captions,
+            chart legends, eyebrows, table headers, muted meta.
           </li>
           <li>
-            <Code>content-tertiary</Code> — ONLY enumerated faint decoration: price <Code>/period</Code>,
-            lightbox counter, calendar other-month day, separators / chevrons / ellipsis. Never for functional
-            labels, captions or legends.
+            <Code>content-tertiary</Code> — ONLY enumerated faint decoration:
+            price <Code>/period</Code>, lightbox counter, calendar other-month
+            day, separators / chevrons / ellipsis. Never for functional labels,
+            captions or legends.
           </li>
           <li>
-            <Code>content-inverse</Code> — any text on a dark surface or dark fill (primary button, overlay
-            badge, hero over media).
+            <Code>content-inverse</Code> — any text on a dark surface or dark
+            fill (primary button, overlay badge, hero over media).
           </li>
           <li>
-            <Code>content-primary/75</Code> — the inactive state of a link / nav item only (→ full{" "}
-            <Code>content-primary</Code> on hover).
+            <Code>content-primary/75</Code> — the inactive state of a link / nav
+            item only (→ full <Code>content-primary</Code> on hover).
           </li>
           <li>
-            <Code>text-error</Code> / <Code>text-warning</Code> / <Code>text-success</Code> /{" "}
-            <Code>text-info</Code> — semantic states. Don&apos;t fake them with a gray.
+            <Code>text-error</Code> / <Code>text-warning</Code> /{" "}
+            <Code>text-success</Code> / <Code>text-info</Code> — semantic
+            states. Don&apos;t fake them with a gray.
           </li>
         </ul>
       </Group>
@@ -442,21 +578,27 @@ export const UsageGuide: Story = {
             <Code>text-h1/h2/h3/body/caption/display-*</Code> token.
           </li>
           <li>
-            Arbitrary sizes: <Code>text-[14px]</Code>, any <Code>text-[…]</Code>.
+            Arbitrary sizes: <Code>text-[14px]</Code>, any <Code>text-[…]</Code>
+            .
           </li>
           <li>
-            Arbitrary <Code>leading-*</Code> / <Code>tracking-*</Code> — the size token already carries them
-            (only sanctioned exception: <Code>uppercase tracking-wider</Code> on eyebrow &amp; table header).
+            Arbitrary <Code>leading-*</Code> / <Code>tracking-*</Code> — the
+            size token already carries them (only sanctioned exception:{" "}
+            <Code>uppercase tracking-wider</Code> on eyebrow &amp; table
+            header).
           </li>
           <li>
-            Invented weights: <Code>font-medium</Code>, <Code>font-light</Code>, <Code>font-extrabold</Code>{" "}
-            are not DS weights. Allowed: <Code>font-normal</Code> (body / values / buttons),{" "}
-            <Code>font-semibold</Code> (UI titles / labels), <Code>font-bold</Code> / <Code>font-black</Code>{" "}
-            (marketing display &amp; stats).
+            Invented weights: <Code>font-medium</Code>, <Code>font-light</Code>,{" "}
+            <Code>font-extrabold</Code> are not DS weights. Allowed:{" "}
+            <Code>font-normal</Code> (body / values / buttons),{" "}
+            <Code>font-semibold</Code> (UI titles / labels),{" "}
+            <Code>font-bold</Code> / <Code>font-black</Code> (marketing display
+            &amp; stats).
           </li>
           <li>
-            Raw hex colours — always a <Code>content-*</Code>, <Code>content-inverse</Code>,{" "}
-            <Code>content-primary/75</Code> or semantic <Code>text-*</Code> token.
+            Raw hex colours — always a <Code>content-*</Code>,{" "}
+            <Code>content-inverse</Code>, <Code>content-primary/75</Code> or
+            semantic <Code>text-*</Code> token.
           </li>
         </ul>
       </Group>

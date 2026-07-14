@@ -50,10 +50,10 @@ export default function AccordionOld({
   const container =
     surface === "separated"
       ? "flex flex-col gap-3"
-      : `rounded-md ${borderless ? "" : "border border-border-strong"} overflow-hidden bg-surface-primary divide-y divide-border-default`;
+      : `rounded-md ${borderless ? "" : "border border-line-strong"} overflow-hidden bg-surface-primary divide-y divide-border-default`;
   const itemClass =
     surface === "separated"
-      ? "overflow-hidden rounded-md border border-border-strong bg-surface-primary"
+      ? "overflow-hidden rounded-md border border-line-strong bg-surface-primary"
       : "";
 
   return (
@@ -116,7 +116,7 @@ export function SingleAccordionOld({
 
   return (
     <div
-      className={`rounded-md border border-border-strong overflow-hidden bg-surface-primary ${className}`}
+      className={`rounded-md border border-line-strong overflow-hidden bg-surface-primary ${className}`}
     >
       <button
         onClick={() => setOpen(!open)}

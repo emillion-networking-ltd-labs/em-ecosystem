@@ -69,17 +69,17 @@ const colorGroups: ColorGroup[] = [
       {
         name: "default (5%) — dividers, separators",
         value: "rgba(0,0,0,0.05)",
-        cssVar: "--border-default",
+        cssVar: "--line-default",
       },
       {
         name: "strong (8%) — cards, containers",
         value: "rgba(0,0,0,0.08)",
-        cssVar: "--border-strong",
+        cssVar: "--line-strong",
       },
       {
         name: "components (15%) — inputs, buttons, selects",
         value: "rgba(0,0,0,0.15)",
-        cssVar: "--border-components",
+        cssVar: "--line-control",
       },
       {
         name: "outline-solid primary/75",
@@ -165,22 +165,22 @@ const unusedColorGroups: ColorGroup[] = [
       {
         name: "subtle (3%)",
         value: "rgba(0,0,0,0.03)",
-        cssVar: "--border-subtle",
+        cssVar: "--line-subtle",
       },
       {
         name: "default (5%) — dividers, separators",
         value: "rgba(0,0,0,0.05)",
-        cssVar: "--border-default",
+        cssVar: "--line-default",
       },
       {
         name: "strong (8%) — cards, containers",
         value: "rgba(0,0,0,0.08)",
-        cssVar: "--border-strong",
+        cssVar: "--line-strong",
       },
       {
         name: "components (15%) — inputs, selects, buttons, checkboxes",
         value: "rgba(0,0,0,0.15)",
-        cssVar: "--border-components",
+        cssVar: "--line-control",
       },
     ],
   },
@@ -362,10 +362,10 @@ function ColorGrid({ groups }: { groups: ColorGroup[] }) {
             {group.tokens.map((token, i) => (
               <div
                 key={`${token.cssVar}-${i}`}
-                className="flex items-center gap-3 p-2 rounded-lg border border-border-strong"
+                className="flex items-center gap-3 p-2 rounded-lg border border-line-strong"
               >
                 <div
-                  className="w-10 h-10 rounded-md border border-border-strong shrink-0"
+                  className="w-10 h-10 rounded-md border border-line-strong shrink-0"
                   style={{ backgroundColor: token.value }}
                 />
                 <div className="min-w-0">
@@ -391,7 +391,7 @@ function ColorSection() {
       <SectionTitle>Colors — Verified</SectionTitle>
       <ColorGrid groups={colorGroups} />
 
-      <div className="border-t border-border-strong pt-6">
+      <div className="border-t border-line-strong pt-6">
         <SectionTitle>Colors — Available</SectionTitle>
         <div className="opacity-60">
           <ColorGrid groups={unusedColorGroups} />
@@ -411,7 +411,7 @@ function TypographySection() {
         <p className="text-body font-semibold text-content-primary">
           Font Family
         </p>
-        <div className="p-3 rounded-md border border-border-strong">
+        <div className="p-3 rounded-md border border-line-strong">
           <p className="text-caption font-mono text-content-primary/50">
             -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, &quot;Noto
             Sans&quot;, Helvetica, Arial, sans-serif
@@ -427,7 +427,7 @@ function TypographySection() {
       <div className="space-y-2">
         <p className="text-body font-semibold text-content-primary">Weights</p>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div className="p-3 rounded-md border border-border-strong">
+          <div className="p-3 rounded-md border border-line-strong">
             <p className="text-body font-normal text-content-primary">
               font-normal (400)
             </p>
@@ -435,7 +435,7 @@ function TypographySection() {
               Body, buttons, links, inputs, descriptions
             </p>
           </div>
-          <div className="p-3 rounded-md border border-border-strong">
+          <div className="p-3 rounded-md border border-line-strong">
             <p className="text-body font-semibold text-content-primary">
               font-semibold (600)
             </p>
@@ -480,7 +480,7 @@ function TypographySection() {
           ].map((h) => (
             <div
               key={h.level}
-              className="flex flex-col gap-1 p-3 rounded-md border border-border-strong sm:flex-row sm:items-center sm:gap-4"
+              className="flex flex-col gap-1 p-3 rounded-md border border-line-strong sm:flex-row sm:items-center sm:gap-4"
             >
               <span className="text-caption text-content-primary/50 sm:w-20 shrink-0">
                 {h.level}
@@ -506,7 +506,7 @@ function TypographySection() {
           {typographyTokens.map((token) => (
             <div
               key={token.name}
-              className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 p-3 rounded-md border border-border-strong"
+              className="flex flex-col sm:flex-row sm:items-baseline gap-2 sm:gap-4 p-3 rounded-md border border-line-strong"
             >
               <div className="sm:w-40 shrink-0">
                 <p className="text-caption font-normal text-content-primary">
@@ -583,7 +583,7 @@ function RadiusSection() {
         {radiusTokens.map((token) => (
           <div key={token.name} className="flex flex-col items-center gap-2">
             <div
-              className="w-16 h-16 bg-surface-tertiary border border-border-strong"
+              className="w-16 h-16 bg-surface-tertiary border border-line-strong"
               style={{ borderRadius: token.value }}
             />
             <div className="text-center">
@@ -609,7 +609,7 @@ function ShadowSection() {
         {shadowTokens.map((token) => (
           <div key={token.name} className="flex flex-col items-center gap-3">
             <div
-              className="w-32 h-20 rounded-3xl bg-surface-primary border border-border-strong"
+              className="w-32 h-20 rounded-3xl bg-surface-primary border border-line-strong"
               style={{ boxShadow: token.value }}
             />
             <div className="text-center">
@@ -633,7 +633,7 @@ function IconSizeSection() {
       <SectionTitle>Icon Sizes</SectionTitle>
       <div className="flex flex-wrap items-end gap-8">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center justify-center w-16 h-16 rounded-xl border border-border-strong bg-surface-primary">
+          <div className="flex items-center justify-center w-16 h-16 rounded-xl border border-line-strong bg-surface-primary">
             <AlertTriangle size={16} className="text-content-primary/50" />
           </div>
           <div className="text-center">
@@ -644,7 +644,7 @@ function IconSizeSection() {
           </div>
         </div>
         <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center justify-center w-16 h-16 rounded-xl border border-border-strong bg-surface-primary">
+          <div className="flex items-center justify-center w-16 h-16 rounded-xl border border-line-strong bg-surface-primary">
             <Settings size={24} className="text-content-primary/50" />
           </div>
           <div className="text-center">
@@ -655,7 +655,7 @@ function IconSizeSection() {
           </div>
         </div>
         <div className="flex flex-col items-center gap-3">
-          <div className="flex items-center justify-center w-16 h-16 rounded-xl border border-border-strong bg-surface-primary">
+          <div className="flex items-center justify-center w-16 h-16 rounded-xl border border-line-strong bg-surface-primary">
             <Inbox size={32} className="text-content-primary/50" />
           </div>
           <div className="text-center">

@@ -20,9 +20,12 @@ export const Default: Story = {
       <div className="overflow-hidden rounded-xl">
         <AuroraBackground {...args} className="h-72">
           <div className="relative z-10 flex flex-col items-center gap-4 px-4 text-center">
-            <h2 className="text-display-2 font-display">Launch in days, not quarters</h2>
+            <h2 className="text-display-2 font-display">
+              Launch in days, not quarters
+            </h2>
             <p className="max-w-xl text-content-secondary">
-              A living backdrop for hero sections — quiet motion that keeps the headline center stage.
+              A living backdrop for hero sections — quiet motion that keeps the
+              headline center stage.
             </p>
           </div>
         </AuroraBackground>
@@ -38,7 +41,9 @@ export const FullField: Story = {
     <DemoCard block className="overflow-hidden">
       <div className="overflow-hidden rounded-xl">
         <AuroraBackground {...args} className="h-72">
-          <h2 className="relative z-10 text-display-2 font-display">Edge to edge</h2>
+          <h2 className="relative z-10 text-display-2 font-display">
+            Edge to edge
+          </h2>
         </AuroraBackground>
       </div>
     </DemoCard>

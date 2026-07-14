@@ -22,7 +22,13 @@ const GAPS = [16, 24, 32, 48] as const;
 const STROKES = [1, 1.5, 2, 3] as const;
 
 // The bounded surface the absolute pattern lives on (the inner tile; DemoCard frames it as the project Card).
-const Tile = ({ h = "h-56", children }: { h?: string; children: ReactNode }) => (
+const Tile = ({
+  h = "h-56",
+  children,
+}: {
+  h?: string;
+  children: ReactNode;
+}) => (
   <div
     className={`relative isolate flex ${h} w-full items-center justify-center overflow-hidden rounded-xl bg-surface-primary`}
   >
@@ -52,7 +58,11 @@ export const Strokes: Story = {
         block: true,
         node: (
           <Tile>
-            <GridPattern gap={28} stroke={stroke} className="text-border-strong" />
+            <GridPattern
+              gap={28}
+              stroke={stroke}
+              className="text-border-strong"
+            />
           </Tile>
         ),
       }))}

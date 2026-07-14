@@ -62,7 +62,7 @@ function ContactMethodCard({
         // valor es select-text). El click sigue navegando; arrastrar selecciona.
         draggable={false}
         style={style}
-        className={`card-flat block transition-colors hover:border-border-components ${className}`}
+        className={`card-flat block transition-colors hover:border-line-control ${className}`}
       >
         {inner}
       </a>
@@ -139,7 +139,7 @@ export default function ContactoPage() {
             <div
               ref={trustBadgeFade.ref}
               style={trustBadgeFade.style}
-              className="mx-auto mb-10 flex max-w-md items-center justify-center gap-2 rounded-md border border-border-strong bg-surface-secondary px-4 py-2.5"
+              className="mx-auto mb-10 flex max-w-md items-center justify-center gap-2 rounded-md border border-line-strong bg-surface-secondary px-4 py-2.5"
             >
               <Clock size={16} className="text-accent" />
               <p className="text-caption text-content-secondary">

@@ -17,7 +17,11 @@ const meta = {
     const [currentPage, setCurrentPage] = useState(args.currentPage);
     return (
       <DemoCard>
-        <Pagination totalPages={args.totalPages} currentPage={currentPage} onPageChange={setCurrentPage} />
+        <Pagination
+          totalPages={args.totalPages}
+          currentPage={currentPage}
+          onPageChange={setCurrentPage}
+        />
       </DemoCard>
     );
   },

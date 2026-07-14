@@ -8,7 +8,10 @@ const meta = {
   tags: ["autodocs"],
   args: {},
   argTypes: {
-    orientation: { control: "inline-radio", options: ["horizontal", "vertical"] },
+    orientation: {
+      control: "inline-radio",
+      options: ["horizontal", "vertical"],
+    },
   },
 } satisfies Meta<typeof Divider>;
 

@@ -11,13 +11,13 @@ type PaginationProps = {
 };
 
 const pageBase =
-  "flex h-8 w-8 items-center justify-center rounded-md text-caption font-normal border border-border-components transition-colors";
+  "flex h-8 w-8 items-center justify-center rounded-md text-caption font-normal border border-line-control transition-colors";
 const pageActive =
   "bg-surface-inverse text-content-inverse transition-opacity hover:opacity-90";
 const pageInactive =
   "bg-surface-primary text-content-primary hover:bg-surface-subtle";
 const arrowBase =
-  "flex h-8 w-8 items-center justify-center rounded-md border border-border-components text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50";
+  "flex h-8 w-8 items-center justify-center rounded-md border border-line-control text-content-primary transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50";
 
 export const paginationSpecs = {
   page: {

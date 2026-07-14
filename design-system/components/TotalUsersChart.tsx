@@ -37,7 +37,7 @@ const COLORS = {
   line: "var(--color-content-primary)",
   compare: "var(--color-chart-1)",
   ticks: "var(--color-content-tertiary)",
-  grid: "var(--color-border-default)",
+  grid: "var(--color-line-default)",
 };
 
 export default function TotalUsersChart() {
@@ -90,7 +90,7 @@ export default function TotalUsersChart() {
             content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
               return (
-                <div className="whitespace-nowrap rounded-lg border border-border-strong bg-surface-elevated px-4 py-3 shadow-card">
+                <div className="whitespace-nowrap rounded-lg border border-line-strong bg-surface-elevated px-4 py-3 shadow-card">
                   <p className="mb-1 text-caption font-semibold capitalize text-content-primary">
                     {String(label).toLowerCase()}
                   </p>
@@ -108,7 +108,7 @@ export default function TotalUsersChart() {
                 </div>
               );
             }}
-            cursor={{ stroke: "var(--color-border-default)", strokeWidth: 1 }}
+            cursor={{ stroke: "var(--color-line-default)", strokeWidth: 1 }}
           />
           <Line
             type="monotone"

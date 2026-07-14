@@ -24,7 +24,7 @@ interface InputProps extends Omit<
 }
 
 const BOX_BASE =
-  "flex items-center gap-2 rounded-lg border border-border-components transition-colors";
+  "flex items-center gap-2 rounded-lg border border-line-control transition-colors";
 const SIZE_CLASSES = {
   sm: "h-10 px-3 text-body",
   md: "h-12 px-4 text-body",

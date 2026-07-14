@@ -43,7 +43,7 @@ export const selectSpecs = {
   dropdown: {
     // ECO-117: estándar de menú/desplegable — contenedor rounded-xl + p-2; opción px-3 py-2 rounded-lg.
     container:
-      "rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card max-h-64 overflow-auto",
+      "rounded-xl border border-line-strong bg-surface-primary p-2 shadow-card max-h-64 overflow-auto",
   },
   option: {
     base: "flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-body font-normal transition-colors",
@@ -197,7 +197,7 @@ export default function Select({
     ? "relative block w-full"
     : "relative inline-block";
   const triggerLayoutClass = fullWidth
-    ? "w-full justify-between rounded-lg border border-border-components px-4"
+    ? "w-full justify-between rounded-lg border border-line-control px-4"
     : "justify-center rounded-md px-6";
   const dropdownAnchorClass = fullWidth
     ? "left-0 right-0"
@@ -239,7 +239,7 @@ export default function Select({
           aria-activedescendant={
             focusedIndex >= 0 ? `${listboxId}-opt-${focusedIndex}` : undefined
           }
-          className={`absolute z-50 ${fullWidth ? "" : "w-fit min-w-[160px]"} bg-surface-primary border border-border-strong rounded-xl p-2 shadow-card flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${dropdownAnchorClass}`}
+          className={`absolute z-50 ${fullWidth ? "" : "w-fit min-w-[160px]"} bg-surface-primary border border-line-strong rounded-xl p-2 shadow-card flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${dropdownAnchorClass}`}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;

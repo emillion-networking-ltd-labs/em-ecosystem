@@ -33,7 +33,13 @@ const INTENSITIES = [
 ] as const;
 
 // The bounded surface the absolute halo lives on (the inner tile; DemoCard frames it as the project Card).
-const Surface = ({ h = "h-56", children }: { h?: string; children: ReactNode }) => (
+const Surface = ({
+  h = "h-56",
+  children,
+}: {
+  h?: string;
+  children: ReactNode;
+}) => (
   <div
     className={`relative isolate flex ${h} w-full items-center justify-center overflow-hidden rounded-xl bg-surface-primary`}
   >

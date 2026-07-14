@@ -6,7 +6,12 @@ const meta = {
   component: Container,
   tags: ["autodocs"],
   args: { size: "lg" },
-  argTypes: { size: { control: "inline-radio", options: ["prose", "sm", "md", "lg", "xl", "full"] } },
+  argTypes: {
+    size: {
+      control: "inline-radio",
+      options: ["prose", "sm", "md", "lg", "xl", "full"],
+    },
+  },
 } satisfies Meta<typeof Container>;
 
 export default meta;
@@ -23,7 +28,7 @@ const SIZES = [
 ] as const;
 
 const Box = ({ label }: { label: string }) => (
-  <div className="rounded-lg border border-border-strong bg-surface-secondary px-4 py-3 text-content-secondary">
+  <div className="rounded-lg border border-line-strong bg-surface-secondary px-4 py-3 text-content-secondary">
     {label}
   </div>
 );

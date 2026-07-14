@@ -107,7 +107,7 @@ export default function ContactForm() {
           onChange={(e) => setMessage(e.target.value)}
           rows={4}
           placeholder="Quiero perder grasa, ganar músculo..."
-          className="w-full resize-none rounded-md border border-border-components bg-transparent px-4 py-3 text-body text-content-primary outline-hidden transition-colors placeholder:text-content-placeholder focus:outline-2 focus:outline-content-primary/75"
+          className="w-full resize-none rounded-md border border-line-control bg-transparent px-4 py-3 text-body text-content-primary outline-hidden transition-colors placeholder:text-content-placeholder focus:outline-2 focus:outline-content-primary/75"
         />
       </FormField>
 

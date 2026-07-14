@@ -39,7 +39,12 @@ export const PositiveTrend: Story = {
 
 // NegativeTrend — a downward trend renders a red delta with a down arrow.
 export const NegativeTrend: Story = {
-  args: { label: "Churned Users", value: "312", trend: -4.2, colorVariant: "blue" },
+  args: {
+    label: "Churned Users",
+    value: "312",
+    trend: -4.2,
+    colorVariant: "blue",
+  },
 };
 
 // NoTrend — trend is optional; without it only the value shows (no delta).

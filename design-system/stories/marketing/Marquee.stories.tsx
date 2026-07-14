@@ -20,7 +20,9 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // Chips de logos = primitivo Badge (etiqueta no interactiva del sistema), no un span pill ad-hoc.
-const Pill = ({ label }: { label: string }) => <Badge variant="default">{label}</Badge>;
+const Pill = ({ label }: { label: string }) => (
+  <Badge variant="default">{label}</Badge>
+);
 
 const LOGOS = ["Next.js", "Prisma", "NestJS", "Tailwind", "Storybook"];
 

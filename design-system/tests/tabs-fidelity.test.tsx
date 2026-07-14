@@ -39,7 +39,12 @@ function extract(container: HTMLElement) {
   };
 }
 
-const rows: { name: string; ok: boolean; old: ReturnType<typeof extract>; neu: ReturnType<typeof extract> }[] = [];
+const rows: {
+  name: string;
+  ok: boolean;
+  old: ReturnType<typeof extract>;
+  neu: ReturnType<typeof extract>;
+}[] = [];
 
 describe("Tabs — fidelidad de atributos (viejo raw/imperativo vs nuevo tv), por caso", () => {
   for (const variant of VARIANTS) {
@@ -79,7 +84,11 @@ describe("Tabs — fidelidad de atributos (viejo raw/imperativo vs nuevo tv), po
     const mism = rows.filter((r) => !r.ok);
     writeFileSync(
       "/tmp/tabs-fidelity.json",
-      JSON.stringify({ total: rows.length, mismatches: mism.length, rows }, null, 2),
+      JSON.stringify(
+        { total: rows.length, mismatches: mism.length, rows },
+        null,
+        2,
+      ),
     );
     expect(mism.length).toBe(0);
   });

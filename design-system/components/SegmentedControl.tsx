@@ -11,7 +11,7 @@ export type SegmentedVariant = "primary" | "secondary" | "outline";
 
 // `gap-1` entre segmentos = el mismo `p-1` (4px) que el contenedor deja alrededor → respiro uniforme.
 const CONTAINER =
-  "inline-flex gap-1 rounded-lg border border-border-strong bg-surface-subtle p-1";
+  "inline-flex gap-1 rounded-lg border border-line-strong bg-surface-subtle p-1";
 
 // Superficie de docs (consumida por ComponentShowcase). Refleja la COMPOSICIÓN, no clases re-implementadas.
 export const segmentedControlSpecs = {

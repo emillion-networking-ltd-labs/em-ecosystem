@@ -88,7 +88,7 @@ export default function ActionDropdown({
       {open && (
         <div
           ref={menuRef}
-          className="fixed z-50 w-[241px] rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card"
+          className="fixed z-50 w-[241px] rounded-xl border border-line-strong bg-surface-primary p-2 shadow-card"
           style={pos}
         >
           <Can permission="users:write">

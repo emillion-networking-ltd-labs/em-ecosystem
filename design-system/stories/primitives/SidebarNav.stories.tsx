@@ -96,7 +96,7 @@ function InteractiveSidebar({
 
   const footer = (
     <div
-      className={`flex items-center gap-2 border-t border-border-default px-3 py-3 ${
+      className={`flex items-center gap-2 border-t border-line-default px-3 py-3 ${
         collapsed ? "justify-center" : ""
       }`}
     >
@@ -124,11 +124,11 @@ function InteractiveSidebar({
 
   return (
     <aside
-      className={`flex h-[560px] flex-col overflow-hidden rounded-r-xl border border-border-strong bg-surface-primary shadow-card transition-[width] duration-200 ${
+      className={`flex h-[560px] flex-col overflow-hidden rounded-r-xl border border-line-strong bg-surface-primary shadow-card transition-[width] duration-200 ${
         collapsed ? "w-[68px]" : "w-[300px]"
       }`}
     >
-      <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-dashed border-border-default px-4">
+      <div className="flex h-[68px] shrink-0 items-center justify-between border-b border-dashed border-line-default px-4">
         {!collapsed && (
           <span className="text-h3 font-semibold text-content-primary">
             NexaCore

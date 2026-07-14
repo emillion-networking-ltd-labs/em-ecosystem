@@ -34,7 +34,7 @@ export const selectSpecs = {
   dropdown: {
     // ECO-117: estándar de menú/desplegable — contenedor rounded-xl + p-2; opción px-3 py-2 rounded-lg.
     container:
-      "rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card max-h-64 overflow-auto",
+      "rounded-xl border border-line-strong bg-surface-elevated p-2 shadow-card max-h-64 overflow-auto",
   },
   option: {
     base: "flex items-center gap-2 whitespace-nowrap px-3 py-2 rounded-lg text-body font-normal transition-colors",
@@ -213,7 +213,7 @@ export default function Select({
           aria-activedescendant={
             focusedIndex >= 0 ? `${listboxId}-opt-${focusedIndex}` : undefined
           }
-          className={`absolute z-50 w-fit min-w-[var(--dropdown-min)] bg-surface-elevated border border-border-strong rounded-xl p-2 shadow-card flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
+          className={`absolute z-50 w-fit min-w-[var(--dropdown-min)] bg-surface-elevated border border-line-strong rounded-xl p-2 shadow-card flex flex-col gap-0.5 max-h-64 overflow-auto ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
         >
           {options.map((option, index) => {
             const isSelected = option.value === value;

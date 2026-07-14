@@ -203,7 +203,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
       className={
         bare
           ? ""
-          : "h-full rounded-xl border border-border-strong bg-surface-primary p-6"
+          : "h-full rounded-xl border border-line-strong bg-surface-primary p-6"
       }
     >
       {!bare && (
@@ -268,7 +268,7 @@ export default function TrustedDevices({ bare }: { bare?: boolean }) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: -8 }}
               transition={{ duration: 0.35, ease: [0.4, 0, 0.2, 1] }}
-              className="flex flex-col gap-3 rounded-xl border border-border-components p-4 sm:flex-row sm:items-center sm:justify-between"
+              className="flex flex-col gap-3 rounded-xl border border-line-control p-4 sm:flex-row sm:items-center sm:justify-between"
             >
               <div className="flex min-w-0 flex-1 items-center gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-tertiary">

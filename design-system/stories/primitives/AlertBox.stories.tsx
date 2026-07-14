@@ -8,7 +8,10 @@ const meta = {
   tags: ["autodocs"],
   args: { variant: "info", children: "Your session expires in 5 minutes." },
   argTypes: {
-    variant: { control: "select", options: ["warning", "error", "info", "success"] },
+    variant: {
+      control: "select",
+      options: ["warning", "error", "info", "success"],
+    },
   },
   render: (args) => (
     <DemoCard>
@@ -22,9 +25,15 @@ type Story = StoryObj<typeof meta>;
 
 // One story per variant (the design axis), before AllVariants groups them.
 export const Info: Story = {};
-export const Warning: Story = { args: { variant: "warning", children: "Double-check the details." } };
-export const Error: Story = { args: { variant: "error", children: "Couldn't save." } };
-export const Success: Story = { args: { variant: "success", children: "Changes saved." } };
+export const Warning: Story = {
+  args: { variant: "warning", children: "Double-check the details." },
+};
+export const Error: Story = {
+  args: { variant: "error", children: "Couldn't save." },
+};
+export const Success: Story = {
+  args: { variant: "success", children: "Changes saved." },
+};
 
 const VARIANTS = ["warning", "error", "info", "success"] as const;
 const variantCopy: Record<(typeof VARIANTS)[number], string> = {

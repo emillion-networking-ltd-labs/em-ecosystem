@@ -22,7 +22,13 @@ const GAPS = [12, 16, 24, 32] as const;
 const RADII = [1, 1.5, 2, 3] as const;
 
 // The bounded surface the absolute pattern lives on (the inner tile; DemoCard frames it as the project Card).
-const Tile = ({ h = "h-56", children }: { h?: string; children: ReactNode }) => (
+const Tile = ({
+  h = "h-56",
+  children,
+}: {
+  h?: string;
+  children: ReactNode;
+}) => (
   <div
     className={`relative isolate flex ${h} w-full items-center justify-center overflow-hidden rounded-xl bg-surface-primary`}
   >
@@ -52,7 +58,11 @@ export const Radii: Story = {
         block: true,
         node: (
           <Tile>
-            <DotPattern gap={20} radius={radius} className="text-border-strong" />
+            <DotPattern
+              gap={20}
+              radius={radius}
+              className="text-border-strong"
+            />
           </Tile>
         ),
       }))}

@@ -20,7 +20,7 @@ function MotionRow({ key_ }: { key_: string }) {
       ref={ref}
       className="group flex cursor-pointer items-center gap-4 py-3"
     >
-      <div className="relative h-10 flex-1 overflow-hidden rounded-md border border-border-strong bg-surface-tertiary">
+      <div className="relative h-10 flex-1 overflow-hidden rounded-md border border-line-strong bg-surface-tertiary">
         <div
           className="absolute left-1 top-1 h-8 w-8 rounded bg-content-primary transition-transform group-hover:translate-x-[300px]"
           style={{
@@ -39,7 +39,7 @@ function ShadowCell({ token, label }: { token: string; label: string }) {
   return (
     <div ref={ref} className="flex flex-col gap-3">
       <div
-        className="h-20 w-full rounded-xl border border-border-default bg-surface-primary"
+        className="h-20 w-full rounded-xl border border-line-default bg-surface-primary"
         style={{ boxShadow: `var(${token})` }}
       />
       <TokenMeta token={token} value={val ? label : "—"} />

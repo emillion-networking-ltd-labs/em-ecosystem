@@ -17,7 +17,7 @@ const sizeClasses = {
 };
 
 const toneClasses = {
-  default: "border-border-strong border-t-content-primary",
+  default: "border-line-strong border-t-content-primary",
   current: "border-current/20 border-t-current",
 };
 
@@ -29,7 +29,7 @@ export const spinnerCircleSpecs = {
     lg: "32px (h-8 w-8 border-[var(--border-width-lg)]) — large sections",
   },
   tones: {
-    default: "border-border-strong border-t-content-primary",
+    default: "border-line-strong border-t-content-primary",
     current:
       "border-current/20 border-t-current — hereda el color del contexto (botón)",
   },

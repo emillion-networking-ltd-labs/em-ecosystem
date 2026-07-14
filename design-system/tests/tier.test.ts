@@ -15,9 +15,18 @@ describe("check-tier (ECO-202)", () => {
   it("detecta pieza sin @ds-tier o con valor inválido; exime el tier válido", () => {
     const dir = mkdtempSync(join(tmpdir(), "tier-"));
     try {
-      writeFileSync(join(dir, "Tiered.tsx"), '"use client";\n// @ds-tier: core — primitivo\nexport const Tiered = () => null;\n');
-      writeFileSync(join(dir, "Bare.tsx"), '"use client";\nexport const Bare = () => null;\n');
-      writeFileSync(join(dir, "BadValue.tsx"), '// @ds-tier: fancy — no válido\nexport const BadValue = () => null;\n');
+      writeFileSync(
+        join(dir, "Tiered.tsx"),
+        '"use client";\n// @ds-tier: core — primitivo\nexport const Tiered = () => null;\n',
+      );
+      writeFileSync(
+        join(dir, "Bare.tsx"),
+        '"use client";\nexport const Bare = () => null;\n',
+      );
+      writeFileSync(
+        join(dir, "BadValue.tsx"),
+        "// @ds-tier: fancy — no válido\nexport const BadValue = () => null;\n",
+      );
       const missing = untiered(dir);
       expect(missing).toContain("Bare"); // sin anotar
       expect(missing).toContain("BadValue"); // valor fuera de core|decorative
@@ -30,7 +39,9 @@ describe("check-tier (ECO-202)", () => {
   it("el corpus del DS está COMPLETO de @ds-tier (guard permanente)", () => {
     // exit 0 = todas las piezas anotadas; execFileSync lanza si el gate falla.
     expect(() =>
-      execFileSync("node", [join(DS, "scripts", "check-tier.mjs")], { cwd: DS }),
+      execFileSync("node", [join(DS, "scripts", "check-tier.mjs")], {
+        cwd: DS,
+      }),
     ).not.toThrow();
   });
 });

@@ -1,5 +1,11 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { Zap, Accessibility, ShieldCheck, Blocks, type LucideIcon } from "lucide-react";
+import {
+  Zap,
+  Accessibility,
+  ShieldCheck,
+  Blocks,
+  type LucideIcon,
+} from "lucide-react";
 import { BentoGrid, BentoGridItem } from "@/components/ui/BentoGrid";
 import { DemoCard } from "../_kit";
 
@@ -24,11 +30,36 @@ const Glyph = ({ icon: Icon }: { icon: LucideIcon }) => (
   <Icon size={16} className="text-content-primary" />
 );
 
-const items: { title: string; description: string; className: string; icon: LucideIcon }[] = [
-  { title: "Fast by default", description: "Production performance out of the box.", className: "md:col-span-2", icon: Zap },
-  { title: "Accessible", description: "WCAG AA by construction.", className: "", icon: Accessibility },
-  { title: "Governed", description: "Tokens and a component registry.", className: "", icon: ShieldCheck },
-  { title: "Composable", description: "Assembled per sector preset.", className: "md:col-span-2", icon: Blocks },
+const items: {
+  title: string;
+  description: string;
+  className: string;
+  icon: LucideIcon;
+}[] = [
+  {
+    title: "Fast by default",
+    description: "Production performance out of the box.",
+    className: "md:col-span-2",
+    icon: Zap,
+  },
+  {
+    title: "Accessible",
+    description: "WCAG AA by construction.",
+    className: "",
+    icon: Accessibility,
+  },
+  {
+    title: "Governed",
+    description: "Tokens and a component registry.",
+    className: "",
+    icon: ShieldCheck,
+  },
+  {
+    title: "Composable",
+    description: "Assembled per sector preset.",
+    className: "md:col-span-2",
+    icon: Blocks,
+  },
 ];
 
 const Grid = ({ withIcons = false }: { withIcons?: boolean }) => (

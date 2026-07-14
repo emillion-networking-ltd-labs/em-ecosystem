@@ -65,7 +65,13 @@ export const WithMinMax: Story = {
     );
     return (
       <DemoCard>
-        <Calendar {...args} value={value} onChange={setValue} minDate={min} maxDate={max} />
+        <Calendar
+          {...args}
+          value={value}
+          onChange={setValue}
+          minDate={min}
+          maxDate={max}
+        />
       </DemoCard>
     );
   },

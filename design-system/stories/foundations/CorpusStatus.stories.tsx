@@ -65,9 +65,15 @@ export const Overview: Story = {
             <code className="text-content-primary">scripts/census.mjs</code>.
           </p>
           <p className="text-caption text-content-tertiary mb-6">
-            Modifiability tier (ECO-202): <strong className="text-content-secondary">{core} core</strong>{" "}
-            (strict) · <span className="text-content-tertiary">{decorative} decorative</span> (lenient) ·{" "}
-            <span className="text-warning">{dudosas} dudosas “?”</span> to confirm at certification.
+            Modifiability tier (ECO-202):{" "}
+            <strong className="text-content-secondary">{core} core</strong>{" "}
+            (strict) ·{" "}
+            <span className="text-content-tertiary">
+              {decorative} decorative
+            </span>{" "}
+            (lenient) ·{" "}
+            <span className="text-warning">{dudosas} dudosas “?”</span> to
+            confirm at certification.
           </p>
           <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
             <Stat label="components" value={census.total} />
@@ -84,7 +90,7 @@ export const Overview: Story = {
           <Card size="lg" className="overflow-x-auto p-4">
             <table className="text-body w-full">
               <thead>
-                <tr className="border-border-strong text-caption text-content-tertiary border-b text-left">
+                <tr className="border-line-strong text-caption text-content-tertiary border-b text-left">
                   <th className="py-2 pr-4 font-normal">Component</th>
                   <th className="py-2 pr-4 font-normal">tier</th>
                   <th className="py-2 pr-4 font-normal">placement</th>
@@ -98,7 +104,7 @@ export const Overview: Story = {
               </thead>
               <tbody>
                 {rows.map((r) => (
-                  <tr key={r.name} className="border-border-subtle border-b">
+                  <tr key={r.name} className="border-line-subtle border-b">
                     <td className="text-content-primary py-1.5 pr-4">
                       {r.name}
                     </td>
@@ -106,7 +112,9 @@ export const Overview: Story = {
                       {r.tier === "core" ? (
                         <span className="text-content-secondary">core</span>
                       ) : r.tier === "decorative" ? (
-                        <span className="text-content-tertiary">decorative</span>
+                        <span className="text-content-tertiary">
+                          decorative
+                        </span>
                       ) : (
                         <span className="text-content-tertiary">—</span>
                       )}

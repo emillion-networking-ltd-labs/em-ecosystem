@@ -3,10 +3,30 @@ import { Mail, Phone, MapPin, MessageCircle } from "lucide-react";
 import Contact from "@/components/sections/Contact";
 
 const METHODS = [
-  { icon: <Mail size={18} />, label: "Email", value: "hello@studio.com", href: "mailto:hello@studio.com" },
-  { icon: <MessageCircle size={18} />, label: "WhatsApp", value: "+1 555 123 4567", href: "https://wa.me/15551234567", external: true },
-  { icon: <Phone size={18} />, label: "Phone", value: "+1 555 123 4567", href: "tel:+15551234567" },
-  { icon: <MapPin size={18} />, label: "Location", value: "Remote · worldwide" },
+  {
+    icon: <Mail size={18} />,
+    label: "Email",
+    value: "hello@studio.com",
+    href: "mailto:hello@studio.com",
+  },
+  {
+    icon: <MessageCircle size={18} />,
+    label: "WhatsApp",
+    value: "+1 555 123 4567",
+    href: "https://wa.me/15551234567",
+    external: true,
+  },
+  {
+    icon: <Phone size={18} />,
+    label: "Phone",
+    value: "+1 555 123 4567",
+    href: "tel:+15551234567",
+  },
+  {
+    icon: <MapPin size={18} />,
+    label: "Location",
+    value: "Remote · worldwide",
+  },
 ];
 
 const SUBJECTS = [
@@ -24,7 +44,8 @@ const meta = {
   args: {
     eyebrow: "Contact",
     title: "Let's talk",
-    subtitle: "Tell us about your project and we'll get back to you within 24 hours.",
+    subtitle:
+      "Tell us about your project and we'll get back to you within 24 hours.",
     methods: METHODS,
     subjectOptions: SUBJECTS,
     privacyHref: "#privacy",

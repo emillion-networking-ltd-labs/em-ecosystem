@@ -8,7 +8,8 @@ export function useVar(token: string) {
   const ref = useRef<HTMLDivElement>(null);
   const [val, setVal] = useState("");
   useEffect(() => {
-    if (ref.current) setVal(getComputedStyle(ref.current).getPropertyValue(token).trim());
+    if (ref.current)
+      setVal(getComputedStyle(ref.current).getPropertyValue(token).trim());
   });
   return [ref, val] as const;
 }
@@ -26,7 +27,9 @@ export function Group({
     <section className="mb-10">
       <h2 className="text-h2 font-semibold text-content-primary">{title}</h2>
       {description && (
-        <p className="mt-1 mb-4 max-w-2xl text-body text-content-secondary">{description}</p>
+        <p className="mt-1 mb-4 max-w-2xl text-body text-content-secondary">
+          {description}
+        </p>
       )}
       {children}
     </section>
@@ -36,9 +39,13 @@ export function Group({
 export function TokenMeta({ token, value }: { token: string; value?: string }) {
   return (
     <div className="flex flex-col">
-      <code className="text-caption font-mono text-content-secondary">{token}</code>
+      <code className="text-caption font-mono text-content-secondary">
+        {token}
+      </code>
       {value !== undefined && (
-        <code className="text-caption font-mono text-content-secondary">{value || "—"}</code>
+        <code className="text-caption font-mono text-content-secondary">
+          {value || "—"}
+        </code>
       )}
     </div>
   );
@@ -46,7 +53,9 @@ export function TokenMeta({ token, value }: { token: string; value?: string }) {
 
 export function Grid({ children }: { children: React.ReactNode }) {
   return (
-    <div className="grid grid-cols-2 items-start gap-4 sm:grid-cols-3 lg:grid-cols-4">{children}</div>
+    <div className="grid grid-cols-2 items-start gap-4 sm:grid-cols-3 lg:grid-cols-4">
+      {children}
+    </div>
   );
 }
 
@@ -56,10 +65,12 @@ export function ColorSwatch({ token, note }: { token: string; note?: string }) {
   return (
     <div ref={ref} className="flex flex-col gap-2">
       <div
-        className="h-16 w-full rounded-xl border border-border-strong"
+        className="h-16 w-full rounded-xl border border-line-strong"
         style={{ background: `var(${token})` }}
       />
-      {note && <span className="text-caption text-content-secondary">{note}</span>}
+      {note && (
+        <span className="text-caption text-content-secondary">{note}</span>
+      )}
       <TokenMeta token={token} value={val} />
     </div>
   );

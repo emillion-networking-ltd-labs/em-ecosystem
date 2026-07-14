@@ -27,7 +27,12 @@ export const CardHoverEffect = ({
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
 
   return (
-    <div className={cn("grid grid-cols-1 py-10 md:grid-cols-2 lg:grid-cols-3", className)}>
+    <div
+      className={cn(
+        "grid grid-cols-1 py-10 md:grid-cols-2 lg:grid-cols-3",
+        className,
+      )}
+    >
       {items.map((item, idx) => (
         <a
           href={item?.link}
@@ -55,9 +60,11 @@ export const CardHoverEffect = ({
           </AnimatePresence>
           <Card
             size="md"
-            className="relative z-20 h-full transition-colors group-hover:border-border-strong"
+            className="relative z-20 h-full transition-colors group-hover:border-line-strong"
           >
-            <h4 className="text-h3 font-semibold text-content-primary">{item.title}</h4>
+            <h4 className="text-h3 font-semibold text-content-primary">
+              {item.title}
+            </h4>
             <p className="mt-4 text-body text-content-secondary">
               {item.description}
             </p>

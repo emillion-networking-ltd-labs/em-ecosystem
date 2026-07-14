@@ -152,11 +152,11 @@ export default function Sidebar({
 
   return (
     <aside
-      className={`fixed left-0 top-0 z-30 flex h-screen flex-col rounded-r-xl border-r border-border-strong bg-surface-primary shadow-card transition-[width,transform] duration-200 ${widthClass} ${translateClass}`}
+      className={`fixed left-0 top-0 z-30 flex h-screen flex-col rounded-r-xl border-r border-line-strong bg-surface-primary shadow-card transition-[width,transform] duration-200 ${widthClass} ${translateClass}`}
     >
       {/* Header area — h-[68px] aligned with NavBar */}
       <div
-        className={`flex h-[68px] shrink-0 items-center justify-between px-4 ${atTop ? "border-b border-dashed border-border-strong" : ""}`}
+        className={`flex h-[68px] shrink-0 items-center justify-between px-4 ${atTop ? "border-b border-dashed border-line-strong" : ""}`}
       >
         {!collapsed && (
           <Link href="/dashboard">

@@ -5,20 +5,35 @@ const SERVICES = [
   {
     label: "Strategy",
     title: "Brand strategy",
-    fullDesc: "We define positioning, naming and messaging so every touchpoint speaks with one clear voice and point of view.",
-    features: ["Market & competitor audit", "Positioning & messaging", "Naming & verbal identity"],
+    fullDesc:
+      "We define positioning, naming and messaging so every touchpoint speaks with one clear voice and point of view.",
+    features: [
+      "Market & competitor audit",
+      "Positioning & messaging",
+      "Naming & verbal identity",
+    ],
   },
   {
     label: "Design",
     title: "Product & web design",
-    fullDesc: "Interfaces and websites crafted to convert and delight, from the first wireframe to a polished, accessible UI.",
-    features: ["UX research & wireframes", "Design system & UI", "Prototyping & handoff"],
+    fullDesc:
+      "Interfaces and websites crafted to convert and delight, from the first wireframe to a polished, accessible UI.",
+    features: [
+      "UX research & wireframes",
+      "Design system & UI",
+      "Prototyping & handoff",
+    ],
   },
   {
     label: "Engineering",
     title: "Front-end development",
-    fullDesc: "Fast, accessible front-ends built to last, with clean code and performance baked in from day one.",
-    features: ["Next.js & React builds", "Design-system implementation", "Performance & a11y"],
+    fullDesc:
+      "Fast, accessible front-ends built to last, with clean code and performance baked in from day one.",
+    features: [
+      "Next.js & React builds",
+      "Design-system implementation",
+      "Performance & a11y",
+    ],
   },
 ];
 
@@ -30,7 +45,8 @@ const meta = {
   args: {
     eyebrow: "Services",
     title: "What we do",
-    subtitle: "A complete system from strategy to launch, built to deliver real results.",
+    subtitle:
+      "A complete system from strategy to launch, built to deliver real results.",
     services: SERVICES,
   },
 } satisfies Meta<typeof Services>;

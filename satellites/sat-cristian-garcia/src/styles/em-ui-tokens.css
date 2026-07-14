@@ -8,30 +8,30 @@
 /* Superficies de tarjeta (ECO-91): utilidades distribuidas del design-system (antes vivían solo en el
    globals del dashboard → StickyCard/Card no se estilaban en el catálogo/satélites). Dos ejes:
    elevación (con sombra `card`/`card-container` vs plana `*-flat`) y radio (12px vs 24px `*-container*`).
-   Tematizadas por token (surface-primary/border-default/shadow-card). */
+   Tematizadas por token (surface-primary/line-default/shadow-card). */
 @utility card {
   background: var(--surface-elevated);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--line-default);
   box-shadow: var(--shadow-card);
   border-radius: 12px;
   padding: 24px;
 }
 @utility card-container {
   background: var(--surface-elevated);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--line-default);
   box-shadow: var(--shadow-card);
   border-radius: 24px;
   padding: 24px;
 }
 @utility card-flat {
   background: var(--surface-primary);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--line-default);
   border-radius: 12px;
   padding: 24px;
 }
 @utility card-container-flat {
   background: var(--surface-primary);
-  border: 1px solid var(--border-default);
+  border: 1px solid var(--line-default);
   border-radius: 24px;
   padding: 24px;
 }
@@ -260,10 +260,10 @@
   --color-content-placeholder: var(--content-placeholder);
   --color-content-inverse: var(--content-inverse);
 
-  --color-border-default: var(--border-default);
-  --color-border-strong: var(--border-strong);
-  --color-border-components: var(--border-components);
-  --color-border-subtle: var(--border-subtle);
+  --color-line-default: var(--line-default);
+  --color-line-strong: var(--line-strong);
+  --color-line-control: var(--line-control);
+  --color-line-subtle: var(--line-subtle);
 
   --color-hover: var(--hover-bg);
 
@@ -399,11 +399,13 @@
     --content-placeholder: rgba(28, 28, 28, 0.3);
     --content-inverse: #ffffff;
 
-    /* Border colors — NORMA (border-components es gate-blocking 3:1) */
-    --border-default: rgba(0, 0, 0, 0.08);
-    --border-strong: rgba(0, 0, 0, 0.14);
-    --border-components: rgba(0, 0, 0, 0.42);
-    --border-subtle: rgba(0, 0, 0, 0.03);
+    /* Line (border) colors — weight scale + one role. NORMA (line-control is gate-blocking 3:1). Read via the
+       border-line-{subtle|default|strong|control} utility. Renamed from border-* in ECO-210 to drop the
+       `border border-border-*` stutter and make the interactive-control border role explicit (= line-control). */
+    --line-default: rgba(0, 0, 0, 0.08);
+    --line-strong: rgba(0, 0, 0, 0.14);
+    --line-control: rgba(0, 0, 0, 0.42);
+    --line-subtle: rgba(0, 0, 0, 0.03);
 
     /* Overlay — flat darkening over media / modal backdrops (ESTRUCTURA-DS, attenuation dimension; used via
        bg-(--overlay) / bg-(--overlay-strong)). Theme-independent: a media backdrop is dark in both themes. */
@@ -471,10 +473,10 @@
     --content-placeholder: rgba(245, 245, 245, 0.3);
     --content-inverse: #1a1a1a;
 
-    --border-default: rgba(255, 255, 255, 0.12);
-    --border-strong: rgba(255, 255, 255, 0.18);
-    --border-components: rgba(255, 255, 255, 0.35);
-    --border-subtle: rgba(255, 255, 255, 0.04);
+    --line-default: rgba(255, 255, 255, 0.12);
+    --line-strong: rgba(255, 255, 255, 0.18);
+    --line-control: rgba(255, 255, 255, 0.35);
+    --line-subtle: rgba(255, 255, 255, 0.04);
 
     /* Overlay */
     --overlay: rgba(0, 0, 0, 0.2);
@@ -531,10 +533,10 @@
     --color-content-disabled: var(--content-disabled);
     --color-content-placeholder: var(--content-placeholder);
     --color-content-inverse: var(--content-inverse);
-    --color-border-default: var(--border-default);
-    --color-border-strong: var(--border-strong);
-    --color-border-components: var(--border-components);
-    --color-border-subtle: var(--border-subtle);
+    --color-line-default: var(--line-default);
+    --color-line-strong: var(--line-strong);
+    --color-line-control: var(--line-control);
+    --color-line-subtle: var(--line-subtle);
     --color-hover: var(--hover-bg);
     /* `--color-error: 239 68 68` (channels) is declared above; override here with
        a proper rgb() color so the `text-error` / `bg-error` utilities resolve. */
@@ -572,10 +574,10 @@
     --content-disabled: #73787d;
     --content-placeholder: rgba(28, 28, 28, 0.3);
     --content-inverse: #ffffff;
-    --border-default: rgba(0, 0, 0, 0.08);
-    --border-strong: rgba(0, 0, 0, 0.14);
-    --border-components: rgba(0, 0, 0, 0.42);
-    --border-subtle: rgba(0, 0, 0, 0.03);
+    --line-default: rgba(0, 0, 0, 0.08);
+    --line-strong: rgba(0, 0, 0, 0.14);
+    --line-control: rgba(0, 0, 0, 0.42);
+    --line-subtle: rgba(0, 0, 0, 0.03);
     --overlay: rgba(0, 0, 0, 0.2);
     --color-error: 138 17 17;
     --color-error-bg: #fef2f2;
@@ -609,10 +611,10 @@
     --color-content-disabled: var(--content-disabled);
     --color-content-placeholder: var(--content-placeholder);
     --color-content-inverse: var(--content-inverse);
-    --color-border-default: var(--border-default);
-    --color-border-strong: var(--border-strong);
-    --color-border-components: var(--border-components);
-    --color-border-subtle: var(--border-subtle);
+    --color-line-default: var(--line-default);
+    --color-line-strong: var(--line-strong);
+    --color-line-control: var(--line-control);
+    --color-line-subtle: var(--line-subtle);
     --color-hover: var(--hover-bg);
     /* Override channels form declared above with proper rgb() color. */
     --color-error: rgb(138 17 17);

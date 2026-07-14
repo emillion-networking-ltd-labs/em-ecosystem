@@ -12,9 +12,27 @@ type StackAt = "md" | "lg" | "xl";
 
 // Clases ESTÁTICAS por breakpoint de reparto (Tailwind escanea literales — no se construyen dinámicamente).
 const RATIO: Record<StackAt, Record<Ratio, string>> = {
-  md: { "1-1": "md:grid-cols-2", "4-8": "md:grid-cols-[4fr_8fr]", "8-4": "md:grid-cols-[8fr_4fr]", "5-7": "md:grid-cols-[5fr_7fr]", "7-5": "md:grid-cols-[7fr_5fr]" },
-  lg: { "1-1": "lg:grid-cols-2", "4-8": "lg:grid-cols-[4fr_8fr]", "8-4": "lg:grid-cols-[8fr_4fr]", "5-7": "lg:grid-cols-[5fr_7fr]", "7-5": "lg:grid-cols-[7fr_5fr]" },
-  xl: { "1-1": "xl:grid-cols-2", "4-8": "xl:grid-cols-[4fr_8fr]", "8-4": "xl:grid-cols-[8fr_4fr]", "5-7": "xl:grid-cols-[5fr_7fr]", "7-5": "xl:grid-cols-[7fr_5fr]" },
+  md: {
+    "1-1": "md:grid-cols-2",
+    "4-8": "md:grid-cols-[4fr_8fr]",
+    "8-4": "md:grid-cols-[8fr_4fr]",
+    "5-7": "md:grid-cols-[5fr_7fr]",
+    "7-5": "md:grid-cols-[7fr_5fr]",
+  },
+  lg: {
+    "1-1": "lg:grid-cols-2",
+    "4-8": "lg:grid-cols-[4fr_8fr]",
+    "8-4": "lg:grid-cols-[8fr_4fr]",
+    "5-7": "lg:grid-cols-[5fr_7fr]",
+    "7-5": "lg:grid-cols-[7fr_5fr]",
+  },
+  xl: {
+    "1-1": "xl:grid-cols-2",
+    "4-8": "xl:grid-cols-[4fr_8fr]",
+    "8-4": "xl:grid-cols-[8fr_4fr]",
+    "5-7": "xl:grid-cols-[5fr_7fr]",
+    "7-5": "xl:grid-cols-[7fr_5fr]",
+  },
 };
 const ORDER: Record<StackAt, { content: string; media: string }> = {
   md: { content: "md:order-2", media: "md:order-1" },
@@ -69,7 +87,13 @@ export function Split({
   }
   return (
     <Comp
-      className={cn("grid grid-cols-1", RATIO[stackAt][ratio], GAP[gap], aligns[align], className)}
+      className={cn(
+        "grid grid-cols-1",
+        RATIO[stackAt][ratio],
+        GAP[gap],
+        aligns[align],
+        className,
+      )}
       {...props}
     >
       <div className={cn(reverse && ORDER[stackAt].content)}>{children}</div>

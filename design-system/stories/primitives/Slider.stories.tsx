@@ -39,8 +39,14 @@ export const Default: Story = {};
 
 export const WithoutValue: Story = { args: { value: 60, showValue: false } };
 
-export const WithoutLabel: Story = { args: { value: 25, label: undefined, showValue: false } };
+export const WithoutLabel: Story = {
+  args: { value: 25, label: undefined, showValue: false },
+};
 
-export const CustomRange: Story = { args: { value: 120, label: "Price", min: 0, max: 500, step: 10 } };
+export const CustomRange: Story = {
+  args: { value: 120, label: "Price", min: 0, max: 500, step: 10 },
+};
 
-export const Disabled: Story = { args: { value: 70, disabled: true, label: "Disabled" } };
+export const Disabled: Story = {
+  args: { value: 70, disabled: true, label: "Disabled" },
+};

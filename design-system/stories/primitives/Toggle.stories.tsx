@@ -33,9 +33,13 @@ export const Default: Story = {};
 
 export const Off: Story = { args: { checked: false } };
 
-export const Disabled: Story = { args: { disabled: true, checked: false, label: "Disabled" } };
+export const Disabled: Story = {
+  args: { disabled: true, checked: false, label: "Disabled" },
+};
 
-export const DisabledOn: Story = { args: { disabled: true, checked: true, label: "Disabled (on)" } };
+export const DisabledOn: Story = {
+  args: { disabled: true, checked: true, label: "Disabled (on)" },
+};
 
 // Sizes (largest → smallest), with px (track width). md is the default.
 const SIZES = [

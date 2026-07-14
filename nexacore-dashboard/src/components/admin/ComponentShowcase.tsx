@@ -190,11 +190,10 @@ function SpecsPanel({
 /* Hover classes derived from Button.tsx variantClasses — static simulation of hover state */
 const hoverClasses = {
   primary:
-    "bg-surface-inverse text-content-inverse border border-border-strong opacity-90",
+    "bg-surface-inverse text-content-inverse border border-line-strong opacity-90",
   secondary:
-    "bg-surface-subtle text-content-secondary border border-border-strong",
-  outline:
-    "bg-surface-subtle text-content-primary border border-border-components",
+    "bg-surface-subtle text-content-secondary border border-line-strong",
+  outline: "bg-surface-subtle text-content-primary border border-line-control",
   danger: "bg-error-bg text-error border border-error-border",
 };
 
@@ -1812,7 +1811,7 @@ function EmailSelectorCard({
       <button
         type="button"
         onClick={() => (open ? setOpen(false) : openDropdown())}
-        className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap border border-border-components text-content-primary transition-colors w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
+        className={`flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap border border-line-control text-content-primary transition-colors w-fit ${open ? "bg-surface-subtle" : "bg-transparent hover:bg-surface-subtle"}`}
       >
         <span className="leading-none">user@example.com</span>
         <ChevronDown
@@ -1824,7 +1823,7 @@ function EmailSelectorCard({
         <div
           className={`absolute z-50 w-fit min-w-[200px] left-0 ${popoverPos.vertical === "up" ? "bottom-full mb-1 animate-dropdown-up" : "top-full mt-1 animate-dropdown-down"}`}
         >
-          <div className="rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card whitespace-nowrap">
+          <div className="rounded-xl border border-line-strong bg-surface-primary p-4 shadow-card whitespace-nowrap">
             <button
               type="button"
               onClick={() => setOpen(false)}
@@ -1913,9 +1912,9 @@ function SelectShowcase() {
           "Select Position": selectSpecs.position,
           "Email Selector (auth)": {
             trigger:
-              "h-10 rounded-md px-6 py-2.5 w-fit text-body font-normal whitespace-nowrap border border-border-components bg-transparent hover:bg-surface-subtle transition-colors",
+              "h-10 rounded-md px-6 py-2.5 w-fit text-body font-normal whitespace-nowrap border border-line-control bg-transparent hover:bg-surface-subtle transition-colors",
             dropdown:
-              "rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card w-fit min-w-[200px] whitespace-nowrap",
+              "rounded-xl border border-line-strong bg-surface-primary p-4 shadow-card w-fit min-w-[200px] whitespace-nowrap",
             avatar:
               "h-8 w-8 rounded-full bg-surface-subtle text-caption font-semibold",
           },
@@ -2111,7 +2110,7 @@ function ToastDemo() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, x: 40 }}
                   transition={{ duration: 0.3 }}
-                  className="group relative grid grid-cols-[14px_1fr_auto] items-start gap-x-2 rounded-3xl border border-border-strong bg-surface-primary py-3 pl-5 pr-4"
+                  className="group relative grid grid-cols-[14px_1fr_auto] items-start gap-x-2 rounded-3xl border border-line-strong bg-surface-primary py-3 pl-5 pr-4"
                 >
                   <Icon
                     size={14}
@@ -2147,10 +2146,10 @@ function FullPageCard({ type }: { type: "error" | "success" }) {
 
   return (
     <div
-      className="w-[280px] rounded-3xl border border-border-default bg-surface-secondary shadow-card overflow-hidden cursor-pointer"
+      className="w-[280px] rounded-3xl border border-line-default bg-surface-secondary shadow-card overflow-hidden cursor-pointer"
       onMouseEnter={() => setAnimKey((k) => k + 1)}
     >
-      <div className="flex flex-col gap-2 border-b border-border-default bg-surface-primary p-6 min-h-[200px] justify-center">
+      <div className="flex flex-col gap-2 border-b border-line-default bg-surface-primary p-6 min-h-[200px] justify-center">
         <div className="flex flex-col items-center gap-2">
           {isError ? (
             <CircleX
@@ -2293,7 +2292,7 @@ function FeedbackShowcase() {
           },
           Toast: {
             container:
-              "rounded-full border border-border-strong bg-surface-primary px-6 py-4",
+              "rounded-full border border-line-strong bg-surface-primary px-6 py-4",
             icons:
               "error: AlertTriangle, success: CircleCheck, warning: CircleAlert, info: Info — 16px",
             title:
@@ -2304,8 +2303,8 @@ function FeedbackShowcase() {
               "Framer Motion: enter (opacity+y), exit (opacity+x), auto-dismiss 5s",
           },
           "Full Page Card": {
-            card: "rounded-3xl border border-border-default bg-surface-secondary shadow-card",
-            content: "bg-surface-primary p-6 border-b border-border-default",
+            card: "rounded-3xl border border-line-default bg-surface-secondary shadow-card",
+            content: "bg-surface-primary p-6 border-b border-line-default",
             footer: "h-14 p-2 (auth-card narrow footer)",
             "error icon":
               "CircleX 48px text-error strokeWidth-1.5 icon-error animation",
@@ -2313,7 +2312,7 @@ function FeedbackShowcase() {
               "CircleCheck 48px text-success strokeWidth-1.5 icon-success animation",
             text: "text-body text-content-tertiary text-center",
             button:
-              "h-10 w-full rounded-md border border-border-components bg-transparent text-h3 font-normal — outline-solid style",
+              "h-10 w-full rounded-md border border-line-control bg-transparent text-h3 font-normal — outline-solid style",
           },
         }}
       />
@@ -2792,7 +2791,7 @@ function getDoughnutMockData(isDark: boolean) {
 function DoughnutChartMock({ isDark = false }: { isDark?: boolean }) {
   const doughnutMockData = getDoughnutMockData(isDark);
   return (
-    <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
+    <div className="rounded-xl border border-line-strong bg-surface-primary p-6">
       <div className="mb-4">
         <h3 className="text-body font-semibold text-content-primary">
           Users by Role
@@ -2822,7 +2821,7 @@ function DoughnutChartMock({ isDark = false }: { isDark?: boolean }) {
                   if (!active || !payload?.length) return null;
                   const item = payload[0];
                   return (
-                    <div className="rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
+                    <div className="rounded-lg border border-line-strong bg-surface-primary px-4 py-3 shadow-card whitespace-nowrap">
                       <div className="flex items-center gap-1.5">
                         <span
                           className="h-2 w-2 shrink-0 rounded-sm"
@@ -2883,7 +2882,7 @@ function ChartsShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   Speedometer
                 </p>
-                <div className="rounded-xl border border-border-strong bg-surface-primary p-6">
+                <div className="rounded-xl border border-line-strong bg-surface-primary p-6">
                   <div className="mb-2">
                     <h3 className="text-body font-semibold text-content-primary">
                       Performance
@@ -2926,7 +2925,7 @@ function ChartsShowcase() {
         specs={{
           "ChartCard Container": {
             shared:
-              "rounded-3xl border border-border-strong bg-surface-secondary p-6",
+              "rounded-3xl border border-line-strong bg-surface-secondary p-6",
             title: "text-body font-semibold text-content-primary",
           },
           Legend: {
@@ -2944,7 +2943,7 @@ function ChartsShowcase() {
             tooltip:
               "Custom HTML content via <Tooltip content={...} /> — native DOM positioning",
             "tooltip style":
-              "rounded-lg border-border-strong bg-surface-primary px-4 py-3 shadow-card (no diamond — Recharts controls position)",
+              "rounded-lg border-line-strong bg-surface-primary px-4 py-3 shadow-card (no diamond — Recharts controls position)",
             "color dots": "h-2 w-2 rounded-sm with item.color",
             grid: "border-strong color, no x-grid, strokeDasharray 3 3",
             ticks: "text-caption (12px) via SVG, system font inherited",
@@ -3109,7 +3108,7 @@ function CardShowcase() {
         specs={{
           "Container (card-container)": {
             background: "bg-surface-primary (#ffffff light / #1a1a1a dark)",
-            border: "1px border-border-default rgba(0,0,0,0.08)",
+            border: "1px border-line-default rgba(0,0,0,0.08)",
             shadow: "0 8px 32px rgba(0,0,0,0.04)",
             radius: "24px (rounded-3xl)",
             padding: "24px",
@@ -3117,7 +3116,7 @@ function CardShowcase() {
           },
           "Inner (card)": {
             background: "bg-surface-primary (#ffffff light / #1a1a1a dark)",
-            border: "1px border-border-default rgba(0,0,0,0.08)",
+            border: "1px border-line-default rgba(0,0,0,0.08)",
             shadow: "0 8px 32px rgba(0,0,0,0.04)",
             radius: "12px (rounded-xl)",
             padding: "24px",
@@ -3126,7 +3125,7 @@ function CardShowcase() {
           },
           "Container Flat (card-container-flat)": {
             background: "bg-surface-primary",
-            border: "1px border-border-default",
+            border: "1px border-line-default",
             shadow: "none",
             radius: "24px (rounded-3xl)",
             padding: "24px",
@@ -3134,7 +3133,7 @@ function CardShowcase() {
           },
           "Inner Flat (card-flat)": {
             background: "bg-surface-primary",
-            border: "1px border-border-default",
+            border: "1px border-line-default",
             shadow: "none",
             radius: "12px (rounded-xl)",
             padding: "24px",
@@ -3511,7 +3510,7 @@ function EmptyStateShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   default
                 </p>
-                <div className="rounded-lg border border-border-default">
+                <div className="rounded-lg border border-line-default">
                   <EmptyState
                     title="No users found"
                     description="Try adjusting your search or filters."
@@ -3522,7 +3521,7 @@ function EmptyStateShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   with action
                 </p>
-                <div className="rounded-lg border border-border-default">
+                <div className="rounded-lg border border-line-default">
                   <EmptyState
                     title="No projects yet"
                     description="Create your first project to get started."
@@ -3538,7 +3537,7 @@ function EmptyStateShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   custom icon
                 </p>
-                <div className="rounded-lg border border-border-default">
+                <div className="rounded-lg border border-line-default">
                   <EmptyState
                     icon={<Search size={48} />}
                     title="No results"
@@ -3550,7 +3549,7 @@ function EmptyStateShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   error variant
                 </p>
-                <div className="rounded-lg border border-border-default">
+                <div className="rounded-lg border border-line-default">
                   <EmptyState
                     variant="error"
                     title="Couldn't load users"
@@ -3734,7 +3733,7 @@ function ImageCropperShowcase() {
             <p className="text-caption text-content-tertiary mb-3">
               Avatar sizes
             </p>
-            <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-border-default p-4">
+            <div className="flex flex-1 items-center justify-center rounded-lg border border-dashed border-line-default p-4">
               {croppedUrl ? (
                 <div className="flex items-end gap-4">
                   {[
@@ -3874,7 +3873,7 @@ function SidebarShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   collapsed (68px)
                 </p>
-                <div className="w-[68px] rounded-r-xl border border-border-strong bg-surface-primary shadow-card">
+                <div className="w-[68px] rounded-r-xl border border-line-strong bg-surface-primary shadow-card">
                   <SidebarNav
                     sections={demoSections}
                     collapsed
@@ -3890,7 +3889,7 @@ function SidebarShowcase() {
                 <p className="text-caption text-content-tertiary font-mono mb-2">
                   expanded (300px)
                 </p>
-                <div className="w-[300px] max-w-full rounded-r-xl border border-border-strong bg-surface-primary shadow-card">
+                <div className="w-[300px] max-w-full rounded-r-xl border border-line-strong bg-surface-primary shadow-card">
                   <SidebarNav
                     sections={demoSections}
                     onNavigate={(href, e) => {
@@ -4019,11 +4018,11 @@ function StickyCardShowcase() {
           position:fixed against the page viewport and would hijack the page
           on scroll). Pure CSS illustration of the visual concept; the real
           component lives in this page's tab bar — scroll the page to see it. */}
-      <div className="h-64 overflow-y-auto rounded-xl border border-border-default bg-surface-secondary">
+      <div className="h-64 overflow-y-auto rounded-xl border border-line-default bg-surface-secondary">
         <div className="px-4 pt-3 pb-2 text-caption text-content-tertiary text-center">
           ↓ Scroll inside this container to see the card stick to the top ↓
         </div>
-        <div className="sticky top-0 z-10 mx-4 rounded-xl border border-border-strong bg-surface-primary p-4 shadow-card">
+        <div className="sticky top-0 z-10 mx-4 rounded-xl border border-line-strong bg-surface-primary p-4 shadow-card">
           <div className="flex items-center justify-between gap-4">
             <p className="text-body font-semibold text-content-primary">
               StickyCard content
@@ -4048,7 +4047,7 @@ function StickyCardShowcase() {
         </div>
       </div>
 
-      <div className="card-flat p-3! bg-surface-secondary/40 border border-dashed border-border-default">
+      <div className="card-flat p-3! bg-surface-secondary/40 border border-dashed border-line-default">
         <p className="text-caption text-content-tertiary">
           <strong className="text-content-primary">Note:</strong> the demo above
           uses CSS <code>position: sticky</code> scoped to its own scroll
@@ -4072,7 +4071,7 @@ function ThemeToggleShowcase() {
         — renders nothing until hydration to avoid hydration mismatch. Consumes{" "}
         <code>ThemeContext</code>.
       </p>
-      <div className="flex items-center gap-4 p-4 border border-border-default rounded-xl bg-surface-secondary">
+      <div className="flex items-center gap-4 p-4 border border-line-default rounded-xl bg-surface-secondary">
         <ThemeToggle tooltipPosition="right" />
         <span className="text-caption text-content-tertiary">
           Click to toggle the entire app between light and dark
@@ -4092,7 +4091,7 @@ function TurnstileWidgetShowcase() {
         <code>NEXT_PUBLIC_TURNSTILE_SITE_KEY</code>. Demo uses Cloudflare&apos;s
         official test site key (always passes verification).
       </p>
-      <div className="border border-border-default rounded-xl p-4 bg-surface-secondary">
+      <div className="border border-line-default rounded-xl p-4 bg-surface-secondary">
         <p className="text-caption text-content-tertiary mb-3">
           Test site key (always passes):
         </p>

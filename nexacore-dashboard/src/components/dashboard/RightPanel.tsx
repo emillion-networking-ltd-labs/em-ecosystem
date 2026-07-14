@@ -88,7 +88,7 @@ export default function RightPanel() {
         </h3>
         <div className="relative mt-2 space-y-1">
           {/* Timeline line */}
-          <div className="absolute bottom-2 left-[19px] top-2 w-px border-l border-dashed border-border-default" />
+          <div className="absolute bottom-2 left-[19px] top-2 w-px border-l border-dashed border-line-default" />
 
           {activities.map((item, i) => (
             <div key={i} className="relative flex items-center gap-2 p-2">

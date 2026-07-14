@@ -39,20 +39,48 @@ type Story = StoryObj<typeof meta>;
 // toast doesn't always show one particular type; success only seeds the playground.
 export const Success: Story = {};
 export const Error: Story = {
-  args: { variant: "error", title: "Couldn't save", description: "Please try again." },
+  args: {
+    variant: "error",
+    title: "Couldn't save",
+    description: "Please try again.",
+  },
 };
 export const Warning: Story = {
-  args: { variant: "warning", title: "Storage almost full", description: "Free up space to keep syncing." },
+  args: {
+    variant: "warning",
+    title: "Storage almost full",
+    description: "Free up space to keep syncing.",
+  },
 };
 export const Info: Story = {
-  args: { variant: "info", title: "Syncing…", description: "This will only take a moment." },
+  args: {
+    variant: "info",
+    title: "Syncing…",
+    description: "This will only take a moment.",
+  },
 };
 
 const VARIANTS = [
-  { variant: "success", title: "Changes saved", description: "Your profile has been updated." },
-  { variant: "error", title: "Couldn't save", description: "Please try again." },
-  { variant: "warning", title: "Storage almost full", description: "Free up space to keep syncing." },
-  { variant: "info", title: "Syncing…", description: "This will only take a moment." },
+  {
+    variant: "success",
+    title: "Changes saved",
+    description: "Your profile has been updated.",
+  },
+  {
+    variant: "error",
+    title: "Couldn't save",
+    description: "Please try again.",
+  },
+  {
+    variant: "warning",
+    title: "Storage almost full",
+    description: "Free up space to keep syncing.",
+  },
+  {
+    variant: "info",
+    title: "Syncing…",
+    description: "This will only take a moment.",
+  },
 ] as const;
 const cap = (v: string) => v.charAt(0).toUpperCase() + v.slice(1);
 

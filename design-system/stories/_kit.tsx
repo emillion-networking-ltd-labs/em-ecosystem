@@ -18,7 +18,11 @@ export function DemoCard({
   block?: boolean;
   children: ReactNode;
 }) {
-  return <Card className={`${block ? "" : FRAME} ${className}`.trim()}>{children}</Card>;
+  return (
+    <Card className={`${block ? "" : FRAME} ${className}`.trim()}>
+      {children}
+    </Card>
+  );
 }
 
 export interface Variant {
@@ -39,7 +43,9 @@ function Overview({ items }: { items: Variant[] }) {
     <div className="flex flex-col gap-6">
       {items.map((v) => (
         <div key={v.label} className="flex flex-col gap-1.5">
-          <span className="text-caption text-content-secondary font-mono">{v.label}</span>
+          <span className="text-caption text-content-secondary font-mono">
+            {v.label}
+          </span>
           <DemoCard className={v.className ?? ""} block={v.block ?? false}>
             {v.node}
           </DemoCard>

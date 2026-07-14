@@ -8,7 +8,8 @@ const meta = {
   tags: ["autodocs"],
   args: {
     title: "Ready to start your project?",
-    description: "Tell us what you need and we'll get back to you within 24 hours.",
+    description:
+      "Tell us what you need and we'll get back to you within 24 hours.",
     primaryCtaText: "Talk to the team",
     primaryCtaHref: "#contact",
     secondaryCtaText: "See plans",

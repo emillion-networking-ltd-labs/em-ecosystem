@@ -14,7 +14,13 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // The meteor shower needs a dark, bounded tile to read — hosted inside the project Card.
-const Tile = ({ number, height = "h-72" }: { number?: number; height?: string }) => (
+const Tile = ({
+  number,
+  height = "h-72",
+}: {
+  number?: number;
+  height?: string;
+}) => (
   <div
     className={`relative isolate flex ${height} w-full items-center justify-center overflow-hidden rounded-xl bg-surface-inverse text-content-inverse`}
   >
