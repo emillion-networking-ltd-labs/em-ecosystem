@@ -28,9 +28,9 @@ export const languageSelectorSpecs = {
     open: "border border-border-components bg-surface-primary text-content-primary",
   },
   popover: {
-    position: "absolute w-fit min-w-[200px]",
+    position: "absolute w-fit min-w-[var(--dropdown-min)]",
     container:
-      "rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card max-h-[240px] overflow-y-auto",
+      "rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card max-h-[var(--popover-max-h)] overflow-y-auto",
     search:
       "Input variant=filled + shadow-card — el borde lo pone el primitivo Input (border-components)",
   },
@@ -149,7 +149,7 @@ export default function LanguageSelector({
       {/* Popover — opens upward (footer context), search adjacent to trigger */}
       {isOpen && (
         <div
-          className={`absolute z-50 w-fit min-w-[200px] ${popoverPos.vertical === "down" ? "top-full mt-1" : "bottom-full mb-1"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
+          className={`absolute z-50 w-fit min-w-[var(--dropdown-min)] ${popoverPos.vertical === "down" ? "top-full mt-1" : "bottom-full mb-1"} ${popoverPos.horizontal === "right" ? "right-0" : "left-0"}`}
         >
           <div
             className={`flex flex-col gap-1 animate-stagger ${popoverPos.vertical === "down" ? "" : "flex-col-reverse"}`}
@@ -179,7 +179,7 @@ export default function LanguageSelector({
             </div>
 
             {/* Results — appears second (stagger child 2) */}
-            <div className="max-h-[240px] overflow-y-auto rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card">
+            <div className="max-h-[var(--popover-max-h)] overflow-y-auto rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card">
               {filtered.length === 0 ? (
                 <p className="py-2 text-center text-body text-content-secondary">
                   No results

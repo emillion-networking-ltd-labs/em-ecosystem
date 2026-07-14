@@ -100,6 +100,16 @@
       "mode": "enforce",
       "ceiling": null,
       "note": "El grosor de borde sale de token: `border` (1px base, default de Tailwind) o border-[var(--border-width-sm|md|lg)] para bordes/anillos gruesos. Prohibe border-[Npx] crudo + la escala generica border-2/4/8. TIER-AWARE: decorative exento. border-width = MARCA (ADR-033): el satelite re-apunta la escala en [data-brand]. La unica deuda era el anillo del SpinnerCircle (sm/md/lg = 1.5/2/2.5px, el operador prefirio lg=2.5); el 1px base de los 47 ficheros se queda como `border`. Core limpio (0) -> lock preventivo."
+    },
+    {
+      "dimension": "piece-measure",
+      "piece": "tokens --dialog-sm/md/lg, --dropdown-min, --popover-max-h, --toast-max, --calendar-width, --tooltip-max",
+      "gate": "check-piece-measure-usage.mjs",
+      "scope": "ds",
+      "escape": "piece-measure-ok",
+      "mode": "enforce",
+      "ceiling": null,
+      "note": "A piece's CONTAINER width (dialog/dropdown/popover/toast/tooltip) comes from a token (max-w-[var(--dialog-*)], min-w-[var(--dropdown-min)]...), not an arbitrary max-w-[Npx]/min-w-[Npx]. ESTRUCTURA-DS (blocked, NOT [data-brand]). Founded on research (reading measure ~45-75ch caps dialogs ~600; the 720 modal removed). Same role + random values -> ONE standard (dropdown 160/180/200 -> --dropdown-min 160). Functional single values named (calendar month-grid 300, tooltip 240). TIER-AWARE: decorative exempt; text truncation (truncate) exempt; intrinsic element sizes (w/h-[Npx]) NOT gated. Core clean (0) -> lock."
     }
   ]
 }

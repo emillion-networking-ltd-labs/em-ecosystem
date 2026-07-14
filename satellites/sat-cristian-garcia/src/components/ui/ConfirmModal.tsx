@@ -12,9 +12,9 @@ export const confirmModalSpecs = {
     danger: "Button danger (bg-error)",
   },
   sizes: {
-    sm: "max-w-[390px] — confirmations, simple yes/no dialogs",
-    md: "max-w-[480px] — form dialogs (edit profile, change email/password)",
-    lg: "max-w-[600px] — complex forms, multi-step dialogs",
+    sm: "dialog-sm 400px — confirmations, simple yes/no dialogs",
+    md: "dialog-md 512px — form dialogs (edit profile, change email/password)",
+    lg: "dialog-lg 600px — complex/multi-step dialogs",
   },
   usage: {
     confirm: "Default: title + description + Confirm/Cancel. Size sm.",
@@ -54,7 +54,7 @@ type ConfirmModalProps = {
   confirmLabel?: string;
   cancelLabel?: string;
   variant?: "primary" | "danger";
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg";
   loading?: boolean;
   children?: React.ReactNode;
 };
@@ -73,10 +73,9 @@ export default function ConfirmModal({
   children,
 }: ConfirmModalProps) {
   const sizeClasses = {
-    sm: "max-w-[390px]",
-    md: "max-w-[480px]",
-    lg: "max-w-[600px]",
-    xl: "max-w-[720px]",
+    sm: "max-w-[var(--dialog-sm)]",
+    md: "max-w-[var(--dialog-md)]",
+    lg: "max-w-[var(--dialog-lg)]",
   };
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
