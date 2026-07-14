@@ -149,7 +149,7 @@ function GalleryTile({
         className="object-cover transition-transform duration-500 group-hover:scale-105"
       />
       {image.caption ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+        <div className="scrim pointer-events-none absolute inset-x-0 bottom-0 p-3 opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <p className="text-caption font-semibold uppercase tracking-wider text-white">
             {image.caption}
           </p>
@@ -242,7 +242,7 @@ function Lightbox({
       aria-label={image.caption || "Image"}
       // `dark` fuerza los tokens de dark mode en los descendientes (IconButton boxed) para que el overlay
       // oscuro los renderice con el contraste correcto sin importar el tema del usuario.
-      className="dark fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-xs"
+      className="dark fixed inset-0 z-[100] flex items-center justify-center bg-(--overlay-strong) backdrop-blur-xs"
       onClick={onBackdrop}
     >
       <IconButton
@@ -316,7 +316,7 @@ function Lightbox({
             {image.caption}
           </p>
         ) : null}
-        <p className="text-caption text-white/60">
+        <p className="text-caption text-(--on-media-muted)">
           {index + 1} / {total}
         </p>
       </div>

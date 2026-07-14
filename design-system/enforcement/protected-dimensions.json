@@ -79,7 +79,7 @@
       "escape": "attenuation-ok",
       "mode": "ratchet",
       "ceiling": null,
-      "note": "Prohibe el modificador de opacidad /NN ad-hoc sobre una clase de color (text-content-primary/75, bg-black/25...); la atenuacion sale de un token semantico. UNIVERSAL: no tier-exenta (atenuacion = ESTRUCTURA-DS en el modelo de 4 categorias / ADR-033). Exime currentColor (current/NN = % del color HEREDADO, no tokenizable a valor fijo, p.ej. pista del spinner) + attenuation-ok. DS limpio en components (ECO-203, tandas /75->secondary, /50->tertiary, /30+25+20->placeholder, error/75->error); baseline=10 = los scrims de marketing (overlays sobre media en Hero/Portfolio) -> van a su propia dimension overlay/on-media (ticket aparte)."
+      "note": "Prohibe el modificador de opacidad /NN ad-hoc sobre una clase de color (text-content-primary/75, bg-black/25...); la atenuacion sale de un token semantico. UNIVERSAL: no tier-exenta (atenuacion = ESTRUCTURA-DS en el modelo de 4 categorias / ADR-033). Exime currentColor (current/NN = % del color HEREDADO, no tokenizable a valor fijo, p.ej. pista del spinner) + attenuation-ok. DS limpio en components (ECO-203, tandas /75->secondary, /50->tertiary, /30+25+20->placeholder, error/75->error). ECO-209: los 10 scrims on-media de Hero/Portfolio reconciliados al sistema overlay/on-media que YA existia (--overlay + nuevos --overlay-strong / --on-media* + @utility scrim; NO familia nueva -> se extendio la existente) -> baseline=0. La atenuacion on-media sale ahora de token (bg-(--overlay-strong), text-(--on-media-muted), clase scrim); un /NN nuevo sobre black/white vuelve a fallar el gate."
     },
     {
       "dimension": "shadow",
