@@ -352,6 +352,33 @@
     --border-width-md: 2px;
     --border-width-lg: 2.5px;
 
+    /* Piece measures (ECO-206, ESTRUCTURA-DS — the DS governs them, NOT satellite-modifiable). Dialog widths by
+       ROLE, founded on the reading measure (~45-75 chars): small confirm · medium form · complex at the ~600 cap
+       (nobody uses 720). Semantic name (dialog-sm/md/lg), not Tailwind's. Values tunable in Storybook. */
+    --dialog-sm: 400px;
+    --dialog-md: 512px;
+    --dialog-lg: 600px;
+    /* Dropdown/menu: ONE standard min-width (was 160/180/200 loose = uncontrolled creation); the menu grows to the
+       trigger/content width above this floor. + max scrollable height of a popover. */
+    --dropdown-min: 160px;
+    --popover-max-h: 240px;
+    /* Toast — distinct from a dialog, narrower (convention ~400; was 550, out of range). */
+    --toast-max: 400px;
+    /* Calendar — FUNCTIONAL: month-grid width (7 columns). Same value, now named. */
+    --calendar-width: 300px;
+    /* Tooltip — max reading width so long tooltips wrap (the render had lost it: was w-max with no cap). */
+    --tooltip-max: 240px;
+    /* Toggle — intrinsic switch proportions (the track WIDTH already uses the control scale w-8/10/12 = button
+       heights). Same values, now tokenized: track height · thumb · translate, per size. */
+    --toggle-track-sm: 18px;
+    --toggle-track-md: 22px;
+    --toggle-track-lg: 26px;
+    --toggle-thumb-md: 18px;
+    --toggle-thumb-lg: 22px;
+    --toggle-translate-sm: 14px;
+    --toggle-translate-md: 18px;
+    --toggle-translate-lg: 22px;
+
     /* Content colors — NORMA (texto de los pares). (RGB channels for legacy `rgb(var(--content-primary))`
        usages — utility classes go through `--color-*` overrides below). */
     --content-primary: 28 28 28;

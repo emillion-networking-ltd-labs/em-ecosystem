@@ -75,7 +75,7 @@ export default function EmailSelector({
       </Tooltip>
 
       {open && (
-        <div className="absolute left-0 top-full z-50 mt-1 w-[300px] animate-dropdown-down">
+        <div className="absolute left-0 top-full z-50 mt-1 min-w-[var(--dropdown-min)] animate-dropdown-down">
           <div className="rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card">
             <button
               type="button"

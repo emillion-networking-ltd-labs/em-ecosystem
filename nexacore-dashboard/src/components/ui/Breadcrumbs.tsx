@@ -150,7 +150,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                 // per item echoes the breadcrumb separator.
                 <ul
                   role="menu"
-                  className="absolute left-0 top-full z-50 mt-1 flex max-h-64 w-fit min-w-[160px] flex-col gap-0.5 overflow-auto rounded-xl border border-border-strong bg-surface-elevated p-6 shadow-card animate-dropdown-down"
+                  className="absolute left-0 top-full z-50 mt-1 flex max-h-64 w-fit min-w-[var(--dropdown-min)] flex-col gap-0.5 overflow-auto rounded-xl border border-border-strong bg-surface-elevated p-6 shadow-card animate-dropdown-down"
                 >
                   {middleItems.map((item) => (
                     <li key={item.label} role="none">

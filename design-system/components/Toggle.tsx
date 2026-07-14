@@ -28,21 +28,21 @@ export const toggleSpecs = {
 };
 
 const trackSizes = {
-  sm: "w-8 h-[18px]",
-  md: "w-10 h-[22px]",
-  lg: "w-12 h-[26px]",
+  sm: "w-8 h-[var(--toggle-track-sm)]",
+  md: "w-10 h-[var(--toggle-track-md)]",
+  lg: "w-12 h-[var(--toggle-track-lg)]",
 };
 
 const circleSizes = {
   sm: "w-3.5 h-3.5",
-  md: "w-[18px] h-[18px]",
-  lg: "w-[22px] h-[22px]",
+  md: "w-[var(--toggle-thumb-md)] h-[var(--toggle-thumb-md)]",
+  lg: "w-[var(--toggle-thumb-lg)] h-[var(--toggle-thumb-lg)]",
 };
 
 const circleTranslate = {
-  sm: "translate-x-[14px]",
-  md: "translate-x-[18px]",
-  lg: "translate-x-[22px]",
+  sm: "translate-x-[var(--toggle-translate-sm)]",
+  md: "translate-x-[var(--toggle-translate-md)]",
+  lg: "translate-x-[var(--toggle-translate-lg)]",
 };
 
 export default function Toggle({
