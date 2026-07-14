@@ -14,7 +14,7 @@ export const emailSelectorSpecs = {
     "flex h-10 items-center justify-center gap-2 rounded-md px-6 py-2.5 text-body font-normal whitespace-nowrap border border-border-components transition-colors",
   // ECO-117: estándar de menú/desplegable — contenedor rounded-xl + p-2; opción px-3 py-2 rounded-lg.
   dropdown:
-    "rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card",
+    "rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card",
   option:
     "flex w-full items-center gap-2 rounded-lg bg-surface-subtle px-3 py-2 text-body font-normal text-content-primary",
 };
@@ -76,7 +76,7 @@ export default function EmailSelector({
 
       {open && (
         <div className="absolute left-0 top-full z-50 mt-1 w-[300px] animate-dropdown-down">
-          <div className="rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card">
+          <div className="rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card">
             <button
               type="button"
               onClick={() => setOpen(false)}
