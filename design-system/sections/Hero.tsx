@@ -51,7 +51,7 @@ function HeroStatCard({
     <div
       className={
         onMedia
-          ? "flex min-w-[120px] flex-col items-center justify-center rounded-2xl border border-white/10 bg-black/25 px-5 py-6 backdrop-blur-xs"
+          ? "flex min-w-[120px] flex-col items-center justify-center rounded-2xl border border-(--on-media-border) bg-(--overlay) px-5 py-6 backdrop-blur-xs"
           : "card-flat py-8 text-center"
       }
     >
@@ -67,7 +67,7 @@ function HeroStatCard({
         {stat.suffix}
       </p>
       <p
-        className={`mt-2 ${onMedia ? "text-caption text-white/60" : "text-body text-content-secondary"}`}
+        className={`mt-2 ${onMedia ? "text-caption text-(--on-media-muted)" : "text-body text-content-secondary"}`}
       >
         {stat.label}
       </p>
@@ -102,7 +102,7 @@ export default function Hero({
             sizes="100vw"
             className="h-full w-full object-cover"
           />
-          <div className="absolute inset-0 bg-linear-to-t from-black via-black/50 to-transparent" />
+          <div className="scrim absolute inset-0" />
         </div>
 
         {/* Contenido anclado abajo */}
@@ -117,7 +117,7 @@ export default function Hero({
                 <div className="mt-10 flex">
                   <Link
                     href={ctaHref}
-                    className="inline-flex h-12 items-center justify-center rounded-md border border-white/30 px-5 py-3 text-body font-normal tracking-wider text-white transition-all hover:bg-white/10 md:px-8 md:text-h3"
+                    className="inline-flex h-12 items-center justify-center rounded-md border border-(--on-media-border-strong) px-5 py-3 text-body font-normal tracking-wider text-white transition-all hover:bg-(--on-media-hover) md:px-8 md:text-h3"
                   >
                     {ctaText}
                   </Link>

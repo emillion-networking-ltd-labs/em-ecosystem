@@ -50,6 +50,17 @@
   box-shadow: var(--shadow-control);
 }
 
+/* scrim — dark bottom-up gradient that darkens media so overlaid text stays legible (Hero/Portfolio).
+   Single source for the treatment; the flat overlay tokens (--overlay*) cover non-gradient backdrops. */
+@utility scrim {
+  background-image: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.8),
+    rgba(0, 0, 0, 0.4) 40%,
+    transparent
+  );
+}
+
 /* scrollbar-hide (ECO-91): utilidad distribuida (antes solo en el globals del dashboard → en el
    catálogo/satélites asomaba la barra nativa, p.ej. en los Tabs nav-horizontal con scroll). */
 @utility scrollbar-hide {
@@ -394,8 +405,18 @@
     --border-components: rgba(0, 0, 0, 0.42);
     --border-subtle: rgba(0, 0, 0, 0.03);
 
-    /* Overlay */
+    /* Overlay — flat darkening over media / modal backdrops (ESTRUCTURA-DS, attenuation dimension; used via
+       bg-(--overlay) / bg-(--overlay-strong)). Theme-independent: a media backdrop is dark in both themes. */
     --overlay: rgba(0, 0, 0, 0.2);
+    --overlay-strong: rgba(0, 0, 0, 0.92);
+
+    /* On-media — content (text/border/hover) laid over photography; always light, theme-independent (the photo is
+       dark in both themes, so this must NOT flip like --content-inverse does). Used via text-(--on-media*), etc. */
+    --on-media: #ffffff;
+    --on-media-muted: rgba(255, 255, 255, 0.6);
+    --on-media-border: rgba(255, 255, 255, 0.15);
+    --on-media-border-strong: rgba(255, 255, 255, 0.3);
+    --on-media-hover: rgba(255, 255, 255, 0.1);
 
     /* Semantic feedback colors — NORMA (texto sobre su -bg y sobre surface). proper rgb() form (TW3 used channels `138 17 17`
        for the `rgb(var() / <alpha-value>)` config pattern; TW4 utilities consume

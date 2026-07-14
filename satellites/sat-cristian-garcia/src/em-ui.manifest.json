@@ -96,7 +96,7 @@
     },
     "styles/em-ui-tokens.css": {
       "from": "tokens/tokens.css",
-      "sha": "a4fd557f948fbc763f907d9d42016b6ed60ad171"
+      "sha": "f79e23c95a52ef93583d6ccc0db71aa120cd2c1c"
     }
   }
 }
