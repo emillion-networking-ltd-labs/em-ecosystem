@@ -52,7 +52,7 @@ export const sidebarNavSpecs = {
   },
   flyout: {
     container:
-      "rounded-xl border-border-strong bg-surface-primary shadow-card p-2 min-w-[180px]",
+      "rounded-xl border-border-strong bg-surface-elevated shadow-card p-2 min-w-[180px]",
     position:
       "createPortal to body, fixed, left: icon.right + 8px, top: icon.top",
     delay: "200ms hover delay (same as Tooltip)",
@@ -128,7 +128,7 @@ function SidebarFlyout({
 
   const flyoutEl = visible ? (
     <div
-      className="fixed z-9999 rounded-xl border border-border-strong bg-surface-primary p-2 shadow-card min-w-[180px]"
+      className="fixed z-9999 rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card min-w-[180px]"
       style={style}
       onMouseEnter={startEnter}
       onMouseLeave={startLeave}

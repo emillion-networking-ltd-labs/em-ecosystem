@@ -90,7 +90,7 @@ export default function TotalUsersChart() {
             content={({ active, payload, label }) => {
               if (!active || !payload?.length) return null;
               return (
-                <div className="whitespace-nowrap rounded-lg border border-border-strong bg-surface-primary px-4 py-3 shadow-card">
+                <div className="whitespace-nowrap rounded-lg border border-border-strong bg-surface-elevated px-4 py-3 shadow-card">
                   <p className="mb-1 text-caption font-semibold capitalize text-content-primary">
                     {String(label).toLowerCase()}
                   </p>

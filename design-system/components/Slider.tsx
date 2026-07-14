@@ -109,8 +109,8 @@ export default function Slider({
             [&::-webkit-slider-thumb]:border
             [&::-webkit-slider-thumb]:border-solid
             [&::-webkit-slider-thumb]:border-border-components
-            [&::-webkit-slider-thumb]:shadow-[0_1px_3px_rgba(0,0,0,0.25)]
-            focus-visible:[&::-webkit-slider-thumb]:shadow-[0_0_0_2px_var(--color-border-components),0_1px_3px_rgba(0,0,0,0.25)]
+            [&::-webkit-slider-thumb]:shadow-control
+            focus-visible:[&::-webkit-slider-thumb]:shadow-[0_0_0_2px_var(--color-border-components),var(--shadow-control)]
             [&::-moz-range-thumb]:w-4
             [&::-moz-range-thumb]:h-4
             [&::-moz-range-thumb]:rounded-full
@@ -118,8 +118,8 @@ export default function Slider({
             [&::-moz-range-thumb]:border
             [&::-moz-range-thumb]:border-solid
             [&::-moz-range-thumb]:border-border-components
-            [&::-moz-range-thumb]:shadow-[0_1px_3px_rgba(0,0,0,0.25)]
-            focus-visible:[&::-moz-range-thumb]:shadow-[0_0_0_2px_var(--color-border-components),0_1px_3px_rgba(0,0,0,0.25)]
+            [&::-moz-range-thumb]:shadow-control
+            focus-visible:[&::-moz-range-thumb]:shadow-[0_0_0_2px_var(--color-border-components),var(--shadow-control)]
             ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
         />
       </div>

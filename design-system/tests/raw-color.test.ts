@@ -11,7 +11,14 @@ const DS = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 describe("check-raw-color (ECO-145)", () => {
   it("detecta color crudo: hex, rgb/hsl, arbitrary Tailwind, paleta cruda", () => {
     expect(rawColorMatch("  background: #1c1c1c;")?.kind).toBe("hex");
-    expect(rawColorMatch("  color: rgba(28, 28, 28, 0.5);")?.kind).toBe("rgb/hsl");
+    expect(rawColorMatch("  color: rgba(28, 28, 28, 0.5);")?.kind).toBe(
+      "rgb/hsl",
+    );
+    // ECO-204 (ex-201): `_rgba` dentro de un shadow arbitrario (Tailwind codifica el espacio con `_`) — el `\b`
+    // no separaba `_` de `rgba`; el lookbehind de letra sí lo caza.
+    expect(rawColorMatch("shadow-[0_1px_3px_rgba(0,0,0,0.25)]")?.kind).toBe(
+      "rgb/hsl",
+    );
     // arbitrary Tailwind `bg-[#hex]`: se detecta (el hex interno matchea primero → kind "hex"; se caza igual).
     expect(rawColorMatch('className="bg-[#a0bce8]"')).not.toBeNull();
     expect(rawColorMatch('className="text-slate-500"')?.kind).toBe("paleta");
@@ -20,8 +27,12 @@ describe("check-raw-color (ECO-145)", () => {
   it("exime: definición de token, comentario, rgb(var(--token)) y raw-color-ok", () => {
     expect(rawColorMatch("  --paper: #f0e9d6;")).toBeNull(); // DEFINICIÓN = fuente del token
     expect(rawColorMatch("  /* Outer card = #fbfbfb */")).toBeNull(); // comentario (documenta)
-    expect(rawColorMatch("  color: rgb(var(--content-primary) / 0.5);")).toBeNull(); // token con alpha
-    expect(rawColorMatch('  fill="#8a1111" // raw-color-ok: crash page')).toBeNull(); // declarado
+    expect(
+      rawColorMatch("  color: rgb(var(--content-primary) / 0.5);"),
+    ).toBeNull(); // token con alpha
+    expect(
+      rawColorMatch('  fill="#8a1111" // raw-color-ok: crash page'),
+    ).toBeNull(); // declarado
     expect(rawColorMatch("  background: var(--surface-primary);")).toBeNull(); // uso de token
     expect(rawColorMatch("  const x = 1;")).toBeNull(); // código sin color
   });
@@ -29,7 +40,9 @@ describe("check-raw-color (ECO-145)", () => {
   it("el DS + consumidores están LIMPIOS de color crudo (guard permanente)", () => {
     // exit 0 = limpio; execFileSync lanza si el gate falla (un raw se coló en el corpus).
     expect(() =>
-      execFileSync("node", [join(DS, "scripts", "check-raw-color.mjs")], { cwd: DS }),
+      execFileSync("node", [join(DS, "scripts", "check-raw-color.mjs")], {
+        cwd: DS,
+      }),
     ).not.toThrow();
   });
 });

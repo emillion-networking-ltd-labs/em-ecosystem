@@ -2,7 +2,7 @@
    Capa de tokens semánticos distribuible por em-ui (em-ui init). Single-source.
    NO editar a mano en consumidores: re-pull via em-ui. */
 
-@import 'tailwindcss';
+@import "tailwindcss";
 @custom-variant dark (&:is(.dark *));
 
 /* Superficies de tarjeta (ECO-91): utilidades distribuidas del design-system (antes vivían solo en el
@@ -10,14 +10,14 @@
    elevación (con sombra `card`/`card-container` vs plana `*-flat`) y radio (12px vs 24px `*-container*`).
    Tematizadas por token (surface-primary/border-default/shadow-card). */
 @utility card {
-  background: var(--surface-primary);
+  background: var(--surface-elevated);
   border: 1px solid var(--border-default);
   box-shadow: var(--shadow-card);
   border-radius: 12px;
   padding: 24px;
 }
 @utility card-container {
-  background: var(--surface-primary);
+  background: var(--surface-elevated);
   border: 1px solid var(--border-default);
   box-shadow: var(--shadow-card);
   border-radius: 24px;
@@ -34,6 +34,20 @@
   border: 1px solid var(--border-default);
   border-radius: 24px;
   padding: 24px;
+}
+
+/* Sombra como token THEME-AWARE (ECO-204, dimensión SHADOW). Utility propia que lee `var(--shadow-card)` en
+   RUNTIME (igual que `@utility card`). NO se usa la utility que Tailwind genera desde el `--shadow-*` de @theme,
+   porque TW v4 HORNEA el literal en `--tw-shadow` (no se puede tematizar en dark). Así `shadow-card` /
+   `shadow-card-hover` resuelven al valor de `:root` (light) o `.dark` (dark) → separan también en modo oscuro. */
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+@utility shadow-card-hover {
+  box-shadow: var(--shadow-card-hover);
+}
+@utility shadow-control {
+  box-shadow: var(--shadow-control);
 }
 
 /* scrollbar-hide (ECO-91): utilidad distribuida (antes solo en el globals del dashboard → en el
@@ -118,17 +132,55 @@
      NO suelto (en un div hereda `none` de body). El texto que un componente ponga en un <div> se reabre con
      la clase `select-text` sobre ese contenedor (ECO-115) — no se añade `div` aquí para no reactivar el caret
      sobre divs de layout. */
-  p, h1, h2, h3, h4, h5, h6,
-  span, li, code, pre, kbd, samp,
-  blockquote, q, cite, em, strong, b, i, u, s, small, mark, sub, sup,
-  abbr, dfn, time, label, dt, dd, figcaption, caption, th, td, address {
+  p,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6,
+  span,
+  li,
+  code,
+  pre,
+  kbd,
+  samp,
+  blockquote,
+  q,
+  cite,
+  em,
+  strong,
+  b,
+  i,
+  u,
+  s,
+  small,
+  mark,
+  sub,
+  sup,
+  abbr,
+  dfn,
+  time,
+  label,
+  dt,
+  dd,
+  figcaption,
+  caption,
+  th,
+  td,
+  address {
     -webkit-user-select: text;
     user-select: text;
   }
   /* ECO-141: SÓLO los inputs de TEXTO reciben el opt-in; los de control (checkbox/radio/button/range/…) NO —
      quedan en user-select:none (regla de control abajo) para que el caret/selección no aparezca sobre el widget. */
-  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="submit"]):not([type="reset"]):not([type="range"]):not([type="color"]):not([type="file"]):not([type="image"]),
-  textarea, [contenteditable="true"] {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="button"]):not(
+      [type="submit"]
+    ):not([type="reset"]):not([type="range"]):not([type="color"]):not(
+      [type="file"]
+    ):not([type="image"]),
+  textarea,
+  [contenteditable="true"] {
     -webkit-user-select: text;
     user-select: text;
   }
@@ -185,6 +237,7 @@
 
   --color-surface-primary: var(--surface-primary);
   --color-surface-secondary: var(--surface-secondary);
+  --color-surface-elevated: var(--surface-elevated);
   --color-surface-tertiary: var(--surface-tertiary);
   --color-surface-subtle: var(--surface-subtle);
   --color-surface-inverse: var(--surface-inverse);
@@ -244,8 +297,8 @@
   --text-caption--line-height: 18px;
   --text-caption--letter-spacing: 0.02em;
 
-  --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.04);
-  --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.08); /* elevación en hover (BentoGrid, cards interactivas) */
+  /* --shadow-card/-hover ya NO viven en @theme (ECO-204): TW hornearía el literal y no se podría tematizar en
+     dark. Ahora son var normales en :root/.dark, servidas por la @utility shadow-card de arriba. */
 
   --radius-xs: 4px;
   --radius-sm: 5px;
@@ -280,9 +333,17 @@
     /* Surface colors — NORMA (fondo de los pares de contraste) */
     --surface-primary: #ffffff;
     --surface-secondary: #fbfbfb;
+    --surface-elevated: #ffffff;
     --surface-tertiary: #f5f7f9;
     --surface-subtle: rgba(28, 28, 28, 0.05);
     --surface-inverse: #1c1c1c;
+
+    /* Sombra de elevación (ECO-204). Light = la sombra suave actual (sin cambios); dark se re-declara en `.dark`
+       (sombra suave + hairline claro). Las sirve la `@utility shadow-card` (theme-aware, lee estas var en runtime). */
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.04);
+    --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.08);
+    /* Elevación de control pequeño (thumb del Slider, knob del Toggle) — canónica, reutilizada. */
+    --shadow-control: 0 1px 3px rgba(0, 0, 0, 0.2);
 
     /* Content colors — NORMA (texto de los pares). (RGB channels for legacy `rgb(var(--content-primary))`
        usages — utility classes go through `--color-*` overrides below). */
@@ -343,6 +404,7 @@
   .dark {
     --surface-primary: #1a1a1a;
     --surface-secondary: #242424;
+    --surface-elevated: #242424;
     --surface-tertiary: #2d2d2d;
     --surface-subtle: rgba(255, 255, 255, 0.06);
     --surface-inverse: #f5f5f5;
@@ -361,6 +423,14 @@
 
     /* Overlay */
     --overlay: rgba(0, 0, 0, 0.2);
+
+    /* Sombra en dark (ECO-204, dimensión SHADOW / ADR-033). La SEPARACIÓN la da el SURFACE-LIFT
+       (--surface-elevated: la card es más clara que su fondo en dark, patrón pro Material/GitHub), NO la sombra
+       (una sombra negra sobre fondo oscuro casi no contrasta). Así la sombra queda solo como PROFUNDIDAD suave —
+       sin hairline/anillo claro (que se leía como un borde). Light = el valor de :root (sin cambios). Afinable. */
+    --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.35);
+    --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.45);
+    --shadow-control: 0 1px 3px rgba(0, 0, 0, 0.4);
 
     /* Semantic feedback colors */
     --color-error: 248 113 113;
@@ -396,6 +466,7 @@
        un valor por preset, NO se re-declara por tema — por eso no aparece aquí.) */
     --color-surface-primary: var(--surface-primary);
     --color-surface-secondary: var(--surface-secondary);
+    --color-surface-elevated: var(--surface-elevated);
     --color-surface-tertiary: var(--surface-tertiary);
     --color-surface-subtle: var(--surface-subtle);
     --color-surface-inverse: var(--surface-inverse);
@@ -436,6 +507,7 @@
   .light {
     --surface-primary: #ffffff;
     --surface-secondary: #fbfbfb;
+    --surface-elevated: #ffffff;
     --surface-tertiary: #f5f7f9;
     --surface-subtle: rgba(28, 28, 28, 0.05);
     --surface-inverse: #1c1c1c;
@@ -472,6 +544,7 @@
     /* FUENTE ÚNICA (ECO-134): var(--X) → el valor vive sólo en el crudo `--X` de .light de arriba. */
     --color-surface-primary: var(--surface-primary);
     --color-surface-secondary: var(--surface-secondary);
+    --color-surface-elevated: var(--surface-elevated);
     --color-surface-tertiary: var(--surface-tertiary);
     --color-surface-subtle: var(--surface-subtle);
     --color-surface-inverse: var(--surface-inverse);
@@ -520,29 +593,52 @@
   --animate-gradient: gradient 8s linear infinite;
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
-  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite alternate;
+  --animate-shimmer-slide: shimmer-slide var(--speed) ease-in-out infinite
+    alternate;
   --animate-spin-around: spin-around calc(var(--speed) * 2) infinite linear;
 }
 
 @keyframes gradient {
-  to { background-position: var(--bg-size, 300%) 0; }
+  to {
+    background-position: var(--bg-size, 300%) 0;
+  }
 }
 @keyframes marquee {
-  from { transform: translateX(0); }
-  to { transform: translateX(calc(-100% - var(--gap))); }
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(calc(-100% - var(--gap)));
+  }
 }
 @keyframes marquee-vertical {
-  from { transform: translateY(0); }
-  to { transform: translateY(calc(-100% - var(--gap))); }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(calc(-100% - var(--gap)));
+  }
 }
 @keyframes shimmer-slide {
-  to { transform: translate(calc(100cqw - 100%), 0); }
+  to {
+    transform: translate(calc(100cqw - 100%), 0);
+  }
 }
 @keyframes spin-around {
-  0% { transform: translateZ(0) rotate(0); }
-  15%, 35% { transform: translateZ(0) rotate(90deg); }
-  65%, 85% { transform: translateZ(0) rotate(270deg); }
-  100% { transform: translateZ(0) rotate(360deg); }
+  0% {
+    transform: translateZ(0) rotate(0);
+  }
+  15%,
+  35% {
+    transform: translateZ(0) rotate(90deg);
+  }
+  65%,
+  85% {
+    transform: translateZ(0) rotate(270deg);
+  }
+  100% {
+    transform: translateZ(0) rotate(360deg);
+  }
 }
 
 /* ===== Marketing animations (ECO-88, fase 1 / ADR-019) — para componentes Aceternity-free adoptados =====
@@ -555,24 +651,50 @@
 }
 
 @keyframes meteor {
-  0% { transform: rotate(215deg) translateX(0); opacity: 1; }
-  70% { opacity: 1; }
-  100% { transform: rotate(215deg) translateX(-500px); opacity: 0; }
+  0% {
+    transform: rotate(215deg) translateX(0);
+    opacity: 1;
+  }
+  70% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(215deg) translateX(-500px);
+    opacity: 0;
+  }
 }
 @keyframes aurora {
-  from { background-position: 50% 50%, 50% 50%; }
-  to { background-position: 350% 50%, 350% 50%; }
+  from {
+    background-position:
+      50% 50%,
+      50% 50%;
+  }
+  to {
+    background-position:
+      350% 50%,
+      350% 50%;
+  }
 }
 @keyframes spotlight {
-  0% { opacity: 0; transform: translate(-72%, -62%) scale(0.5); }
-  100% { opacity: 1; transform: translate(-50%, -40%) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translate(-72%, -62%) scale(0.5);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -40%) scale(1);
+  }
 }
 
 /* InfinitySpinner (ECO-91): keyframes + clase distribuidas (antes vivían solo en el globals del
    dashboard → el spinner no animaba en el catálogo/satélites). dashoffset 0 → 256.589 (dash+gap). */
 @keyframes infinity-spin {
-  0% { stroke-dashoffset: 0; }
-  100% { stroke-dashoffset: 256.589; }
+  0% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 256.589;
+  }
 }
 .infinity-spinner {
   animation: infinity-spin 2s linear infinite;
@@ -582,20 +704,49 @@
    del dashboard → las pantallas de feedback full-page no animaban el icono en el catálogo/satélites).
    success = pop-in; error = pop-in + shake horizontal (comunica rechazo). */
 @keyframes icon-success {
-  0% { opacity: 0; transform: scale(0.3); }
-  50% { opacity: 1; transform: scale(1.08); }
-  70% { transform: scale(0.96); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  70% {
+    transform: scale(0.96);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 @keyframes icon-error {
-  0% { opacity: 0; transform: scale(0.5); }
-  40% { opacity: 1; transform: scale(1); }
-  50% { transform: translateX(-6px); }
-  60% { transform: translateX(5px); }
-  70% { transform: translateX(-4px); }
-  80% { transform: translateX(3px); }
-  90% { transform: translateX(-1px); }
-  100% { transform: translateX(0); }
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  40% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    transform: translateX(-6px);
+  }
+  60% {
+    transform: translateX(5px);
+  }
+  70% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+  90% {
+    transform: translateX(-1px);
+  }
+  100% {
+    transform: translateX(0);
+  }
 }
 .icon-success {
   animation: icon-success 500ms cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -620,8 +771,11 @@
    --font-serif-face); aquí va el token gobernado + los fallbacks de sistema. */
 @theme {
   /* Familias (el consumidor provee la cara vía next/font como --font-*-face) */
-  --font-display: var(--font-display-face), -apple-system, BlinkMacSystemFont, Segoe UI, Noto Sans, Helvetica, Arial, sans-serif;
-  --font-serif: var(--font-serif-face), Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-display:
+    var(--font-display-face), -apple-system, BlinkMacSystemFont, Segoe UI,
+    Noto Sans, Helvetica, Arial, sans-serif;
+  --font-serif:
+    var(--font-serif-face), Georgia, Cambria, "Times New Roman", Times, serif;
 
   /* Escala DISPLAY fluida (clamp), tracking negativo + line-height ajustado (estilo .text-display del benchmark) */
   --text-display-1: clamp(2.5rem, 1.4rem + 5.2vw, 5rem);
@@ -641,8 +795,17 @@
 /* Gradientes de marca multi-stop (atmósfera). Vars planas (no @theme → no generan utilidad de color);
    se usan con [background-image:var(--gradient-brand)] o en CSS. Tematizables vía --color-accent/-2. */
 :root {
-  --gradient-brand: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%);
-  --gradient-brand-radial: radial-gradient(120% 120% at 50% 0%, var(--color-accent-2) 0%, var(--color-accent) 55%, transparent 100%);
+  --gradient-brand: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-accent-2) 100%
+  );
+  --gradient-brand-radial: radial-gradient(
+    120% 120% at 50% 0%,
+    var(--color-accent-2) 0%,
+    var(--color-accent) 55%,
+    transparent 100%
+  );
 }
 
 /* Motion gobernado (ECO-93) — duración + easing para reveals/stagger/transiciones de las secciones, sin
@@ -669,7 +832,8 @@
 /* Ripple (ECO-106, fase 1 / ADR-019) — fondo de círculos concéntricos que laten (escala) con stagger por
    `--i`. Token de animación + keyframe que consume la utilidad `animate-ripple`. Aditivo. */
 @theme inline {
-  --animate-ripple: ripple var(--duration, 2s) ease calc(var(--i, 0) * 0.2s) infinite;
+  --animate-ripple: ripple var(--duration, 2s) ease calc(var(--i, 0) * 0.2s)
+    infinite;
 }
 @keyframes ripple {
   0%,

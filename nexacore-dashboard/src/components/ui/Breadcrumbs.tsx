@@ -145,12 +145,12 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
               </button>
               {menuOpen && (
                 // SAME classes as the Select popup (1:1 coherence): panel p-6 rounded-xl
-                // border-border-strong bg-surface-primary shadow-card gap-0.5; items h-10 px-6
+                // border-border-strong bg-surface-elevated shadow-card gap-0.5; items h-10 px-6
                 // py-2.5 rounded-md, text-content-primary hover:bg-surface-subtle. A leading chevron
                 // per item echoes the breadcrumb separator.
                 <ul
                   role="menu"
-                  className="absolute left-0 top-full z-50 mt-1 flex max-h-64 w-fit min-w-[160px] flex-col gap-0.5 overflow-auto rounded-xl border border-border-strong bg-surface-primary p-6 shadow-card animate-dropdown-down"
+                  className="absolute left-0 top-full z-50 mt-1 flex max-h-64 w-fit min-w-[160px] flex-col gap-0.5 overflow-auto rounded-xl border border-border-strong bg-surface-elevated p-6 shadow-card animate-dropdown-down"
                 >
                   {middleItems.map((item) => (
                     <li key={item.label} role="none">

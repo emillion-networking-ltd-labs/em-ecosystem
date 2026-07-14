@@ -69,7 +69,7 @@ function MethodCard({ method }: { method: ContactMethod }) {
         {...(method.external
           ? { target: "_blank", rel: "noopener noreferrer" }
           : {})}
-        className="card-flat block transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-strong hover:shadow-[var(--shadow-card)]"
+        className="card-flat block transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-strong hover:shadow-card"
       >
         {inner}
       </a>

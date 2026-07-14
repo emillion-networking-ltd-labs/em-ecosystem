@@ -23,10 +23,10 @@
 /* Marca — tema claro (por defecto). */
 [data-brand="__BRAND__"] {
   /* Crudos de marca — la fuente única del valor en el satélite. REEMPLAZA los hex. */
-  --accent: #1b5e20;        /* REEMPLAZA — acento principal */
-  --accent-light: #2e7d32;  /* REEMPLAZA — acento claro (hovers, fills suaves) */
-  --accent-2: #2e7d32;      /* REEMPLAZA — 2º acento (gradientes multi-stop) */
-  --accent-dark: #1b5e20;   /* REEMPLAZA — acento oscuro (pressed, texto de marca sobre claro) */
+  --accent: #1b5e20; /* REEMPLAZA — acento principal */
+  --accent-light: #2e7d32; /* REEMPLAZA — acento claro (hovers, fills suaves) */
+  --accent-2: #2e7d32; /* REEMPLAZA — 2º acento (gradientes multi-stop) */
+  --accent-dark: #1b5e20; /* REEMPLAZA — acento oscuro (pressed, texto de marca sobre claro) */
 
   /* Escape del freeze — NO EDITAR. Re-declara los tokens @theme en este scope para runtime. */
   --color-accent: var(--accent);
@@ -39,21 +39,48 @@
      COMPUTAN/CONGELAN con el acento base (var() en una custom property se substituye en el elemento
      donde se declara y el valor computado se hereda). Para que tomen tu acento hay que re-declararlos
      AQUÍ con la misma fórmula que tokens.css (mantener en sync). Si no usas gradientes de marca, borra. */
-  --gradient-brand: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%);
-  --gradient-brand-radial: radial-gradient(120% 120% at 50% 0%, var(--color-accent-2) 0%, var(--color-accent) 55%, transparent 100%);
+  --gradient-brand: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-accent-2) 100%
+  );
+  --gradient-brand-radial: radial-gradient(
+    120% 120% at 50% 0%,
+    var(--color-accent-2) 0%,
+    var(--color-accent) 55%,
+    transparent 100%
+  );
+
+  /* OPCIONAL — SOMBRA de marca (ECO-204, shadow ∈ MARCA / ADR-033). La elevación es tokenizada y
+     satélite-modificable: si tu marca quiere otra sombra (más marcada, más plana), re-apunta estos tokens. Son
+     var NORMALES (no @theme → NO llevan el escape `--color-X`), las lee la @utility shadow-card en runtime. En
+     dark la separación la refuerza `--surface-elevated` (la card más clara que el fondo); re-apúntala también si
+     cambias el lift. Si te vale la elevación del sistema, borra este bloque. */
+  /* --shadow-card: 0 8px 32px rgba(0, 0, 0, 0.06); */
+  /* --shadow-card-hover: 0 12px 40px rgba(0, 0, 0, 0.1); */
+  /* --shadow-control: 0 1px 3px rgba(0, 0, 0, 0.2); */
 }
 
 /* Marca — tema oscuro. OPCIONAL: solo si tu acento se afina para fondo oscuro (legibilidad).
    Si tu marca usa el mismo acento en ambos temas, BORRA este bloque y el oscuro hereda el de arriba. */
 .dark[data-brand="__BRAND__"] {
-  --accent: #2e7d32;        /* REEMPLAZA — acento en oscuro (o borra este bloque) */
-  --accent-light: #4caf50;  /* REEMPLAZA */
+  --accent: #2e7d32; /* REEMPLAZA — acento en oscuro (o borra este bloque) */
+  --accent-light: #4caf50; /* REEMPLAZA */
 
   --color-accent: var(--accent);
   --color-accent-light: var(--accent-light);
 
   /* Si re-declaraste los gradientes arriba y tu acento flipa por tema, re-declara también aquí
      (se congelan con el acento del scope donde se declaran). Si no usas gradientes de marca, borra. */
-  --gradient-brand: linear-gradient(135deg, var(--color-accent) 0%, var(--color-accent-2) 100%);
-  --gradient-brand-radial: radial-gradient(120% 120% at 50% 0%, var(--color-accent-2) 0%, var(--color-accent) 55%, transparent 100%);
+  --gradient-brand: linear-gradient(
+    135deg,
+    var(--color-accent) 0%,
+    var(--color-accent-2) 100%
+  );
+  --gradient-brand-radial: radial-gradient(
+    120% 120% at 50% 0%,
+    var(--color-accent-2) 0%,
+    var(--color-accent) 55%,
+    transparent 100%
+  );
 }

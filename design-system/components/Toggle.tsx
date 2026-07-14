@@ -19,7 +19,7 @@ export const toggleSpecs = {
     off: "bg-surface-tertiary border-border-components",
     disabled: "opacity-50 cursor-not-allowed",
   },
-  circle: "bg-surface-primary shadow-sm rounded-full",
+  circle: "bg-surface-primary shadow-control rounded-full",
   sizes: {
     sm: "track: 32×18px · circle: 14px",
     "md (default)": "track: 40×22px · circle: 18px",
