@@ -34,7 +34,7 @@ export const countdownTimer = tv(
       size: {
         sm: {
           root: "gap-px",
-          digit: "w-[1.25em] h-[1.5em] text-caption rounded-[3px]",
+          digit: "w-[1.25em] h-[1.5em] text-caption rounded-xs",
           sep: "text-caption mx-px",
         },
         md: {

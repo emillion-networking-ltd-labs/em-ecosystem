@@ -9,7 +9,7 @@ export default function ToastContainer() {
   const { toasts, removeToast } = useToast();
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-6 z-50 flex flex-col items-center gap-2 px-[50px]">
+    <div className="pointer-events-none fixed inset-x-0 top-6 z-50 flex flex-col items-center gap-2 px-8">
       <AnimatePresence>
         {toasts.map((toast) => (
           <Toast

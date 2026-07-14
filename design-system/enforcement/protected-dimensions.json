@@ -110,6 +110,26 @@
       "mode": "enforce",
       "ceiling": null,
       "note": "A piece's CONTAINER width (dialog/dropdown/popover/toast/tooltip) comes from a token (max-w-[var(--dialog-*)], min-w-[var(--dropdown-min)]...), not an arbitrary max-w-[Npx]/min-w-[Npx]. ESTRUCTURA-DS (blocked, NOT [data-brand]). Founded on research (reading measure ~45-75ch caps dialogs ~600; the 720 modal removed). Same role + random values -> ONE standard (dropdown 160/180/200 -> --dropdown-min 160). Functional single values named (calendar month-grid 300, tooltip 240). TIER-AWARE: decorative exempt; text truncation (truncate) exempt; intrinsic element sizes (w/h-[Npx]) NOT gated. Core clean (0) -> lock."
+    },
+    {
+      "dimension": "radius",
+      "piece": "tokens --radius-xs/sm/md/lg/xl/2xl/3xl/full (rounded-* from @theme)",
+      "gate": "check-radius-usage.mjs",
+      "scope": "ds",
+      "escape": "radius-ok",
+      "mode": "enforce",
+      "ceiling": null,
+      "note": "Corner radius comes from the token scale (rounded-xs..3xl|full, mapped from --radius-* in @theme) or rounded-[var(--radius-*)], not an arbitrary rounded-[Npx]. TIER-AWARE: decorative pieces (harvested effects) use their own radii -> exempt; keyword values (rounded-[inherit]) are not magic lengths (no match). radius = MARCA (ADR-033): the satellite re-points --radius-* in [data-brand]. Scale already existed (ECO-131-era, 9 tokens); the only debt was CountdownTimer rounded-[3px] -> rounded-xs (singleton folds to nearest token). Meteors rounded-[9999px] / ShimmerButton rounded-[inherit] are decorative -> exempt. Core clean (0) -> lock."
+    },
+    {
+      "dimension": "spacing",
+      "piece": "tokens --spacing-1..9 (+ 0_5/1_5/2_5)",
+      "gate": "check-spacing-usage.mjs",
+      "scope": "ds",
+      "escape": "spacing-ok",
+      "mode": "enforce",
+      "ceiling": null,
+      "note": "Padding/margin/gap come from the spacing scale (p-4, mx-2, gap-3, mapped from --spacing-* in @theme) or p-[var(--spacing-*)], not an arbitrary p-[Npx]/m-[Npx]/gap-[Npx]. The named 1px utilities (gap-px, mx-px) are on-scale (no brackets -> no match). ESTRUCTURA-DS (blocked, NOT [data-brand]): spacing is a system constant identical across satellites. NOT tier-aware (universal, like attenuation). Covers ONLY padding/margin/gap; intrinsic w/h and container widths (piece-measure) are other dimensions. The only debt was ToastContainer px-[50px] -> px-8 (on-grid gutter). Core clean (0) -> lock."
     }
   ]
 }
