@@ -67,7 +67,7 @@ export default function CopyCell({
         <div
           className={`pointer-events-none select-none fixed z-50 max-w-xs rounded-lg border px-3 py-2 text-caption shadow-card ${
             copied
-              ? "border-success/30 bg-success-bg text-success"
+              ? "border-success-border bg-success-bg text-success"
               : "border-border-components bg-surface-primary text-content-primary"
           }`}
           style={{ left: pos.x, top: pos.y }}

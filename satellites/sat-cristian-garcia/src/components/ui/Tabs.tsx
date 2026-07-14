@@ -52,14 +52,14 @@ export const variantStyles = {
     active:
       "bg-surface-subtle rounded-md text-body font-normal text-content-primary",
     inactive:
-      "text-body font-normal text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
+      "text-body font-normal text-content-secondary hover:bg-surface-subtle hover:text-content-primary rounded-md",
   },
   "nav-horizontal": {
     container: "gap-2",
     active:
       "bg-surface-subtle rounded-md text-body font-normal text-content-primary",
     inactive:
-      "text-body font-normal text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
+      "text-body font-normal text-content-secondary hover:bg-surface-subtle hover:text-content-primary rounded-md",
   },
 };
 
@@ -150,7 +150,7 @@ export const tabsSpecs = {
   variants: {
     subtle:
       "Active: bg-surface-secondary border font-semibold | Inactive: font-semibold text-content-primary (Figma)",
-    nav: "Active: bg-surface-subtle rounded-md text-body text-content-primary | Inactive: text-body text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
+    nav: "Active: bg-surface-subtle rounded-md text-body text-content-primary | Inactive: text-body text-content-secondary hover:bg-surface-subtle hover:text-content-primary rounded-md",
     "nav-horizontal": "Same as nav but horizontal layout (top nav bar)",
   },
   container: {
@@ -161,7 +161,7 @@ export const tabsSpecs = {
   nav: {
     height: "h-9 (36px) — fixed for all nav items",
     icon: "16px lucide — optional per tab",
-    chevron: "ChevronRight 16px text-content-primary/75 — inactive only",
+    chevron: "ChevronRight 16px text-content-secondary — inactive only",
     padding: "px-2 py-2, gap-2 between items, gap-1 between inner elements",
   },
   sizes: {
@@ -266,7 +266,7 @@ export default function Tabs({
               <Icon
                 icon={ChevronRight}
                 size="md"
-                className="shrink-0 text-content-primary/75"
+                className="shrink-0 text-content-secondary"
               />
             )}
             {isNav && tab.icon && <span className="shrink-0">{tab.icon}</span>}

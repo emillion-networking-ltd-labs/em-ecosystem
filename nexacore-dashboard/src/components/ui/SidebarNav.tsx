@@ -329,13 +329,13 @@ export default function SidebarNav({
                           <Icon
                             icon={ChevronDown}
                             size="md"
-                            className="shrink-0 text-content-primary/75"
+                            className="shrink-0 text-content-secondary"
                           />
                         ) : (
                           <Icon
                             icon={ChevronRight}
                             size="md"
-                            className="shrink-0 text-content-primary/75"
+                            className="shrink-0 text-content-secondary"
                           />
                         )}
                         <Icon icon={Glyph} size="md" className="shrink-0" />
@@ -368,7 +368,7 @@ export default function SidebarNav({
                                   <Icon
                                     icon={ChevronRight}
                                     size="md"
-                                    className="shrink-0 text-content-primary/75"
+                                    className="shrink-0 text-content-secondary"
                                   />
                                 )}
                                 <Icon
@@ -397,7 +397,7 @@ export default function SidebarNav({
                       <Icon
                         icon={ChevronRight}
                         size="md"
-                        className="shrink-0 text-content-primary/75"
+                        className="shrink-0 text-content-secondary"
                       />
                     )}
                     <Icon icon={Glyph} size="md" className="shrink-0" />

@@ -19,7 +19,7 @@ export const emptyState = tv(
     },
     variants: {
       variant: {
-        default: { icon: "text-content-primary/30" },
+        default: { icon: "text-content-placeholder" },
         error: { icon: "text-error" },
       },
     },
@@ -33,7 +33,7 @@ export const emptyState = tv(
 export const emptyStateSpecs = {
   container: "flex flex-col items-center gap-3 py-12",
   "icon (variant=default)":
-    "2xl (40px) text-content-primary/30 (default: Inbox)",
+    "2xl (40px) text-content-placeholder (default: Inbox)",
   "icon (variant=error)": "2xl (40px) text-error (default: CircleX)",
   title: "text-body font-semibold text-content-primary",
   description: "text-caption text-content-secondary text-center",

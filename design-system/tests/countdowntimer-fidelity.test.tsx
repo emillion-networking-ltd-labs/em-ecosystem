@@ -7,7 +7,7 @@ const OLD_V = {
   error: {
     digitBg: "bg-error-bg",
     digitText: "text-error",
-    sepText: "text-error/75",
+    sepText: "text-error",
   },
   warning: {
     digitBg: "bg-warning-bg",

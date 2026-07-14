@@ -43,14 +43,14 @@ const variantStyles = {
     active:
       "bg-surface-subtle rounded-md text-body font-normal text-content-primary",
     inactive:
-      "text-body font-normal text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
+      "text-body font-normal text-content-secondary hover:bg-surface-subtle hover:text-content-primary rounded-md",
   },
   "nav-horizontal": {
     container: "gap-2",
     active:
       "bg-surface-subtle rounded-md text-body font-normal text-content-primary",
     inactive:
-      "text-body font-normal text-content-primary/75 hover:bg-surface-subtle hover:text-content-primary rounded-md",
+      "text-body font-normal text-content-secondary hover:bg-surface-subtle hover:text-content-primary rounded-md",
   },
 };
 
@@ -117,7 +117,7 @@ export default function TabsOld({
             {isNav && !isActive && (
               <ChevronRight
                 size={16}
-                className="shrink-0 text-content-primary/75"
+                className="shrink-0 text-content-secondary"
               />
             )}
             {isNav && tab.icon && <span className="shrink-0">{tab.icon}</span>}

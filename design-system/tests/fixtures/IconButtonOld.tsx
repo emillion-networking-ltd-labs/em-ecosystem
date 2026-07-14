@@ -13,14 +13,14 @@ const baseClass =
   "inline-flex items-center justify-center shrink-0 p-2 rounded-md cursor-pointer disabled:pointer-events-none disabled:opacity-50";
 
 const variantClasses: Record<string, string> = {
-  default: "text-content-primary/50 transition-colors hover:text-content-primary",
+  default: "text-content-tertiary transition-colors hover:text-content-primary",
   "inside input":
-    "text-content-secondary transition-colors hover:text-content-primary/75 hover:bg-surface-tertiary",
+    "text-content-secondary transition-colors hover:text-content-secondary hover:bg-surface-tertiary",
   danger: "text-error transition-colors hover:bg-error-bg",
   boxed:
     "bg-surface-tertiary text-content-primary hover:bg-surface-subtle focus-visible:ring-1 focus-visible:ring-border-components aria-pressed:ring-1 aria-pressed:ring-border-strong",
   "boxed-hover":
-    "text-content-primary/50 transition-colors hover:bg-surface-tertiary hover:text-content-primary",
+    "text-content-tertiary transition-colors hover:bg-surface-tertiary hover:text-content-primary",
 };
 
 const sizeClasses = { sm: "p-2 rounded-md", md: "p-3 rounded-md" };

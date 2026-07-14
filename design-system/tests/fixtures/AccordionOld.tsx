@@ -71,13 +71,13 @@ export default function AccordionOld({
                 <Icon
                   icon={Plus}
                   size="md"
-                  className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}
+                  className={`shrink-0 text-content-tertiary transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}
                 />
               ) : (
                 <Icon
                   icon={ChevronDown}
                   size="md"
-                  className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                  className={`shrink-0 text-content-tertiary transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
                 />
               )}
             </button>
@@ -87,7 +87,9 @@ export default function AccordionOld({
               }`}
             >
               <div className="overflow-hidden">
-                <div className="select-text px-4 pt-3 pb-4">{item.children}</div>
+                <div className="select-text px-4 pt-3 pb-4">
+                  {item.children}
+                </div>
               </div>
             </div>
           </div>
@@ -124,7 +126,7 @@ export function SingleAccordionOld({
         <Icon
           icon={ChevronDown}
           size="md"
-          className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-content-tertiary transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
       <div

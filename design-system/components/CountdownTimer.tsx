@@ -28,7 +28,7 @@ export const countdownTimer = tv(
     },
     variants: {
       variant: {
-        error: { digit: "bg-error-bg text-error", sep: "text-error/75" },
+        error: { digit: "bg-error-bg text-error", sep: "text-error" },
         warning: { digit: "bg-warning-bg text-warning", sep: "text-warning" },
       },
       size: {

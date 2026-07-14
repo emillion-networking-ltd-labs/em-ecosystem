@@ -12,7 +12,7 @@ export const copyFieldSpecs = {
     "flex items-center gap-2 rounded-lg border border-border-strong bg-surface-subtle px-4 overflow-hidden",
   code: "flex-1 truncate font-mono text-body leading-6 text-content-primary",
   copyButton:
-    "shrink-0 text-content-primary/50 transition-colors hover:text-content-primary",
+    "shrink-0 text-content-tertiary transition-colors hover:text-content-primary",
   icon: "Copy/Check 14px — toggles on click, reverts after 2s",
   sizes: {
     "md (default)": "h-12 (48px)",
@@ -62,7 +62,7 @@ export default function CopyField({
         <button
           type="button"
           onClick={handleCopy}
-          className="shrink-0 text-content-primary/50 transition-colors hover:text-content-primary"
+          className="shrink-0 text-content-tertiary transition-colors hover:text-content-primary"
           aria-label={copied ? "Copied" : "Copy to clipboard"}
         >
           {copied ? (

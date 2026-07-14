@@ -5,7 +5,7 @@ import InlineError from "./InlineError";
 
 export const formFieldSpecs = {
   container: "flex flex-col gap-2",
-  label: "text-body font-semibold text-content-primary (error: text-error/75)",
+  label: "text-body font-semibold text-content-primary (error: text-error)",
   required: "ml-0.5 text-error (*)",
   children:
     "Any form control: Input, Select, EmailSelector, Toggle, Checkbox, etc.",
@@ -34,7 +34,7 @@ export default function FormField({
       {label && (
         <label
           htmlFor={htmlFor}
-          className={`text-body font-semibold ${error ? "text-error/75" : "text-content-primary"}`}
+          className={`text-body font-semibold ${error ? "text-error" : "text-content-primary"}`}
         >
           {label}
           {required && (

@@ -28,8 +28,8 @@ const InputOld = forwardRef<HTMLInputElement, InputOldProps>(function InputOld(
   const outlineClass = isFilled
     ? "outline-hidden"
     : isErrorState
-      ? "outline-error/75"
-      : "outline-transparent hover:outline-content-primary/75 focus-within:outline-content-primary/75";
+      ? "outline-error"
+      : "outline-transparent hover:outline-content-secondary focus-within:outline-content-secondary";
 
   return (
     <div className="flex flex-col gap-2">

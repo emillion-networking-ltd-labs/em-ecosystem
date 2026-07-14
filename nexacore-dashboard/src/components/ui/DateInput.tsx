@@ -33,9 +33,9 @@ export const dateInputSpecs = {
   },
   states: {
     default: "outline-transparent",
-    hover: "hover:outline-content-primary/75",
-    focus: "outline-content-primary/75",
-    error: "outline-error/75",
+    hover: "hover:outline-content-secondary",
+    focus: "outline-content-secondary",
+    error: "outline-error",
     disabled: "cursor-not-allowed opacity-60",
   },
   dropdown: "Calendar component — shadow-card, rounded-xl",
@@ -126,10 +126,10 @@ export default function DateInput({
         disabled={disabled}
         className={`flex items-center gap-2 ${sizeClasses[size]} rounded-lg border border-border-components bg-transparent text-left outline outline-2 outline-offset-2 transition-colors ${
           hasError
-            ? "outline-error/75"
+            ? "outline-error"
             : open
               ? "outline-transparent"
-              : "outline-transparent hover:outline-content-primary/75"
+              : "outline-transparent hover:outline-content-secondary"
         } ${disabled ? "cursor-not-allowed opacity-60" : "cursor-pointer"}`}
       >
         <span
@@ -142,7 +142,7 @@ export default function DateInput({
         <Icon
           icon={CalendarDays}
           size="md"
-          className="shrink-0 text-content-primary/50"
+          className="shrink-0 text-content-tertiary"
         />
       </button>
 

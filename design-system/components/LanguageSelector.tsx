@@ -24,7 +24,7 @@ export const languageSelectorSpecs = {
   trigger: {
     base: "flex h-10 items-center gap-2 rounded-md px-4 text-body font-normal transition-colors",
     closed:
-      "border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary",
+      "border border-transparent bg-transparent text-content-secondary hover:text-content-primary",
     open: "border border-border-components bg-surface-primary text-content-primary",
   },
   popover: {
@@ -127,7 +127,7 @@ export default function LanguageSelector({
     "flex h-10 items-center gap-2 px-4 text-body font-normal transition-colors";
   const triggerClass = isOpen
     ? `${triggerBase} border border-border-components bg-surface-subtle text-content-primary`
-    : `${triggerBase} border border-transparent bg-transparent text-content-primary/75 hover:text-content-primary`;
+    : `${triggerBase} border border-transparent bg-transparent text-content-secondary hover:text-content-primary`;
 
   return (
     <div ref={containerRef} className="relative w-fit">
@@ -167,7 +167,7 @@ export default function LanguageSelector({
                     <button
                       type="button"
                       onClick={() => setSearch("")}
-                      className="text-content-primary/50 hover:text-content-primary"
+                      className="text-content-tertiary hover:text-content-primary"
                     >
                       <Icon icon={X} size="xs" />
                     </button>

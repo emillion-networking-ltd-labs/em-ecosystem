@@ -62,7 +62,7 @@ function StarRating({
           className={
             n <= rating
               ? "fill-content-primary text-content-primary"
-              : "fill-content-primary/30 text-content-primary/30"
+              : "fill-content-placeholder text-content-placeholder"
           }
         />
       ))}

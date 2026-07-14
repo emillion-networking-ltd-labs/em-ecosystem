@@ -30,7 +30,7 @@ export default function MetricCard({
       <p className="text-body font-semibold text-content-secondary">{label}</p>
       <div className="mt-2 flex items-center gap-2">
         {loading ? (
-          <div className="h-8 w-20 animate-pulse rounded-lg bg-black/8 dark:bg-white/8" />
+          <div className="h-8 w-20 animate-pulse rounded-lg bg-surface-subtle" />
         ) : (
           <>
             <span className="text-h1 text-content-primary">{value}</span>

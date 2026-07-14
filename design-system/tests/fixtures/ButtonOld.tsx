@@ -24,9 +24,9 @@ export const variantClasses = {
     "bg-transparent text-content-primary border border-border-components transition-colors hover:bg-surface-subtle disabled:pointer-events-none disabled:opacity-50",
   danger:
     "bg-transparent text-error border border-error-border transition-colors hover:bg-error-bg disabled:pointer-events-none disabled:opacity-50",
-  link: "bg-transparent text-content-primary/75 border-0 transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-50",
+  link: "bg-transparent text-content-secondary border-0 transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-50",
   "link-underline":
-    "bg-transparent text-content-primary/75 border-0 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted disabled:pointer-events-none disabled:opacity-50",
+    "bg-transparent text-content-secondary border-0 transition-colors hover:text-content-primary hover:underline active:text-content-secondary active:underline active:decoration-dotted disabled:pointer-events-none disabled:opacity-50",
 };
 
 export const baseClass =
