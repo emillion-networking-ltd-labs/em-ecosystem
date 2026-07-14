@@ -96,7 +96,7 @@
     },
     "components/ui/IconButton.tsx": {
       "from": "components/IconButton.tsx",
-      "sha": "520292987fb955bd26da8e48732e2438ae26c181"
+      "sha": "dfcdefbca98246ed482143e3a2634e8c287775c2"
     },
     "components/ui/IdleWarningModal.tsx": {
       "from": "components/IdleWarningModal.tsx",
