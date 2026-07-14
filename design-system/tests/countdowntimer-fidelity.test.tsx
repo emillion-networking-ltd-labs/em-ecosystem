@@ -17,7 +17,7 @@ const OLD_V = {
 } as const;
 const OLD_S = {
   sm: {
-    digit: "w-[1.25em] h-[1.5em] text-caption rounded-[3px]",
+    digit: "w-[1.25em] h-[1.5em] text-caption rounded-xs",
     sep: "text-caption mx-px",
     gap: "gap-px",
   },
