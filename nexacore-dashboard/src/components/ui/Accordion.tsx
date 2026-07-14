@@ -38,7 +38,7 @@ export const accordionSpecs = {
       "rounded-md border border-border-strong overflow-hidden bg-surface-primary",
     divider: "divide-y divide-border-default",
   },
-  icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open (duration-200)",
+  icon: "ChevronDown 16px text-content-tertiary, rotate-180 on open (duration-200)",
   content: "px-4 pt-3 pb-4",
   animation: {
     style: "CSS grid-template-rows 0fr/1fr transition (Radix UI pattern)",
@@ -114,13 +114,13 @@ export default function Accordion({
                 <Icon
                   icon={Plus}
                   size="md"
-                  className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}
+                  className={`shrink-0 text-content-tertiary transition-transform duration-200 ${isOpen ? "rotate-45" : ""}`}
                 />
               ) : (
                 <Icon
                   icon={ChevronDown}
                   size="md"
-                  className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
+                  className={`shrink-0 text-content-tertiary transition-transform duration-200 ${isOpen ? "rotate-180" : ""}`}
                 />
               )}
             </button>
@@ -180,7 +180,7 @@ export function SingleAccordion({
         <Icon
           icon={ChevronDown}
           size="md"
-          className={`shrink-0 text-content-primary/50 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          className={`shrink-0 text-content-tertiary transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
       <div

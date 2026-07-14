@@ -9,9 +9,9 @@ export const mfaDigitInputSpecs = {
   },
   digit: {
     base: "rounded-lg border border-border-components bg-transparent text-center font-mono caret-transparent text-body text-content-primary outline-solid outline-2 outline-offset-2 transition-colors",
-    hover: "hover:outline-content-primary/75",
-    focus: "focus:outline-content-primary/75",
-    error: "outline-error/75 — same pattern as Input error state",
+    hover: "hover:outline-content-secondary",
+    focus: "focus:outline-content-secondary",
+    error: "outline-error — same pattern as Input error state",
     sizing:
       "aspect-square flex-1 max-w-12 min-w-0 — auto-shrinks to fit container, max 48px",
   },
@@ -139,7 +139,7 @@ export default function MfaDigitInput({
           value={value[i] || ""}
           onChange={(e) => handleDigitChange(i, e.target.value)}
           onKeyDown={(e) => handleKeyDown(i, e)}
-          className={`${compact ? "h-10 max-w-10" : "h-12 max-w-12"} min-w-0 flex-1 ${digitBase} ${error ? "outline-error/75" : "outline-transparent hover:outline-content-primary/75 focus:outline-content-primary/75"}`}
+          className={`${compact ? "h-10 max-w-10" : "h-12 max-w-12"} min-w-0 flex-1 ${digitBase} ${error ? "outline-error" : "outline-transparent hover:outline-content-secondary focus:outline-content-secondary"}`}
           aria-label={`Digit ${i + 1}`}
           autoFocus={autoFocus && i === 0}
         />

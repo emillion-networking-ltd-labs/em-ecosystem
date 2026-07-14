@@ -52,7 +52,7 @@ export default function TotalUsersChart() {
               This year
             </span>
           </div>
-          <span className="text-caption text-content-primary/20">|</span>
+          <span className="text-caption text-content-placeholder">|</span>
           <div className="flex items-center gap-1.5">
             <span className="h-2 w-2 rounded-full bg-chart-1" />
             <span className="text-caption text-content-secondary">

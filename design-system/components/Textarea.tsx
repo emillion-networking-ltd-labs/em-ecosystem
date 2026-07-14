@@ -10,10 +10,16 @@ interface TextareaProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   hasError?: boolean;
 }
 
-export default function Textarea({ hasError = false, className = "", rows = 4, disabled, ...props }: TextareaProps) {
+export default function Textarea({
+  hasError = false,
+  className = "",
+  rows = 4,
+  disabled,
+  ...props
+}: TextareaProps) {
   const outline = hasError
-    ? "outline-error/75"
-    : "outline-transparent hover:outline-content-primary/75 focus:outline-content-primary/75";
+    ? "outline-error"
+    : "outline-transparent hover:outline-content-secondary focus:outline-content-secondary";
   return (
     <textarea
       rows={rows}

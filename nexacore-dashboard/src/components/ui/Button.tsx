@@ -51,9 +51,9 @@ const VARIANT_CLASSES = {
   // grupo). Para toolbars, el segmento inactivo de SegmentedControl, o el look "ghost" que IconButton hace a mano.
   ghost:
     "bg-transparent text-content-secondary border border-transparent transition-colors hover:bg-surface-subtle hover:text-content-primary disabled:pointer-events-none disabled:opacity-50",
-  link: "bg-transparent text-content-primary/75 border-0 transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-50",
+  link: "bg-transparent text-content-secondary border-0 transition-colors hover:text-content-primary disabled:pointer-events-none disabled:opacity-50",
   "link-underline":
-    "bg-transparent text-content-primary/75 border-0 transition-colors hover:text-content-primary hover:underline active:text-content-primary/75 active:underline active:decoration-dotted disabled:pointer-events-none disabled:opacity-50",
+    "bg-transparent text-content-secondary border-0 transition-colors hover:text-content-primary hover:underline active:text-content-secondary active:underline active:decoration-dotted disabled:pointer-events-none disabled:opacity-50",
 } as const;
 // El texto por tamaño (compartido por control y link):
 const SIZE_TEXT = {

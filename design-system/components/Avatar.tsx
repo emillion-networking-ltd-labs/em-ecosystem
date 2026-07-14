@@ -99,7 +99,7 @@ export default function Avatar({
         <Icon
           icon={User}
           size={iconSize[size]}
-          className="text-content-primary/50"
+          className="text-content-tertiary"
           aria-hidden="true"
         />
       )}

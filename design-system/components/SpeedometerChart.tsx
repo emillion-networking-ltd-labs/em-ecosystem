@@ -143,7 +143,7 @@ export default function SpeedometerChart({
           fill="none"
           strokeWidth="1"
           strokeDasharray="4 3"
-          className="stroke-content-primary/50"
+          className="stroke-content-tertiary"
         />
         {/* Needle */}
         <polygon

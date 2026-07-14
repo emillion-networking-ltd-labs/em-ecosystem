@@ -195,7 +195,7 @@ function ContactFormBlock({
           />
           <a
             href={privacyHref}
-            className="shrink-0 text-caption text-content-primary/75 underline decoration-dotted underline-offset-2 transition-colors hover:text-content-primary"
+            className="shrink-0 text-caption text-content-secondary underline decoration-dotted underline-offset-2 transition-colors hover:text-content-primary"
           >
             Read the privacy policy
           </a>

@@ -8,7 +8,7 @@ const OLD = {
   title: "text-body font-semibold text-content-primary",
   description: "text-caption text-content-secondary text-center",
   icon: {
-    default: "text-content-primary/30",
+    default: "text-content-placeholder",
     error: "text-error",
   },
 } as const;

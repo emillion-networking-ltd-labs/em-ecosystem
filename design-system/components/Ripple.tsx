@@ -1,9 +1,13 @@
 // @ds-tier: decorative — efecto cosechado — efecto ripple de fondo
 // Ripple — Magic UI (MIT, © Magic UI), adoptado (ECO-106, fase 1 / ADR-019). Fondo de círculos concéntricos
 // que laten (escala) con stagger; se desvanecen hacia el centro con una máscara. VERBATIM salvo: color crudo
-// `bg-foreground/25` + `var(--foreground)` → token `content-primary`; el latido usa el keyframe `ripple`
+// `bg-foreground/25` + `var(--foreground)` → token (ECO-203: la atenuación /25 pliega al peldaño
+// `content-placeholder`); el latido usa el keyframe `ripple`
 // (`--animate-ripple`) añadido a `tokens.css` (append). Solo `cn` (ya presente).
-import React, { type ComponentPropsWithoutRef, type CSSProperties } from "react";
+import React, {
+  type ComponentPropsWithoutRef,
+  type CSSProperties,
+} from "react";
 
 import { cn } from "@/lib/utils";
 
@@ -36,7 +40,7 @@ export const Ripple = React.memo(function Ripple({
         return (
           <div
             key={i}
-            className="absolute animate-ripple rounded-full border bg-content-primary/25 shadow-xl"
+            className="absolute animate-ripple rounded-full border bg-content-placeholder shadow-xl"
             style={
               {
                 "--i": i,

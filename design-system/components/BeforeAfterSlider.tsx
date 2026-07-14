@@ -219,7 +219,7 @@ export default function BeforeAfterSlider({
           }}
         >
           <svg
-            className={`h-4 w-4 text-content-primary/50 transition-colors group-hover:text-content-primary ${
+            className={`h-4 w-4 text-content-tertiary transition-colors group-hover:text-content-primary ${
               orientation === "vertical" ? "rotate-90" : ""
             }`}
             fill="none"

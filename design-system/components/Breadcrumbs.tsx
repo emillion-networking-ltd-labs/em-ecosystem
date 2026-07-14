@@ -19,7 +19,7 @@ export const breadcrumbsSpecs = {
   link: {
     active: "text-body font-normal text-content-primary (last item)",
     inactive:
-      "text-body font-normal text-content-primary/75 hover:text-content-primary",
+      "text-body font-normal text-content-secondary hover:text-content-primary",
   },
   separator: "ChevronRight 16px text-content-tertiary — between all levels",
   home: "text-content-tertiary hover:text-content-primary 16px Birdhouse icon shrink-0",
@@ -83,7 +83,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
   }, [collapsed]);
 
   const linkClass =
-    "text-body font-normal text-content-primary/75 transition-colors hover:text-content-primary";
+    "text-body font-normal text-content-secondary transition-colors hover:text-content-primary";
   const activeClass = "text-body font-normal text-content-primary";
   const sepClass = "shrink-0 text-content-tertiary";
 
@@ -139,7 +139,7 @@ export default function Breadcrumbs({ items }: BreadcrumbsProps) {
                 aria-expanded={menuOpen}
                 aria-haspopup="menu"
                 aria-label="Show hidden levels"
-                className="rounded px-2 py-1 text-body font-normal text-content-primary/75 transition-colors hover:bg-surface-subtle hover:text-content-primary"
+                className="rounded px-2 py-1 text-body font-normal text-content-secondary transition-colors hover:bg-surface-subtle hover:text-content-primary"
               >
                 …
               </button>

@@ -52,12 +52,12 @@ export const inputBox = tv(
     },
     compoundVariants: [
       // El outline es SOLO de la variante default (filled va sin él).
-      { variant: "default", error: true, class: "outline-error/75" },
+      { variant: "default", error: true, class: "outline-error" },
       {
         variant: "default",
         error: false,
         class:
-          "outline-transparent hover:outline-content-primary/75 focus-within:outline-content-primary/75",
+          "outline-transparent hover:outline-content-secondary focus-within:outline-content-secondary",
       },
     ],
     defaultVariants: {
@@ -82,9 +82,9 @@ export const inputSpecs = {
   input: INPUT_EL,
   states: {
     default: "outline-transparent",
-    hover: "hover:outline-content-primary/75",
-    focus: "focus-within:outline-content-primary/75",
-    error: "outline-error/75",
+    hover: "hover:outline-content-secondary",
+    focus: "focus-within:outline-content-secondary",
+    error: "outline-error",
     disabled: "cursor-not-allowed opacity-60",
     "filled variant": "bg-surface-primary, no outline (search bars, dropdowns)",
   },
@@ -127,7 +127,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       {label && (
         <label
           htmlFor={inputId}
-          className={`text-body font-semibold ${isErrorState ? "text-error/75" : "text-content-primary"}`}
+          className={`text-body font-semibold ${isErrorState ? "text-error" : "text-content-primary"}`}
         >
           {label}
         </label>

@@ -251,7 +251,7 @@ export default function Calendar({
           type="button"
           onClick={handleHeaderClick}
           disabled={viewMode === "years"}
-          className={`text-body font-semibold transition-colors ${viewMode === "years" ? "text-content-primary cursor-default" : "text-content-primary/75 hover:text-content-primary cursor-pointer"}`}
+          className={`text-body font-semibold transition-colors ${viewMode === "years" ? "text-content-primary cursor-default" : "text-content-secondary hover:text-content-primary cursor-pointer"}`}
         >
           {headerLabel}
         </button>

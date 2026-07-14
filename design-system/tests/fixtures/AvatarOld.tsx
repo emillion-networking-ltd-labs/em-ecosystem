@@ -68,7 +68,7 @@ export default function AvatarOld({
       ) : (
         <User
           size={iconSizes[size]}
-          className="text-content-primary/50"
+          className="text-content-tertiary"
           aria-hidden="true"
         />
       )}

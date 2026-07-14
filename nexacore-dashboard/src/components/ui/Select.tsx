@@ -27,7 +27,7 @@ export const selectSpecs = {
   trigger: {
     base: "flex h-10 items-center justify-center gap-2 whitespace-nowrap rounded-md px-6 py-2.5 text-body font-normal transition-colors",
     closed:
-      "text-content-primary/75 hover:text-content-primary hover:bg-surface-subtle",
+      "text-content-secondary hover:text-content-primary hover:bg-surface-subtle",
     open: "bg-surface-subtle text-content-primary",
     disabled: "opacity-50 cursor-not-allowed",
   },
@@ -43,7 +43,7 @@ export const selectSpecs = {
     danger: "text-error hover:bg-error-bg",
     focused: "bg-surface-subtle text-content-primary",
   },
-  icon: "ChevronDown 16px text-content-primary/50, rotate-180 on open",
+  icon: "ChevronDown 16px text-content-tertiary, rotate-180 on open",
   position: {
     auto: "Detects viewport edges — flips vertical (up/down) and horizontal (left/right)",
     animation: "animate-dropdown-down / animate-dropdown-up (150ms ease-out)",
@@ -195,13 +195,13 @@ export default function Select({
           disabled
             ? "opacity-50 cursor-not-allowed"
             : "hover:text-content-primary hover:bg-surface-subtle cursor-pointer"
-        } ${open ? "bg-surface-subtle text-content-primary" : "bg-transparent text-content-primary/75"}`}
+        } ${open ? "bg-surface-subtle text-content-primary" : "bg-transparent text-content-secondary"}`}
       >
         <span>{selectedOption?.label ?? placeholder}</span>
         <Icon
           icon={ChevronDown}
           size="md"
-          className={`text-content-primary/50 transition-transform ${open ? "rotate-180" : ""}`}
+          className={`text-content-tertiary transition-transform ${open ? "rotate-180" : ""}`}
           aria-hidden="true"
         />
       </button>
