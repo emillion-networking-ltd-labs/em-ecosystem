@@ -102,3 +102,8 @@ jobs:
         env:
           EMKEEL_BRANCH: ${{ github.head_ref }}
         run: python -m emkeel.gates.check_strategy_alignment
+      - name: "Gate - code-health ratchet (declared checks; debt only decreases)"
+        if: github.event_name == 'pull_request'
+        env:
+          EMKEEL_BASE_REF: ${{ github.base_ref }}
+        run: python -m emkeel.gates.check_code_health
