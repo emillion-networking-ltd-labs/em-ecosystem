@@ -26,7 +26,7 @@ jobs:
   # ==========================================================================
   full-dependency-audit:
     name: 'Full Dependency Audit'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         package: [nexacore-api, nexacore-dashboard]
@@ -120,7 +120,7 @@ jobs:
   # ==========================================================================
   supply-chain:
     name: 'Supply Chain Integrity'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     strategy:
       matrix:
         package: [nexacore-api, nexacore-dashboard]
@@ -175,7 +175,7 @@ jobs:
   # ==========================================================================
   branch-audit:
     name: 'Branch Hygiene Audit'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       issues: write
@@ -264,7 +264,7 @@ jobs:
   # ==========================================================================
   branch-protection-audit:
     name: 'Branch Protection Audit'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     permissions:
       contents: read
       issues: write
@@ -312,7 +312,7 @@ jobs:
   # ==========================================================================
   summary:
     name: 'Weekly Summary'
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [full-dependency-audit, supply-chain, branch-audit, branch-protection-audit]
     if: always()
     steps:

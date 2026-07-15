@@ -27,7 +27,7 @@ concurrency:
 jobs:
   conflict-markers:
     name: Conflict markers
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout PR / branch
         uses: actions/checkout@v6
