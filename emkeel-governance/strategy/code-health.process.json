@@ -1,0 +1,93 @@
+{
+  "process": "strategy",
+  "state": "presented",
+  "steps": {
+    "scaffolded": {
+      "done": true,
+      "timestamp": "2026-07-15T10:19:01Z",
+      "topic": "code-health",
+      "kill_criteria": [
+        "La capa de gate-de-juicio genera tantos falsos positivos que se termina apagando (como react-hooks SCRUM-377)",
+        "El coste de mantener N linters+gates+AI-review supera el defecto que previene (falsa economia)",
+        "El enforcement por-diff ralentiza tanto Verify/CI que el equipo lo evita o bypassa",
+        "La deuda legacy es tan grande que el ratchet nunca converge (el baseline no baja en la practica)"
+      ]
+    },
+    "researched": {
+      "done": true,
+      "timestamp": "2026-07-15T10:29:28Z",
+      "sources": [
+        "nexacore-dashboard/eslint.config.mjs:20-46",
+        "nexacore-api/eslint.config.mjs:12-34",
+        ".github/workflows/security.yml:151-229",
+        ".jscpd.json:3-5",
+        ".husky/pre-commit:40-56",
+        "design-system/scripts/_ratchet.mjs:1-28",
+        "design-system/scripts/check-piece-complete.mjs:76-130",
+        "em-development-framework/.em-out/governance/checks-registry.yml:10-52",
+        "emkeel/src/emkeel/gates/check_maint_scope.py:29-38",
+        "emkeel/src/emkeel/doctor.py:137-139",
+        "https://eslint.org/blog/2025/04/introducing-bulk-suppressions/",
+        "https://github.com/phenomnomnominal/betterer",
+        "https://cwe.mitre.org/data/slices/1128.html",
+        "https://knip.dev/explanations/comparison-and-migration",
+        "https://docs.sonarsource.com/sonarqube-server/2025.1/user-guide/code-metrics/metrics-definition/",
+        "https://biomejs.dev/blog/biome-v2/",
+        "https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps",
+        "https://www.cubic.dev/blog/the-false-positive-problem-why-most-ai-code-reviewers-fail-and-how-cubic-solved-it",
+        "https://github.com/anthropics/claude-code-action"
+      ]
+    },
+    "proposed": {
+      "done": true,
+      "timestamp": "2026-07-15T10:29:28Z",
+      "options": [
+        "Capas+ratchet-nativo (extender: eslint-hardened+stylelint+knip+jscpd-gate",
+        "ratchet por-diff",
+        "gate emkeel + Verify + hook",
+        "IA advisory)",
+        "SonarQube plataforma (quality gate per-new-code)",
+        "Consolidar en Biome v2",
+        "Generalizar el patron de gates a medida del design-system"
+      ]
+    },
+    "critiqued": {
+      "done": true,
+      "timestamp": "2026-07-15T10:36:20Z",
+      "lens_source": "Fuentes bien fundadas; unico drift: CISQ ASCMM es CWE-1130 no el superset 1128 (corregido). Bulk-suppressions, jscpd exitCode, exhaustive-deps y changed_files confirmados abriendo cada fuente.",
+      "lens_calibration": "El gate mecanico resuelve ~1 de ~5 sintomas de tokens.css: stylelint caza lineas muertas intra-bloque, pero la duplicacion titular (light re-escribe root, feedback 5x cross-block) es review no gate. Corregido: no sobre-prometer.",
+      "lens_falsepositive": "jscpd-gate-duro dispararia el kill-criterion 1: dup relacional (dos sitios), el ratchet solo-lo-nuevo no mapea, un PR que toca V1 y V2 resurface el clon. Corregido: dup a advisory.",
+      "lens_cost": "La recomendacion subestima el TCO (Opcion 1 = seis piezas a mantener mas tres a construir mas coste IA por PR mas setup de baselines) y descarto Sonar por gobernanza no por coste. Corregido: kill-criterion 2 es decision del operador con cifras.",
+      "lens_completeness": "Falta operacionalizar el acoplamiento/direccion de dependencias (ciclos, fronteras NestJS, corte server/client Next), gate-able con eslint-plugin-boundaries. Segundo hueco: metrica de eficacia. Ambos anadidos.",
+      "completeness": "Anadidas dos dimensiones: fronteras/ciclos como 5a capa de gate, y metrica de eficacia (aceptacion IA-review, falsos-positivos, convergencia del ratchet) para juzgar los kill-criteria."
+    },
+    "checked": {
+      "done": true,
+      "timestamp": "2026-07-15T10:38:02Z",
+      "check_passed": true
+    },
+    "validated": {
+      "done": true,
+      "timestamp": "2026-07-15T10:38:02Z",
+      "case": "El fichero que disparo la estrategia: design-system/tokens/tokens.css (feedback declarado dos veces dentro de .dark y .light = lineas muertas).",
+      "method": "Corri de verdad stylelint 16 con la regla declaration-block-no-duplicate-custom-properties sobre tokens.css (la herramienta que la recomendacion propone para el hueco de CSS).",
+      "outcome": "pass",
+      "evidence_ref": "design-system/tokens/tokens.css:543"
+    },
+    "presented": {
+      "done": true,
+      "timestamp": "2026-07-15T10:38:17Z",
+      "presented_to": "operator"
+    }
+  },
+  "steps_schema": [
+    "scaffolded",
+    "researched",
+    "proposed",
+    "critiqued",
+    "checked",
+    "validated",
+    "presented",
+    "approved"
+  ]
+}
