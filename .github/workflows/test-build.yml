@@ -1,0 +1,184 @@
+# ============================================================================
+# EM NexaCore — Tests & Build
+# ============================================================================
+# Quality gates split out of the Security Pipeline (ECO-215): tests + build are
+# NOT security — they are the fundamental correctness/build gates. Per-package:
+# a package's jobs run only when that package changed (PR) or always (push to
+# main/develop). The Tests & Build Gate is the single REQUIRED check — it always
+# runs and aggregates, so skipped per-package jobs never deadlock the merge.
+# Standards: ISO 25010 (Reliability), SOC 2 CC8.2/CC8.3.
+# ============================================================================
+
+name: Tests & Build
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "22"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    name: "Detect changed packages"
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'nexacore-api/**'
+            frontend:
+              - 'nexacore-dashboard/**'
+
+  tests-backend:
+    name: "Tests (Backend)"
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.backend == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: nexacore-api/package-lock.json
+      - name: Install dependencies
+        working-directory: nexacore-api
+        run: npm ci
+      - name: Generate Prisma client
+        working-directory: nexacore-api
+        run: npx prisma generate
+      - name: Run tests with coverage
+        working-directory: nexacore-api
+        run: npm run test:cov
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: backend-coverage
+          path: nexacore-api/coverage/
+          retention-days: 30
+
+  tests-frontend:
+    name: "Tests (Frontend)"
+    runs-on: ubuntu-latest
+    needs: [changes]
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.frontend == 'true' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: nexacore-dashboard/package-lock.json
+      - name: Install dependencies
+        working-directory: nexacore-dashboard
+        run: npm ci
+      - name: Run tests with coverage
+        working-directory: nexacore-dashboard
+        run: npm run test:cov
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: frontend-coverage
+          path: nexacore-dashboard/coverage/
+          retention-days: 30
+
+  build-backend:
+    name: "Build (Backend)"
+    runs-on: ubuntu-latest
+    needs: [tests-backend]
+    if: ${{ !cancelled() && needs.tests-backend.result == 'success' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: nexacore-api/package-lock.json
+      - name: Install dependencies
+        working-directory: nexacore-api
+        run: npm ci
+      - name: Generate Prisma client
+        working-directory: nexacore-api
+        run: npx prisma generate
+      - name: Build
+        working-directory: nexacore-api
+        run: npm run build
+      - name: Verify dist output
+        working-directory: nexacore-api
+        run: |
+          if [ ! -f dist/main.js ]; then
+            echo "::error::Build output missing dist/main.js"
+            exit 1
+          fi
+          echo "Build verification passed"
+
+  build-frontend:
+    name: "Build (Frontend)"
+    runs-on: ubuntu-latest
+    needs: [tests-frontend]
+    if: ${{ !cancelled() && needs.tests-frontend.result == 'success' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "npm"
+          cache-dependency-path: nexacore-dashboard/package-lock.json
+      - name: Install dependencies
+        working-directory: nexacore-dashboard
+        run: npm ci
+      - name: Build
+        working-directory: nexacore-dashboard
+        run: npm run build
+
+  # Single REQUIRED check. Always runs; a package whose jobs were SKIPPED (unchanged)
+  # counts as pass — only a real failure/cancelled fails the gate. So per-package
+  # skipping never deadlocks branch protection.
+  test-build-gate:
+    name: "Tests & Build Gate"
+    runs-on: ubuntu-latest
+    needs: [tests-backend, tests-frontend, build-backend, build-frontend]
+    if: always()
+    steps:
+      - name: Aggregate results
+        run: |
+          fail=0
+          for pair in \
+            "tests-backend:${{ needs.tests-backend.result }}" \
+            "tests-frontend:${{ needs.tests-frontend.result }}" \
+            "build-backend:${{ needs.build-backend.result }}" \
+            "build-frontend:${{ needs.build-frontend.result }}" ; do
+            job="${pair%%:*}"; res="${pair#*:}"
+            if [ "$res" = "failure" ] || [ "$res" = "cancelled" ]; then
+              echo "::error::$job = $res"; fail=1
+            else
+              echo "  $job = $res (ok)"
+            fi
+          done
+          [ "$fail" -eq 0 ] && echo "Tests & Build gate passed" || exit 1
