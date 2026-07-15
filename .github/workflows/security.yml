@@ -21,6 +21,10 @@ permissions:
 env:
   NODE_VERSION: '22'
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   # ==========================================================================
   # Layer 1: Secrets Detection (Gitleaks)
