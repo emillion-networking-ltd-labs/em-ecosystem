@@ -75,7 +75,7 @@ function TestimonialCard({ t, index }: { t: Testimonial; index: number }) {
   const interactive = !!t.href;
   const cls = `card-flat flex h-full flex-col ${
     interactive
-      ? "transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-strong hover:shadow-card"
+      ? "transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-line-strong hover:shadow-card"
       : ""
   }`;
   const inner = (

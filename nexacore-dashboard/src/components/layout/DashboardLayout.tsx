@@ -111,7 +111,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Right panel */}
       {showRightPanel && (
-        <aside className="fixed right-0 top-0 z-30 flex h-screen w-[300px] flex-col rounded-l-xl border-l border-border-strong bg-surface-primary shadow-card">
+        <aside className="fixed right-0 top-0 z-30 flex h-screen w-[300px] flex-col rounded-l-xl border-l border-line-strong bg-surface-primary shadow-card">
           <div className="flex h-[68px] shrink-0 items-center justify-between px-4">
             <div className="flex items-center gap-2">
               <Bell size={16} className="text-content-secondary" />

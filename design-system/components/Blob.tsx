@@ -27,7 +27,12 @@ export interface BlobProps extends ComponentPropsWithoutRef<"div"> {
   intensity?: keyof typeof intensities;
 }
 
-export function Blob({ size = "lg", intensity = "soft", className, ...props }: BlobProps) {
+export function Blob({
+  size = "lg",
+  intensity = "soft",
+  className,
+  ...props
+}: BlobProps) {
   return (
     <div
       aria-hidden="true"

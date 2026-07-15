@@ -26,11 +26,20 @@ export interface ContainerProps extends ComponentPropsWithoutRef<"div"> {
   as?: ElementType;
 }
 
-export function Container({ size = "lg", as, className, ...props }: ContainerProps) {
+export function Container({
+  size = "lg",
+  as,
+  className,
+  ...props
+}: ContainerProps) {
   const Comp = as ?? "div";
   return (
     <Comp
-      className={cn("mx-auto w-full px-4 sm:px-6 lg:px-8", widths[size], className)}
+      className={cn(
+        "mx-auto w-full px-4 sm:px-6 lg:px-8",
+        widths[size],
+        className,
+      )}
       {...props}
     />
   );

@@ -54,7 +54,7 @@ export default function AuthLayout({ children, narrow }: AuthLayoutProps) {
         <div ref={contentRef} className="w-full">
           {/* Container — Figma: fill surface-primary, stroke border-default 1px INSIDE, p=24, gap=24 */}
           <div
-            className={`flex w-full flex-col gap-6 border-b border-border-strong bg-surface-primary p-6 ${narrow ? "rounded-none" : "rounded-t-3xl"}`}
+            className={`flex w-full flex-col gap-6 border-b border-line-strong bg-surface-primary p-6 ${narrow ? "rounded-none" : "rounded-t-3xl"}`}
           >
             {/* Header — Logo + Theme Toggle */}
             <div className="flex items-center gap-2.5">

@@ -53,7 +53,10 @@ export const FlipWords = ({
           scale: 2,
           position: "absolute",
         }}
-        className={cn("relative z-10 inline-block px-2 text-left text-content-primary", className)}
+        className={cn(
+          "relative z-10 inline-block px-2 text-left text-content-primary",
+          className,
+        )}
         key={currentWord}
       >
         {currentWord.split(" ").map((word, wordIndex) => (
@@ -69,7 +72,10 @@ export const FlipWords = ({
                 key={word + letterIndex}
                 initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-                transition={{ delay: wordIndex * 0.3 + letterIndex * 0.05, duration: 0.2 }}
+                transition={{
+                  delay: wordIndex * 0.3 + letterIndex * 0.05,
+                  duration: 0.2,
+                }}
                 className="inline-block"
               >
                 {letter}

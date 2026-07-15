@@ -16,7 +16,9 @@ const MODES = [
 ] as const;
 
 const classSet = (el: Element | null) =>
-  el ? (el.getAttribute("class") || "").split(/\s+/).filter(Boolean).sort() : null;
+  el
+    ? (el.getAttribute("class") || "").split(/\s+/).filter(Boolean).sort()
+    : null;
 
 function extract(container: HTMLElement) {
   const root = container.firstElementChild as Element;
@@ -29,7 +31,12 @@ function extract(container: HTMLElement) {
   };
 }
 
-const rows: { name: string; ok: boolean; old: ReturnType<typeof extract>; neu: ReturnType<typeof extract> }[] = [];
+const rows: {
+  name: string;
+  ok: boolean;
+  old: ReturnType<typeof extract>;
+  neu: ReturnType<typeof extract>;
+}[] = [];
 
 describe("Avatar — fidelidad de atributos (viejo raw/maps vs nuevo tv), por caso", () => {
   for (const size of SIZES) {
@@ -61,7 +68,11 @@ describe("Avatar — fidelidad de atributos (viejo raw/maps vs nuevo tv), por ca
     const mism = rows.filter((r) => !r.ok);
     writeFileSync(
       "/tmp/avatar-fidelity.json",
-      JSON.stringify({ total: rows.length, mismatches: mism.length, rows }, null, 2),
+      JSON.stringify(
+        { total: rows.length, mismatches: mism.length, rows },
+        null,
+        2,
+      ),
     );
     expect(mism.length).toBe(0);
   });

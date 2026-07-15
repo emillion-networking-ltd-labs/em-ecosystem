@@ -4,7 +4,7 @@
  *
  * Positions are derived from the Figma 1440×1024 artboard and
  * converted to percentages so they scale with the viewport.
- * Stroke: #000000 at 5% opacity, 1px — matches var(--border-default).
+ * Stroke: #000000 at 5% opacity, 1px — matches var(--line-default).
  */
 export default function AuthGridLines() {
   return (

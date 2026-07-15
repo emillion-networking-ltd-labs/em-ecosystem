@@ -24,7 +24,7 @@ function Panel({ theme }: { theme: "light" | "dark" }) {
       </div>
 
       {/* 1) SOLO SOMBRA — misma superficie que el fondo */}
-      <div className="bg-surface-primary border-border-default shadow-card rounded-xl border p-6">
+      <div className="bg-surface-primary border-line-default shadow-card rounded-xl border p-6">
         <div className="text-body text-content-primary font-semibold">
           1 · solo sombra (misma superficie que el fondo)
         </div>
@@ -34,7 +34,7 @@ function Panel({ theme }: { theme: "light" | "dark" }) {
       </div>
 
       {/* 2) SURFACE-LIFT — superficie más clara que el fondo */}
-      <div className="bg-surface-elevated border-border-default shadow-card rounded-xl border p-6">
+      <div className="bg-surface-elevated border-line-default shadow-card rounded-xl border p-6">
         <div className="text-body text-content-primary font-semibold">
           2 · surface-lift (superficie más clara)
         </div>
@@ -45,7 +45,7 @@ function Panel({ theme }: { theme: "light" | "dark" }) {
       </div>
 
       {/* hover */}
-      <div className="bg-surface-elevated border-border-default shadow-card-hover rounded-xl border p-6">
+      <div className="bg-surface-elevated border-line-default shadow-card-hover rounded-xl border p-6">
         <div className="text-body text-content-primary font-semibold">
           3 · surface-lift + shadow-card-hover
         </div>

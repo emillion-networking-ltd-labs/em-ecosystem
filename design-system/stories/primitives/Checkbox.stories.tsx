@@ -37,7 +37,9 @@ export const Indeterminate: Story = {
   args: { indeterminate: true, checked: false, label: "Partial selection" },
 };
 
-export const Disabled: Story = { args: { disabled: true, checked: false, label: "Not editable" } };
+export const Disabled: Story = {
+  args: { disabled: true, checked: false, label: "Not editable" },
+};
 
 export const DisabledChecked: Story = {
   args: { disabled: true, checked: true, label: "Not editable (checked)" },

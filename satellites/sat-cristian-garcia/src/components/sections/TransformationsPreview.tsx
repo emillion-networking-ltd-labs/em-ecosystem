@@ -322,13 +322,13 @@ export default function TransformationsPreview({
       {/* Divider with link — oculto cuando se renderiza dentro de /testimonios */}
       {!hideTestimonialsLink && (
         <div className="mt-10 flex items-center">
-          <div className="flex-1 border-t border-dashed border-accent dark:border-border-strong" />
+          <div className="flex-1 border-t border-dashed border-accent dark:border-line-strong" />
           <div className="px-6">
             <Button variant="link" as="a" href="/testimonios">
               VER TODOS LOS TESTIMONIOS
             </Button>
           </div>
-          <div className="flex-1 border-t border-dashed border-accent dark:border-border-strong" />
+          <div className="flex-1 border-t border-dashed border-accent dark:border-line-strong" />
         </div>
       )}
     </section>

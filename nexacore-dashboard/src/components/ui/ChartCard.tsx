@@ -22,7 +22,7 @@ export default function ChartCard({
 }: ChartCardProps) {
   return (
     <div
-      className={`rounded-xl border border-border-strong bg-surface-primary p-6 ${className}`}
+      className={`rounded-xl border border-line-strong bg-surface-primary p-6 ${className}`}
     >
       <div className="mb-4 flex items-center justify-between">
         <h3 className="text-h3 font-semibold text-content-primary">{title}</h3>

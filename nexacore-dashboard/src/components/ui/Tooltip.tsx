@@ -26,9 +26,9 @@ interface TooltipProps {
 
 export const tooltipSpecs = {
   container:
-    "max-w-[var(--tooltip-max)] rounded-lg border border-border-strong bg-surface-primary px-4 py-3",
+    "max-w-[var(--tooltip-max)] rounded-lg border border-line-strong bg-surface-primary px-4 py-3",
   text: "text-caption font-normal text-content-primary",
-  arrow: "h-2 w-2 rotate-45 border border-border-strong bg-surface-primary",
+  arrow: "h-2 w-2 rotate-45 border border-line-strong bg-surface-primary",
   positions: {
     "top (default)": "above trigger, centered",
     bottom: "below trigger, centered",
@@ -195,7 +195,7 @@ export default function Tooltip({
         ref={tooltipRef}
         id={tooltipId}
         role="tooltip"
-        className="fixed z-9999 w-max max-w-[var(--tooltip-max)] rounded-lg border border-border-strong bg-surface-primary px-4 py-3"
+        className="fixed z-9999 w-max max-w-[var(--tooltip-max)] rounded-lg border border-line-strong bg-surface-primary px-4 py-3"
         style={{ ...style, maxWidth }}
       >
         {typeof content === "string" ? (
@@ -206,7 +206,7 @@ export default function Tooltip({
           content
         )}
         <div
-          className="absolute h-2 w-2 border border-border-default bg-surface-primary"
+          className="absolute h-2 w-2 border border-line-default bg-surface-primary"
           style={arrowStyles[resolved]}
         />
       </div>

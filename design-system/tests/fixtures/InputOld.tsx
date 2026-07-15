@@ -35,7 +35,7 @@ const InputOld = forwardRef<HTMLInputElement, InputOldProps>(function InputOld(
     <div className="flex flex-col gap-2">
       <div
         className={`
-          flex items-center gap-2 rounded-lg border border-border-components
+          flex items-center gap-2 rounded-lg border border-line-control
           ${isFilled ? "bg-surface-primary" : "bg-transparent outline-solid outline-2 outline-offset-2"}
           transition-colors
           ${sizeClasses[size]}

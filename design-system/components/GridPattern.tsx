@@ -14,7 +14,12 @@ export interface GridPatternProps extends ComponentPropsWithoutRef<"svg"> {
   stroke?: number;
 }
 
-export function GridPattern({ gap = 32, stroke = 1, className, ...props }: GridPatternProps) {
+export function GridPattern({
+  gap = 32,
+  stroke = 1,
+  className,
+  ...props
+}: GridPatternProps) {
   const id = useId();
   return (
     <svg

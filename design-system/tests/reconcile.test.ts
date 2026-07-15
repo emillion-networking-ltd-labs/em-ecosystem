@@ -1,6 +1,12 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, rmSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  rmSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -24,16 +30,26 @@ afterEach(() => {
   for (const t of tmps.splice(0)) rmSync(t, { recursive: true, force: true });
 });
 
-function runUpdate(dest: string, extra: string[] = []): { status: number; out: string } {
+function runUpdate(
+  dest: string,
+  extra: string[] = [],
+): { status: number; out: string } {
   try {
-    const out = execFileSync("node", [CLI, "update", "Button", "--dest", dest, ...extra], {
-      cwd: DS,
-      encoding: "utf8",
-    });
+    const out = execFileSync(
+      "node",
+      [CLI, "update", "Button", "--dest", dest, ...extra],
+      {
+        cwd: DS,
+        encoding: "utf8",
+      },
+    );
     return { status: 0, out };
   } catch (e: unknown) {
     const err = e as { status?: number; stdout?: string; stderr?: string };
-    return { status: err.status ?? -1, out: (err.stdout ?? "") + (err.stderr ?? "") };
+    return {
+      status: err.status ?? -1,
+      out: (err.stdout ?? "") + (err.stderr ?? ""),
+    };
   }
 }
 
@@ -41,11 +57,19 @@ describe("_reconcile helpers (ECO-144)", () => {
   it("isAdapted: reconoce el marcador SOLO en el prólogo de comentarios (no substring global)", () => {
     expect(isAdapted("// @em-ui-adapted: x\nconst a = 1")).toBe(true);
     // header de licencia multi-línea ENCIMA del marcador → sigue protegido (el fix del silent-clobber)
-    expect(isAdapted("// Copyright 2026\n// Licencia MIT\n//\n// @em-ui-adapted: x\nconst a = 1")).toBe(true);
-    expect(isAdapted("/* block header\n * @em-ui-adapted en bloque\n */\ncode()")).toBe(true);
+    expect(
+      isAdapted(
+        "// Copyright 2026\n// Licencia MIT\n//\n// @em-ui-adapted: x\nconst a = 1",
+      ),
+    ).toBe(true);
+    expect(
+      isAdapted("/* block header\n * @em-ui-adapted en bloque\n */\ncode()"),
+    ).toBe(true);
     // marcador TRAS la primera línea de código (o en el cuerpo / un conflicto) → NO cuenta
     expect(isAdapted("const a = 1\n// @em-ui-adapted body")).toBe(false);
-    expect(isAdapted(Array(10).fill("x").join("\n") + "\n// @em-ui-adapted body")).toBe(false);
+    expect(
+      isAdapted(Array(10).fill("x").join("\n") + "\n// @em-ui-adapted body"),
+    ).toBe(false);
     expect(isAdapted("const a = 1")).toBe(false);
   });
 
@@ -54,7 +78,9 @@ describe("_reconcile helpers (ECO-144)", () => {
     expect(hasConflictMarkers("a\n=======\nb")).toBe(true);
     expect(hasConflictMarkers("a\n>>>>>>> theirs\nb")).toBe(true);
     expect(hasConflictMarkers("a\n||||||| base\nb")).toBe(true);
-    expect(hasConflictMarkers("// ==== sección decorativa ====\nconst a = 1")).toBe(false);
+    expect(
+      hasConflictMarkers("// ==== sección decorativa ====\nconst a = 1"),
+    ).toBe(false);
     expect(hasConflictMarkers("const a = 1;\nconst b = 2;\n")).toBe(false);
   });
 });

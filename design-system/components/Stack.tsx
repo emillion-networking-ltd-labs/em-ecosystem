@@ -32,11 +32,24 @@ export interface StackProps extends ComponentPropsWithoutRef<"div"> {
   as?: ElementType;
 }
 
-export function Stack({ gap = "sm", align = "start", justify, as, className, ...props }: StackProps) {
+export function Stack({
+  gap = "sm",
+  align = "start",
+  justify,
+  as,
+  className,
+  ...props
+}: StackProps) {
   const Comp = as ?? "div";
   return (
     <Comp
-      className={cn("flex flex-col", GAP[gap], aligns[align], justify && justifies[justify], className)}
+      className={cn(
+        "flex flex-col",
+        GAP[gap],
+        aligns[align],
+        justify && justifies[justify],
+        className,
+      )}
       {...props}
     />
   );

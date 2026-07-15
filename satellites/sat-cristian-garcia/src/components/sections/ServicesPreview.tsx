@@ -14,7 +14,7 @@ function ServiceCard({ service }: { service: Service }) {
   return (
     <Link
       href={`/servicios#${service.id}`}
-      className="card-flat block transition-all hover:border-border-components"
+      className="card-flat block transition-all hover:border-line-control"
     >
       <Badge variant="default" size="sm" className="text-accent!">
         {service.id.toUpperCase()}
@@ -90,13 +90,13 @@ export default function ServicesPreview() {
         </div>
       </div>
       <div className="mt-6 flex items-center">
-        <div className="flex-1 border-t border-dashed border-accent dark:border-border-strong" />
+        <div className="flex-1 border-t border-dashed border-accent dark:border-line-strong" />
         <div className="px-6">
           <Button variant="link" as="a" href="/servicios">
             VER TODOS LOS SERVICIOS
           </Button>
         </div>
-        <div className="flex-1 border-t border-dashed border-accent dark:border-border-strong" />
+        <div className="flex-1 border-t border-dashed border-accent dark:border-line-strong" />
       </div>
     </section>
   );

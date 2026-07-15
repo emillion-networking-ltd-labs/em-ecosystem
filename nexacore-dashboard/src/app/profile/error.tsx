@@ -15,7 +15,7 @@ export default function ProfileError({
   }, [error]);
 
   return (
-    <div className="rounded-xl border border-border-default bg-surface-primary p-6">
+    <div className="rounded-xl border border-line-default bg-surface-primary p-6">
       <div className="text-center py-8">
         <svg
           width="40"

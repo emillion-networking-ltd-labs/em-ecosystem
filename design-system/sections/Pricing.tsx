@@ -47,10 +47,10 @@ function PricingCard({
   return (
     <div ref={ref} style={style} className="h-full">
       <div
-        className={`relative flex h-full flex-col rounded-2xl border bg-surface-elevated p-6 transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-strong hover:shadow-card ${
+        className={`relative flex h-full flex-col rounded-2xl border bg-surface-elevated p-6 transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-line-strong hover:shadow-card ${
           plan.highlighted
-            ? "border-border-strong shadow-card"
-            : "border-border-default"
+            ? "border-line-strong shadow-card"
+            : "border-line-default"
         }`}
       >
         {plan.highlighted ? (

@@ -41,7 +41,9 @@ export const WithAction: Story = {
         <ChartCard
           {...args}
           action={
-            <span className="text-caption text-content-tertiary">Last 7 days</span>
+            <span className="text-caption text-content-tertiary">
+              Last 7 days
+            </span>
           }
         >
           <Body />

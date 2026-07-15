@@ -6,11 +6,26 @@ const meta = {
   title: "Layout/Split",
   component: Split,
   tags: ["autodocs"],
-  args: { ratio: "1-1", gap: "xl", align: "center", stackAt: "lg", reverse: false },
+  args: {
+    ratio: "1-1",
+    gap: "xl",
+    align: "center",
+    stackAt: "lg",
+    reverse: false,
+  },
   argTypes: {
-    ratio: { control: "inline-radio", options: ["1-1", "4-8", "8-4", "5-7", "7-5"] },
-    gap: { control: "inline-radio", options: ["none", "xs", "sm", "md", "lg", "xl", "2xl"] },
-    align: { control: "inline-radio", options: ["start", "center", "end", "stretch", "baseline"] },
+    ratio: {
+      control: "inline-radio",
+      options: ["1-1", "4-8", "8-4", "5-7", "7-5"],
+    },
+    gap: {
+      control: "inline-radio",
+      options: ["none", "xs", "sm", "md", "lg", "xl", "2xl"],
+    },
+    align: {
+      control: "inline-radio",
+      options: ["start", "center", "end", "stretch", "baseline"],
+    },
     stackAt: { control: "inline-radio", options: ["md", "lg", "xl"] },
   },
 } satisfies Meta<typeof Split>;
@@ -27,15 +42,16 @@ const RATIOS = [
   { ratio: "4-8", label: "content 4 / media 8" },
 ] as const;
 const Media = () => (
-  <div className="aspect-video w-full rounded-xl border border-border-strong [background-image:var(--gradient-brand)] opacity-80" />
+  <div className="aspect-video w-full rounded-xl border border-line-strong [background-image:var(--gradient-brand)] opacity-80" />
 );
 
 const Content = () => (
   <>
     <h2 className="text-display-3 font-display">Text and media, split</h2>
     <p className="mt-3 text-content-secondary">
-      Stacks on mobile; on desktop it splits by the ratio. <code>reverse</code> flips the visual
-      order without changing the DOM (content stays first for SEO/a11y).
+      Stacks on mobile; on desktop it splits by the ratio. <code>reverse</code>{" "}
+      flips the visual order without changing the DOM (content stays first for
+      SEO/a11y).
     </p>
     <div className="mt-5">
       <Button as="a" href="#" variant="primary" size="md" fullWidth={false}>

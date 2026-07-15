@@ -3,7 +3,7 @@ import { siteConfig, footerLinks } from "@/lib/data";
 
 export default function PublicFooter() {
   return (
-    <footer className="border-t border-border-default bg-surface-primary py-16">
+    <footer className="border-t border-line-default bg-surface-primary py-16">
       <div className="mx-auto max-w-7xl px-6">
         <div className="grid grid-cols-1 gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="sm:col-span-2 lg:col-span-1">
@@ -63,7 +63,7 @@ export default function PublicFooter() {
             </div>
           </div>
         </div>
-        <div className="mt-12 border-t border-border-default pt-6 text-center">
+        <div className="mt-12 border-t border-line-default pt-6 text-center">
           <p className="text-caption text-content-tertiary">
             &copy; {new Date().getFullYear()} {siteConfig.name}. Powered by EM
             Ecosystem.

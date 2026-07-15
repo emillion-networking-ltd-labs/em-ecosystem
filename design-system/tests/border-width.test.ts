@@ -29,7 +29,7 @@ describe("check-border-width-usage (ECO-205)", () => {
       borderWidthHits('// @ds-tier: decorative\nx = "border-[4px]"'),
     ).toHaveLength(0); // efecto → exento
     expect(
-      borderWidthHits('// @ds-tier: core\nx = "border-border-default"'),
+      borderWidthHits('// @ds-tier: core\nx = "border-line-default"'),
     ).toHaveLength(0); // color, no grosor
   });
 

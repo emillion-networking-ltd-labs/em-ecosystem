@@ -32,7 +32,7 @@ const alignClasses = {
 
 function SkeletonRow({ cols }: { cols: number }) {
   return (
-    <tr className="border-b border-border-default last:border-b-0">
+    <tr className="border-b border-line-default last:border-b-0">
       {Array.from({ length: cols }).map((_, i) => (
         <td key={i} className="px-4 py-3">
           <div className="h-4 rounded bg-surface-subtle animate-pulse" />
@@ -56,13 +56,13 @@ export default function DataTable<T>({
 }: DataTableProps<T>) {
   return (
     <div
-      className={`overflow-x-auto rounded-xl border border-border-strong bg-surface-primary ${className}`}
+      className={`overflow-x-auto rounded-xl border border-line-strong bg-surface-primary ${className}`}
     >
       <table className="w-full">
         {/* Header */}
         <thead>
           <tr
-            className={`border-b border-border-default bg-surface-secondary ${headerRowClassName}`}
+            className={`border-b border-line-default bg-surface-secondary ${headerRowClassName}`}
           >
             {columns.map((col) => (
               <th
@@ -98,7 +98,7 @@ export default function DataTable<T>({
               <tr
                 key={keyExtractor(row)}
                 onClick={onRowClick ? () => onRowClick(row) : undefined}
-                className={`border-b border-border-default last:border-b-0 ${
+                className={`border-b border-line-default last:border-b-0 ${
                   hoverRows ? "transition-colors hover:bg-surface-subtle" : ""
                 } ${onRowClick ? "cursor-pointer" : ""}`}
               >

@@ -20,7 +20,7 @@ type MfaModal = null | "setup" | "recovery-codes" | "disable" | "regenerate";
 export default function MfaSetup({ bare }: { bare?: boolean }) {
   const cardClass = bare
     ? ""
-    : "h-full rounded-xl border border-border-strong bg-surface-primary p-6";
+    : "h-full rounded-xl border border-line-strong bg-surface-primary p-6";
   const { user, refreshSession } = useAuth();
   const { addToast } = useToast();
 

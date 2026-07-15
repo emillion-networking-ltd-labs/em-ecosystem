@@ -10,7 +10,14 @@ import ButtonOld from "./fixtures/ButtonOld";
 // (root/label/spinner) y exige que sean IGUALES. Las clases se comparan como conjunto ordenado (el orden en
 // el atributo class NO afecta al render). Emite además una tabla viejo-vs-nuevo para revisión humana.
 
-const VARIANTS = ["primary", "secondary", "outline", "danger", "link", "link-underline"] as const;
+const VARIANTS = [
+  "primary",
+  "secondary",
+  "outline",
+  "danger",
+  "link",
+  "link-underline",
+] as const;
 const SIZES = ["sm", "md", "lg"] as const;
 const CIRCLE = "h-9! w-9! min-w-0! rounded-full! px-0!";
 
@@ -22,25 +29,38 @@ for (const variant of VARIANTS)
   for (const size of SIZES)
     for (const fullWidth of [true, false])
       for (const loading of [false, true])
-        cases.push({ name: `${variant} · ${size} · fw=${fullWidth} · loading=${loading}`, props: { variant, size, fullWidth, loading } });
+        cases.push({
+          name: `${variant} · ${size} · fw=${fullWidth} · loading=${loading}`,
+          props: { variant, size, fullWidth, loading },
+        });
 for (const variant of ["primary", "secondary", "outline", "danger"] as const)
   cases.push({
     name: `circular · ${variant}`,
     props: { variant, fullWidth: false, className: CIRCLE },
     newProps: { variant, fullWidth: false, shape: "circle" },
   });
-cases.push({ name: `link como <a> (href)`, props: { variant: "link-underline", as: "a", href: "/x" } });
-cases.push({ name: `control como <a> (href)`, props: { variant: "primary", as: "a", href: "/x" } });
+cases.push({
+  name: `link como <a> (href)`,
+  props: { variant: "link-underline", as: "a", href: "/x" },
+});
+cases.push({
+  name: `control como <a> (href)`,
+  props: { variant: "primary", as: "a", href: "/x" },
+});
 cases.push({ name: `disabled`, props: { variant: "primary", disabled: true } });
 
 const classSet = (el: Element | null) =>
-  el ? (el.getAttribute("class") || "").split(/\s+/).filter(Boolean).sort() : null;
+  el
+    ? (el.getAttribute("class") || "").split(/\s+/).filter(Boolean).sort()
+    : null;
 
 function extract(container: HTMLElement) {
   const root = container.firstElementChild as Element;
   const spinner = root.querySelector('[role="status"]');
   // el label es el primer <span> que NO es el spinner
-  const label = Array.from(root.querySelectorAll("span")).find((s) => s !== spinner) || null;
+  const label =
+    Array.from(root.querySelectorAll("span")).find((s) => s !== spinner) ||
+    null;
   return {
     tag: root.tagName.toLowerCase(),
     disabled: root.hasAttribute("disabled"),
@@ -52,7 +72,12 @@ function extract(container: HTMLElement) {
   };
 }
 
-const rows: { name: string; ok: boolean; old: ReturnType<typeof extract>; neu: ReturnType<typeof extract> }[] = [];
+const rows: {
+  name: string;
+  ok: boolean;
+  old: ReturnType<typeof extract>;
+  neu: ReturnType<typeof extract>;
+}[] = [];
 
 describe("Button — fidelidad de atributos (viejo mapas vs nuevo tv), por caso", () => {
   for (const c of cases) {
@@ -88,9 +113,18 @@ describe("Button — fidelidad de atributos (viejo mapas vs nuevo tv), por caso"
 
   it("emite la tabla viejo-vs-nuevo (JSON) para revisión", () => {
     const mism = rows.filter((r) => !r.ok);
-    writeFileSync("/tmp/button-fidelity.json", JSON.stringify({ total: rows.length, mismatches: mism.length, rows }, null, 2));
+    writeFileSync(
+      "/tmp/button-fidelity.json",
+      JSON.stringify(
+        { total: rows.length, mismatches: mism.length, rows },
+        null,
+        2,
+      ),
+    );
     // eslint-disable-next-line no-console
-    console.log(`\nFIDELIDAD Button: ${rows.length} casos comparados, ${mism.length} con diferencia.`);
+    console.log(
+      `\nFIDELIDAD Button: ${rows.length} casos comparados, ${mism.length} con diferencia.`,
+    );
     expect(mism.length).toBe(0);
   });
 });

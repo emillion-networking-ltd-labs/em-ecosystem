@@ -146,7 +146,7 @@ export default function PermissionsMatrix() {
 
   if (loadError && permissions.length === 0) {
     return (
-      <div className="flex h-64 items-center justify-center rounded-xl border border-border-strong bg-surface-primary">
+      <div className="flex h-64 items-center justify-center rounded-xl border border-line-strong bg-surface-primary">
         <p className="text-body text-error">Failed to load permissions data.</p>
       </div>
     );

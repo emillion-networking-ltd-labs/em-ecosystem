@@ -59,7 +59,7 @@ export default function PortfolioPreview() {
 
           {/* Newspaper-style card — overlapping the image */}
           <div
-            className="relative z-10 -mt-6 w-full overflow-hidden rounded-xl border border-border-strong shadow-card md:-mt-8"
+            className="relative z-10 -mt-6 w-full overflow-hidden rounded-xl border border-line-strong shadow-card md:-mt-8"
             style={{
               backgroundColor: "var(--paper)",
               backgroundImage:
@@ -117,13 +117,13 @@ export default function PortfolioPreview() {
 
       {/* Divider with link */}
       <div className="mt-6 flex items-center">
-        <div className="flex-1 border-t border-dashed border-accent dark:border-border-strong" />
+        <div className="flex-1 border-t border-dashed border-accent dark:border-line-strong" />
         <div className="px-6">
           <Button variant="link" as="a" href="/portfolio">
             VER PORTFOLIO COMPLETO
           </Button>
         </div>
-        <div className="flex-1 border-t border-dashed border-accent dark:border-border-strong" />
+        <div className="flex-1 border-t border-dashed border-accent dark:border-line-strong" />
       </div>
     </section>
   );

@@ -3,7 +3,7 @@ import Tooltip from "@/components/ui/Tooltip";
 import { DemoCard, Variants } from "../_kit";
 
 const triggerClass =
-  "rounded-lg border border-border-components bg-surface-primary px-4 py-2 text-body text-content-primary";
+  "rounded-lg border border-line-control bg-surface-primary px-4 py-2 text-body text-content-primary";
 
 const meta = {
   title: "Migration/Tooltip",

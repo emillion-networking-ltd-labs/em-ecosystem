@@ -9,9 +9,18 @@ const meta = {
   args: { cols: 3, gap: "md" },
   argTypes: {
     cols: { control: "inline-radio", options: [1, 2, 3, 4] },
-    gap: { control: "inline-radio", options: ["none", "xs", "sm", "md", "lg", "xl", "2xl"] },
-    align: { control: "inline-radio", options: ["start", "center", "end", "stretch"] },
-    justify: { control: "inline-radio", options: ["start", "center", "end", "stretch"] },
+    gap: {
+      control: "inline-radio",
+      options: ["none", "xs", "sm", "md", "lg", "xl", "2xl"],
+    },
+    align: {
+      control: "inline-radio",
+      options: ["start", "center", "end", "stretch"],
+    },
+    justify: {
+      control: "inline-radio",
+      options: ["start", "center", "end", "stretch"],
+    },
   },
 } satisfies Meta<typeof Grid>;
 
@@ -56,11 +65,15 @@ export const Responsive: Story = {
   render: () => (
     <div className="space-y-8">
       <div className="space-y-1.5">
-        <span className="text-caption text-content-secondary font-mono">cols={"{{ base: 1, md: 3 }}"} — 1 → 3 at md</span>
+        <span className="text-caption text-content-secondary font-mono">
+          cols={"{{ base: 1, md: 3 }}"} — 1 → 3 at md
+        </span>
         <Grid cols={{ base: 1, md: 3 }}>{cells(3)}</Grid>
       </div>
       <div className="space-y-1.5">
-        <span className="text-caption text-content-secondary font-mono">cols={"{{ base: 1, sm: 2, lg: 4 }}"}</span>
+        <span className="text-caption text-content-secondary font-mono">
+          cols={"{{ base: 1, sm: 2, lg: 4 }}"}
+        </span>
         <Grid cols={{ base: 1, sm: 2, lg: 4 }}>{cells(4)}</Grid>
       </div>
     </div>
@@ -71,7 +84,9 @@ export const Responsive: Story = {
 export const AutoFit: Story = {
   render: () => (
     <div className="space-y-1.5">
-      <span className="text-caption text-content-secondary font-mono">minItemWidth=&quot;14rem&quot;</span>
+      <span className="text-caption text-content-secondary font-mono">
+        minItemWidth=&quot;14rem&quot;
+      </span>
       <Grid minItemWidth="14rem">{cells(6)}</Grid>
     </div>
   ),

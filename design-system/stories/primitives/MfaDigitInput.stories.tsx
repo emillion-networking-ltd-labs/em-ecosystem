@@ -52,7 +52,12 @@ export const Default: Story = {
     return (
       <DemoCard>
         <Field label="Verification code">
-          <MfaDigitInput {...args} value={value} onChange={setValue} idPrefix="default" />
+          <MfaDigitInput
+            {...args}
+            value={value}
+            onChange={setValue}
+            idPrefix="default"
+          />
         </Field>
       </DemoCard>
     );
@@ -61,11 +66,23 @@ export const Default: Story = {
 
 export const Filled: Story = {
   render: (args) => {
-    const [value, setValue] = useState<string[]>(["1", "2", "3", "4", "5", "6"]);
+    const [value, setValue] = useState<string[]>([
+      "1",
+      "2",
+      "3",
+      "4",
+      "5",
+      "6",
+    ]);
     return (
       <DemoCard>
         <Field label="Verification code">
-          <MfaDigitInput {...args} value={value} onChange={setValue} idPrefix="filled" />
+          <MfaDigitInput
+            {...args}
+            value={value}
+            onChange={setValue}
+            idPrefix="filled"
+          />
         </Field>
       </DemoCard>
     );
@@ -79,7 +96,12 @@ export const WithError: Story = {
     return (
       <DemoCard>
         <Field label="Verification code" error>
-          <MfaDigitInput value={value} onChange={setValue} error idPrefix="error" />
+          <MfaDigitInput
+            value={value}
+            onChange={setValue}
+            error
+            idPrefix="error"
+          />
           <InlineError message="Enter all 6 digits" />
         </Field>
       </DemoCard>
@@ -95,7 +117,12 @@ export const FourDigits: Story = {
     return (
       <DemoCard>
         <Field label="PIN">
-          <MfaDigitInput {...args} value={value} onChange={setValue} idPrefix="four" />
+          <MfaDigitInput
+            {...args}
+            value={value}
+            onChange={setValue}
+            idPrefix="four"
+          />
         </Field>
       </DemoCard>
     );
@@ -113,7 +140,11 @@ export const AllSizes: Story = {
         <div className="flex flex-col gap-6">
           <div className="w-[360px]">
             <Field label="Verification code">
-              <MfaDigitInput value={filled} onChange={() => {}} idPrefix="size-md" />
+              <MfaDigitInput
+                value={filled}
+                onChange={() => {}}
+                idPrefix="size-md"
+              />
               <span className="text-caption text-content-secondary font-mono">
                 md · 48×48px gap-3 (default — container ≥ 348px)
               </span>
@@ -121,7 +152,11 @@ export const AllSizes: Story = {
           </div>
           <div className="w-[280px]">
             <Field label="Verification code">
-              <MfaDigitInput value={filled} onChange={() => {}} idPrefix="size-sm" />
+              <MfaDigitInput
+                value={filled}
+                onChange={() => {}}
+                idPrefix="size-sm"
+              />
               <span className="text-caption text-content-secondary font-mono">
                 sm · 40×40px gap-2 (auto — container &lt; 348px)
               </span>

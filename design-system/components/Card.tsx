@@ -22,9 +22,17 @@ function cardUtility(elevated: boolean, size: "md" | "lg") {
   return elevated ? "card" : "card-flat";
 }
 
-export function Card({ elevated = false, size = "md", as, className, ...props }: CardProps) {
+export function Card({
+  elevated = false,
+  size = "md",
+  as,
+  className,
+  ...props
+}: CardProps) {
   const Comp = as ?? "div";
-  return <Comp className={cn(cardUtility(elevated, size), className)} {...props} />;
+  return (
+    <Comp className={cn(cardUtility(elevated, size), className)} {...props} />
+  );
 }
 
 export default Card;

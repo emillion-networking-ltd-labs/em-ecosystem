@@ -25,7 +25,9 @@ const columns: ColumnDef<Row>[] = [
     key: "role",
     label: "Role",
     render: (row) => (
-      <Badge variant={row.role === "Admin" ? "info" : "default"}>{row.role}</Badge>
+      <Badge variant={row.role === "Admin" ? "info" : "default"}>
+        {row.role}
+      </Badge>
     ),
   },
   {

@@ -22,7 +22,7 @@ interface AvatarProps {
 }
 
 const ROOT_BASE =
-  "relative inline-flex items-center justify-center rounded-full border border-border-strong bg-surface-tertiary overflow-hidden shrink-0";
+  "relative inline-flex items-center justify-center rounded-full border border-line-strong bg-surface-tertiary overflow-hidden shrink-0";
 
 const SIZE_CLASSES = {
   sm: "w-8 h-8 text-caption",

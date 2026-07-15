@@ -12,7 +12,8 @@ const meta = {
     onClose: () => {},
     onConfirm: () => {},
     title: "Confirm action",
-    description: "Are you sure you want to continue? This action can be undone.",
+    description:
+      "Are you sure you want to continue? This action can be undone.",
     confirmLabel: "Confirm",
     cancelLabel: "Cancel",
     variant: "primary",
@@ -38,7 +39,8 @@ export const Danger: Story = {
     variant: "danger",
     size: "sm",
     title: "Delete item",
-    description: "This action can't be undone. All associated data will be removed.",
+    description:
+      "This action can't be undone. All associated data will be removed.",
     confirmLabel: "Delete",
   },
 };

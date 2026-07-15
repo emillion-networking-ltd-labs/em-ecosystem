@@ -25,12 +25,12 @@ export const languageSelectorSpecs = {
     base: "flex h-10 items-center gap-2 rounded-md px-4 text-body font-normal transition-colors",
     closed:
       "border border-transparent bg-transparent text-content-secondary hover:text-content-primary",
-    open: "border border-border-components bg-surface-primary text-content-primary",
+    open: "border border-line-control bg-surface-primary text-content-primary",
   },
   popover: {
     position: "absolute w-fit min-w-[var(--dropdown-min)]",
     container:
-      "rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card max-h-[var(--popover-max-h)] overflow-y-auto",
+      "rounded-xl border border-line-strong bg-surface-elevated p-2 shadow-card max-h-[var(--popover-max-h)] overflow-y-auto",
     search:
       "Input variant=filled + shadow-card — el borde lo pone el primitivo Input (border-components)",
   },
@@ -126,7 +126,7 @@ export default function LanguageSelector({
   const triggerBase =
     "flex h-10 items-center gap-2 px-4 text-body font-normal transition-colors";
   const triggerClass = isOpen
-    ? `${triggerBase} border border-border-components bg-surface-subtle text-content-primary`
+    ? `${triggerBase} border border-line-control bg-surface-subtle text-content-primary`
     : `${triggerBase} border border-transparent bg-transparent text-content-secondary hover:text-content-primary`;
 
   return (
@@ -179,7 +179,7 @@ export default function LanguageSelector({
             </div>
 
             {/* Results — appears second (stagger child 2) */}
-            <div className="max-h-[var(--popover-max-h)] overflow-y-auto rounded-xl border border-border-strong bg-surface-elevated p-2 shadow-card">
+            <div className="max-h-[var(--popover-max-h)] overflow-y-auto rounded-xl border border-line-strong bg-surface-elevated p-2 shadow-card">
               {filtered.length === 0 ? (
                 <p className="py-2 text-center text-body text-content-secondary">
                   No results

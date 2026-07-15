@@ -1,6 +1,13 @@
 import { describe, it, expect, afterEach } from "vitest";
 import { spawnSync } from "node:child_process";
-import { mkdtempSync, mkdirSync, writeFileSync, readFileSync, existsSync, rmSync } from "node:fs";
+import {
+  mkdtempSync,
+  mkdirSync,
+  writeFileSync,
+  readFileSync,
+  existsSync,
+  rmSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -15,13 +22,20 @@ const DS = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const CLI = join(DS, "registry", "cli.mjs");
 
 const tmps: string[] = [];
-function newConsumer(deps: Record<string, string> = {}): { root: string; src: string; pkgPath: string } {
+function newConsumer(deps: Record<string, string> = {}): {
+  root: string;
+  src: string;
+  pkgPath: string;
+} {
   const root = mkdtempSync(join(tmpdir(), "em-ui-deps-"));
   tmps.push(root);
   const src = join(root, "src");
   mkdirSync(src, { recursive: true });
   const pkgPath = join(root, "package.json");
-  writeFileSync(pkgPath, JSON.stringify({ name: "consumer", dependencies: deps }, null, 2) + "\n");
+  writeFileSync(
+    pkgPath,
+    JSON.stringify({ name: "consumer", dependencies: deps }, null, 2) + "\n",
+  );
   return { root, src, pkgPath };
 }
 afterEach(() => {
@@ -32,7 +46,8 @@ function run(args: string[]): { status: number; out: string } {
   const r = spawnSync("node", [CLI, ...args], { cwd: DS, encoding: "utf8" });
   return { status: r.status ?? -1, out: (r.stdout ?? "") + (r.stderr ?? "") };
 }
-const readDeps = (p: string): Record<string, string> => JSON.parse(readFileSync(p, "utf8")).dependencies ?? {};
+const readDeps = (p: string): Record<string, string> =>
+  JSON.parse(readFileSync(p, "utf8")).dependencies ?? {};
 
 describe("em-ui add → deps npm al package.json del consumidor (ECO-164)", () => {
   it("propaga la dep externa directa (DoughnutChart → recharts)", () => {

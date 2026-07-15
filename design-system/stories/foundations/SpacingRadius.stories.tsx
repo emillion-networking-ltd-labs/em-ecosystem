@@ -18,7 +18,10 @@ function SpacingRow({ key_ }: { key_: string }) {
   const [ref, val] = useVar(token);
   return (
     <div ref={ref} className="flex items-center gap-4 py-2">
-      <div className="h-4 rounded-sm bg-content-primary" style={{ width: `var(${token})` }} />
+      <div
+        className="h-4 rounded-sm bg-content-primary"
+        style={{ width: `var(${token})` }}
+      />
       <TokenMeta token={token} value={val} />
     </div>
   );
@@ -30,7 +33,7 @@ function RadiusCell({ key_ }: { key_: string }) {
   return (
     <div ref={ref} className="flex flex-col gap-2">
       <div
-        className="h-16 w-full border border-border-strong bg-surface-tertiary"
+        className="h-16 w-full border border-line-strong bg-surface-tertiary"
         style={{ borderRadius: `var(${token})` }}
       />
       <TokenMeta token={token} value={val} />
@@ -42,7 +45,10 @@ export const SpacingRadius: Story = {
   name: "Spacing & Radius",
   render: () => (
     <div className="text-content-primary">
-      <Group title="Spacing" description="Spacing scale (`--spacing-*`). The bar measures the real token.">
+      <Group
+        title="Spacing"
+        description="Spacing scale (`--spacing-*`). The bar measures the real token."
+      >
         <div className="flex flex-col">
           {SPACING.map((k) => (
             <SpacingRow key={k} key_={k} />

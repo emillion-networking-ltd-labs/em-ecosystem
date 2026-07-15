@@ -56,7 +56,9 @@ export const WithValue: Story = {
     icon: Clock,
     label: "Session Timeout",
     description: "Default session duration for all users",
-    children: <span className="text-caption text-content-primary">24 hours</span>,
+    children: (
+      <span className="text-caption text-content-primary">24 hours</span>
+    ),
   },
 };
 

@@ -4,7 +4,7 @@
   "files": {
     "components/ui/Accordion.tsx": {
       "from": "components/Accordion.tsx",
-      "sha": "568904270db3a2fdccad6a2eb0c6276b0f62d7f3"
+      "sha": "8dedc79f97fdcaded66987a58cbeb5bc129a03d6"
     },
     "components/ui/AlertBox.tsx": {
       "from": "components/AlertBox.tsx",
@@ -12,47 +12,47 @@
     },
     "components/ui/Avatar.tsx": {
       "from": "components/Avatar.tsx",
-      "sha": "4e5f7405b9bdb9bf2f9e9e3d6877cf290c000299"
+      "sha": "3c4f46be4a02d5ada32bcc5f42b6135279195342"
     },
     "components/ui/Badge.tsx": {
       "from": "components/Badge.tsx",
-      "sha": "0cedd1caa9927436936fa9d9c52ceca69721db8f"
+      "sha": "a51eeb79f618e1fe9c1d3a3a8096e501c04139dd"
     },
     "components/ui/BeforeAfterSlider.tsx": {
       "from": "components/BeforeAfterSlider.tsx",
-      "sha": "2bd2f7205338d781cabae7b752204afaa0658121"
+      "sha": "06746d700e931cc279c83cc672b08c5628b66e9d"
     },
     "components/ui/Breadcrumbs.tsx": {
       "from": "components/Breadcrumbs.tsx",
-      "sha": "3a014ca5cf21d54169a2da79c9e82284a77cde89"
+      "sha": "3f0e91e752dfbc669d330ae13aebe946e4353feb"
     },
     "components/ui/Button.tsx": {
       "from": "components/Button.tsx",
-      "sha": "bb1f28ad85f5d99e2890e6589a4d1b83671f1d8a"
+      "sha": "8d8d893bfd16db10672bc33f94111c419fa8a85d"
     },
     "components/ui/Calendar.tsx": {
       "from": "components/Calendar.tsx",
-      "sha": "08aeadb9f40d1a065c0bb613942510d0b5281e08"
+      "sha": "b357c061d3662b6aa6b5980cf1a5af3586cea3a3"
     },
     "components/ui/ChartCard.tsx": {
       "from": "components/ChartCard.tsx",
-      "sha": "3d1396de44160d737b86603e6f968c319a5ff900"
+      "sha": "878a782031dc3c6b1c801c24a9edcd31a3d4bdd6"
     },
     "components/ui/Checkbox.tsx": {
       "from": "components/Checkbox.tsx",
-      "sha": "de0d52166c30be76da0af17f895e1b1aa90252f4"
+      "sha": "77bceb035dd5486cacc351833646e79b232a15aa"
     },
     "components/ui/ConfirmModal.tsx": {
       "from": "components/ConfirmModal.tsx",
-      "sha": "9797a66ffff2f546805473164704a9ae4c030a17"
+      "sha": "ba39b6993784b633f8ba08b331e4f3a11a7e3a09"
     },
     "components/ui/CopyCell.tsx": {
       "from": "components/CopyCell.tsx",
-      "sha": "004c2d5aa293162e2b5885b56c79e516de4b9596"
+      "sha": "724b53e3b087093a81a1f9697cf28d68716d388d"
     },
     "components/ui/CopyField.tsx": {
       "from": "components/CopyField.tsx",
-      "sha": "f060601020d833775a2a3fea63bc7a030d91ee99"
+      "sha": "e92d0730e126f0c2c6cad8210da8a54af015f8d9"
     },
     "components/ui/CountdownTimer.tsx": {
       "from": "components/CountdownTimer.tsx",
@@ -60,11 +60,11 @@
     },
     "components/ui/DataTable.tsx": {
       "from": "components/DataTable.tsx",
-      "sha": "dcd6612b82ed3593a2bf7d8c1c5630f92a0b824f"
+      "sha": "d9263ea0ded8aed161b8fbf53e12d16a81bc5df4"
     },
     "components/ui/DateInput.tsx": {
       "from": "components/DateInput.tsx",
-      "sha": "32f2d381e21568790d459e6ff7be3cdcbf02aefd"
+      "sha": "f3ff1e5d48113f319c80e86e007c3b99908a0ba8"
     },
     "components/ui/Divider.tsx": {
       "from": "components/Divider.tsx",
@@ -72,11 +72,11 @@
     },
     "components/ui/DoughnutChart.tsx": {
       "from": "components/DoughnutChart.tsx",
-      "sha": "622efd6446648dee1e56d5894d01a8dc17c839f1"
+      "sha": "57bee574573d93d89a255a3368f2f409ddd64bc2"
     },
     "components/ui/EmailSelector.tsx": {
       "from": "components/EmailSelector.tsx",
-      "sha": "60ea0a21856dd69cfe80fa757ad568f20484bd96"
+      "sha": "104f20f14a402419933ce2d2bcb124ca6a7cb85f"
     },
     "components/ui/EmptyState.tsx": {
       "from": "components/EmptyState.tsx",
@@ -100,7 +100,7 @@
     },
     "components/ui/IdleWarningModal.tsx": {
       "from": "components/IdleWarningModal.tsx",
-      "sha": "8d9bf4bbb60ddedf8b52abbf45720dfd17df1794"
+      "sha": "09b00b710fa9e91505f9c9cd0af4f150f5e3a9c0"
     },
     "components/ui/ImageCropper.tsx": {
       "from": "components/ImageCropper.tsx",
@@ -112,27 +112,27 @@
     },
     "components/ui/Input.tsx": {
       "from": "components/Input.tsx",
-      "sha": "cffd6ba2427c47ec00b992165c49c8c087ad5878"
+      "sha": "699e39ae3fc487b86f1a4718f38b1b1a0e4c7686"
     },
     "components/ui/LanguageSelector.tsx": {
       "from": "components/LanguageSelector.tsx",
-      "sha": "bd5dcb04d01c09065b4eeefe6a5612ce08a95b4a"
+      "sha": "926241ab5590789407fa190c243db05be756705c"
     },
     "components/ui/MetricCard.tsx": {
       "from": "components/MetricCard.tsx",
-      "sha": "ab17e5c397f9a96437b3822e0f8026fb0f77d0ec"
+      "sha": "f96eaf7d13b5822e56fbb33eb761e70b389a252d"
     },
     "components/ui/MfaDigitInput.tsx": {
       "from": "components/MfaDigitInput.tsx",
-      "sha": "51ca4da9418bb3472c652671d34d3bf0b9cea689"
+      "sha": "df57c9baff619a31e4fd1f5f27303ba7d6a31568"
     },
     "components/ui/Pagination.tsx": {
       "from": "components/Pagination.tsx",
-      "sha": "ecc9da3f01f3221a7e736db3339c7c6b01c0701f"
+      "sha": "0653a8c700cba872148998585bf402bebde6f7c3"
     },
     "components/ui/QrCodeCard.tsx": {
       "from": "components/QrCodeCard.tsx",
-      "sha": "40f1f5d1938013a5e16ebe18fc4254a6ef45862d"
+      "sha": "9b0c1d9fec6e318c535e7fd80080c3bbcdf20f45"
     },
     "components/ui/RateLimitBanner.tsx": {
       "from": "components/RateLimitBanner.tsx",
@@ -140,19 +140,19 @@
     },
     "components/ui/RecoveryCodesGrid.tsx": {
       "from": "components/RecoveryCodesGrid.tsx",
-      "sha": "90da838c55efc9b815c7d85a050cb1ab565ca4bb"
+      "sha": "11415cb1d92ec76070c81efba2c7e482515db30c"
     },
     "components/ui/SearchTrigger.tsx": {
       "from": "components/SearchTrigger.tsx",
-      "sha": "1e5567e6c926273bc7d13e98768478de366f5f2a"
+      "sha": "88bf0b0026a218858a6840b4a763c458a4aac6c5"
     },
     "components/ui/SegmentedControl.tsx": {
       "from": "components/SegmentedControl.tsx",
-      "sha": "25ca27d15af1b7b236c60052502e4ea29f19ba3a"
+      "sha": "5335337a7a574877e307f35504d224e7a6e459fc"
     },
     "components/ui/Select.tsx": {
       "from": "components/Select.tsx",
-      "sha": "dd287222b3d731c08c758d376bcf953916fc45ba"
+      "sha": "ba0a3a0a91267fafe62474b612a686c8f0c8b2ad"
     },
     "components/ui/SettingRow.tsx": {
       "from": "components/SettingRow.tsx",
@@ -160,15 +160,15 @@
     },
     "components/ui/SidebarNav.tsx": {
       "from": "components/SidebarNav.tsx",
-      "sha": "26e429ce956df33743ccbeb5b47fc3ea4a2f095a"
+      "sha": "d38dabc12ae015d27abf35ce5f079c8ac729dd60"
     },
     "components/ui/Slider.tsx": {
       "from": "components/Slider.tsx",
-      "sha": "6a21b81a9ee4075634dc3f48604db5d966f59040"
+      "sha": "aa0c1ac41c3322873dfd1afa80178bec41a9e0d3"
     },
     "components/ui/SpinnerCircle.tsx": {
       "from": "components/SpinnerCircle.tsx",
-      "sha": "3a5decb7a2575e13c69a8a10a2da703b05b9cd5d"
+      "sha": "b7ca5a3bfeed0133a9a926d2c7a2f1c53341528b"
     },
     "components/ui/SpinnerInfinity.tsx": {
       "from": "components/SpinnerInfinity.tsx",
@@ -176,11 +176,11 @@
     },
     "components/ui/StickyCard.tsx": {
       "from": "components/StickyCard.tsx",
-      "sha": "267502f9a369b84867ee4befde8fd3013af3ecbf"
+      "sha": "e995e8e107bd1b963ae58f9f2cd1b3ac51243369"
     },
     "components/ui/Tabs.tsx": {
       "from": "components/Tabs.tsx",
-      "sha": "d5d647275865b57cf620d0f21f40cc9047336058"
+      "sha": "7afa5aa068ac4aa418cbba2f07e3c33285e7402b"
     },
     "components/ui/ThemeToggle.tsx": {
       "from": "components/ThemeToggle.tsx",
@@ -188,7 +188,7 @@
     },
     "components/ui/Toast.tsx": {
       "from": "components/Toast.tsx",
-      "sha": "95a3686b04141433fb017efd2cc8214fee308ffd"
+      "sha": "c1f2892233ac38269d32f309d7e400a4aa64d7b3"
     },
     "components/ui/ToastContainer.tsx": {
       "from": "components/ToastContainer.tsx",
@@ -196,15 +196,15 @@
     },
     "components/ui/Toggle.tsx": {
       "from": "components/Toggle.tsx",
-      "sha": "cbc2e69e466259940566cefe193994ee059d6361"
+      "sha": "c9ee376db220b951a9caed864405f7e923147008"
     },
     "components/ui/Tooltip.tsx": {
       "from": "components/Tooltip.tsx",
-      "sha": "94d0eb350e8309579919bb6bbed4621054afdfb9"
+      "sha": "fbd42aacab17cce63e975974897771a2210d0604"
     },
     "components/ui/TotalUsersChart.tsx": {
       "from": "components/TotalUsersChart.tsx",
-      "sha": "ed86c06e9a62095e63e43ab018b492857b056bbc"
+      "sha": "698a2c43d5cd29da62f897b83c8e151e3923e3ba"
     },
     "components/ui/TurnstileWidget.tsx": {
       "from": "components/TurnstileWidget.tsx",
@@ -236,7 +236,7 @@
     },
     "styles/em-ui-tokens.css": {
       "from": "tokens/tokens.css",
-      "sha": "f79e23c95a52ef93583d6ccc0db71aa120cd2c1c"
+      "sha": "fba728967f3241ba534239178b9bcc7d296e2b8a"
     }
   }
 }

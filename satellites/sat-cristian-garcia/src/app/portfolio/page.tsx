@@ -313,7 +313,7 @@ function MediaCard({ entry, index }: { entry: MediaEntry; index: number }) {
     <div ref={ref} className={className} style={style}>
       <Wrapper
         {...wrapperProps}
-        className={`card-flat block transition-all ${isExternal ? "hover:border-border-components" : ""}`}
+        className={`card-flat block transition-all ${isExternal ? "hover:border-line-control" : ""}`}
       >
         <div className="flex flex-wrap items-center gap-3">
           <p className="text-caption font-semibold uppercase tracking-widest text-accent">

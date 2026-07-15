@@ -15,12 +15,22 @@ export default meta;
 type Story = StoryObj<typeof meta>;
 
 // The spotlight needs a dark, bounded tile to read — hosted inside the project Card.
-const Tile = ({ fill, label, height = "h-72" }: { fill: string; label: string; height?: string }) => (
+const Tile = ({
+  fill,
+  label,
+  height = "h-72",
+}: {
+  fill: string;
+  label: string;
+  height?: string;
+}) => (
   <div
     className={`relative flex ${height} w-full items-center justify-center overflow-hidden rounded-xl bg-surface-inverse`}
   >
     <Spotlight className="-top-40 left-0 md:-top-20 md:left-60" fill={fill} />
-    <span className="relative z-10 text-display-3 font-display text-content-inverse">{label}</span>
+    <span className="relative z-10 text-display-3 font-display text-content-inverse">
+      {label}
+    </span>
   </div>
 );
 

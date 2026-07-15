@@ -29,7 +29,7 @@ function Code({ children }: { children: ReactNode }) {
 
 function Snippet({ children }: { children: string }) {
   return (
-    <pre className="mt-3 overflow-x-auto rounded-lg border border-border-default bg-surface-primary p-4 text-caption font-mono text-content-secondary">
+    <pre className="mt-3 overflow-x-auto rounded-lg border border-line-default bg-surface-primary p-4 text-caption font-mono text-content-secondary">
       {children}
     </pre>
   );
@@ -71,10 +71,9 @@ export const StoryConventions: Story = {
         <strong>all</strong> sections. One principle drives it —{" "}
         <strong>a small, open set of buckets</strong> (three axes: variant /
         size / shape, plus state, content and behavior) — and a gate keeps it
-        honest (
-        <Code>npm run coverage</Code>). All copy is in English, all colour comes
-        from tokens, and stories never change a registered component — they only
-        present it.
+        honest (<Code>npm run coverage</Code>). All copy is in English, all
+        colour comes from tokens, and stories never change a registered
+        component — they only present it.
       </p>
 
       <Group
@@ -248,9 +247,9 @@ export const StoryConventions: Story = {
             (the <Code>DemoCard</Code>; or a layout primitive&apos;s own frame
             when the border sits on the container itself — a <Code>Stack</Code>,
             a <Code>Cluster</Code>, a <Code>Section</Code> band showing its
-            padding) → <Code>border-default</Code> (the card token). DemoCard
-            already <em>is</em> a <Code>Card</Code> ={" "}
-            <Code>border-default</Code>, so a hand-rolled frame matches it.
+            padding) → <Code>line-default</Code> (the card token). DemoCard
+            already <em>is</em> a <Code>Card</Code> = <Code>line-default</Code>,
+            so a hand-rolled frame matches it.
           </Rule>
           <Rule>
             <strong>
@@ -258,7 +257,7 @@ export const StoryConventions: Story = {
             </strong>{" "}
             (a placeholder box, <Code>Split</Code>&apos;s media panel,{" "}
             <Code>Container</Code>&apos;s measure box, the content box inside a
-            padded band) → <Code>border-strong</Code> (the element token).
+            padded band) → <Code>line-strong</Code> (the element token).
             Tell-tale: the container is invisible and you border a{" "}
             <em>child</em> to reveal the structure.
           </Rule>
@@ -269,14 +268,13 @@ export const StoryConventions: Story = {
           </Rule>
           <Rule>
             <strong>Mandatory by the norm</strong>: an input&apos;s{" "}
-            <em>border</em> → <Code>border-components</Code> (WCAG 3:1,
-            gate-enforced by <Code>check-contrast</Code>). Its{" "}
-            <em>focus ring</em> → <Code>content-primary</Code> (a stronger
-            indicator than the resting border). By design{" "}
-            <strong>only inputs</strong> carry a custom focus ring — other
-            controls keep the browser default. A shadowed popup/dropdown uses{" "}
-            <Code>border-strong</Code> (the shadow is the indicator — the border
-            is decorative).
+            <em>border</em> → <Code>line-control</Code> (WCAG 3:1, gate-enforced
+            by <Code>check-contrast</Code>). Its <em>focus ring</em> →{" "}
+            <Code>content-primary</Code> (a stronger indicator than the resting
+            border). By design <strong>only inputs</strong> carry a custom focus
+            ring — other controls keep the browser default. A shadowed
+            popup/dropdown uses <Code>line-strong</Code> (the shadow is the
+            indicator — the border is decorative).
           </Rule>
           <Rule>
             <strong>
@@ -287,11 +285,10 @@ export const StoryConventions: Story = {
             visual: <em>if you saw it rendered, what is it?</em> A{" "}
             <strong>card</strong> (a surface box holding content —{" "}
             <Code>bg-surface-*</Code> + <Code>rounded-*</Code> + padding, that
-            you don&apos;t fill or toggle) → <Code>border-default</Code>,
-            <em>even if it was coded with</em> <Code>border-components</Code>. A
-            card wearing the input token{" "}
-            <strong>stands out for no reason</strong> — whole sections read as
-            highlighted. Keep <Code>border-components</Code>{" "}
+            you don&apos;t fill or toggle) → <Code>line-default</Code>,
+            <em>even if it was coded with</em> <Code>line-control</Code>. A card
+            wearing the input token <strong>stands out for no reason</strong> —
+            whole sections read as highlighted. Keep <Code>line-control</Code>{" "}
             <strong>only</strong> for a real input/control the user fills or
             toggles. Same visual role → same token: uniformity, nothing
             highlighted without cause.
@@ -303,22 +300,22 @@ export const StoryConventions: Story = {
             Un botón/target SIN relleno propio (fondo = la página —{" "}
             <Code>bg-surface-primary</Code> — o transparente), donde el
             <em>borde es la ÚNICA afordancia</em>, lleva{" "}
-            <Code>border-components</Code> aunque sea un botón: su límite debe
+            <Code>line-control</Code> aunque sea un botón: su límite debe
             percibirse a WCAG 3:1 (ej. un botón de paginación inactivo, un botón{" "}
             <em>outline</em>). Un botón CON relleno propio (
             <Code>bg-surface-inverse/tertiary/subtle</Code>, como Button primary
-            / secondary) → <Code>border-strong</Code>: el relleno es la
+            / secondary) → <Code>line-strong</Code>: el relleno es la
             afordancia, el borde es secundario.
           </Rule>
           <Rule>
             The deciding question: is the border{" "}
             <strong>ON the container</strong> being demonstrated (→{" "}
-            <Code>border-default</Code>) or on a{" "}
+            <Code>line-default</Code>) or on a{" "}
             <strong>discrete element/panel</strong> shown as its content (→{" "}
-            <Code>border-strong</Code>)? Pick the <em>role</em> —{" "}
-            <strong>never a raw value</strong> (a hex, an{" "}
-            <Code>rgba()</Code>, or a Tailwind palette colour) that merely matches — {/* raw-color-ok: prose that TEACHES the norm */}
-            a non-token value cannot be re-themed and breaks propagation.
+            <Code>line-strong</Code>)? Pick the <em>role</em> —{" "}
+            <strong>never a raw value</strong> (a hex, an <Code>rgba</Code>{" "}
+            colour, or a Tailwind palette colour) that merely matches — a
+            non-token value cannot be re-themed and breaks propagation.
           </Rule>
         </ul>
       </Group>

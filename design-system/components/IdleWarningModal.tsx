@@ -15,7 +15,7 @@ export default function IdleWarningModal({
 }: IdleWarningModalProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-(--overlay)">
-      <div className="flex w-full max-w-[var(--dialog-sm)] flex-col items-center gap-4 rounded-xl border border-border-strong bg-surface-secondary p-6 shadow-card">
+      <div className="flex w-full max-w-[var(--dialog-sm)] flex-col items-center gap-4 rounded-xl border border-line-strong bg-surface-secondary p-6 shadow-card">
         <CountdownTimer seconds={secondsLeft} variant="warning" size="lg" />
         <p className="text-center text-body text-content-secondary">
           Your session is about to expire due to inactivity.

@@ -7,9 +7,18 @@ const meta = {
   tags: ["autodocs"],
   args: { gap: "sm", align: "start" },
   argTypes: {
-    gap: { control: "inline-radio", options: ["none", "xs", "sm", "md", "lg", "xl", "2xl"] },
-    align: { control: "inline-radio", options: ["start", "center", "end", "stretch"] },
-    justify: { control: "inline-radio", options: ["start", "center", "between", "end"] },
+    gap: {
+      control: "inline-radio",
+      options: ["none", "xs", "sm", "md", "lg", "xl", "2xl"],
+    },
+    align: {
+      control: "inline-radio",
+      options: ["start", "center", "end", "stretch"],
+    },
+    justify: {
+      control: "inline-radio",
+      options: ["start", "center", "between", "end"],
+    },
   },
 } satisfies Meta<typeof Stack>;
 
@@ -20,9 +29,13 @@ const ALIGNS = ["start", "center", "end"] as const;
 
 const Sample = () => (
   <>
-    <span className="text-caption uppercase tracking-wide text-content-secondary">Eyebrow</span>
+    <span className="text-caption uppercase tracking-wide text-content-secondary">
+      Eyebrow
+    </span>
     <h2 className="text-display-3 font-display">Headline with rhythm</h2>
-    <p className="text-content-secondary">A claim with its spacing governed by the gap.</p>
+    <p className="text-content-secondary">
+      A claim with its spacing governed by the gap.
+    </p>
     <span className="text-content-primary">Call to action →</span>
   </>
 );
@@ -45,7 +58,10 @@ export const Aligns: Story = {
           <span className="text-caption text-content-secondary font-mono">
             align=&quot;{align}&quot;{align === "start" ? " (default)" : ""}
           </span>
-          <Stack align={align} className="w-full rounded-lg border border-border-default p-6">
+          <Stack
+            align={align}
+            className="w-full rounded-lg border border-line-default p-6"
+          >
             <Sample />
           </Stack>
         </div>

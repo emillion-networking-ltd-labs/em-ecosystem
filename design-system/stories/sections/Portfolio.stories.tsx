@@ -10,16 +10,31 @@ const srcB = typeof photoB === "string" ? photoB : photoB.src;
 const srcC = typeof photoC === "string" ? photoC : photoC.src;
 
 const ITEMS = [
-  { title: "Atlas Rebrand", description: "Identity and website for a fintech." },
+  {
+    title: "Atlas Rebrand",
+    description: "Identity and website for a fintech.",
+  },
   { title: "Verde App", description: "A mobility mobile product." },
   { title: "Norte Store", description: "Custom e-commerce build." },
 ];
 
 // Same items but every card has a photo (the third reuses srcA) — for the image-driven views.
 const ITEMS_IMG = [
-  { title: "Atlas Rebrand", description: "Identity and website for a fintech.", imageSrc: srcA },
-  { title: "Verde App", description: "A mobility mobile product.", imageSrc: srcB },
-  { title: "Norte Store", description: "Custom e-commerce build.", imageSrc: srcA },
+  {
+    title: "Atlas Rebrand",
+    description: "Identity and website for a fintech.",
+    imageSrc: srcA,
+  },
+  {
+    title: "Verde App",
+    description: "A mobility mobile product.",
+    imageSrc: srcB,
+  },
+  {
+    title: "Norte Store",
+    description: "Custom e-commerce build.",
+    imageSrc: srcA,
+  },
 ];
 
 // Pure image set for the gallery variant (captions via `title`; images reused to fill the grid).
@@ -47,7 +62,12 @@ const meta = {
     viewAllHref: "#",
     items: ITEMS,
   },
-  argTypes: { variant: { control: "inline-radio", options: ["grid", "featured", "gallery"] } },
+  argTypes: {
+    variant: {
+      control: "inline-radio",
+      options: ["grid", "featured", "gallery"],
+    },
+  },
 } satisfies Meta<typeof Portfolio>;
 
 export default meta;
@@ -63,7 +83,12 @@ export const WithImages: Story = { args: { items: ITEMS_IMG } };
 
 // gallery = image grid with hover captions + a full lightbox (click an image: zoom, drag-swipe, arrows, Esc).
 export const Gallery: Story = {
-  args: { variant: "gallery", eyebrow: "Gallery", title: "Selected shots", items: GALLERY },
+  args: {
+    variant: "gallery",
+    eyebrow: "Gallery",
+    title: "Selected shots",
+    items: GALLERY,
+  },
 };
 
 // AllVariants — ALWAYS last: the layout variants (grid · featured · gallery), grouping the stories above.
@@ -80,9 +105,18 @@ export const AllVariants: Story = {
       {ALL.map(({ label, variant, items }) => (
         <div key={label}>
           <div className="px-6 pt-6 pb-2">
-            <span className="text-caption text-content-secondary font-mono">{label}</span>
+            <span className="text-caption text-content-secondary font-mono">
+              {label}
+            </span>
           </div>
-          <Portfolio eyebrow="Work" title="Recent projects" variant={variant} items={items} viewAllText="View all" viewAllHref="#" />
+          <Portfolio
+            eyebrow="Work"
+            title="Recent projects"
+            variant={variant}
+            items={items}
+            viewAllText="View all"
+            viewAllHref="#"
+          />
         </div>
       ))}
     </div>

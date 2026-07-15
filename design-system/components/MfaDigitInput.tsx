@@ -8,7 +8,7 @@ export const mfaDigitInputSpecs = {
     base: "flex gap-2 sm:gap-3",
   },
   digit: {
-    base: "rounded-lg border border-border-components bg-transparent text-center font-mono caret-transparent text-body text-content-primary outline-solid outline-2 outline-offset-2 transition-colors",
+    base: "rounded-lg border border-line-control bg-transparent text-center font-mono caret-transparent text-body text-content-primary outline-solid outline-2 outline-offset-2 transition-colors",
     hover: "hover:outline-content-secondary",
     focus: "focus:outline-content-secondary",
     error: "outline-error — same pattern as Input error state",
@@ -36,7 +36,7 @@ interface MfaDigitInputProps {
 }
 
 const digitBase =
-  "rounded-lg border border-border-components bg-transparent text-center font-mono caret-transparent text-body text-content-primary outline-solid outline-2 outline-offset-2 transition-colors";
+  "rounded-lg border border-line-control bg-transparent text-center font-mono caret-transparent text-body text-content-primary outline-solid outline-2 outline-offset-2 transition-colors";
 
 export default function MfaDigitInput({
   length = 6,

@@ -7,7 +7,7 @@ import Button from "./Button";
 import Icon from "./Icon";
 
 export const recoveryCodesGridSpecs = {
-  container: "rounded-lg border border-border-strong bg-surface-subtle p-4",
+  container: "rounded-lg border border-line-strong bg-surface-subtle p-4",
   grid: "grid grid-cols-2 gap-2",
   code: "flex h-10 items-center justify-center rounded-md bg-surface-primary font-mono text-body text-content-primary",
   copyButton: "Button variant=outline size=sm — copies all codes to clipboard",
@@ -32,7 +32,7 @@ export default function RecoveryCodesGrid({
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      <div className="rounded-lg border border-border-strong bg-surface-subtle p-4">
+      <div className="rounded-lg border border-line-strong bg-surface-subtle p-4">
         <div className="grid grid-cols-2 gap-2">
           {codes.map((code, i) => (
             <code

@@ -148,7 +148,7 @@ export default function SobreMiPage() {
           className="bg-surface-primary py-20"
         >
           <div className="mx-auto max-w-4xl px-6">
-            <div className="border-l border-accent pl-6 md:pl-10 dark:border-border-strong">
+            <div className="border-l border-accent pl-6 md:pl-10 dark:border-line-strong">
               <p className="text-[18px] leading-7 md:text-h1 font-semibold tracking-wide text-accent">
                 Filosofía »»
               </p>

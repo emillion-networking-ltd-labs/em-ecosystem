@@ -283,7 +283,7 @@ export default function ProfileForm() {
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border border-border-strong bg-surface-primary">
+      <div className="overflow-hidden rounded-xl border border-line-strong bg-surface-primary">
         {/* Banner area — hover shows edit button */}
         <div className="group/banner relative h-24 bg-surface-subtle px-6 pt-4">
           <h2 className="text-h3 font-semibold uppercase tracking-wider text-content-primary">

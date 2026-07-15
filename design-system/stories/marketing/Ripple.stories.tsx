@@ -27,7 +27,9 @@ const Tile = ({
     className={`relative flex ${height} w-full items-center justify-center overflow-hidden rounded-xl bg-surface-secondary`}
   >
     <Ripple numCircles={numCircles} mainCircleSize={mainCircleSize} />
-    <span className="relative z-10 text-h2 font-semibold text-content-primary">Ripple</span>
+    <span className="relative z-10 text-h2 font-semibold text-content-primary">
+      Ripple
+    </span>
   </div>
 );
 

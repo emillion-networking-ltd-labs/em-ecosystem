@@ -14,7 +14,12 @@ export interface DotPatternProps extends ComponentPropsWithoutRef<"svg"> {
   radius?: number;
 }
 
-export function DotPattern({ gap = 16, radius = 1, className, ...props }: DotPatternProps) {
+export function DotPattern({
+  gap = 16,
+  radius = 1,
+  className,
+  ...props
+}: DotPatternProps) {
   const id = useId();
   return (
     <svg

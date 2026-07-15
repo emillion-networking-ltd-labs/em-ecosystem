@@ -4,7 +4,13 @@ import { mkdtempSync, writeFileSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
-import { blobSha, governedSources, validateManifest, readManifest, emptyManifest } from "../registry/_manifest.mjs";
+import {
+  blobSha,
+  governedSources,
+  validateManifest,
+  readManifest,
+  emptyManifest,
+} from "../registry/_manifest.mjs";
 
 // ECO-152 (design-propagation Fase 1 E4a) — manifest por-consumidor + verbos pin/hold/unhold + gate.
 // Test de integración end-to-end: shellea el CLI REAL (execFileSync) contra un consumidor temporal y valida
@@ -30,11 +36,17 @@ afterEach(() => {
 
 function run(args: string[]): { status: number; out: string } {
   try {
-    const out = execFileSync("node", [CLI, ...args], { cwd: DS, encoding: "utf8" });
+    const out = execFileSync("node", [CLI, ...args], {
+      cwd: DS,
+      encoding: "utf8",
+    });
     return { status: 0, out };
   } catch (e: unknown) {
     const err = e as { status?: number; stdout?: string; stderr?: string };
-    return { status: err.status ?? -1, out: (err.stdout ?? "") + (err.stderr ?? "") };
+    return {
+      status: err.status ?? -1,
+      out: (err.stdout ?? "") + (err.stderr ?? ""),
+    };
   }
 }
 
@@ -43,7 +55,10 @@ describe("blob-sha (lynchpin: byte-length, no char-length)", () => {
     for (const rel of ["components/Button.tsx", "components/AlertBox.tsx"]) {
       const abs = join(DS, rel);
       const buf = readFileSync(abs);
-      const git = execFileSync("git", ["hash-object", abs], { cwd: DS, encoding: "utf8" }).trim();
+      const git = execFileSync("git", ["hash-object", abs], {
+        cwd: DS,
+        encoding: "utf8",
+      }).trim();
       expect(blobSha(buf)).toBe(git);
     }
     // AlertBox tiene acentos → bytes > chars: es el caso que un header `blob <chars>` rompería en silencio.
@@ -58,7 +73,10 @@ describe("em-ui add → manifest", () => {
     const r = run(["add", "Button", "--dest", c]);
     expect(r.status).toBe(0);
     const m = readManifest(c);
-    expect(m.files[BUTTON_KEY]).toEqual({ from: "components/Button.tsx", sha: blobSha(Buffer.from(DS_BUTTON)) });
+    expect(m.files[BUTTON_KEY]).toEqual({
+      from: "components/Button.tsx",
+      sha: blobSha(Buffer.from(DS_BUTTON)),
+    });
     expect(m.files[SPINNER_KEY]?.from).toBe("components/SpinnerInfinity.tsx");
     expect(m.files[SPINNER_KEY]?.sha).toMatch(/^[0-9a-f]{40}$/);
   });
@@ -85,8 +103,12 @@ describe("em-ui hold / unhold / update", () => {
     run(["hold", "Button", "--dest", c]);
     const r = run(["update", "Button", "--dest", c]);
     expect(r.status).toBe(0); // hold es benigno (a diferencia de @em-ui-adapted, que sale ≠0)
-    expect(readFileSync(buttonPath, "utf8")).toBe("contenido divergente sin marcador\n"); // NO clobbeado
-    expect(readManifest(c).files[BUTTON_KEY].sha).toBe(blobSha(Buffer.from(DS_BUTTON))); // base intacta
+    expect(readFileSync(buttonPath, "utf8")).toBe(
+      "contenido divergente sin marcador\n",
+    ); // NO clobbeado
+    expect(readManifest(c).files[BUTTON_KEY].sha).toBe(
+      blobSha(Buffer.from(DS_BUTTON)),
+    ); // base intacta
   });
 
   it("unhold + update adopta la fuente del DS y limpia el hold", () => {
@@ -114,7 +136,9 @@ describe("check-manifest (validateManifest — la misma regla que el gate)", () 
     const c = newConsumer();
     run(["add", "Button", "--dest", c]);
     const v = validateManifest(SOURCES, c, emptyManifest());
-    expect(v.some((x) => x.startsWith("INCOMPLETO") && x.includes(BUTTON_KEY))).toBe(true);
+    expect(
+      v.some((x) => x.startsWith("INCOMPLETO") && x.includes(BUTTON_KEY)),
+    ).toBe(true);
   });
 
   it("sha corrupto, from inválido y entrada huérfana → cada uno es una violación", () => {
@@ -124,14 +148,25 @@ describe("check-manifest (validateManifest — la misma regla que el gate)", () 
 
     const badSha = structuredClone(base);
     badSha.files[BUTTON_KEY].sha = "nope";
-    expect(validateManifest(SOURCES, c, badSha).some((x) => x.startsWith("SHA"))).toBe(true);
+    expect(
+      validateManifest(SOURCES, c, badSha).some((x) => x.startsWith("SHA")),
+    ).toBe(true);
 
     const badFrom = structuredClone(base);
     badFrom.files[BUTTON_KEY].from = "components/DoesNotExist.tsx";
-    expect(validateManifest(SOURCES, c, badFrom).some((x) => x.startsWith("FROM"))).toBe(true);
+    expect(
+      validateManifest(SOURCES, c, badFrom).some((x) => x.startsWith("FROM")),
+    ).toBe(true);
 
     const orphan = structuredClone(base);
-    orphan.files["hooks/useTheme.ts"] = { from: "hooks/useTheme.ts", sha: base.files[BUTTON_KEY].sha };
-    expect(validateManifest(SOURCES, c, orphan).some((x) => x.startsWith("HUERFANA"))).toBe(true);
+    orphan.files["hooks/useTheme.ts"] = {
+      from: "hooks/useTheme.ts",
+      sha: base.files[BUTTON_KEY].sha,
+    };
+    expect(
+      validateManifest(SOURCES, c, orphan).some((x) =>
+        x.startsWith("HUERFANA"),
+      ),
+    ).toBe(true);
   });
 });

@@ -29,7 +29,7 @@ export default function PublicNavbar() {
   const hasSolidBg = theme === "light" || scrolled;
 
   const navBg = hasSolidBg
-    ? "bg-surface-primary border-b border-border-default"
+    ? "bg-surface-primary border-b border-line-default"
     : "bg-black/25 backdrop-blur-xs";
 
   const linkCls = hasSolidBg

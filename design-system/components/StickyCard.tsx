@@ -77,7 +77,7 @@ function StickyCardBottom({
   }, [isFloating, updateRect]);
 
   const floatingClass =
-    "fixed bottom-0 z-30 border border-border-strong bg-surface-elevated shadow-card";
+    "fixed bottom-0 z-30 border border-line-strong bg-surface-elevated shadow-card";
 
   return (
     <div
@@ -171,7 +171,7 @@ function StickyCardTop({
   }, [isFloating, updateRect]);
 
   const floatingClass =
-    "fixed top-0 z-10 border border-border-strong bg-surface-elevated shadow-card";
+    "fixed top-0 z-10 border border-line-strong bg-surface-elevated shadow-card";
 
   return (
     <div

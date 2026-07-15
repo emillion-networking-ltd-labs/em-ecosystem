@@ -20,11 +20,11 @@ type Story = StoryObj<typeof meta>;
 
 function ContentCard() {
   return (
-    <div className="mx-4 mb-4 mt-3 space-y-3 rounded-xl border border-border-default bg-surface-primary p-4 text-caption text-content-secondary">
+    <div className="mx-4 mb-4 mt-3 space-y-3 rounded-xl border border-line-default bg-surface-primary p-4 text-caption text-content-secondary">
       {Array.from({ length: 8 }, (_, i) => (
         <p key={i}>
-          Filler paragraph {i + 1} — scroll to see the card stick while the content scrolls
-          behind it.
+          Filler paragraph {i + 1} — scroll to see the card stick while the
+          content scrolls behind it.
         </p>
       ))}
     </div>
@@ -40,28 +40,37 @@ function StickyDemo({ position }: { position: "top" | "bottom" }) {
     const root = rootRef.current;
     const sentinel = sentinelRef.current;
     if (!root || !sentinel) return;
-    const io = new IntersectionObserver(([entry]) => setStuck(!entry.isIntersecting), {
-      root,
-      threshold: 0,
-    });
+    const io = new IntersectionObserver(
+      ([entry]) => setStuck(!entry.isIntersecting),
+      {
+        root,
+        threshold: 0,
+      },
+    );
     io.observe(sentinel);
     return () => io.disconnect();
   }, []);
 
   // When stuck, the edge corners go square — exactly like the real component
   // (top floats with rounded-b-xl, bottom floats with rounded-t-xl).
-  const rounded = !stuck ? "rounded-xl" : position === "top" ? "rounded-b-xl" : "rounded-t-xl";
+  const rounded = !stuck
+    ? "rounded-xl"
+    : position === "top"
+      ? "rounded-b-xl"
+      : "rounded-t-xl";
   const sentinel = <div ref={sentinelRef} className="h-px" />;
   const arrow = position === "top" ? "↓" : "↑";
 
   const card = (
     <div
-      className={`sticky z-10 mx-4 border border-border-strong bg-surface-primary p-4 shadow-card ${
+      className={`sticky z-10 mx-4 border border-line-strong bg-surface-primary p-4 shadow-card ${
         position === "top" ? "top-0" : "bottom-0"
       } ${rounded}`}
     >
       <div className="flex items-center justify-between gap-4">
-        <p className="text-body font-semibold text-content-primary">StickyCard content</p>
+        <p className="text-body font-semibold text-content-primary">
+          StickyCard content
+        </p>
         <span className="font-mono text-caption text-content-secondary">
           position=&quot;{position}&quot;
         </span>
@@ -73,14 +82,15 @@ function StickyDemo({ position }: { position: "top" | "bottom" }) {
   // from the bottom edge by default, mirroring how the intro separates the top card from the top).
   const intro = (
     <div className="px-4 py-3 text-center text-caption text-content-secondary">
-      {arrow} Scroll inside this container — the card sticks to the {position} {arrow}
+      {arrow} Scroll inside this container — the card sticks to the {position}{" "}
+      {arrow}
     </div>
   );
 
   return (
     <div
       ref={rootRef}
-      className="h-64 max-w-md overflow-y-auto rounded-xl border border-border-strong bg-surface-secondary"
+      className="h-64 max-w-md overflow-y-auto rounded-xl border border-line-strong bg-surface-secondary"
     >
       {position === "top" ? (
         <>

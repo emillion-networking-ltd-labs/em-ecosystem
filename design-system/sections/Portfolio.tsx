@@ -79,7 +79,7 @@ function PortfolioCard({
     <article ref={ref} style={style} className={big ? "sm:col-span-2" : ""}>
       <Wrapper
         {...(item.href ? { href: item.href } : {})}
-        className="group block overflow-hidden rounded-2xl border border-border-default bg-surface-primary transition-colors hover:border-border-strong"
+        className="group block overflow-hidden rounded-2xl border border-line-default bg-surface-primary transition-colors hover:border-line-strong"
       >
         <div
           className={`relative ${big ? "aspect-[2/1]" : "aspect-[4/3]"} ${hasImg ? "" : "flex items-end bg-surface-secondary"}`}

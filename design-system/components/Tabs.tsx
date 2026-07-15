@@ -42,9 +42,9 @@ const sizeClasses = {
 export const variantStyles = {
   subtle: {
     container:
-      "bg-surface-elevated border border-border-default rounded-sm shadow-card",
+      "bg-surface-elevated border border-line-default rounded-sm shadow-card",
     active:
-      "bg-surface-secondary border border-border-strong font-semibold text-content-primary",
+      "bg-surface-secondary border border-line-strong font-semibold text-content-primary",
     inactive: "font-semibold text-content-primary hover:bg-surface-subtle",
   },
   nav: {
@@ -154,7 +154,7 @@ export const tabsSpecs = {
     "nav-horizontal": "Same as nav but horizontal layout (top nav bar)",
   },
   container: {
-    subtle: "border border-border-default rounded-sm",
+    subtle: "border border-line-default rounded-sm",
     nav: "flex-col gap-2 (vertical, 8px — matches NavBar icon spacing)",
     "nav-horizontal": "gap-2 (horizontal, 8px — matches NavBar icon spacing)",
   },
@@ -232,7 +232,7 @@ export default function Tabs({
           // El borde entre items es posicional (no la última), solo en subtle.
           className:
             !isNav && index < tabs.length - 1
-              ? "border-r border-border-default"
+              ? "border-r border-line-default"
               : undefined,
         });
 

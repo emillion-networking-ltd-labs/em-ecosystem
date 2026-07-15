@@ -47,7 +47,7 @@ function ServiceCard({
   });
   return (
     <div ref={ref} style={style}>
-      <div className="card-flat scroll-mt-24 transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-border-strong hover:shadow-card">
+      <div className="card-flat scroll-mt-24 transition-[border-color,box-shadow] duration-[var(--duration-fast)] hover:border-line-strong hover:shadow-card">
         <div className="flex items-start gap-5">
           <span className="text-h1 font-black text-content-primary">
             {String(index + 1).padStart(2, "0")}

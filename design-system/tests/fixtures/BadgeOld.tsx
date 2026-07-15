@@ -18,7 +18,7 @@ export const variantClasses = {
   info: "bg-info-bg text-info",
   kbd: "bg-surface-tertiary text-content-primary font-mono",
   overlay:
-    "bg-surface-inverse text-content-inverse border border-border-strong backdrop-blur-xs",
+    "bg-surface-inverse text-content-inverse border border-line-strong backdrop-blur-xs",
 };
 
 export const sizeClasses = {

@@ -275,7 +275,7 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
       className={
         bare
           ? ""
-          : "rounded-xl border border-border-strong bg-surface-primary p-6"
+          : "rounded-xl border border-line-strong bg-surface-primary p-6"
       }
     >
       {!bare && <div className="mb-6">{header}</div>}
@@ -312,7 +312,7 @@ export default function ActiveSessions({ bare }: { bare?: boolean }) {
                   className={`flex items-center gap-4 rounded-xl border p-4 ${
                     session.isCurrent
                       ? "border-status-success/30 bg-status-success/5"
-                      : "border-border-components"
+                      : "border-line-control"
                   }`}
                 >
                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-tertiary">

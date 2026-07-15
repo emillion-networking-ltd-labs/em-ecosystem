@@ -76,7 +76,12 @@ export const AllSizes: Story = {
         label: `${size} · ${px}px${size === "sm" ? " (default)" : ""}`,
         node: (
           <div className="w-80">
-            <Select options={options} size={size} value="es" onChange={() => {}} />
+            <Select
+              options={options}
+              size={size}
+              value="es"
+              onChange={() => {}}
+            />
           </div>
         ),
       }))}

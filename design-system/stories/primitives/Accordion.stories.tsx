@@ -9,7 +9,8 @@ const faqItems = [
     title: "How do I create a new project?",
     children: (
       <p className="text-body text-content-tertiary">
-        Go to the Projects panel and click “New project”. Fill in the name and assign an owner.
+        Go to the Projects panel and click “New project”. Fill in the name and
+        assign an owner.
       </p>
     ),
   },
@@ -17,7 +18,8 @@ const faqItems = [
     title: "Can I invite my team?",
     children: (
       <p className="text-body text-content-tertiary">
-        Yes. From the Team section you can send email invitations and assign roles to each member.
+        Yes. From the Team section you can send email invitations and assign
+        roles to each member.
       </p>
     ),
   },
@@ -25,7 +27,8 @@ const faqItems = [
     title: "How do I manage billing?",
     children: (
       <p className="text-body text-content-tertiary">
-        Billing is managed in Settings → Billing, where you can see your plans and payment methods.
+        Billing is managed in Settings → Billing, where you can see your plans
+        and payment methods.
       </p>
     ),
   },
@@ -69,7 +72,11 @@ export const Surface: Story = {
   render: () => (
     <Variants
       items={[
-        { label: "grouped (default)", block: true, node: <Accordion items={faqItems} /> },
+        {
+          label: "grouped (default)",
+          block: true,
+          node: <Accordion items={faqItems} />,
+        },
         {
           label: "separated",
           block: true,
@@ -86,7 +93,11 @@ export const Indicator: Story = {
   render: () => (
     <Variants
       items={[
-        { label: "chevron (default)", block: true, node: <Accordion items={faqItems} /> },
+        {
+          label: "chevron (default)",
+          block: true,
+          node: <Accordion items={faqItems} />,
+        },
         {
           label: "plus → × on open",
           block: true,

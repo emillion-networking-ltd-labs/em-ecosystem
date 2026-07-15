@@ -22,8 +22,14 @@ const meta = {
     aspectRatio: "4/5",
   },
   argTypes: {
-    orientation: { control: "inline-radio", options: ["horizontal", "vertical"] },
-    aspectRatio: { control: "inline-radio", options: ["4/5", "1/1", "16/9", "3/4"] },
+    orientation: {
+      control: "inline-radio",
+      options: ["horizontal", "vertical"],
+    },
+    aspectRatio: {
+      control: "inline-radio",
+      options: ["4/5", "1/1", "16/9", "3/4"],
+    },
     objectFit: { control: "inline-radio", options: ["cover", "contain"] },
   },
   render: (args) => (

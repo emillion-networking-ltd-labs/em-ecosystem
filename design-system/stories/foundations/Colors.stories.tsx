@@ -17,7 +17,7 @@ function GradientBar({ token }: { token: string }) {
   return (
     <div ref={ref} className="flex flex-col gap-2">
       <div
-        className="h-24 w-full rounded-xl border border-border-strong"
+        className="h-24 w-full rounded-xl border border-line-strong"
         style={{ backgroundImage: `var(${token})` }}
       />
       <TokenMeta token={token} value={val} />
@@ -57,7 +57,10 @@ export const Colors: Story = {
         </Grid>
       </Group>
 
-      <Group title="Content" description="SEMANTIC text/icon tokens (color shown as a block).">
+      <Group
+        title="Content"
+        description="SEMANTIC text/icon tokens (color shown as a block)."
+      >
         <Grid>
           <ColorSwatch token="--color-content-primary" />
           <ColorSwatch token="--color-content-secondary" />
@@ -70,10 +73,10 @@ export const Colors: Story = {
 
       <Group title="Borders" description="SEMANTIC border/separator tokens.">
         <Grid>
-          <ColorSwatch token="--color-border-default" />
-          <ColorSwatch token="--color-border-strong" />
-          <ColorSwatch token="--color-border-components" />
-          <ColorSwatch token="--color-border-subtle" />
+          <ColorSwatch token="--color-line-default" />
+          <ColorSwatch token="--color-line-strong" />
+          <ColorSwatch token="--color-line-control" />
+          <ColorSwatch token="--color-line-subtle" />
         </Grid>
       </Group>
 

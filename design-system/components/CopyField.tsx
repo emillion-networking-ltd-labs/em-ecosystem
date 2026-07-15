@@ -9,7 +9,7 @@ import { useIsTruncated } from "@/hooks/useIsTruncated";
 
 export const copyFieldSpecs = {
   container:
-    "flex items-center gap-2 rounded-lg border border-border-strong bg-surface-subtle px-4 overflow-hidden",
+    "flex items-center gap-2 rounded-lg border border-line-strong bg-surface-subtle px-4 overflow-hidden",
   code: "flex-1 truncate font-mono text-body leading-6 text-content-primary",
   copyButton:
     "shrink-0 text-content-tertiary transition-colors hover:text-content-primary",
@@ -51,7 +51,7 @@ export default function CopyField({
   return (
     <Tooltip content={truncated ? value : ""} position="auto">
       <div
-        className={`flex ${sizeClasses[size]} items-center gap-2 rounded-lg border border-border-strong bg-surface-subtle px-4 overflow-hidden ${className}`}
+        className={`flex ${sizeClasses[size]} items-center gap-2 rounded-lg border border-line-strong bg-surface-subtle px-4 overflow-hidden ${className}`}
       >
         <code
           ref={codeRef}

@@ -72,9 +72,7 @@ export default function FAQ({
             items={items.map((i) => ({
               title: i.question,
               children: (
-                <p className="text-body text-content-secondary">
-                  {i.answer}
-                </p>
+                <p className="text-body text-content-secondary">{i.answer}</p>
               ),
             }))}
           />

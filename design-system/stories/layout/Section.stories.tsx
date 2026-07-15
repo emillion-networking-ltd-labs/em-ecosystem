@@ -8,8 +8,14 @@ const meta = {
   tags: ["autodocs"],
   args: { spacing: "md", surface: "secondary" },
   argTypes: {
-    spacing: { control: "inline-radio", options: ["none", "sm", "md", "lg", "xl"] },
-    surface: { control: "inline-radio", options: ["none", "primary", "secondary", "subtle", "inverse"] },
+    spacing: {
+      control: "inline-radio",
+      options: ["none", "sm", "md", "lg", "xl"],
+    },
+    surface: {
+      control: "inline-radio",
+      options: ["none", "primary", "secondary", "subtle", "inverse"],
+    },
   },
 } satisfies Meta<typeof Section>;
 
@@ -34,7 +40,8 @@ export const Default: Story = {
       <Container>
         <h2 className="text-display-3 font-display">A band with rhythm</h2>
         <p className="mt-3 text-content-secondary">
-          Surface and padding-block come from tokens. Content enters through children.
+          Surface and padding-block come from tokens. Content enters through
+          children.
         </p>
       </Container>
     </Section>
@@ -49,7 +56,9 @@ export const Surfaces: Story = {
       {SURFACES.map((surface) => (
         <Section key={surface} spacing="sm" surface={surface}>
           <Container>
-            <span className="text-caption font-mono text-content-secondary">surface=&quot;{surface}&quot;</span>
+            <span className="text-caption font-mono text-content-secondary">
+              surface=&quot;{surface}&quot;
+            </span>
           </Container>
         </Section>
       ))}
@@ -67,9 +76,13 @@ export const Spacing: Story = {
           <span className="text-caption text-content-secondary font-mono">
             {spacing} · {px}px{spacing === "md" ? " (default)" : ""}
           </span>
-          <Section spacing={spacing} surface="secondary" className="mt-1.5 rounded-lg border border-border-default">
+          <Section
+            spacing={spacing}
+            surface="secondary"
+            className="mt-1.5 rounded-lg border border-line-default"
+          >
             <Container>
-              <div className="rounded-md border border-border-strong bg-surface-primary px-4 py-2 text-content-tertiary">
+              <div className="rounded-md border border-line-strong bg-surface-primary px-4 py-2 text-content-tertiary">
                 content
               </div>
             </Container>

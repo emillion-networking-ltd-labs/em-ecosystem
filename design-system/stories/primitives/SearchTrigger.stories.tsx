@@ -30,8 +30,10 @@ export const Default: Story = {};
 export const InTopBar: Story = {
   render: (args) => (
     <DemoCard>
-      <div className="flex w-[420px] items-center justify-between rounded-md border border-border-default bg-surface-primary px-4 py-2">
-        <span className="text-body font-semibold text-content-primary">NexaCore</span>
+      <div className="flex w-[420px] items-center justify-between rounded-md border border-line-default bg-surface-primary px-4 py-2">
+        <span className="text-body font-semibold text-content-primary">
+          NexaCore
+        </span>
         <SearchTrigger {...args} />
       </div>
     </DemoCard>
@@ -51,7 +53,9 @@ export const KeyboardShortcut: Story = {
         <Badge variant="kbd" size="sm">
           Ctrl+K
         </Badge>
-        <span className="text-caption text-content-secondary">Windows / Linux</span>
+        <span className="text-caption text-content-secondary">
+          Windows / Linux
+        </span>
       </div>
     </DemoCard>
   ),
