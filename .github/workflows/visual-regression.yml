@@ -50,6 +50,10 @@ permissions:
   contents: write # so workflow_dispatch capture can push baseline back
   pull-requests: write # post diff summary as PR comment
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   visual-regression:
     name: Dashboard visual regression
