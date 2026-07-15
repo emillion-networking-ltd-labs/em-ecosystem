@@ -1,9 +1,12 @@
 # ============================================================================
-# EM NexaCore — Security CI Pipeline
+# EM NexaCore — Security Pipeline
 # ============================================================================
-# Runs on every push and PR to main/develop branches.
-# 5 layers: Secrets Detection, Dependency Audit, SAST, Tests, Build
-# Standards: OWASP A06:2021, NIST SA-11, SOC 2 CC8.2, CWE-798
+# SECURITY ONLY (ECO-215 split): Secrets Detection, Dependency Audit, SAST.
+# Tests + Build moved to test-build.yml (they are correctness/build gates, not
+# security). Per-package: SAST runs only when its package changed (PR) or always
+# (push). The Security Gate is the single REQUIRED check — always runs and
+# aggregates, so skipped per-package jobs never deadlock the merge.
+# Standards: OWASP A06:2021, NIST SA-11, SOC 2 CC8.2, CWE-798.
 # ============================================================================
 
 name: Security Pipeline
@@ -19,25 +22,42 @@ permissions:
   security-events: write
 
 env:
-  NODE_VERSION: '22'
+  NODE_VERSION: "22"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
+  changes:
+    name: "Detect changed packages"
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.filter.outputs.backend }}
+      frontend: ${{ steps.filter.outputs.frontend }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            backend:
+              - 'nexacore-api/**'
+            frontend:
+              - 'nexacore-dashboard/**'
+
   # ==========================================================================
-  # Layer 1: Secrets Detection (Gitleaks)
+  # Layer 1: Secrets Detection (Gitleaks) — always runs (secrets can be anywhere)
   # Standard: CWE-798 (Hard-coded Credentials), OWASP A07:2021
   # ==========================================================================
   secrets-scan:
-    name: 'Layer 1: Secrets Detection'
+    name: "Layer 1: Secrets Detection"
     runs-on: ubuntu-latest
-    # Se corre el BINARIO de gitleaks (open-source, gratis), NO el action wrapper: gitleaks-action@v2
-    # introdujo enforcement de licencia de pago para ORGANIZACIONES (secret GITLEAKS_LICENSE) y, al faltar,
-    # abortaba con "missing gitleaks license" ANTES de escanear — dejando en rojo este job y el Security Gate
-    # en CADA PR de la org (ECO-94). El binario hace el mismo escaneo sin licencia. Ya no postea comentario de
-    # PR, así que basta contents:read (antes pull-requests:write era para ese comentario del action — ECO-6).
+    # Runs the gitleaks BINARY (open-source, free), NOT the action wrapper: gitleaks-action@v2 introduced
+    # PAID license enforcement for ORGANIZATIONS (GITLEAKS_LICENSE secret) and, when missing, aborted with
+    # "missing gitleaks license" BEFORE scanning — turning this job and the Security Gate red on EVERY org PR
+    # (ECO-94). The binary does the same scan without a license. It no longer posts a PR comment, so
+    # contents:read suffices (pull-requests:write was for that action comment — ECO-6).
     permissions:
       contents: read
     steps:
@@ -46,10 +66,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Escanea SOLO el rango introducido por el PR/push (lo que hacía el action), con el binario + .gitleaks.toml.
-      # Así caza secretos NUEVOS sin re-escanear todo el historial: ni ahoga el gate con placeholders viejos de
-      # docs ni necesita licencia. fetch-depth: 0 da el rango base..head completo.
-      - name: Run Gitleaks (binario fijado — sin licencia de org)
+      # Scans ONLY the range introduced by the PR/push (what the action did), with the binary + .gitleaks.toml.
+      # Catches NEW secrets without re-scanning the whole history: neither drowns the gate with old doc
+      # placeholders nor needs a license. fetch-depth: 0 gives the full base..head range.
+      - name: Run Gitleaks (pinned binary — no org license)
         env:
           GL_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
           GL_HEAD: ${{ github.event.pull_request.head.sha || github.sha }}
@@ -61,24 +81,22 @@ jobs:
           /tmp/gitleaks version
           ZERO="0000000000000000000000000000000000000000"
           if [ -n "${GL_BASE:-}" ] && [ "$GL_BASE" != "$ZERO" ] && git cat-file -e "${GL_BASE}^{commit}" 2>/dev/null; then
-            echo "Escaneando rango ${GL_BASE}..${GL_HEAD}"
+            echo "Scanning range ${GL_BASE}..${GL_HEAD}"
             /tmp/gitleaks detect --source . --config .gitleaks.toml --redact --verbose \
               --exit-code 1 --log-opts="--no-merges ${GL_BASE}..${GL_HEAD}"
           else
-            echo "Sin base válida (rama nueva / primer push): escaneo del último commit"
+            echo "No valid base (new branch / first push): scanning the last commit"
             /tmp/gitleaks detect --source . --config .gitleaks.toml --redact --verbose \
               --exit-code 1 --log-opts="--no-merges -1"
           fi
 
   # ==========================================================================
-  # Layer 2: Dependency Audit
+  # Layer 2: Dependency Audit — per discovered package (api + dashboard + satellites)
   # Standard: OWASP A06:2021 (Vulnerable Components), NIST SA-11
   # ==========================================================================
-  # ECO-27 (F3a): descubre satélites por glob para que entren a los gates SIN editar el workflow.
-  # audit-packages = api + dashboard + satellites/sat-* (siempre no vacía); satellites puede ser
-  # vacía → los jobs por-satélite hacen skip limpio.
+  # ECO-27 (F3a): discovers satellites by glob so they enter the gates WITHOUT editing the workflow.
   discover-satellites:
-    name: 'Discover satellites'
+    name: "Discover satellites"
     runs-on: ubuntu-latest
     outputs:
       audit-packages: ${{ steps.find.outputs.audit-packages }}
@@ -96,17 +114,12 @@ jobs:
           echo "satellites: $sat_json"; echo "audit-packages: $audit_json"
 
   dependency-audit:
-    name: 'Layer 2: Dependency Audit'
+    name: "Layer 2: Dependency Audit"
     runs-on: ubuntu-latest
     needs: [discover-satellites]
     strategy:
       # SCRUM-370: ensure both api and dashboard always run independently.
-      # Default fail-fast: true cancels siblings on first failure, costing
-      # visibility (e.g. cannot tell if api is passing while debugging
-      # dashboard). With fail-fast: false, every CI run reports both
-      # outcomes — essential for incremental triage.
       fail-fast: false
-      # ECO-27: matrix dinámica = api + dashboard + satélites descubiertos (auto-discover).
       matrix:
         package: ${{ fromJSON(needs.discover-satellites.outputs.audit-packages) }}
     steps:
@@ -117,7 +130,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: ${{ matrix.package }}/package-lock.json
 
       - name: Install dependencies (clean)
@@ -147,17 +160,19 @@ jobs:
 
       - name: Verify integrity hashes
         working-directory: ${{ matrix.package }}
-        # ECO-125: la lógica vive en un script testeado que TOLERA deps opcionales de plataforma sin hash
-        # (p.ej. @tailwindcss/oxide-wasm32-wasi/* en linux) y sigue estricto para las deps normales.
+        # ECO-125: the logic lives in a tested script that TOLERATES optional platform deps without a hash
+        # (e.g. @tailwindcss/oxide-wasm32-wasi/* on linux) and stays strict for normal deps.
         run: node "$GITHUB_WORKSPACE/.github/scripts/check-lockfile-integrity.mjs" package-lock.json
 
   # ==========================================================================
-  # Layer 3: Static Analysis (ESLint + Security Plugin)
+  # Layer 3: Static Analysis (ESLint + Security Plugin) — per-package
   # Standard: CWE-89, CWE-79, CWE-1333, OWASP A03:2021
   # ==========================================================================
   sast-backend:
-    name: 'Layer 3: SAST (Backend)'
+    name: "Layer 3: SAST (Backend)"
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.backend == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -166,7 +181,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: nexacore-api/package-lock.json
 
       - name: Install dependencies
@@ -210,8 +225,10 @@ jobs:
           echo "All dangerous pattern checks passed"
 
   sast-frontend:
-    name: 'Layer 3: SAST (Frontend)'
+    name: "Layer 3: SAST (Frontend)"
     runs-on: ubuntu-latest
+    needs: [changes]
+    if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.frontend == 'true' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -220,7 +237,7 @@ jobs:
         uses: actions/setup-node@v6
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
+          cache: "npm"
           cache-dependency-path: nexacore-dashboard/package-lock.json
 
       - name: Install dependencies
@@ -232,10 +249,10 @@ jobs:
         # Next 16 removed `next lint` — use eslint directly with the flat config (SCRUM-364).
         run: npx eslint "src/**/*.{ts,tsx}" --max-warnings 0
 
-      # ECO-126: prettier en CI para el dashboard. La API ya valida formato vía eslint-plugin-prettier
-      # (SAST Backend), pero el eslint del dashboard NO lo incluye → el formato solo se veía en el pre-push
-      # LOCAL, que Dependabot no ejecuta. Un bump de prettier (o drift manual) pasaba CI entero sin ser
-      # cazado. Mismo comando que el pre-commit/pre-push (package.json lint-staged) → una sola fuente de norma.
+      # ECO-126: prettier in CI for the dashboard. The API already validates formatting via eslint-plugin-prettier
+      # (SAST Backend), but the dashboard eslint does NOT include it → formatting was only checked by the LOCAL
+      # pre-push, which Dependabot doesn't run. A prettier bump (or manual drift) passed all of CI uncaught.
+      # Same command as pre-commit/pre-push (package.json lint-staged) → a single source of the norm.
       - name: Check formatting (Prettier)
         working-directory: nexacore-dashboard
         run: npx prettier --check "src/**/*.{ts,tsx}"
@@ -267,145 +284,10 @@ jobs:
           echo "All frontend pattern checks passed"
 
   # ==========================================================================
-  # Layer 4: Tests + Coverage Gates
-  # Standard: ISO 25010 (Reliability), SOC 2 CC8.3
+  # Gate self-tests — validates the .github/scripts gate logic (ECO-125)
   # ==========================================================================
-  tests-backend:
-    name: 'Layer 4: Tests (Backend)'
-    runs-on: ubuntu-latest
-    needs: [sast-backend]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: nexacore-api/package-lock.json
-
-      - name: Install dependencies
-        working-directory: nexacore-api
-        run: npm ci
-
-      - name: Generate Prisma client
-        working-directory: nexacore-api
-        run: npx prisma generate
-
-      - name: Run tests with coverage
-        working-directory: nexacore-api
-        run: npm run test:cov
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: backend-coverage
-          path: nexacore-api/coverage/
-          retention-days: 30
-
-  tests-frontend:
-    name: 'Layer 4: Tests (Frontend)'
-    runs-on: ubuntu-latest
-    needs: [sast-frontend]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: nexacore-dashboard/package-lock.json
-
-      - name: Install dependencies
-        working-directory: nexacore-dashboard
-        run: npm ci
-
-      - name: Run tests with coverage
-        working-directory: nexacore-dashboard
-        run: npm run test:cov
-
-      - name: Upload coverage report
-        if: always()
-        uses: actions/upload-artifact@v7
-        with:
-          name: frontend-coverage
-          path: nexacore-dashboard/coverage/
-          retention-days: 30
-
-  # ==========================================================================
-  # Layer 5: Build Verification
-  # Standard: SOC 2 CC8.2 (Change Management)
-  # ==========================================================================
-  build-backend:
-    name: 'Layer 5: Build (Backend)'
-    runs-on: ubuntu-latest
-    needs: [tests-backend]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: nexacore-api/package-lock.json
-
-      - name: Install dependencies
-        working-directory: nexacore-api
-        run: npm ci
-
-      - name: Generate Prisma client
-        working-directory: nexacore-api
-        run: npx prisma generate
-
-      - name: Build
-        working-directory: nexacore-api
-        run: npm run build
-
-      - name: Verify dist output
-        working-directory: nexacore-api
-        run: |
-          if [ ! -f dist/main.js ]; then
-            echo "::error::Build output missing dist/main.js"
-            exit 1
-          fi
-          echo "Build verification passed"
-
-  build-frontend:
-    name: 'Layer 5: Build (Frontend)'
-    runs-on: ubuntu-latest
-    needs: [tests-frontend]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: nexacore-dashboard/package-lock.json
-
-      - name: Install dependencies
-        working-directory: nexacore-dashboard
-        run: npm ci
-
-      - name: Build
-        working-directory: nexacore-dashboard
-        run: npm run build
-
-  # ==========================================================================
-  # Pipeline Summary
-  # ==========================================================================
-  # ECO-125: self-test de la lógica de los gates que vive en .github/scripts (p.ej. el check de integrity
-  # que tolera deps opcionales). Así un cambio que rompa esa lógica se caza aquí.
   gate-selftests:
-    name: 'Gate self-tests'
+    name: "Gate self-tests"
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -417,32 +299,37 @@ jobs:
       - name: Run .github/scripts tests
         run: node --test .github/scripts/*.test.mjs
 
+  # ==========================================================================
+  # Single REQUIRED check. Always runs; a package whose SAST was SKIPPED
+  # (unchanged) counts as pass — only a real failure/cancelled fails the gate.
+  # ==========================================================================
   security-gate:
-    name: 'Security Gate (All Checks)'
+    name: "Security Gate (All Checks)"
     runs-on: ubuntu-latest
-    needs: [secrets-scan, dependency-audit, build-backend, build-frontend, gate-selftests]
+    needs:
+      [
+        secrets-scan,
+        dependency-audit,
+        sast-backend,
+        sast-frontend,
+        gate-selftests,
+      ]
     if: always()
     steps:
-      - name: Check all jobs passed
+      - name: Aggregate results
         run: |
-          if [ "${{ needs.secrets-scan.result }}" != "success" ]; then
-            echo "::error::Secrets scan failed"
-            exit 1
-          fi
-          if [ "${{ needs.gate-selftests.result }}" != "success" ]; then
-            echo "::error::Gate self-tests failed"
-            exit 1
-          fi
-          if [ "${{ needs.dependency-audit.result }}" != "success" ]; then
-            echo "::error::Dependency audit failed"
-            exit 1
-          fi
-          if [ "${{ needs.build-backend.result }}" != "success" ]; then
-            echo "::error::Backend build failed"
-            exit 1
-          fi
-          if [ "${{ needs.build-frontend.result }}" != "success" ]; then
-            echo "::error::Frontend build failed"
-            exit 1
-          fi
-          echo "All security gates passed"
+          fail=0
+          for pair in \
+            "secrets-scan:${{ needs.secrets-scan.result }}" \
+            "dependency-audit:${{ needs.dependency-audit.result }}" \
+            "sast-backend:${{ needs.sast-backend.result }}" \
+            "sast-frontend:${{ needs.sast-frontend.result }}" \
+            "gate-selftests:${{ needs.gate-selftests.result }}" ; do
+            job="${pair%%:*}"; res="${pair#*:}"
+            if [ "$res" = "failure" ] || [ "$res" = "cancelled" ]; then
+              echo "::error::$job = $res"; fail=1
+            else
+              echo "  $job = $res (ok)"
+            fi
+          done
+          [ "$fail" -eq 0 ] && echo "All security gates passed" || exit 1
