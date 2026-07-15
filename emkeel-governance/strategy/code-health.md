@@ -54,7 +54,12 @@ Decidir CÓMO la flota impone "código sano" de forma sistemática al MODIFICAR 
 
 **Métrica de eficacia (para poder medir los kill-criteria, hoy solo enunciados):** tasa de aceptación de la IA-review (comentarios accionados / emitidos; objetivo evitar el ~40% ignorado), tasa de falsos-positivos de cada gate mecánico, y convergencia del ratchet (los baselines DEBEN bajar trimestre a trimestre; si `comment-language`=1060 no baja, el ratchet no funciona = kill-criterion #4). Sin esto no se puede juzgar si el sistema previene defectos o solo mete ruido.
 
-**La decisión es tuya en los interrupts** (topología exacta, jscpd advisory vs excluido, Sonar sí/no con el coste sobre la mesa, qué dimensiones entran primero, umbrales). `/emkeel-engineer` construye el motor tras aprobación + ADR.
+**Drenaje proactivo (complemento al ratchet reactivo).** El ratchet solo drena al TOCAR un fichero → lo frío (p.ej. `comment-language:1060`) no baja solo, y la métrica de eficacia exige que baje. Se añade un **asistente de campaña** (skill `/code-health <ámbito>`) que **AUDITA y PROPONE un diff** sobre un ámbito elegido — NO una máquina que auto-arregla:
+- **Propone, no arregla en ciego** (regla del operador *eco-agree-before-acting*). El auto-fix solo sería admisible para el subconjunto **determinista y gate-duro** (comentario sin directiva, custom-properties duplicadas intra-bloque vía `declaration-block-no-duplicate-custom-properties`); dedup/dead-code/`.light`≈`:root` van a review porque la estrategia YA los mandó ahí (relacional/intencional). Modos de fallo reales: knip no ve usos DINÁMICOS ni exports consumidos por el toolchain; un comentario español puede ser una directiva load-bearing (`eslint-disable`, `@ts-expect-error`, `@ds-role`, marcadores `[H]` que lee `check-piece-complete.mjs`); editar a mano un `@em-ui-adapted` = `check-fleet-report` rojo (reconciliar con `em-ui update`, no hand-edit).
+- **El baseline se recomputa desde `main` MERGEADO — nunca lo escribe el skill.** El baseline refleja la deuda REAL en `main` (`_ratchet.mjs:1-28`); bajarlo antes del merge = baseline fantasma → deuda>baseline imposible de satisfacer, o falso 0 → auto-`enforce` roto. El fix baja el baseline como EFECTO del merge (el ratchet recomputa), no como acto anticipado.
+- **No commitea ni tickeza:** la campaña entra por el flujo gobernado normal (`emkeel start` → branch → PR → gates), un ticket por tanda, pasando los MISMOS gates (incluido `Strategy: code-health` + `## Alignment`). El precedente `/audit` (ECO-1/10-audit) son REGISTROS de lectura — no autorizan mutar producción.
+
+**La decisión es tuya en los interrupts** (topología exacta, jscpd advisory vs excluido, Sonar sí/no con el coste sobre la mesa, qué dimensiones entran primero, umbrales, y si el asistente de drenaje llega a auto-arreglar el subconjunto determinista o solo propone). `/emkeel-engineer` construye el motor tras aprobación + ADR.
 
 ## Non-goals
 - NO gatear en duro el JUICIO de diseño (abstracción, "¿es la abstracción correcta?", coherencia, largo de comentarios) — va a review advisory (evidencia: https://react.dev/reference/eslint-plugin-react-hooks/lints/exhaustive-deps).
@@ -63,6 +68,9 @@ Decidir CÓMO la flota impone "código sano" de forma sistemática al MODIFICAR 
 - NO adoptar una plataforma pesada (Sonar) salvo que el operador lo elija; NO migrar el toolchain a Biome ahora.
 - NO reemplazar el review humano — la capa IA lo complementa (https://www.cubic.dev/blog/the-false-positive-problem-why-most-ai-code-reviewers-fail-and-how-cubic-solved-it).
 - NO gatear la DUPLICACIÓN en duro — es relacional (dos sitios) y no mapea al ratchet "solo lo nuevo"; va a la capa advisory + IA-review, con exclusión de coexistencia intencional (V1/V2). Las FRONTERAS/ciclos sí son gate duro (son inter-módulo pero decidibles y con fix local).
+- NO abarca el RENDIMIENTO (performance efficiency de ISO 25010) — "código sano" aquí = MANTENIBILIDAD (el catálogo CISQ ASCMM). Perf es otra característica de calidad, con su propia herramienta/estrategia; frontera de alcance consciente. Seguridad y tests tampoco se re-cubren: ya tienen sus gates (Security Pipeline `security.yml`; gates de tests).
 
 ## Decisions
 <!-- ADR a redactar tras la aprobación del operador: emkeel-governance/adr/00NN-code-health-enforcement.md -->
+- La topología (gate-mecánico / review-juicio / hook-Verify-gate) + el modelo ratchet → ADR.
+- **Sub-decisión de riesgo propio para el ADR:** si el asistente de drenaje puede AUTO-ARREGLAR el subconjunto determinista (o solo PROPONER un diff) — muta producción, superficie de fallo propia; se decide explícito, no se cuela como detalle de ejecución.
