@@ -57,7 +57,7 @@ concurrency:
 jobs:
   visual-regression:
     name: Dashboard visual regression
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
       - name: Checkout PR / branch
@@ -243,7 +243,7 @@ jobs:
   # ==========================================================================
   discover-satellites-vrt:
     name: Discover satellites (VRT)
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       satellites: ${{ steps.find.outputs.satellites }}
       changed: ${{ steps.changes.outputs.satellites }}
@@ -270,7 +270,7 @@ jobs:
   # ==========================================================================
   visual-regression-satellite:
     name: Satellite visual regression
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [discover-satellites-vrt]
     # ECO-157 (E4c): el job corre SIEMPRE que haya satélites (para reportar en CADA PR → requerible vía el
     # agregador `Satellite visual regression (all)`); los pasos PESADOS hacen green-skip cuando el PR no toca
@@ -415,7 +415,7 @@ jobs:
   # ==========================================================================
   satellite-vrt-gate:
     name: Satellite visual regression (all)
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [visual-regression-satellite]
     if: ${{ always() && github.event_name == 'pull_request' }}
     steps:

@@ -31,7 +31,7 @@ concurrency:
 jobs:
   changes:
     name: "Detect changed packages"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
@@ -52,7 +52,7 @@ jobs:
   # ==========================================================================
   secrets-scan:
     name: "Layer 1: Secrets Detection"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # Runs the gitleaks BINARY (open-source, free), NOT the action wrapper: gitleaks-action@v2 introduced
     # PAID license enforcement for ORGANIZATIONS (GITLEAKS_LICENSE secret) and, when missing, aborted with
     # "missing gitleaks license" BEFORE scanning — turning this job and the Security Gate red on EVERY org PR
@@ -97,7 +97,7 @@ jobs:
   # ECO-27 (F3a): discovers satellites by glob so they enter the gates WITHOUT editing the workflow.
   discover-satellites:
     name: "Discover satellites"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       audit-packages: ${{ steps.find.outputs.audit-packages }}
       satellites: ${{ steps.find.outputs.satellites }}
@@ -115,7 +115,7 @@ jobs:
 
   dependency-audit:
     name: "Layer 2: Dependency Audit"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [discover-satellites]
     strategy:
       # SCRUM-370: ensure both api and dashboard always run independently.
@@ -170,7 +170,7 @@ jobs:
   # ==========================================================================
   sast-backend:
     name: "Layer 3: SAST (Backend)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [changes]
     if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.backend == 'true' }}
     steps:
@@ -226,7 +226,7 @@ jobs:
 
   sast-frontend:
     name: "Layer 3: SAST (Frontend)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [changes]
     if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.frontend == 'true' }}
     steps:
@@ -288,7 +288,7 @@ jobs:
   # ==========================================================================
   gate-selftests:
     name: "Gate self-tests"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -305,7 +305,7 @@ jobs:
   # ==========================================================================
   security-gate:
     name: "Security Gate (All Checks)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs:
       [
         secrets-scan,

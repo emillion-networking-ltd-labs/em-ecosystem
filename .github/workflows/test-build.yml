@@ -30,7 +30,7 @@ concurrency:
 jobs:
   changes:
     name: "Detect changed packages"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
@@ -47,7 +47,7 @@ jobs:
 
   tests-backend:
     name: "Tests (Backend)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [changes]
     if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.backend == 'true' }}
     steps:
@@ -78,7 +78,7 @@ jobs:
 
   tests-frontend:
     name: "Tests (Frontend)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [changes]
     if: ${{ github.event_name != 'pull_request' || needs.changes.outputs.frontend == 'true' }}
     steps:
@@ -106,7 +106,7 @@ jobs:
 
   build-backend:
     name: "Build (Backend)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [tests-backend]
     if: ${{ !cancelled() && needs.tests-backend.result == 'success' }}
     steps:
@@ -138,7 +138,7 @@ jobs:
 
   build-frontend:
     name: "Build (Frontend)"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [tests-frontend]
     if: ${{ !cancelled() && needs.tests-frontend.result == 'success' }}
     steps:
@@ -162,7 +162,7 @@ jobs:
   # skipping never deadlocks branch protection.
   test-build-gate:
     name: "Tests & Build Gate"
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     needs: [tests-backend, tests-frontend, build-backend, build-frontend]
     if: always()
     steps:
