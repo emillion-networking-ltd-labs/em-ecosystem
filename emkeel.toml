@@ -10,7 +10,7 @@ runner = "self-hosted"   # Actions runner for emkeel-ci/jira-transition (ubuntu-
 # connect` enforces exactly these; `emkeel doctor` verifies they're enforced (catches "the check
 # exists but isn't required"). `gates` is always included. Change with:
 #   emkeel set github-required-checks "gates,Security Gate (All Checks)"
-required_checks = ["gates"]
+required_checks = ["gates", "Security Gate (All Checks)", "Tests & Build Gate"]
 
 [emkeel]
 source = "emkeel~=0.1.0"
