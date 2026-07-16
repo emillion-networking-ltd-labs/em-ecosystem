@@ -8,7 +8,7 @@ on:
 jobs:
   transition:
     if: github.event.pull_request.merged == true
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/setup-python@v5
         with:
