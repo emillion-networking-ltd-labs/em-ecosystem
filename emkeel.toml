@@ -5,7 +5,7 @@ project_key = "ECO"
 
 [github]
 repo = "emillion-networking-ltd-labs/em-ecosystem"
-runner = "ubuntu-latest"   # Actions runner for emkeel-ci/jira-transition (ubuntu-latest | self-hosted | <label>)
+runner = "self-hosted"   # Actions runner for emkeel-ci/jira-transition (ubuntu-latest | self-hosted | <label>)
 # required_checks: status-check contexts that MUST be required on the default branch.
 # `emkeel doctor` verifies they're enforced (catches "the check exists but isn't required").
 # `gates` is always checked. Add your other CI gates here, e.g.:
