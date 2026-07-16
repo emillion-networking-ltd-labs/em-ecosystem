@@ -28,6 +28,19 @@
 
 set -e
 
+# emkeel maintenance lane: these branches touch only emkeel-managed wiring (AGENTS.md, workflows,
+# emkeel.toml…), never NexaCore product code, and their PR still runs the full CI on GitHub (the
+# gates job) before auto-merge → skip the local CI-parity here (nothing product-related to verify).
+# Works even when `emkeel update` pushes from a /tmp/emkeel-maint-* worktree: the hook is the repo's
+# and HEAD there is the emkeel-maint/… branch.
+branch="$(git rev-parse --abbrev-ref HEAD)"
+case "$branch" in
+  emkeel-maint/*)
+    echo "  [pre-push] emkeel-maint lane → skipping CI-parity (wiring only; the PR runs full CI)."
+    exit 0
+    ;;
+esac
+
 echo ""
 echo "▶ Pre-push CI parity checks (target ~3-5 min total)"
 echo "  Bypass with --no-verify if absolutely necessary."
