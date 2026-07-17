@@ -31,7 +31,9 @@ work is done.
    If `<topic>` genuinely has no market/external dimension, declare it EXPLICITLY (never skip the web silently):
    `emkeel strategy advance researched <topic> --set=internal_only=true`
 3. **Propose** — fill the Options table with **≥2 real options**, each with its **Source**, pros, cons, risk:
-   `emkeel strategy advance proposed <topic> --set='options=[<opt1>,<opt2>,…]'`
+   `emkeel strategy advance proposed <topic> --set option_<name>='<summary>' --set option_<name2>='<summary>'`
+   One field per option (the `lens_` shape) so a summary may contain commas safely. The engine REFUSES
+   fewer than 2 — one option is a justification, not a decision.
 4. **Critique** — a multi-lens adversarial PANEL (fan out subagents, one per angle): re-open each option's
    cited source (does it really say that?) AND attack from DISTINCT lenses — recommended: discovery/SEO,
    professional completeness, calibration to the real case, legal/compliance, plus any topic-specific angle.
@@ -45,20 +47,34 @@ work is done.
    **resolvable proof** (a repo `file:line`, a URL, or an external citation). The engine and CI REFUSE
    `validated` without it — reality is non-skippable, and a `fail`/`mixed` is an HONEST record, never hidden:
    `emkeel strategy advance validated <topic> --set=case="<the real case>" --set=method="<how you tested>" --set=outcome=<pass|fail|mixed> --set=evidence_ref=<file:line|URL>`
-7. **Human gate — present** — present the options + your recommendation to the operator. **Do NOT decide
-   for them.** Record that you showed it (this does NOT approve anything) — the LAST step you commit in the
-   lane PR. If the reality outcome was `fail`/`mixed`, proceeding requires a recorded `proceed_justification`
-   — approving despite a failed reality test must be a deliberate, on-record act:
+7. **Human gate — present, then the fork: APPROVE / REFINE / DISCARD.** Present the options + your
+   recommendation. **Do NOT decide for them.** Record that you showed it (this does NOT approve anything):
    `emkeel strategy advance presented <topic> --set=presented_to=<operator>`
-   (add `--set=proceed_justification="<why proceed despite the reality result>"` when the outcome was not `pass`)
+   (add `--set=proceed_justification="<why>"` when the reality outcome was `fail`/`mixed`). This **auto-binds
+   a hash of the doc's substantive content** (KEEL-133) — so the version that LANDS is provably the version
+   you presented. Then the operator chooses:
+   - **APPROVE** → they approve + merge the PR. Nothing more to record; the merge IS the approval (step 8).
+   - **REFINE** → open a round (durable the moment it's chosen): `emkeel strategy advance presented <topic>
+     --set=presented_to=<operator> --set=refinement_open=true --set=refinement="<what the debate asks>"`.
+     An open round is **NOT mergeable** (the gate is RED) — you don't leave the loop until it converges.
+     Then edit the doc to the AGREED version and **RE-present** (`emkeel strategy advance presented …`),
+     which re-binds the new hash and closes the round. The debate's CONCLUSION becomes the record; the
+     conversation stays in the PR. You can iterate as many rounds as needed. **If you edit the doc after
+     presenting and forget to re-present, the gate goes RED** (the hash won't match) — the stale draft can
+     never merge silently.
+   - **DISCARD** → retire it: delete `<topic>.md` AND `<topic>.process.json` together (a clean retiro).
 8. **Approval is the MERGE — never stamp it yourself.** The operator approves by **approving + merging the
    PR** (branch protection requires a human approving review). Do NOT run `emkeel strategy advance approved`
    in the lane PR — a self-written `approved_by` certifies nothing, and the `check_strategy_process` gate
    FAILS a committed `approved` (the merge hasn't happened yet). The committed `<topic>.process.json` stops
    at `presented`; the merge IS the approval, recorded immutably in the PR/git history.
-   On the operator's yes, set `Status: APPROVED` in the doc, finalize the Recommendation, offer to record
-   the decision as an ADR in `emkeel-governance/adr/`, and remind them to add `Strategy: <topic>` to
-   feature specs (the `check_strategy_link` gate enforces it).
+   To LAND, the doc must declare `Status: APPROVED` and link an ADR that RESOLVES (or `ADR: none — <why>`).
+   Both are GATED (`check_strategy_process`), so neither depends on you remembering: a DRAFT in main is the
+   model contradicting itself, and a decision that isn't recorded didn't happen. Declaring APPROVED before
+   the merge is not a lie — it is what every ADR here does with `Status: accepted`; the operator's merge
+   ratifies it. Finalize the Recommendation, write the ADR in `emkeel-governance/adr/` (a `00NN` placeholder
+   resolves to nothing and FAILS), and remind them to add `Strategy: <topic>` to feature specs
+   (`check_strategy_link` enforces that one).
 
 **Refining an existing strategy?** A new refinement (a new ticket on the same `<topic>`) starts the process
 CLEAN — re-run from `scaffolded`; the engine resets and a prior refinement's `approved` NEVER carries over.
