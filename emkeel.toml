@@ -14,4 +14,4 @@ required_checks = ["gates", "Security Gate (All Checks)", "Tests & Build Gate"]
 
 [emkeel]
 source = "emkeel~=0.1.0"
-generated_with = "0.1.111"   # informational: the Emkeel version that wrote this wiring
+generated_with = "0.1.115"   # informational: the Emkeel version that wrote this wiring
