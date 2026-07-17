@@ -47,22 +47,22 @@ work is done.
    **resolvable proof** (a repo `file:line`, a URL, or an external citation). The engine and CI REFUSE
    `validated` without it — reality is non-skippable, and a `fail`/`mixed` is an HONEST record, never hidden:
    `emkeel strategy advance validated <topic> --set=case="<the real case>" --set=method="<how you tested>" --set=outcome=<pass|fail|mixed> --set=evidence_ref=<file:line|URL>`
-7. **Human gate — present, then the fork: APPROVE / REFINE / DISCARD.** Present the options + your
-   recommendation. **Do NOT decide for them.** Record that you showed it (this does NOT approve anything):
-   `emkeel strategy advance presented <topic> --set=presented_to=<operator>`
-   (add `--set=proceed_justification="<why>"` when the reality outcome was `fail`/`mixed`). This **auto-binds
-   a hash of the doc's substantive content** (KEEL-133) — so the version that LANDS is provably the version
-   you presented. Then the operator chooses:
+7. **Human gate — present with `emkeel strategy present <topic>`.** This GENERATES a summary from the doc
+   (goal, options, recommendation, reality outcome) — so the presentation can't be hollow — prints the
+   **APPROVE / REFINE / DISCARD** menu with the exact replies, and records `presented` (auto-binding a hash
+   of the substantive content, so what LANDS is provably what you presented). Show the operator that output;
+   **do NOT decide for them.** (Add `--set=proceed_justification="<why>"` when the reality outcome was
+   `fail`/`mixed`.) The operator replies with one:
    - **APPROVE** → they approve + merge the PR. Nothing more to record; the merge IS the approval (step 8).
-   - **REFINE** → open a round (durable the moment it's chosen): `emkeel strategy advance presented <topic>
-     --set=presented_to=<operator> --set=refinement_open=true --set=refinement="<what the debate asks>"`.
-     An open round is **NOT mergeable** (the gate is RED) — you don't leave the loop until it converges.
-     Then edit the doc to the AGREED version and **RE-present** (`emkeel strategy advance presented …`),
-     which re-binds the new hash and closes the round. The debate's CONCLUSION becomes the record; the
-     conversation stays in the PR. You can iterate as many rounds as needed. **If you edit the doc after
-     presenting and forget to re-present, the gate goes RED** (the hash won't match) — the stale draft can
-     never merge silently.
-   - **DISCARD** → retire it: delete `<topic>.md` AND `<topic>.process.json` together (a clean retiro).
+   - **REFINE: `<what>`** → your FIRST act is to open the round — `emkeel strategy refine <topic>
+     --set=reason="<what>"` — so the refinement is durable the instant it's chosen. **Echo back what you
+     understood and confirm before editing.** An open round is **NOT mergeable** (RED). Then refine the doc
+     **end-to-end** (update every affected section, remove contradictions — never a bolt-on), and re-run the
+     TAIL for coherence: `emkeel strategy advance critiqued …` (re-runs the panel over the new version) →
+     `advance validated …` → `emkeel strategy present …` (re-binds + closes the round). Editing the doc and
+     only re-presenting is **RED** — a stale critique can't land a contradiction nobody checked. Iterate as
+     many rounds as the debate needs.
+   - **DISCARD: `<why>`** → retire it: delete `<topic>.md` AND `<topic>.process.json` together (clean retiro).
 8. **Approval is the MERGE — never stamp it yourself.** The operator approves by **approving + merging the
    PR** (branch protection requires a human approving review). Do NOT run `emkeel strategy advance approved`
    in the lane PR — a self-written `approved_by` certifies nothing, and the `check_strategy_process` gate
