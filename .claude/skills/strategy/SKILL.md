@@ -68,13 +68,16 @@ work is done.
    in the lane PR — a self-written `approved_by` certifies nothing, and the `check_strategy_process` gate
    FAILS a committed `approved` (the merge hasn't happened yet). The committed `<topic>.process.json` stops
    at `presented`; the merge IS the approval, recorded immutably in the PR/git history.
-   To LAND, the doc must declare `Status: APPROVED` and link an ADR that RESOLVES (or `ADR: none — <why>`).
-   Both are GATED (`check_strategy_process`), so neither depends on you remembering: a DRAFT in main is the
-   model contradicting itself, and a decision that isn't recorded didn't happen. Declaring APPROVED before
-   the merge is not a lie — it is what every ADR here does with `Status: accepted`; the operator's merge
-   ratifies it. Finalize the Recommendation, write the ADR in `emkeel-governance/adr/` (a `00NN` placeholder
-   resolves to nothing and FAILS), and remind them to add `Strategy: <topic>` to feature specs
-   (`check_strategy_link` enforces that one).
+   To LAND, the doc must declare `Status: APPROVED`, link an ADR that RESOLVES (or `ADR: none — <why>`), AND
+   carry a filled **runbook** (`<topic>.runbook.md`, scaffolded by `emkeel strategy new`). All three are
+   GATED (`check_strategy_process`), so none depends on you remembering: a DRAFT in main is the model
+   contradicting itself, a decision that isn't recorded didn't happen, and a strategy with no implementation
+   plan never gets built. Declaring APPROVED before the merge is not a lie — it is what every ADR here does
+   with `Status: accepted`; the operator's merge ratifies it. Finalize the Recommendation, write the ADR in
+   `emkeel-governance/adr/` (a `00NN` placeholder resolves to nothing and FAILS), **fill the runbook's
+   Implementation plan** — one piece per thing the Recommendation decided, each with a ticket and a
+   RESOLVABLE `done_when` (a repo `file:line`, a test, or a gate) — and remind them to add `Strategy: <topic>`
+   to feature specs (`check_strategy_link` enforces that one).
 
 **Refining an existing strategy?** A new refinement (a new ticket on the same `<topic>`) starts the process
 CLEAN — re-run from `scaffolded`; the engine resets and a prior refinement's `approved` NEVER carries over.

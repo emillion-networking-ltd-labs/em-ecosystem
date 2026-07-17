@@ -30,6 +30,9 @@ Edit the doc to close every gap — no contradictory bolt-ons:
   operator's calls at the interrupts — present them, don't decide for them.
 - **The ADR** → point `## Decisions` at the ADR that RESOLVES (write it, or fix a `00NN` placeholder to the
   real number). If none is warranted, declare `ADR: none — <why>`.
+- **The runbook** → if `<topic>.runbook.md` is missing or empty, write its Implementation plan: one piece per
+  thing the Recommendation decided, each with a ticket and a RESOLVABLE `done_when`. The implementation
+  north star — without it the strategy never gets built (the reason this one stalled).
 - **Provenance / missing steps** → resume them with `emkeel strategy advance <step>` (real sources, real
   reality evidence).
 
