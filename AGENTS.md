@@ -49,6 +49,13 @@ Analysis and action are different modes — don't slide from one into the other.
   before writing** — a silenced `cd` that failed once clobbered a real `.env`.
 
 ## Strategy (the north star — don't drift)
+- **Presenting a strategy: use `emkeel strategy present <topic>` and honor the fork.** It generates the
+  summary + the APPROVE/REFINE/DISCARD menu — never present a hollow "draft ready, approve?". **When the
+  operator directs a REFINE, your FIRST act is `emkeel strategy refine <topic> --set=reason="<what>"`**
+  (open the round before you discuss the change — it's durable the instant it's chosen), then echo back what
+  you understood, refine the doc end-to-end (no contradictory bolt-ons), and re-run the tail
+  (critiqued→validated→present). The gate can't see this conversation — an unrecorded refinement is the one
+  thing it can't catch, so opening the round is non-negotiable.
 - A development strategy for an area lives in `emkeel-governance/strategy/<area>.md` (goal,
   architecture, parameters, non-goals). Created once, human-approved, committed.
 - **Before working a feature, read the strategy it serves and align to it.** Declare it in the
