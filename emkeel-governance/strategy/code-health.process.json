@@ -53,13 +53,16 @@
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-07-15T10:36:20Z",
+      "timestamp": "2026-07-18T01:09:54Z",
       "lens_source": "Fuentes bien fundadas; unico drift: CISQ ASCMM es CWE-1130 no el superset 1128 (corregido). Bulk-suppressions, jscpd exitCode, exhaustive-deps y changed_files confirmados abriendo cada fuente.",
-      "lens_calibration": "El gate mecanico resuelve ~1 de ~5 sintomas de tokens.css: stylelint caza lineas muertas intra-bloque, pero la duplicacion titular (light re-escribe root, feedback 5x cross-block) es review no gate. Corregido: no sobre-prometer.",
+      "lens_calibration": "Recorta la topologia a 2 puntos SELF-CONTAINED en em-ecosystem (retira el paso Verify de em-development-framework, fuera del scope de /eco-engineer); el hook local cubre el rol proactivo. El gate ya existe (emkeel >=0.1.111), asi que 'construir' se reduce a declarar checks en code-health.toml.",
       "lens_falsepositive": "jscpd-gate-duro dispararia el kill-criterion 1: dup relacional (dos sitios), el ratchet solo-lo-nuevo no mapea, un PR que toca V1 y V2 resurface el clon. Corregido: dup a advisory.",
       "lens_cost": "La recomendacion subestima el TCO (Opcion 1 = seis piezas a mantener mas tres a construir mas coste IA por PR mas setup de baselines) y descarto Sonar por gobernanza no por coste. Corregido: kill-criterion 2 es decision del operador con cifras.",
-      "lens_completeness": "Falta operacionalizar el acoplamiento/direccion de dependencias (ciclos, fronteras NestJS, corte server/client Next), gate-able con eslint-plugin-boundaries. Segundo hueco: metrica de eficacia. Ambos anadidos.",
-      "completeness": "Anadidas dos dimensiones: fronteras/ciclos como 5a capa de gate, y metrica de eficacia (aceptacion IA-review, falsos-positivos, convergencia del ratchet) para juzgar los kill-criteria."
+      "lens_completeness": "El runbook cubre las 10 piezas decididas (comment-language/stylelint/knip/eslint/boundaries + hook + eco-reviewer + drenaje + metrica). Hueco menor: el recompute de baselines flota-wide (generalizar _ratchet.mjs, pieza 2) es detalle de ejecucion.",
+      "completeness": "none \u2014 decisiones abiertas (dimension-primero/umbrales, auto-fix, eco-reviewer a/b) conscientemente DIFERIDAS con casa en el runbook, no olvidadas.",
+      "lens_discovery": "N/A \u2014 estrategia interna de enforcement, sin dimension de descubrimiento/SEO.",
+      "lens_legal": "Licencias OK: eslint-plugin-sonarjs LGPL-3.0 (dev-only, no taintea producto), stylelint/knip/dependency-cruiser MIT. Sin bloqueo legal.",
+      "content_hash": "a0b4c95407d1e4693b2c6734357a4568c4a19bfb3babf57b68b99778ea1cb02c"
     },
     "checked": {
       "done": true,
@@ -68,16 +71,19 @@
     },
     "validated": {
       "done": true,
-      "timestamp": "2026-07-15T10:38:02Z",
-      "case": "El fichero que disparo la estrategia: design-system/tokens/tokens.css (feedback declarado dos veces dentro de .dark y .light = lineas muertas).",
-      "method": "Corri de verdad stylelint 16 con la regla declaration-block-no-duplicate-custom-properties sobre tokens.css (la herramienta que la recomendacion propone para el hueco de CSS).",
+      "timestamp": "2026-07-18T01:11:00Z",
+      "case": "gate check_code_health (emkeel 0.1.111) sin code-health.toml en em-ecosystem \u2014 el arranque incremental que la estrategia consolidada asume",
+      "method": "correr 'python -m emkeel.gates.check_code_health' en la raiz del repo, sin code-health.toml",
       "outcome": "pass",
-      "evidence_ref": "design-system/tokens/tokens.css:543"
+      "evidence_ref": "emkeel-governance/strategy/code-health.runbook.md:18"
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-07-15T10:38:17Z",
-      "presented_to": "operator"
+      "timestamp": "2026-07-18T01:11:12Z",
+      "presented_to": "operador",
+      "refinement_open": false,
+      "refinement": "consolidar: Status DRAFT->APPROVED tras merge #608; registrar Sonar=NO (decidido con investigacion, solo vivia en memoria); enlazar ADR-034 real (no 00NN); crear runbook; recortar topologia a 2 puntos self-contained en em-ecosystem (quitar el paso Verify de em-development-framework, fuera del scope de /eco-engineer); resolver/re-diferir coherentemente las decisiones abiertas",
+      "content_hash": "a0b4c95407d1e4693b2c6734357a4568c4a19bfb3babf57b68b99778ea1cb02c"
     }
   },
   "steps_schema": [
