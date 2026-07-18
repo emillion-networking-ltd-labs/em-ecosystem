@@ -53,37 +53,39 @@
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-07-18T01:09:54Z",
+      "timestamp": "2026-07-18T16:47:39Z",
       "lens_source": "Fuentes bien fundadas; unico drift: CISQ ASCMM es CWE-1130 no el superset 1128 (corregido). Bulk-suppressions, jscpd exitCode, exhaustive-deps y changed_files confirmados abriendo cada fuente.",
-      "lens_calibration": "Recorta la topologia a 2 puntos SELF-CONTAINED en em-ecosystem (retira el paso Verify de em-development-framework, fuera del scope de /eco-engineer); el hook local cubre el rol proactivo. El gate ya existe (emkeel >=0.1.111), asi que 'construir' se reduce a declarar checks en code-health.toml.",
+      "lens_calibration": "Topologia recortada a 2 puntos self-contained en em-ecosystem (retirado el paso Verify de em-development-framework, fuera del scope de /eco-engineer). El motor del gate ya existe (>=0.1.111), asi que construir = declarar checks, no motor.",
       "lens_falsepositive": "jscpd-gate-duro dispararia el kill-criterion 1: dup relacional (dos sitios), el ratchet solo-lo-nuevo no mapea, un PR que toca V1 y V2 resurface el clon. Corregido: dup a advisory.",
       "lens_cost": "La recomendacion subestima el TCO (Opcion 1 = seis piezas a mantener mas tres a construir mas coste IA por PR mas setup de baselines) y descarto Sonar por gobernanza no por coste. Corregido: kill-criterion 2 es decision del operador con cifras.",
-      "lens_completeness": "El runbook cubre las 10 piezas decididas (comment-language/stylelint/knip/eslint/boundaries + hook + eco-reviewer + drenaje + metrica). Hueco menor: el recompute de baselines flota-wide (generalizar _ratchet.mjs, pieza 2) es detalle de ejecucion.",
-      "completeness": "none \u2014 decisiones abiertas (dimension-primero/umbrales, auto-fix, eco-reviewer a/b) conscientemente DIFERIDAS con casa en el runbook, no olvidadas.",
+      "lens_completeness": "Se cerraron 2 huecos reales que la ronda anterior dejo: (1) 'duplicacion=ADVISORY' era decision sin pieza -> ahora P8 (report + exclusiones V1/V2); (2) el recompute de baselines desde main MERGEADO no tenia dueno -> ahora P9.",
+      "completeness": "none \u2014 los parametros de ejecucion (orden de dimensiones, umbrales, forma del revisor, alcance del auto-fix) salieron de la Recommendation a Non-goals, que es su sitio; no son decisiones abiertas.",
       "lens_discovery": "N/A \u2014 estrategia interna de enforcement, sin dimension de descubrimiento/SEO.",
-      "lens_legal": "Licencias OK: eslint-plugin-sonarjs LGPL-3.0 (dev-only, no taintea producto), stylelint/knip/dependency-cruiser MIT. Sin bloqueo legal.",
-      "content_hash": "a0b4c95407d1e4693b2c6734357a4568c4a19bfb3babf57b68b99778ea1cb02c"
+      "lens_legal": "Licencias OK: eslint-plugin-sonarjs LGPL-3.0 (dev-only, no taintea producto), stylelint/knip/dependency-cruiser MIT. Sin bloqueo.",
+      "content_hash": "95fa337829fcfab6363f90530d6a2516e8c4b37238f995053f300b8ced442c28",
+      "lens_coverage": "Cruce decision->pieza VERIFICADO (lo que fallo en la ronda anterior): D1->P1,P2 \u00b7 D2->P5 \u00b7 D3->P3 \u00b7 D4->P4 \u00b7 D5->P6 \u00b7 D6->P1,P9 \u00b7 D7->P1,P7 \u00b7 D8->P8 \u00b7 D9->P10 \u00b7 D10->P11 \u00b7 D11->P12. Las 11 decisiones tienen constructor y el gate lo verifica en ambas direcciones.",
+      "lens_coherence": "Resuelta la contradiccion interna: el doc decia ratchet via 'bulk-suppressions + betterer', pero check_code_health YA hace ese ratchet (conteo vs baseline) -> betterer queda superseded y declarado fuera de alcance."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-07-15T10:38:02Z",
+      "timestamp": "2026-07-18T16:47:54Z",
       "check_passed": true
     },
     "validated": {
       "done": true,
-      "timestamp": "2026-07-18T01:11:00Z",
-      "case": "gate check_code_health (emkeel 0.1.111) sin code-health.toml en em-ecosystem \u2014 el arranque incremental que la estrategia consolidada asume",
-      "method": "correr 'python -m emkeel.gates.check_code_health' en la raiz del repo, sin code-health.toml",
+      "timestamp": "2026-07-18T16:48:06Z",
+      "case": "gate check_code_health (emkeel 0.1.139) sin code-health.toml en em-ecosystem \u2014 el arranque incremental que la pieza 1 asume",
+      "method": "correr 'python -m emkeel.gates.check_code_health' en la raiz del repo, sin code-health.toml presente",
       "outcome": "pass",
-      "evidence_ref": "emkeel-governance/strategy/code-health.runbook.md:18"
+      "evidence_ref": "emkeel-governance/strategy/code-health.runbook.md:13"
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-07-18T01:11:12Z",
+      "timestamp": "2026-07-18T16:48:13Z",
       "presented_to": "operador",
-      "refinement_open": false,
-      "refinement": "consolidar: Status DRAFT->APPROVED tras merge #608; registrar Sonar=NO (decidido con investigacion, solo vivia en memoria); enlazar ADR-034 real (no 00NN); crear runbook; recortar topologia a 2 puntos self-contained en em-ecosystem (quitar el paso Verify de em-development-framework, fuera del scope de /eco-engineer); resolver/re-diferir coherentemente las decisiones abiertas",
-      "content_hash": "a0b4c95407d1e4693b2c6734357a4568c4a19bfb3babf57b68b99778ea1cb02c"
+      "content_hash": "95fa337829fcfab6363f90530d6a2516e8c4b37238f995053f300b8ced442c28",
+      "runbook_hash": "31b6f39d90b46702a0f1efce89f971a553222398859da72e7add19ee2a83a890",
+      "refinement_open": false
     }
   },
   "steps_schema": [
