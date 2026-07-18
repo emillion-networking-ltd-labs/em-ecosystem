@@ -64,7 +64,8 @@ work is done.
      many rounds as the debate needs.
    - **DISCARD: `<why>`** → retire it: delete `<topic>.md` AND `<topic>.process.json` together (clean retiro).
 8. **Approval is the MERGE — never stamp it yourself.** The operator approves by **approving + merging the
-   PR** (branch protection requires a human approving review). Do NOT run `emkeel strategy advance approved`
+   PR**. (NOT enforced yet — the default `required_approvals` is 0 — GitHub forbids approving your own PR, so 1 would hard-block a lone operator. A team sets it and `connect` installs it; with a single actor no mechanism can tell your merge from an agent's)
+   Do NOT run `emkeel strategy advance approved`
    in the lane PR — a self-written `approved_by` certifies nothing, and the `check_strategy_process` gate
    FAILS a committed `approved` (the merge hasn't happened yet). The committed `<topic>.process.json` stops
    at `presented`; the merge IS the approval, recorded immutably in the PR/git history.
@@ -75,8 +76,15 @@ work is done.
    plan never gets built. Declaring APPROVED before the merge is not a lie — it is what every ADR here does
    with `Status: accepted`; the operator's merge ratifies it. Finalize the Recommendation, write the ADR in
    `emkeel-governance/adr/` (a `00NN` placeholder resolves to nothing and FAILS), **fill the runbook's
-   Implementation plan** — one piece per thing the Recommendation decided, each with a ticket and a
-   RESOLVABLE `done_when` (a repo `file:line`, a test, or a gate) — and remind them to add `Strategy: <topic>`
+   Implementation plan** — **REGISTER each decision in `## Recommendation` as `- D1 — <what you decided>`,
+   and give each one a piece whose `Implements` column cites it** (the gate checks BOTH directions: no
+   decision without a piece, no citation without a decision — so nothing decided is dropped from the plan).
+   Each piece carries a ticket and a `done_when` from the RESOLVABLE vocabulary — a repo `path:line`, a URL,
+   `test:<name>` or `gate:<name>`; prose is REJECTED. Keep the `## Recommendation` DECIDED: `emkeel strategy diagnose`
+   REPORTS an open marker there ("por decidir", "decisión abierta") but does NOT block the landing — gating
+   it was tried and withdrawn because those words are ordinary Spanish and legitimate sentences went red.
+   What IS gated is the decision REGISTER: every `- D1 — <what>` must have a runbook piece that builds it. And re-present if you touch the runbook after presenting: the plan that lands must be the
+   plan the operator saw. Remind them to add `Strategy: <topic>`
    to feature specs (`check_strategy_link` enforces that one).
 
 **Refining an existing strategy?** A new refinement (a new ticket on the same `<topic>`) starts the process

@@ -32,16 +32,20 @@ Edit the doc to close every gap — no contradictory bolt-ons:
   real number). If none is warranted, declare `ADR: none — <why>`. A resolving ADR must not DEFER or leave
   its own decision open (`diagnose` flags this) — an ADR that both decides X and lists X as still-open
   contradicts itself; decide it, or move it out of this ADR's scope.
-- **The runbook** → if `<topic>.runbook.md` is missing or empty, write its Implementation plan: one piece per
-  thing the Recommendation decided, each with a ticket and a RESOLVABLE `done_when` (REQUIRED per piece — a
-  piece with no proof-of-done fails the gate). The implementation north star — without it the strategy never
+- **The runbook** → if `<topic>.runbook.md` is missing or empty, write its Implementation plan. **Every
+  decision must be REGISTERED in `## Recommendation` as `- D1 — <what>` and CITED by a piece's `Implements`
+  column** — the gate fails a decision with no piece (work silently dropped from the plan) and a citation
+  with no decision. Each piece carries a ticket and a `done_when` from the resolvable vocabulary (a repo
+  `path:line`, a URL, `test:<name>` or `gate:<name>` — prose is rejected). Touching the runbook after
+  presenting means RE-presenting: the plan that lands must be the plan the operator saw. The implementation north star — without it the strategy never
   gets built (the reason this one stalled).
 - **Provenance / missing steps** → resume them with `emkeel strategy advance <step>` (real sources, real
   reality evidence).
 
 ## 4. Re-run the tail for coherence (KEEL-134)
 A substantive edit makes the critique STALE. Re-run: `emkeel strategy advance critiqued …` (the panel +
-completeness critic over the consolidated version) → `advance validated …` → `emkeel strategy present …`
+completeness critic over the consolidated version) → `advance checked …` (the lint, over the EDITED doc)
+→ `advance validated …` → `emkeel strategy present …`
 (re-binds the content hash, closes the round). `diagnose` should now be clean.
 
 ## 5. Land it

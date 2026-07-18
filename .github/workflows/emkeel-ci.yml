@@ -89,6 +89,46 @@ jobs:
         env:
           EMKEEL_BASE_REF: ${{ github.base_ref }}
         run: python -m emkeel.gates.check_strategy_process
+      - name: "Tests - this repo's own suite (declared in emkeel.toml [tests].command)"
+        env:
+          EMKEEL_TEST_CMD: ''
+        run: |
+          CMD="$EMKEEL_TEST_CMD"
+          if [ -z "$CMD" ]; then
+            echo "::warning::No [tests].command in emkeel.toml — this PR runs NO tests. A regression can"
+            echo "::warning::merge green. Declare it with: emkeel set test-command <your command>"
+          else
+            echo "Running: $CMD"
+            bash -lc "$CMD"
+          fi
+      - name: "Gate - branch prefix vocabulary (an unknown prefix silently disables the feature gates)"
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
+        run: python -m emkeel.gates.check_branch_vocabulary
+      - name: "Gate - a bug fix carries a test (regression guard)"
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
+          EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
+        run: python -m emkeel.gates.check_fix_has_test
+      - name: "Gate - Conventional Commits with the ticket KEY"
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
+          EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
+        run: python -m emkeel.gates.check_commit_convention
+      - name: "Gate - an architectural change is answered (an ADR, or a declared no-adr)"
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
+          EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
+        run: python -m emkeel.gates.check_adr_for_architecture
+      - name: "Gate - a spec names a ticket that exists"
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
+        run: python -m emkeel.gates.check_spec_ticket_exists
       - name: "Gate - critical change needs an integration test (tests/integration/)"
         if: github.event_name == 'pull_request'
         env:
