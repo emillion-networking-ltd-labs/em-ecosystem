@@ -34,7 +34,10 @@ Analysis and action are different modes — don't slide from one into the other.
    (it clears the pending flag), or place it in Jira. (`emkeel doctor` lists tickets still awaiting a decision.)
 2. For `feat/` tickets: write `emkeel-governance/specs/<KEY>.md` with an "Acceptance Criteria" section.
 3. Every bug fix starts with a failing test (permanent regression guard).
-4. Open a PR. Merge requires: CI green + your approval + a linked ticket.
+4. Open a PR. Merge requires: CI green + a linked ticket, and YOUR approval.
+   (NOT enforced yet — the default `required_approvals` is 0 — GitHub forbids approving your own PR, so 1 would hard-block a lone operator. A team sets it and `connect` installs it; with a single actor no mechanism can tell your merge from an agent's)
+   With a single actor there is no mechanism that can tell your merge from an agent's: that is exactly why
+   the agent must never merge. `emkeel rules --gaps` lists every rule in this state.
 5. **`Done` is earned by the work + the merge** — move the ticket with `emkeel jira transition` after it
    merges, never at create. (Like a strategy's `approved`, a terminal state is never self-written up front.)
 
@@ -54,7 +57,7 @@ Analysis and action are different modes — don't slide from one into the other.
   operator directs a REFINE, your FIRST act is `emkeel strategy refine <topic> --set=reason="<what>"`**
   (open the round before you discuss the change — it's durable the instant it's chosen), then echo back what
   you understood, refine the doc end-to-end (no contradictory bolt-ons), and re-run the tail
-  (critiqued→validated→present). The gate can't see this conversation — an unrecorded refinement is the one
+  (critiqued→checked→validated→present). The gate can't see this conversation — an unrecorded refinement is the one
   thing it can't catch, so opening the round is non-negotiable.
 - A development strategy for an area lives in `emkeel-governance/strategy/<area>.md` (goal,
   architecture, parameters, non-goals). Created once, human-approved, committed.

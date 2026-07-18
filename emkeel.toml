@@ -11,7 +11,21 @@ runner = "self-hosted"   # Actions runner for emkeel-ci/jira-transition (ubuntu-
 # exists but isn't required"). `gates` is always included. Change with:
 #   emkeel set github-required-checks "gates,Security Gate (All Checks)"
 required_checks = ["gates", "Security Gate (All Checks)", "Tests & Build Gate"]
+# required_approvals: approving reviews branch protection REQUIRES. 0 = solo-friendly (you cannot
+# approve your own PR, so 1 would block a lone operator). A team sets 1+; `emkeel connect` installs it.
+required_approvals = 0
+
+[architecture]
+# surfaces: paths (globs) whose change must be ANSWERED — an ADR in the PR, or `no-adr: <why>` in a
+# commit message. The gate never judges whether a change IS architectural; it requires the question
+# to be answered while it is still cheap. Empty = dormant.
+surfaces = []
+
+[tests]
+# command: how to run THIS repo's suite. Empty = the distributed CI runs NO tests, so a regression
+# can merge green. Declared = it runs inside the required `gates` job. e.g. "npm test" | "pytest -q"
+command = ""
 
 [emkeel]
 source = "emkeel~=0.1.0"
-generated_with = "0.1.122"   # informational: the Emkeel version that wrote this wiring
+generated_with = "0.1.137"   # informational: the Emkeel version that wrote this wiring
