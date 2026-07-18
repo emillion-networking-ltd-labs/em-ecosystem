@@ -90,6 +90,10 @@ jobs:
           EMKEEL_BASE_REF: ${{ github.base_ref }}
         run: python -m emkeel.gates.check_strategy_process
       - name: "Tests - this repo's own suite (declared in emkeel.toml [tests].command)"
+        # The maint lane carries only generated wiring (proven by check_maint_scope), so YOUR product suite
+        # cannot be affected by it — and running it anyway makes emkeel's wiring refresh hostage to an
+        # unrelated failure in your codebase (KEEL-156).
+        if: ${{ !startsWith(github.head_ref, 'emkeel-maint/') }}
         env:
           EMKEEL_TEST_CMD: ''
         run: |
