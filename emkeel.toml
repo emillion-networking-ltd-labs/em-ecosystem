@@ -14,6 +14,11 @@ required_checks = ["gates", "Security Gate (All Checks)", "Tests & Build Gate"]
 # required_approvals: approving reviews branch protection REQUIRES. 0 = solo-friendly (you cannot
 # approve your own PR, so 1 would block a lone operator). A team sets 1+; `emkeel connect` installs it.
 required_approvals = 0
+# enforce_admins: do the rules apply to admins too? false = an admin can push straight to the
+# default branch and merge with red checks. strict_up_to_date: must a PR be current with the base
+# before merging? Both are RECONCILED by `emkeel update` — set them here, never in the GitHub UI.
+enforce_admins = false
+strict_up_to_date = false
 
 [architecture]
 # surfaces: paths (globs) whose change must be ANSWERED — an ADR in the PR, or `no-adr: <why>` in a
@@ -28,4 +33,4 @@ command = ""
 
 [emkeel]
 source = "emkeel~=0.1.0"
-generated_with = "0.1.137"   # informational: the Emkeel version that wrote this wiring
+generated_with = "0.1.138"   # informational: the Emkeel version that wrote this wiring
