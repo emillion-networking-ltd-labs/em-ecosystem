@@ -96,3 +96,4 @@ tmp-*.py
 logs/
 # Effective flags file (per-environment). The .example.yml IS committed.
 nexacore-api/online-enforcement-flags.yml
+.emkeel/
