@@ -47,23 +47,39 @@ work is done.
    **resolvable proof** (a repo `file:line`, a URL, or an external citation). The engine and CI REFUSE
    `validated` without it — reality is non-skippable, and a `fail`/`mixed` is an HONEST record, never hidden:
    `emkeel strategy advance validated <topic> --set=case="<the real case>" --set=method="<how you tested>" --set=outcome=<pass|fail|mixed> --set=evidence_ref=<file:line|URL>`
-7. **Human gate — present with `emkeel strategy present <topic>`.** This GENERATES a summary from the doc
-   (goal, options, recommendation, reality outcome) — so the presentation can't be hollow — prints the
+7. **Semantic self-review — an INDEPENDENT re-read, then declare it.** No gate reads the doc looking for
+   it contradicting itself, so the process forces the re-read: after editing, the FULL doc + runbook must
+   be re-read by a reviewer who did NOT write them (the no-author-attachment principle: the author is a
+   poor judge of what they broke — fan out a FRESH subagent that reads everything cold and reports):
+   - **Coherence**: does the doc contradict itself, or prescribe something the repo ALREADY does? Every
+     contradiction found must be RESOLVED in the doc before advancing — "found, left in" has no honest
+     declaration.
+   - **Runbook extraction**: does the runbook extract EVERY step the strategy needs? (`Implements` proves
+     the 1:1 structure, not that a piece suffices for its decision — this is the semantic complement.)
+   The engine REFUSES `presented` without both declarations, and they bind to the content/runbook hashes —
+   so they provably speak about the exact doc and plan the operator sees. The engine forces the record;
+   the OPERATOR judges it (the declarations are printed in the presentation).
+8. **Human gate — present with the declarations:**
+   `emkeel strategy present <topic> --set=coherence="re-read end-to-end; <contradiction between §N and §M → resolved, or 'none'>" --set=runbook_extraction="re-read vs the runbook; <complete, or what was added>"`
+   This GENERATES a summary from the doc (goal, options, recommendation, reality outcome, your two
+   re-read declarations) — so the presentation can't be hollow — prints the
    **APPROVE / REFINE / DISCARD** menu with the exact replies, and records `presented` (auto-binding a hash
    of the substantive content, so what LANDS is provably what you presented). Show the operator that output;
    **do NOT decide for them.** (Add `--set=proceed_justification="<why>"` when the reality outcome was
    `fail`/`mixed`.) The operator replies with one:
-   - **APPROVE** → they approve + merge the PR. Nothing more to record; the merge IS the approval (step 8).
+   - **APPROVE** → they approve + merge the PR. Nothing more to record; the merge IS the approval (step 9).
    - **REFINE: `<what>`** → your FIRST act is to open the round — `emkeel strategy refine <topic>
      --set=reason="<what>"` — so the refinement is durable the instant it's chosen. **Echo back what you
      understood and confirm before editing.** An open round is **NOT mergeable** (RED). Then refine the doc
      **end-to-end** (update every affected section, remove contradictions — never a bolt-on), and re-run the
      TAIL for coherence: `emkeel strategy advance critiqued …` (re-runs the panel over the new version) →
-     `advance validated …` → `emkeel strategy present …` (re-binds + closes the round). Editing the doc and
+     `advance validated …` → the step-7 independent re-read of the EDITED version → `emkeel strategy
+     present …` with FRESH declarations (re-binds + closes the round; stale declarations about the old
+     version are exactly the abridgement this step kills). Editing the doc and
      only re-presenting is **RED** — a stale critique can't land a contradiction nobody checked. Iterate as
      many rounds as the debate needs.
    - **DISCARD: `<why>`** → retire it: delete `<topic>.md` AND `<topic>.process.json` together (clean retiro).
-8. **Approval is the MERGE — never stamp it yourself.** The operator approves by **approving + merging the
+9. **Approval is the MERGE — never stamp it yourself.** The operator approves by **approving + merging the
    PR**. (NOT enforced yet — the default `required_approvals` is 0 — GitHub forbids approving your own PR, so 1 would hard-block a lone operator. A team sets it and `connect` installs it; with a single actor no mechanism can tell your merge from an agent's)
    Do NOT run `emkeel strategy advance approved`
    in the lane PR — a self-written `approved_by` certifies nothing, and the `check_strategy_process` gate

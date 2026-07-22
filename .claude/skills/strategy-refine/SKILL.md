@@ -42,11 +42,18 @@ Edit the doc to close every gap — no contradictory bolt-ons:
 - **Provenance / missing steps** → resume them with `emkeel strategy advance <step>` (real sources, real
   reality evidence).
 
-## 4. Re-run the tail for coherence (KEEL-134)
+## 4. Re-run the tail for coherence (KEEL-134, KEEL-190)
 A substantive edit makes the critique STALE. Re-run: `emkeel strategy advance critiqued …` (the panel +
 completeness critic over the consolidated version) → `advance checked …` (the lint, over the EDITED doc)
-→ `advance validated …` → `emkeel strategy present …`
-(re-binds the content hash, closes the round). `diagnose` should now be clean.
+→ `advance validated …` → the SEMANTIC self-review: an INDEPENDENT reviewer (a fresh subagent, not
+whoever edited — the author is a poor judge of what they broke) re-reads the FULL doc + runbook cold and
+reports (a) every internal contradiction — including the doc prescribing what the repo ALREADY does — and
+(b) whether the runbook extracts EVERY step the strategy needs (`Implements` proves the 1:1, not
+sufficiency). Resolve what it found, then → `emkeel strategy present <topic>
+--set=coherence="re-read end-to-end; <found → resolved, or 'none'>"
+--set=runbook_extraction="re-read vs the runbook; <complete, or what was added>"`
+(the engine REFUSES `presented` without the declarations; presenting re-binds the content hash and closes
+the round). `diagnose` should now be clean.
 
 ## 5. Land it
 The doc declares `Status: APPROVED` with a resolving ADR; the operator approves by merging the lane PR (the

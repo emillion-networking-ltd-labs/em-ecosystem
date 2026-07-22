@@ -24,4 +24,4 @@ jobs:
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
           EMKEEL_BRANCH: ${{ github.head_ref }}
           EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
-        run: python -m emkeel.jira
+        run: python -m emkeel.jira --status Done
