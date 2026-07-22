@@ -19,6 +19,9 @@ on:
 
 permissions:
   contents: read
+  pull-requests: read # dorny/paths-filter reads the PR's changed files via the API; without it the
+  # `changes` job dies with "Resource not accessible by integration" on lanes whose token is scoped
+  # down (e.g. the emkeel-maint lane), blocking every maintenance PR.
 
 env:
   NODE_VERSION: "22"
