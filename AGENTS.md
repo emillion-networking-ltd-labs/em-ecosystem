@@ -16,7 +16,27 @@ Analysis and action are different modes — don't slide from one into the other.
 - A clarification or a restated requirement is NOT approval to execute. When unsure whether "go" was given, ask — don't assume.
 - When the operator has already said to proceed ("do it", "go ahead"), act without re-asking.
 
+## The two layers (do not confuse them)
+- **The STRATEGY cycle** (`emkeel strategy`, `/strategy*`) decides DIRECTIONS: a researched doc with
+  decisions and a runbook of pieces, driven by the non-skippable engine. It creates no tickets — it
+  decides which tickets deserve to exist.
+- **The TICKET cycle** (`emkeel agree`, `/intake`, the agreement gates) governs how EVERY concrete
+  piece of work is born and lives: errand → agreement → ticket carrying it → gates → per-point close →
+  the operator's merge. A runbook piece enters here like any other errand.
+They feed each other and live in different files: strategy work touches `strategy.py`/its gates; ticket
+work touches `agree.py`/its gates. Extending one is not touching the other.
+
 ## Loop
+0. **Work that arrives as PROSE becomes an AGREEMENT before any ticket** (`emkeel agree`). Decompose the
+   operator's words into numbered points and — APART, lettered — what YOU are adding; `agree new` refuses
+   any shape that hides a line nobody approved, and `agree review` shows the operator THEIR text plus what
+   appears in no point. They approve/correct/strike point by point; `agree seal` closes it, and
+   `emkeel start --agreement <slug>` lands the sealed text in the ticket description, where Jira's clock
+   stamps it and the gates keep it verbatim. At close, every point ends done / impossible / ruled-deviated
+   (`emkeel agree close`) — pending blocks the merge, and a goal seals only when every point of every
+   ticket landed (`emkeel agree assign` / `seal-goal`). This is not ceremony: you cannot tell recalling a
+   requirement from inventing a plausible one, so the agreement has to exist outside you, sealed where you
+   cannot edit it.
 1. One branch per ticket: `feat/<KEY-123>-slug` for features; `fix/`, `chore/`, `docs/` otherwise.
    **Create the ticket FIRST, then branch from its key, then write the code** — that order is not advice:
    `check_ticket_precedes_work` FAILS a PR whose ticket was created AFTER the branch's first commit
