@@ -20,6 +20,7 @@ on:
 permissions:
   contents: read
   security-events: write
+  pull-requests: read # dorny/paths-filter reads the PR's changed files via the API (see test-build.yml)
 
 env:
   NODE_VERSION: "22"
