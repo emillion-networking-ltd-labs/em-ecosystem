@@ -26,6 +26,14 @@ strict_up_to_date = false
 # to be answered while it is still cheap. Empty = dormant.
 surfaces = []
 
+[release]
+# version_file: the file holding this repo's version (python `__version__`, a TOML `version =`, or
+# a package.json `"version"`). package_paths: what the artifact CONTAINS. With both declared, a PR
+# that changes the package must bump the version — asked in the PR, where the fix is one line.
+# Empty = dormant.
+version_file = ""
+package_paths = []
+
 [tests]
 # command: how to run THIS repo's suite. Empty = the distributed CI runs NO tests, so a regression
 # can merge green. Declared = it runs inside the required `gates` job. e.g. "npm test" | "pytest -q"
@@ -33,4 +41,4 @@ command = ""
 
 [emkeel]
 source = "emkeel~=0.1.0"
-generated_with = "0.1.139"   # informational: the Emkeel version that wrote this wiring
+generated_with = "0.1.169"   # informational: the Emkeel version that wrote this wiring

@@ -27,6 +27,39 @@ jobs:
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
         run: python -m emkeel.gates.check_ticket_link
+      - name: "Gate - agreement verbatim (the sealed words are the governing words)"
+        if: github.event_name == 'pull_request'
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref }}
+          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
+          # FAIL-CLOSED (ADR-0061): a ticket carrying an agreement in its description must show it intact
+          # (zero description edits since creation). No secrets / no Jira answer -> red, no escape hatch.
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+        run: python -m emkeel.gates.check_agreement_verbatim
+      - name: "Gate - agreement points closed (pending blocks the merge)"
+        if: github.event_name == 'pull_request'
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref }}
+          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
+          EMKEEL_BASE_REF: ${{ github.base_ref }}
+          # FAIL-CLOSED (ADR-0061). Every point of the sealed agreement closes as done / impossible /
+          # ruled-deviated in emkeel-governance/records/<KEY>.md -> pending blocks (D9).
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+        run: python -m emkeel.gates.check_agreement_points_closed
+
+      - name: "Gate - goal sealed honestly, and the last merge carries the goal"
+        if: github.event_name == 'pull_request'
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref }}
+          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+        run: python -m emkeel.gates.check_goal_sealed && python -m emkeel.gates.check_every_point_has_a_ticket
       - name: "Gate - ticket precedes work (ticket-first)"
         if: github.event_name == 'pull_request'
         env:
@@ -128,6 +161,24 @@ jobs:
           EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
           EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
         run: python -m emkeel.gates.check_adr_for_architecture
+      - name: "Gate - a changed decision reaches the runbook"
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
+          EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
+        run: python -m emkeel.gates.check_refinement_reaches_the_runbook
+      - name: "Gate - a runbook piece marked done actually resolves"
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
+          EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
+        run: python -m emkeel.gates.check_runbook_claims
+      - name: "Gate - a change to the package bumps the version"
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
+          EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
+        run: python -m emkeel.gates.check_version_bumped
       - name: "Gate - a spec names a ticket that exists"
         if: ${{ github.event_name == 'pull_request' }}
         env:
