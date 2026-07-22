@@ -72,7 +72,7 @@ jobs:
 
       - name: Install Playwright + Chromium
         working-directory: nexacore-dashboard
-        run: npx playwright install chromium --with-deps
+        run: npx playwright install chromium
 
       - name: Run structural probe against /login (public route)
         working-directory: nexacore-dashboard
