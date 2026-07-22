@@ -95,7 +95,7 @@ jobs:
       - name: Install Playwright + Chromium
         if: ${{ (github.event_name == 'pull_request' && steps.changes.outputs.dashboard == 'true') || (github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'dashboard' || inputs.package == 'both')) }}
         working-directory: nexacore-dashboard
-        run: npx playwright install chromium --with-deps
+        run: npx playwright install chromium
 
       # ----- BASELINE CAPTURE PATH (manual trigger) -----
       - name: Capture baseline from ${{ inputs.baseline_ref }}
@@ -136,7 +136,7 @@ jobs:
             nexacore-dashboard/src/context/AuthContext.tsx \
             nexacore-dashboard/tests/e2e/visual.spec.ts \
             nexacore-dashboard/tests/e2e/fixtures/
-          (cd nexacore-dashboard && npm ci && npx playwright install chromium --with-deps)
+          (cd nexacore-dashboard && npm ci && npx playwright install chromium)
           # ECO-36: dev + capture run WITHOUT the bypass so public auth pages render their
           # real forms (matching the PR-comparison run). Post-auth route tests auto-skip.
           (cd nexacore-dashboard && npm run dev &)
@@ -316,7 +316,7 @@ jobs:
       - name: Install Playwright + Chromium
         if: ${{ (github.event_name == 'pull_request' && needs.discover-satellites-vrt.outputs.changed == 'true') || github.event_name == 'workflow_dispatch' }}
         working-directory: ${{ matrix.satellite }}
-        run: npx playwright install chromium --with-deps
+        run: npx playwright install chromium
 
       - name: Capture baseline from ${{ inputs.baseline_ref }}
         if: github.event_name == 'workflow_dispatch' && inputs.capture_baseline && (inputs.package == 'satellite' || inputs.package == 'both')
@@ -340,7 +340,7 @@ jobs:
             ${{ matrix.satellite }}/tests/e2e/visual.spec.ts
           (cd ${{ matrix.satellite }} && npm ci)
           (cd ${{ matrix.satellite }} && npm install --no-save @playwright/test wait-on)
-          (cd ${{ matrix.satellite }} && npx playwright install chromium --with-deps)
+          (cd ${{ matrix.satellite }} && npx playwright install chromium)
           (cd ${{ matrix.satellite }} && npm run dev &)
           (cd ${{ matrix.satellite }} && npx wait-on ${{ steps.port.outputs.url }} -t 90000)
           (cd ${{ matrix.satellite }} && npx playwright test visual.spec.ts --update-snapshots --workers=1 --reporter=list)
