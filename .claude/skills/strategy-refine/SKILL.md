@@ -51,9 +51,11 @@ reports (a) every internal contradiction — including the doc prescribing what 
 (b) whether the runbook extracts EVERY step the strategy needs (`Implements` proves the 1:1, not
 sufficiency). Resolve what it found, then → `emkeel strategy present <topic>
 --set=coherence="re-read end-to-end; <found → resolved, or 'none'>"
---set=runbook_extraction="re-read vs the runbook; <complete, or what was added>"`
-(the engine REFUSES `presented` without the declarations; presenting re-binds the content hash and closes
-the round). `diagnose` should now be clean.
+--set=runbook_extraction="re-read vs the runbook; <complete, or what was added>"
+--set=naming="the file NAME (the slug) + the doc's writing LANGUAGE, confirmed canonical — ASCII/English name"`
+(the engine REFUSES `presented` without ALL THREE declarations — `naming` is the D6 checkpoint: a machine
+can't judge "is this name English?", so it forces the slug in front of the operator, who judges it at the
+merge; presenting re-binds the content hash and closes the round). `diagnose` should now be clean.
 
 ## 5. Land it
 The doc declares `Status: APPROVED` with a resolving ADR; the operator approves by merging the lane PR (the

@@ -60,7 +60,10 @@ work is done.
    so they provably speak about the exact doc and plan the operator sees. The engine forces the record;
    the OPERATOR judges it (the declarations are printed in the presentation).
 8. **Human gate — present with the declarations:**
-   `emkeel strategy present <topic> --set=coherence="re-read end-to-end; <contradiction between §N and §M → resolved, or 'none'>" --set=runbook_extraction="re-read vs the runbook; <complete, or what was added>"`
+   `emkeel strategy present <topic> --set=coherence="re-read end-to-end; <contradiction between §N and §M → resolved, or 'none'>" --set=runbook_extraction="re-read vs the runbook; <complete, or what was added>" --set=naming="the file NAME (the slug) + the doc's writing LANGUAGE, confirmed canonical — ASCII/English name"`
+   (`naming` is the D6 checkpoint: the engine REFUSES `presented` without it. A machine cannot judge "is this
+   name English?" — so it forces the slug IN FRONT of the operator, who judges it at the merge, exactly like
+   `coherence`. The presentation prints it.)
    This GENERATES a summary from the doc (goal, options, recommendation, reality outcome, your two
    re-read declarations) — so the presentation can't be hollow — prints the
    **APPROVE / REFINE / DISCARD** menu with the exact replies, and records `presented` (auto-binding a hash

@@ -2,6 +2,7 @@
 [jira]
 base_url = "https://emillionnetworking-ltd-labs.atlassian.net"
 project_key = "ECO"
+board = ""
 
 [github]
 repo = "emillion-networking-ltd-labs/em-ecosystem"
@@ -41,4 +42,4 @@ command = ""
 
 [emkeel]
 source = "emkeel~=0.1.0"
-generated_with = "0.1.172"   # informational: the Emkeel version that wrote this wiring
+generated_with = "0.1.199"   # informational: the Emkeel version that wrote this wiring

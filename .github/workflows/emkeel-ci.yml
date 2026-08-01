@@ -51,6 +51,18 @@ jobs:
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
         run: python -m emkeel.gates.check_agreement_points_closed
 
+      - name: "Gate - the spec covers the agreement (forward-coverage)"
+        if: github.event_name == 'pull_request'
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref }}
+          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
+          # FAIL-CLOSED (ADR-0061). Every non-delegated agreement point must be cited by a spec criterion
+          # via (#n); a point that falls off the spec blocks. Grandfathered temporally.
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+        run: python -m emkeel.gates.check_spec_covers_agreement
+
       - name: "Gate - goal sealed honestly, and the last merge carries the goal"
         if: github.event_name == 'pull_request'
         env:
@@ -173,6 +185,15 @@ jobs:
           EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
           EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
         run: python -m emkeel.gates.check_runbook_claims
+      - name: "Gate - a runbook piece marked done carries the ticket-discipline (agreement + back-link)"
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
+          EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+        run: python -m emkeel.gates.check_piece_ticket_discipline
       - name: "Gate - a change to the package bumps the version"
         if: ${{ github.event_name == 'pull_request' }}
         env:
