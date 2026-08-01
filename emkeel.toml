@@ -19,7 +19,7 @@ required_approvals = 0
 # default branch and merge with red checks. strict_up_to_date: must a PR be current with the base
 # before merging? Both are RECONCILED by `emkeel update` — set them here, never in the GitHub UI.
 enforce_admins = true
-strict_up_to_date = false
+strict_up_to_date = true
 
 [architecture]
 # surfaces: paths (globs) whose change must be ANSWERED — an ADR in the PR, or `no-adr: <why>` in a
@@ -42,4 +42,4 @@ command = ""
 
 [emkeel]
 source = "emkeel~=0.1.0"
-generated_with = "0.1.204"   # informational: the Emkeel version that wrote this wiring
+generated_with = "0.1.205"   # informational: the Emkeel version that wrote this wiring
