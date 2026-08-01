@@ -18,7 +18,7 @@ required_approvals = 0
 # enforce_admins: do the rules apply to admins too? false = an admin can push straight to the
 # default branch and merge with red checks. strict_up_to_date: must a PR be current with the base
 # before merging? Both are RECONCILED by `emkeel update` — set them here, never in the GitHub UI.
-enforce_admins = false
+enforce_admins = true
 strict_up_to_date = false
 
 [architecture]
@@ -42,4 +42,4 @@ command = ""
 
 [emkeel]
 source = "emkeel~=0.1.0"
-generated_with = "0.1.199"   # informational: the Emkeel version that wrote this wiring
+generated_with = "0.1.204"   # informational: the Emkeel version that wrote this wiring
