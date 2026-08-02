@@ -20,7 +20,9 @@ critique/presented hash (edited after critiquing), and a heuristic scan for OPEN
 that is your work-list.
 
 ## 2. Open a governed round
-Touching a landed strategy needs a ticket + lane (`emkeel start`), then open the round as your FIRST act:
+Touching a landed strategy needs a ticket on a dedicated `strategy/<KEY>-slug` lane — `check_strategy_change`
+REQUIRES that prefix (not `feat/fix`, so `emkeel start` won't make it): create the ticket (`emkeel jira create`)
+and branch from its key (`git checkout -b strategy/<KEY>-slug`). Then open the round as your FIRST act:
 `emkeel strategy refine <topic> --set=reason="consolidate: <what the diagnosis found>"`. An open round is
 NOT mergeable — you don't leave until it converges.
 
