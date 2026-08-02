@@ -13,6 +13,15 @@ execute effects (no ticket, no branch, no code, no PR) and, if asked to build, y
    memory or context (the agent that built this mechanism once typed a note from memory and dropped the
    operator's strongest argument — the gate went green against the abridgement). If text arrived glued to
    the invocation, tolerate it as the note.
+   **For a DEBATE, you MAY draft the note (D6) — a CONSCIOUS tradeoff the operator owns.** When the agreement
+   emerged from a back-and-forth with no single note to paste, you may DRAFT it by QUOTING the operator's actual
+   words from the conversation into `## Source` (never paraphrase — you hold the transcript), your own reading
+   APART in `## Enrichment` (lettered, strikeable), presented EXPLICITLY as a draft, and SEALED only after the
+   operator's point-by-point verdicts. Be HONEST about the residual, never safe-wash it: quoting defends the
+   FIDELITY of what you quote and the `## Source`/`## Enrichment` split surfaces what you ADDED — but NEITHER
+   makes an OMISSION visible. A dropped argument is text you never quoted; only the operator remembering it
+   catches it — the same residual that produced the original incident. So the operator must verify COMPLETENESS,
+   not only spin; that weight is theirs, consciously accepted for the convenience of not re-pasting a whole debate.
 2. **The note enters VERBATIM.** Save it exactly as received and run the cycle:
    - `emkeel agree new <slug>` with the note as `## Source` (fenced, verbatim), your decomposition as
      numbered `## Points` (the operator's words), and what YOU add — assumptions, technical detail — as

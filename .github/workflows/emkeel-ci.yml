@@ -173,6 +173,18 @@ jobs:
           EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
           EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
         run: python -m emkeel.gates.check_adr_for_architecture
+      - name: "Gate - a code-shipping ticket carries an agreement or a declared no-agreement"
+        if: ${{ github.event_name == 'pull_request' }}
+        env:
+          EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
+          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
+          EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
+          # FAIL-CLOSED (ADR-0061): the agreement lives on Jira. The exemption path (no-agreement:) is
+          # Jira-free and checked first, so a legit agent fix passes without credentials.
+          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
+          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
+          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
+        run: python -m emkeel.gates.check_ticket_agreed_or_exempt
       - name: "Gate - a changed decision reaches the runbook"
         if: ${{ github.event_name == 'pull_request' }}
         env:
