@@ -52,6 +52,12 @@ work touches `agree.py`/its gates. Extending one is not touching the other.
    or leave it in the backlog. The decision is not optional: `check_ticket_placed` BLOCKS the merge while a
    sprint-project ticket is still undecided. Decide it with `emkeel jira place <KEY> --sprint active|backlog|<id>`
    (it clears the pending flag), or place it in Jira. (`emkeel doctor` lists tickets still awaiting a decision.)
+   **Whatever the birth — /intake, a runbook piece, or a normal CONVERSATION — a ticket whose PR ships code
+   (the repo's `package_paths`) must carry an agreement OR a declared exemption.** `check_ticket_agreed_or_exempt`
+   requires a `## Points` agreement OR a `no-agreement: <why>` commit line and points to BOTH remedies. The two
+   paths are CO-EQUAL: run /intake when the work is an errand (a debate may prompt it — the operator supplies the
+   words, you draft), or declare `no-agreement: <why>` when it is legit agent-initiated work with no errand. The
+   gate never infers which — you declare, and the operator judges the surfaced reason at the merge.
 2. For `feat/` tickets: write `emkeel-governance/specs/<KEY>.md` with an "Acceptance Criteria" section.
 3. Every bug fix starts with a failing test (permanent regression guard).
 4. Open a PR. Merge requires: CI green + a linked ticket, and YOUR approval.
