@@ -53,36 +53,40 @@
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-07-18T16:47:39Z",
+      "timestamp": "2026-08-02T14:45:06Z",
       "lens_source": "Fuentes bien fundadas; unico drift: CISQ ASCMM es CWE-1130 no el superset 1128 (corregido). Bulk-suppressions, jscpd exitCode, exhaustive-deps y changed_files confirmados abriendo cada fuente.",
-      "lens_calibration": "Topologia recortada a 2 puntos self-contained en em-ecosystem (retirado el paso Verify de em-development-framework, fuera del scope de /eco-engineer). El motor del gate ya existe (>=0.1.111), asi que construir = declarar checks, no motor.",
+      "lens_calibration": "Topologia 2 puntos self-contained en em-ecosystem; el motor del gate ya existe (>=0.1.111), construir = declarar checks en code-health.toml, no motor.",
       "lens_falsepositive": "jscpd-gate-duro dispararia el kill-criterion 1: dup relacional (dos sitios), el ratchet solo-lo-nuevo no mapea, un PR que toca V1 y V2 resurface el clon. Corregido: dup a advisory.",
       "lens_cost": "La recomendacion subestima el TCO (Opcion 1 = seis piezas a mantener mas tres a construir mas coste IA por PR mas setup de baselines) y descarto Sonar por gobernanza no por coste. Corregido: kill-criterion 2 es decision del operador con cifras.",
       "lens_completeness": "Se cerraron 2 huecos reales que la ronda anterior dejo: (1) 'duplicacion=ADVISORY' era decision sin pieza -> ahora P8 (report + exclusiones V1/V2); (2) el recompute de baselines desde main MERGEADO no tenia dueno -> ahora P9.",
-      "completeness": "none \u2014 los parametros de ejecucion (orden de dimensiones, umbrales, forma del revisor, alcance del auto-fix) salieron de la Recommendation a Non-goals, que es su sitio; no son decisiones abiertas.",
+      "completeness": "none \u2014 parametros de ejecucion (orden/umbrales, forma del revisor, alcance auto-fix) en Non-goals, no decisiones abiertas en Recommendation.",
       "lens_discovery": "N/A \u2014 estrategia interna de enforcement, sin dimension de descubrimiento/SEO.",
-      "lens_legal": "Licencias OK: eslint-plugin-sonarjs LGPL-3.0 (dev-only, no taintea producto), stylelint/knip/dependency-cruiser MIT. Sin bloqueo.",
+      "lens_legal": "Licencias OK: eslint-plugin-sonarjs LGPL-3.0 (dev-only), stylelint/knip/dependency-cruiser MIT.",
       "content_hash": "95fa337829fcfab6363f90530d6a2516e8c4b37238f995053f300b8ced442c28",
-      "lens_coverage": "Cruce decision->pieza VERIFICADO (lo que fallo en la ronda anterior): D1->P1,P2 \u00b7 D2->P5 \u00b7 D3->P3 \u00b7 D4->P4 \u00b7 D5->P6 \u00b7 D6->P1,P9 \u00b7 D7->P1,P7 \u00b7 D8->P8 \u00b7 D9->P10 \u00b7 D10->P11 \u00b7 D11->P12. Las 11 decisiones tienen constructor y el gate lo verifica en ambas direcciones.",
-      "lens_coherence": "Resuelta la contradiccion interna: el doc decia ratchet via 'bulk-suppressions + betterer', pero check_code_health YA hace ese ratchet (conteo vs baseline) -> betterer queda superseded y declarado fuera de alcance."
+      "lens_coverage": "Trazabilidad D1..D11 -> pieza verificada bidireccional por el gate (toda decision tiene constructor, toda cita existe).",
+      "lens_coherence": "Relectura end-to-end: SIN contradicciones duras. La unica real (betterer vs gate-ratchet) ya se resolvio en la ronda previa (D6: betterer superseded; runbook lo lista fuera de alcance). Nota menor: refinamiento #3 cita Claude Code Action como EJEMPLO de coste, no decision \u2014 D9 difiere la forma del revisor correctamente, sin choque.",
+      "lens_abandon": "Ninguna abandon-condition es cierta: la estrategia NO se ha implementado aun, asi que falsos-positivos/falsa-economia/bypass-por-diff/ratchet-no-converge no pueden haberse manifestado. Refinar, no abandonar."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-07-18T16:47:54Z",
+      "timestamp": "2026-08-02T14:45:28Z",
       "check_passed": true
     },
     "validated": {
       "done": true,
-      "timestamp": "2026-07-18T16:48:06Z",
-      "case": "gate check_code_health (emkeel 0.1.139) sin code-health.toml en em-ecosystem \u2014 el arranque incremental que la pieza 1 asume",
-      "method": "correr 'python -m emkeel.gates.check_code_health' en la raiz del repo, sin code-health.toml presente",
+      "timestamp": "2026-08-02T14:45:28Z",
+      "case": "gate check_code_health (emkeel 0.1.212) sin code-health.toml en em-ecosystem",
+      "method": "correr 'python -m emkeel.gates.check_code_health' en la raiz sin code-health.toml",
       "outcome": "pass",
       "evidence_ref": "emkeel-governance/strategy/code-health.runbook.md:13"
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-07-18T16:48:13Z",
+      "timestamp": "2026-08-02T14:45:49Z",
       "presented_to": "operador",
+      "coherence": "Relectura end-to-end del doc + ADR-034 + runbook: SIN contradicciones. La unica real (betterer vs el ratchet que ya da check_code_health) se resolvio en la ronda previa -> D6 declara betterer superseded y el runbook lo lista fuera de alcance. Redundancia menor (D11 y el parrafo 'Metrica de eficacia' describen la misma metrica) pero no es contradiccion. Coherente.",
+      "runbook_extraction": "Verificado estrategia->runbook: cada decision D1..D11 tiene >=1 pieza que la construye (D1->P1,P2 D2->P5 D3->P3 D4->P4 D5->P6 D6->P1,P9 D7->P1,P7 D8->P8 D9->P10 D10->P11 D11->P12), y el gate lo confirma bidireccional. Ningun paso necesario de la Recommendation quedo sin pieza.",
+      "naming": "Fichero 'code-health.md' -> slug ASCII/ingles, canonico OK. El doc esta redactado en ESPANOL: legitimo para gobernanza (D1/Non-goals excluyen emkeel-governance/ del gate de idioma), pero se surface para tu juicio en el merge.",
       "content_hash": "95fa337829fcfab6363f90530d6a2516e8c4b37238f995053f300b8ced442c28",
       "runbook_hash": "31b6f39d90b46702a0f1efce89f971a553222398859da72e7add19ee2a83a890",
       "refinement_open": false
