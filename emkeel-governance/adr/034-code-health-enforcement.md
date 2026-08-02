@@ -22,7 +22,7 @@ PROCESO (ninguno de code-health); el ratchet existe solo en el DS. Revisar cada 
 
 ## Decisión
 
-**Modelo de dos naturalezas + topología de tres puntos + ratchet, con la línea gate-vs-review como invariante.**
+**Modelo de dos naturalezas + topología de DOS puntos (self-contained en em-ecosystem) + ratchet, con la línea gate-vs-review como invariante.**
 
 1. **Gate-duro para lo MECÁNICO, review para el JUICIO.** Lo mecánico es un catálogo FINITO y automatizable (CISQ
    ASCMM = mantenibilidad, CWE-1130): complejidad, tamaño, dead-code, fronteras/ciclos, idioma, dead-props de CSS.
@@ -35,9 +35,11 @@ PROCESO (ninguno de code-health); el ratchet existe solo en el DS. Revisar cada 
    **La DUPLICACIÓN es ADVISORY, no gate duro** — es relacional (dos sitios), el ratchet "solo lo nuevo" no le
    mapea, y gatearla bloquearía coexistencia intencional (auth V1/V2).
 
-3. **Ratchet "solo lo que tocas" (sin big-bang):** ESLint bulk-suppressions (nativo) + `betterer` para lo no-ESLint,
-   doctrina de `_ratchet.mjs` — la deuda legacy solo decrece; el baseline se **recomputa desde `main` MERGEADO**,
-   nunca lo escribe un actor anticipado.
+3. **Ratchet "solo lo que tocas" (sin big-bang):** el ratchet lo provee el gate **`check_code_health`** (compara el
+   conteo de cada check contra su baseline en `code-health.toml`); las ESLint bulk-suppressions siguen siendo útiles
+   DENTRO de ESLint. **`betterer` queda SUPERSEDED** — el gate ya hace de máquina de baselines (doctrina de
+   `_ratchet.mjs`), no hace falta una segunda. La deuda legacy solo decrece; el baseline se **recomputa desde `main`
+   MERGEADO**, nunca lo escribe un actor anticipado.
 
 4. **Topología de 2 puntos, SELF-CONTAINED en em-ecosystem, una config compartida (`code-health.toml`):** hook local
    (feedback proactivo por-diff) → **gate required de emkeel** (`check_code_health`, backstop no-bypasseable, hereda

@@ -82,11 +82,11 @@
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-08-02T14:45:49Z",
+      "timestamp": "2026-08-02T16:52:47Z",
       "presented_to": "operador",
-      "coherence": "Relectura end-to-end del doc + ADR-034 + runbook: SIN contradicciones. La unica real (betterer vs el ratchet que ya da check_code_health) se resolvio en la ronda previa -> D6 declara betterer superseded y el runbook lo lista fuera de alcance. Redundancia menor (D11 y el parrafo 'Metrica de eficacia' describen la misma metrica) pero no es contradiccion. Coherente.",
-      "runbook_extraction": "Verificado estrategia->runbook: cada decision D1..D11 tiene >=1 pieza que la construye (D1->P1,P2 D2->P5 D3->P3 D4->P4 D5->P6 D6->P1,P9 D7->P1,P7 D8->P8 D9->P10 D10->P11 D11->P12), y el gate lo confirma bidireccional. Ningun paso necesario de la Recommendation quedo sin pieza.",
-      "naming": "Fichero 'code-health.md' -> slug ASCII/ingles, canonico OK. El doc esta redactado en ESPANOL: legitimo para gobernanza (D1/Non-goals excluyen emkeel-governance/ del gate de idioma), pero se surface para tu juicio en el merge.",
+      "coherence": "Relectura E2E (doc + ADR-034 + runbook). ENCONTRADAS 2 contradicciones, ambas en el ADR (doc y runbook eran coherentes entre si), y RESUELTAS: (1) la cabecera de la Decision decia 'topologia de TRES puntos' contra \u00a74 '2 puntos' -> corregida a DOS; (2) \u00a73 aun prescribia 'betterer para lo no-ESLint' contra D6 'betterer superseded, el ratchet lo da check_code_health' -> \u00a73 alineado con D6. Post-fix: los 3 artefactos coherentes. (Mi declaracion previa decia 'ninguna' - fue un sello apresurado; el operador pidio re-revisar y aparecieron.)",
+      "runbook_extraction": "Verificado estrategia->runbook: cada decision D1..D11 tiene >=1 pieza (D1->P1,P2 D2->P5 D3->P3 D4->P4 D5->P6 D6->P1,P9 D7->P1,P7 D8->P8 D9->P10 D10->P11 D11->P12), bidireccional por el gate. Ningun paso necesario sin pieza.",
+      "naming": "Fichero 'code-health.md' -> slug ASCII/ingles OK. Doc en espanol: legitimo para gobernanza (excluida del gate de idioma), surface para juicio humano.",
       "content_hash": "95fa337829fcfab6363f90530d6a2516e8c4b37238f995053f300b8ced442c28",
       "runbook_hash": "31b6f39d90b46702a0f1efce89f971a553222398859da72e7add19ee2a83a890",
       "refinement_open": false
