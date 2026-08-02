@@ -53,41 +53,41 @@
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-08-02T14:45:06Z",
+      "timestamp": "2026-08-02T18:16:05Z",
       "lens_source": "Fuentes bien fundadas; unico drift: CISQ ASCMM es CWE-1130 no el superset 1128 (corregido). Bulk-suppressions, jscpd exitCode, exhaustive-deps y changed_files confirmados abriendo cada fuente.",
-      "lens_calibration": "Topologia 2 puntos self-contained en em-ecosystem; el motor del gate ya existe (>=0.1.111), construir = declarar checks en code-health.toml, no motor.",
+      "lens_calibration": "El doc ahora calibra con la realidad: check_code_health YA existe (no 'nuevo'), el ratchet-enforcement lo provee ese gate, topologia 2 puntos self-contained. El fundamento (Context L17/L20 + Opcion 1) estaba stale y contradecia las decisiones; reconciliado.",
       "lens_falsepositive": "jscpd-gate-duro dispararia el kill-criterion 1: dup relacional (dos sitios), el ratchet solo-lo-nuevo no mapea, un PR que toca V1 y V2 resurface el clon. Corregido: dup a advisory.",
       "lens_cost": "La recomendacion subestima el TCO (Opcion 1 = seis piezas a mantener mas tres a construir mas coste IA por PR mas setup de baselines) y descarto Sonar por gobernanza no por coste. Corregido: kill-criterion 2 es decision del operador con cifras.",
-      "lens_completeness": "Se cerraron 2 huecos reales que la ronda anterior dejo: (1) 'duplicacion=ADVISORY' era decision sin pieza -> ahora P8 (report + exclusiones V1/V2); (2) el recompute de baselines desde main MERGEADO no tenia dueno -> ahora P9.",
-      "completeness": "none \u2014 parametros de ejecucion (orden/umbrales, forma del revisor, alcance auto-fix) en Non-goals, no decisiones abiertas en Recommendation.",
-      "lens_discovery": "N/A \u2014 estrategia interna de enforcement, sin dimension de descubrimiento/SEO.",
-      "lens_legal": "Licencias OK: eslint-plugin-sonarjs LGPL-3.0 (dev-only), stylelint/knip/dependency-cruiser MIT.",
-      "content_hash": "95fa337829fcfab6363f90530d6a2516e8c4b37238f995053f300b8ced442c28",
+      "lens_completeness": "Runbook 1:1 intacto (D1..D11 cada uno con >=1 pieza; toda cita Dn existe). Ningun paso dropeado por el saneamiento.",
+      "completeness": "El hueco que cerro este refine: incoherencia Context<->Decisiones (que el gate estructural NO caza) + scope-leak a em-df. Ambos resueltos; nada mas pendiente.",
+      "lens_discovery": "Cero referencias VIVAS a em-development-framework en los 3 artefactos (revisor independiente lo confirmo, VERDICT CLEAN); unica mencion = changelog historico del ADR. Topologia 2 puntos coherente en todo el doc.",
+      "lens_legal": "Sin implicacion legal (doc de gobernanza); separacion de concerns respetada \u2014 la estrategia de este repo ya no razona sobre otro repo.",
+      "content_hash": "ab3a72803c21327ba4127232caee5c89ab3c98badff63c734f83a81e39520979",
       "lens_coverage": "Trazabilidad D1..D11 -> pieza verificada bidireccional por el gate (toda decision tiene constructor, toda cita existe).",
       "lens_coherence": "Relectura end-to-end: SIN contradicciones duras. La unica real (betterer vs gate-ratchet) ya se resolvio en la ronda previa (D6: betterer superseded; runbook lo lista fuera de alcance). Nota menor: refinamiento #3 cita Claude Code Action como EJEMPLO de coste, no decision \u2014 D9 difiere la forma del revisor correctamente, sin choque.",
       "lens_abandon": "Ninguna abandon-condition es cierta: la estrategia NO se ha implementado aun, asi que falsos-positivos/falsa-economia/bypass-por-diff/ratchet-no-converge no pueden haberse manifestado. Refinar, no abandonar."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-08-02T14:45:28Z",
+      "timestamp": "2026-08-02T18:16:30Z",
       "check_passed": true
     },
     "validated": {
       "done": true,
-      "timestamp": "2026-08-02T14:45:28Z",
-      "case": "gate check_code_health (emkeel 0.1.212) sin code-health.toml en em-ecosystem",
-      "method": "correr 'python -m emkeel.gates.check_code_health' en la raiz sin code-health.toml",
+      "timestamp": "2026-08-02T18:16:30Z",
+      "case": "Re-lectura del doc reconciliado contra el repo real (el 'caso' del saneamiento = las afirmaciones del fundamento ahora son verdaderas).",
+      "method": "grep de referencias em-df en los 3 artefactos (0 vivas) + revisor independiente cold-read (VERDICT CLEAN) + verificado que check_code_health corre DORMIDO en CI (job 'Gate - code-health ratchet' verde en #629).",
       "outcome": "pass",
-      "evidence_ref": "emkeel-governance/strategy/code-health.runbook.md:13"
+      "evidence_ref": "https://github.com/emillion-networking-ltd-labs/em-ecosystem/actions/runs/30757844896/job/91523448786"
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-08-02T16:52:47Z",
+      "timestamp": "2026-08-02T18:16:57Z",
       "presented_to": "operador",
-      "coherence": "Relectura E2E (doc + ADR-034 + runbook). ENCONTRADAS 2 contradicciones, ambas en el ADR (doc y runbook eran coherentes entre si), y RESUELTAS: (1) la cabecera de la Decision decia 'topologia de TRES puntos' contra \u00a74 '2 puntos' -> corregida a DOS; (2) \u00a73 aun prescribia 'betterer para lo no-ESLint' contra D6 'betterer superseded, el ratchet lo da check_code_health' -> \u00a73 alineado con D6. Post-fix: los 3 artefactos coherentes. (Mi declaracion previa decia 'ninguna' - fue un sello apresurado; el operador pidio re-revisar y aparecieron.)",
-      "runbook_extraction": "Verificado estrategia->runbook: cada decision D1..D11 tiene >=1 pieza (D1->P1,P2 D2->P5 D3->P3 D4->P4 D5->P6 D6->P1,P9 D7->P1,P7 D8->P8 D9->P10 D10->P11 D11->P12), bidireccional por el gate. Ningun paso necesario sin pieza.",
-      "naming": "Fichero 'code-health.md' -> slug ASCII/ingles OK. Doc en espanol: legitimo para gobernanza (excluida del gate de idioma), surface para juicio humano.",
-      "content_hash": "95fa337829fcfab6363f90530d6a2516e8c4b37238f995053f300b8ced442c28",
+      "coherence": "Re-lectura E2E por revisor INDEPENDIENTE (subagente fresco, no quien edito). Encontro 4 issues: 2 BLOCKER (clausula 'Espejo de Enrich' \u2014paso de ciclo de vida de em-df usado como analogia VIVA\u2014 en D7 del strategy y \u00a74 del ADR; la 2a ademas contradecia la enmienda que dice 'em-df eliminado') + 2 MINOR (ADR citaba 'pieza 8/9' obsoletas -> 10/11; el strategy no registraba procedencia ECO-227). Los 4 RESUELTOS y re-verificados: VERDICT CLEAN. Unica mencion residual de em-df = changelog historico del ADR (deliberado).",
+      "runbook_extraction": "Re-leido vs runbook: 1:1 intacto \u2014 D1..D11 cada uno con >=1 pieza, toda cita Dn existe (confirmado por el revisor independiente). El runbook solo se edito para quitar el bullet 'em-development-framework' de Fuera-de-alcance; ningun paso dropeado.",
+      "naming": "Slug 'code-health' ASCII/ingles OK. Doc en espanol: legitimo (gobernanza, excluida del gate de idioma). SURFACE para el merge: la unica mencion de em-df que queda es el changelog ECO-227 del ADR (registro historico del scrub); si se quiere 100% purgada, reformular sin nombrarlo.",
+      "content_hash": "ab3a72803c21327ba4127232caee5c89ab3c98badff63c734f83a81e39520979",
       "runbook_hash": "31b6f39d90b46702a0f1efce89f971a553222398859da72e7add19ee2a83a890",
       "refinement_open": false
     }

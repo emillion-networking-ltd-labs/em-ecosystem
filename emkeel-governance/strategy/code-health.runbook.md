@@ -31,4 +31,3 @@ Strategy: code-health   <!-- the strategy this runbook implements -->
 - **SEGURIDAD y TESTS** — ya tienen sus gates (Security Pipeline; gates de tests). Un SAST profundo (Semgrep/CodeQL) sería su propia estrategia.
 - **Sonar** — descartado (ver Decisions de la estrategia): stack libre in-house; `eslint-plugin-sonarjs` da la paridad de reglas gratis.
 - **`betterer`** — superseded: el ratchet lo provee `check_code_health` (conteo vs baseline), no hace falta una segunda máquina de baselines.
-- **`em-development-framework`** — su paso Verify quedó FUERA de la topología (self-contained en em-ecosystem).
