@@ -36,11 +36,12 @@ PROCESO (ninguno de code-health); el ratchet existe solo en el DS. Revisar cada 
    **La DUPLICACIÓN es ADVISORY, no gate duro** — es relacional (dos sitios), el ratchet "solo lo nuevo" no le
    mapea, y gatearla bloquearía coexistencia intencional (auth V1/V2).
 
-3. **Ratchet "solo lo que tocas" (sin big-bang):** el ratchet lo provee el gate **`check_code_health`** (compara el
-   conteo de cada check contra su baseline en `code-health.toml`); las ESLint bulk-suppressions siguen siendo útiles
-   DENTRO de ESLint. **`betterer` queda SUPERSEDED** — el gate ya hace de máquina de baselines (doctrina de
-   `_ratchet.mjs`), no hace falta una segunda. La deuda legacy solo decrece; el baseline se **recomputa desde `main`
-   MERGEADO**, nunca lo escribe un actor anticipado.
+3. **Ratchet "solo lo que tocas" (sin big-bang):** el ratchet completo son **DOS mitades** — el gate
+   **`check_code_health`** (enforcement: compara el conteo de cada check contra el baseline COMMITTED en
+   `code-health.toml`, NO recomputa) + el **recompute del baseline desde `main` MERGEADO** (doctrina de
+   `_ratchet.mjs`, pieza aparte del runbook). **Juntas superan a `betterer`** (que hacía AMBAS: enforce +
+   mantener el baseline), así que ya no hace falta; las ESLint bulk-suppressions siguen siendo útiles DENTRO de
+   ESLint. La deuda legacy solo decrece; el baseline lo recomputa el merge, nunca lo escribe un actor anticipado.
 
 4. **Topología de 2 puntos, SELF-CONTAINED en em-ecosystem, una config compartida (`code-health.toml`):** hook local
    (feedback proactivo por-diff) → **gate required de emkeel** (`check_code_health`, backstop no-bypasseable, hereda
