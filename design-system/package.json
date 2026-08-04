@@ -46,6 +46,7 @@
     "vitest": "^4.1.9"
   },
   "overrides": {
-    "@swc/helpers": "0.5.15"
+    "@swc/helpers": "0.5.15",
+    "postcss": "^8.5.23"
   }
 }
