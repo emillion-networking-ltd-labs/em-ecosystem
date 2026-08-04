@@ -111,6 +111,7 @@ biblioteca enlazada, no a nuestro código):
 | `lightningcss` | MPL-2.0 | Transformador CSS de Vite/Tailwind v4; dev/build, sin modificar. | https://github.com/parcel-bundler/lightningcss/blob/master/LICENSE |
 | `lightningcss-linux-x64-gnu` · `-musl` | MPL-2.0 | Binarios nativos de `lightningcss` (linux-x64 glibc/musl). | https://github.com/parcel-bundler/lightningcss/blob/master/LICENSE |
 | `@img/sharp-libvips-linux-x64` · `-linuxmusl-x64` | LGPL-3.0-or-later | libvips de `sharp` (optimización de imágenes de next), enlazado dinámicamente, sin modificar (binarios linux-x64 glibc/musl). | https://github.com/lovell/sharp-libvips/blob/main/LICENSE |
+| `@img/sharp-wasm32` | Apache-2.0 AND LGPL-3.0-or-later AND MIT | Variante WASM de `sharp` (opcional, misma familia libvips; llegó con el bump sharp≥0.35 por CVE-2026-33327 et al.). Dev/build, sin modificar; el runner Linux usa el binario nativo, no el WASM. | https://github.com/lovell/sharp/blob/main/LICENSE |
 
 > La línea verde de **DISTRIBUCIÓN** sigue intacta: `npm run lic:check` (root, target de distribución) y los
 > satélites NO permiten copyleft. El `--allow` aquí es exclusivo del árbol de **tooling** del catálogo.

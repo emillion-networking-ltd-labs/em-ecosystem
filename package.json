@@ -11,7 +11,7 @@
     "test:dashboard": "cd nexacore-dashboard && npm test",
     "dup:check": "jscpd --config .jscpd.json",
     "lic:check": "node scripts/check-licenses.mjs",
-    "lic:check:ds": "node scripts/check-licenses.mjs design-system --allow axe-core --allow lightningcss --allow lightningcss-linux-x64-gnu --allow lightningcss-linux-x64-musl --allow @img/sharp-libvips-linux-x64 --allow @img/sharp-libvips-linuxmusl-x64",
+    "lic:check:ds": "node scripts/check-licenses.mjs design-system --allow axe-core --allow lightningcss --allow lightningcss-linux-x64-gnu --allow lightningcss-linux-x64-musl --allow @img/sharp-libvips-linux-x64 --allow @img/sharp-libvips-linuxmusl-x64 --allow @img/sharp-wasm32",
     "sb:build": "cd design-system && npm run build-storybook",
     "sb:coverage": "cd design-system && npm run coverage",
     "sb:test": "cd design-system && npm run test-storybook"
