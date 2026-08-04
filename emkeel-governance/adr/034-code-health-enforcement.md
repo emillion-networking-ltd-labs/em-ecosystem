@@ -5,7 +5,8 @@
 - Ticket: [ECO-212](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-212) (este ADR) — registra la estrategia [ECO-211](https://emillionnetworking-ltd-labs.atlassian.net/browse/ECO-211)
 - Strategy: code-health
 - Deciders: Operador (human gate = aprobación + merge del PR de estrategia #608)
-- Enmienda (ECO-224, 2026-07-16): consolidación del refinamiento — topología recortada a **2 puntos** (retira el paso Verify de `em-development-framework`, fuera del scope de em-ecosystem); **Sonar = NO** registrado; contradicciones internas resueltas (§5 eco-reviewer y §6 auto-fix: separado lo DECIDIDO de lo DIFERIDO).
+- Enmienda (ECO-224, 2026-07-16): consolidación del refinamiento — topología recortada a **2 puntos** (hook local + gate `check_code_health`, self-contained en em-ecosystem); **Sonar = NO** registrado; contradicciones internas resueltas (§5 eco-reviewer y §6 auto-fix: separado lo DECIDIDO de lo DIFERIDO).
+- Enmienda (ECO-227, 2026-08-02): saneamiento — reconciliada la capa de fundamento (Context/Opciones) con las decisiones y eliminadas las referencias a `em-development-framework`; la topología se describe en positivo (hook local + `check_code_health`, self-contained). La decisión (2 puntos) no cambia.
 - Contexto de gobierno: registra la decisión de la estrategia `code-health` (ECO-211, aprobada por merge de #608).
   **Generaliza a toda la flota** el patrón que el design-system ya probó por-pieza — gate por invariante + `_ratchet.mjs`
   (familia de gates de ADR-031, calidad de construcción de ADR-029, DoD por-ítem de `check-piece-complete`). No
@@ -35,18 +36,18 @@ PROCESO (ninguno de code-health); el ratchet existe solo en el DS. Revisar cada 
    **La DUPLICACIÓN es ADVISORY, no gate duro** — es relacional (dos sitios), el ratchet "solo lo nuevo" no le
    mapea, y gatearla bloquearía coexistencia intencional (auth V1/V2).
 
-3. **Ratchet "solo lo que tocas" (sin big-bang):** el ratchet lo provee el gate **`check_code_health`** (compara el
-   conteo de cada check contra su baseline en `code-health.toml`); las ESLint bulk-suppressions siguen siendo útiles
-   DENTRO de ESLint. **`betterer` queda SUPERSEDED** — el gate ya hace de máquina de baselines (doctrina de
-   `_ratchet.mjs`), no hace falta una segunda. La deuda legacy solo decrece; el baseline se **recomputa desde `main`
-   MERGEADO**, nunca lo escribe un actor anticipado.
+3. **Ratchet "solo lo que tocas" (sin big-bang):** el ratchet completo son **DOS mitades** — el gate
+   **`check_code_health`** (enforcement: compara el conteo de cada check contra el baseline COMMITTED en
+   `code-health.toml`, NO recomputa) + el **recompute del baseline desde `main` MERGEADO** (doctrina de
+   `_ratchet.mjs`, pieza aparte del runbook). **Juntas superan a `betterer`** (que hacía AMBAS: enforce +
+   mantener el baseline), así que ya no hace falta; las ESLint bulk-suppressions siguen siendo útiles DENTRO de
+   ESLint. La deuda legacy solo decrece; el baseline lo recomputa el merge, nunca lo escribe un actor anticipado.
 
 4. **Topología de 2 puntos, SELF-CONTAINED en em-ecosystem, una config compartida (`code-health.toml`):** hook local
    (feedback proactivo por-diff) → **gate required de emkeel** (`check_code_health`, backstop no-bypasseable, hereda
-   branch-protection + `doctor`). **Se RETIRA el paso Verify del motor `em-development-framework`** — está fuera del
-   scope de este repo (/eco-engineer no sale de em-ecosystem) y el hook local ya cubre el rol proactivo. El gate YA
+   branch-protection + `doctor`). El gate YA
    existe (emkeel ≥0.1.111); su config vive en `code-health.toml` (raíz, agent-editable — NO `emkeel.toml`, que emkeel
-   regenera y el guard bloquea). Espejo de cómo la corrección de ticket se impone en Enrich Y en `check_ticket_precedes_work`.
+   regenera y el guard bloquea).
 
 5. **Capa de juicio = revisor advisory `eco-reviewer`** (hermano de `eco-verifier`): lee el diff y da criterio
    razonado contra la rúbrica, independiente ("sin juicio previo" = sin apego de autor; varios + mayoría), PERO con
@@ -77,14 +78,13 @@ Este ADR decide la ARQUITECTURA. Lo que sigue son **parámetros que el operador 
 - **Sonar → NO** (cerrado en el refinamiento ECO-224): stack libre in-house; el análisis de PR de SonarQube es Developer Edition de pago; SonarCloud es gratis solo en repos PÚBLICOS y estos son privados; Community no hace análisis de PR; `eslint-plugin-sonarjs` v2+ (gratis) da la paridad de reglas de mantenibilidad. Cierra el kill-criterion #2 a favor del stack propio.
 - **Duplicación → ADVISORY** (§2); la exclusión concreta de coexistencia V1/V2 se ajusta al configurar `jscpd`.
 - **Orden de dimensiones + umbrales** (complexity=N, max-lines=M): parámetro por-pieza en el runbook.
-- **Forma del revisor de juicio** (subagente propio vs tercero, pieza 8) y **si el drenaje auto-arregla el subconjunto determinista** (pieza 9): lo arquitectónico ya está decidido en §5 (juicio → review advisory) y §6 (drenaje → propone por defecto); solo la forma concreta se elige al construir la pieza.
+- **Forma del revisor de juicio** (subagente propio vs tercero, pieza 10) y **si el drenaje auto-arregla el subconjunto determinista** (pieza 11): lo arquitectónico ya está decidido en §5 (juicio → review advisory) y §6 (drenaje → propone por defecto); solo la forma concreta se elige al construir la pieza.
 
 ## Consecuencias
 
 - **emkeel gana su primer gate de code-health** (hoy todos son de proceso; ya shipeado en ≥0.1.111 como
   `check_code_health`). Hereda infra existente: `_ratchet.mjs`, `changed_files`, la no-bypasseabilidad de emkeel, el
-  patrón `eco-verifier`. El punto proactivo por-diff lo da el **hook local** (no el motor `em-development-framework`,
-  retirado del alcance).
+  patrón `eco-verifier`. El punto proactivo por-diff lo da el **hook local**.
 - **La regla de idioma deja de depender de la memoria** — se ejecuta con el ticket + los gates, siempre.
 - **Coste asumido:** N herramientas a mantener + setup de baselines flota-wide + coste por-token de la capa IA por
   PR. La comparación con Sonar se **cerró = NO** (kill-criterion #2 a favor del stack in-house; `eslint-plugin-sonarjs`

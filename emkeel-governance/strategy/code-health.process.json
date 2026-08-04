@@ -53,41 +53,41 @@
     },
     "critiqued": {
       "done": true,
-      "timestamp": "2026-08-02T14:45:06Z",
+      "timestamp": "2026-08-04T19:04:33Z",
       "lens_source": "Fuentes bien fundadas; unico drift: CISQ ASCMM es CWE-1130 no el superset 1128 (corregido). Bulk-suppressions, jscpd exitCode, exhaustive-deps y changed_files confirmados abriendo cada fuente.",
-      "lens_calibration": "Topologia 2 puntos self-contained en em-ecosystem; el motor del gate ya existe (>=0.1.111), construir = declarar checks en code-health.toml, no motor.",
+      "lens_calibration": "D6 ahora calibra con el codigo real: check_code_health lee un baseline COMMITTED (git show origin/main:code-health.toml), NO recomputa. El ratchet completo = 2 mitades (gate enforcement, pieza 1 + recompute, Pieza 9); betterer hacia ambas. Coherente con L17 y la Pieza 9.",
       "lens_falsepositive": "jscpd-gate-duro dispararia el kill-criterion 1: dup relacional (dos sitios), el ratchet solo-lo-nuevo no mapea, un PR que toca V1 y V2 resurface el clon. Corregido: dup a advisory.",
       "lens_cost": "La recomendacion subestima el TCO (Opcion 1 = seis piezas a mantener mas tres a construir mas coste IA por PR mas setup de baselines) y descarto Sonar por gobernanza no por coste. Corregido: kill-criterion 2 es decision del operador con cifras.",
-      "lens_completeness": "Se cerraron 2 huecos reales que la ronda anterior dejo: (1) 'duplicacion=ADVISORY' era decision sin pieza -> ahora P8 (report + exclusiones V1/V2); (2) el recompute de baselines desde main MERGEADO no tenia dueno -> ahora P9.",
-      "completeness": "none \u2014 parametros de ejecucion (orden/umbrales, forma del revisor, alcance auto-fix) en Non-goals, no decisiones abiertas en Recommendation.",
-      "lens_discovery": "N/A \u2014 estrategia interna de enforcement, sin dimension de descubrimiento/SEO.",
-      "lens_legal": "Licencias OK: eslint-plugin-sonarjs LGPL-3.0 (dev-only), stylelint/knip/dependency-cruiser MIT.",
-      "content_hash": "95fa337829fcfab6363f90530d6a2516e8c4b37238f995053f300b8ced442c28",
+      "lens_completeness": "Sin cambio estructural: D6 sigue mapeando a sus piezas (1 y 9); trazabilidad Dn<->pieza intacta, ninguna decision sin constructor.",
+      "completeness": "Cierra la unica imprecision que quedaba (D6 atribuia el ratchet completo a check_code_health). Nada mas pendiente.",
+      "lens_discovery": "Cambio de una linea en D6; sin efectos colaterales. L17 y la Pieza 9 ya hacian el split; ahora D6 concuerda en vez de atribuir el ratchet completo al gate.",
+      "lens_legal": "Sin implicacion legal (doc de gobernanza); separacion de concerns respetada \u2014 la estrategia de este repo ya no razona sobre otro repo.",
+      "content_hash": "59ad44a2c90e6d629e9242f67547da1a5f30cb5ff93a2a9d2b1b79327b996c46",
       "lens_coverage": "Trazabilidad D1..D11 -> pieza verificada bidireccional por el gate (toda decision tiene constructor, toda cita existe).",
       "lens_coherence": "Relectura end-to-end: SIN contradicciones duras. La unica real (betterer vs gate-ratchet) ya se resolvio en la ronda previa (D6: betterer superseded; runbook lo lista fuera de alcance). Nota menor: refinamiento #3 cita Claude Code Action como EJEMPLO de coste, no decision \u2014 D9 difiere la forma del revisor correctamente, sin choque.",
       "lens_abandon": "Ninguna abandon-condition es cierta: la estrategia NO se ha implementado aun, asi que falsos-positivos/falsa-economia/bypass-por-diff/ratchet-no-converge no pueden haberse manifestado. Refinar, no abandonar."
     },
     "checked": {
       "done": true,
-      "timestamp": "2026-08-02T14:45:28Z",
+      "timestamp": "2026-08-04T19:04:50Z",
       "check_passed": true
     },
     "validated": {
       "done": true,
-      "timestamp": "2026-08-02T14:45:28Z",
-      "case": "gate check_code_health (emkeel 0.1.212) sin code-health.toml en em-ecosystem",
-      "method": "correr 'python -m emkeel.gates.check_code_health' en la raiz sin code-health.toml",
+      "timestamp": "2026-08-04T19:04:50Z",
+      "case": "D6 verificado contra el comportamiento real del gate: check_code_health lee un baseline COMMITTED, no recomputa; el recompute es pieza aparte.",
+      "method": "comportamiento del gate (git show origin/main:code-health.toml, via nota /emkeel-engineer) + coherencia con L17 y la Pieza 9 del runbook que ya declaran el split.",
       "outcome": "pass",
-      "evidence_ref": "emkeel-governance/strategy/code-health.runbook.md:13"
+      "evidence_ref": "emkeel-governance/strategy/code-health.runbook.md:21"
     },
     "presented": {
       "done": true,
-      "timestamp": "2026-08-02T16:52:47Z",
+      "timestamp": "2026-08-04T19:12:33Z",
       "presented_to": "operador",
-      "coherence": "Relectura E2E (doc + ADR-034 + runbook). ENCONTRADAS 2 contradicciones, ambas en el ADR (doc y runbook eran coherentes entre si), y RESUELTAS: (1) la cabecera de la Decision decia 'topologia de TRES puntos' contra \u00a74 '2 puntos' -> corregida a DOS; (2) \u00a73 aun prescribia 'betterer para lo no-ESLint' contra D6 'betterer superseded, el ratchet lo da check_code_health' -> \u00a73 alineado con D6. Post-fix: los 3 artefactos coherentes. (Mi declaracion previa decia 'ninguna' - fue un sello apresurado; el operador pidio re-revisar y aparecieron.)",
-      "runbook_extraction": "Verificado estrategia->runbook: cada decision D1..D11 tiene >=1 pieza (D1->P1,P2 D2->P5 D3->P3 D4->P4 D5->P6 D6->P1,P9 D7->P1,P7 D8->P8 D9->P10 D10->P11 D11->P12), bidireccional por el gate. Ningun paso necesario sin pieza.",
-      "naming": "Fichero 'code-health.md' -> slug ASCII/ingles OK. Doc en espanol: legitimo para gobernanza (excluida del gate de idioma), surface para juicio humano.",
-      "content_hash": "95fa337829fcfab6363f90530d6a2516e8c4b37238f995053f300b8ced442c28",
+      "coherence": "Ronda de precision de D6: el ratchet = 2 mitades (check_code_health enforcement sobre baseline COMMITTED + Pieza 9 recompute desde main; betterer hacia AMBAS). El revisor INDEPENDIENTE encontro que corregir solo el strategy dejaba la MISMA imprecision stale en dos hermanos: ADR \u00a73 (BLOCKER) y runbook L33 (BLOCKER \u2014 ademas se auto-contradecia con la Pieza 9). Ambos corregidos + grep del patron en los 3 artefactos (0 restantes). Re-verificado holisticamente: VERDICT CLEAN \u2014 D6, ADR \u00a73, runbook L33, L17 y la Pieza 9 concuerdan en el split.",
+      "runbook_extraction": "Runbook 1:1 intacto (D1..D11; D6 -> piezas 1 y 9, ambas direcciones). Editada SOLO la nota de betterer (Fuera de alcance, L33) para el split de 2 mitades; la tabla Implementation sin cambios.",
+      "naming": "Slug 'code-health' ASCII/ingles OK; doc en espanol (gobernanza, excluida del gate de idioma). Sin cambios de naming en esta ronda; el changelog ECO-227 del ADR sigue siendo la unica mencion de em-df (para tu juicio en el merge).",
+      "content_hash": "59ad44a2c90e6d629e9242f67547da1a5f30cb5ff93a2a9d2b1b79327b996c46",
       "runbook_hash": "31b6f39d90b46702a0f1efce89f971a553222398859da72e7add19ee2a83a890",
       "refinement_open": false
     }
