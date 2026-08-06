@@ -11,7 +11,7 @@ Strategy: code-health   <!-- the strategy this runbook implements -->
 | # | Piece | Implements | Ticket | Done when (resolves) | Status |
 |---|-------|------------|--------|----------------------|--------|
 | 1 | **Despertar el gate**: crear `code-health.toml` + primer check `comment-language` (adaptador `--count` que imprime el entero) | D1, D6, D7 | ECO-214 | ./code-health.toml:1 | pending |
-| 2 | **Generalizar `comment-language` a la FLOTA** (nexacore-api + nexacore-dashboard + satélites) con sus baselines | D1 | (por crear) | gate:comment-language-fleet | pending |
+| 2 | **Generalizar `comment-language` a la FLOTA** (nexacore-api + nexacore-dashboard + satélites) con sus baselines | D1 | #668 | gate:comment-language-fleet | pending |
 | 3 | **stylelint** (CSS/tokens): config + check que imprime conteo + baseline. Caza dead custom-properties intra-bloque | D3 | ECO-219 | ./.stylelintrc.json:1 | pending |
 | 4 | **knip** (dead-code): config + check + baseline | D4 | (por crear) | ./knip.json:1 | pending |
 | 5 | **ESLint endurecido** (complexity / max-lines / `eslint-plugin-sonarjs`) + bulk-suppressions como baseline interno | D2 | (por crear) | gate:eslint-code-health | pending |
