@@ -20,52 +20,44 @@ Analysis and action are different modes — don't slide from one into the other.
 - **The STRATEGY cycle** (`emkeel strategy`, `/strategy*`) decides DIRECTIONS: a researched doc with
   decisions and a runbook of pieces, driven by the non-skippable engine. It creates no tickets — it
   decides which tickets deserve to exist.
-- **The TICKET cycle** (`emkeel agree`, `/intake`, the agreement gates) governs how EVERY concrete
-  piece of work is born and lives: errand → agreement → ticket carrying it → gates → per-point close →
-  the operator's merge. A runbook piece enters here like any other errand.
-They feed each other and live in different files: strategy work touches `strategy.py`/its gates; ticket
-work touches `agree.py`/its gates. Extending one is not touching the other.
+- **The TICKET cycle** (the Spec Kit funnel + the thin gates) governs how EVERY concrete piece of work
+  is born and lives: intent → spec (`/speckit-specify`, operator-reviewed) → plan → tasks → GitHub Issue
+  (`/speckit-taskstoissues`) → branch → PR → gates → the operator's merge. A runbook piece enters the same
+  funnel.
+They feed each other: strategy work touches the strategy engine and its gates; ticket work flows through
+the funnel and the identity chain. Extending one is not touching the other.
 
 ## Loop
-0. **Work that arrives as PROSE becomes an AGREEMENT before any ticket** (`emkeel agree`). Decompose the
-   operator's words into numbered points and — APART, lettered — what YOU are adding; `agree new` refuses
-   any shape that hides a line nobody approved, and `agree review` shows the operator THEIR text plus what
-   appears in no point. They approve/correct/strike point by point; `agree seal` closes it, and
-   `emkeel start --agreement <slug>` lands the sealed text in the ticket description, where Jira's clock
-   stamps it and the gates keep it verbatim. At close, every point ends done / impossible / ruled-deviated
-   (`emkeel agree close`) — pending blocks the merge, and a goal seals only when every point of every
-   ticket landed (`emkeel agree assign` / `seal-goal`). This is not ceremony: you cannot tell recalling a
-   requirement from inventing a plausible one, so the agreement has to exist outside you, sealed where you
-   cannot edit it.
-1. One branch per ticket: `feat/<KEY-123>-slug` for features; `fix/`, `chore/`, `docs/` otherwise.
-   **Create the ticket FIRST, then branch from its key, then write the code** — that order is not advice:
-   `check_ticket_precedes_work` FAILS a PR whose ticket was created AFTER the branch's first commit
-   (Jira's `created` vs the first commit's author-date). The easy, correct path is `emkeel start <summary>`
-   — it creates the ticket and `git checkout -b <kind>/<KEY>-slug` in one step, so the order can't invert.
-   The ticket is born in the project's INITIAL state — `emkeel jira create` has no `--status`; a ticket is
-   never born `Done`. If creating it fails (creds, a cross-project block) it errors red and stops — do NOT
-   proceed to open a PR without a ticket. Fix the cause (`emkeel connect`) and retry.
-   When the project uses sprints, create ALWAYS recommends a placement and leaves the ticket PENDING — it
-   does NOT auto-place it in a sprint: the ticket stays in the backlog (labeled `emkeel-placement-pending`)
-   and the OPERATOR decides the sprint. RELAY the recommendation (the `::notice::` it prints) to the
-   operator — surface it, don't swallow it — and let them choose; pass `--sprint <id>|active` to place it,
-   or leave it in the backlog. The decision is not optional: `check_ticket_placed` BLOCKS the merge while a
-   sprint-project ticket is still undecided. Decide it with `emkeel jira place <KEY> --sprint active|backlog|<id>`
-   (it clears the pending flag), or place it in Jira. (`emkeel doctor` lists tickets still awaiting a decision.)
-   **Whatever the birth — /intake, a runbook piece, or a normal CONVERSATION — a ticket whose PR ships code
-   (the repo's `package_paths`) must carry an agreement OR a declared exemption.** `check_ticket_agreed_or_exempt`
-   requires a `## Points` agreement OR a `no-agreement: <why>` commit line and points to BOTH remedies. The two
-   paths are CO-EQUAL: run /intake when the work is an errand (a debate may prompt it — the operator supplies the
-   words, you draft), or declare `no-agreement: <why>` when it is legit agent-initiated work with no errand. The
-   gate never infers which — you declare, and the operator judges the surfaced reason at the merge.
-2. For `feat/` tickets: write `emkeel-governance/specs/<KEY>.md` with an "Acceptance Criteria" section.
+0. **Work that arrives as PROSE becomes a SPEC before any building** (`/speckit-specify`). The operator's
+   words are the input; the spec you write back IS your understanding made visible — every guess goes in
+   `Assumptions` (declared, never silently decided), and real ambiguity is ASKED first (`/speckit-clarify`),
+   not guessed. **Nothing proceeds to plan/tasks/code until the operator OKs the spec** — their review of it
+   is the intent safeguard. Then `/speckit-plan` → `/speckit-tasks` → `/speckit-taskstoissues` births the
+   GitHub Issue(s): the ticket, born linked to the spec. You cannot tell recalling a requirement from
+   inventing a plausible one — so the spec exists outside you, and the operator reads it before anything is
+   built.
+1. One branch per work item: `feat/<N>-<slug>` for features (N = the GitHub Issue number the funnel
+   birthed); `fix/`, `chore/`, `docs/` otherwise. **The Issue exists FIRST, then the branch, then the
+   code** — that order is not advice: `check_ticket_precedes_work` FAILS a PR whose issue was created
+   AFTER the branch's first commit (GitHub's server-set `createdAt` vs the first commit's author-date —
+   you cannot backdate either). Mint the branch from the issue: `git checkout -b feat/<N>-<slug>` with the
+   SAME slug the funnel gave the feature (`specs/<NNN>-<slug>/`) — the gates resolve the spec by that slug,
+   and `check_ticket_link` verifies the issue exists. Small conversation-born fixes take the light path:
+   open an Issue (`gh issue create`), then branch — the issue IS the declaration.
+   Every commit stays traceable: reference the issue parenthesized in the subject, e.g.
+   `fix: resolve the flaky retry (#286)` — `check_commit_convention` requires a work identity on every
+   subject.
+2. For `feat/` work the spec is the funnel's: `specs/<NNN>-<slug>/spec.md` with a non-empty
+   "Success Criteria" section (`check_plan_present` + `check_acceptance_criteria` resolve it by the branch
+   slug and FAIL loud when it is missing — run `/speckit-specify` first, never hand-invent the layout).
 3. Every bug fix starts with a failing test (permanent regression guard).
 4. Open a PR. Merge requires: CI green + a linked ticket, and YOUR approval.
    (NOT enforced yet — the default `required_approvals` is 0 — GitHub forbids approving your own PR, so 1 would hard-block a lone operator. A team sets it and `connect` installs it; with a single actor no mechanism can tell your merge from an agent's)
    With a single actor there is no mechanism that can tell your merge from an agent's: that is exactly why
    the agent must never merge. `emkeel rules --gaps` lists every rule in this state.
-5. **`Done` is earned by the work + the merge** — move the ticket with `emkeel jira transition` after it
-   merges, never at create. (Like a strategy's `approved`, a terminal state is never self-written up front.)
+5. **`Done` is earned by the work + the merge** — the PR body says `Closes #<N>` and the MERGE closes the
+   issue; never close it by hand up front. (Like a strategy's `approved`, a terminal state is never
+   self-written before the work lands.)
 
 ## Don't break something else in silence
 - **Critical / cross-cutting change → add an INTEGRATION test.** If you touch creds, isolation, the
@@ -88,7 +80,8 @@ work touches `agree.py`/its gates. Extending one is not touching the other.
 - A development strategy for an area lives in `emkeel-governance/strategy/<area>.md` (goal,
   architecture, parameters, non-goals). Created once, human-approved, committed.
 - **Before working a feature, read the strategy it serves and align to it.** Declare it in the
-  spec with a line `Strategy: <area>` (or `Strategy: none` for a deliberate standalone).
+  feature's spec (`specs/<NNN>-<slug>/spec.md`) with a line `Strategy: <area>` (or `Strategy: none` for a
+  deliberate standalone) — spec.md is hand-editable; add the line after `/speckit-specify` writes it.
 - When a spec declares `Strategy: <area>`, it must also carry an `## Alignment` section that lists
   which north-star decisions/constraints the feature implements or touches — the `check_strategy_alignment`
   gate requires it to exist and be non-empty (the human judges whether the content is true at the PR).
