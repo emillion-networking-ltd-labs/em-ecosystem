@@ -6,7 +6,25 @@
 
 [[check]]
 # Code and code comments must be ENGLISH (D1). Reuses the design-system's existing scanner via a `--count`
-# adapter; scope = design-system for now (the fleet is Piece 2). The DS's own internal ratchet is unchanged.
+# adapter; the DS's own internal ratchet is unchanged.
 name = "comment-language"
 command = "node design-system/scripts/check-comment-language.mjs --count"
 baseline = 1060
+
+# Fleet generalization (Piece 2, #668): the same rule (D1) across the rest of the fleet — one check per
+# package, each with its own baseline. The shared `scripts/check-comment-language.mjs` reuses the DS detector
+# and scans a target dir. Baselines are each package's real current count (ratchet: only decreases).
+[[check]]
+name = "comment-language-api"
+command = "node scripts/check-comment-language.mjs --count nexacore-api/src"
+baseline = 1
+
+[[check]]
+name = "comment-language-dashboard"
+command = "node scripts/check-comment-language.mjs --count nexacore-dashboard/src"
+baseline = 208
+
+[[check]]
+name = "comment-language-sat-cristian-garcia"
+command = "node scripts/check-comment-language.mjs --count satellites/sat-cristian-garcia/src"
+baseline = 382
