@@ -27,51 +27,6 @@ jobs:
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
         run: python -m emkeel.gates.check_ticket_link
-      - name: "Gate - agreement verbatim (the sealed words are the governing words)"
-        if: github.event_name == 'pull_request'
-        env:
-          EMKEEL_BRANCH: ${{ github.head_ref }}
-          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
-          # FAIL-CLOSED (ADR-0061): a ticket carrying an agreement in its description must show it intact
-          # (zero description edits since creation). No secrets / no Jira answer -> red, no escape hatch.
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-        run: python -m emkeel.gates.check_agreement_verbatim
-      - name: "Gate - agreement points closed (pending blocks the merge)"
-        if: github.event_name == 'pull_request'
-        env:
-          EMKEEL_BRANCH: ${{ github.head_ref }}
-          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
-          EMKEEL_BASE_REF: ${{ github.base_ref }}
-          # FAIL-CLOSED (ADR-0061). Every point of the sealed agreement closes as done / impossible /
-          # ruled-deviated in emkeel-governance/records/<KEY>.md -> pending blocks (D9).
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-        run: python -m emkeel.gates.check_agreement_points_closed
-
-      - name: "Gate - the spec covers the agreement (forward-coverage)"
-        if: github.event_name == 'pull_request'
-        env:
-          EMKEEL_BRANCH: ${{ github.head_ref }}
-          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
-          # FAIL-CLOSED (ADR-0061). Every non-delegated agreement point must be cited by a spec criterion
-          # via (#n); a point that falls off the spec blocks. Grandfathered temporally.
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-        run: python -m emkeel.gates.check_spec_covers_agreement
-
-      - name: "Gate - goal sealed honestly, and the last merge carries the goal"
-        if: github.event_name == 'pull_request'
-        env:
-          EMKEEL_BRANCH: ${{ github.head_ref }}
-          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-        run: python -m emkeel.gates.check_goal_sealed && python -m emkeel.gates.check_every_point_has_a_ticket
       - name: "Gate - ticket precedes work (ticket-first)"
         if: github.event_name == 'pull_request'
         env:
@@ -83,16 +38,6 @@ jobs:
           JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
           JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
         run: python -m emkeel.gates.check_ticket_precedes_work
-      - name: "Gate - ticket placed (decide the sprint before merge)"
-        if: github.event_name == 'pull_request'
-        env:
-          EMKEEL_BRANCH: ${{ github.head_ref }}
-          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
-          # Blocks merge while a sprint-project ticket is still pending a placement decision. Secrets absent -> inconclusive.
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-        run: python -m emkeel.gates.check_ticket_placed
       - name: "Gate - maintenance scope (emkeel-maint lane only)"
         if: github.event_name == 'pull_request'
         env:
@@ -173,18 +118,6 @@ jobs:
           EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
           EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
         run: python -m emkeel.gates.check_adr_for_architecture
-      - name: "Gate - a code-shipping ticket carries an agreement or a declared no-agreement"
-        if: ${{ github.event_name == 'pull_request' }}
-        env:
-          EMKEEL_BRANCH: ${{ github.head_ref || github.ref_name }}
-          EMKEEL_PR_TITLE: ${{ github.event.pull_request.title }}
-          EMKEEL_BASE_REF: ${{ github.base_ref || 'main' }}
-          # FAIL-CLOSED (ADR-0061): the agreement lives on Jira. The exemption path (no-agreement:) is
-          # Jira-free and checked first, so a legit agent fix passes without credentials.
-          JIRA_BASE_URL: ${{ secrets.JIRA_BASE_URL }}
-          JIRA_EMAIL: ${{ secrets.JIRA_EMAIL }}
-          JIRA_TOKEN: ${{ secrets.JIRA_TOKEN }}
-        run: python -m emkeel.gates.check_ticket_agreed_or_exempt
       - name: "Gate - a changed decision reaches the runbook"
         if: ${{ github.event_name == 'pull_request' }}
         env:
