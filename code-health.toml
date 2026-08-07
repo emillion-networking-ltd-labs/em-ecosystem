@@ -28,3 +28,7 @@ baseline = 208
 name = "comment-language-sat-cristian-garcia"
 command = "node scripts/check-comment-language.mjs --count satellites/sat-cristian-garcia/src"
 baseline = 382
+
+# Post-outage canary (#670): #669 merged during a GitHub Actions outage that dropped the push-to-main event,
+# so emkeel-ci never ran on the merge commit. This trivial change re-triggers push:[main] on merge, exercising
+# all four fleet checks above in real CI — the standard re-verification when an incident swallows the proving run.
