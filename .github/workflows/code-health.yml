@@ -9,6 +9,12 @@ on:
   push:
     branches: [main]
 
+# Same convention as the other workflows: a new push to a PR supersedes the previous run, so an
+# obsolete run does not keep a self-hosted runner busy while the current one waits in the queue.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
   code-health:
     runs-on: self-hosted

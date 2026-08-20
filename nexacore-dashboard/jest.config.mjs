@@ -18,6 +18,11 @@ const config = {
     '!src/**/*.d.ts',
   ],
   coverageDirectory: 'coverage',
+  // Bound the worker pool: the CI machine is shared by several self-hosted runners, and an
+  // unbounded jest (one worker per CPU, no memory ceiling) is what tipped it into an OOM kill that
+  // took a runner down. Same limits the API package already uses.
+  maxWorkers: '50%',
+  workerIdleMemoryLimit: '512MB',
 };
 
 export default createJestConfig(config);
