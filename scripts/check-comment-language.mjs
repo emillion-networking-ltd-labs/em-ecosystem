@@ -2,10 +2,10 @@
 // check-comment-language (fleet) — code AND code documentation must be ENGLISH across the whole fleet
 // (code-health D1). Generalizes the design-system's Piece-1 check to any package: it REUSES the detector
 // (`spanishLineCount`) from the design-system script and walks a given target directory. Declared once per
-// package in the repo-root `code-health.toml`, each with its own baseline, and enforced by the emkeel
-// `check_code_health` gate (ratchet: count <= baseline, baseline only decreases).
+// package in the repo-root `code-health.toml`, each with its own baseline, and enforced by the repo's
+// ratchet `scripts/code_health.py` (count <= baseline, baseline only decreases).
 //
-// Usage (from the repo root, as the gate runs it):
+// Usage (from the repo root, as the ratchet runs it):
 //   node scripts/check-comment-language.mjs --count <target-dir>   → prints the violation count (integer)
 //   node scripts/check-comment-language.mjs <target-dir>           → lists the offending lines, exits 1 if any
 //

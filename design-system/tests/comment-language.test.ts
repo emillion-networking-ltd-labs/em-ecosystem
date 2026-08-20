@@ -34,10 +34,10 @@ describe("check-comment-language (ECO-207)", () => {
     ).not.toThrow();
   });
 
-  // ECO-233 — the --count adapter feeds the emkeel `check_code_health` gate, which parses the LAST non-empty
+  // ECO-233 — the --count adapter feeds the repo's code-health ratchet, which parses the LAST non-empty
   // stdout line as an integer. This guards that contract: a pure integer on the last line, run from the repo
-  // root (the gate's cwd). Breaking it (extra output on the last line) silently disables the gate.
-  it("--count emits only the integer violation count, from the repo root (check_code_health contract)", () => {
+  // root (the ratchet's cwd). Breaking it (extra output on the last line) silently disables the check.
+  it("--count emits only the integer violation count, from the repo root (ratchet contract)", () => {
     const out = execFileSync(
       "node",
       [join(DS, "scripts", "check-comment-language.mjs"), "--count"],

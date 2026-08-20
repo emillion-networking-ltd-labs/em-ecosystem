@@ -3,7 +3,8 @@
 # SIN checkout del código del PR → no se ejecuta código no confiable ni se exponen secrets.
 # Solo patch/minor → auto-merge; majors → revisión humana (y dependabot.yml ya los ignora en rutina).
 # `gh pr merge --auto` activa el merge AUTOMÁTICO que la branch protection dispara SOLO cuando los
-# required checks (gates, Security Gate) pasan. Las PRs de SEGURIDAD también fluyen por esta vía.
+# required checks (Security Gate, Tests & Build, code-health) pasan. Las PRs de SEGURIDAD también
+# fluyen por esta vía.
 name: Dependabot auto-merge
 
 on: pull_request

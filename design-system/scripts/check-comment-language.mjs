@@ -13,8 +13,8 @@
 // line fails the gate. Draining = translate old comments to English and lower the baseline with --update.
 //
 // Usage:  node scripts/check-comment-language.mjs [--update | --count]
-//   --count: emit ONLY the current violation count (integer) for the emkeel `check_code_health` gate.
-//   Paths resolve from the script's own location, so any cwd works (the gate runs it from the repo root).
+//   --count: emit ONLY the current violation count (integer) for the repo's code-health ratchet.
+//   Paths resolve from the script's own location, so any cwd works (the ratchet runs it from the repo root).
 import { readFileSync, readdirSync, writeFileSync, existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -83,9 +83,9 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const hits = [];
   for (const r of ROOTS) walk(join(ds, r), hits);
 
-  // --count: emit ONLY the current violation count (integer, last stdout line) for the emkeel
-  // `check_code_health` gate, which reads `code-health.toml`, runs this, and enforces `count <= baseline`.
-  // No ratchet comparison here — the gate owns it (the baseline lives in `code-health.toml`, not here).
+  // --count: emit ONLY the current violation count (integer, last stdout line) for the repo's ratchet
+  // (`scripts/code_health.py`), which reads `code-health.toml`, runs this, and enforces `count <= baseline`.
+  // No ratchet comparison here — the ratchet owns it (the baseline lives in `code-health.toml`, not here).
   if (COUNT) {
     console.log(hits.length);
     process.exit(0);

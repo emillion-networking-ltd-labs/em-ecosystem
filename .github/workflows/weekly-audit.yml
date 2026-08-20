@@ -256,7 +256,7 @@ jobs:
   # ==========================================================================
   # Branch Protection Drift Audit (ECO-126)
   # Verifica que la branch protection de main sigue exigiendo los required checks
-  # correctos (Security Gate + gates + Dashboard VRT) y strict:true. La deriva de
+  # correctos (Security Gate + code-health + Dashboard VRT) y strict:true. La deriva de
   # esta config (Security Gate NO-required) fue lo que dejó auto-mergear los bumps
   # rotos #515/#516. Leer la protección necesita permiso ADMIN → si el runner solo
   # tiene GITHUB_TOKEN el script sale 2 (warn, no rojo); define el secret ADMIN_TOKEN

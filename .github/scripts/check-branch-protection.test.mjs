@@ -55,10 +55,11 @@ test("strict:false → deriva (permite mergear sobre base desactualizada)", () =
   assert.ok(problems.some((p) => /strict/.test(p)));
 });
 
-test("solo `gates` (la config REAL que teníamos) → deriva por strict + todos los demás required", () => {
-  const legacy = { required_status_checks: { strict: false, contexts: ["gates"] } };
+test("un solo required + strict:false (la deriva histórica) → deriva por strict + todos los demás", () => {
+  const [only] = EXPECTED.contexts;
+  const legacy = { required_status_checks: { strict: false, contexts: [only] } };
   const problems = findDrift(legacy);
-  // strict:false (1) + los (EXPECTED.contexts - "gates") que faltan.
+  // strict:false (1) + los (EXPECTED.contexts - el único presente) que faltan.
   assert.equal(problems.length, 1 + (EXPECTED.contexts.length - 1));
 });
 
