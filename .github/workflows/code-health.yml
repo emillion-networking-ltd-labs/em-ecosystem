@@ -1,0 +1,29 @@
+name: code-health
+
+# The repo's own code-health ratchet: every check declared in `code-health.toml` must stay at or
+# under its committed baseline, and a baseline may only go down. Self-contained — the script is in
+# this repo and uses the Python stdlib only, so nothing external governs the merge.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  code-health:
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0          # full history so the baseline can be read from the base branch
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"  # tomllib is stdlib from 3.11
+      - name: "Self-test - the ratchet's own rules (what it must REFUSE)"
+        run: python3 -m unittest discover -s tests
+      - name: "Ratchet - declared checks (debt only decreases)"
+        env:
+          # On a PR the baseline comes from the target branch, so a PR cannot raise its own ceiling.
+          # On a push there is no base: the script then enforces count <= baseline only.
+          BASE_REF: ${{ github.event_name == 'pull_request' && format('origin/{0}', github.base_ref) || '' }}
+        run: python3 scripts/code_health.py

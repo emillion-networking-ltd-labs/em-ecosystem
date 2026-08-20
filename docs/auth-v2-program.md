@@ -12,7 +12,7 @@
 > (step-up) están ahora **EN alcance**; la Fase 5 (OIDC issuer) está **congelada**; la Fase 6 diferida.
 >
 > *Origen:* `ai-specs/changes/auth/programs/AUTH-v2.md` (framework congelado). Las fases 0–2 (el MVP)
-> se ejecutaron bajo el proyecto Jira legacy **SCRUM**; el go-forward se gobierna bajo **ECO / Emkeel**.
+> se ejecutaron bajo el proyecto Jira legacy **SCRUM**; el go-forward se gobierna bajo **GitHub Issues**.
 > El detalle de ejecución por ticket vive en el historial git de `nexacore-api`.
 
 ---

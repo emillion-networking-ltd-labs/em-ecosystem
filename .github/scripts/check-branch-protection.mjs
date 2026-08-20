@@ -2,7 +2,7 @@
 // ECO-126 — Guardia anti-deriva de la branch protection de `main`.
 //
 // Contexto: los PRs de bump mensual de Dependabot (#515 prettier, #516 integrity) se auto-mergearon EN
-// ROJO porque el único required check de `main` era `gates` (gobernanza emkeel); el `Security Gate` del
+// ROJO porque el único required check de `main` era el de gobernanza; el `Security Gate` del
 // pipeline de seguridad NO estaba marcado required — la config de GitHub había derivado del intent (el
 // propio dependabot-auto-merge.yml afirma que "la branch protection dispara solo cuando gates + Security
 // Gate pasan"). `gh pr merge --auto` mergea en cuanto pasan los REQUIRED checks → un gate no-required no
@@ -17,7 +17,7 @@ import { execFileSync } from "node:child_process";
 
 // El intent. Solo se exigen checks que corren en CADA PR a main (si no, strict + required + "nunca corre"
 // deja PRs bloqueados para siempre):
-//   - gates                        → emkeel-ci (gobernanza), corre en cada PR.
+//   - code-health                  → code-health.yml (ratchet propio del repo), corre en cada PR.
 //   - Security Gate (All Checks)   → agregador de security.yml; su needs:+result-checks propagan cualquier
 //                                    capa en rojo → un solo required cubre las 5 capas y resiste renombres.
 //   - Dashboard visual regression  → visual-regression.yml, SIN paths-filter a propósito (ECO-38): corre
@@ -36,7 +36,7 @@ import { execFileSync } from "node:child_process";
 export const EXPECTED = {
   strict: true,
   contexts: [
-    "gates",
+    "code-health",
     "Security Gate (All Checks)",
     "Dashboard visual regression",
     "Satellite visual regression (all)",

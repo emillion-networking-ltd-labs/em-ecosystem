@@ -1,8 +1,8 @@
-# code-health — declared checks for the emkeel `check_code_health` gate (ADR-034, strategy: code-health).
-# Each check's command prints the CURRENT violation count (an integer, last line of stdout); the gate reads
-# the baseline committed on the base branch and FAILS a PR whose count exceeds it. The baseline may only
-# DECREASE (no big-bang on legacy debt). This file lives at the repo ROOT (not emkeel.toml, which `emkeel
-# update` regenerates and the isolation guard blocks). The gate is DORMANT until this file declares a check.
+# code-health — declared checks for this repo's own ratchet (ADR-034, strategy: code-health).
+# Each check's command prints the CURRENT violation count (an integer, last line of stdout). On a PR the
+# baseline is read from the base branch, so a PR can neither add violations (count > baseline) nor widen
+# the ceiling (raising the baseline). The baseline may only DECREASE — no big-bang on legacy debt.
+# Enforced by `scripts/code_health.py` via the `code-health` workflow; dormant until a check is declared.
 
 [[check]]
 # Code and code comments must be ENGLISH (D1). Reuses the design-system's existing scanner via a `--count`
