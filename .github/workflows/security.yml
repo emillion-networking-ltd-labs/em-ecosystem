@@ -36,6 +36,7 @@ jobs:
     outputs:
       backend: ${{ steps.filter.outputs.backend }}
       frontend: ${{ steps.filter.outputs.frontend }}
+      deps: ${{ steps.filter.outputs.deps }}
     steps:
       - uses: actions/checkout@v6
       - uses: dorny/paths-filter@v3
@@ -46,6 +47,13 @@ jobs:
               - 'nexacore-api/**'
             frontend:
               - 'nexacore-dashboard/**'
+            # Dependency manifests anywhere in the fleet. A PR that does not touch one of these
+            # cannot introduce a vulnerability, so blocking it on a PRE-EXISTING advisory protects
+            # nothing — main is already exposed — while it halts unrelated work. The audit stays
+            # hard-blocking where it does prevent harm (see `dependency-audit`).
+            deps:
+              - '**/package.json'
+              - '**/package-lock.json'
 
   # ==========================================================================
   # Layer 1: Secrets Detection (Gitleaks) — always runs (secrets can be anywhere)
@@ -117,7 +125,13 @@ jobs:
   dependency-audit:
     name: "Layer 2: Dependency Audit"
     runs-on: self-hosted
-    needs: [discover-satellites]
+    needs: [discover-satellites, changes]
+    # On `main` this always runs: that is the product's real exposure, and it stays hard-blocking.
+    # On a PR it runs only when a dependency manifest changed — the only way a PR can INTRODUCE a
+    # vulnerability. A pre-existing advisory is caught by the push-to-main run and by the daily
+    # scheduled audit (which opens an issue), instead of silently blocking unrelated work.
+    # `security-gate` treats a skipped job as OK, so skipping here cannot fake a green gate.
+    if: github.event_name != 'pull_request' || needs.changes.outputs.deps == 'true'
     strategy:
       # SCRUM-370: ensure both api and dashboard always run independently.
       fail-fast: false

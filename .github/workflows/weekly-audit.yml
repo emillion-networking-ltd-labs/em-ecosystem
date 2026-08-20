@@ -10,7 +10,10 @@ name: Weekly Security Audit
 
 on:
   schedule:
-    - cron: '0 6 * * 1'
+    # Daily, not weekly: a freshly published advisory should surface within a day. The PR-level
+    # audit only runs when a dependency manifest changes, so this is what catches an advisory that
+    # appears without anyone touching the code.
+    - cron: '0 6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -46,20 +49,55 @@ jobs:
         run: npm ci
 
       - name: Full npm audit (JSON output)
+        id: audit
         working-directory: ${{ matrix.package }}
         run: |
           echo "=== All Dependencies ==="
           npm audit --json > audit-all.json 2>&1 || true
-          cat audit-all.json | node -e "
-            const data = JSON.parse(require('fs').readFileSync('/dev/stdin','utf8'));
+          # Writes a human-readable advisory list to summary.md so the tracking issue can name what
+          # is wrong, then fails the step when anything critical/high is present.
+          set +e
+          node -e "
+            const fs = require('fs');
+            const data = JSON.parse(fs.readFileSync('audit-all.json','utf8'));
             const v = data.metadata?.vulnerabilities || {};
-            console.log('Critical:', v.critical || 0);
-            console.log('High:', v.high || 0);
-            console.log('Moderate:', v.moderate || 0);
-            console.log('Low:', v.low || 0);
-            console.log('Info:', v.info || 0);
-            if ((v.critical || 0) > 0 || (v.high || 0) > 0) process.exit(1);
+            for (const k of ['critical','high','moderate','low','info']) {
+              console.log(k[0].toUpperCase()+k.slice(1)+':', v[k] || 0);
+            }
+            const bad = Object.entries(data.vulnerabilities || {})
+              .filter(([, x]) => ['critical','high'].includes(x.severity));
+            const lines = bad.map(([name, x]) => {
+              const via = (x.via || []).find((y) => typeof y === 'object');
+              const fix = x.fixAvailable === false ? 'no fix available'
+                        : (typeof x.fixAvailable === 'object'
+                           ? \`fix: \${x.fixAvailable.name}@\${x.fixAvailable.version}\${x.fixAvailable.isSemVerMajor ? ' (MAJOR)' : ''}\`
+                           : 'fix available');
+              return \`- **\${name}** [\${x.severity}] — \${via?.title || 'see advisory'}\${via?.url ? ' (' + via.url + ')' : ''} — \${fix}\`;
+            });
+            fs.writeFileSync('summary.md', lines.join('\n') + '\n');
+            process.exit((v.critical || 0) > 0 || (v.high || 0) > 0 ? 1 : 0);
           "
+          code=$?
+          set -e
+          echo "vulnerable=$([ "$code" -ne 0 ] && echo true || echo false)" >> "$GITHUB_OUTPUT"
+          exit "$code"
+
+      - name: Open or update tracking issue on vulnerabilities
+        if: failure() && steps.audit.outputs.vulnerable == 'true'
+        working-directory: ${{ matrix.package }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          today=$(date -u +%Y-%m-%d)
+          title="[security] critical/high vulnerabilities in dependencies ($today)"
+          body="## Vulnerabilidades en \`${{ matrix.package }}\`\n\nLa auditoría diaria encontró dependencias con severidad critical/high:\n\n$(cat summary.md)\n\n## Qué hacer\n\nFijar la versión parcheada (override si es transitiva), verificar build + tests, y añadir un guard de versión. Si no hay parche upstream, anotarlo aquí y vigilar.\n\n## Por qué llega como issue\n\nEl audit a nivel de PR solo corre cuando cambia un manifiesto de dependencias — un PR que no las toca no puede introducir una vulnerabilidad. Un advisory nuevo aparece sin que nadie toque el código, así que lo caza esta auditoría diaria y lo convierte en tarea con dueño en vez de un rojo silencioso.\n"
+          existing=$(gh issue list --state open --search "in:title [security] critical/high vulnerabilities" --json number --jq '.[0].number // empty')
+          if [ -n "$existing" ]; then
+            printf "%b" "$body" | gh issue comment "$existing" --body-file -
+          else
+            printf "%b" "$body" | gh issue create --title "$title" --label "tech-debt" --body-file -
+          fi
 
       - name: Production-only audit
         working-directory: ${{ matrix.package }}
