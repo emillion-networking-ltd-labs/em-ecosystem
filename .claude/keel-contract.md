@@ -1,6 +1,8 @@
 <!--
-  keel-contract · contract-version: 1 · generada el 2026-08-22, pre-paquete (la fuente canónica
-  pasará al paquete de emkeel cuando exista src/; hasta entonces, esta copia es la canónica).
+  keel-contract · contract-version: 2 · generada el 2026-08-22, subida el 2026-08-27 (ticket #25:
+  la capa local declara desde esta versión el repositorio gobernado). Los repositorios instalados
+  con la versión 1 carecen de esa declaración, y su guardián lo dice — «sin comprobar»— hasta que
+  se reinstale la capa.
   CAPA DISTRIBUIDA — idéntica en todo repositorio gobernado. NO editar aquí: toda adaptación va en
   .claude/keel-local.md. Presupuesto del conjunto cargado (CLAUDE.md + imports) ≤ 150 líneas; esta
   capa ≤ 90. Recuento de esta capa: 67 líneas.
