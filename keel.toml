@@ -43,7 +43,6 @@ paths = [
     ".github/dependabot.yml",        # decide qué versiones entran
     ".github/scripts/*",             # código que la forja ejecuta
     ".husky/*",                      # los controles que corren antes del commit
-    "emkeel-governance/*",           # especificaciones, ADR y estrategia: deciden qué se construye
     ".claude/*",                     # la capa de instrucción
     "CLAUDE.md",
     "AGENTS.md",                     # el contrato real de este repositorio
