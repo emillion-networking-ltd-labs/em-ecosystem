@@ -1,0 +1,108 @@
+# Governance configuration for em-ecosystem.
+#
+# Sembrado en el estreno del 2026-08-27, corregido tras auditoría. El instalador
+# no lo coloca por diseño: la clase del cambio y los nombres admitidos son
+# decisiones del operador de este repositorio, no del marco (GOVERNANCE §1.1).
+
+[trivial]
+# Rutas cuyo efecto se agota en el fichero que las contiene (GOVERNANCE §1.1).
+# A diferencia de emkeel —donde casi todo es documento normativo, plantilla o
+# control, y la lista está deliberadamente vacía—, aquí sí existen.
+#
+# La medida es el alcance, nunca el tamaño: doscientas líneas de documentación
+# entran; una línea de package-lock.json no.
+patterns = [
+    "docs/*.md",                    # runbooks y programas: prosa que nadie ejecuta
+    "**/README.md",
+    "**/CHANGELOG.md",
+    ".github/ISSUE_TEMPLATE/*",     # vive: la exclusión de .github se estrechó a los controles
+    ".github/PULL_REQUEST_TEMPLATE.md",
+]
+
+[excluded]
+# Rutas cuyo efecto excede su fichero. La exclusión prevalece: una ruta que
+# coincida con un patrón trivial y con una de estas queda excluida.
+#
+# Comprobado contra la implementación el 2026-08-27: el comparador es fnmatch
+# con un startswith de refuerzo, de modo que `*` SÍ cruza subdirectorios —
+# `design-system/*` alcanza `design-system/components/Button.tsx`—. No hacen
+# falta `**` para eso. Sí hacen falta para casar un nombre a cualquier
+# profundidad, porque el patrón se compara contra la ruta entera.
+paths = [
+    "design-system/*",              # artefacto compartido: el diff es de una línea y llega a cada consumidor
+    "nexacore-api/prisma/*",         # el esquema: contrato de datos de todo lo que lo consume
+    "package-lock.json",             # fija versiones, y con ellas qué código corre
+    "**/package-lock.json",          # y los de cada paquete y satélite: el patrón anterior NO los alcanza
+    "**/*.config.mjs",               # next, postcss, eslint: deciden qué código se construye y corre
+    "**/*.config.ts",
+    "**/tsconfig.json",
+    ".env*",                         # secretos y configuración de entorno
+    ".envrc",
+    ".github/workflows/*",           # los controles que corre la forja
+    ".github/CODEOWNERS",            # decide quién revisa: control del proceso
+    ".github/dependabot.yml",        # decide qué versiones entran
+    ".github/scripts/*",             # código que la forja ejecuta
+    ".husky/*",                      # los controles que corren antes del commit
+    "emkeel-governance/*",           # especificaciones, ADR y estrategia: deciden qué se construye
+    ".claude/*",                     # la capa de instrucción
+    "CLAUDE.md",
+    "AGENTS.md",                     # el contrato real de este repositorio
+    "keel.toml",                     # este fichero: determina la clase misma
+    "code-health.toml",              # umbrales de los controles propios
+    ".jscpd.json",
+    ".gitleaks.toml",
+]
+
+[gates]
+prefix = "keel"
+
+[guard]
+# Rutas cuya escritura el guardián deniega al agente. Quien pueda reescribir la
+# capa de instrucción o la configuración de clase desarma al guardián mismo.
+#
+# AGENTS.md entra: aquí vive el contrato que el agente obedece, y CLAUDE.md solo
+# lo importa.
+protected_paths = [
+    "CLAUDE.md",
+    "AGENTS.md",
+    ".claude/keel-contract.md",
+    ".claude/keel-local.md",
+    ".claude/settings.json",
+    "keel.toml",
+]
+
+# Huella no secreta del token esperado: SHA-256 DEL token, jamás el token.
+token_fingerprint = "a853c2f919a7e2958fbc36bc3b67010b0bbefa28a5c5325894e5d488b5491cc7"
+
+# Respaldo. Desde el ticket #23 la caducidad se LEE de la forja en cada sesión,
+# y esta fecha solo se usa cuando no puede leerse — diciéndolo.
+token_expires = "2026-09-24"
+
+[branch]
+# Slugs admitidos. Comprobado contra la implementación el 2026-08-27, y con dos
+# consecuencias que hay que saber antes de usar esta lista:
+#
+# 1. El comprobador solo juzga ramas con la forma `<tipo>/<NNN>-<slug>`. Las dos
+#    ramas vivas de este repositorio —`fix/audit-scope-and-alerting` y
+#    `chore/emkeel-estreno`— NO la siguen, de modo que hoy el control se
+#    abstiene y esta lista es INERTE hasta que las ramas nazcan de un Issue con
+#    su número.
+# 2. El slug es TODO lo que sigue al número, no una palabra suelta:
+#    `feat/031-auth-v2` tiene el slug `auth-v2`, y `auth` no lo cubre. Los slugs
+#    de varias palabras se escriben aquí enteros, como hace emkeel con
+#    `ci-second-wave`.
+#
+# La lista siguiente asume un slug por dominio de trabajo. Si el equipo prefiere
+# slugs descriptivos por rama, esta lista crecerá sin fin y conviene retirarla:
+# un control que avisa siempre enseña a no leerlo.
+vocabulary = [
+    "auth",
+    "billing",
+    "projects",
+    "satellites",
+    "design-system",
+    "dashboard",
+    "api",
+    "audit",
+    "emkeel",
+]
