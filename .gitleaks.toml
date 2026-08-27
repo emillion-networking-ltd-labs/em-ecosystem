@@ -72,4 +72,12 @@ regexes = [
   '''placeholder''',
   '''example\.com''',
   '''localhost''',
+
+  # La huella del token del guardián en keel.toml: SHA-256 DEL token, jamás el token.
+  # generic-api-key la marca por entropía (3.87) porque la clave contiene "token"; publicar
+  # un hash no revela el secreto, y su presencia es justo lo que permite comprobarlo sin red.
+  # Acotada a la forma exacta de la declaración: 64 hexadecimales asignados a token_fingerprint.
+  # La versión anclada (8.18.4) no sabe cruzar ruta Y regla en un allowlist, así que el acote
+  # es de contenido y no de fichero: keel.toml NO queda exento del resto de las reglas.
+  '''^\s*token_fingerprint\s*=\s*"[a-f0-9]{64}"\s*$''',
 ]
