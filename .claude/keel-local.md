@@ -12,4 +12,4 @@
   copia**: una copia por repositorio es una segunda verdad que deriva (decisión del operador,
   2026-08-25). Consultarlo exige alcanzar ese repositorio o clonarlo.
 - Idioma de preferencia del operador: `español` — la prosa canónica y las respuestas.
-- Zona de prosa para la comprobación de idioma del guardián: `emkeel-governance/` y `docs/`.
+- Zona de prosa para la comprobación de idioma del guardián: `docs/` y `specs/`.
