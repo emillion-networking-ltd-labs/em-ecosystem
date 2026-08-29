@@ -52,10 +52,14 @@ jobs:
         with:
           python-version: "3.12"
       - name: Instalar el marco por referencia anclada
-        # D4 aplicada a la instalación: referencia, nunca copia. La referencia
+        # D4 aplicada a la instalación: referencia, nunca copia. El marco es
+        # privado, de modo que el runner necesita credencial de LECTURA: un
+        # token fino de solo lectura sobre emkeel, jamás el del agente. La referencia
         # la sustituye el comando de adopción por la que el repositorio declara
         # en su capa local, de modo que el control corre la versión que gobierna.
-        run: pip install "git+https://github.com/emillion-networking-ltd-labs/emkeel@0.1.0+b3a3120"
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0.1.0+04cd612"
       - name: Ejecutar el control
         run: python -m emkeel.ci.gates.${{ matrix.module }} --repo . --pr ${{ github.event.number }}
 
@@ -68,7 +72,9 @@ jobs:
         with:
           python-version: "3.12"
       - name: Instalar las herramientas ancladas
-        run: pip install "git+https://github.com/emillion-networking-ltd-labs/emkeel@0.1.0+b3a3120#egg=emkeel[dev]"
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0.1.0+04cd612#egg=emkeel[dev]"
       - name: Formato
         run: ruff format --check .
       - name: Reglas y seguridad
@@ -96,10 +102,14 @@ jobs:
         with:
           python-version: "3.12"
       - name: Instalar el marco por referencia anclada
-        # D4 aplicada a la instalación: referencia, nunca copia. La referencia
+        # D4 aplicada a la instalación: referencia, nunca copia. El marco es
+        # privado, de modo que el runner necesita credencial de LECTURA: un
+        # token fino de solo lectura sobre emkeel, jamás el del agente. La referencia
         # la sustituye el comando de adopción por la que el repositorio declara
         # en su capa local, de modo que el control corre la versión que gobierna.
-        run: pip install "git+https://github.com/emillion-networking-ltd-labs/emkeel@0.1.0+b3a3120"
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0.1.0+04cd612"
       - name: Toda ruta protegida tocada consta declarada
         run: >
           python -m emkeel.ci.gates.protected_paths --repo .
@@ -118,10 +128,14 @@ jobs:
         with:
           python-version: "3.12"
       - name: Instalar el marco por referencia anclada
-        # D4 aplicada a la instalación: referencia, nunca copia. La referencia
+        # D4 aplicada a la instalación: referencia, nunca copia. El marco es
+        # privado, de modo que el runner necesita credencial de LECTURA: un
+        # token fino de solo lectura sobre emkeel, jamás el del agente. La referencia
         # la sustituye el comando de adopción por la que el repositorio declara
         # en su capa local, de modo que el control corre la versión que gobierna.
-        run: pip install "git+https://github.com/emillion-networking-ltd-labs/emkeel@0.1.0+b3a3120"
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0.1.0+04cd612"
       - name: El documento del ciclo y la configuración dicen lo mismo
         run: python -m emkeel.ci.gates.cycle_drift --repo .
 
@@ -138,10 +152,14 @@ jobs:
         with:
           python-version: "3.12"
       - name: Instalar el marco por referencia anclada
-        # D4 aplicada a la instalación: referencia, nunca copia. La referencia
+        # D4 aplicada a la instalación: referencia, nunca copia. El marco es
+        # privado, de modo que el runner necesita credencial de LECTURA: un
+        # token fino de solo lectura sobre emkeel, jamás el del agente. La referencia
         # la sustituye el comando de adopción por la que el repositorio declara
         # en su capa local, de modo que el control corre la versión que gobierna.
-        run: pip install "git+https://github.com/emillion-networking-ltd-labs/emkeel@0.1.0+b3a3120"
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0.1.0+04cd612"
       - name: El slug de la rama consta en el vocabulario
         run: python -m emkeel.ci.gates.branch_vocabulary --repo .
 
@@ -154,9 +172,13 @@ jobs:
         with:
           python-version: "3.12"
       - name: Instalar el marco por referencia anclada
-        # D4 aplicada a la instalación: referencia, nunca copia. La referencia
+        # D4 aplicada a la instalación: referencia, nunca copia. El marco es
+        # privado, de modo que el runner necesita credencial de LECTURA: un
+        # token fino de solo lectura sobre emkeel, jamás el del agente. La referencia
         # la sustituye el comando de adopción por la que el repositorio declara
         # en su capa local, de modo que el control corre la versión que gobierna.
-        run: pip install "git+https://github.com/emillion-networking-ltd-labs/emkeel@0.1.0+b3a3120"
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0.1.0+04cd612"
       - name: Cada gate rechaza lo que debe rechazar
         run: python -m emkeel.ci.gates.canary --repo .
