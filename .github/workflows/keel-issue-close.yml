@@ -1,0 +1,60 @@
+# destino: .github/workflows/keel-issue-close.yml
+#
+# El agente carece del alcance `workflow`: lo traslada y empuja el operador.
+# Único workflow con `issues: write`, y solo para reabrir y comentar una vez
+# por cierre (clarificación del 2026-08-22). Su límite: quien tenga escritura
+# puede cerrar de nuevo; la reapertura es acto visible, y nunca acto impedido.
+
+name: keel-issue-close
+
+on:
+  issues:
+    types: [closed]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  issue-close:
+    name: keel/issue-close
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ISSUE: ${{ github.event.issue.number }}
+    steps:
+      # actions/checkout v4.2.2, anclada por SHA
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          ref: main
+      # setup-python v5.3.0
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: "3.12"
+      - name: Juzgar el cierre
+        id: judge
+        run: |
+          set +e
+          python -m emkeel.ci.gates.issue_close --repo . --issue "$ISSUE" | tee verdict.txt
+          echo "code=${PIPESTATUS[0]}" >> "$GITHUB_OUTPUT"
+      - name: Reabrir y comentar una sola vez
+        if: steps.judge.outputs.code == '1'
+        run: |
+          # El gate ya declara si un rechazo consta: la actuación es única.
+          if grep -q "ya consta un rechazo" verdict.txt; then
+            echo "rechazo previo en pie: no se repite la actuación"
+            exit 1
+          fi
+          gh issue reopen "$ISSUE" --repo "$GITHUB_REPOSITORY"
+          {
+            echo "keel-close-rejected: el cierre no cumple lifecycle §2.6"
+            echo
+            echo '```'
+            cat verdict.txt
+            echo '```'
+          } | gh issue comment "$ISSUE" --repo "$GITHUB_REPOSITORY" --body-file -
+          exit 1
+      - name: Declarar el veredicto
+        if: steps.judge.outputs.code != '0'
+        run: exit 1

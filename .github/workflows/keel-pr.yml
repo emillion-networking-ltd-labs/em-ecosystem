@@ -1,0 +1,159 @@
+# destino: .github/workflows/keel-pr.yml
+#
+# El agente carece del alcance `workflow` (GOVERNANCE §8.2, verificado por
+# denegación el 2026-08-22): este fichero lo traslada y empuja el operador.
+# La lógica vive en `ci/`, de modo que iterar sobre un gate no toque este YAML.
+
+name: keel
+
+on:
+  pull_request:
+    branches: [main]
+
+# Mínimo indispensable: el GITHUB_TOKEN del runner es una credencial como las demás.
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  KEEL_BRANCH: ${{ github.head_ref }}
+
+jobs:
+  gate:
+    # El nombre del control es estable: renombrar uno exigido rompe la
+    # protección de rama en silencio (lifecycle §5).
+    name: keel/${{ matrix.gate }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { gate: issue-precedence, module: issue_precedence }
+          - { gate: decisions, module: decisions }
+          - { gate: phase0-anchor, module: phase0_anchor }
+          - { gate: approval, module: approval }
+          - { gate: clarifications, module: clarifications }
+          - { gate: traceability, module: traceability }
+          - { gate: checklists, module: checklists }
+          - { gate: anchored-config, module: anchored_config }
+          - { gate: maintenance, module: maintenance }
+          - { gate: trivial-class, module: trivial_class }
+    steps:
+      # Acciones de terceros ancladas por SHA de commit, nunca por etiqueta
+      # (GOVERNANCE §6.2 aplicado a la cadena de suministro): v4.2.2.
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+      # setup-python v5.3.0
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: "3.12"
+      - name: Instalar el marco por referencia anclada
+        # D4 aplicada a la instalación: referencia, nunca copia. El marco es
+        # privado, de modo que el runner necesita credencial de LECTURA: un
+        # token fino de solo lectura sobre emkeel, jamás el del agente. La referencia
+        # la sustituye el comando de adopción por la que el repositorio declara
+        # en su capa local, de modo que el control corre la versión que gobierna.
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@2438c5d55740b3f5f361ab08923f787f524bd48b"
+      - name: Ejecutar el control
+        run: python -m emkeel.ci.gates.${{ matrix.module }} --repo . --pr ${{ github.event.number }}
+
+  # This one IS required, unlike keel/branch-vocabulary below, and the
+  # asymmetry is the reason (GOVERNANCE §4.4, decision of 2026-08-25): there
+  # the only way out was renaming, which destroys the Issue's link, so blocking
+  # caused the harm the control prevented. Here the ways out — declaring the
+  # handover, or reverting the write — harm nothing.
+  protected-paths:
+    name: keel/protected-paths
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: "3.12"
+      - name: Instalar el marco por referencia anclada
+        # D4 aplicada a la instalación: referencia, nunca copia. El marco es
+        # privado, de modo que el runner necesita credencial de LECTURA: un
+        # token fino de solo lectura sobre emkeel, jamás el del agente. La referencia
+        # la sustituye el comando de adopción por la que el repositorio declara
+        # en su capa local, de modo que el control corre la versión que gobierna.
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@2438c5d55740b3f5f361ab08923f787f524bd48b"
+      - name: Toda ruta protegida tocada consta declarada
+        run: >
+          python -m emkeel.ci.gates.protected_paths --repo .
+          --pr ${{ github.event.number }} --base ${{ github.base_ref }}
+
+  # Required, like keel/protected-paths and for the same reason: the ways out
+  # of its red — correct the document, or correct the configuration, whichever
+  # the arbiter of §4.4 backs — harm nothing, so blocking causes no damage the
+  # control exists to prevent.
+  cycle-drift:
+    name: keel/cycle-drift
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: "3.12"
+      - name: Instalar el marco por referencia anclada
+        # D4 aplicada a la instalación: referencia, nunca copia. El marco es
+        # privado, de modo que el runner necesita credencial de LECTURA: un
+        # token fino de solo lectura sobre emkeel, jamás el del agente. La referencia
+        # la sustituye el comando de adopción por la que el repositorio declara
+        # en su capa local, de modo que el control corre la versión que gobierna.
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@2438c5d55740b3f5f361ab08923f787f524bd48b"
+      - name: El documento del ciclo y la configuración dicen lo mismo
+        run: python -m emkeel.ci.gates.cycle_drift --repo .
+
+  # Informative by design (GOVERNANCE §4.4, decision of 2026-08-25): this job
+  # reports and never bars the way, so it MUST NOT be added to
+  # required_status_checks. Blocking would force renaming the branch, which
+  # destroys the Issue's link (§4.2, limit 3) — the harm the check prevents.
+  branch-vocabulary:
+    name: keel/branch-vocabulary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: "3.12"
+      - name: Instalar el marco por referencia anclada
+        # D4 aplicada a la instalación: referencia, nunca copia. El marco es
+        # privado, de modo que el runner necesita credencial de LECTURA: un
+        # token fino de solo lectura sobre emkeel, jamás el del agente. La referencia
+        # la sustituye el comando de adopción por la que el repositorio declara
+        # en su capa local, de modo que el control corre la versión que gobierna.
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@2438c5d55740b3f5f361ab08923f787f524bd48b"
+      - name: El slug de la rama consta en el vocabulario
+        run: python -m emkeel.ci.gates.branch_vocabulary --repo .
+
+  canary:
+    name: keel/canary
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
+        with:
+          python-version: "3.12"
+      - name: Instalar el marco por referencia anclada
+        # D4 aplicada a la instalación: referencia, nunca copia. El marco es
+        # privado, de modo que el runner necesita credencial de LECTURA: un
+        # token fino de solo lectura sobre emkeel, jamás el del agente. La referencia
+        # la sustituye el comando de adopción por la que el repositorio declara
+        # en su capa local, de modo que el control corre la versión que gobierna.
+        run: >
+          pip install
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@2438c5d55740b3f5f361ab08923f787f524bd48b"
+      - name: Cada gate rechaza lo que debe rechazar
+        run: python -m emkeel.ci.gates.canary --repo .
