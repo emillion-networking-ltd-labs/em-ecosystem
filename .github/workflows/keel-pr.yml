@@ -59,7 +59,7 @@ jobs:
         # en su capa local, de modo que el control corre la versión que gobierna.
         run: >
           pip install
-          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0d8e9a6"
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
       - name: Ejecutar el control
         run: python -m emkeel.ci.gates.${{ matrix.module }} --repo . --pr ${{ github.event.number }}
 
@@ -74,7 +74,7 @@ jobs:
       - name: Instalar las herramientas ancladas
         run: >
           pip install
-          "emkeel[dev] @ git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0d8e9a6"
+          "emkeel[dev] @ git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
       - name: Formato
         run: ruff format --check .
       - name: Reglas y seguridad
@@ -109,7 +109,7 @@ jobs:
         # en su capa local, de modo que el control corre la versión que gobierna.
         run: >
           pip install
-          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0d8e9a6"
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
       - name: Toda ruta protegida tocada consta declarada
         run: >
           python -m emkeel.ci.gates.protected_paths --repo .
@@ -135,7 +135,7 @@ jobs:
         # en su capa local, de modo que el control corre la versión que gobierna.
         run: >
           pip install
-          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0d8e9a6"
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
       - name: El documento del ciclo y la configuración dicen lo mismo
         run: python -m emkeel.ci.gates.cycle_drift --repo .
 
@@ -159,7 +159,7 @@ jobs:
         # en su capa local, de modo que el control corre la versión que gobierna.
         run: >
           pip install
-          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0d8e9a6"
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
       - name: El slug de la rama consta en el vocabulario
         run: python -m emkeel.ci.gates.branch_vocabulary --repo .
 
@@ -179,6 +179,6 @@ jobs:
         # en su capa local, de modo que el control corre la versión que gobierna.
         run: >
           pip install
-          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@0d8e9a6"
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
       - name: Cada gate rechaza lo que debe rechazar
         run: python -m emkeel.ci.gates.canary --repo .
