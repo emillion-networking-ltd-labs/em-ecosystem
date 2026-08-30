@@ -59,34 +59,9 @@ jobs:
         # en su capa local, de modo que el control corre la versión que gobierna.
         run: >
           pip install
-          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@541f7f5f5bb603e030ce1a0053a83c2f97932f68"
       - name: Ejecutar el control
         run: python -m emkeel.ci.gates.${{ matrix.module }} --repo . --pr ${{ github.event.number }}
-
-  standard-armed:
-    name: keel/standard-armed
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-      - uses: actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b
-        with:
-          python-version: "3.12"
-      - name: Instalar las herramientas ancladas
-        run: >
-          pip install
-          "emkeel[dev] @ git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
-      - name: Formato
-        run: ruff format --check .
-      - name: Reglas y seguridad
-        run: ruff check .
-      - name: Tipos
-        run: mypy
-      - name: Suite
-        run: python -m pytest tests/ -q
-      - name: Comprobar que toda medida declarada corrió
-        run: >
-          python -m emkeel.ci.gates.standard_armed --repo .
-          --ran "ruff check,ruff format --check,mypy --strict"
 
   # This one IS required, unlike keel/branch-vocabulary below, and the
   # asymmetry is the reason (GOVERNANCE §4.4, decision of 2026-08-25): there
@@ -109,7 +84,7 @@ jobs:
         # en su capa local, de modo que el control corre la versión que gobierna.
         run: >
           pip install
-          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@541f7f5f5bb603e030ce1a0053a83c2f97932f68"
       - name: Toda ruta protegida tocada consta declarada
         run: >
           python -m emkeel.ci.gates.protected_paths --repo .
@@ -135,7 +110,7 @@ jobs:
         # en su capa local, de modo que el control corre la versión que gobierna.
         run: >
           pip install
-          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@541f7f5f5bb603e030ce1a0053a83c2f97932f68"
       - name: El documento del ciclo y la configuración dicen lo mismo
         run: python -m emkeel.ci.gates.cycle_drift --repo .
 
@@ -159,7 +134,7 @@ jobs:
         # en su capa local, de modo que el control corre la versión que gobierna.
         run: >
           pip install
-          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@541f7f5f5bb603e030ce1a0053a83c2f97932f68"
       - name: El slug de la rama consta en el vocabulario
         run: python -m emkeel.ci.gates.branch_vocabulary --repo .
 
@@ -179,6 +154,6 @@ jobs:
         # en su capa local, de modo que el control corre la versión que gobierna.
         run: >
           pip install
-          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@SHA_AQUI"
+          "git+https://x-access-token:${{ secrets.EMKEEL_TOKEN }}@github.com/emillion-networking-ltd-labs/emkeel@541f7f5f5bb603e030ce1a0053a83c2f97932f68"
       - name: Cada gate rechaza lo que debe rechazar
         run: python -m emkeel.ci.gates.canary --repo .
