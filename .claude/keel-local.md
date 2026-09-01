@@ -8,9 +8,10 @@
   capa incompleta gobierna a medias sin decirlo.
 -->
 
-- El marco vive en `https://github.com/emillion-networking-ltd-labs/emkeel`, referencia `0.1.0+df66ee9` — **consulta por referencia, nunca
+- El marco vive en `https://github.com/emillion-networking-ltd-labs/emkeel`, referencia `2.0.3` — **consulta por referencia, nunca
   copia**: una copia por repositorio es una segunda verdad que deriva (decisión del operador,
-  2026-08-25). Consultarlo exige alcanzar ese repositorio o clonarlo.
+  2026-08-25). Su normativa —`GOVERNANCE.md` y `process/lifecycle.md`— viaja en el
+  **paquete instalado**, bajo `emkeel/docs/`: consultarla no exige alcanzar ese repositorio.
 - Este repositorio es `emillion-networking-ltd-labs/em-ecosystem` — el que el guardián juzga. **Se declara y nunca se supone**:
   un guardián que adivina acaba anunciando la conformidad de otro repositorio (ticket #25).
 - Idioma de preferencia del operador: `español` — la prosa canónica y las respuestas.
