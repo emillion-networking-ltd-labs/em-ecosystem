@@ -1,7 +1,9 @@
 <!--
-  keel-contract · contract-version: 2 · generada el 2026-08-22, subida el 2026-08-27 (ticket #25:
-  la capa local declara desde esta versión el repositorio gobernado). Los repositorios instalados
-  con la versión 1 carecen de esa declaración, y su guardián lo dice — «sin comprobar»— hasta que
+  keel-contract · contract-version: 3 · generada el 2026-08-22, subida el 2026-08-27 (ticket #25:
+  la capa local declara desde esta versión el repositorio gobernado; ticket #59, 2026-08-31: la
+  versión 3 ordena el inglés de los nombres, que ninguna máquina puede vigilar). Los repositorios
+  instalados con una versión anterior carecen de esas órdenes, y su guardián lo dice —«sin
+  comprobar»— hasta que
   se reinstale la capa.
   CAPA DISTRIBUIDA — idéntica en todo repositorio gobernado. NO editar aquí: toda adaptación va en
   .claude/keel-local.md. Presupuesto del conjunto cargado (CLAUDE.md + imports) ≤ 150 líneas; esta
@@ -23,6 +25,11 @@ permisos — no este texto. Su función es que sepas el proceso sin que cada enc
 - Los componentes que GOVERNANCE §5.1 declara sin uso no se usan ni se reactivan.
 - La clase de un cambio (trivial o completo) la determina el patrón de ruta, nunca tu juicio
   (GOVERNANCE §1.1).
+- Todo nombre que crees —fichero, rama, slug, directorio— va **en inglés**, ASCII, minúsculas y
+  guiones (GOVERNANCE §4.3). Se aplica **antes de crear**, no después: si el nombre natural te sale
+  en el idioma del operador, tradúcelo antes de escribirlo, y si dudas de la traducción,
+  **pregunta antes de crear**. Ninguna máquina juzga el idioma de un nombre: esta orden es lo
+  único que lo sostiene. La prosa **dentro** de los documentos sigue en el idioma del operador.
 
 ## Conducta
 
