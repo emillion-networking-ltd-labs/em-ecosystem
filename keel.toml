@@ -74,11 +74,11 @@ protected_paths = [
 ]
 
 # Huella no secreta del token esperado: SHA-256 DEL token, jamás el token.
-token_fingerprint = "a853c2f919a7e2958fbc36bc3b67010b0bbefa28a5c5325894e5d488b5491cc7"
+token_fingerprint = "392799f79322956584368a748e06e57516a0820a73f4d2aa76c25f961f4a2721"
 
 # Respaldo. Desde el ticket #23 la caducidad se LEE de la forja en cada sesión,
 # y esta fecha solo se usa cuando no puede leerse — diciéndolo.
-token_expires = "2026-09-24"
+token_expires = "2026-11-30"
 
 [branch]
 # Slugs admitidos. Comprobado contra la implementación el 2026-08-27, y con dos

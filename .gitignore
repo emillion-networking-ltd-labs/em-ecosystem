@@ -100,3 +100,4 @@ nexacore-api/online-enforcement-flags.yml
 # Python bytecode (the code-health ratchet + its tests).
 __pycache__/
 *.pyc
+.venv-emkeel/
