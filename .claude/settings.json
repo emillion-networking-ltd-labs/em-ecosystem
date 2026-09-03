@@ -10,7 +10,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/em-admin/projects/emkeel/.venv/bin/python -m emkeel.guard.hooks.pre_tool_use"
+            "command": "/home/em-admin/projects/em-ecosystem/.venv-emkeel/bin/python3.12 -m emkeel.guard.hooks.pre_tool_use"
           }
         ]
       }
@@ -20,7 +20,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/home/em-admin/projects/emkeel/.venv/bin/python -m emkeel.guard.hooks.session_start"
+            "command": "/home/em-admin/projects/em-ecosystem/.venv-emkeel/bin/python3.12 -m emkeel.guard.hooks.session_start"
           }
         ]
       }

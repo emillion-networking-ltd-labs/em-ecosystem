@@ -8,13 +8,14 @@
   capa incompleta gobierna a medias sin decirlo.
 -->
 
-- El marco vive en `https://github.com/emillion-networking-ltd-labs/emkeel`, referencia `0.1.0+df66ee9` — **consulta por referencia, nunca
+- El marco vive en `https://github.com/emillion-networking-ltd-labs/emkeel`, referencia `2.0.5` — **consulta por referencia, nunca
   copia**: una copia por repositorio es una segunda verdad que deriva (decisión del operador,
-  2026-08-25). Consultarlo exige alcanzar ese repositorio o clonarlo.
+  2026-08-25). Su normativa viaja en el **paquete instalado**, bajo
+  `emkeel/governance/norms/`: consultarla no exige alcanzar ese repositorio.
 - Este repositorio es `emillion-networking-ltd-labs/em-ecosystem` — el que el guardián juzga. **Se declara y nunca se supone**:
   un guardián que adivina acaba anunciando la conformidad de otro repositorio (ticket #25).
 - Idioma de preferencia del operador: `español` — la prosa canónica y las respuestas.
-- Zona de prosa para la comprobación de idioma del guardián: `docs/` y `specs/`.
+- Zona de prosa para la comprobación de idioma del guardián: ninguna declarada — sin confirmar.
 - Documentos operativos —registros de fricción, estrategias, post-mortems— en `emkeel-records/`.
   **Lo que algo cita es fichero; lo que solo se lee una vez, basta en la forja.** Sin ruta
   declarada acaban en comentarios y en ficheros temporales, como los cuatro del estreno.
