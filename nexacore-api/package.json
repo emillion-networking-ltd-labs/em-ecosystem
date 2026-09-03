@@ -119,7 +119,7 @@
     "mailparser": ">=3.9.10",
     "multer": "^2.2.0",
     "@babel/core": ">=7.29.7",
-    "qs": ">=6.15.2",
+    "qs": ">=6.16.0",
     "deepmerge-ts": "^8.0.1"
   },
   "prisma": {
