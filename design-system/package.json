@@ -43,7 +43,7 @@
     "tailwindcss": "^4.3.0",
     "typescript": "^5.9.3",
     "vite": "^7.0.0",
-    "vitest": "^4.1.9"
+    "vitest": "^4.1.11"
   },
   "overrides": {
     "@swc/helpers": "0.5.15",
